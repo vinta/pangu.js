@@ -1,3 +1,5 @@
+console.log('auto_spacing.js run');
+
 function replaceEntry() {
 	var temp;
     var target_tags = ['div', 'p', 'li', 'td', 'span', 'a'];
@@ -62,41 +64,43 @@ function insert_space(text) {
     return text;
 }
 
-replaceEntry();
-
 function test_run() {
     var target_tags = ['div', 'p', 'li', 'span', 'a'];
     var body_tag = $('body');
     
-    // for (var i = 0; i < target_tags.length; i++) {
-        // var target_tag = target_tags[i];
+    for (var i = 0; i < target_tags.length; i++) {
+        var target_tag = target_tags[i];
         
-        // $(target_tag, body_tag).each(function() {
-            // var has_children = false;
+        $(target_tag, body_tag).each(function() {
+            var has_children = false;
             
-            // for (var j = 0; j < target_tags.length; j++) {
-                // if ($(this).find('').length > 0) {
-                    // has_children = true;
-                    // break;
-                // }
-            // }
+            for (var j = 0; j < target_tags.length; j++) {
+                if ($(this).find('').length > 0) {
+                    has_children = true;
+                    break;
+                }
+            }
             
-            // if (!has_children) {
+            if (!has_children) {
 
-            // }
-        // });
-    // }
+            }
+        });
+    }
     
-    // var output_string = $('body').find('script').length;
-    // console.log(output_string);
+    var output_string = $('body').find('script').length;
+    console.log(output_string);
     
-    // $('body').find('script').each(function() {
-        // console.log($(this));
-    // });
+    $('body').find('script').each(function() {
+        console.log($(this));
+    });
     
     $('body').find('div').each(function() {
         console.log($(this));
     });
 }
 
+/* replaceEntry(); */
+
 test_run();
+
+console.log('auto_spacing.js end');
