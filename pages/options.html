@@ -1,0 +1,50 @@
+<html>
+<head><title>我的测试扩展程序的选项</title></head>
+<script type="text/javascript">
+
+// 将选项保存至 localStorage.
+function save_options() {
+  var select = document.getElementById("color");
+  var color = select.children[select.selectedIndex].value;
+  localStorage["favorite_color"] = color;
+
+  // 更新状态告诉用户选项已保存。
+  var status = document.getElementById("status");
+  status.innerHTML = "选项已保存。";
+  setTimeout(function() {
+    status.innerHTML = "";
+  }, 750);
+}
+
+// 从保存在 localStorage 中的值恢复选定的内容。
+function restore_options() {
+  var favorite = localStorage["favorite_color"];
+  if (!favorite) {
+    return;
+  }
+  var select = document.getElementById("color");
+  for (var i = 0; i < select.children.length; i++) {
+    var child = select.children[i];
+    if (child.value == favorite) {
+      child.selected = "true";
+      break;
+    }
+  }
+}
+
+</script>
+
+<body onload="restore_options()">
+
+最喜欢的颜色：
+<select id="color">
+ <option value="red">红</option>
+ <option value="green">绿</option>
+ <option value="blue">蓝</option>
+ <option value="yellow">黄</option>
+</select>
+
+<br>
+<button onclick="save_options()">保存</button>
+</body>
+</html>

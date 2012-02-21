@@ -1,0 +1,30 @@
+{
+    "name": "Paranoid Auto-Spacing",
+    "version": "0.1", // Chrome 會根據版本數字來判斷要不要 update
+    "description": "在中文和半形的英文、數字、符號之間插入空白。沒辦法，處女座就是比較龜毛。",
+    "icons": {
+        "16": "images/icon_16.png", // favicon
+        "48": "images/icon_48.png", // chrome://settings/extensions
+        "128": "images/icon_128.png" // Chrome Web Store
+    },
+    "options_page": "pages/options.html",
+    "permissions": [
+        "tabs",
+        "http://*/*",
+        "https://*/*"
+    ],
+    "browser_action": {
+        "default_icon": "images/icon_19.png",
+        "default_title": "Paranoid Auto-Spacing",
+        "popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"], // , "http://*/*", "https://*/*"
+            "css": ["styles/styles.css"],
+            "js": ["js/libs/jquery-1.7.1.min.js", "js/auto_spacing.js"],
+            "run_at": "document_idle",
+            "all_frames": true
+        }
+    ]
+}
