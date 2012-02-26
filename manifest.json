@@ -8,6 +8,7 @@
         "128": "images/icon_128.png"
     },
     "manifest_version": 2,
+    "default_locale": "zh_TW",
     "background_page": "pages/background.html",
     "background": {
         "page": ["pages/background.html"]
@@ -21,5 +22,12 @@
         "default_icon": "images/icon_19.png",
         "default_title": "__MSG_extensions_name__"
     },
-    "default_locale": "zh_TW"
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["thirdparty/jquery-1.7.1.min.js", "js/auto_spacing.js"],
+            "run_at": "document_end",
+            "all_frames": true
+        }
+    ]
 }
