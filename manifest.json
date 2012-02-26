@@ -10,9 +10,9 @@
     "manifest_version": 2,
     "background_page": "pages/background.html",
     "background": { // Chrome 18 之前的版本似乎不支援這個欄位
-        "page": ["pages/background.html"]
+        "page": ["pages/background.html"] // 在這裡引入 js 檔案
     },
-    "options_page": "pages/options.html",
+    // "options_page": "pages/options.html",
     "permissions": [
         "tabs",
         "<all_urls>"
