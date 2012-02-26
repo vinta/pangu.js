@@ -1,3 +1,4 @@
+/*
 var EXTENTION_NAME = chrome.i18n.getMessage("extensions_name");
 
 function init_options_page() {
@@ -8,3 +9,6 @@ function init_options_page() {
 }
 
 init_options_page();
+*/
+
+console.log('dsfgsfg');

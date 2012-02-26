@@ -1,18 +1,18 @@
 {
     "name": "__MSG_extensions_name__",
-    "version": "0.1", // Chrome 會根據版本數字來判斷要不要 update
+    "version": "0.1",
     "description": "__MSG_extensions_description__",
     "icons": {
-        "16": "images/icon_16.png", // favicon
-        "48": "images/icon_48.png", // chrome://settings/extensions
-        "128": "images/icon_128.png" // Chrome Web Store
+        "16": "images/icon_16.png",
+        "48": "images/icon_48.png",
+        "128": "images/icon_128.png"
     },
     "manifest_version": 2,
     "background_page": "pages/background.html",
-    "background": { // Chrome 18 之前的版本似乎不支援這個欄位
-        "page": ["pages/background.html"] // 在這裡引入 js 檔案
+    "background": {
+        "page": ["pages/background.html"]
     },
-    // "options_page": "pages/options.html",
+    "options_page": "pages/options.html",
     "permissions": [
         "tabs",
         "<all_urls>"
