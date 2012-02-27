@@ -1,3 +1,5 @@
+console.log('options.js BEGIN');
+
 /*
 var EXTENTION_NAME = chrome.i18n.getMessage("extensions_name");
 
@@ -11,4 +13,10 @@ function init_options_page() {
 init_options_page();
 */
 
-console.log('dsfgsfg');
+var background_page = chrome.extension.getBackgroundPage();
+
+background_page.default_setuip();
+
+background_page.set_badge('123');
+
+console.log('options.js END');

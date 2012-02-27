@@ -15,19 +15,12 @@
     },
     "options_page": "pages/options.html",
     "permissions": [
+        "background",
         "tabs",
         "<all_urls>"
     ],
     "browser_action": {
         "default_icon": "images/icon_19.png",
         "default_title": "__MSG_extensions_name__"
-    },
-    "content_scripts": [
-        {
-            "matches": ["<all_urls>"],
-            "js": ["thirdparty/jquery-1.7.1.min.js", "js/auto_spacing.js"],
-            "run_at": "document_end",
-            "all_frames": true
-        }
-    ]
+    }
 }
