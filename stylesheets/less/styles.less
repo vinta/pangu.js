@@ -1,3 +1,43 @@
 // Twitter Bootstrap
-@import "../../thirdparty/twitter-bootstrap/less/bootstrap.less";
+// @import "../../thirdparty/twitter-bootstrap/less/bootstrap.less";
 
+// CSS Reset
+@import "reset.css";
+
+// GLOBAL VARIABLES
+
+// Grays
+@black: #000;
+@grayDarker: #222;
+@grayDark: #333;
+@gray: #555;
+@grayLight: #999;
+@grayLighter: #eee;
+@white: #fff;
+
+// Accent colors
+@blue: #049cdb;
+@blueDark: #0064cd;
+@green: #46a546;
+@red: #9d261d;
+@yellow: #ffc40d;
+@orange: #f89406;
+@pink: #c3325f;
+@purple: #7a43b6;
+
+// Typography
+@backgroundColor: @black;
+@baseFontSize: 120px;
+@baseLineHeight: 42px;
+@textColor: @white;
+@linkColor: @white;
+
+body {
+    background-color: @backgroundColor;
+    color: @textColor;
+}
+
+p {
+    font-size: @baseFontSize;
+    color: @textColor;
+}

@@ -48,6 +48,8 @@ function traversal_and_spacing() {
     }		
 }
 
+/* alert('spacing'); */
+
 /* traversal_and_spacing(); */
 
 $('body').bind('DOMSubtreeModified', function() {
