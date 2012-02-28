@@ -1,22 +1,28 @@
-console.log('options.js BEGIN');
+console.log('options.js');
 
-/*
+var BG_PAGE = chrome.extension.getBackgroundPage();
 var EXTENTION_NAME = chrome.i18n.getMessage("extensions_name");
 
 function init_options_page() {
-    
     $('#options_page_title').html(EXTENTION_NAME);
-    
-    console.log(EXTENTION_NAME);
 }
 
-init_options_page();
-*/
+// DOM 載入後就觸發
+$(document).ready(function() {
+    init_options_page();
+    
+    $('#spacing_when_load').click(function () {
+        alert('when_load');
+        BG_PAGE.localStorage.spacing_mode = 'when_load';
+    });
+    
+    $('#spacing_when_click').click(function () {
+        alert('when_click');
+        BG_PAGE.localStorage.spacing_mode = 'when_click';
+    });
+});
 
-var background_page = chrome.extension.getBackgroundPage();
-
-background_page.default_setuip();
-
-background_page.set_badge('123');
-
-console.log('options.js END');
+// DOM 裡頭的元素（例如圖片）載入完才會觸發
+$(window).load(function() {
+    // do something
+});

@@ -1,10 +1,18 @@
+console.log('background.js');
+
 /*
  background.js 由 background.html 引入
  在整個 extension 的生命週期中都存在
  主要是作為跟 extension 中的其他 js 相互通訊的中繼站
  */
 
-function default_setuip() {    
+function default_setuip() {
+    alert('default_setuip');
+    
+    if (!localStorage.spacing_mode) {
+        localStorage.spacing_mode = 'when_load';
+    }
+    
     var blacklist = [
         'https://picasaweb.google.com/'
     ];
@@ -14,20 +22,24 @@ function default_setuip() {
     
     localStorage.blacklist = JSON.stringify(blacklist);
     localStorage.whitelist = JSON.stringify(whitelist);
-};
+}
 
 function set_badge(text) {
     // 注意檔案路徑！
     // browserAction 的 icon 不能顯示動態的 gif
-    // chrome.browserAction.setIcon({path: "/images/ajax_loader.gif"});
+    // chrome.browserAction.setIcon({path: '/images/ajax_loader.gif'});
     
     chrome.browserAction.setBadgeText({text: text});
 }
 
+default_setuip();
+
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-    if (changeInfo.status == "complete") {
-        chrome.tabs.executeScript(tab.id, {file: 'thirdparty/jquery-1.7.1.min.js', allFrames: true});
-        chrome.tabs.executeScript(tab.id, {file: 'js/spacing.js'});
+    if (changeInfo.status == 'complete' && tab.url.search(/^chrome/i) == -1) {
+        if (true) {
+            chrome.tabs.executeScript(tab.id, {file: 'thirdparty/jquery-1.7.1.min.js', allFrames: true});
+            chrome.tabs.executeScript(tab.id, {file: 'js/spacing.js'});
+        }
     }
 });
 
