@@ -7,8 +7,6 @@ console.log('background.js');
  */
 
 function default_setuip() {
-    alert('default_setuip');
-    
     if (!localStorage.spacing_mode) {
         localStorage.spacing_mode = 'when_load';
     }
