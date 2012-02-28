@@ -27,17 +27,47 @@
 
 // Typography
 @backgroundColor: @black;
-@baseFontSize: 120px;
-@baseLineHeight: 42px;
+@baseFontSize: 200px;
+@baseLineHeight: @baseFontSize;
 @textColor: @white;
 @linkColor: @white;
 
-body {
-    background-color: @backgroundColor;
+// MIXINS
+.typographyStyle {
     color: @textColor;
+    font-size: @baseFontSize;
+    line-height: @baseLineHeight * 1.0;
+}
+
+.noMarginPadding {
+    margin: 0;
+    padding: 0;
+}
+
+// --
+
+a {
+    color: @textColor;
+    text-decoration: none;
+}
+a:visited { color: @textColor; }
+a:hover { color: @textColor; }
+a:focus { color: @textColor; }
+a:active { color: @textColor; }
+
+body {
+    .noMarginPadding;
+    .typographyStyle;
+    
+    background-color: @backgroundColor;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    .noMarginPadding;
+    .typographyStyle;
 }
 
 p {
-    font-size: @baseFontSize;
-    color: @textColor;
+    .noMarginPadding;
+    .typographyStyle;
 }

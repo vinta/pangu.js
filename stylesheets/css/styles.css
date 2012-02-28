@@ -1,9 +1,53 @@
 @import "reset.css";
-body {
-  background-color: #000000;
+.typographyStyle {
+  color: #ffffff;
+  font-size: 200px;
+  line-height: 200px;
+}
+.noMarginPadding {
+  margin: 0;
+  padding: 0;
+}
+a {
+  color: #ffffff;
+  text-decoration: none;
+}
+a:visited {
   color: #ffffff;
 }
-p {
-  font-size: 120px;
+a:hover {
   color: #ffffff;
+}
+a:focus {
+  color: #ffffff;
+}
+a:active {
+  color: #ffffff;
+}
+body {
+  margin: 0;
+  padding: 0;
+  color: #ffffff;
+  font-size: 200px;
+  line-height: 200px;
+  background-color: #000000;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  padding: 0;
+  color: #ffffff;
+  font-size: 200px;
+  line-height: 200px;
+}
+p {
+  margin: 0;
+  padding: 0;
+  color: #ffffff;
+  font-size: 200px;
+  line-height: 200px;
 }
