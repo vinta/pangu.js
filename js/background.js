@@ -57,3 +57,14 @@ chrome.browserAction.onClicked.addListener(function(tab) {
     
     chrome.tabs.executeScript(tab.id, {code: 'traversal_and_spacing();'});
 });
+
+chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+    console.log(sender.tab ? "来自内容脚本：" + sender.tab.url : "来自扩展程序");
+    
+    if (request.purpose == 'spacing_mode') {
+        sendResponse({spacing_mode: localStorage.spacing_mode});
+    }
+    else {
+        sendResponse({}); // clean request
+    }
+});

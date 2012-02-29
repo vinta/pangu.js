@@ -3,17 +3,21 @@ console.log('spacing.js');
 function insert_space(text) {
     // 英文、數字、符號 ([a-z0-9~!@#&;=_\$\%\^\*\-\+\,\.\/(\\)\?\:\'\"\[\]\(\)])
     
+/*
     console.log('\n');
     console.log('raw text:');
     console.log(text);
+*/
     
     text = text.replace(/([\u4E00-\u9FA5])([a-z0-9@#&;=_\$\%\^\*\-\+\(\/])/ig, '$1 $2');
     
     text = text.replace(/([a-z0-9@#!~&;=_\,\.\:\?\$\%\^\*\-\+\(\)\/])([\u4E00-\u9FA5])/ig, '$1 $2');
     
+/*
     console.log('format text:');
     console.log(text);
     console.log('\n');
+*/
     
     return text;
 }
@@ -48,9 +52,16 @@ function traversal_and_spacing() {
     }		
 }
 
-if (localStorage.spacing_mode == 'when_load') {
-    traversal_and_spacing();
-}
+// content script 只能用這種方式跟 background page（或其他 tab）溝通
+chrome.extension.sendRequest({purpose: 'spacing_mode'}, function(response) {
+    console.log(response.spacing_mode);
+    
+    var spacing_mode = response.spacing_mode;
+    
+    if (spacing_mode == 'when_load') {
+        traversal_and_spacing();
+    }
+});
 
 /*
 $('body').bind('DOMSubtreeModified', function() {
