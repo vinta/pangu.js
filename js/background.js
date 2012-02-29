@@ -37,11 +37,17 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
         if (true) {
             chrome.tabs.executeScript(tab.id, {file: 'thirdparty/jquery-1.7.1.min.js', allFrames: true});
             chrome.tabs.executeScript(tab.id, {file: 'js/spacing.js'});
+            
+            // 實際執行 spacing 是在這一行
+            // 直接寫在這裡會發生 Uncaught ReferenceError: traversal_and_spacing is not defined
+            // chrome.tabs.executeScript(tab.id, {code: 'traversal_and_spacing();'});
         }
     }
 });
 
 chrome.browserAction.onClicked.addListener(function(tab) {
+/*     alert('onClicked'); */
+    
     /*
      在 background.html 引入 jquery 是沒有作用的
      因為 background page 的執行環境跟 tabs 不一樣

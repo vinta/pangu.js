@@ -1,4 +1,4 @@
-console.log('auto_spacing.js BEGIN');
+console.log('spacing.js');
 
 function insert_space(text) {
     // 英文、數字、符號 ([a-z0-9~!@#&;=_\$\%\^\*\-\+\,\.\/(\\)\?\:\'\"\[\]\(\)])
@@ -48,12 +48,12 @@ function traversal_and_spacing() {
     }		
 }
 
-/* alert('spacing'); */
+if (localStorage.spacing_mode == 'when_load') {
+    traversal_and_spacing();
+}
 
-/* traversal_and_spacing(); */
-
+/*
 $('body').bind('DOMSubtreeModified', function() {
     console.log('DOM change');
 });
-
-console.log('auto_spacing.js END');
+*/
