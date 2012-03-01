@@ -10,21 +10,44 @@
     
     <!-- JS -->
     <script src="../thirdparty/jquery-1.7.1.min.js"></script>
+    <script src="../thirdparty/twitter-bootstrap/js/bootstrap-button.js"></script>
+    <script src="../thirdparty/twitter-bootstrap/js/bootstrap-dropdown.js"></script>
     <script src="../js/options.js"></script>
 </head>
 
 <body>
-    <div id="header">
-        <h1 id="extension_name"><a href="#content">為什麼你們就是不能加個空格呢？</a></h1>
-    </div>
+    <header class="hero-unit">
+        <h1 id="extension_name">為什麼你們就是不能加個空格呢？</h1>
+        <p id="subtitle">自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白</p>
+        
+        <div id="quote">
+            <p>漢學家稱這個空白字元為「盤古之白」，因為它劈開了全形字和半形字之間的混沌。也有研究顯示，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有六成的比例只能在 34 歲的時候跟自己不愛的人結婚，畢竟愛情跟書寫都需要適時地留白。</p>
+        </div>
+    </header>
     
     <div id="content">
-        <p id="spacing_when_load">網頁載入後自動幫我加上空格</p>
-        <p id="spacing_when_click">我要自己決定什麼時候要加空格</p>
+        <div class="option_group_first">
+            <p>什麼時候生效？</p>
+            <div class="btn-group">
+                <a class="btn" href="#">網頁載入後自動幫我加上空格</a>
+                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a href="#">網頁載入後自動幫我加上空格</a></li>
+                    <li><a href="#">我要自己決定什麼時候要加空格</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="option_group">
+            <p>不要在這些網站生效：</p>
+            <textarea class="input-xlarge" id="textarea" rows="6"></textarea>
+        </div>
     </div>
     
     <footer>
-        <!-- footer -->
+        <p>Fork me on <a href="https://github.com/gibuloto/paranoid-auto-spacing" target="_blank">GitHub</a></p>
+        <p>Follow me on Twitter (<a href="https://twitter.com/vinta" title="我覺得我這個人最大的缺點就是太他媽的上進了">@vinta</a>)</p>
+        <p id="copyleft"><a href="http://zh.wikipedia.org/wiki/Copyleft" target="_blank">Copyleft</a> <span style="-webkit-transform: rotate(180deg); -moz-transform: rotate(180deg); -o-transform: rotate(180deg); -khtml-transform: rotate(180deg); -ms-transform: rotate(180deg); transform: rotate(180deg); display: inline-block;">&copy;</span>&nbsp;&nbsp;2012 <a href="http://vinta.ws/">Vinta</a></p>
     </footer>
 </body>
 

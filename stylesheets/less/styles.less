@@ -1,8 +1,8 @@
 // Twitter Bootstrap
-// @import "../../thirdparty/twitter-bootstrap/less/bootstrap.less";
+@import "../../thirdparty/twitter-bootstrap/less/bootstrap.less";
 
 // CSS Reset
-@import "reset.css";
+// @import "reset.css";
 
 // GLOBAL VARIABLES
 
@@ -26,17 +26,18 @@
 @purple: #7a43b6;
 
 // Typography
-@backgroundColor: @black;
-@baseFontSize: 200px;
+@backgroundColor: @white;
+@baseFontSize: 18px;
 @baseLineHeight: @baseFontSize;
-@textColor: @white;
-@linkColor: @white;
+@textColor: @grayDark;
+@linkColor: @pink;
+@linkColorHover: darken(@linkColor, 15%);
 
 // MIXINS
 .typographyStyle {
-    color: @textColor;
+    color: @grayDark;
     font-size: @baseFontSize;
-    line-height: @baseLineHeight * 1.0;
+    line-height: @baseLineHeight * 1.5;
 }
 
 .noMarginPadding {
@@ -46,28 +47,84 @@
 
 // --
 
-a {
-    color: @textColor;
-    text-decoration: none;
-}
-a:visited { color: @textColor; }
-a:hover { color: @textColor; }
-a:focus { color: @textColor; }
-a:active { color: @textColor; }
+/* a:hover { color: @blue; } */
+
+/*
+a { color: @linkColor; }
+a:visited { color: @linkColor; }
+a:hover { color: @linkColor; }
+a:focus { color: @linkColor; }
+a:active { color: @linkColor; }
+*/
 
 body {
-    .noMarginPadding;
-    .typographyStyle;
-    
     background-color: @backgroundColor;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    .noMarginPadding;
-    .typographyStyle;
+    
 }
 
 p {
-    .noMarginPadding;
     .typographyStyle;
+}
+
+header {
+    .hero-unit {
+        margin: 0;
+    }
+    
+    #subtitle {
+        margin: 15px 0px 0px 2px;
+    }
+    
+    #quote {
+        margin: 30px 100px 0px 2px;
+    }
+}
+
+#content {
+    margin: 0px;
+    padding: 60px 0px 60px 60px; // top, right, bottom, left
+    
+    .option_group_first {
+        margin: 0px 0px 0px 0px;
+    }
+    
+    .option_group {
+        margin: 50px 0px 0px 0px;
+    }
+}
+
+footer {
+    margin: 0px 60px 0px 60px;
+    padding: 50px 0px 60px 0px;
+    border-top: 1px solid #E5E5E5;
+    
+    p {
+        font-size: @baseFontSize;
+        line-height: @baseLineHeight;
+    }
+    
+    #copyleft {
+        margin-top: 25px;
+        word-spacing: 3px;
+        font-size: @baseFontSize * 0.9;
+        color: @grayLight;
+        
+        a {
+            color: @grayLight;
+        }
+    }
+}
+
+.dropdown-menu {
+    a {
+        line-height: @baseLineHeight * 1.5;
+    }
+    
+    a:hover {
+        background-color: @red;
+        color: @blue;
+    }
 }
