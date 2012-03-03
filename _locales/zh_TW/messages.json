@@ -8,11 +8,11 @@
         "description": ""
     },
     "spacing_when_load": {
-        "message": "",
+        "message": "網頁載入後自動幫我加上空格",
         "description": ""
     },
     "spacing_when_click": {
-        "message": "",
+        "message": "我要自己決定什麼時候要加空格",
         "description": ""
     }
 }

@@ -27,19 +27,24 @@
     
     <div id="content">
         <div class="option_group_first">
-            <p>什麼時候生效？</p>
+            <p>什麼時候作用？</p>
             <div class="btn-group">
-                <a class="btn" href="#">網頁載入後自動幫我加上空格</a>
+                <a id="now_spacing_when" class="btn">網頁載入後自動幫我加上空格</a>
                 <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                    <li><a href="#">網頁載入後自動幫我加上空格</a></li>
-                    <li><a href="#">我要自己決定什麼時候要加空格</a></li>
+                    <li><a id="spacing_when_load" class="spacing_when">網頁載入後自動幫我加上空格 123</a></li>
+                    <li><a id="spacing_when_click" class="spacing_when">我要自己決定什麼時候要加空格 456</a></li>
                 </ul>
             </div>
         </div>
         
         <div class="option_group">
-            <p>不要在這些網站生效：</p>
+            <p>只在這些網站作用：</p>
+            <textarea class="input-xlarge" id="textarea" rows="6"></textarea>
+        </div>
+        
+        <div class="option_group">
+            <p>不要在這些網站作用：</p>
             <textarea class="input-xlarge" id="textarea" rows="6"></textarea>
         </div>
     </div>
