@@ -3570,6 +3570,9 @@ header #quote {
   width: 500px;
   font-size: 16.2px;
 }
+#content #submit_result {
+  margin-left: 20px;
+}
 footer {
   margin: 0px 60px 0px 60px;
   padding: 50px 0px 60px 0px;
