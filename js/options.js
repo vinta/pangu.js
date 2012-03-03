@@ -21,8 +21,9 @@ function init_options_page() {
     $('#copyleft_year').html(now.getFullYear());
 }
 
-function play_sound() {
-    var audio = document.getElementById('sound1');
+function play_sound(id) {
+    var element_id = id || 'sound1';
+    var audio = document.getElementById(id);
     audio.play();
 }
 
@@ -30,6 +31,7 @@ function play_sound() {
 $(document).ready(function() {
     init_options_page();
     
+    // 何時作用？
     $('.spacing_when').click(function() {
         var spacing_when = $(this).attr('id');
         
@@ -39,7 +41,7 @@ $(document).ready(function() {
     });
     
     $('#now_spacing_when').click(function() {
-        play_sound();
+        play_sound('Hadouken');
         
         if (BG_PAGE.localStorage['spacing_mode'] == 'spacing_when_click') {
             BG_PAGE.localStorage['spacing_mode'] = 'spacing_when_load';
@@ -51,8 +53,17 @@ $(document).ready(function() {
         $('#now_spacing_when').html(get_i18n(BG_PAGE.localStorage['spacing_mode']));
     });
     
+    // 黑名單、白名單
+    $('.exception_target').click(function() {
+        var spacing_when = $(this).attr('id');
+        
+        BG_PAGE.localStorage['exception_mode'] = spacing_when;
+        
+        $('#now_exception').html(get_i18n(spacing_when));
+    });
+    
     $('#now_exception').click(function() {
-        play_sound();
+        play_sound('Shouryuuken');
         
         if (BG_PAGE.localStorage['exception_mode'] == 'whitelist') {
             BG_PAGE.localStorage['exception_mode'] = 'blacklist';
@@ -62,6 +73,16 @@ $(document).ready(function() {
         }
         
         $('#now_exception').html(get_i18n(BG_PAGE.localStorage['exception_mode']));
+    });
+    
+    // textarea 的 change event 只有 blur 之後才會觸發
+    $('#exception_url_list').change(function() {
+        var arrayOfLines = $(this).val().split('\n');
+    });
+    
+    // 提交（儲存）按鈕
+    $('#submit').click(function() {
+        play_sound('YeahBaby');
     });
 });
 

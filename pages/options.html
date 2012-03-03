@@ -29,8 +29,8 @@
         <div class="option_group_first">
             <p>什麼時候作用？</p>
             <div class="btn-group">
-                <a id="now_spacing_when" class="btn">網頁載入後自動幫我加上空格</a>
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+                <a id="now_spacing_when" class="btn btn-info">網頁載入後自動幫我加上空格</a>
+                <a class="btn btn-info dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
                 <ul class="dropdown-menu">
                     <li><a id="spacing_when_load" class="spacing_when">網頁載入後自動幫我加上空格 123</a></li>
                     <li><a id="spacing_when_click" class="spacing_when">我要自己決定什麼時候要加空格 456</a></li>
@@ -41,25 +41,33 @@
         <div class="option_group">
             <p>然後，你是否希望：</p>
             <div class="btn-group">
-                <a id="now_exception" class="btn">不要在這些網站作用</a>
-                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+                <a id="now_exception" class="btn btn-info">不要在這些網站作用</a>
+                <a class="btn btn-info dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                    <li><a id="exception_blacklist" class="spacing_when">不要在這些網站作用</a></li>
-                    <li><a id="exception_whitelist" class="spacing_when">只在這些網站作用</a></li>
+                    <li><a id="exception_blacklist" class="exception_target">不要在這些網站作用</a></li>
+                    <li><a id="exception_whitelist" class="exception_target">只在這些網站作用</a></li>
                 </ul>
             </div>
-            <textarea id="exception_url_list" class="input-xlarge" rows="7" placeholder="一行一個網址"></textarea>
+            <textarea id="exception_url_list" class="input-xlarge" rows="7" placeholder="一行一個網址，沒有的話就不要填"></textarea>
+        </div>
+        
+        <div class="option_group">
+            <button id="submit" class="btn btn-info" type="submit">喔耶！好了！</button>
+            
+            <button id="bullshit" class="btn btn-danger" type="submit">好了，就這樣吧</button>
         </div>
     </div>
     
-    <div>
-        <audio id="sound1" src="../sounds/Swoosh04.mp3" preload="auto"></audio>
+    <div id="sounds">
+        <audio id="Hadouken" src="../sounds/StreetFighter-Hadouken.mp3" preload="auto"></audio>
+        <audio id="Shouryuuken" src="../sounds/StreetFighter-Shouryuuken.mp3" preload="auto"></audio>
+        <audio id="YeahBaby" src="../sounds/AustinPowers-YeahBaby.mp3" preload="auto"></audio>
     </div>
     
     <footer>
         <p>Fork me on <a href="https://github.com/gibuloto/paranoid-auto-spacing" target="_blank">GitHub</a></p>
         <p>Follow me on Twitter (<a href="https://twitter.com/vinta" title="我覺得我這個人最大的缺點就是太他媽的上進了">@vinta</a>)</p>
-        <p id="copyleft"><a href="http://zh.wikipedia.org/wiki/Copyleft" target="_blank">Copyleft</a> <span style="-webkit-transform: rotate(180deg); -moz-transform: rotate(180deg); -o-transform: rotate(180deg); -khtml-transform: rotate(180deg); -ms-transform: rotate(180deg); transform: rotate(180deg); display: inline-block;">&copy;</span> <span id="copyleft_year">2012</span> <a href="http://vinta.ws/">Vinta</a></p>
+        <p id="copyleft"><a href="http://zh.wikipedia.org/wiki/Copyleft" target="_blank">Copyleft</a> <span id="copyleft_symbol" style="-webkit-transform: rotate(180deg); -moz-transform: rotate(180deg); -o-transform: rotate(180deg); -khtml-transform: rotate(180deg); -ms-transform: rotate(180deg); transform: rotate(180deg); display: inline-block;">&copy;</span> <span id="copyleft_year">2012</span> <a href="http://vinta.ws/">Vinta</a></p>
     </footer>
 </body>
 

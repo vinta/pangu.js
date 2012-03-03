@@ -30,7 +30,7 @@
 @baseFontSize: 18px;
 @baseLineHeight: @baseFontSize;
 @textColor: @grayDark;
-@linkColor: @pink;
+@linkColor: #49afcd;
 @linkColorHover: darken(@linkColor, 15%);
 
 // MIXINS
@@ -89,11 +89,48 @@ header {
     }
     
     .option_group {
-        margin: 50px 0px 0px 0px;
+        margin: 60px 0px 0px 0px;
+    }
+    
+    .btn-group {
+        margin-top: 15px;
+    }
+    
+    .btn {
+        padding: 20px 24px 18px 20px;
+        font-size: @baseFontSize * 2;
+    }
+    
+    .caret {
+        font-size: @baseFontSize * 2;
+    }
+    
+    .dropdown-menu {
+        a {
+            line-height: @baseLineHeight * 1.5;
+        }
+        
+        a:hover {
+            background-color: @backgroundColor;
+            color: @linkColor;
+            cursor: pointer;
+        }
+    }
+    
+    .border_btn {
+        font-size: 1.4em;
+        border: 3px solid #00693C;
+        border-radius: 8px;
+        -moz-border-radius: 8px;
+        -webkit-border-radius: 8px;
+        padding: 2px 6px;
+        line-height: 2.0em;
+        margin-right: 6px;
+        color: #00693C;
     }
     
     #exception_url_list {
-        margin: 17px 0px 0px 0px;
+        margin: 20px 0px 0px 0px;
         width: 500px;
         font-size: @baseFontSize * 0.9;
     }
@@ -118,16 +155,9 @@ footer {
         a {
             color: @grayLight;
         }
-    }
-}
-
-.dropdown-menu {
-    a {
-        line-height: @baseLineHeight * 1.5;
-    }
-    
-    a:hover {
-        background-color: @red;
-        color: @blue;
+        
+        #copyleft_symbol {
+            margin-right: 3px;
+        }
     }
 }
