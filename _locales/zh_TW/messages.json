@@ -14,5 +14,13 @@
     "spacing_when_click": {
         "message": "我要自己決定什麼時候要加空格",
         "description": ""
+    },
+    "whitelist": {
+        "message": "只在這些網站作用",
+        "description": ""
+    },
+    "blacklist": {
+        "message": "不要在這些網站作用",
+        "description": ""
     }
 }

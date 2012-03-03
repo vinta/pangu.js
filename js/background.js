@@ -8,7 +8,7 @@ console.log('background.js');
 
 function default_setuip() {
     if (!localStorage.spacing_mode) {
-        localStorage.spacing_mode = 'when_load';
+        localStorage.spacing_mode = 'spacing_when_load';
     }
     
     var blacklist = [
@@ -28,6 +28,9 @@ function set_badge(text) {
     // chrome.browserAction.setIcon({path: '/images/ajax_loader.gif'});
     
     chrome.browserAction.setBadgeText({text: text});
+}
+
+function find_string() {
 }
 
 default_setuip();

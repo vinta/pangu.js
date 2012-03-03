@@ -1,24 +1,29 @@
 console.log('options.js');
 
 var BG_PAGE = chrome.extension.getBackgroundPage();
-VAR STORAGE = BG_PAGE.localStorage;
 
-function init_options_page() {
-    var i18n_extensions_name = chrome.i18n.getMessage('extensions_name');
-    var i18n_spacing_when_load = chrome.i18n.getMessage('spacing_when_load');
-    var i18n_spacing_when_click = chrome.i18n.getMessage('spacing_when_click');
-    
-    $('#options_page_title').html(i18n_extensions_name);
-    
-    $('#spacing_when_load').html(i18n_spacing_when_load);
-    $('#spacing_when_click').html(i18n_spacing_when_click);
-    
-    if (STORAGE['spacing_mode'] == 'spacing_when_click') {
-        $('#now_spacing_when').html(chrome.i18n.getMessage(spacing_when));
-    }
+function get_i18n(message_name) {
+    return chrome.i18n.getMessage(message_name);
 }
 
-function switch_spacing_mode() {
+function init_options_page() {
+    $('#options_page_title').html(get_i18n('extensions_name'));
+    
+    $('#now_spacing_when').html(get_i18n(BG_PAGE.localStorage['spacing_mode']));
+    $('#spacing_when_load').html(get_i18n('spacing_when_load'));
+    $('#spacing_when_click').html(get_i18n('spacing_when_click'));
+    
+    $('#now_exception').html(get_i18n(BG_PAGE.localStorage['exception_mode']));
+    $('#exception_whitelist').html(get_i18n('exception_whitelist'));
+    $('#exception_blacklist').html(get_i18n('exception_blacklist'));
+    
+    var now = new Date();
+    $('#copyleft_year').html(now.getFullYear());
+}
+
+function play_sound() {
+    var audio = document.getElementById('sound1');
+    audio.play();
 }
 
 // DOM 載入後就觸發
@@ -28,16 +33,35 @@ $(document).ready(function() {
     $('.spacing_when').click(function() {
         var spacing_when = $(this).attr('id');
         
-        STORAGE['spacing_mode'] = spacing_when;
+        BG_PAGE.localStorage['spacing_mode'] = spacing_when;
         
-        $('#now_spacing_when').html(chrome.i18n.getMessage(spacing_when));
+        $('#now_spacing_when').html(get_i18n(spacing_when));
     });
     
     $('#now_spacing_when').click(function() {
-        if (STORAGE['spacing_mode'] == 'spacing_when_load') {
-            STORAGE['spacing_mode'] = 'spacing_when_click';
-            $('#now_spacing_when').html(chrome.i18n.getMessage(STORAGE['spacing_mode']));
+        play_sound();
+        
+        if (BG_PAGE.localStorage['spacing_mode'] == 'spacing_when_click') {
+            BG_PAGE.localStorage['spacing_mode'] = 'spacing_when_load';
         }
+        else {
+            BG_PAGE.localStorage['spacing_mode'] = 'spacing_when_click';
+        }
+        
+        $('#now_spacing_when').html(get_i18n(BG_PAGE.localStorage['spacing_mode']));
+    });
+    
+    $('#now_exception').click(function() {
+        play_sound();
+        
+        if (BG_PAGE.localStorage['exception_mode'] == 'whitelist') {
+            BG_PAGE.localStorage['exception_mode'] = 'blacklist';
+        }
+        else {
+            BG_PAGE.localStorage['exception_mode'] = 'whitelist';
+        }
+        
+        $('#now_exception').html(get_i18n(BG_PAGE.localStorage['exception_mode']));
     });
 });
 

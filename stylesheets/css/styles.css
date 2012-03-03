@@ -3499,10 +3499,6 @@ a.thumbnail:hover {
   font-size: 18px;
   line-height: 27px;
 }
-.noMarginPadding {
-  margin: 0;
-  padding: 0;
-}
 /* a:hover { color: @blue; } */
 /*
 a { color: @linkColor; }
@@ -3524,19 +3520,26 @@ header .hero-unit {
 }
 header #subtitle {
   margin: 15px 0px 0px 2px;
+  color: #555555;
 }
 header #quote {
   margin: 30px 100px 0px 2px;
+  color: #555555;
 }
 #content {
   margin: 0px;
-  padding: 60px 0px 60px 60px;
+  padding: 30px 0px 60px 60px;
 }
 #content .option_group_first {
   margin: 0px 0px 0px 0px;
 }
 #content .option_group {
   margin: 50px 0px 0px 0px;
+}
+#content #exception_url_list {
+  margin: 17px 0px 0px 0px;
+  width: 500px;
+  font-size: 16.2px;
 }
 footer {
   margin: 0px 60px 0px 60px;
