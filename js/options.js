@@ -1,9 +1,5 @@
 console.log('options.js');
 
-/*
- usage:
- submit_msg = "小心！那是 {0} 啊！".format('驗孕棒');
- */
 String.prototype.format = function() {
     var args = arguments;
     
@@ -16,21 +12,6 @@ var BG_PAGE = chrome.extension.getBackgroundPage();
 
 function get_i18n(message_name) {
     return chrome.i18n.getMessage(message_name);
-}
-
-function init_options_page() {
-    $('#options_page_title').html(get_i18n('extensions_name'));
-    
-    $('#now_spacing_when').html(get_i18n(BG_PAGE.localStorage['spacing_mode']));
-    $('#spacing_when_load').html(get_i18n('spacing_when_load'));
-    $('#spacing_when_click').html(get_i18n('spacing_when_click'));
-    
-    $('#now_exception').html(get_i18n(BG_PAGE.localStorage['exception_mode']));
-    $('#exception_whitelist').html(get_i18n('exception_whitelist'));
-    $('#exception_blacklist').html(get_i18n('exception_blacklist'));
-    
-    var now = new Date();
-    $('#copyleft_year').html(now.getFullYear());
 }
 
 function play_sound(id) {
@@ -50,9 +31,55 @@ function is_valid_url(string) {
     }
 }
 
+function read_from_textarea() {
+}
+
+function init_options_page() {
+    $('#options_page_title').html(get_i18n('extensions_name'));
+    
+    $('#now_spacing_when').html(get_i18n(BG_PAGE.localStorage['spacing_mode']));
+    $('#spacing_when_load').html(get_i18n('spacing_when_load'));
+    $('#spacing_when_click').html(get_i18n('spacing_when_click'));
+    
+    $('#now_exception').html(get_i18n(BG_PAGE.localStorage['exception_mode']));
+    $('#exception_whitelist').html(get_i18n('exception_whitelist'));
+    $('#exception_blacklist').html(get_i18n('exception_blacklist'));
+    
+    var exception_mode = BG_PAGE.localStorage['exception_mode'];
+    var textarea = $('#exception_url_list');
+    
+    // 把之前暫存的內容再放回 textarea
+    if (exception_mode == 'blacklist') {
+        var blacklist_temp = JSON.parse(BG_PAGE.localStorage['blacklist']); // array
+        
+        if (blacklist_temp.length > 0) {
+            textarea.val(blacklist_temp.join("\n"));
+        }
+        else {
+            textarea.val('');
+        }
+    }
+    else {
+        var whitelist_temp = JSON.parse(BG_PAGE.localStorage['whitelist']); // array
+        
+        if (whitelist_temp.length > 0) {
+            textarea.val(whitelist_temp.join("\n"));
+        }
+        else {
+            textarea.val('');
+        }
+    }
+    
+    var now = new Date();
+    $('#copyleft_year').html(now.getFullYear());
+}
+
 // DOM 載入後就觸發
 $(document).ready(function() {
     init_options_page();
+    
+    var textarea = $('#exception_url_list');
+    var raw_textarea = textarea.val();
     
     // 何時作用？
     $('.spacing_when').click(function() {
@@ -88,10 +115,51 @@ $(document).ready(function() {
     $('#now_exception').click(function() {
         play_sound('Shouryuuken');
         
+
+        
         if (BG_PAGE.localStorage['exception_mode'] == 'whitelist') {
+            // 切換 whitelist / backlist 之前先把 textarea 的內容暫存起來
+            var whitelist_temp = [];
+            
+            if ($.trim(raw_textarea).length > 0) {
+                whitelist_temp = raw_textarea.split("\n"); // array
+            }
+            
+            BG_PAGE.localStorage['whitelist_temp'] = JSON.stringify(whitelist_temp);
+            
+            // 把之前暫存的內容再放回 textarea
+            var blacklist_temp = JSON.parse(BG_PAGE.localStorage['blacklist_temp']); // array
+            
+            if (blacklist_temp.length > 0) {
+                textarea.val(blacklist_temp.join("\n"));
+            }
+            else {
+                textarea.val('');
+            }
+            
             BG_PAGE.localStorage['exception_mode'] = 'blacklist';
         }
         else {
+            var blacklist_temp = [];
+            
+            if ($.trim(raw_textarea).length > 0) {
+                blacklist_temp = raw_textarea.split("\n"); // array
+            }
+            
+            BG_PAGE.localStorage['blacklist_temp'] = JSON.stringify(blacklist_temp);
+            
+            
+            
+            // 把之前暫存的內容再放回 textarea
+            var whitelist_temp = JSON.parse(BG_PAGE.localStorage['whitelist_temp']); // array
+            
+            if (whitelist_temp.length > 0) {
+                textarea.val(whitelist_temp.join("\n"));
+            }
+            else {
+                textarea.val('');
+            }
+            
             BG_PAGE.localStorage['exception_mode'] = 'whitelist';
         }
         
@@ -107,23 +175,35 @@ $(document).ready(function() {
         var submit_label_class = 'label-success';
         var submit_msg = '恭喜你，設定已經儲存';
         
-        for (var i = 0; i < lines.length; i++) {
-            var line = lines[i];
-            
-            if (is_valid_url(line)) {
-                url_list.push(line);
-            }
-            else {
-                submit_status = false;
-                submit_label_class = 'label-important';
-                submit_msg = "不要亂輸入好不好？第 {0} 行根本就不是一個合法的網址啊幹".format(i + 1);
+        if (lines.length > 0) {
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
                 
-                break;
+                if (is_valid_url(line)) {
+                    url_list.push(line);
+                }
+                else {
+                    submit_status = false;
+                    submit_label_class = 'label-important';
+                    submit_msg = "不要亂輸入好不好？第 {0} 行根本就不是一個合法的網址啊幹".format(i + 1);
+                    
+                    break;
+                }
             }
         }
         
         if (submit_status) {
             play_sound('YeahBaby');
+            
+            var exception_mode = BG_PAGE.localStorage['exception_mode'];
+            
+            if (exception_mode == 'whitelist') {
+                // localStorage 只能存字串
+                BG_PAGE.localStorage['whitelist'] = JSON.stringify(url_list);
+            }
+            else {
+                BG_PAGE.localStorage['blacklist'] = JSON.stringify(url_list);
+            }
         }
         else {
             play_sound('WahWahWaaah');
@@ -131,7 +211,8 @@ $(document).ready(function() {
         
         $('#submit_result')
         .removeClass() // 移除所有的 class
-        .addClass('label ' + submit_label_class)
+        .addClass('label')
+        .addClass(submit_label_class)
         .html(submit_msg);
     });
     

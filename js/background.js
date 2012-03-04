@@ -7,19 +7,29 @@ console.log('background.js');
  */
 
 function default_setuip() {
-    if (!localStorage.spacing_mode) {
-        localStorage.spacing_mode = 'spacing_when_load';
+    if (!localStorage['spacing_mode']) {
+        localStorage['spacing_mode'] = 'spacing_when_load';
     }
     
-    var blacklist = [
-        'https://picasaweb.google.com/'
-    ];
+    if (!localStorage['exception_mode']) {
+        localStorage['exception_mode'] = 'blacklist';
+    }
     
-    var whitelist = [
-    ];
+    if (!localStorage['blacklist']) {
+        var blacklist = [
+            'https://picasaweb.google.com/'
+        ];
+        
+        localStorage['blacklist'] = JSON.stringify(blacklist);
+        localStorage['blacklist_temp'] = JSON.stringify(blacklist);
+    }
     
-    localStorage.blacklist = JSON.stringify(blacklist);
-    localStorage.whitelist = JSON.stringify(whitelist);
+    if (!localStorage['whitelist']) {
+        var whitelist = [];
+        
+        localStorage['whitelist'] = JSON.stringify(whitelist);
+        localStorage['whitelist_temp'] = JSON.stringify(whitelist);
+    }
 }
 
 function set_badge(text) {
