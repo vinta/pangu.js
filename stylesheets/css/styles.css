@@ -3499,14 +3499,6 @@ a.thumbnail:hover {
   font-size: 18px;
   line-height: 27px;
 }
-/* a:hover { color: @blue; } */
-/*
-a { color: @linkColor; }
-a:visited { color: @linkColor; }
-a:hover { color: @linkColor; }
-a:focus { color: @linkColor; }
-a:active { color: @linkColor; }
-*/
 body {
   background-color: #ffffff;
 }
@@ -3566,9 +3558,13 @@ header #quote {
   color: #00693C;
 }
 #content #exception_url_list {
-  margin: 20px 0px 0px 0px;
+  margin: 25px 0px 0px 0px;
   width: 500px;
   font-size: 16.2px;
+}
+#content .label {
+  padding: 7px 10px 7px 10px;
+  font-weight: normal;
 }
 #content #submit_result {
   margin-left: 20px;

@@ -58,11 +58,9 @@ function traversal_and_spacing() {
 
 // content script 只能用這種方式跟 background page（或其他 tab）溝通
 chrome.extension.sendRequest({purpose: 'spacing_mode'}, function(response) {
-    console.log(response.spacing_mode);
-    
     var spacing_mode = response.spacing_mode;
     
-    if (spacing_mode == 'when_load') {
+    if (spacing_mode == 'spacing_when_load') {
         traversal_and_spacing();
     }
 });

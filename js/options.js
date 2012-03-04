@@ -50,20 +50,20 @@ function init_options_page() {
     
     // 把之前暫存的內容再放回 textarea
     if (exception_mode == 'blacklist') {
-        var blacklist_temp = JSON.parse(BG_PAGE.localStorage['blacklist']); // array
+        var blacklist = JSON.parse(BG_PAGE.localStorage['blacklist']); // array
         
-        if (blacklist_temp.length > 0) {
-            textarea.val(blacklist_temp.join("\n"));
+        if (blacklist.length > 0) {
+            textarea.val(blacklist.join("\n"));
         }
         else {
             textarea.val('');
         }
     }
     else {
-        var whitelist_temp = JSON.parse(BG_PAGE.localStorage['whitelist']); // array
+        var whitelist = JSON.parse(BG_PAGE.localStorage['whitelist']); // array
         
-        if (whitelist_temp.length > 0) {
-            textarea.val(whitelist_temp.join("\n"));
+        if (whitelist.length > 0) {
+            textarea.val(whitelist.join("\n"));
         }
         else {
             textarea.val('');
@@ -79,7 +79,6 @@ $(document).ready(function() {
     init_options_page();
     
     var textarea = $('#exception_url_list');
-    var raw_textarea = textarea.val();
     
     // 何時作用？
     $('.spacing_when').click(function() {
@@ -115,11 +114,12 @@ $(document).ready(function() {
     $('#now_exception').click(function() {
         play_sound('Shouryuuken');
         
-
-        
         if (BG_PAGE.localStorage['exception_mode'] == 'whitelist') {
             // 切換 whitelist / backlist 之前先把 textarea 的內容暫存起來
             var whitelist_temp = [];
+            
+            // 每次判斷之前，都要再抓一次 textarea.val() 的值
+            var raw_textarea = textarea.val();
             
             if ($.trim(raw_textarea).length > 0) {
                 whitelist_temp = raw_textarea.split("\n"); // array
@@ -141,6 +141,7 @@ $(document).ready(function() {
         }
         else {
             var blacklist_temp = [];
+            var raw_textarea = textarea.val();
             
             if ($.trim(raw_textarea).length > 0) {
                 blacklist_temp = raw_textarea.split("\n"); // array
@@ -148,9 +149,6 @@ $(document).ready(function() {
             
             BG_PAGE.localStorage['blacklist_temp'] = JSON.stringify(blacklist_temp);
             
-            
-            
-            // 把之前暫存的內容再放回 textarea
             var whitelist_temp = JSON.parse(BG_PAGE.localStorage['whitelist_temp']); // array
             
             if (whitelist_temp.length > 0) {
@@ -168,14 +166,16 @@ $(document).ready(function() {
     
     // 提交（儲存）按鈕
     $('#submit').click(function() {
-        var lines = $('#exception_url_list').val().split('\n');
+        var raw_textarea = textarea.val();
         var url_list = [];
         
         var submit_status = true;
         var submit_label_class = 'label-success';
-        var submit_msg = '恭喜你，設定已經儲存';
+        var submit_msg = '恭喜你，設定完成，你可以繼續回去上網了';
         
-        if (lines.length > 0) {
+        if ($.trim(raw_textarea).length > 0) {
+            var lines = $('#exception_url_list').val().split('\n');
+            
             for (var i = 0; i < lines.length; i++) {
                 var line = lines[i];
                 
@@ -195,6 +195,8 @@ $(document).ready(function() {
         if (submit_status) {
             play_sound('YeahBaby');
             
+            $('#submit_result').css('cursor', 'pointer');
+            
             var exception_mode = BG_PAGE.localStorage['exception_mode'];
             
             if (exception_mode == 'whitelist') {
@@ -207,6 +209,8 @@ $(document).ready(function() {
         }
         else {
             play_sound('WahWahWaaah');
+            
+            $('#submit_result').css('cursor', 'default');
         }
         
         $('#submit_result')
@@ -214,6 +218,16 @@ $(document).ready(function() {
         .addClass('label')
         .addClass(submit_label_class)
         .html(submit_msg);
+    });
+    
+    $('#submit_result').click(function() {
+        var this_element = $(this);
+        
+        if (this_element.hasClass('label-success')) {
+            this_element.css('cursor', 'default');
+            
+            this_element.html('不客氣，我知道你想跟我說謝謝');
+        }
     });
     
     $('a').tooltip();
