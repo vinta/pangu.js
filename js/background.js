@@ -73,7 +73,11 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
         sendResponse({spacing_mode: localStorage['spacing_mode']});
     }
     else if (request.purpose == 'exception_mode') {
-        sendResponse({exception_mode: localStorage['exception_mode']});
+        sendResponse({
+            exception_mode: localStorage['exception_mode'],
+            blacklist: localStorage['blacklist'],
+            whitelist: localStorage['whitelist']
+        });
     }
     else {
         sendResponse({}); // clean request

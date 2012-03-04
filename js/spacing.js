@@ -61,7 +61,13 @@ chrome.extension.sendRequest({purpose: 'spacing_mode'}, function(response) {
     var spacing_mode = response.spacing_mode;
     
     if (spacing_mode == 'spacing_when_load') {
-        traversal_and_spacing();
+        chrome.extension.sendRequest({purpose: 'exception_mode'}, function(response) {
+            var exception_mode = response.exception_mode;
+            var blacklist = response.blacklist;
+            var whitelist = response.whitelist;
+            
+            traversal_and_spacing();
+        });
     }
 });
 
