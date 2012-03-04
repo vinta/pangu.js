@@ -63,10 +63,56 @@ chrome.extension.sendRequest({purpose: 'spacing_mode'}, function(response) {
     if (spacing_mode == 'spacing_when_load') {
         chrome.extension.sendRequest({purpose: 'exception_mode'}, function(response) {
             var exception_mode = response.exception_mode;
-            var blacklist = response.blacklist;
-            var whitelist = response.whitelist;
+            var blacklist = JSON.parse(response.blacklist);
+            var whitelist = JSON.parse(response.whitelist);
             
-            traversal_and_spacing();
+            chrome.extension.sendRequest({purpose: 'current_tab'}, function(response) {
+                var current_tab = response.current_tab;
+                var current_url = current_tab.url;
+                
+                // 開始做例外判斷
+                if (exception_mode == 'blacklist') { // 不要在這些網站作用
+                    if (blacklist.length > 0) {
+                        var is_found = false;
+                        
+                        // 如果當前網頁的 url 符合 blacklist 中的任一筆，就不要作用
+                        for (var i = 0; i < blacklist.length; i++) {
+                            var black_url = blacklist[i];
+                            
+                            if (current_url.indexOf(black_url) >= 0) {
+                                is_found = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!is_found) {
+                            traversal_and_spacing();
+                        }
+                    }
+                    else {
+                        traversal_and_spacing();
+                    }
+                }
+                else { // 只在這些網站作用
+                    if (whitelist.length > 0) {
+                        var is_found = false;
+                        
+                        // 當前網頁的 url 符合 whitelist 中的任一筆，才作用
+                        for (var i = 0; i < whitelist.length; i++) {
+                            var white_url = whitelist[i];
+                            
+                            if (current_url.indexOf(white_url) >= 0) {
+                                is_found = true;
+                                break;
+                            }
+                        }
+                        
+                        if (is_found) {
+                            traversal_and_spacing();
+                        }
+                    }
+                }
+            });
         });
     }
 });

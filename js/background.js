@@ -79,6 +79,9 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
             whitelist: localStorage['whitelist']
         });
     }
+    else if (request.purpose == 'current_tab') {
+        sendResponse({current_tab: sender.tab});
+    }
     else {
         sendResponse({}); // clean request
     }
