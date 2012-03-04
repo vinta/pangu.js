@@ -171,7 +171,7 @@ $(document).ready(function() {
         
         var submit_status = true;
         var submit_label_class = 'label-success';
-        var submit_msg = '恭喜你，設定完成，你可以繼續回去上網了';
+        var submit_msg = '恭喜你，設定完成，你可以繼續上網了';
         
         if ($.trim(raw_textarea).length > 0) {
             var lines = $('#exception_url_list').val().split('\n');

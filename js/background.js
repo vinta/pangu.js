@@ -17,7 +17,6 @@ function default_setuip() {
     
     if (!localStorage['blacklist']) {
         var blacklist = [
-            'chrome://',
             'https://picasaweb.google.com/'
         ];
         
