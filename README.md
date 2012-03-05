@@ -6,6 +6,7 @@ Google Chrome Extension
 ## 用途
 自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。
 
+沒辦法，處女座都有強迫症。
 
 ## 安裝
 [Chrome Web Store](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
