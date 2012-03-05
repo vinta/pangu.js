@@ -17,66 +17,64 @@
 </head>
 
 <body>
-    <header class="hero-unit">
-        <h1 id="extension_name">為什麼你們就是不能加個空格呢？</h1>
-        <p id="subtitle">自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白</p>
-        
-        <div>
-            <p id="quote">漢學家稱這個空白字元為「盤古之白」，因為它劈開了全形字和半形字之間的混沌。也有研究顯示，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有六成的比例只能在 34 歲的時候跟自己不愛的人結婚，畢竟愛情跟書寫都需要適時地留白。</p>
-        </div>
-    </header>
-    
-    <div id="content">
-        <div class="option_group_first">
-            <p>什麼時候作用？</p>
-            <div class="btn-group">
-                <a id="now_spacing_when" class="btn btn-info">網頁載入後自動幫我加上空格</a>
-                <a class="btn btn-info dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
-                <ul class="dropdown-menu">
-                    <li><a id="spacing_when_load" class="spacing_when">網頁載入後自動幫我加上空格 123</a></li>
-                    <li><a id="spacing_when_click" class="spacing_when">我要自己決定什麼時候要加空格 456</a></li>
-                </ul>
+    <div class="container">
+        <header class="hero-unit">
+            <h1 id="extension_name">為什麼你們就是不能加個空格呢？</h1>
+            <p id="subtitle">自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白</p>
+            
+            <div>
+                <p id="quote">漢學家稱這個空白字元為「盤古之白」，因為它劈開了全形字和半形字之間的混沌。也有研究顯示，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有六成的比例只能在 34 歲的時候跟自己不愛的人結婚，畢竟愛情跟書寫都需要適時地留白。</p>
+            </div>
+        </header>
+        <div id="content">
+            <div class="option_group_first">
+                <p>什麼時候作用？</p>
+                <div class="btn-group">
+                    <a id="now_spacing_when" class="btn btn-info">網頁載入後自動幫我加上空格</a>
+                    <a class="btn btn-info dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a id="spacing_when_load" class="spacing_when">網頁載入後自動幫我加上空格 123</a></li>
+                        <li><a id="spacing_when_click" class="spacing_when">我要自己決定什麼時候要加空格 456</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="option_group">
+                <p>然後，你是否希望：</p>
+                <div class="btn-group">
+                    <a id="now_exception" class="btn btn-info">不要在這些網站作用</a>
+                    <a class="btn btn-info dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a id="exception_blacklist" class="exception_target">不要在這些網站作用</a></li>
+                        <li><a id="exception_whitelist" class="exception_target">只在這些網站作用</a></li>
+                    </ul>
+                </div>
+                <textarea id="exception_url_list" class="input-xlarge" rows="7" placeholder="一行一個網址，沒有的話就不要填"></textarea>
+            </div>
+            <div class="option_group">
+                <button id="submit" class="btn btn-info" type="submit">好了，就這樣吧</button>
+                <span id="submit_result" class="label hide">設定完成，你可以繼續回去上網了</span>
             </div>
         </div>
-        
-        <div class="option_group">
-            <p>然後，你是否希望：</p>
-            <div class="btn-group">
-                <a id="now_exception" class="btn btn-info">不要在這些網站作用</a>
-                <a class="btn btn-info dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
-                <ul class="dropdown-menu">
-                    <li><a id="exception_blacklist" class="exception_target">不要在這些網站作用</a></li>
-                    <li><a id="exception_whitelist" class="exception_target">只在這些網站作用</a></li>
-                </ul>
+        <div id="sounds">
+            <audio id="Hadouken" src="../sounds/StreetFighter-Hadouken.mp3" preload="auto"></audio>
+            <audio id="Shouryuuken" src="../sounds/StreetFighter-Shouryuuken.mp3" preload="auto"></audio>
+            <audio id="YeahBaby" src="../sounds/AustinPowers-YeahBaby.mp3" preload="auto"></audio>
+            <audio id="WahWahWaaah" src="../sounds/WahWahWaaah.mp3" preload="auto"></audio>
+        </div>
+        <footer>
+            <div class="row-fluid">
+                <div class="span8">
+                    <p>Fork me on <a href="https://github.com/gibuloto/paranoid-auto-spacing" target="_blank">GitHub</a></p>
+                    <p>Follow me on Twitter (<a href="https://twitter.com/vinta" title="我覺得我這個人最大的缺點就是太他媽的上進了">@vinta</a>)</p>
+                    <p id="copyleft"><a href="http://zh.wikipedia.org/wiki/Copyleft" target="_blank">Copyleft</a> <span id="copyleft_symbol" style="-webkit-transform: rotate(180deg); -moz-transform: rotate(180deg); -o-transform: rotate(180deg); -khtml-transform: rotate(180deg); -ms-transform: rotate(180deg); transform: rotate(180deg); display: inline-block;">&copy;</span> <span id="copyleft_year">2012</span> <a href="http://vinta.ws/">Vinta</a></p>
+                </div>
+                <div class="span4">
+                    <p>Icons: <a href="http://deleket.deviantart.com/">Deleket</a></p>
+                    <p>Sounds: <a href="http://soundfxnow.com/">SoundFXNow</a></p>
+                </div>
             </div>
-            <textarea id="exception_url_list" class="input-xlarge" rows="7" placeholder="一行一個網址，沒有的話就不要填"></textarea>
-        </div>
-        
-        <div class="option_group">
-            <button id="submit" class="btn btn-info" type="submit">好了，就這樣吧</button>
-            <span id="submit_result" class="label hide">設定完成，你可以繼續回去上網了</span>
-        </div>
+        </footer>
     </div>
-    
-    <div id="sounds">
-        <audio id="Hadouken" src="../sounds/StreetFighter-Hadouken.mp3" preload="auto"></audio>
-        <audio id="Shouryuuken" src="../sounds/StreetFighter-Shouryuuken.mp3" preload="auto"></audio>
-        <audio id="YeahBaby" src="../sounds/AustinPowers-YeahBaby.mp3" preload="auto"></audio>
-        <audio id="WahWahWaaah" src="../sounds/WahWahWaaah.mp3" preload="auto"></audio>
-    </div>
-    
-    <footer>
-        <div class="row">
-            <div class="span6">
-                <p>Fork me on <a href="https://github.com/gibuloto/paranoid-auto-spacing" target="_blank">GitHub</a></p>
-                <p>Follow me on Twitter (<a href="https://twitter.com/vinta">@vinta</a>)</p>
-                <p id="copyleft"><a href="http://zh.wikipedia.org/wiki/Copyleft" target="_blank">Copyleft</a> <span id="copyleft_symbol" style="-webkit-transform: rotate(180deg); -moz-transform: rotate(180deg); -o-transform: rotate(180deg); -khtml-transform: rotate(180deg); -ms-transform: rotate(180deg); transform: rotate(180deg); display: inline-block;">&copy;</span> <span id="copyleft_year">2012</span> <a href="http://vinta.ws/">Vinta</a></p>
-            </div>
-            <div class="span6">
-                <p>哈哈哈</p>
-            </div>
-        </div>
-    </footer>
 </body>
 
 </html>

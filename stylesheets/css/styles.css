@@ -3510,6 +3510,9 @@ p {
 header .hero-unit {
   margin: 0;
 }
+header #extension_name {
+  font-size: 54px;
+}
 header #subtitle {
   margin: 15px 0px 0px 2px;
   color: #555555;
@@ -3536,7 +3539,7 @@ header #quote {
   font-size: 36px;
 }
 #content .caret {
-  font-size: 36px;
+  font-size: 18px;
 }
 #content .dropdown-menu a {
   line-height: 27px;
@@ -3570,7 +3573,7 @@ header #quote {
   margin-left: 20px;
 }
 footer {
-  margin: 0px 60px 0px 60px;
+  margin: 0px 0px 0px 60px;
   padding: 50px 0px 60px 0px;
   border-top: 1px solid #E5E5E5;
 }
@@ -3590,6 +3593,6 @@ footer #copyleft a {
 footer #copyleft #copyleft_symbol {
   margin-right: 3px;
 }
-.bgcolor_red {
-  background-color: red;
+.tooltip-inner {
+  max-width: 300px;
 }
