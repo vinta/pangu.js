@@ -8,7 +8,7 @@ Google Chrome Extension
 
 
 ## 安裝
-[Chrome Web Store](https://chrome.google.com/webstore/category/home)
+[Chrome Web Store](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 
 
 ## 授權
