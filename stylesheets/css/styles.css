@@ -3590,3 +3590,6 @@ footer #copyleft a {
 footer #copyleft #copyleft_symbol {
   margin-right: 3px;
 }
+.bgcolor_red {
+  background-color: red;
+}
