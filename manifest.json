@@ -1,7 +1,7 @@
 {
-    "name": "__MSG_extensions_name__",
+    "name": "__MSG_extension_name__",
     "version": "0.2",
-    "description": "__MSG_extensions_description__",
+    "description": "__MSG_extension_description__",
     "icons": {
         "16": "images/icon_16.png",
         "48": "images/icon_48.png",
@@ -21,6 +21,6 @@
     ],
     "browser_action": {
         "default_icon": "images/icon_19.png",
-        "default_title": "__MSG_extensions_name__"
+        "default_title": "__MSG_extension_name__"
     }
 }

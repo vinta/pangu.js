@@ -35,7 +35,10 @@ function read_from_textarea() {
 }
 
 function init_options_page() {
-    $('#options_page_title').html(get_i18n('extensions_name'));
+    $('#page_title').html(get_i18n('extension_name'));
+    $('#header_title').html(get_i18n('extension_name'));
+    $('#subtitle').html(get_i18n('subtitle'));
+    $('#quote').html(get_i18n('quote'));
     
     $('#now_spacing_when').html(get_i18n(BG_PAGE.localStorage['spacing_mode']));
     $('#spacing_when_load').html(get_i18n('spacing_when_load'));

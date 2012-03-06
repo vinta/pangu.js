@@ -3510,7 +3510,7 @@ p {
 header .hero-unit {
   margin: 0;
 }
-header #extension_name {
+header #header_title {
   font-size: 54px;
 }
 header #subtitle {
