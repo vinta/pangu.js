@@ -32,6 +32,7 @@ function default_setuip() {
     }
 }
 
+
 function set_badge(text) {
     // 注意檔案路徑！
     // browserAction 的 icon 不能顯示動態的 gif
@@ -40,7 +41,16 @@ function set_badge(text) {
     chrome.browserAction.setBadgeText({text: text});
 }
 
+
+function show_notify(tab_id) {
+    chrome.tabs.insertCSS(tab_id, {file: 'thirdparty/needim-noty/css/jquery.noty.css'});
+    chrome.tabs.executeScript(tab_id, {file: 'thirdparty/needim-noty/js/jquery.noty.js'});
+    chrome.tabs.executeScript(tab_id, {file: 'js/notify.js'});
+}
+
+
 default_setuip();
+
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     if (changeInfo.status == 'complete' && tab.url.search(/^chrome/i) == -1) {
@@ -56,6 +66,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     }
 });
 
+
 chrome.browserAction.onClicked.addListener(function(tab) {
     /*
      在 background.html 引入 jquery 是沒有作用的
@@ -67,6 +78,8 @@ chrome.browserAction.onClicked.addListener(function(tab) {
     chrome.tabs.executeScript(tab.id, {code: 'traversal_and_spacing();'});
 });
 
+
+// listen 從 content scripts 傳來的 requests
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     if (request.purpose == 'spacing_mode') {
         sendResponse({spacing_mode: localStorage['spacing_mode']});
@@ -80,6 +93,12 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     }
     else if (request.purpose == 'current_tab') {
         sendResponse({current_tab: sender.tab});
+    }
+    else if (request.purpose == 'notify') { // 顯示右上角的 notify alert
+        show_notify(sender.tab.id);
+        
+        // 就算不回傳 response 應該也可以吧？
+        sendResponse({notify: 'show'});
     }
     else {
         sendResponse({}); // clean request

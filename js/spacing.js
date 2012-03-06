@@ -1,5 +1,14 @@
 console.log('spacing.js');
 
+
+function request_notify() {
+    // 顯示右上角的 notify alert
+    chrome.extension.sendRequest({purpose: 'notify'}, function(response) {
+        var notify = response.notify;
+    });
+}
+
+
 function insert_space(text) {
     // 英文、數字、符號 ([a-z0-9~!@#&;=_\$\%\^\*\-\+\,\.\/(\\)\?\:\'\"\[\]\(\)])
     
@@ -26,7 +35,10 @@ function insert_space(text) {
     return text;
 }
 
+
 function traversal_and_spacing() {
+    request_notify();
+    
     var current_documant = window.document;
     
     /*
@@ -55,6 +67,7 @@ function traversal_and_spacing() {
         current_node.data = insert_space(current_node.data);
     }		
 }
+
 
 // content script 只能用這種方式跟 background page（或其他 tab）溝通
 chrome.extension.sendRequest({purpose: 'spacing_mode'}, function(response) {

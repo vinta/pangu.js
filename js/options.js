@@ -31,9 +31,6 @@ function is_valid_url(string) {
     }
 }
 
-function read_from_textarea() {
-}
-
 function init_options_page() {
     $('#page_title').html(get_i18n('extension_name'));
     $('#header_title').html(get_i18n('extension_name'));
@@ -233,7 +230,7 @@ $(document).ready(function() {
         }
     });
     
-    $('a').tooltip();
+// end: $(document).ready(function() {
 });
 
 // DOM 裡頭的元素（例如圖片）載入完才會觸發
