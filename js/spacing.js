@@ -20,11 +20,7 @@ function insert_space(text) {
     
     text = text.replace(/([\u4E00-\u9FA5])([a-z0-9@#&;=_\$\%\^\*\-\+\(\/])/ig, '$1 $2');
     
-    text = text.replace(/([a-z0-9@#!~&;=_\,\.\:\?\$\%\^\*\-\+\(\)\/])([\u4E00-\u9FA5])/ig, '$1 $2');
-    
-    // TODO
-    // 漢字<a href="">abcd</a>漢字
-    // abcd,efg,123,hijkl
+    text = text.replace(/([a-z0-9@#!~&;=_\,\.\:\?\$\%\^\*\-\+\)\/])([\u4E00-\u9FA5])/ig, '$1 $2');
     
 /*
     console.log('format text:');
