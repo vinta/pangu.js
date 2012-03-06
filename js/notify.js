@@ -3,7 +3,7 @@
  http://needim.github.com/noty/
  */
 noty({
-    text: '正在加空格...',
+    text: '空格之神顯靈了！',
     layout: 'topRight',
     easing: 'swing',
     animateOpen: {'opacity': 'toggle'},
