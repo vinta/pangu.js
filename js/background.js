@@ -75,6 +75,7 @@ chrome.browserAction.onClicked.addListener(function(tab) {
     // chrome.tabs.executeScript(tab.id, {file: 'thirdparty/jquery-1.7.1.min.js'});
     // chrome.tabs.executeScript(tab.id, {file: 'js/spacing.js'});
 
+    show_notify(tab.id);
     chrome.tabs.executeScript(tab.id, {code: 'traversal_and_spacing();'});
 });
 
