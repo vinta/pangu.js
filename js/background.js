@@ -10,23 +10,23 @@ function default_setuip() {
     if (!localStorage['spacing_mode']) {
         localStorage['spacing_mode'] = 'spacing_when_load';
     }
-    
+
     if (!localStorage['exception_mode']) {
         localStorage['exception_mode'] = 'blacklist';
     }
-    
+
     if (!localStorage['blacklist']) {
         var blacklist = [
             'https://picasaweb.google.com/'
         ];
-        
+
         localStorage['blacklist'] = JSON.stringify(blacklist);
         localStorage['blacklist_temp'] = JSON.stringify(blacklist);
     }
-    
+
     if (!localStorage['whitelist']) {
         var whitelist = [];
-        
+
         localStorage['whitelist'] = JSON.stringify(whitelist);
         localStorage['whitelist_temp'] = JSON.stringify(whitelist);
     }
@@ -37,7 +37,7 @@ function set_badge(text) {
     // 注意檔案路徑！
     // browserAction 的 icon 不能顯示動態的 gif
     // chrome.browserAction.setIcon({path: '/images/ajax_loader.gif'});
-    
+
     chrome.browserAction.setBadgeText({text: text});
 }
 
@@ -56,7 +56,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     if (changeInfo.status == 'complete' && tab.url.search(/^chrome/i) == -1) {
         chrome.tabs.executeScript(tab.id, {file: 'thirdparty/jquery-1.7.1.min.js', allFrames: true});
         chrome.tabs.executeScript(tab.id, {file: 'js/spacing.js'});
-        
+
         /*
          實際執行 spacing 是在這一行
          直接寫在這裡會發生 Uncaught ReferenceError: traversal_and_spacing is not defined
@@ -74,7 +74,7 @@ chrome.browserAction.onClicked.addListener(function(tab) {
      */
     // chrome.tabs.executeScript(tab.id, {file: 'thirdparty/jquery-1.7.1.min.js'});
     // chrome.tabs.executeScript(tab.id, {file: 'js/spacing.js'});
-    
+
     chrome.tabs.executeScript(tab.id, {code: 'traversal_and_spacing();'});
 });
 
@@ -96,7 +96,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     }
     else if (request.purpose == 'notify') { // 顯示右上角的 notify alert
         show_notify(sender.tab.id);
-        
+
         // 就算不回傳 response 應該也可以吧？
         sendResponse({notify: 'show'});
     }
