@@ -126,8 +126,14 @@ chrome.extension.sendRequest({purpose: 'spacing_mode'}, function(response) {
     }
 });
 
-
+var ajaxQueue;
 $('body').bind('DOMSubtreeModified', function() {
-    console.log('DOM change');
-    console.log(new Date());
+    if (!ajaxQueue) {
+        ajaxQueue = setTimeout(function() {
+            console.log('do it');
+            traversal_and_spacing();
+
+            ajaxQueue = null;
+        }, 2000);
+    }
 });

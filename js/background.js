@@ -55,7 +55,7 @@ default_setuip();
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     if (changeInfo.status == 'complete' && tab.url.search(/^chrome/i) == -1) {
         chrome.tabs.executeScript(tab.id, {file: 'thirdparty/jquery-1.7.1.min.js', allFrames: true});
-        chrome.tabs.executeScript(tab.id, {file: 'js/spacing.js'});
+        chrome.tabs.executeScript(tab.id, {file: 'js/spacing.js', allFrames: true});
 
         /*
          實際執行 spacing 是在這一行
