@@ -12,21 +12,13 @@ function request_notify() {
 function insert_space(text) {
     // 英文、數字、符號 ([a-z0-9~!@#&;=_\$\%\^\*\-\+\,\.\/(\\)\?\:\'\"\[\]\(\)])
 
-/*
-    console.log('\n');
-    console.log('raw text:');
-    console.log(text);
-*/
-
+    // 中文在前
     text = text.replace(/([\u4E00-\u9FA5])([a-z0-9@#&;=_\$\%\^\*\-\+\(\/])/ig, '$1 $2');
 
+    // 中文在後
     text = text.replace(/([a-z0-9@#!~&;=_\,\.\:\?\$\%\^\*\-\+\)\/])([\u4E00-\u9FA5])/ig, '$1 $2');
 
-/*
-    console.log('format text:');
-    console.log(text);
-    console.log('\n');
-*/
+    // 考慮增加 - + / * 前後的空白
 
     return text;
 }
@@ -126,8 +118,17 @@ chrome.extension.sendRequest({purpose: 'spacing_mode'}, function(response) {
     }
 });
 
+
+/*
+ 這一段是為了對付那些 AJAX 加載進來的內容
+ 當頁面 DOM 有變動時
+ 就再執行一次 spacing
+
+ 但是我要怎麼分辨由 ajax 引起的 DOM insert 和 spacing 造成的 DOM insert？
+ */
 var ajaxQueue;
-$('body').bind('DOMSubtreeModified', function() {
+
+$('body').bind('DOMNodeInserted', function() {
     if (!ajaxQueue) {
         ajaxQueue = setTimeout(function() {
             console.log('do it');
