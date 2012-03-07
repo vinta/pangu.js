@@ -25,6 +25,8 @@ function insert_space(text) {
 
 
 function traversal_and_spacing() {
+    console.log('traversal_and_spacing()');
+
     request_notify();
 
     var current_documant = window.document;
@@ -123,18 +125,14 @@ chrome.extension.sendRequest({purpose: 'spacing_mode'}, function(response) {
  這一段是為了對付那些 AJAX 加載進來的內容
  當頁面 DOM 有變動時
  就再執行一次 spacing
-
- 但是我要怎麼分辨由 ajax 引起的 DOM insert 和 spacing 造成的 DOM insert？
  */
-var ajaxQueue;
+var had_spacing; // 是不是剛剛執行完 spacing
 
 $('body').bind('DOMNodeInserted', function() {
-    if (!ajaxQueue) {
-        ajaxQueue = setTimeout(function() {
-            console.log('do it');
+    if (!had_spacing) {
+        had_spacing = setTimeout(function() {
             traversal_and_spacing();
-
-            ajaxQueue = null;
-        }, 2000);
+            had_spacing = null;
+        }, 1000);
     }
 });
