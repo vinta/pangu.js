@@ -134,34 +134,35 @@ chrome.extension.sendRequest({purpose: 'spacing_mode'}, function(response) {
  但是我要怎麼分辨由 ajax 引起的 DOM insert 和 spacing 造成的 DOM insert？
  */
 var had_spacing; // 是不是剛剛執行完 spacing
-var lastreq = 0; // 0 means there were never any requests sent
+var last_spacing_time = 0; // 0 means there were never any requests sent
 
-// $(document).bind('DOMNodeInserted', function() {
-//     console.log('1: ' + $(this).height());
-//     console.log('2: ' + $(this).outerHeight());
-//     console.log('3: ' + $(this).innerHeight());
-//     // var d = new Date();
-//     // var currenttime = d.getTime(); // get the time of this change event
-//     // var interval = currenttime - lastreq; // how many milliseconds since the last request
+$('body').bind('DOMNodeInserted', function() {
+    var d = new Date();
+    var current_time = d.getTime(); // get the time of this change event
+    var interval = current_time - last_spacing_time; // how many milliseconds since the last request
 
-//     // if (interval >= 2000) { // more than 2 seconds
-//     //     lastreq = currenttime; // set lastreq for next change event
-//     //     traversal_and_spacing();
-//     // }
+    if (interval >= 1000) { // more than 2 seconds
+        last_spacing_time = current_time; // set last_spacing_time for next change event
 
-//     // if (!had_spacing) {
-//     //     had_spacing = setTimeout(function() {
-//     //         traversal_and_spacing();
-//     //         had_spacing = null;
-//     //     }, 1000);
-//     // }
-// });
-
-$(document).resize(function(e) {
-    console.log('resize');
-
-    had_spacing = setTimeout(function() {
-        traversal_and_spacing();
-        had_spacing = null;
-    }, 1000);
+        if (!had_spacing) {
+            had_spacing = setTimeout(function() {
+                traversal_and_spacing();
+                had_spacing = null;
+            }, 1000);
+        }
+    }
 });
+
+/*
+ jquery.ba-resize.min.js
+ https://github.com/cowboy/jquery-resize
+ */
+
+// $(document).resize(function(e) {
+//     console.log('resize');
+
+//     had_spacing = setTimeout(function() {
+//         traversal_and_spacing();
+//         had_spacing = null;
+//     }, 1000);
+// });
