@@ -31,6 +31,21 @@ function is_valid_url(string) {
     }
 }
 
+function notify_alert(msg) {
+    noty({
+        text: msg,
+        layout: 'topRight',
+        modal: true,
+        easing: 'swing',
+        animateOpen: {'opacity': 'toggle'},
+        animateClose: {'opacity': 'toggle'},
+        speed: 1,
+        timeout: 1000,
+        closable: false,
+        closeOnSelfClick: false
+    });
+}
+
 function init_options_page() {
     $('#page_title').html(get_i18n('extension_name'));
     $('#header_title').html(get_i18n('extension_name'));
@@ -68,6 +83,12 @@ function init_options_page() {
         else {
             textarea.val('');
         }
+    }
+
+    var is_notify = BG_PAGE.localStorage['is_notify'];
+
+    if (is_notify == 'false') {
+        $('#is_notify').click();
     }
 
     var now = new Date();
@@ -167,6 +188,7 @@ $(document).ready(function() {
     $('#is_notify').change(function() {
         if ($(this).attr("checked") == 'checked') {
             BG_PAGE.localStorage['is_notify'] = 'false'; // 不要顯示 notify alert
+            notify_alert('可惡！');
         }
         else {
             BG_PAGE.localStorage['is_notify'] = 'true';

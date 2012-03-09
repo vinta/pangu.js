@@ -111,8 +111,9 @@ div.noty_modal {
 	cursor: pointer;
 }
 .noty_bar.alert {
-	background-color: #fff;
-	border-color: #ccc;
+	background-color: #fff !important;
+	border-color: #ccc !important;
+	color: #333 !important;
 }
 .noty_bar.error {
 	background-color: red;
