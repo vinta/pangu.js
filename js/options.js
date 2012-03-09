@@ -164,6 +164,15 @@ $(document).ready(function() {
         $('#now_exception').html(get_i18n(BG_PAGE.localStorage['exception_mode']));
     });
 
+    $('#is_notify').change(function() {
+        if ($(this).attr("checked") == 'checked') {
+            BG_PAGE.localStorage['is_notify'] = 'false'; // 不要顯示 notify alert
+        }
+        else {
+            BG_PAGE.localStorage['is_notify'] = 'true';
+        }
+    });
+
     // 提交（儲存）按鈕
     $('#submit').click(function() {
         var raw_textarea = textarea.val();

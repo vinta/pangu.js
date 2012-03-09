@@ -43,9 +43,13 @@ function set_badge(text) {
 
 
 function show_notify(tab_id) {
-    chrome.tabs.insertCSS(tab_id, {file: 'thirdparty/needim-noty/css/jquery.noty.css'});
-    chrome.tabs.executeScript(tab_id, {file: 'thirdparty/needim-noty/js/jquery.noty.js'});
-    chrome.tabs.executeScript(tab_id, {file: 'js/notify.js'});
+    var is_notify = localStorage['is_notify'];
+
+    if (is_notify != 'false') {
+        chrome.tabs.insertCSS(tab_id, {file: 'thirdparty/needim-noty/css/jquery.noty.css'});
+        chrome.tabs.executeScript(tab_id, {file: 'thirdparty/needim-noty/js/jquery.noty.js'});
+        chrome.tabs.executeScript(tab_id, {file: 'js/notify.js'});
+    }
 }
 
 

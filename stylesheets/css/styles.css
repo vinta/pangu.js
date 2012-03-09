@@ -3572,6 +3572,19 @@ header #quote {
 #content #submit_result {
   margin-left: 20px;
 }
+#content #control-group {
+  margin-top: 12px;
+}
+#content #control-group .controls {
+  margin: 0px 0px 3px 0px;
+}
+#content #control-group .controls input[type="checkbox"] {
+  height: 18px;
+  line-height: 18px;
+}
+#content #control-group .controls .checkbox_text {
+  font-size: 16.2px;
+}
 footer {
   margin: 0px 0px 0px 60px;
   padding: 50px 0px 60px 0px;

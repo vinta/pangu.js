@@ -47,7 +47,6 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    
 }
 
 p {
@@ -58,16 +57,16 @@ header {
     .hero-unit {
         margin: 0;
     }
-    
+
     #header_title {
         font-size: @baseFontSize * 3;
     }
-    
+
     #subtitle {
         margin: 15px 0px 0px 2px;
         color: @gray;
     }
-    
+
     #quote {
         margin: 30px 100px 0px 2px;
         color: @gray;
@@ -77,40 +76,40 @@ header {
 #content {
     margin: 0px;
     padding: 30px 0px 60px 60px; // top, right, bottom, left
-    
+
     .option_group_first {
         margin: 0px 0px 0px 0px;
     }
-    
+
     .option_group {
         margin: 60px 0px 0px 0px;
     }
-    
+
     .btn-group {
         margin-top: 15px;
     }
-    
+
     .btn {
         padding: 20px 24px 18px 20px;
         font-size: @baseFontSize * 2;
     }
-    
+
     .caret {
         font-size: @baseFontSize * 1;
     }
-    
+
     .dropdown-menu {
         a {
             line-height: @baseLineHeight * 1.5;
         }
-        
+
         a:hover {
             background-color: @backgroundColor;
             color: @linkColor;
             cursor: pointer;
         }
     }
-    
+
     .border_btn {
         font-size: 1.4em;
         border: 3px solid #00693C;
@@ -122,20 +121,37 @@ header {
         margin-right: 6px;
         color: #00693C;
     }
-    
+
     #exception_url_list {
         margin: 25px 0px 0px 0px;
         width: 500px;
         font-size: @baseFontSize * 0.9;
     }
-    
+
     .label {
         padding: 7px 10px 7px 10px;
         font-weight: normal;
     }
-    
+
     #submit_result {
         margin-left: 20px;
+    }
+
+    #control-group {
+        margin-top: 12px;
+
+        .controls {
+            margin: 0px 0px 3px 0px;
+
+            input[type="checkbox"] {
+                height: @baseFontSize;
+                line-height: @baseFontSize;
+            }
+
+            .checkbox_text {
+                font-size: @baseFontSize * 0.9;
+            }
+        }
     }
 }
 
@@ -143,22 +159,22 @@ footer {
     margin: 0px 0px 0px 60px;
     padding: 50px 0px 60px 0px;
     border-top: 1px solid #E5E5E5;
-    
+
     p {
         font-size: @baseFontSize;
         line-height: @baseLineHeight;
     }
-    
+
     #copyleft {
         margin-top: 25px;
         word-spacing: 3px;
         font-size: @baseFontSize * 0.9;
         color: @grayLight;
-        
+
         a {
             color: @grayLight;
         }
-        
+
         #copyleft_symbol {
             margin-right: 3px;
         }
