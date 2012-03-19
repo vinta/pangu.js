@@ -257,7 +257,7 @@ $(document).ready(function() {
         if (this_element.hasClass('label-success')) {
             this_element.css('cursor', 'default');
 
-            this_element.html('不客氣，我知道你想跟我說謝謝');
+            this_element.html(get_i18n('submit_thanks'));
         }
     });
 

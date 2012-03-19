@@ -29,7 +29,7 @@
         </header>
         <div id="content">
             <div class="option_group_first">
-                <p>什麼時候作用？</p>
+                <p id="label_spacing">什麼時候作用？</p>
                 <div class="btn-group">
                     <a id="now_spacing_when" class="btn btn-info">網頁載入後自動幫我加上空格</a>
 <!--
@@ -42,7 +42,7 @@
                 </div>
             </div>
             <div class="option_group">
-                <p>然後，你是否希望：</p>
+                <p id="label_exception">然後，你是否希望：</p>
                 <div class="btn-group">
                     <a id="now_exception" class="btn btn-info">不要在這些網站作用</a>
 <!--
@@ -56,13 +56,13 @@
                 <textarea id="exception_url_list" class="input-xlarge" rows="7" placeholder="一行一個網址，沒有的話就不要填"></textarea>
             </div>
             <div class="option_group">
-                <p>其他選項：</p>
+                <p id="label_options">其他選項：</p>
                 <div id="control-group" class="control-group">
                     <div class="controls">
-                        <input id="is_notify" type="checkbox"> <span class="checkbox_text">可不可以不要每次空格之神顯靈的時候都通知我？他好煩</span>
+                        <input id="is_notify" type="checkbox"> <span id="is_notify_text" class="checkbox_text">可不可以不要每次空格之神顯靈的時候都通知我？他好煩</span>
                     </div>
                     <div class="controls">
-                        <input type="checkbox" disabled> <span class="checkbox_text">可不可以中午再去上班？</span>
+                        <input type="checkbox" disabled> <span id="go_to_work_text" class="checkbox_text">可不可以中午再去上班？</span>
                     </div>
                 </div>
             </div>
