@@ -39,6 +39,14 @@
         "message": "不要在這些網站作用",
         "description": ""
     },
+    "exception_urls_placeholder": {
+        "message": "一行一個網址，沒有的話就不要填",
+        "description": ""
+    },
+    "exception_urls_error": {
+        "message": "不要亂輸入好不好？第 {0} 行根本就不是一個合法的網址啊幹",
+        "description": ""
+    },
     "label_options": {
         "message": "其他選項：",
         "description": ""
@@ -56,11 +64,15 @@
         "description": ""
     },
     "submit_result": {
-        "message": "設定完成，你可以繼續回去上網了",
+        "message": "恭喜你，設定完成，你可以繼續上網了",
         "description": ""
     },
     "submit_thanks": {
-        "message": "不客氣，我知道你想跟我說謝謝123",
+        "message": "不客氣，我知道你想跟我說謝謝",
+        "description": ""
+    },
+    "holly_god_of_spacing": {
+        "message": "空格之神顯靈了！",
         "description": ""
     }
 }

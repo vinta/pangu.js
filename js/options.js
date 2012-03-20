@@ -59,7 +59,9 @@ function init_options_page() {
     $('#now_exception').html(get_i18n(BG_PAGE.localStorage['exception_mode']));
     $('#exception_whitelist').html(get_i18n('exception_whitelist'));
     $('#exception_blacklist').html(get_i18n('exception_blacklist'));
-
+    
+    $('#exception_url_list').attr('placeholder', get_i18n('exception_urls_placeholder'));
+    
     var exception_mode = BG_PAGE.localStorage['exception_mode'];
     var textarea = $('#exception_url_list');
 
@@ -90,6 +92,12 @@ function init_options_page() {
     if (is_notify == 'false') {
         $('#is_notify').click();
     }
+    
+    $('#label_options').html(get_i18n('label_options'));
+    $('#is_notify_text').html(get_i18n('is_notify_text'));
+    $('#go_to_work_text').html(get_i18n('go_to_work_text'));
+    
+    $('#submit').html(get_i18n('submit'));
 
     var now = new Date();
     $('#copyleft_year').html(now.getFullYear());
@@ -202,7 +210,7 @@ $(document).ready(function() {
 
         var submit_status = true;
         var submit_label_class = 'label-success';
-        var submit_msg = '恭喜你，設定完成，你可以繼續上網了';
+        var submit_msg = get_i18n('submit_result');
 
         if ($.trim(raw_textarea).length > 0) {
             var lines = $('#exception_url_list').val().split('\n');
@@ -216,7 +224,7 @@ $(document).ready(function() {
                 else {
                     submit_status = false;
                     submit_label_class = 'label-important';
-                    submit_msg = "不要亂輸入好不好？第 {0} 行根本就不是一個合法的網址啊幹".format(i + 1);
+                    submit_msg = get_i18n('exception_urls_error').format(i + 1);
 
                     break;
                 }
