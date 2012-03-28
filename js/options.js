@@ -1,5 +1,3 @@
-console.log('options.js');
-
 String.prototype.format = function() {
     var args = arguments;
 

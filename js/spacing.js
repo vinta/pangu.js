@@ -1,6 +1,3 @@
-console.log('spacing.js');
-
-
 function request_notify() {
     // 顯示右上角的 notify alert
     chrome.extension.sendRequest({purpose: 'notify'}, function(response) {
@@ -11,12 +8,15 @@ function request_notify() {
 
 function insert_space(text) {
     // 英文、數字、符號 ([a-z0-9~!@#&;=_\$\%\^\*\-\+\,\.\/(\\)\?\:\'\"\[\]\(\)])
+    // 中文 ([\u4E00-\u9FFF])
+    // 日文 ([\u3040-\u30FF])
+    // http://www.diybl.com/course/6_system/linux/Linuxjs/20090426/165435.html
 
     // 中文在前
-    text = text.replace(/([^\x00-\xFF])([a-z0-9@#&;=_\[\$\%\^\*\-\+\(\/])/ig, '$1 $2');
+    text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([a-z0-9@#&;=_\[\$\%\^\*\-\+\(\/])/ig, '$1 $2');
 
     // 中文在後
-    text = text.replace(/([a-z0-9#!~&;=_\]\,\.\:\?\$\%\^\*\-\+\)\/])([^\x00-\xFF])/ig, '$1 $2');
+    text = text.replace(/([a-z0-9#!~&;=_\]\,\.\:\?\$\%\^\*\-\+\)\/])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
 
     // 考慮增加 - + / * 前後的空白
 
@@ -65,65 +65,71 @@ function traversal_and_spacing() {
 
 
 // content script 只能用這種方式跟 background page（或其他 tab）溝通
-chrome.extension.sendRequest({purpose: 'spacing_mode'}, function(response) {
-    var spacing_mode = response.spacing_mode;
+function request_spacing() {
+    chrome.extension.sendRequest({purpose: 'spacing_mode'}, function(response) {
+        var spacing_mode = response.spacing_mode;
 
-    if (spacing_mode == 'spacing_when_load') {
-        chrome.extension.sendRequest({purpose: 'exception_mode'}, function(response) {
-            var exception_mode = response.exception_mode;
-            var blacklist = JSON.parse(response.blacklist);
-            var whitelist = JSON.parse(response.whitelist);
+        if (spacing_mode == 'spacing_when_load') {
+            chrome.extension.sendRequest({purpose: 'exception_mode'}, function(response) {
+                var exception_mode = response.exception_mode;
+                var blacklist = JSON.parse(response.blacklist);
+                var whitelist = JSON.parse(response.whitelist);
 
-            chrome.extension.sendRequest({purpose: 'current_tab'}, function(response) {
-                var current_tab = response.current_tab;
-                var current_url = current_tab.url;
+                chrome.extension.sendRequest({purpose: 'current_tab'}, function(response) {
+                    var current_tab = response.current_tab;
+                    var current_url = current_tab.url;
 
-                // 開始做例外判斷
-                if (exception_mode == 'blacklist') { // 不要在這些網站作用
-                    if (blacklist.length > 0) {
-                        var is_found = false;
+                    // 開始做例外判斷
+                    if (exception_mode == 'blacklist') { // 不要在這些網站作用
+                        if (blacklist.length > 0) {
+                            var is_found = false;
 
-                        // 如果當前網頁的 url 符合 blacklist 中的任一筆，就不要作用
-                        for (var i = 0; i < blacklist.length; i++) {
-                            var black_url = blacklist[i];
+                            // 如果當前網頁的 url 符合 blacklist 中的任一筆，就不要作用
+                            for (var i = 0; i < blacklist.length; i++) {
+                                var black_url = blacklist[i];
 
-                            if (current_url.indexOf(black_url) >= 0) {
-                                is_found = true;
-                                break;
+                                if (current_url.indexOf(black_url) >= 0) {
+                                    is_found = true;
+                                    break;
+                                }
+                            }
+
+                            if (!is_found) {
+                                traversal_and_spacing();
                             }
                         }
-
-                        if (!is_found) {
+                        else {
                             traversal_and_spacing();
                         }
                     }
-                    else {
-                        traversal_and_spacing();
-                    }
-                }
-                else { // 只在這些網站作用
-                    if (whitelist.length > 0) {
-                        var is_found = false;
+                    else { // 只在這些網站作用
+                        if (whitelist.length > 0) {
+                            var is_found = false;
 
-                        // 當前網頁的 url 符合 whitelist 中的任一筆，才作用
-                        for (var i = 0; i < whitelist.length; i++) {
-                            var white_url = whitelist[i];
+                            // 當前網頁的 url 符合 whitelist 中的任一筆，才作用
+                            for (var i = 0; i < whitelist.length; i++) {
+                                var white_url = whitelist[i];
 
-                            if (current_url.indexOf(white_url) >= 0) {
-                                is_found = true;
-                                break;
+                                if (current_url.indexOf(white_url) >= 0) {
+                                    is_found = true;
+                                    break;
+                                }
+                            }
+
+                            if (is_found) {
+                                traversal_and_spacing();
                             }
                         }
-
-                        if (is_found) {
-                            traversal_and_spacing();
-                        }
                     }
-                }
+                });
             });
-        });
-    }
-});
+        }
+    });
+}
+
+
+// 網頁載入後就先判斷一次要不要執行 spacing
+request_spacing();
 
 
 /*
@@ -141,17 +147,18 @@ $('body').bind('DOMNodeInserted', function() {
     var current_time = d.getTime(); // get the time of this change event
     var interval = current_time - last_spacing_time; // how many milliseconds since the last request
 
-    if (interval >= 1000) { // more than 2 seconds
+    if (interval >= 1000) { // more than 1 second
         last_spacing_time = current_time; // set last_spacing_time for next change event
 
         if (!had_spacing) {
             had_spacing = setTimeout(function() {
-                traversal_and_spacing();
+                request_spacing();
                 had_spacing = null;
             }, 1000);
         }
     }
 });
+
 
 /*
  jquery.ba-resize.min.js

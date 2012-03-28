@@ -1,5 +1,3 @@
-console.log('background.js');
-
 /*
  background.js 由 background.html 引入
  在整個 extension 的生命週期中都存在
