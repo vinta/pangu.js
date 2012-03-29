@@ -14,9 +14,17 @@ for Google Chrome & Mozilla Firefox
 
 ## 安裝
 
-* [Chrome Web Store](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+* [Google Chrome (Extension)](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+* [Mozilla Firefox (UserScript)](https://github.com/gibuloto/paranoid-auto-spacing/raw/master/js/firefox/paranoid-auto-spacing.user.js) by [jiefoxi](https://github.com/jiefoxi)
+    * 請先安裝 [Greasemonkey](https://addons.mozilla.org/zh-tw/firefox/addon/greasemonkey/)
 
 
 ## 授權
 
 [GNU General Public License v3.0 (GPL-3.0)](http://www.gnu.org/copyleft/gpl.html)
+
+
+## 聯繫
+
+* Twitter: [@vinta](https://twitter.com/vinta)
+* Website: [科學的愛情](http://gibuloto.com/)
