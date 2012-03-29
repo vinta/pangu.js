@@ -1,16 +1,15 @@
 // ==UserScript==
 // @name         為什麼你們就是不能加個空格呢？
+// @namespace    http://gibuloto.com/
 // @description  自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。（攤手）沒辦法，處女座都有強迫症。
-// @author       Vinta
 // @version      1.4
-// @include      http*://*
+// @include      *
+// 
+// @author       Vinta
+// @homepage     http://vinta.ws/
+// @contributor  jiefoxi (https://github.com/jiefoxi)
+// @license GNU General Public License v3.0 (GPL-3.0); http://www.gnu.org/copyleft/gpl.html
 // ==/UserScript==
-
-/*
- Author: Vinta <http://vinta.ws/>
- Source: <https://github.com/gibuloto/paranoid-auto-spacing>
- License: [GNU General Public License v3.0 (GPL-3.0)](http://www.gnu.org/copyleft/gpl.html)
- */
 
 
 function insert_space(text) {
