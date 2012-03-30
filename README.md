@@ -15,7 +15,7 @@ for Google Chrome & Mozilla Firefox
 ## 安裝
 
 * [Google Chrome (Extension)](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
-* [Mozilla Firefox (Userscript)](https://github.com/gibuloto/paranoid-auto-spacing/raw/master/js/firefox/paranoid-auto-spacing.user.js) by [jiefoxi](https://github.com/jiefoxi)
+* [Mozilla Firefox (Userscript)](http://userscripts.org/scripts/show/129555) by [jiefoxi](https://github.com/jiefoxi)
     * 請先安裝 [Greasemonkey](https://addons.mozilla.org/zh-tw/firefox/addon/greasemonkey/)
 
 
