@@ -66,12 +66,12 @@ function traversal_and_spacing() {
 
             if (text != newText) {
                 var next_temp = next_node;
-                while (next_temp.parentNode && next_temp.parentNode.firstChild == next_temp) {
+                while (next_temp.parentNode && next_temp.nodeName.toLowerCase() != "a" && next_temp.parentNode.firstChild == next_temp) {
                     next_temp = next_temp.parentNode;
                 }
 
                 var current_temp = current_node;
-                while (current_temp.parentNode && current_temp.parentNode.lastChild == current_temp) {
+                while (current_temp.parentNode && current_temp.nodeName.toLowerCase() != "a" && current_temp.parentNode.lastChild == current_temp) {
                     current_temp = current_temp.parentNode;
                 }
 
