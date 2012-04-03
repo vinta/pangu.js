@@ -54,12 +54,41 @@ function traversal_and_spacing() {
     // snapshotLength 要配合 XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE 使用
     var nodes_length = nodes.snapshotLength;
 
-    for (var i = 0; i < nodes_length; ++i) {
+    var next_node;
+
+    for (var i = nodes_length - 1; i > -1; --i) {
         var current_node = nodes.snapshotItem(i);
 
         // .data 是 XML DOM 的屬性
         // http://www.w3school.com.cn/xmldom/dom_text.asp
         current_node.data = insert_space(current_node.data);
+
+        if (next_node) {
+            var text = current_node.data.toString().substr(-1) + next_node.data.toString().substr(0, 1);
+            var newText = insert_space(text);
+
+            if (text != newText) {
+                var next_temp = next_node;
+                while (next_temp.parentNode && next_temp.nodeName.toLowerCase() != "a" && next_temp.parentNode.firstChild == next_temp) {
+                    next_temp = next_temp.parentNode;
+                }
+
+                var current_temp = current_node;
+                while (current_temp.parentNode && current_temp.nodeName.toLowerCase() != "a" && current_temp.parentNode.lastChild == current_temp) {
+                    current_temp = current_temp.parentNode;
+                }
+
+                if (next_temp.nodeName.toLowerCase() != "a") {
+                    next_node.data = " " + next_node.data;
+                } else if (current_temp.nodeName.toLowerCase() != "a") {
+                    current_node.data = current_node.data + " ";
+                } else {
+                    next_temp.parentNode.insertBefore(document.createTextNode(" "), next_temp);
+                }
+            }
+        }
+
+        next_node = current_node;
     }
 }
 
