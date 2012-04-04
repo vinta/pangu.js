@@ -2,13 +2,13 @@
 // @name         為什麼你們就是不能加個空格呢？
 // @namespace    http://gibuloto.com/
 // @description  自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。（攤手）沒辦法，處女座都有強迫症。
-// @version      1.4
+// @version      1.5
 // @include      *
 // 
 // @author       Vinta
 // @homepage     http://vinta.ws/
 // @contributor  jiefoxi (https://github.com/jiefoxi)
-// @license GNU General Public License v3.0 (GPL-3.0); http://www.gnu.org/copyleft/gpl.html
+// @license      GNU General Public License v3.0 (GPL-3.0); http://www.gnu.org/copyleft/gpl.html
 // ==/UserScript==
 
 
@@ -43,7 +43,6 @@ function traversal_and_spacing() {
      試試 [translate(name(), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")="html"]
      而 lower-case(name(..)) 不起作用
      */
-
     var xpath_query = '//text()[normalize-space(.)][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="script"][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="style"]';
 
     var nodes = current_documant.evaluate(xpath_query, current_documant, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
