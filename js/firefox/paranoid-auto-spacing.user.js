@@ -65,18 +65,18 @@ function traversal_and_spacing() {
 
             if (text != newText) {
                 var next_temp = next_node;
-                while (next_temp.parentNode && next_temp.nodeName.toLowerCase() != "a" && next_temp.parentNode.firstChild == next_temp) {
+                while (next_temp.parentNode && next_temp.nodeName.search(/^(a|u)$/i) == -1 && next_temp.parentNode.firstChild == next_temp) {
                     next_temp = next_temp.parentNode;
                 }
 
                 var current_temp = current_node;
-                while (current_temp.parentNode && current_temp.nodeName.toLowerCase() != "a" && current_temp.parentNode.lastChild == current_temp) {
+                while (current_temp.parentNode && current_temp.nodeName.search(/^(a|u)$/i) == -1 && current_temp.parentNode.lastChild == current_temp) {
                     current_temp = current_temp.parentNode;
                 }
 
-                if (next_temp.nodeName.toLowerCase() != "a") {
+                if (next_temp.nodeName.search(/^(a|u)$/i) == -1) {
                     next_node.data = " " + next_node.data;
-                } else if (current_temp.nodeName.toLowerCase() != "a") {
+                } else if (current_temp.nodeName.search(/^(a|u)$/i) == -1) {
                     current_node.data = current_node.data + " ";
                 } else {
                     next_temp.parentNode.insertBefore(document.createTextNode(" "), next_temp);
