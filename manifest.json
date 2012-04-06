@@ -1,6 +1,6 @@
 {
     "name": "__MSG_extension_name__",
-    "version": "1.5",
+    "version": "1.6",
     "description": "__MSG_extension_description__",
     "icons": {
         "16": "images/icon_16.png",
