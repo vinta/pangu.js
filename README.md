@@ -24,6 +24,14 @@ for Google Chrome & Mozilla Firefox
 [GNU General Public License v3.0 (GPL-3.0)](http://www.gnu.org/copyleft/gpl.html)
 
 
+## 問題
+
+目前已知的問題：
+
+1. 在 Google Docs 和 Facebook 中的 input 會發生問題。
+2. parsing 的過程有時候會讓頁面變得有點頓。
+
+
 ## 聯繫
 
 * Twitter: [@vinta](https://twitter.com/vinta)
