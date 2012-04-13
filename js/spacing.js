@@ -29,12 +29,34 @@ var had_notify;
 function traversal_and_spacing() {
     console.log('traversal_and_spacing()');
 
+	var firstTextChild = function (parentNode, targetChild) {
+		var childNodes = parentNode.childNodes;
+		for (var i = 0; i < childNodes.length && childNodes[i] != targetChild; i++) {
+			if (childNodes[i].nodeType != 8 && childNodes[i].textContent) {
+				return childNodes[i];
+			}
+		}
+
+		return targetChild;
+	};
+
+	var lastTextChild = function (parentNode, targetChild) {
+		var childNodes = parentNode.childNodes;
+		for (var i = childNodes.length - 1; i > -1 && childNodes[i] != targetChild; i--) {
+			if (childNodes[i].nodeType != 8 && childNodes[i].textContent) {
+				return childNodes[i];
+			}
+		}
+
+		return targetChild;
+	};
+
     if (!had_notify) {
         request_notify();
         had_notify = true;
     }
 
-    var current_documant = window.document;
+    var current_document = window.document;
 
     /*
      // >> 選擇任意位置的某個節點
@@ -49,7 +71,7 @@ function traversal_and_spacing() {
      */
     var xpath_query = '//text()[normalize-space(.)][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="script"][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="style"]';
 
-    var nodes = current_documant.evaluate(xpath_query, current_documant, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+    var nodes = current_document.evaluate(xpath_query, current_document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
 
     // snapshotLength 要配合 XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE 使用
     var nodes_length = nodes.snapshotLength;
@@ -69,12 +91,12 @@ function traversal_and_spacing() {
 
             if (text != newText) {
                 var next_temp = next_node;
-                while (next_temp.parentNode && next_temp.nodeName.search(/^(a|u)$/i) == -1 && next_temp.parentNode.firstChild == next_temp) {
+                while (next_temp.parentNode && next_temp.nodeName.search(/^(a|u)$/i) == -1 && firstTextChild(next_temp.parentNode, next_temp) == next_temp) {
                     next_temp = next_temp.parentNode;
                 }
 
                 var current_temp = current_node;
-                while (current_temp.parentNode && current_temp.nodeName.search(/^(a|u)$/i) == -1 && current_temp.parentNode.lastChild == current_temp) {
+                while (current_temp.parentNode && current_temp.nodeName.search(/^(a|u)$/i) == -1 && lastTextChild(current_temp.parentNode, current_temp) == current_temp) {
                     current_temp = current_temp.parentNode;
                 }
 
