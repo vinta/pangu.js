@@ -13,10 +13,10 @@ function insert_space(text) {
     // http://www.diybl.com/course/6_system/linux/Linuxjs/20090426/165435.html
 
     // 中文在前
-    text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([a-z0-9@#&;=_\[\$\%\^\*\-\+\(\/])/ig, '$1 $2');
+    text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([a-z0-9@&;=_\[\$\%\^\*\-\+\(\/])/ig, '$1 $2');
 
     // 中文在後
-    text = text.replace(/([a-z0-9#!~&;=_\]\,\.\:\?\$\%\^\*\-\+\)\/])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
+    text = text.replace(/([a-z0-9!~&;=_\]\,\.\:\?\$\%\^\*\-\+\)\/])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
 
     // 考慮增加 - + / * 前後的空白
 
