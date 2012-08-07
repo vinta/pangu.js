@@ -16,8 +16,8 @@ function default_setuip() {
 
     if (!localStorage['blacklist']) {
         var blacklist = [
-            'https://picasaweb.google.com/',
-            'http://the-left.com/'
+            'http://the-left.com/',
+            'https://picasaweb.google.com/'
         ];
 
         localStorage['blacklist'] = JSON.stringify(blacklist);
