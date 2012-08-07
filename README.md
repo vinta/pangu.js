@@ -11,7 +11,7 @@ for Google Chrome & Mozilla Firefox
 
 與大家共勉之。
 
-**另外，插入空格的核心功能已經從 extension 中獨立出來，不嫌棄的話，你可以在你的 project 中使用。詳見 [paranoid_spacing.js](https://github.com/gibuloto/paranoid-auto-spacing/blob/master/thirdparty/paranoid_spacing.js)。**
+**另外，插入空格的核心功能已經從 extension 中獨立出來，詳見 [paranoid_spacing.js](https://github.com/gibuloto/paranoid-auto-spacing/blob/master/thirdparty/paranoid_spacing.js)。不嫌棄的話，你可以在你的 project 中使用。**
 
 
 ## 安裝
@@ -28,13 +28,16 @@ for Google Chrome & Mozilla Firefox
 
 ## 問題
 
-目前已發現但是尚未解決的問題：
+### 尚未解決的問題：
 
 1. 在 Google Docs 中的 input 會發生游標錯亂的問題。
-2. parsing 的過程有時候會讓頁面變得有點 lag。
-3. 宇宙的起源？
-4. 如何在需求完全不確定的情況下估算出一個老闆可以接受的時程？
-5. 
+2. parsing 的過程有時候會讓頁面變得有點遲鈍。
+
+### 看樣子是解決不了的問題：
+
+1. 需求變更（抖）
+2. 準確地估算時程
+3. 聽說人品不好程式就容易當
 
 
 ## 聯繫
