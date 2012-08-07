@@ -4,6 +4,7 @@
  主要是作為跟 extension 中的其他 js 相互通訊的中繼站
  */
 
+
 function default_setuip() {
     if (!localStorage['spacing_mode']) {
         localStorage['spacing_mode'] = 'spacing_when_load';
@@ -15,7 +16,8 @@ function default_setuip() {
 
     if (!localStorage['blacklist']) {
         var blacklist = [
-            'https://picasaweb.google.com/'
+            'https://picasaweb.google.com/',
+            'http://the-left.com/'
         ];
 
         localStorage['blacklist'] = JSON.stringify(blacklist);
@@ -31,13 +33,13 @@ function default_setuip() {
 }
 
 
-function set_badge(text) {
-    // 注意檔案路徑！
-    // browserAction 的 icon 不能顯示動態的 gif
-    // chrome.browserAction.setIcon({path: '/images/ajax_loader.gif'});
+// function set_badge(text) {
+//     // 注意檔案路徑！
+//     // browserAction 的 icon 不能顯示動態的 gif
+//     // chrome.browserAction.setIcon({path: '/images/ajax_loader.gif'});
 
-    chrome.browserAction.setBadgeText({text: text});
-}
+//     chrome.browserAction.setBadgeText({text: text});
+// }
 
 
 function show_notify(tab_id) {
@@ -54,11 +56,12 @@ function show_notify(tab_id) {
 default_setuip();
 
 
+// 當頁面載入完成後就注入 js 程式碼
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     if (changeInfo.status == 'complete' && tab.url.search(/^chrome/i) == -1) {
-        chrome.tabs.executeScript(tab.id, {file: 'thirdparty/jquery-1.7.1.min.js', allFrames: true});
-        chrome.tabs.executeScript(tab.id, {file: 'thirdparty/jquery.ba-resize.min.js', allFrames: true});
-        chrome.tabs.executeScript(tab.id, {file: 'js/spacing.js', allFrames: true});
+        chrome.tabs.executeScript(tab.id, {file: 'thirdparty/jquery-1.7.2.min.js', allFrames: true});
+        chrome.tabs.executeScript(tab.id, {file: 'thirdparty/paranoid_spacing.js', allFrames: true});
+        chrome.tabs.executeScript(tab.id, {file: 'js/main.js', allFrames: true});
 
         /*
          實際執行 spacing 是在這一行
@@ -72,7 +75,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 
 chrome.browserAction.onClicked.addListener(function(tab) {
     /*
-     在 background.html 引入 jquery 是沒有作用的
+     在 background.html 引入 jQuery 是沒有作用的
      因為 background page 的執行環境跟 tabs (content scripts) 不一樣
      */
     // chrome.tabs.executeScript(tab.id, {file: 'thirdparty/jquery-1.7.1.min.js'});

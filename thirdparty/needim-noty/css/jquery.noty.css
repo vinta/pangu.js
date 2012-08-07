@@ -26,7 +26,7 @@ ul.noty_container.topRight li {
 }
 /* Fix for: http://bugs.jquery.com/ticket/2278 */
 ul.noty_container.topLeft li, ul.noty_container.topRight li {
-	width: 200px;
+	width: 210px;
 }
 div.noty_modal {
 	position: fixed;
@@ -120,10 +120,18 @@ div.noty_modal {
 	color: #fff;
 	border-color: darkred;
 }
-.noty_bar.success {
-	background-color: lightgreen;
+.noty_bar.success_xyz {
+/*	background-color: lightgreen;
 	color: darkgreen;
-	border-color: darkgreen;
+	border-color: darkgreen;*/
+	background-color: white !important;
+	border-color: #ccc !important;
+	color: black !important;
+}
+.noty_text p {
+	font-size: 18px;
+	font-weight: normal;
+	margin: 5px 5px 5px 5px;
 }
 
 /* Layout: Top Center */
@@ -160,21 +168,21 @@ div.noty_modal {
 }
 .noty_bar.topCenter.alert .noty_message {
 	background-color: #F9EDBE;
-	border: 1px solid #F0C36D;	
+	border: 1px solid #F0C36D;
 }
 .noty_bar.topCenter.alert .noty_close {
 	border: 1px solid #F0C36D;
 }
 .noty_bar.topCenter.error .noty_message {
 	background-color: #FA5914;
-	border: 1px solid #E64906;	
+	border: 1px solid #E64906;
 }
 .noty_bar.topCenter.error .noty_close {
 	border: 1px solid #E64906;
 }
 .noty_bar.topCenter.success .noty_message {
 	background-color: #8FEC8F;
-	border: 1px solid #50C24E;	
+	border: 1px solid #50C24E;
 }
 .noty_bar.topCenter.success .noty_close {
 	border: 1px solid #50C24E;
@@ -188,7 +196,7 @@ div.noty_modal {
 	font: bold 12px/12px HelveticaNeue, Arial;
   padding: 3px 4px;
   color: #555;
-  background: none; 
+  background: none;
   border: none;
 }
 
@@ -206,16 +214,16 @@ div.noty_modal {
 	color: #6D6D6D;
 	line-height: 1.5em;
 	text-shadow: 0 1px 0 #FFFFFF;
-	width: 100%;      
+	width: 100%;
 }
 .noty_bar.mitgux.center .noty_message {
 	width: 95%;
 }
 .noty_bar.mitgux.alert .noty_message {
-	background: url("../img/mitgux/alert.png") no-repeat 13px center,url("../img/mitgux/bg.png") repeat scroll 0 0 transparent;           
+	background: url("../img/mitgux/alert.png") no-repeat 13px center,url("../img/mitgux/bg.png") repeat scroll 0 0 transparent;
 }
 .noty_bar.mitgux.error .noty_message {
-	background: url("../img/mitgux/error.png") no-repeat 13px center,url("../img/mitgux/bg.png") repeat scroll 0 0 transparent;	
+	background: url("../img/mitgux/error.png") no-repeat 13px center,url("../img/mitgux/bg.png") repeat scroll 0 0 transparent;
 }
 .noty_bar.mitgux.success .noty_message {
 	background: url("../img/mitgux/done.png") no-repeat 13px center,url("../img/mitgux/bg.png") repeat scroll 0 0 transparent;

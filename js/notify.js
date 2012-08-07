@@ -7,6 +7,7 @@
 if ($('body').has('.noty_message').length == 0) {
 	noty({
 	    text: chrome.i18n.getMessage('holly_god_of_spacing'),
+	    type: 'success_xyz',
 	    layout: 'topRight',
 	    easing: 'swing',
 	    animateOpen: {'opacity': 'toggle'},
