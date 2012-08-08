@@ -3,18 +3,11 @@
  Version: 1.7
  URL: https://github.com/gibuloto/paranoid-auto-spacing
  Author: Vinta
- License: GNU General Public License v3.0 (GPL-3.0)
-
- Description:
- 在網頁中的中文字和半形的英文、數字、符號之間插入空白。（攤手）沒辦法，處女座都有強迫症。
+ License: MIT License
+ Description: Insert a white space between full-width characters (Chinese, Japanese, etc.) and half-width alphanumeric characters
 
  Usage:
  paranoid_spacing.page_spacing();
-
- // 以下功能尚未完成，喔，應該說根本還沒開始做
- paranoid_spacing.element_spacing('#title');
- paranoid_spacing.element_spacing('.comment');
- paranoid_spacing.element_spacing('p');
  */
 
 (function(paranoid_spacing) {
@@ -127,7 +120,7 @@
 
 
     /*
-     TO-DO
+     TODO:
      page_spacing() 是對整個 document 做 spacing
      應該要有一個 method 是像 jQuery selector 那樣可以對某個 id, class, tag 裡面的文字做 spacing
      */
