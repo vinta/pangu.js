@@ -40,9 +40,9 @@ Released under the [MIT License](http://opensource.org/licenses/MIT).
 
 ### 尚未解決的問題：
 
-1. 只針對特定的 id, class 或 tag 裡面的文字做 spacing。
-2. 在 Google Docs 中輸入英文或符號之後會發生游標錯亂的問題。
-3. 解析 DOM 的過程有時候會讓頁面反應變得有點遲鈍。
+1. 只針對特定的 id, class 或 tag 裡面的文字做 spacing
+2. 在 Google Docs 中輸入英文或符號之後會發生游標錯亂的問題
+3. 解析 DOM 的過程有時候會讓頁面反應變得有點遲鈍
 
 ### 解決不了的問題：
 
