@@ -8,6 +8,9 @@
 
  Usage:
  paranoid_spacing.page_spacing();
+ paranoid_spacing.element_spacing('#id_name');
+ paranoid_spacing.element_spacing('.class_name');
+ paranoid_spacing.element_spacing('tag_name');
  */
 
 (function(paranoid_spacing) {
@@ -50,26 +53,16 @@
         // 中文在後
         text = text.replace(/([a-z0-9!~&;=_\]\,\.\:\?\$\%\^\*\-\+\)\/])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
 
-        // TODO: 增加 - + / * 前後的空白
+        // 字"字"字 >> 字 "字" 字
+        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])(\"|\'(\S+))/ig, '$1 $2');
+        text = text.replace(/((\S+)\'|\")([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $3'); // $2 是 (\S+)
 
         return text;
     }
 
-    function spacing(element_obj) {
-        var working_element = element_obj;
-
-        /*
-         // >> 選擇任意位置的某個節點
-         . >> 自己這個節點
-         .. >> 父節點
-         text() >> 尋找某點的文字型別，例如 hello 之於 <tag>hello</tag>
-         normalize-space() >> 字串頭和尾的空白字元都會被移除，大於兩個以上的空白字元會被置換成單一空白
-
-         XML 是 case-sensitive 的
-         */
-        var xpath_query = '//text()[normalize-space(.)][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="script"][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="style"]';
-
-        var nodes = working_element.evaluate(xpath_query, working_element, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+    function spacing(xpath_query) {
+        // https://developer.mozilla.org/en-US/docs/DOM/document.evaluate
+        var nodes = document.evaluate(xpath_query, document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
 
         // snapshotLength 要配合 XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE 使用
         var nodes_length = nodes.snapshotLength;
@@ -102,9 +95,11 @@
 
                     if (next_temp.nodeName.search(/^(a|u)$/i) == -1) {
                         next_node.data = " " + next_node.data;
-                    } else if (current_temp.nodeName.search(/^(a|u)$/i) == -1) {
+                    }
+                    else if (current_temp.nodeName.search(/^(a|u)$/i) == -1) {
                         current_node.data = current_node.data + " ";
-                    } else {
+                    }
+                    else {
                         next_temp.parentNode.insertBefore(document.createTextNode(" "), next_temp);
                     }
                 }
@@ -121,23 +116,57 @@
      對整個 window.document 加空格
      */
     paranoid_spacing.page_spacing = function() {
-        spacing(document); // window.document
+        /*
+         // >> 選擇任意位置的節點
+         . >> 自己這個節點
+         .. >> 父節點
+         text() >> 節點的文字內容，例如 hello 之於 <tag>hello</tag>
+         normalize-space() >> 字串頭和尾的空白字元都會被移除，大於兩個以上的空白字元會被置換成單一空白
+         translate() >> 將所查詢的字串轉換成小寫，因為 XML 是 case-sensitive 的
+         */
+
+        // 撈出所有節點（但是不包刮 <script>）的文字內容
+        var xpath_query = '//text()[normalize-space(.)][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="script"][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="style"]';
+
+        spacing(xpath_query);
     };
 
 
     /*
-     TODO:
-     page_spacing() 是對整個 document 做 spacing
-     應該要有一個 method 是像 jQuery selector 那樣可以對某個 id, class, tag 裡面的文字做 spacing
+     對特定 element 加空格
      */
     paranoid_spacing.element_spacing = function(selector_string) {
-        var element = document.getElementById(selector_string);
+        /*
+         http://www.w3schools.com/xpath/xpath_examples.asp
+         http://zh.wikipedia.org/wiki/XPath
+         http://mi.hosp.ncku.edu.tw/km/index.php/dotnet/48-netdisk/57-xml-xpath
+         http://stackoverflow.com/questions/1390568/xpath-how-to-match-attributes-that-contain-a-certain-string
+         */
 
-        // getElementById();
-        // getElementsByClassName();
-        // getElementsByTagName();
+        var xpath_query;
 
-        spacing(element);
+        if (selector_string.indexOf('#') === 0) {
+            var target_id = selector_string.substr(1, selector_string.length - 1);
+
+            // ex: id("id_name")//text()
+            xpath_query = 'id("' + target_id + '")//text()';
+        }
+        else if (selector_string.indexOf('.') === 0) {
+            var target_class = selector_string.slice(1);
+
+            // ex: //*[contains(concat(' ', normalize-space(@class), ' '), ' class_name ')]/text()
+            xpath_query = '//*[contains(concat(" ", normalize-space(@class), " "), " ' + target_class + ' ")]/text()';
+        }
+        else {
+            var target_tag = selector_string;
+
+            // ex: //tag_name/text()
+            xpath_query = '//' + target_tag + '/text()';
+        }
+
+        // console.log(xpath_query);
+
+        spacing(xpath_query);
     };
 
 }(window.paranoid_spacing = window.paranoid_spacing || {}));
