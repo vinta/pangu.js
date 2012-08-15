@@ -40,20 +40,6 @@ paranoid_spacing.element_spacing('p');
 Released under the [MIT License](http://opensource.org/licenses/MIT).
 
 
-## Issues
-
-### 尚未解決的問題：
-
-1. 在 Google Docs 中輸入英文或符號之後會發生游標錯亂的問題
-2. 解析 DOM 的過程有時候會讓頁面反應變得有點遲鈍
-
-### 解決不了的問題：
-
-1. 需求變更（抖）
-2. 準確地估算時程
-3. 聽說人品不好程式就容易當
-
-
 ## Contact
 
 * Twitter: [@vinta](https://twitter.com/vinta)

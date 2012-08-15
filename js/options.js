@@ -57,9 +57,9 @@ function init_options_page() {
     $('#now_exception').html(get_i18n(BG_PAGE.localStorage['exception_mode']));
     $('#exception_whitelist').html(get_i18n('exception_whitelist'));
     $('#exception_blacklist').html(get_i18n('exception_blacklist'));
-    
+
     $('#exception_url_list').attr('placeholder', get_i18n('exception_urls_placeholder'));
-    
+
     var exception_mode = BG_PAGE.localStorage['exception_mode'];
     var textarea = $('#exception_url_list');
 
@@ -90,11 +90,11 @@ function init_options_page() {
     if (is_notify == 'false') {
         $('#is_notify').click();
     }
-    
+
     $('#label_options').html(get_i18n('label_options'));
     $('#is_notify_text').html(get_i18n('is_notify_text'));
     $('#go_to_work_text').html(get_i18n('go_to_work_text'));
-    
+
     $('#submit').html(get_i18n('submit'));
 
     var now = new Date();
