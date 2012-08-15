@@ -22,9 +22,13 @@
 // whole page spacing
 paranoid_spacing.page_spacing();
 
-// TODO
+// by id
 paranoid_spacing.element_spacing('#title');
+
+// by class
 paranoid_spacing.element_spacing('.comment');
+
+// by tag
 paranoid_spacing.element_spacing('p');
 ```
 
