@@ -16,7 +16,7 @@
 
 ### for Developers
 
-* [paranoid_spacing.js](https://github.com/gibuloto/paranoid-auto-spacing/blob/master/thirdparty/paranoid_spacing.js)
+* [paranoid_spacing.js](https://github.com/gibuloto/paranoid-auto-spacing/blob/develop/thirdparty/paranoid_spacing.js)
 
 ``` js
 // whole page spacing
