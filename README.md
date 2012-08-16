@@ -32,7 +32,7 @@ paranoid_spacing.element_spacing('.comment');
 paranoid_spacing.element_spacing('p');
 ```
 
-插入空格的核心功能已經從 extension 中獨立出來 。不嫌棄的話，你可以在你的 project 中使用。
+插入空格的功能已經從 extension 中獨立出來 。不嫌棄的話，你可以在你的 project 中使用。
 
 
 ## License
