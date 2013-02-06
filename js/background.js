@@ -47,8 +47,8 @@ function show_notify(tab_id) {
     var is_notify = localStorage['is_notify'];
 
     if (is_notify != 'false') {
-        chrome.tabs.insertCSS(tab_id, {file: 'thirdparty/needim-noty/css/jquery.noty.css'});
-        chrome.tabs.executeScript(tab_id, {file: 'thirdparty/needim-noty/js/jquery.noty.js'});
+        chrome.tabs.insertCSS(tab_id, {file: 'vendors/needim-noty/css/jquery.noty.css'});
+        chrome.tabs.executeScript(tab_id, {file: 'vendors/needim-noty/js/jquery.noty.js'});
         chrome.tabs.executeScript(tab_id, {file: 'js/notify.js'});
     }
 }
@@ -60,8 +60,8 @@ default_setuip();
 // 當頁面載入完成後就注入 js 程式碼
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     if (changeInfo.status == 'complete' && tab.url.search(/^chrome/i) == -1) {
-        chrome.tabs.executeScript(tab.id, {file: 'thirdparty/jquery-1.7.2.min.js', allFrames: true});
-        chrome.tabs.executeScript(tab.id, {file: 'thirdparty/paranoid_spacing.js', allFrames: true});
+        chrome.tabs.executeScript(tab.id, {file: 'vendors/jquery-1.7.2.min.js', allFrames: true});
+        chrome.tabs.executeScript(tab.id, {file: 'vendors/pangu.js', allFrames: true});
         chrome.tabs.executeScript(tab.id, {file: 'js/main.js', allFrames: true});
 
         /*
@@ -79,7 +79,7 @@ chrome.browserAction.onClicked.addListener(function(tab) {
      在 background.html 引入 jQuery 是沒有作用的
      因為 background page 的執行環境跟 tabs (content scripts) 不一樣
      */
-    // chrome.tabs.executeScript(tab.id, {file: 'thirdparty/jquery-1.7.1.min.js'});
+    // chrome.tabs.executeScript(tab.id, {file: 'vendors/jquery-1.7.1.min.js'});
     // chrome.tabs.executeScript(tab.id, {file: 'js/spacing.js'});
 
     show_notify(tab.id);
