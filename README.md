@@ -20,6 +20,8 @@
 
 * [pangu.js](https://github.com/gibuloto/paranoid-auto-spacing/blob/develop/vendors/pangu.js)（盤古）
 
+![Pangu](https://raw.github.com/gibuloto/paranoid-auto-spacing/develop/images/pangu_260.jpg)
+
 ``` js
 // whole page spacing
 pangu.page_spacing();
