@@ -1,19 +1,19 @@
 /*
- Name: paranoid_spacing.js
- Version: 1.7.1
+ Name: pangu.js (paranoid_spacing.js)
+ Version: 1.7.2
  URL: https://github.com/gibuloto/paranoid-auto-spacing
  Author: Vinta
  License: MIT License
  Description: Insert a white space between full-width characters (Chinese, Japanese, etc.) and half-width alphanumeric characters
 
  Usage:
- paranoid_spacing.page_spacing();
- paranoid_spacing.element_spacing('#id_name');
- paranoid_spacing.element_spacing('.class_name');
- paranoid_spacing.element_spacing('tag_name');
+ pangu.page_spacing();
+ pangu.element_spacing('#id_name');
+ pangu.element_spacing('.class_name');
+ pangu.element_spacing('tag_name');
  */
 
-(function(paranoid_spacing) {
+(function(pangu) {
 
     /* Private Methods */
 
@@ -115,7 +115,7 @@
     /*
      對整個 window.document 加空格
      */
-    paranoid_spacing.page_spacing = function() {
+    pangu.page_spacing = function() {
         /*
          // >> 選擇任意位置的節點
          . >> 自己這個節點
@@ -135,7 +135,7 @@
     /*
      對特定 element 加空格
      */
-    paranoid_spacing.element_spacing = function(selector_string) {
+    pangu.element_spacing = function(selector_string) {
         /*
          http://www.w3schools.com/xpath/xpath_examples.asp
          http://zh.wikipedia.org/wiki/XPath
@@ -169,4 +169,4 @@
         spacing(xpath_query);
     };
 
-}(window.paranoid_spacing = window.paranoid_spacing || {}));
+}(window.pangu = window.pangu || {}));

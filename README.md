@@ -9,27 +9,31 @@
 
 ## Installation
 
+
 ### for Users
 
 * [Google Chrome (Extension)](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 * [Mozilla Firefox (Userscript)](http://userscripts.org/scripts/show/129555) by [jiefoxi](https://github.com/jiefoxi)
 
+
 ### for Developers
 
-* [paranoid_spacing.js](https://github.com/gibuloto/paranoid-auto-spacing/blob/develop/thirdparty/paranoid_spacing.js)
+* [pangu.js](https://github.com/gibuloto/paranoid-auto-spacing/blob/develop/vendors/pangu.js)（盤古）
+
+![Pangu](https://raw.github.com/gibuloto/paranoid-auto-spacing/develop/images/pangu_260.jpg)
 
 ``` js
 // whole page spacing
-paranoid_spacing.page_spacing();
+pangu.page_spacing();
 
 // by id
-paranoid_spacing.element_spacing('#title');
+pangu.element_spacing('#title');
 
 // by class
-paranoid_spacing.element_spacing('.comment');
+pangu.element_spacing('.comment');
 
 // by tag
-paranoid_spacing.element_spacing('p');
+pangu.element_spacing('p');
 ```
 
 插入空格的功能已經從 extension 中獨立出來 。不嫌棄的話，你可以在你的 project 中使用。

@@ -11,8 +11,8 @@ var had_notify;
 function traversal_and_spacing() {
     console.log('traversal_and_spacing()');
 
-    // 詳見 /thirdparty/paranoid_spacing.js
-    paranoid_spacing.page_spacing();
+    // 詳見 /vendors/pangu.js
+    pangu.page_spacing();
 
     // 只在第一次 spacing 時顯示「空格之神顯靈了！」
     if (!had_notify) {
