@@ -57,6 +57,9 @@
         text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])(\"|\'(\S+))/ig, '$1 $2');
         text = text.replace(/((\S+)\'|\")([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $3'); // $2 是 (\S+)
 
+        // “哆啦A梦”
+        text = text.replace(/([\u54c6\u591a])([\u5566\u62c9])(?:\s)([Aa\uff21])(?:\s)([\u68a6\u5922])/ig, '$1$2$3$4');
+
         return text;
     }
 
