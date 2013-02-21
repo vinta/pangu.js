@@ -4,32 +4,35 @@
 
 漢學家稱這個空白字元為「盤古之白」，因為它劈開了全形字和半形字之間的混沌。另有研究顯示，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有七成的比例會在 34 歲的時候跟自己不愛的人結婚，而其餘三成的人最後只能把遺產留給自己的貓。畢竟愛情跟書寫都需要適時地留白。
 
-與大家共勉之。123
-
+與大家共勉之。
 
 ## Installation
+
 
 ### for Users
 
 * [Google Chrome (Extension)](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 * [Mozilla Firefox (Userscript)](http://userscripts.org/scripts/show/129555) by [jiefoxi](https://github.com/jiefoxi)
 
+
 ### for Developers
 
-* [paranoid_spacing.js](https://github.com/gibuloto/paranoid-auto-spacing/blob/develop/thirdparty/paranoid_spacing.js)
+* [pangu.js](https://github.com/gibuloto/paranoid-auto-spacing/blob/develop/vendors/pangu.js)（盤古）
+
+![Pangu](https://raw.github.com/gibuloto/paranoid-auto-spacing/develop/images/pangu_260.jpg)
 
 ``` js
 // whole page spacing
-paranoid_spacing.page_spacing();
+pangu.page_spacing();
 
 // by id
-paranoid_spacing.element_spacing('#title');
+pangu.element_spacing('#title');
 
 // by class
-paranoid_spacing.element_spacing('.comment');
+pangu.element_spacing('.comment');
 
 // by tag
-paranoid_spacing.element_spacing('p');
+pangu.element_spacing('p');
 ```
 
 插入空格的功能已經從 extension 中獨立出來 。不嫌棄的話，你可以在你的 project 中使用。
