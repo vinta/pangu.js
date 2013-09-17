@@ -19,14 +19,17 @@ function play_sound(id) {
 }
 
 function is_valid_url(string) {
-    var regexp_url = /((([a-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[a-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[a-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)/i;
+    // var regexp_url = /((([a-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[a-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[a-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[.\!\/\\w]*))?)/i;
 
-    if (regexp_url.test(string)) {
-        return true;
-    }
-    else {
-        return false;
-    }
+    // if (regexp_url.test(string)) {
+    //     return true;
+    // }
+    // else {
+    //     return false;
+    // }
+
+    // don't check, always return true
+    return true;
 }
 
 function notify_alert(msg) {

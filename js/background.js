@@ -4,6 +4,18 @@
  主要是作為跟 extension 中的其他 js 相互通訊的中繼站
  */
 
+Array.prototype.unique = function() {
+    var a = this.concat();
+    for (var i = 0; i < a.length; ++i) {
+        for (var j = i + 1; j < a.length; ++j) {
+            if (a[i] === a[j]) {
+                a.splice(j--, 1);
+            }
+        }
+    }
+
+    return a;
+};
 
 function default_setuip() {
     if (!localStorage['spacing_mode']) {
@@ -14,26 +26,29 @@ function default_setuip() {
         localStorage['exception_mode'] = 'blacklist';
     }
 
-    if (!localStorage['blacklist']) {
-        var blacklist = [
-            'http://the-left.com/',
-            'https://picasaweb.google.com/',
-            'https://drive.google.com/',
-            'https://docs.google.com/'
-        ];
-
-        localStorage['blacklist'] = JSON.stringify(blacklist);
-        localStorage['blacklist_temp'] = JSON.stringify(blacklist);
+    var default_blacklist = [
+        '//drive.google.com/',
+        '//docs.google.com/',
+        '//picasaweb.google.com/',
+        '//vinta.ws/'
+    ];
+    var blacklist;
+    if (localStorage['blacklist']) {
+        var local_blacklist = JSON.parse(localStorage['blacklist']);
+        blacklist = default_blacklist.concat(local_blacklist).unique();
     }
+    else {
+        blacklist = default_blacklist;
+    }
+    localStorage['blacklist'] = JSON.stringify(blacklist);
+    localStorage['blacklist_temp'] = JSON.stringify(blacklist);
 
+    var default_whitelist = [];
     if (!localStorage['whitelist']) {
-        var whitelist = [];
-
-        localStorage['whitelist'] = JSON.stringify(whitelist);
-        localStorage['whitelist_temp'] = JSON.stringify(whitelist);
+        localStorage['whitelist'] = JSON.stringify(default_whitelist);
+        localStorage['whitelist_temp'] = JSON.stringify(default_whitelist);
     }
 }
-
 
 // function set_badge(text) {
 //     // 注意檔案路徑！
@@ -42,7 +57,6 @@ function default_setuip() {
 
 //     chrome.browserAction.setBadgeText({text: text});
 // }
-
 
 function show_notify(tab_id) {
     var is_notify = localStorage['is_notify'];
@@ -54,9 +68,7 @@ function show_notify(tab_id) {
     }
 }
 
-
 default_setuip();
-
 
 // 當頁面載入完成後就注入 js 程式碼
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
@@ -74,7 +86,6 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     }
 });
 
-
 chrome.browserAction.onClicked.addListener(function(tab) {
     /*
      在 background.html 引入 jQuery 是沒有作用的
@@ -86,7 +97,6 @@ chrome.browserAction.onClicked.addListener(function(tab) {
     show_notify(tab.id);
     chrome.tabs.executeScript(tab.id, {code: 'traversal_and_spacing();'});
 });
-
 
 // listen 從 content scripts 傳來的 requests
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
