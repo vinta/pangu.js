@@ -12,7 +12,7 @@
 ### for Users
 
 * [Google Chrome (Extension)](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
-* [Mozilla Firefox (Userscript)](http://userscripts.org/scripts/show/129555) by [jiefoxi](https://github.com/jiefoxi)
+* [Mozilla Firefox (Userscript)](http://userscripts.org/scripts/show/129555)
 
 
 ### for Developers
@@ -43,7 +43,15 @@ pangu.element_spacing('p');
 Released under the [MIT License](http://opensource.org/licenses/MIT).
 
 
-## Contact
+## Author
 
 * Twitter: [@vinta](https://twitter.com/vinta)
-* Blog: [科學的愛情](http://gibuloto.com/)
+* Blog: [vinta.ws](http://vinta.ws/)
+
+
+## Contributors
+
+* [jiefoxi](https://github.com/jiefoxi)
+* [xslidian](https://github.com/xslidian)
+
+偉哉 Open Source！

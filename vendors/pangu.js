@@ -48,7 +48,7 @@
          */
 
         // 中文在前
-        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([a-z0-9@&;=_\[\$\%\^\*\-\+\(\/\\])/ig, '$1 $2');
+        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([a-z0-9@&=_\[\$\%\^\*\-\+\(\/\\])/ig, '$1 $2');
 
         // 中文在後
         text = text.replace(/([a-z0-9!~&;=_\]\,\.\:\?\$\%\^\*\-\+\)\/\\])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
@@ -126,7 +126,7 @@
          */
 
         // 撈出所有節點（但是不包刮 <script>）的文字內容
-        var xpath_query = '//text()[normalize-space(.)][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="script"][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="style"]';
+        var xpath_query = '//*[not(@contenteditable)]/text()[normalize-space(.)][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="script"][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="style"]';
 
         spacing(xpath_query);
     };
