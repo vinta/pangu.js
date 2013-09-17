@@ -1,4 +1,4 @@
-/*
+﻿/*
  background.js 由 background.html 引入
  在整個 extension 的生命週期中都存在
  主要是作為跟 extension 中的其他 js 相互通訊的中繼站
@@ -18,7 +18,8 @@ function default_setuip() {
         var blacklist = [
             'http://the-left.com/',
             'https://picasaweb.google.com/',
-            'https://drive.google.com/'
+            'https://drive.google.com/',
+            'https://docs.google.com/'
         ];
 
         localStorage['blacklist'] = JSON.stringify(blacklist);
