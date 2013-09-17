@@ -5,11 +5,10 @@ function request_notify() {
     });
 }
 
-
 var had_notify;
 
 function traversal_and_spacing() {
-    console.log('traversal_and_spacing()');
+    // console.log('traversal_and_spacing()');
 
     // 詳見 /vendors/pangu.js
     pangu.page_spacing();
@@ -20,7 +19,6 @@ function traversal_and_spacing() {
         had_notify = true;
     }
 }
-
 
 // content script 只能用這種方式跟 background page（或其他 tab）溝通
 function request_spacing() {
@@ -85,10 +83,8 @@ function request_spacing() {
     });
 }
 
-
 // 網頁載入完成後就先判斷一次要不要執行 spacing
 request_spacing();
-
 
 /*
  這一段是為了對付那些 AJAX 加載進來的內容
@@ -96,7 +92,7 @@ request_spacing();
  就再執行一次 spacing
 
  要怎麼分辨由 ajax 引起的 DOM insert 和 spacing 造成的 DOM insert？
-只好設置一個 timeout 時間
+ 只好設置一個 timeout 時間
  */
 var had_spacing; // 是不是剛剛執行完 spacing
 var last_spacing_time = 0; // 0 means there were never any requests sent
