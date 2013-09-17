@@ -51,6 +51,7 @@ Released under the [MIT License](http://opensource.org/licenses/MIT).
 
 ## Contributors
 
+* [ChanCheng](https://github.com/ChanCheng)
 * [jiefoxi](https://github.com/jiefoxi)
 * [xslidian](https://github.com/xslidian)
 
