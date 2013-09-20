@@ -17,37 +17,62 @@ Array.prototype.unique = function() {
     return a;
 };
 
+var syncStorage = chrome.storage.sync;
+
 function default_setuip() {
-    if (!localStorage['spacing_mode']) {
-        localStorage['spacing_mode'] = 'spacing_when_load';
-    }
-
-    if (!localStorage['exception_mode']) {
-        localStorage['exception_mode'] = 'blacklist';
-    }
-
-    var default_blacklist = [
-        '//drive.google.com/',
-        '//docs.google.com/',
-        '//picasaweb.google.com/',
-        '//vinta.ws/'
-    ];
-    var blacklist;
-    if (localStorage['blacklist']) {
-        var local_blacklist = JSON.parse(localStorage['blacklist']);
-        blacklist = default_blacklist.concat(local_blacklist).unique();
-    }
-    else {
-        blacklist = default_blacklist;
-    }
-    localStorage['blacklist'] = JSON.stringify(blacklist);
-    localStorage['blacklist_temp'] = JSON.stringify(blacklist);
-
-    var default_whitelist = [];
-    if (!localStorage['whitelist']) {
-        localStorage['whitelist'] = JSON.stringify(default_whitelist);
-        localStorage['whitelist_temp'] = JSON.stringify(default_whitelist);
-    }
+		
+		// 需要保存的设置项
+		var settings = [
+	  		'spacing_mode',
+	  		'exception_mode',
+	  		'is_notify',
+	  		'blacklist',
+	  		'whitelist'
+	  ];
+	  
+	  syncStorage.get(settings, function(items) {
+	  		if (!items.spacing_mode) {
+	  				syncStorage.set({'spacing_mode': 'spacing_when_load'});
+	  		}
+	  		
+	  		if (!items.exception_mode) {
+     		   items.exception_mode = 'blacklist';
+    		}
+    		
+    		if (!items.is_notify) {
+	  				syncStorage.set({'is_notify': 'true'});
+	  		}
+	  		
+	  		var default_blacklist = [
+        		'//drive.google.com/',
+        		'//docs.google.com/',
+        		'//picasaweb.google.com/',
+        		'//vinta.ws/'
+    		];
+    		var blacklist;
+    		if (items.blacklist) {
+	  				blacklist = default_blacklist.concat(items.blacklist).unique();	  				
+	  		}
+	  		else {
+	  				blacklist = default_blacklist;
+	  		}
+	  		syncStorage.set({'blacklist': blacklist});
+	  		
+	  		var whitelist;
+	  		if (!items.whitelist) {
+	  				whitelist = [];	  				
+	  		}
+	  		else {
+	  				whitelist = items.whitelist;
+	  		}
+	  		syncStorage.set({'whitelist': whitelist});
+	  		
+	  		// 临时黑白名单保存在 localStorageArea 中
+	  		chrome.storage.local.set({
+	  				'blacklist_temp': blacklist,
+	  				'whitelist_temp': whitelist
+				});
+	  });	  
 }
 
 // function set_badge(text) {
@@ -59,13 +84,13 @@ function default_setuip() {
 // }
 
 function show_notify(tab_id) {
-    var is_notify = localStorage['is_notify'];
-
-    if (is_notify != 'false') {
-        chrome.tabs.insertCSS(tab_id, {file: 'vendors/needim-noty/css/jquery.noty.css'});
-        chrome.tabs.executeScript(tab_id, {file: 'vendors/needim-noty/js/jquery.noty.js'});
-        chrome.tabs.executeScript(tab_id, {file: 'js/notify.js'});
-    }
+		syncStorage.get('is_notify', function(item) {
+				if (item.is_notify != 'false') {
+					chrome.tabs.insertCSS(tab_id, {file: 'vendors/needim-noty/css/jquery.noty.css'});
+        	chrome.tabs.executeScript(tab_id, {file: 'vendors/needim-noty/js/jquery.noty.js'});
+        	chrome.tabs.executeScript(tab_id, {file: 'js/notify.js'});
+				}
+		});
 }
 
 default_setuip();
@@ -100,17 +125,18 @@ chrome.browserAction.onClicked.addListener(function(tab) {
 
 // listen 從 content scripts 傳來的 requests
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
-    if (request.purpose == 'spacing_mode') {
-        sendResponse({spacing_mode: localStorage['spacing_mode']});
-    }
-    else if (request.purpose == 'exception_mode') {
-        sendResponse({
-            exception_mode: localStorage['exception_mode'],
-            blacklist: localStorage['blacklist'],
-            whitelist: localStorage['whitelist']
-        });
-    }
-    else if (request.purpose == 'current_tab') {
+	  // 使用 chrome storage 后不需要这些 request 了	  
+//    if (request.purpose == 'spacing_mode') {
+//        sendResponse({spacing_mode: localStorage['spacing_mode']});
+//    }
+//    else if (request.purpose == 'exception_mode') {
+//        sendResponse({
+//            exception_mode: localStorage['exception_mode'],
+//            blacklist: localStorage['blacklist'],
+//            whitelist: localStorage['whitelist']
+//        });
+//    }
+    if (request.purpose == 'current_tab') {
         sendResponse({current_tab: sender.tab});
     }
     else if (request.purpose == 'notify') { // 顯示右上角的 notify alert
