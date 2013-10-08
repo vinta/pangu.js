@@ -57,3 +57,7 @@ Released under the [MIT License](http://opensource.org/licenses/MIT).
 * [xslidian](https://github.com/xslidian)
 
 偉哉 Open Source！
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vinta/paranoid-auto-spacing/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
