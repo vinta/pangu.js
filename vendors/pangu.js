@@ -62,7 +62,7 @@
 
     function spacing(xpath_query) {
         // https://developer.mozilla.org/en-US/docs/DOM/document.evaluate
-        var nodes = document.evaluate(xpath_query, document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+        var nodes = document.evaluate(xpath_query, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
         // snapshotLength 要配合 XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE 使用
         var nodes_length = nodes.snapshotLength;

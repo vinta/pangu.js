@@ -18,6 +18,7 @@
         "default_title": "__MSG_extension_name__"
     },
     "permissions": [
+    		"storage",
         "tabs",
         "<all_urls>"
     ]
