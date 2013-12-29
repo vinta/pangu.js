@@ -6,6 +6,7 @@ function request_notify() {
 }
 
 var had_notify;
+var syncStorage = chrome.storage.sync;
 
 function traversal_and_spacing() {
     // console.log('traversal_and_spacing()');
@@ -22,69 +23,74 @@ function traversal_and_spacing() {
 
 // content script 只能用這種方式跟 background page（或其他 tab）溝通
 function request_spacing() {
-    chrome.extension.sendRequest({purpose: 'spacing_mode'}, function(response) {
-        var spacing_mode = response.spacing_mode;
+		// 保存在 syncStorageArea 中的设置项
+		var settings = [
+	  		'spacing_mode',
+	  		'exception_mode',
+	  		'is_notify',
+	  		'blacklist',
+	  		'whitelist'
+	  ];
+	  
+	  syncStorage.get(settings, function(items) {
+	  		if (items.spacing_mode == 'spacing_when_load') {
+	  				var blacklist = items.blacklist;
+            var whitelist = items.whitelist;
+            
+            chrome.extension.sendRequest({purpose: 'current_tab'}, function(response) {
+            		var current_tab = response.current_tab;
+                var current_url = current_tab.url;
+                
+                // 開始做例外判斷
+                if (items.exception_mode == 'blacklist') { // 不要在這些網站作用
+                    if (blacklist.length > 0) {
+                        var is_found = false;
 
-        if (spacing_mode == 'spacing_when_load') {
-            chrome.extension.sendRequest({purpose: 'exception_mode'}, function(response) {
-                var exception_mode = response.exception_mode;
-                var blacklist = JSON.parse(response.blacklist);
-                var whitelist = JSON.parse(response.whitelist);
+                        // 如果當前網頁的 url 符合 blacklist 中的任一筆，就不要作用
+                        for (var i = 0; i < blacklist.length; i++) {
+                            var black_url = blacklist[i];
 
-                chrome.extension.sendRequest({purpose: 'current_tab'}, function(response) {
-                    var current_tab = response.current_tab;
-                    var current_url = current_tab.url;
-
-                    // 開始做例外判斷
-                    if (exception_mode == 'blacklist') { // 不要在這些網站作用
-                        if (blacklist.length > 0) {
-                            var is_found = false;
-
-                            // 如果當前網頁的 url 符合 blacklist 中的任一筆，就不要作用
-                            for (var i = 0; i < blacklist.length; i++) {
-                                var black_url = blacklist[i];
-
-                                if (current_url.indexOf(black_url) >= 0) {
-                                    is_found = true;
-                                    break;
-                                }
-                            }
-
-                            if (!is_found) {
-                                traversal_and_spacing();
+                            if (current_url.indexOf(black_url) >= 0) {
+                                is_found = true;
+                                break;
                             }
                         }
-                        else {
+
+                        if (!is_found) {
                             traversal_and_spacing();
                         }
                     }
-                    else { // 只在這些網站作用
-                        if (whitelist.length > 0) {
-                            var is_found = false;
+                    else {
+                        traversal_and_spacing();
+                    }
+                }
+                else { // 只在這些網站作用
+                    if (whitelist.length > 0) {
+                        var is_found = false;
 
-                            // 當前網頁的 url 符合 whitelist 中的任一筆，才作用
-                            for (var i = 0; i < whitelist.length; i++) {
-                                var white_url = whitelist[i];
+                        // 當前網頁的 url 符合 whitelist 中的任一筆，才作用
+                        for (var i = 0; i < whitelist.length; i++) {
+                            var white_url = whitelist[i];
 
-                                if (current_url.indexOf(white_url) >= 0) {
-                                    is_found = true;
-                                    break;
-                                }
-                            }
-
-                            if (is_found) {
-                                traversal_and_spacing();
+                            if (current_url.indexOf(white_url) >= 0) {
+                                is_found = true;
+                                break;
                             }
                         }
+
+                        if (is_found) {
+                            traversal_and_spacing();
+                        }
                     }
-                });
+                }
             });
-        }
-    });
+	  		}
+	  });
 }
 
 // 網頁載入完成後就先判斷一次要不要執行 spacing
-request_spacing();
+// BUG：访问一些网页，如 www.163.com 的时候会出现多次执行该语句的情况
+//request_spacing();
 
 /*
  這一段是為了對付那些 AJAX 加載進來的內容
