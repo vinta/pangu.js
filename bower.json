@@ -1,0 +1,17 @@
+{
+  "name": "pangu.js",
+  "version": "2.0.0",
+  "description": "",
+  "main": "./src/pangu.js",
+  "homepage": "https://github.com/vinta/paranoid-auto-spacing",
+  "license": "MIT",
+  "authors": [
+    "Vinta <vinta.chen@gmail.com>"
+  ],
+  "dependencies": {},
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ]
+}
