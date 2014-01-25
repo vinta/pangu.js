@@ -1,0 +1,28 @@
+{
+  "name": "pangu",
+  "version": "2.0.1",
+  "description": "Insert a white space between full-width characters (Chinese, Japanese, etc.) and half-width alphanumerics. For good readability.",
+  "keywords": [
+    "alphanumerics",
+    "chinese",
+    "readability",
+    "space",
+    "text",
+    "xpath"
+  ],
+  "main": "src/pangu.js",
+  "ignore": [
+    "**/.*",
+    "browser_extensions",
+    "node_modules"
+  ],
+  "license": "MIT",
+  "authors": [
+    "Vinta <vinta.chen@gmail.com> (https://github.com/vinta)"
+  ],
+  "homepage": "https://github.com/vinta/paranoid-auto-spacing",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/vinta/paranoid-auto-spacing.git"
+  }
+}

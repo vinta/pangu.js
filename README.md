@@ -6,21 +6,18 @@
 
 與大家共勉之。
 
-
 ## Installation
-
 
 ### for Users
 
-* [Google Chrome (Extension)](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
-* [Mozilla Firefox (Userscript)](http://userscripts.org/scripts/show/129555)
-
+* [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+* [Mozilla Firefox](http://userscripts.org/scripts/show/129555)
 
 ### for Developers
 
-* [pangu.js](https://github.com/gibuloto/paranoid-auto-spacing/blob/develop/vendors/pangu.js)（盤古）
+* [pangu.js](https://github.com/vinta/paranoid-auto-spacing/blob/master/src/pangu.js)（盤古）
 
-![Pangu](https://raw.github.com/gibuloto/paranoid-auto-spacing/develop/images/pangu_260.jpg)
+![Pangu](https://raw.github.com/vinta/paranoid-auto-spacing/master/browser_extensions/chrome/images/pangu_260.jpg)
 
 ``` js
 // whole page spacing
@@ -36,28 +33,22 @@ pangu.element_spacing('.comment');
 pangu.element_spacing('p');
 ```
 
-插入空格的功能已經從 extension 中獨立出來 。不嫌棄的話，你可以在你的 project 中使用。
+## Run Tests
 
+``` bash
+$ npm install
+$ grunt
+```
 
 ## License
 
 Released under the [MIT License](http://opensource.org/licenses/MIT).
 
-
 ## Author
 
 * Twitter: [@vinta](https://twitter.com/vinta)
-* Blog: [vinta.ws](http://vinta.ws/)
-
+* Website: [vinta.ws](http://vinta.ws/)
 
 ## Contributors
 
-* [ChanCheng](https://github.com/ChanCheng)
-* [jiefoxi](https://github.com/jiefoxi)
-* [xslidian](https://github.com/xslidian)
-
-偉哉 Open Source！
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vinta/paranoid-auto-spacing/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
+[偉哉 Open Source！](https://github.com/vinta/paranoid-auto-spacing/graphs/contributors)

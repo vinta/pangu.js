@@ -1,0 +1,54 @@
+{
+    "extension_name": {
+        "message": "為什麼你們就是不能加個空格呢？",
+        "description": ""
+    },
+    "extension_description": {
+        "message": "自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。（攤手）沒辦法，處女座都有強迫症。",
+        "description": ""
+    },
+    "subtitle": {
+        "message": "自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。",
+        "description": ""
+    },
+    "quote": {
+        "message": "漢學家稱這個空白字元為「盤古之白」，因為它劈開了全形字和半形字之間的混沌。另有研究顯示，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有七成的比例會在 34 歲的時候跟自己不愛的人結婚，而其餘三成的人最後只能把遺產留給自己的貓。畢竟愛情跟書寫都需要適時地留白。",
+        "description": ""
+    },
+    "label_spacing_mode": {
+        "message": "什麼時候作用？",
+        "description": ""
+    },
+    "spacing_when_load": {
+        "message": "網頁載入後自動幫我加上空格",
+        "description": ""
+    },
+    "spacing_when_click": {
+        "message": "我要自己決定什麼時候要加空格",
+        "description": ""
+    },
+    "spacing_when_click_msg": {
+        "message": "你可以按右上角那個黑人頭來招喚空格之神！",
+        "description": ""
+    },
+    "label_spacing_rule": {
+        "message": "然後，你是否希望：",
+        "description": ""
+    },
+    "whitelists": {
+        "message": "只在這些網站作用",
+        "description": ""
+    },
+    "blacklists": {
+        "message": "不要在這些網站作用",
+        "description": ""
+    },
+    "god_of_spacing": {
+        "message": "空格之神",
+        "description": ""
+    },
+    "holly_god_of_spacing": {
+        "message": "招喚空格之神！",
+        "description": ""
+    }
+}

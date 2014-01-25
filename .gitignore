@@ -1,2 +1,5 @@
-.DS_Store
-key.pem
+browser_extensions/chrome_dev/
+browser_extensions/chrome_dist/
+node_modules/
+*.pem
+.DS_STORE
