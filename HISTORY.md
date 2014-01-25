@@ -1,5 +1,9 @@
 # History
 
+## v2.0.1
+
+* 拿掉 `console.log()`
+
 ## v2.0.0
 
 * 新年新氣象，翻新 Option Page 的 UI 和 Icon
