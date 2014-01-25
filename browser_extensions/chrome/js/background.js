@@ -1,125 +1,147 @@
 ﻿/*
- background.js 由 background.html 引入
- 在整個 extension 的生命週期中都存在
- 主要是作為跟 extension 中的其他 js 相互通訊的中繼站
+ Storage
  */
 
-Array.prototype.unique = function() {
-    var a = this.concat();
-    for (var i = 0; i < a.length; ++i) {
-        for (var j = i + 1; j < a.length; ++j) {
-            if (a[i] === a[j]) {
-                a.splice(j--, 1);
+var syncStorage = chrome.storage.sync;
+var loStorage = chrome.storage.local;
+
+var DEFAULT_SETTINGS = {
+    'spacing_mode': 'spacing_when_load', // or spacing_when_click
+    'spacing_rule': 'blacklists', // or whitelists
+    'blacklists': [
+        '//drive.google.com',
+        '//docs.google.com',
+        'http://vinta.ws',
+        'http://heelsfetishism.com'
+    ],
+    'whitelists': []
+};
+var CACHED_SETTINGS = Object.create(DEFAULT_SETTINGS);
+var SETTING_KEYS = Object.keys(DEFAULT_SETTINGS);
+
+function refresh_cached_settings() {
+    syncStorage.get(null, function(items) {
+        CACHED_SETTINGS = items;
+    });
+}
+
+function merge_settings() {
+    syncStorage.get(null, function(items) {
+        var old_settings = items;
+        var new_settings = {};
+        var is_changed = false;
+
+        SETTING_KEYS.forEach(function(key) {
+            if (old_settings[key] === undefined) {
+                new_settings[key] = DEFAULT_SETTINGS[key];
             }
+            else {
+                new_settings[key] = old_settings[key];
+            }
+        });
+
+        // 如果 new_settings 跟 old_settings 一樣的話，並不會觸發 chrome.storage.onChanged
+        // 所以這裡強制 refresh，確保 CACHED_SETTINGS 一定有東西
+        syncStorage.set(new_settings, function() {
+            refresh_cached_settings();
+        });
+    });
+}
+
+chrome.storage.onChanged.addListener(
+    function(changes, areaName) {
+        if (areaName === 'sync') {
+            refresh_cached_settings();
+
+            // chrome.storage.sync 同步更新到 chrome.storage.local
+            obj_to_save = {}
+            for (key in changes) {
+                obj_to_save[key] = changes[key].newValue;
+            }
+            loStorage.set(obj_to_save);
         }
     }
+);
 
-    return a;
-};
+merge_settings();
 
-function default_setuip() {
-    if (!localStorage['spacing_mode']) {
-        localStorage['spacing_mode'] = 'spacing_when_load';
+/*
+ Utils
+ */
+
+// 判斷能不能對這個頁面插入空格
+function can_spacing(tab) {
+    var current_url = tab.url;
+
+    if (current_url.search(/^http(s?)/i) == -1) {
+        return false;
+    }
+    else if (CACHED_SETTINGS['spacing_mode'] === 'spacing_when_load') {
+        if (CACHED_SETTINGS['spacing_rule'] === 'blacklists') {
+            for (var i in CACHED_SETTINGS['blacklists']) {
+                var blacklist_url = CACHED_SETTINGS['blacklists'][i];
+                if (current_url.indexOf(blacklist_url) >= 0) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        else if (CACHED_SETTINGS['spacing_rule'] === 'whitelists') {
+            for (var j in CACHED_SETTINGS['whitelists']) {
+                var whitelist_url = CACHED_SETTINGS['whitelists'][j];
+                if (current_url.indexOf(whitelist_url) >= 0) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+    else if (CACHED_SETTINGS['spacing_mode'] === 'spacing_when_click') {
+        return false;
     }
 
-    if (!localStorage['exception_mode']) {
-        localStorage['exception_mode'] = 'blacklist';
-    }
-
-    var default_blacklist = [
-        '//drive.google.com/',
-        '//docs.google.com/',
-        '//picasaweb.google.com/',
-        '//vinta.ws/'
-    ];
-    var blacklist;
-    if (localStorage['blacklist']) {
-        var local_blacklist = JSON.parse(localStorage['blacklist']);
-        blacklist = default_blacklist.concat(local_blacklist).unique();
-    }
-    else {
-        blacklist = default_blacklist;
-    }
-    localStorage['blacklist'] = JSON.stringify(blacklist);
-    localStorage['blacklist_temp'] = JSON.stringify(blacklist);
-
-    var default_whitelist = [];
-    if (!localStorage['whitelist']) {
-        localStorage['whitelist'] = JSON.stringify(default_whitelist);
-        localStorage['whitelist_temp'] = JSON.stringify(default_whitelist);
-    }
+    return true;
 }
 
-// function set_badge(text) {
-//     // 注意檔案路徑！
-//     // browserAction 的 icon 不能顯示動態的 gif
-//     // chrome.browserAction.setIcon({path: '/images/ajax_loader.gif'});
+/*
+ Message Passing
+ */
 
-//     chrome.browserAction.setBadgeText({text: text});
-// }
+// 監聽來自 content_script.js 的訊息
+chrome.runtime.onMessage.addListener(
+    // https://crxdoc-zh.appspot.com/extensions/runtime.html#event-onMessage
+    function(message_obj, sender, sendResponse) {
+        var purpose = message_obj.purpose;
 
-function show_notify(tab_id) {
-    var is_notify = localStorage['is_notify'];
-
-    if (is_notify != 'false') {
-        chrome.tabs.insertCSS(tab_id, {file: 'vendors/needim-noty/css/jquery.noty.css'});
-        chrome.tabs.executeScript(tab_id, {file: 'vendors/needim-noty/js/jquery.noty.js'});
-        chrome.tabs.executeScript(tab_id, {file: 'js/notify.js'});
+        switch (purpose) {
+            case 'can_spacing':
+                result = can_spacing(sender.tab);
+                sendResponse({result: result});
+                break;
+        }
     }
-}
+);
 
-default_setuip();
+/*
+ Content Script
+ */
 
-// 當頁面載入完成後就注入 js 程式碼
+// 當頁面載入完成後就注入 JavaScript 程式碼
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-    if (changeInfo.status == 'complete' && tab.url.search(/^chrome/i) == -1) {
-        chrome.tabs.executeScript(tab.id, {file: 'vendors/jquery-1.7.2.min.js', allFrames: true});
-        chrome.tabs.executeScript(tab.id, {file: 'vendors/pangu.js', allFrames: true});
-        chrome.tabs.executeScript(tab.id, {file: 'js/main.js', allFrames: true});
-
-        /*
-         實際執行 spacing 是在這一行
-         直接寫在這裡會發生 Uncaught ReferenceError: traversal_and_spacing is not defined
-         所以要放在 spacing.js
-         */
-        // chrome.tabs.executeScript(tab.id, {code: 'traversal_and_spacing();'});
+    if (changeInfo.status == 'complete') {
+        chrome.tabs.executeScript(tab.id, {file: 'vendors/jquery/jquery-1.10.2.min.js', allFrames: true});
+        chrome.tabs.executeScript(tab.id, {file: 'vendors/pangu.min.js', allFrames: true});
+        chrome.tabs.executeScript(tab.id, {file: 'js/content_script.js', allFrames: true});
     }
 });
+
+/*
+ Browser Action
+ */
 
 chrome.browserAction.onClicked.addListener(function(tab) {
-    /*
-     在 background.html 引入 jQuery 是沒有作用的
-     因為 background page 的執行環境跟 tabs (content scripts) 不一樣
-     */
-    // chrome.tabs.executeScript(tab.id, {file: 'vendors/jquery-1.7.1.min.js'});
-    // chrome.tabs.executeScript(tab.id, {file: 'js/spacing.js'});
-
-    show_notify(tab.id);
-    chrome.tabs.executeScript(tab.id, {code: 'traversal_and_spacing();'});
-});
-
-// listen 從 content scripts 傳來的 requests
-chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
-    if (request.purpose == 'spacing_mode') {
-        sendResponse({spacing_mode: localStorage['spacing_mode']});
-    }
-    else if (request.purpose == 'exception_mode') {
-        sendResponse({
-            exception_mode: localStorage['exception_mode'],
-            blacklist: localStorage['blacklist'],
-            whitelist: localStorage['whitelist']
-        });
-    }
-    else if (request.purpose == 'current_tab') {
-        sendResponse({current_tab: sender.tab});
-    }
-    else if (request.purpose == 'notify') { // 顯示右上角的 notify alert
-        show_notify(sender.tab.id);
-
-        // 就算不回傳 response 應該也可以吧？
-        sendResponse({notify: 'show'});
-    }
-    else {
-        sendResponse({}); // clean request
-    }
+    chrome.tabs.executeScript(tab.id, {code: 'is_spacing = true;'});
+    chrome.tabs.executeScript(tab.id, {code: 'go_spacing();'});
 });

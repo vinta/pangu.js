@@ -9,27 +9,51 @@ module.exports = function(grunt) {
     clean: {
       build: [
         'dist/',
+        'browser_extensions/chrome_dev/',
         'browser_extensions/chrome_dist/'
       ],
       finish: [
-        'dist/pangu.safe.js'
+        'dist/pangu.safe.js',
       ]
     },
 
-    strip: {
+    copy: {
       build: {
-        src: 'src/pangu.js',
-        dest: 'dist/pangu.safe.js'
-      }
-    },
-
-    uglify: {
-      options: {
-        banner: grunt.file.read('src/banner.js')
+        files: [
+          {
+            src: 'dist/pangu.min.js',
+            dest: 'browser_extensions/chrome/vendors/pangu.min.js'
+          },
+          {
+            expand: true,
+            cwd: 'browser_extensions/chrome/',
+            src: [
+              '_locales/**/*',
+              'images/icon_*',
+              'js/**/*',
+              'pages/**/*',
+              'sounds/**/*',
+              'stylesheets/**/*.css',
+              'vendors/**/*',
+              'manifest.json'
+            ],
+            dest: 'browser_extensions/chrome_dev/'
+          }
+        ]
       },
-      build: {
-        src: 'dist/pangu.safe.js',
-        dest: 'dist/pangu.min.js'
+      package: {
+        files: [
+          {
+            expand: true,
+            cwd: 'browser_extensions/chrome_dev/',
+            src: '**',
+            dest: 'browser_extensions/chrome_dist/'
+          },
+          {
+            src: '/Users/vinta/Dropbox/Developer/Projects/paranoid-auto-spacing/key.pem',
+            dest: 'browser_extensions/chrome_dist/key.pem'
+          }
+        ]
       }
     },
 
@@ -74,29 +98,27 @@ module.exports = function(grunt) {
       }
     },
 
-    copy: {
+    // remove console.log()
+    strip: {
       build: {
-        files: [
-          {
-            src: 'dist/pangu.min.js',
-            dest: 'browser_extensions/chrome/vendors/pangu.min.js',
-          },
-          {
-            expand: true,
-            cwd: 'browser_extensions/chrome/',
-            src: [
-              '_locales/**/*',
-              'images/icon_*',
-              'js/**/*',
-              'pages/**/*',
-              'sounds/**/*',
-              'stylesheets/**/*.css',
-              'vendors/**/*',
-              'manifest.json'
-            ],
-            dest: 'browser_extensions/chrome_dist/',
-          }
-        ]
+        src: 'src/pangu.js',
+        dest: 'dist/pangu.safe.js'
+      },
+      package: {
+        src: 'browser_extensions/chrome_dist/js/*.js',
+        options: {
+          inline: true
+        }
+      }
+    },
+
+    uglify: {
+      options: {
+        banner: grunt.file.read('src/banner.js')
+      },
+      build: {
+        src: 'dist/pangu.safe.js',
+        dest: 'dist/pangu.min.js'
       }
     },
 
@@ -124,9 +146,9 @@ module.exports = function(grunt) {
 
   grunt.registerTask('build', [
     'clean:build',
-    'strip',
+    'strip:build',
     'uglify',
-    'copy',
+    'copy:build',
     'clean:finish'
   ]);
 
@@ -134,9 +156,19 @@ module.exports = function(grunt) {
     'karma'
   ]);
 
+  // 準備打包到 Chrome Web Store
+  // browser_extensions/chrome_dev/ 是開發用的
+  // browser_extensions/chrome_dist/ 是打包用的
+  grunt.registerTask('package', [
+    'build',
+    'copy:package',
+    'strip:package'
+  ]);
+
   grunt.registerTask('default', [
     'build',
-    'test'
+    'test',
+    'package'
   ]);
 
 };

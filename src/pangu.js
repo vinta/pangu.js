@@ -1,7 +1,5 @@
 (function(pangu) {
 
-    /* Private Methods */
-
     // nodeType: http://www.w3schools.com/dom/dom_nodetype.asp
     // 1: ELEMENT_NODE
     // 3: TEXT_NODE
@@ -88,7 +86,7 @@
 
             // 處理嵌套的 <tag> 中的文字
             if (next_text_node) {
-                var not_spacing_tags = /^(a|del|p|pre|s|strike|u)$/i;
+                var not_spacing_tags = /^(a|br|del|p|pre|s|strike|u)$/i;
 
                 // current_text_node 的最後一個字 + next_text_node 的第一個字
                 var text = current_text_node.data.toString().substr(-1) + next_text_node.data.toString().substr(0, 1);
@@ -131,8 +129,6 @@
         }
     }
 
-    /* Public Methods */
-
     // 對純文字加空格
     pangu.text_spacing = function(text) {
         return insert_space(text);
@@ -151,24 +147,22 @@
          translate() >> 將所查詢的字串轉換成小寫，因為 XML 是 case-sensitive 的
          */
 
-        // 撈出所有節點（但是不包含 <script> 和 <style>）的文字內容
-        // 不要用 contenteditable，會有問題
-        // var xpath_query = '//*[not(@contenteditable)]/text()[normalize-space(.)][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="script"][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="style"]';
-
-        // 只處理 body 底下的節點
-        // var xpath_query = '/html/body//*[not(@contenteditable)]/text()[normalize-space(.)][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="script"][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="style"]';
-
+        // 不要處理 <script> 和 <style> 裡的內容
         var not_parse_tags = ['script', 'style'];
         var extra_query = '';
         not_parse_tags.forEach(function(tag) {
             // ex: [translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="script"]
             extra_query += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
         });
-        var xpath_query = '//text()[normalize-space(.)]' + extra_query;
-
-        // var xpath_query = '//text()[normalize-space(.)][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="script"][translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="style"]';
-
+        // 處理 <body> 底下的節點
+        // var xpath_query = '/html/body//text()[normalize-space(.)]' + extra_query;
+        // 略過 contenteditable 的節點
+        var xpath_query = '/html/body//*[not(@contenteditable)]/text()[normalize-space(.)]' + extra_query;
         spacing(xpath_query);
+
+        // 處理 <title>
+        var xpath_query_title = '/html/head/title/text()';
+        spacing(xpath_query_title);
 
         var end = new Date().getTime();
         console.log(end - start);

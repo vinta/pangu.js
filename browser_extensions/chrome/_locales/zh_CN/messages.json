@@ -4,7 +4,7 @@
         "description": ""
     },
     "extension_description": {
-        "message": "自动在网页中所有的中文字和半形的英文、数字、符号之间插入空白。（摊手）没办法，处女座都有强迫症。",
+        "message": "自动在网页中所有的中文字和半形的英文、数字、符号之间插入空白。（摊手）没办法，我大处女座都有强迫症。",
         "description": ""
     },
     "subtitle": {
@@ -15,7 +15,7 @@
         "message": "汉学家称这个空白字元为「盘古之白」，因为它劈开了全形字和半形字之间的混沌。另有研究显示，打字的时候不喜欢在中文和英文之间加空格的人，感情路都走得很辛苦，有七成的比例会在 34 岁的时候跟自己不爱的人结婚，而其余三成的人最后只能把遗产留给自己的猫。毕竟爱情跟书写都需要适时地留白。",
         "description": ""
     },
-    "label_spacing": {
+    "label_spacing_mode": {
         "message": "什么时候作用？",
         "description": ""
     },
@@ -27,52 +27,28 @@
         "message": "我要自己决定什么时候要加空格",
         "description": ""
     },
-    "label_exception": {
+    "spacing_when_click_msg": {
+        "message": "你可以按右上角那个黑人头来招唤空格之神！",
+        "description": ""
+    },
+    "label_spacing_rule": {
         "message": "然后，你是否希望：",
         "description": ""
     },
-    "whitelist": {
+    "whitelists": {
         "message": "只在这些网站作用",
         "description": ""
     },
-    "blacklist": {
+    "blacklists": {
         "message": "不要在这些网站作用",
         "description": ""
     },
-    "exception_urls_placeholder": {
-        "message": "一行一个网址，没有的话就不要填",
-        "description": ""
-    },
-    "exception_urls_error": {
-        "message": "不要乱输入好不好？第 {0} 行根本就不是一个合法的网址啊混帐",
-        "description": ""
-    },
-    "label_options": {
-        "message": "其他选项：",
-        "description": ""
-    },
-    "is_notify_text": {
-        "message": "可不可以不要每次空格之神显灵的时候都通知我？他好烦",
-        "description": ""
-    },
-    "go_to_work_text": {
-        "message": "可不可以中午再去上班？",
-        "description": ""
-    },
-    "submit": {
-        "message": "好了，就这样吧",
-        "description": ""
-    },
-    "submit_result": {
-        "message": "恭喜你，设定完成，你可以继续上网了",
-        "description": ""
-    },
-    "submit_thanks": {
-        "message": "不客气，我知道你想跟我说谢谢",
+    "god_of_spacing": {
+        "message": "空格之神",
         "description": ""
     },
     "holly_god_of_spacing": {
-        "message": "空格之神显灵了！",
+        "message": "招唤空格之神！",
         "description": ""
     }
 }

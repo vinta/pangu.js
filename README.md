@@ -15,9 +15,9 @@
 
 ### for Developers
 
-* [pangu.js](https://github.com/vinta/pangu.js/blob/master/src/pangu.js)（盤古）
+* [pangu.js](https://github.com/vinta/paranoid-auto-spacing/blob/master/src/pangu.js)（盤古）
 
-![Pangu](https://raw.github.com/vinta/paranoid-auto-spacing/develop/images/pangu_260.jpg)
+![Pangu](https://raw.github.com/vinta/paranoid-auto-spacing/master/browser_extensions/chrome/images/pangu_260.jpg)
 
 ``` js
 // whole page spacing
@@ -37,8 +37,7 @@ pangu.element_spacing('p');
 
 ``` bash
 $ npm install
-$ grunt build
-$ grunt test
+$ grunt
 ```
 
 ## License

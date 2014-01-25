@@ -1,32 +1,80 @@
+$link_color: #3b8bba;
+
 a {
-    color: #3b8bba;
+    color: $link_color;
     text-decoration: none;
 
-    &:visited {
-        color: #265778;
+    &:hover {
+        text-decoration: underline;
     }
 }
 
-.hide {
-    display: none;
+a.editable-click {
+    border: none;
+    color: #646464;
+    vertical-align: middle;
+
+    &:hover {
+        color: #646464;
+        border-bottom: dotted 1px #646464;
+    }
 }
 
-.pure-button {
+.editable-buttons {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.editable-error {
+    font-size: 80%;
+    color: #d13b3b;
+    margin-top: 5px;
+}
+
+.alertify-log {
+    border-radius: 2px;
+    font-size: 110%;
+    text-shadow: none;
+}
+
+.alertify-log-error {
+    background-color: #d13b3b;
+}
+
+input[type=url],
+input[type=text] {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: none;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    display: inline-block;
+    font-size: .8em;
+    padding: .5em .6em;
+    -webkit-transition: .3s linear border;
+    -moz-transition: .3s linear border;
+    -ms-transition: .3s linear border;
+    -o-transition: .3s linear border;
+    transition: .3s linear border;
+    width: 70%;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.big-button {
     font-size: 180%;
 }
 
+.small-button {
+    font-size: 70%;
+}
+
 .pure-button-secondary {
-    background: rgb(66, 184, 221); /* this is a light blue */
+    background: rgb(66, 184, 221);
     color: white;
-}
-
-.pure-button-success {
-    background: rgb(28, 184, 65); /* this is a green */
-    color: white;
-}
-
-.block {
-    display: block;
 }
 
 .container {
@@ -50,7 +98,7 @@ a {
     p {
         color: #999999;
 
-        &.subtitle {
+        &#subtitle {
             margin-top: 15px;
             margin-bottom: 35px;
         }
@@ -58,51 +106,43 @@ a {
 }
 
 .content {
-    padding-top: 20px;
-    padding-bottom: 80px;
+    padding-bottom: 130px;
     padding-left: 80px;
     padding-right: 80px;
 
     .option_group {
-        margin-top: 50px;
+        margin-top: 70px;
     }
 
-    textarea {
-        border-color: #999999;
-        border-radius: 2px;
-        margin-top: 35px;
-        padding: 10px;
-        width: 100%;
+    ul.spacing_rule_list {
+        list-style-type: none;
+        margin-top: 30px;
+        margin-left: 0;
+        padding-left: 5px;
+
+        li {
+            height: 39px;
+            margin-bottom: 10px;
+        }
     }
 
-    .controls {
-        font-size: 90%;
-        margin-bottom: 10px;
+    p#spacing_when_click_msg {
+        margin-top: 30px;
     }
 }
 
 .footer {
     background-color: #ecf0f2;
     padding: 40px 80px 30px 80px;
+    text-align: center;
 
-    .container {
-        font-size: 120%;
+    p {
+        font-size: 110%;
+        margin-top: 0px;
+        margin-bottom: 8px;
 
-        .right {
-            text-align: right;
-        }
-
-        p {
-            margin-top: 8px;
-            margin-bottom: 8px;
+        &.copyleft {
+            margin-top: 30px;
         }
     }
-
-    p.copyleft {
-        text-align: center;
-    }
-}
-
-.alertify-logs {
-    width: 350px;
 }
