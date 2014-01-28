@@ -7,8 +7,11 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('bower.json'),
 
     clean: {
-      build: [
-        'browser_extensions/chrome_dev/',
+      dev: [
+        'browser_extensions/chrome_dev/'
+      ],
+      dist: [
+        'dist/',
         'browser_extensions/chrome_dist/'
       ]
     },
@@ -156,7 +159,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-strip');
 
   grunt.registerTask('dev', [
-    'clean',
+    'clean:dev',
     'copy:dev'
   ]);
 
@@ -164,7 +167,7 @@ module.exports = function(grunt) {
   // browser_extensions/chrome_dev/ 是開發用的
   // browser_extensions/chrome_dist/ 是打包用的
   grunt.registerTask('dist', [
-    'clean',
+    'clean:dist',
     'strip:dist',
     'uglify',
     'copy:dist',
