@@ -73,7 +73,7 @@ merge_settings();
 function can_spacing(tab) {
     var current_url = tab.url;
 
-    if (current_url.search(/^http(s?)/i) == -1) {
+    if (current_url.search(/^(http(s?)|file)/i) == -1) {
         return false;
     }
     else if (CACHED_SETTINGS['spacing_mode'] === 'spacing_when_load') {
