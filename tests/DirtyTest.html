@@ -31,7 +31,7 @@ body {
  -->
         <!-- <pre id="best-content-332820798" accuse="aContent" class="best-text mb-10">一楼的第一句是正确<br>cpu要找的数据就在命令中，是指令的一部分，比如mov al,0fh風<br><br>bb下面的措辞不当：LEA指令会比乘法快很多，但是究竟有多少人懂呢？</pre> -->
 
-        <pre id="best-content-332820798" accuse="aContent" class="best-text mb-10">一楼的第一句是正确<br>cpu要找的数据就在命令中，是指令的一部分，比如mov al,0fh風</pre>
+        <!-- <pre id="best-content-332820798" accuse="aContent" class="best-text mb-10">一楼的第一句是正确<br>cpu要找的数据就在命令中，是指令的一部分，比如mov al,0fh風</pre> -->
 
 <!--
         <p>開頭qwer简体中文456</p>
@@ -83,11 +83,27 @@ body {
           <li><a href="http://vinta.ws/中文網址with英文.html">bk一個超連結with英文，網址包含中文</a></li>
         </ul> -->
 
+        <div id="c1" contentEditable="true">
+            <div id="c2">123中文abc</div>
+        </div>
+
     </div>
+    <script src="lib/jquery/jquery-1.10.2.min.js"></script>
     <script src="../src/pangu.js"></script>
     <script>
+        // $('body').on('DOMNodeInserted', function(event) {
+        //     console.log('DOMNodeInserted');
+        //     pangu.page_spacing();
+        // });
+
         pangu.page_spacing();
         // pangu.element_spacing('p');
+
+        var c1 = document.getElementById('c1');
+        console.log(c1.contentEditable);
+
+        var c2 = document.getElementById('c2');
+        console.log(c2.contentEditable);
     </script>
 </body>
 </html>

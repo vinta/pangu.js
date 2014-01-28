@@ -8,7 +8,6 @@ module.exports = function(grunt) {
 
     clean: {
       build: [
-        'dist/',
         'browser_extensions/chrome_dev/',
         'browser_extensions/chrome_dist/'
       ]
