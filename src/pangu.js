@@ -79,6 +79,31 @@
             // console.log('next_text_node: %O', next_text_node);
 
             /*
+             處理 contentEditable 元素的 child nodes 還是會被 spacing 的問題
+             contentEditable 的值可能是 'true', 'false', 'inherit'
+             如果沒有顯式地指定 contentEditable 的值
+             一般都會是 'inherit' 而不是 'false'
+
+             TODO:
+             太暴力了，應該有更好的解法
+             */
+            var should_continue = false;
+            var pn = current_text_node.parentNode;
+            while (pn) {
+                if (pn.contentEditable === 'true') {
+                    // console.log('should_continue');
+                    should_continue = true;
+                    break;
+                }
+                else {
+                    pn = pn.parentNode;
+                }
+            }
+            if (should_continue) {
+                continue;
+            }
+
+            /*
              .data 是 XML text node 的屬性
              http://www.w3school.com.cn/xmldom/dom_text.asp
              */
@@ -148,7 +173,7 @@
 
     // 對整個 window.document 加空格
     pangu.page_spacing = function() {
-        // var start = new Date().getTime();
+        var start = new Date().getTime();
 
         /*
          // >> 選擇任意位置的節點
@@ -167,18 +192,19 @@
             extra_query += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
         });
 
-        // 只處理 <body> 底下的節點
-        // 略過 contenteditable 的節點
-        // var xpath_query = '/html/body//text()[normalize-space(.)]' + extra_query;
+        /*
+         1. 只處理 <body> 底下的節點 >> var xpath_query = '/html/body//text()[normalize-space(.)]' + extra_query;
+         2. 略過 contentEditable 的節點
+         */
         var xpath_query = '/html/body//*[not(@contenteditable)]/text()[normalize-space(.)]' + extra_query;
         spacing(xpath_query);
 
-        // 處理 <title>
-        var xpath_query_title = '/html/head/title/text()';
-        spacing(xpath_query_title);
+        // // 處理 <title>
+        // var xpath_query_title = '/html/head/title/text()';
+        // spacing(xpath_query_title);
 
-        // var end = new Date().getTime();
-        // console.log(end - start);
+        var end = new Date().getTime();
+        console.log(end - start);
     };
 
     // 對特定 element 加空格
