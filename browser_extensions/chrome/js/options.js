@@ -49,6 +49,37 @@ function is_valid_url(url) {
     }
 }
 
+function wschar_use(e){
+	ws = {
+		'0020': ' ',
+		ooao: '\u00A0',
+		'00a0': '\u00A0',
+		2002: '\u2002',
+		2003: '\u2003',
+		2004: '\u2004',
+		2005: '\u2005',
+		2006: '\u2006',
+		2007: '\u2007',
+		2008: '\u2008',
+		2009: '\u2009',
+		'200a': '\u200a',
+		'200b': '\u200b',
+		3000: '\u3000'
+	};
+	i = Object.keys(ws).indexOf(e.value);
+	wschar = (i == -1) ? ' ' : ws[e.value];
+	console.log(e, e.value, i, wschar);
+	SYNC_Storage.set({'wschar': wschar}, function() {
+		SYNC_Storage.get('wschar', function(items) {
+			console.log(items);
+		});
+	});
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+	$('input[name=wschar]').click(function(){wschar_use(this);});
+});
+
 var app = angular.module('app', ['xeditable']);
 
 app.controller('OptionController', [
