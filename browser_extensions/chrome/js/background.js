@@ -14,7 +14,8 @@ var DEFAULT_SETTINGS = {
         'http://vinta.ws',
         'http://heelsfetishism.com'
     ],
-    'whitelists': []
+    'whitelists': [],
+    'wschar': ' '
 };
 var CACHED_SETTINGS = Object.create(DEFAULT_SETTINGS);
 var SETTING_KEYS = Object.keys(DEFAULT_SETTINGS);
@@ -118,7 +119,7 @@ chrome.runtime.onMessage.addListener(
         switch (purpose) {
             case 'can_spacing':
                 result = can_spacing(sender.tab);
-                sendResponse({result: result});
+                sendResponse({result: result, wschar: CACHED_SETTINGS['wschar']});
                 break;
         }
     }

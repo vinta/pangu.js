@@ -49,6 +49,49 @@ function is_valid_url(url) {
     }
 }
 
+ws = {
+	'0020': ' ',
+	ooao: '\u00A0',
+	'00a0': '\u00A0',
+	2002: '\u2002',
+	2003: '\u2003',
+	2004: '\u2004',
+	2005: '\u2005',
+	2006: '\u2006',
+	2007: '\u2007',
+	2008: '\u2008',
+	2009: '\u2009',
+	'200a': '\u200a',
+	'200b': '\u200b',
+	3000: '\u3000'
+};
+function wschar_use(e){
+	i = Object.keys(ws).indexOf(e.value);
+	wschar = (i == -1) ? ' ' : ws[e.value];
+	console.log(e, e.value, i, wschar);
+	SYNC_Storage.set({'wschar': wschar}, function() {
+		SYNC_Storage.get('wschar', function(items) {
+			console.log(items);
+		});
+	});
+	demo(wschar);
+}
+function demo(wschar) {
+	if(wschar == undefined) wschar = BG_PAGE.CACHED_SETTINGS['wschar'];
+	h2 = $('#label_wschar')[0];
+	if(h2.getAttribute('title') == null) h2.setAttribute('title', h2.innerText);
+	h2.innerText = h2.getAttribute('title').split('').join(wschar);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+	demo();
+	$('input[name=wschar]').click(function(){wschar_use(this);});
+	$('input[name=wschar]')[0].checked = true;
+	for(var i in ws)
+		if (ws[i] == BG_PAGE.CACHED_SETTINGS['wschar'])
+			$('input[name=wschar][value=' + i + ']').attr('checked', true);
+});
+
 var app = angular.module('app', ['xeditable']);
 
 app.controller('OptionController', [

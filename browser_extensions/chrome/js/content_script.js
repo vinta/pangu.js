@@ -1,5 +1,9 @@
 var is_spacing = false; // 是不是正在加入空格
 var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
+chrome.storage.sync.get('wschar', function(o){
+	//console.log(o);
+	if(o.wschar !== undefined) pangu.wschar = o.wschar;
+	});
 
 function go_spacing() {
     console.log('go_spacing()');
@@ -24,6 +28,7 @@ chrome.runtime.sendMessage({purpose: 'can_spacing'},
         console.log('can_spacing: %O', response.result);
 
         if (response.result) {
+        	  pangu.wschar = response.wschar;
             go_spacing();
 
             $('body').on('DOMNodeInserted', function(event) {
