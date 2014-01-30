@@ -81,9 +81,21 @@ describe('pangu', function() {
       expect(new_html).toEqual(expected_html);
     }
 
-    it('處理一個關於連城訣的 DOM', function() {
+    it('處理 DOM: <a>abc</a> 漢字', function() {
       if (run_by_karma()) {
-        run_fixture_test('t1');
+        run_fixture_test('e1');
+      }
+    });
+
+    it('處理 DOM: <a>abc</a> <a>漢字</a>', function() {
+      if (run_by_karma()) {
+        run_fixture_test('e2');
+      }
+    });
+
+    it('處理 DOM: 多個 <p>', function() {
+      if (run_by_karma()) {
+        run_fixture_test('e3');
       }
     });
 
@@ -91,7 +103,19 @@ describe('pangu', function() {
 
   describe('page_spacing()', function() {
 
-    it('處理', function() {
+    function run_fixture_test(fixture_name) {
+      loadFixtures(fixture_name + '.html');
+      pangu.page_spacing();
+      var new_html = $('#' + fixture_name).prop('outerHTML');
+
+      var fixture_str = readFixtures(fixture_name + '_expected.html');
+      var $expected = $(fixture_str);
+      var expected_html = $expected.prop('outerHTML');
+
+      expect(new_html).toEqual(expected_html);
+    }
+
+    it('處理 DOM: p1', function() {
       // TODO: 有空在補
       // TODO: 也要檢查 title
     });
