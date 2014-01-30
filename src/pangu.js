@@ -1,6 +1,37 @@
 (function(pangu) {
 
     /*
+     1.
+     硬幹 contentEditable 元素的 child nodes 還是會被 spacing 的問題
+     contentEditable 的值可能是 'true', 'false', 'inherit'
+     如果沒有顯式地指定 contentEditable 的值
+     一般都會是 'inherit' 而不是 'false'
+
+     2.
+     不要對 <code> 或 <pre> 裡的文字加空格
+
+     TODO:
+     太暴力了，應該有更好的解法
+     */
+    function can_ignore_node(node) {
+        var parent_node = node.parentNode;
+        var stop_tags = /^(code|pre)$/i;
+        while (parent_node) {
+            if (parent_node.contentEditable === 'true') {
+                return true;
+            }
+            else if (parent_node.nodeName.search(stop_tags) >= 0) {
+                return true;
+            }
+            else {
+                parent_node = parent_node.parentNode;
+            }
+        }
+
+        return false;
+    }
+
+    /*
      nodeType: http://www.w3schools.com/dom/dom_nodetype.asp
      1: ELEMENT_NODE
      3: TEXT_NODE
@@ -80,27 +111,7 @@
             // console.log('current_text_node: %O, nextSibling: %O', current_text_node, current_text_node.nextSibling);
             // console.log('next_text_node: %O', next_text_node);
 
-            /*
-             硬幹 contentEditable 元素的 child nodes 還是會被 spacing 的問題
-             contentEditable 的值可能是 'true', 'false', 'inherit'
-             如果沒有顯式地指定 contentEditable 的值
-             一般都會是 'inherit' 而不是 'false'
-
-             TODO:
-             太暴力了，應該有更好的解法
-             */
-            var should_continue = false;
-            var pn = current_text_node.parentNode;
-            while (pn) {
-                if (pn.contentEditable === 'true') {
-                    should_continue = true;
-                    break;
-                }
-                else {
-                    pn = pn.parentNode;
-                }
-            }
-            if (should_continue) {
+            if (can_ignore_node(current_text_node)) {
                 continue;
             }
 
@@ -112,10 +123,9 @@
 
             // 處理嵌套的 <tag> 中的文字
             if (next_text_node) {
-
                 /*
                  TODO:
-                 現在只是簡單得判斷相鄰的下一個 node 是不是 <br>
+                 現在只是簡單地判斷相鄰的下一個 node 是不是 <br>
                  萬一遇上嵌套的標籤就不行了
                  */
                 if (current_text_node.nextSibling) {
@@ -124,41 +134,54 @@
                     }
                 }
 
-                var not_spacing_tags = /^(a|br|del|p|pre|s|strike|u)$/i;
-
                 // current_text_node 的最後一個字 + next_text_node 的第一個字
                 var text = current_text_node.data.toString().substr(-1) + next_text_node.data.toString().substr(0, 1);
                 var new_text = insert_space(text);
 
+                var outside_spacing_tags = /^(a|del|p|s|strike|u)$/i;
+
                 if (text != new_text) {
                     /*
                      往上找 next_text_node 的 parent node
-                     直到遇到 not_spacing_tags
-                     而且 next_text_node 必須是第一個 text child（才能把空格加在 next_text_node 前面）
+                     直到遇到 outside_spacing_tags
+                     而且 next_text_node 必須是第一個 text child
+                     才能把空格加在 next_text_node 的前面
                      */
                     var next_node = next_text_node;
                     while (next_node.parentNode
-                        && next_node.nodeName.search(not_spacing_tags) == -1
+                        && next_node.nodeName.search(outside_spacing_tags) == -1
                         && is_first_text_child(next_node.parentNode, next_node)) {
                         next_node = next_node.parentNode;
                     }
 
                     var current_node = current_text_node;
                     while (current_node.parentNode
-                        && current_node.nodeName.search(not_spacing_tags) == -1
+                        && current_node.nodeName.search(outside_spacing_tags) == -1
                         && is_last_text_child(current_node.parentNode, current_node)) {
                         current_node = current_node.parentNode;
                     }
 
-                    // 不要把空格加在 <a> 文字的前面或後面，因為會有底線
-                    if (next_node.nodeName.search(not_spacing_tags) == -1) {
+                    /*
+                     不要把空格加在 <not_spacing_tag> 裡文字的開頭或結尾
+                     因為會有底線
+
+                     X: <p><a>漢字 </a>abc</p>
+                     O: <p><a>漢字</a> abc</p>
+                     */
+                    if (next_node.nodeName.search(outside_spacing_tags) == -1) {
                         next_text_node.data = " " + next_text_node.data;
                     }
-                    else if (current_node.nodeName.search(not_spacing_tags) == -1) {
+                    else if (current_node.nodeName.search(outside_spacing_tags) == -1) {
                         current_text_node.data = current_text_node.data + " ";
                     }
                     else {
-                        next_node.parentNode.insertBefore(document.createTextNode(" "), next_node);
+                        /*
+                         避免 <p>123</p> <p>漢字</p> 的情況發生
+                         空格會被加在兩個 <p> 之間
+                         */
+                        if (next_node.nodeName.search(/^(p)$/i) == -1 ) {
+                            next_node.parentNode.insertBefore(document.createTextNode(" "), next_node);
+                        }
                     }
                 }
             }
