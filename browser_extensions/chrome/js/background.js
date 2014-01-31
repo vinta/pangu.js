@@ -71,12 +71,9 @@ merge_settings();
 
 // 判斷能不能對這個頁面插入空格
 function can_spacing(tab) {
-    var current_url = tab.url;
+    if (CACHED_SETTINGS['spacing_mode'] === 'spacing_when_load') {
+        var current_url = tab.url;
 
-    if (current_url.search(/^(http(s?)|file)/i) == -1) {
-        return false;
-    }
-    else if (CACHED_SETTINGS['spacing_mode'] === 'spacing_when_load') {
         if (CACHED_SETTINGS['spacing_rule'] === 'blacklists') {
             for (var i in CACHED_SETTINGS['blacklists']) {
                 var blacklist_url = CACHED_SETTINGS['blacklists'][i];
