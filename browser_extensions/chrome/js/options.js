@@ -1,33 +1,8 @@
 /*
- Chrome
- */
-
-var SYNC_Storage = chrome.storage.sync;
-var BG_PAGE = chrome.extension.getBackgroundPage();
-var CACHED_SETTINGS = BG_PAGE.CACHED_SETTINGS;
-
-// SYNC_Storage.get(null, function(items) {
-//     console.log(items);
-// });
-
-function get_i18n(message_name) {
-    return chrome.i18n.getMessage(message_name);
-}
-
-/*
- Alertify
- */
-
-alertify.set({
-    delay: 2000
-});
-
-/*
- Angular
+ Utils
  */
 
 var IS_MUTE;
-
 function play_sound(name) {
     if (!IS_MUTE) {
         var sounds = {
@@ -53,11 +28,24 @@ function is_valid_url(url) {
     }
 }
 
+/*
+ Alertify
+ */
+
+alertify.set({
+    delay: 2000
+});
+
+/*
+ Angular
+ */
+
 var app = angular.module('app', ['xeditable']);
 
-app.controller('OptionController', [
+app.controller('OptionsController', [
   '$scope', '$element',
-  function OptionController($scope, $element) {
+  function OptionsController($scope, $element) {
+    angular.element('#page_title').html(get_i18n('extension_name'));
     angular.element('#header_title').html(get_i18n('extension_name'));
     angular.element('#subtitle').html(get_i18n('subtitle'));
     angular.element('#quote').html(get_i18n('quote'));
@@ -83,9 +71,7 @@ app.controller('OptionController', [
         $scope.spacing_mode_display = get_i18n($scope.spacing_mode);
 
         SYNC_Storage.set({'spacing_mode': $scope.spacing_mode}, function() {
-            // SYNC_Storage.get(null, function(items) {
-            //     console.log(items);
-            // });
+            // print_sync_storage();
         });
     };
 
@@ -110,9 +96,7 @@ app.controller('OptionController', [
         $scope.spacing_rule_display = get_i18n($scope.spacing_rule);
 
         SYNC_Storage.set({'spacing_rule': $scope.spacing_rule}, function() {
-            // SYNC_Storage.get(null, function(items) {
-            //     console.log(items);
-            // });
+            // print_sync_storage();
         });
     };
 
@@ -126,9 +110,7 @@ app.controller('OptionController', [
             obj_to_save[spacing_rule] = urls;
 
             SYNC_Storage.set(obj_to_save, function() {
-                // SYNC_Storage.get(null, function(items) {
-                //     console.log(items);
-                // });
+                // print_sync_storage();
             });
         }
         else {
@@ -149,9 +131,7 @@ app.controller('OptionController', [
         var obj_to_save = {};
         obj_to_save[spacing_rule] = urls;
         SYNC_Storage.set(obj_to_save, function() {
-            // SYNC_Storage.get(null, function(items) {
-            //     console.log(items);
-            // });
+            // print_sync_storage();
         });
 
         event.preventDefault();
@@ -171,9 +151,7 @@ app.controller('OptionController', [
             var obj_to_save = {};
             obj_to_save[spacing_rule] = urls;
             SYNC_Storage.set(obj_to_save, function() {
-                // SYNC_Storage.get(null, function(items) {
-                //     console.log(items);
-                // });
+                // print_sync_storage();
             });
         }
         else {
@@ -200,9 +178,7 @@ app.controller('OptionController', [
     $scope.$watch('is_mute', function(new_val, old_val) {
         if (new_val !== old_val) {
             SYNC_Storage.set({'is_mute': new_val}, function() {
-                // SYNC_Storage.get(null, function(items) {
-                //     console.log(items);
-                // });
+                // print_sync_storage();
             });
         }
 
@@ -218,9 +194,7 @@ app.controller('OptionController', [
         if (new_val !== old_val) {
             // 注意這裡用的是 ! (not)
             SYNC_Storage.set({'can_notify': !new_val}, function() {
-                // SYNC_Storage.get(null, function(items) {
-                //     console.log(items);
-                // });
+                // print_sync_storage();
             });
         }
     });

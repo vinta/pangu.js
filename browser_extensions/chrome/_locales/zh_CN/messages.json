@@ -62,5 +62,9 @@
     "label_shut_the_fuck_up": {
         "message": "不要再他妈「空格之神显灵了」！",
         "description": ""
+    },
+    "can_not_call_god_of_spacing": {
+        "message": "在这种地方是招唤不出空格之神的，除非你在七七四十九天之内都能够不怀着淫狎之念上网。\n\n不过看你这副人五人六的样子，想必是不可能的。",
+        "description": ""
     }
 }

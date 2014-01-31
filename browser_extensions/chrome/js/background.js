@@ -68,7 +68,7 @@ chrome.storage.onChanged.addListener(
 merge_settings();
 
 /*
- Utils
+ Message Passing
  */
 
 // 判斷能不能對這個頁面插入空格
@@ -109,10 +109,6 @@ function can_notify() {
     return CACHED_SETTINGS['can_notify'];
 }
 
-/*
- Message Passing
- */
-
 // 監聽來自 content_script.js 的訊息
 chrome.runtime.onMessage.addListener(
     // https://crxdoc-zh.appspot.com/extensions/runtime.html#event-onMessage
@@ -131,13 +127,3 @@ chrome.runtime.onMessage.addListener(
         }
     }
 );
-
-/*
- Browser Action
- */
-
-chrome.browserAction.onClicked.addListener(function(tab) {
-    chrome.tabs.executeScript(tab.id, {code: 'is_spacing = true;'});
-    chrome.tabs.executeScript(tab.id, {code: 'ask_can_notify(true);'});
-    chrome.tabs.executeScript(tab.id, {code: 'go_spacing();'});
-});
