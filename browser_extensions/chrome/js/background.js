@@ -14,7 +14,8 @@ var DEFAULT_SETTINGS = {
         'http://vinta.ws',
         'http://heelsfetishism.com'
     ],
-    'whitelists': []
+    'whitelists': [],
+    'can_notify': true
 };
 var CACHED_SETTINGS = Object.create(DEFAULT_SETTINGS);
 var SETTING_KEYS = Object.keys(DEFAULT_SETTINGS);
@@ -104,7 +105,7 @@ function can_spacing(tab) {
 
 // 要不要顯示「空格之神顯靈了」
 function can_notify() {
-    return true
+    return CACHED_SETTINGS['can_notify'];
 }
 
 /*
