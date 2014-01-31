@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "__MSG_extension_name__",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "default_locale": "zh_TW",
     "description": "__MSG_extension_description__",
     "icons": {
@@ -20,7 +20,40 @@
         ],
         "persistent": true
     },
+    "content_scripts": [
+        {
+            "matches": [
+                "http://*/*",
+                "https://*/*",
+                "file:///*/*"
+            ],
+            "css": [
+                "vendors/alertify/css/alertify.core.css",
+                "vendors/alertify/css/alertify.flat.css",
+                "stylesheets/alertify.custom.css"
+            ],
+            "js": [
+                "vendors/alertify/js/alertify.js"
+            ],
+            "all_frames": false
+        },
+        {
+            "matches": [
+                "http://*/*",
+                "https://*/*",
+                "file:///*/*"
+            ],
+            "js": [
+                "vendors/jquery/jquery-1.10.2.min.js",
+                "vendors/pangu.min.js",
+                "js/content_script.js"
+            ],
+            "run_at": "document_idle",
+            "all_frames": true
+        }
+    ],
     "minimum_chrome_version": "22.0",
+    "offline_enabled": true,
     "options_page": "pages/options.html",
     "permissions": [
         "storage",

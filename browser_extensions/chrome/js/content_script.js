@@ -24,6 +24,11 @@ chrome.runtime.sendMessage({purpose: 'can_spacing'},
         console.log('can_spacing: %O', response.result);
 
         if (response.result) {
+            if (alertify) {
+                alertify.custom = alertify.extend('custom');
+                alertify.custom('空格之神顯靈了', 1800, true);
+            }
+
             go_spacing();
 
             $('body').on('DOMNodeInserted', function(event) {
@@ -33,7 +38,7 @@ chrome.runtime.sendMessage({purpose: 'can_spacing'},
                         clearTimeout(spacing_timer);
                         spacing_timer = setTimeout(function() {
                             go_spacing();
-                        }, 200);
+                        }, 500);
                     }
                 }
             });

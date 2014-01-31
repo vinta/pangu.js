@@ -105,6 +105,11 @@ function can_spacing(tab) {
     return true;
 }
 
+// 要不要顯示「空格之神顯靈了」
+function can_notify() {
+    return true
+}
+
 /*
  Message Passing
  */
@@ -120,22 +125,13 @@ chrome.runtime.onMessage.addListener(
                 result = can_spacing(sender.tab);
                 sendResponse({result: result});
                 break;
+            case 'can_notify':
+                result = can_notify();
+                sendResponse({result: result});
+                break;
         }
     }
 );
-
-/*
- Content Script
- */
-
-// 當頁面載入完成後就注入 JavaScript 程式碼
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-    if (changeInfo.status == 'complete') {
-        chrome.tabs.executeScript(tab.id, {file: 'vendors/jquery/jquery-1.10.2.min.js', allFrames: true});
-        chrome.tabs.executeScript(tab.id, {file: 'vendors/pangu.min.js', allFrames: true});
-        chrome.tabs.executeScript(tab.id, {file: 'js/content_script.js', allFrames: true});
-    }
-});
 
 /*
  Browser Action
