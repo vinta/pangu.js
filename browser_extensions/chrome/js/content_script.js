@@ -12,18 +12,27 @@ function go_spacing() {
     return _had_spacing;
 }
 
-function ask_can_notify() {
-    if (typeof alertify != 'undefined') {
-        chrome.runtime.sendMessage({purpose: 'can_notify'},
-            function(response) {
-                console.log('can_notify: %O', response.result);
+function ask_can_notify(just_notify) {
+    if (typeof alertify !== 'undefined') {
+        alertify.custom = alertify.extend('custom');
 
-                if (response.result) {
-                    alertify.custom = alertify.extend('custom');
-                    alertify.custom('空格之神顯靈了', 1500, true);
+        var msg = chrome.i18n.getMessage('hello_god_of_spacing');
+
+        // just_notify 是給 browser action 用的，強制顯示「空格之神顯靈了」
+        if (just_notify) {
+            alertify.custom(msg, 1500, true);
+        }
+        else {
+            chrome.runtime.sendMessage({purpose: 'can_notify'},
+                function(response) {
+                    console.log('can_notify: %O', response.result);
+
+                    if (response.result) {
+                        alertify.custom(msg, 1500, true);
+                    }
                 }
-            }
-        );
+            );
+        }
     }
 }
 
@@ -37,7 +46,7 @@ function ask_can_spacing() {
 
                 // 真的有插入空格才提示「空格之神顯靈了」
                 if (had_spacing) {
-                    ask_can_notify();
+                    ask_can_notify(false);
                 }
 
                 /*

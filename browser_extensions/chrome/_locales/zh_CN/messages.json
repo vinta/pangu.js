@@ -47,8 +47,20 @@
         "message": "空格之神",
         "description": ""
     },
-    "holly_god_of_spacing": {
-        "message": "招唤空格之神！",
+    "call_god_of_spacing": {
+        "message": "招唤空格之神",
+        "description": ""
+    },
+    "hello_god_of_spacing": {
+        "message": "空格之神显灵了",
+        "description": ""
+    },
+    "label_is_mute": {
+        "message": "在这个页面静音",
+        "description": ""
+    },
+    "label_shut_the_fuck_up": {
+        "message": "不要再他妈「空格之神显灵了」！",
         "description": ""
     }
 }

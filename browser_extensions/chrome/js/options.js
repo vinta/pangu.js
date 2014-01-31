@@ -26,17 +26,21 @@ alertify.set({
  Angular
  */
 
-function play_sound(name) {
-    var sounds = {
-        'Hadouken': '../sounds/StreetFighter-Hadouken.mp3',
-        'Shouryuuken': '../sounds/StreetFighter-Shouryuuken.mp3',
-        'YeahBaby': '../sounds/AustinPowers-YeahBaby.mp3',
-        'WahWahWaaah': '../sounds/WahWahWaaah.mp3'
-    };
+var IS_MUTE;
 
-    var audio_url = sounds[name];
-    var audio = new Audio(audio_url);
-    audio.play();
+function play_sound(name) {
+    if (!IS_MUTE) {
+        var sounds = {
+            'Hadouken': '../sounds/StreetFighter-Hadouken.mp3',
+            'Shouryuuken': '../sounds/StreetFighter-Shouryuuken.mp3',
+            'YeahBaby': '../sounds/AustinPowers-YeahBaby.mp3',
+            'WahWahWaaah': '../sounds/WahWahWaaah.mp3'
+        };
+
+        var audio_url = sounds[name];
+        var audio = new Audio(audio_url);
+        audio.play();
+    }
 }
 
 // TODO: validation
@@ -60,6 +64,9 @@ app.controller('OptionController', [
     angular.element('#label_spacing_mode').html(get_i18n('label_spacing_mode'));
     angular.element('#label_spacing_rule').html(get_i18n('label_spacing_rule'));
 
+    /*
+     什麼時候作用？
+     */
     $scope.spacing_mode = CACHED_SETTINGS['spacing_mode'];
     $scope.spacing_mode_display = get_i18n($scope.spacing_mode);
     $scope.spacing_when_click_msg = get_i18n('spacing_when_click_msg');
@@ -82,6 +89,9 @@ app.controller('OptionController', [
         });
     };
 
+    /*
+     然後，你是否希望：
+     */
     $scope.spacing_rule = CACHED_SETTINGS['spacing_rule'];
     $scope.spacing_rule_display = get_i18n($scope.spacing_rule);
     $scope.blacklists = CACHED_SETTINGS['blacklists'];
@@ -182,14 +192,45 @@ app.controller('OptionController', [
         $scope.url_to_add.for_whitelist = '';
     };
 
+    /*
+     在這個頁面靜音
+     */
+    $scope.label_is_mute = get_i18n('label_is_mute');
+    $scope.is_mute = CACHED_SETTINGS['is_mute'];
+    $scope.$watch('is_mute', function(new_val, old_val) {
+        if (new_val !== old_val) {
+            SYNC_Storage.set({'is_mute': new_val}, function() {
+                // SYNC_Storage.get(null, function(items) {
+                //     console.log(items);
+                // });
+            });
+        }
+
+        IS_MUTE = new_val;
+    });
+
+    /*
+     不要再他媽「空格之神顯靈了」！
+     */
+    $scope.label_shut_the_fuck_up = get_i18n('label_shut_the_fuck_up');
+    $scope.can_notify = !CACHED_SETTINGS['can_notify'];
+    $scope.$watch('can_notify', function(new_val, old_val) {
+        if (new_val !== old_val) {
+            // 注意這裡用的是 ! (not)
+            SYNC_Storage.set({'can_notify': !new_val}, function() {
+                // SYNC_Storage.get(null, function(items) {
+                //     console.log(items);
+                // });
+            });
+        }
+    });
+
   }
 ]);
 
 app.run(function(editableOptions, editableThemes) {
-  // set `default` theme
-  editableOptions.theme = 'default';
-
-  // overwrite submit button template
-  editableThemes['default'].submitTpl = '<button class="pure-button small-button">save</button>';
-  editableThemes['default'].cancelTpl = '<button class="pure-button small-button" ng-click="$form.$cancel()">cancel</button>';
+    // http://vitalets.github.io/angular-xeditable/
+    editableOptions.theme = 'default';
+    editableThemes['default'].submitTpl = '<button class="pure-button small-button">save</button>';
+    editableThemes['default'].cancelTpl = '<button class="pure-button small-button" ng-click="$form.$cancel()">cancel</button>';
 });

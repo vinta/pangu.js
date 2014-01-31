@@ -106,6 +106,18 @@ input[type=text] {
 
     .option_group {
         margin-top: 70px;
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type=checkbox] {
+            margin: 0;
+            padding: 0;
+            position: relative;
+            top: -1px;
+        }
     }
 
     ul.spacing_rule_list {

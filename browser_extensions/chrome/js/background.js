@@ -15,6 +15,7 @@ var DEFAULT_SETTINGS = {
         'http://heelsfetishism.com'
     ],
     'whitelists': [],
+    'is_mute': false,
     'can_notify': true
 };
 var CACHED_SETTINGS = Object.create(DEFAULT_SETTINGS);
@@ -137,5 +138,6 @@ chrome.runtime.onMessage.addListener(
 
 chrome.browserAction.onClicked.addListener(function(tab) {
     chrome.tabs.executeScript(tab.id, {code: 'is_spacing = true;'});
+    chrome.tabs.executeScript(tab.id, {code: 'ask_can_notify(true);'});
     chrome.tabs.executeScript(tab.id, {code: 'go_spacing();'});
 });

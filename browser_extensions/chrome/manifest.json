@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "__MSG_extension_name__",
     "version": "2.1.1",
-    "default_locale": "zh_TW",
+    "default_locale": "zh_CN",
     "description": "__MSG_extension_description__",
     "icons": {
         "16": "images/icon_16.png",
@@ -11,7 +11,7 @@
     },
     "browser_action": {
         "default_icon": "images/icon_19.png",
-        "default_title": "__MSG_holly_god_of_spacing__"
+        "default_title": "__MSG_call_god_of_spacing__"
     },
     "author": "Vinta",
     "background": {
