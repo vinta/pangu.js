@@ -13,7 +13,6 @@
   "main": "src/pangu.js",
   "ignore": [
     "**/.*",
-    "browser_extensions",
     "node_modules"
   ],
   "license": "MIT",

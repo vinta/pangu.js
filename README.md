@@ -19,6 +19,10 @@
 
 ![Pangu](https://raw.github.com/vinta/paranoid-auto-spacing/master/browser_extensions/chrome/images/pangu_260.jpg)
 
+``` bash
+$ bower install pangu
+```
+
 ``` js
 // whole page spacing
 pangu.page_spacing();
