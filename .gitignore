@@ -1,5 +1,6 @@
 browser_extensions/chrome_dev/
 browser_extensions/chrome_dist/
+browser_extensions/chrome_dist.zip
 node_modules/
 *.pem
 .DS_STORE
