@@ -33,7 +33,7 @@
                 "stylesheets/alertify.custom.css"
             ],
             "js": [
-                "vendors/alertify/js/alertify.js"
+                "vendors/alertify/js/alertify.min.js"
             ],
             "all_frames": false
         },
