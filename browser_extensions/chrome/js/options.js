@@ -2,7 +2,7 @@
  Utils
  */
 
-var IS_MUTE;
+var IS_MUTE = false;
 function play_sound(name) {
     if (!IS_MUTE) {
         var sounds = {
@@ -70,7 +70,7 @@ app.controller('OptionsController', [
 
         $scope.spacing_mode_display = get_i18n($scope.spacing_mode);
 
-        SYNC_Storage.set({'spacing_mode': $scope.spacing_mode}, function() {
+        SYNC_STORAGE.set({'spacing_mode': $scope.spacing_mode}, function() {
             // print_sync_storage();
         });
     };
@@ -95,7 +95,7 @@ app.controller('OptionsController', [
 
         $scope.spacing_rule_display = get_i18n($scope.spacing_rule);
 
-        SYNC_Storage.set({'spacing_rule': $scope.spacing_rule}, function() {
+        SYNC_STORAGE.set({'spacing_rule': $scope.spacing_rule}, function() {
             // print_sync_storage();
         });
     };
@@ -109,7 +109,7 @@ app.controller('OptionsController', [
             var obj_to_save = {};
             obj_to_save[spacing_rule] = urls;
 
-            SYNC_Storage.set(obj_to_save, function() {
+            SYNC_STORAGE.set(obj_to_save, function() {
                 // print_sync_storage();
             });
         }
@@ -130,7 +130,7 @@ app.controller('OptionsController', [
 
         var obj_to_save = {};
         obj_to_save[spacing_rule] = urls;
-        SYNC_Storage.set(obj_to_save, function() {
+        SYNC_STORAGE.set(obj_to_save, function() {
             // print_sync_storage();
         });
 
@@ -150,7 +150,7 @@ app.controller('OptionsController', [
 
             var obj_to_save = {};
             obj_to_save[spacing_rule] = urls;
-            SYNC_Storage.set(obj_to_save, function() {
+            SYNC_STORAGE.set(obj_to_save, function() {
                 // print_sync_storage();
             });
         }
@@ -177,7 +177,7 @@ app.controller('OptionsController', [
     $scope.is_mute = CACHED_SETTINGS['is_mute'];
     $scope.$watch('is_mute', function(new_val, old_val) {
         if (new_val !== old_val) {
-            SYNC_Storage.set({'is_mute': new_val}, function() {
+            SYNC_STORAGE.set({'is_mute': new_val}, function() {
                 // print_sync_storage();
             });
         }
@@ -193,7 +193,7 @@ app.controller('OptionsController', [
     $scope.$watch('can_notify', function(new_val, old_val) {
         if (new_val !== old_val) {
             // 注意這裡用的是 ! (not)
-            SYNC_Storage.set({'can_notify': !new_val}, function() {
+            SYNC_STORAGE.set({'can_notify': !new_val}, function() {
                 // print_sync_storage();
             });
         }

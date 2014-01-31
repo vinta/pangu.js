@@ -2,8 +2,8 @@
  Storage
  */
 
-var syncStorage = chrome.storage.sync;
-var loStorage = chrome.storage.local;
+var SYNC_STORAGE = chrome.storage.sync;
+var LOCA_STORAGE = chrome.storage.local;
 
 var DEFAULT_SETTINGS = {
     'spacing_mode': 'spacing_when_load', // or spacing_when_click
@@ -22,13 +22,13 @@ var CACHED_SETTINGS = Object.create(DEFAULT_SETTINGS);
 var SETTING_KEYS = Object.keys(DEFAULT_SETTINGS);
 
 function refresh_cached_settings() {
-    syncStorage.get(null, function(items) {
+    SYNC_STORAGE.get(null, function(items) {
         CACHED_SETTINGS = items;
     });
 }
 
 function merge_settings() {
-    syncStorage.get(null, function(items) {
+    SYNC_STORAGE.get(null, function(items) {
         var old_settings = items;
         var new_settings = {};
         var is_changed = false;
@@ -44,7 +44,7 @@ function merge_settings() {
 
         // 如果 new_settings 跟 old_settings 一樣的話，並不會觸發 chrome.storage.onChanged
         // 所以這裡強制 refresh，確保 CACHED_SETTINGS 一定有東西
-        syncStorage.set(new_settings, function() {
+        SYNC_STORAGE.set(new_settings, function() {
             refresh_cached_settings();
         });
     });
@@ -60,7 +60,7 @@ chrome.storage.onChanged.addListener(
             for (key in changes) {
                 obj_to_save[key] = changes[key].newValue;
             }
-            loStorage.set(obj_to_save);
+            LOCA_STORAGE.set(obj_to_save);
         }
     }
 );

@@ -35,7 +35,7 @@ app.controller('PopupController', [
 
         $scope.spacing_mode_display = get_i18n($scope.spacing_mode);
 
-        SYNC_Storage.set({'spacing_mode': $scope.spacing_mode}, function() {
+        SYNC_STORAGE.set({'spacing_mode': $scope.spacing_mode}, function() {
             // print_sync_storage();
         });
     };

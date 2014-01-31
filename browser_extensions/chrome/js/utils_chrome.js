@@ -2,13 +2,13 @@
  Chrome
  */
 
-var SYNC_Storage = chrome.storage.sync;
+var SYNC_STORAGE = chrome.storage.sync;
 var BG_PAGE = chrome.extension.getBackgroundPage();
 var CACHED_SETTINGS = BG_PAGE.CACHED_SETTINGS;
 
 function print_sync_storage() {
-    SYNC_Storage.get(null, function(items) {
-        console.log('SYNC_Storage: %O', items);
+    SYNC_STORAGE.get(null, function(items) {
+        console.log('SYNC_STORAGE: %O', items);
     });
 }
 
