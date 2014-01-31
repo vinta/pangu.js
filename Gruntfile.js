@@ -8,7 +8,8 @@ module.exports = function(grunt) {
 
     clean: {
       dev: [
-        'browser_extensions/chrome_dev/'
+        'browser_extensions/chrome_dev/',
+        'browser_extensions/chrome_dist/'
       ],
       dist: [
         'dist/',
@@ -164,7 +165,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-strip');
 
   grunt.registerTask('dev', [
-    'clean:all',
+    'clean:dev',
     'copy:dev'
   ]);
 
