@@ -52,3 +52,5 @@ Released under the [MIT License](http://opensource.org/licenses/MIT).
 ## Contributors
 
 [偉哉 Open Source！](https://github.com/vinta/paranoid-auto-spacing/graphs/contributors)
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vinta/paranoid-auto-spacing/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
