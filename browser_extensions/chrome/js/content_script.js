@@ -12,11 +12,34 @@ function go_spacing() {
     return _had_spacing;
 }
 
+var SAY_HELLOS = [
+    '空格之神顯靈了',
+    '空格之神準備好了',
+    '空格之神 在此',
+    '空格之神 參見',
+    '空格之神 參上',
+    '空格之神 登場',
+    '空格之神 來也',
+    '空格之神 路過',
+    '空格之神 駕到',
+    '空格之神 報到',
+    '空格之神 姍姍來遲',
+    '空格之神 粉墨登場',
+    '空格之神 強勢登場',
+    '空格之神 強勢回歸',
+    '空格之神 夜露死苦',
+    '空格之神 這不是來了嗎！',
+    '空格之神 射出！',
+    '空格之神 露出',
+    '空格之神 登入'
+];
+
 function ask_can_notify(just_notify) {
     if (typeof alertify !== 'undefined') {
         alertify.custom = alertify.extend('custom');
 
-        var msg = chrome.i18n.getMessage('hello_god_of_spacing');
+        // var msg = chrome.i18n.getMessage('hello_god_of_spacing');
+        var msg = SAY_HELLOS[Math.floor(Math.random() * SAY_HELLOS.length)];
 
         // just_notify 是給 browser action 用的，強制顯示「空格之神顯靈了」
         if (just_notify) {

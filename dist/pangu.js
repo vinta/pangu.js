@@ -85,15 +85,18 @@
         text = text.replace(/((\S+)#)([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $3'); // $2 是 (\S+)
 
         // 中文在前
-        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([a-z0-9@&=_\[\$\%\^\*\-\+\(\/\\])/ig, '$1 $2');
+        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([a-z0-9@&=\|\[\$\%\^\*\-\+\(\/\\])/ig, '$1 $2');
 
         // 中文在後
-        text = text.replace(/([a-z0-9!~&;=_\]\,\.\:\?\$\%\^\*\-\+\)\/\\])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
+        text = text.replace(/([a-z0-9!~&;=\|\]\,\.\:\?\$\%\^\*\-\+\)\/\\])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
 
         return text;
     }
 
     function spacing(xpath_query) {
+        // 是否加了空格
+        var had_spacing = false;
+
         /*
          因為 xpath_query 用的是 text()，所以這些 nodes 是 text 而不是 DOM element
          https://developer.mozilla.org/en-US/docs/DOM/document.evaluate
@@ -121,7 +124,11 @@
              .data 是 XML text node 的屬性
              http://www.w3school.com.cn/xmldom/dom_text.asp
              */
-            current_text_node.data = insert_space(current_text_node.data);
+            var new_data = insert_space(current_text_node.data);
+            if (current_text_node.data != new_data) {
+                had_spacing = true;
+                current_text_node.data = new_data;
+            }
 
             // 處理嵌套的 <tag> 中的文字
             if (next_text_node) {
@@ -143,6 +150,8 @@
                 var outside_spacing_tags = /^(a|del|p|s|strike|u)$/i;
 
                 if (text != new_text) {
+                    had_spacing = true;
+
                     /*
                      往上找 next_text_node 的 parent node
                      直到遇到 outside_spacing_tags
@@ -190,6 +199,10 @@
 
             next_text_node = current_text_node;
         }
+
+        // console.log('had_spacing: %O', had_spacing);
+
+        return had_spacing;
     }
 
     // 對純文字加空格
@@ -218,19 +231,21 @@
             extra_query += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
         });
 
+        // 處理 <title>
+        var xpath_query_title = '/html/head/title/text()';
+        spacing(xpath_query_title);
+
         /*
          1. 只處理 <body> 底下的節點 >> var xpath_query = '/html/body//text()[normalize-space(.)]' + extra_query;
          2. 略過 contentEditable 的節點
          */
         var xpath_query = '/html/body//*[not(@contenteditable)]/text()[normalize-space(.)]' + extra_query;
-        spacing(xpath_query);
-
-        // 處理 <title>
-        var xpath_query_title = '/html/head/title/text()';
-        spacing(xpath_query_title);
+        var had_spacing = spacing(xpath_query);
 
         // var end = new Date().getTime();
         // console.log(end - start);
+
+        return had_spacing;
     };
 
     // 對特定 element 加空格
@@ -263,7 +278,9 @@
             xpath_query = '//' + target_tag + '//text()';
         }
 
-        spacing(xpath_query);
+        var had_spacing = spacing(xpath_query);
+
+        return had_spacing;
     };
 
 }(window.pangu = window.pangu || {}));
