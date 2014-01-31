@@ -2,20 +2,21 @@
 <html ng-app="app">
 <head>
     <meta charset="UTF-8">
-    <title id="page_title"></title>
-    <link rel="stylesheet" href="../vendors/alertify/alertify.core.css">
-    <link rel="stylesheet" href="../vendors/alertify/alertify.default.css">
+    <title id="page_title">為什麼你們就是不能加個空格呢？</title>
+    <link rel="stylesheet" href="../vendors/alertify/css/alertify.core.css">
+    <link rel="stylesheet" href="../vendors/alertify/css/alertify.flat.css">
     <link rel="stylesheet" href="../vendors/angular-xeditable/css/xeditable.css">
     <link rel="stylesheet" href="../stylesheets/pure-min.css">
     <link rel="stylesheet" href="../stylesheets/styles.css">
     <script src="../vendors/jquery/jquery-1.10.2.min.js"></script>
-    <script src="../vendors/alertify/alertify.min.js"></script>
+    <script src="../vendors/alertify/js/alertify.min.js"></script>
     <script src="../vendors/angular/angular-1.2.9.min.js"></script>
     <script src="../vendors/angular-xeditable/js/xeditable.min.js"></script>
+    <script src="../js/utils_chrome.js"></script>
     <script src="../js/options.js"></script>
 </head>
-<body>
-    <div ng-controller="OptionController" class="container">
+<body ng-controller="OptionsController">
+    <div class="options_container">
         <div class="header">
             <h1 id="header_title">為什麼你們就是不能加個空格呢？</h1>
             <p id="subtitle">自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。</p>
@@ -24,13 +25,13 @@
         <div class="content">
             <div class="option_group">
                 <h2 id="label_spacing_mode">什麼時候作用？</h2>
-                <input ng-click="change_spacing_mode()" id="spacing_mode_btn" class="pure-button pure-button-primary big-button" type="button" value="{{ spacing_mode_display }}" />
+                <input ng-click="change_spacing_mode()" id="spacing_mode_btn" class="pure-button pure-button-blue big-button" type="button" value="{{ spacing_mode_display }}" />
             </div>
             <div ng-switch on="spacing_mode">
                 <div ng-switch-when="spacing_when_load">
                     <div class="option_group spacing_rule_group">
                         <h2 id="label_spacing_rule">然後，你是否希望：</h2>
-                        <input ng-click="change_spacing_rule()" id="spacing_rule_btn" class="pure-button pure-button-secondary big-button" type="button" value="{{ spacing_rule_display }}" />
+                        <input ng-click="change_spacing_rule()" id="spacing_rule_btn" class="pure-button pure-button-green big-button" type="button" value="{{ spacing_rule_display }}" />
                         <div ng-switch on="spacing_rule">
                             <div ng-switch-when="blacklists">
                                 <ul class="spacing_rule_list">
@@ -61,9 +62,18 @@
                     <p id="spacing_when_click_msg">{{ spacing_when_click_msg }}</p>
                 </div>
             </div>
+            <div class="option_group">
+                <h2 id="label_other_options">其他：</h2>
+                <label>
+                    <input ng-model="is_mute" type="checkbox" /> {{ label_is_mute }}
+                </label>
+                <label>
+                    <input ng-model="can_notify" type="checkbox" /> {{ label_shut_the_fuck_up }}
+                </label>
+            </div>
         </div>
     </div>
-    <div class="footer">
+    <div class="options_footer">
         <p>Fork me on <a href="https://github.com/vinta/paranoid-auto-spacing" target="_blank">GitHub</a></p>
         <p>Follow me on <a href="https://twitter.com/vinta" target="_blank">Twitter</a></p>
         <p>Icons: <a href="http://thenounproject.com/term/afro/1500/" target="_blank">NounProject</a></p>

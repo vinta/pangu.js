@@ -1,41 +1,28 @@
 a {
   color: #3b8bba;
-  text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
-}
+  text-decoration: none; }
+  a:hover {
+    text-decoration: underline; }
 
 a.editable-click {
   border: none;
   color: #646464;
-  vertical-align: middle;
-}
-a.editable-click:hover {
-  color: #646464;
-  border-bottom: dotted 1px #646464;
-}
+  vertical-align: middle; }
+  a.editable-click:hover {
+    color: #646464;
+    border-bottom: dotted 1px #646464; }
 
 .editable-buttons {
   display: inline-block;
-  vertical-align: middle;
-}
+  vertical-align: middle; }
 
 .editable-error {
   font-size: 80%;
   color: #d13b3b;
-  margin-top: 5px;
-}
+  margin-top: 5px; }
 
 .alertify-log {
-  border-radius: 2px;
-  font-size: 110%;
-  text-shadow: none;
-}
-
-.alertify-log-error {
-  background-color: #d13b3b;
-}
+  font-size: 18px; }
 
 input[type=url],
 input[type=text] {
@@ -53,83 +40,94 @@ input[type=text] {
   -ms-transition: .3s linear border;
   -o-transition: .3s linear border;
   transition: .3s linear border;
-  width: 70%;
-}
-input[type=url]:focus,
-input[type=text]:focus {
-  outline: none;
-}
+  width: 70%; }
+  input[type=url]:focus,
+  input[type=text]:focus {
+    outline: none; }
 
 .big-button {
-  font-size: 180%;
-}
+  font-size: 180%; }
 
 .small-button {
-  font-size: 70%;
-}
+  font-size: 70%; }
 
-.pure-button-secondary {
-  background: #42b8dd;
-  color: white;
-}
+.pure-button-blue {
+  background: #2e7bc8;
+  color: white; }
 
-.container {
+.pure-button-green {
+  background: #4faf4c;
+  color: white; }
+
+.pure-button-purple {
+  background: #6c4094;
+  color: white; }
+
+.options_container {
   font-size: 130%;
   margin: 0 auto;
-  max-width: 940px;
-}
+  max-width: 940px; }
+  .options_container .header {
+    background-color: #eff3f4;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+    padding: 30px 80px 60px 80px; }
+    .options_container .header h1 {
+      color: #333333;
+      font-size: 2.5em;
+      margin-bottom: 5px; }
+    .options_container .header p {
+      color: #999999; }
+      .options_container .header p#subtitle {
+        margin-top: 15px;
+        margin-bottom: 35px; }
+  .options_container .content {
+    padding-bottom: 130px;
+    padding-left: 80px;
+    padding-right: 80px; }
+    .options_container .content .option_group {
+      margin-top: 70px; }
+      .options_container .content .option_group label {
+        display: block;
+        margin-bottom: 10px; }
+      .options_container .content .option_group input[type=checkbox] {
+        margin: 0;
+        padding: 0;
+        position: relative;
+        top: -1px; }
+    .options_container .content ul.spacing_rule_list {
+      list-style-type: none;
+      margin-top: 30px;
+      margin-left: 0;
+      padding-left: 5px; }
+      .options_container .content ul.spacing_rule_list li {
+        height: 39px;
+        margin-bottom: 10px; }
+    .options_container .content p#spacing_when_click_msg {
+      margin-top: 30px; }
 
-.header {
-  background-color: #eff3f4;
-  border-bottom-left-radius: 2px;
-  border-bottom-right-radius: 2px;
-  padding: 30px 80px 60px 80px;
-}
-.header h1 {
-  color: #333333;
-  font-size: 2.5em;
-  margin-bottom: 5px;
-}
-.header p {
-  color: #999999;
-}
-.header p#subtitle {
-  margin-top: 15px;
-  margin-bottom: 35px;
-}
-
-.content {
-  padding-bottom: 130px;
-  padding-left: 80px;
-  padding-right: 80px;
-}
-.content .option_group {
-  margin-top: 70px;
-}
-.content ul.spacing_rule_list {
-  list-style-type: none;
-  margin-top: 30px;
-  margin-left: 0;
-  padding-left: 5px;
-}
-.content ul.spacing_rule_list li {
-  height: 39px;
-  margin-bottom: 10px;
-}
-.content p#spacing_when_click_msg {
-  margin-top: 30px;
-}
-
-.footer {
+.options_footer {
   background-color: #ecf0f2;
   padding: 40px 80px 30px 80px;
+  text-align: center; }
+  .options_footer p {
+    font-size: 110%;
+    margin-top: 0px;
+    margin-bottom: 8px; }
+    .options_footer p.copyleft {
+      margin-top: 30px; }
+
+.popup_container {
+  padding: 0px 20px 0px 20px;
   text-align: center;
-}
-.footer p {
-  font-size: 110%;
-  margin-top: 0px;
-  margin-bottom: 8px;
-}
-.footer p.copyleft {
-  margin-top: 30px;
-}
+  width: 340px; }
+  .popup_container .pure-button {
+    margin-bottom: 20px; }
+
+.popup_footer {
+  background-color: #ecf0f2;
+  margin: 0;
+  padding: 2px 2px 1px 2px;
+  text-align: center; }
+  .popup_footer p {
+    font-size: 90%; }

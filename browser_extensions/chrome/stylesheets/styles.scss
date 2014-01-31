@@ -1,3 +1,5 @@
+// Options Page
+
 $link_color: #3b8bba;
 
 a {
@@ -32,13 +34,7 @@ a.editable-click {
 }
 
 .alertify-log {
-    border-radius: 2px;
-    font-size: 110%;
-    text-shadow: none;
-}
-
-.alertify-log-error {
-    background-color: #d13b3b;
+    font-size: 18px;
 }
 
 input[type=url],
@@ -72,66 +68,88 @@ input[type=text] {
     font-size: 70%;
 }
 
-.pure-button-secondary {
-    background: rgb(66, 184, 221);
+.pure-button-blue {
+    background: #2e7bc8;
     color: white;
 }
 
-.container {
+.pure-button-green {
+    background: #4faf4c;
+    color: white;
+}
+
+.pure-button-purple {
+    background: #6c4094;
+    color: white;
+}
+
+.options_container {
     font-size: 130%;
     margin: 0 auto;
     max-width: 940px;
-}
 
-.header {
-    background-color: #eff3f4;
-    border-bottom-left-radius: 2px;
-    border-bottom-right-radius: 2px;
-    padding: 30px 80px 60px 80px;
+    .header {
+        background-color: #eff3f4;
+        border-bottom-left-radius: 2px;
+        border-bottom-right-radius: 2px;
+        padding: 30px 80px 60px 80px;
 
-    h1 {
-        color: #333333;
-        font-size: 2.5em;
-        margin-bottom: 5px;
+        h1 {
+            color: #333333;
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+
+        p {
+            color: #999999;
+
+            &#subtitle {
+                margin-top: 15px;
+                margin-bottom: 35px;
+            }
+        }
     }
 
-    p {
-        color: #999999;
+    .content {
+        padding-bottom: 130px;
+        padding-left: 80px;
+        padding-right: 80px;
 
-        &#subtitle {
-            margin-top: 15px;
-            margin-bottom: 35px;
+        .option_group {
+            margin-top: 70px;
+
+            label {
+                display: block;
+                margin-bottom: 10px;
+            }
+
+            input[type=checkbox] {
+                margin: 0;
+                padding: 0;
+                position: relative;
+                top: -1px;
+            }
+        }
+
+        ul.spacing_rule_list {
+            list-style-type: none;
+            margin-top: 30px;
+            margin-left: 0;
+            padding-left: 5px;
+
+            li {
+                height: 39px;
+                margin-bottom: 10px;
+            }
+        }
+
+        p#spacing_when_click_msg {
+            margin-top: 30px;
         }
     }
 }
 
-.content {
-    padding-bottom: 130px;
-    padding-left: 80px;
-    padding-right: 80px;
-
-    .option_group {
-        margin-top: 70px;
-    }
-
-    ul.spacing_rule_list {
-        list-style-type: none;
-        margin-top: 30px;
-        margin-left: 0;
-        padding-left: 5px;
-
-        li {
-            height: 39px;
-            margin-bottom: 10px;
-        }
-    }
-
-    p#spacing_when_click_msg {
-        margin-top: 30px;
-    }
-}
-
-.footer {
+.options_footer {
     background-color: #ecf0f2;
     padding: 40px 80px 30px 80px;
     text-align: center;
@@ -144,5 +162,29 @@ input[type=text] {
         &.copyleft {
             margin-top: 30px;
         }
+    }
+}
+
+// Popup Page
+
+.popup_container {
+    // background-color: #f9f9f9;
+    padding: 0px 20px 0px 20px;
+    text-align: center;
+    width: 340px;
+
+    .pure-button {
+        margin-bottom: 20px;
+    }
+}
+
+.popup_footer {
+    background-color: #ecf0f2;
+    margin: 0;
+    padding: 2px 2px 1px 2px;
+    text-align: center;
+
+    p {
+        font-size: 90%;
     }
 }

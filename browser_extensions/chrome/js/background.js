@@ -2,8 +2,8 @@
  Storage
  */
 
-var syncStorage = chrome.storage.sync;
-var loStorage = chrome.storage.local;
+var SYNC_STORAGE = chrome.storage.sync;
+var LOCA_STORAGE = chrome.storage.local;
 
 var DEFAULT_SETTINGS = {
     'spacing_mode': 'spacing_when_load', // or spacing_when_click
@@ -14,19 +14,21 @@ var DEFAULT_SETTINGS = {
         'http://vinta.ws',
         'http://heelsfetishism.com'
     ],
-    'whitelists': []
+    'whitelists': [],
+    'is_mute': false,
+    'can_notify': true
 };
 var CACHED_SETTINGS = Object.create(DEFAULT_SETTINGS);
 var SETTING_KEYS = Object.keys(DEFAULT_SETTINGS);
 
 function refresh_cached_settings() {
-    syncStorage.get(null, function(items) {
+    SYNC_STORAGE.get(null, function(items) {
         CACHED_SETTINGS = items;
     });
 }
 
 function merge_settings() {
-    syncStorage.get(null, function(items) {
+    SYNC_STORAGE.get(null, function(items) {
         var old_settings = items;
         var new_settings = {};
         var is_changed = false;
@@ -42,7 +44,7 @@ function merge_settings() {
 
         // 如果 new_settings 跟 old_settings 一樣的話，並不會觸發 chrome.storage.onChanged
         // 所以這裡強制 refresh，確保 CACHED_SETTINGS 一定有東西
-        syncStorage.set(new_settings, function() {
+        SYNC_STORAGE.set(new_settings, function() {
             refresh_cached_settings();
         });
     });
@@ -58,7 +60,7 @@ chrome.storage.onChanged.addListener(
             for (key in changes) {
                 obj_to_save[key] = changes[key].newValue;
             }
-            loStorage.set(obj_to_save);
+            LOCA_STORAGE.set(obj_to_save);
         }
     }
 );
@@ -66,17 +68,14 @@ chrome.storage.onChanged.addListener(
 merge_settings();
 
 /*
- Utils
+ Message Passing
  */
 
 // 判斷能不能對這個頁面插入空格
 function can_spacing(tab) {
-    var current_url = tab.url;
+    if (CACHED_SETTINGS['spacing_mode'] === 'spacing_when_load') {
+        var current_url = tab.url;
 
-    if (current_url.search(/^(http(s?)|file)/i) == -1) {
-        return false;
-    }
-    else if (CACHED_SETTINGS['spacing_mode'] === 'spacing_when_load') {
         if (CACHED_SETTINGS['spacing_rule'] === 'blacklists') {
             for (var i in CACHED_SETTINGS['blacklists']) {
                 var blacklist_url = CACHED_SETTINGS['blacklists'][i];
@@ -105,9 +104,10 @@ function can_spacing(tab) {
     return true;
 }
 
-/*
- Message Passing
- */
+// 要不要顯示「空格之神顯靈了」
+function can_notify() {
+    return CACHED_SETTINGS['can_notify'];
+}
 
 // 監聽來自 content_script.js 的訊息
 chrome.runtime.onMessage.addListener(
@@ -120,28 +120,10 @@ chrome.runtime.onMessage.addListener(
                 result = can_spacing(sender.tab);
                 sendResponse({result: result});
                 break;
+            case 'can_notify':
+                result = can_notify();
+                sendResponse({result: result});
+                break;
         }
     }
 );
-
-/*
- Content Script
- */
-
-// 當頁面載入完成後就注入 JavaScript 程式碼
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-    if (changeInfo.status == 'complete') {
-        chrome.tabs.executeScript(tab.id, {file: 'vendors/jquery/jquery-1.10.2.min.js', allFrames: true});
-        chrome.tabs.executeScript(tab.id, {file: 'vendors/pangu.min.js', allFrames: true});
-        chrome.tabs.executeScript(tab.id, {file: 'js/content_script.js', allFrames: true});
-    }
-});
-
-/*
- Browser Action
- */
-
-chrome.browserAction.onClicked.addListener(function(tab) {
-    chrome.tabs.executeScript(tab.id, {code: 'is_spacing = true;'});
-    chrome.tabs.executeScript(tab.id, {code: 'go_spacing();'});
-});
