@@ -8,7 +8,7 @@
      一般都會是 'inherit' 而不是 'false'
 
      2.
-     不要對 <code> 或 <pre> 裡的文字加空格
+     不要對 <code>、<pre> 或 <textarea> 裡的文字加空格
      關於這個我還不是很確定
      所以先註解掉
 
@@ -17,14 +17,15 @@
      */
     function can_ignore_node(node) {
         var parent_node = node.parentNode;
-        var stop_tags = /^(code|pre)$/i;
+        // var stop_tags = /^(code|pre|textarea)$/i;
+        var stop_tags = /^(textarea)$/i;
         while (parent_node) {
             if (parent_node.contentEditable === 'true') {
                 return true;
             }
-            // else if (parent_node.nodeName.search(stop_tags) >= 0) {
-            //     return true;
-            // }
+            else if (parent_node.nodeName.search(stop_tags) >= 0) {
+                return true;
+            }
             else {
                 parent_node = parent_node.parentNode;
             }

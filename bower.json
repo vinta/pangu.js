@@ -1,6 +1,6 @@
 {
   "name": "pangu",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Insert a white space between full-width characters (Chinese, Japanese, etc.) and half-width alphanumerics. For good readability.",
   "keywords": [
     "alphanumerics",
