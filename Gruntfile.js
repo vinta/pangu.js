@@ -13,6 +13,11 @@ module.exports = function(grunt) {
       dist: [
         'dist/',
         'browser_extensions/chrome_dist/'
+      ],
+      all: [
+        'dist/',
+        'browser_extensions/chrome_dev/',
+        'browser_extensions/chrome_dist/'
       ]
     },
 
@@ -159,7 +164,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-strip');
 
   grunt.registerTask('dev', [
-    'clean:dev',
+    'clean:all',
     'copy:dev'
   ]);
 
@@ -167,7 +172,7 @@ module.exports = function(grunt) {
   // browser_extensions/chrome_dev/ 是開發用的
   // browser_extensions/chrome_dist/ 是打包用的
   grunt.registerTask('dist', [
-    'clean:dist',
+    'clean:all',
     'strip:dist',
     'uglify',
     'copy:dist',
