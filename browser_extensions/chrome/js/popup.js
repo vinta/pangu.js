@@ -48,7 +48,7 @@ app.controller('PopupController', [
          也可能包含 Developer Tools 的 tab
          */
         chrome.tabs.query({active: true}, function(tab_array) {
-            BG_PAGE.console.log(tab_array);
+            // BG_PAGE.console.log(tab_array);
 
             for (var i = 0; i < tab_array.length; i++) {
                 var tab = tab_array[i];
