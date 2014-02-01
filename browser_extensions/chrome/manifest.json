@@ -45,7 +45,6 @@
                 "file:///*/*"
             ],
             "js": [
-                "vendors/jquery/jquery-1.10.2.min.js",
                 "vendors/pangu.min.js",
                 "js/content_script.js"
             ],
