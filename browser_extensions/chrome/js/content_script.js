@@ -1,12 +1,9 @@
-var is_spacing = false; // 是不是正在插入空格？
 var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
 
 function go_spacing() {
     console.log('go_spacing()');
 
     var _had_spacing = pangu.page_spacing();
-
-    is_spacing = false;
     last_spacing_time = new Date().getTime(); // set last_spacing_time for next change event
 
     return _had_spacing;
@@ -15,12 +12,14 @@ function go_spacing() {
 var SAY_HELLOS = [
     '空格之神顯靈了！',
     '空格之神準備好了！',
+    '空格之神 到此一遊',
     '空格之神 在此！',
     '空格之神 參見！',
     '空格之神 參上！',
+    '空格之神 參戰！',
     '空格之神 登場！',
     '空格之神 來也！',
-    '空格之神 路過',
+    '空格之神 來囉！',
     '空格之神 駕到！',
     '空格之神 報到！',
     '空格之神 姍姍來遲',
@@ -28,9 +27,8 @@ var SAY_HELLOS = [
     '空格之神 強勢登場！',
     '空格之神 強勢回歸！',
     '空格之神 這不是來了嗎！',
-    '空格之神 射出！',
-    '空格之神 露出',
-    '空格之神 登入'
+    '空格之神 在此聽候差遣',
+    '空格之神 射出！'
 ];
 
 function ask_can_notify(just_notify) {
@@ -80,15 +78,13 @@ function ask_can_spacing() {
                  只好設置一個 timeout 時間
                  */
                 var spacing_timer;
-                $('body').on('DOMNodeInserted', function(event) {
+                document.body.addEventListener('DOMNodeInserted', function() {
                     var interval = new Date().getTime() - last_spacing_time; // how many milliseconds since the last request
                     if (interval >= 1000) { // more than 1 second
-                        if (!is_spacing) {
-                            clearTimeout(spacing_timer);
-                            spacing_timer = setTimeout(function() {
-                                go_spacing();
-                            }, 500);
-                        }
+                        clearTimeout(spacing_timer);
+                        spacing_timer = setTimeout(function() {
+                            go_spacing();
+                        }, 500);
                     }
                 });
             }
