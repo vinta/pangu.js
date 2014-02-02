@@ -1,9 +1,13 @@
+var is_spacing = false; // 是不是正在插入空格？
 var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
 
 function go_spacing() {
     console.log('go_spacing()');
 
+    is_spacing = true;
     var _had_spacing = pangu.page_spacing();
+    is_spacing = false;
+
     last_spacing_time = new Date().getTime(); // set last_spacing_time for next change event
 
     return _had_spacing;
@@ -79,12 +83,14 @@ function ask_can_spacing() {
                  */
                 var spacing_timer;
                 document.body.addEventListener('DOMNodeInserted', function() {
-                    var interval = new Date().getTime() - last_spacing_time; // how many milliseconds since the last request
-                    if (interval >= 1000) { // more than 1 second
-                        clearTimeout(spacing_timer);
-                        spacing_timer = setTimeout(function() {
-                            go_spacing();
-                        }, 500);
+                    if (!is_spacing) {
+                        var interval = new Date().getTime() - last_spacing_time; // how many milliseconds since the last request
+                        if (interval >= 1000) { // more than 1 second
+                            clearTimeout(spacing_timer);
+                            spacing_timer = setTimeout(function() {
+                                go_spacing();
+                            }, 500);
+                        }
                     }
                 });
             }

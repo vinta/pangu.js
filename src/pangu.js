@@ -8,7 +8,7 @@
      一般都會是 'inherit' 而不是 'false'
 
      2.
-     不要對 <code>、<pre> 或 <textarea> 裡的文字加空格
+     不要對特定 tag 裡的文字加空格
      關於這個我還不是很確定
      所以先註解掉
 
@@ -17,15 +17,14 @@
      */
     function can_ignore_node(node) {
         var parent_node = node.parentNode;
-        // var stop_tags = /^(code|pre|textarea)$/i;
-        var stop_tags = /^(textarea)$/i;
+        // var ignore_tags = /^(code|pre)$/i;
         while (parent_node) {
-            if (parent_node.contentEditable === 'true') {
+            if (parent_node.contentEditable == 'true') {
                 return true;
             }
-            else if (parent_node.nodeName.search(stop_tags) >= 0) {
-                return true;
-            }
+            // else if (parent_node.nodeName.search(ignore_tags) >= 0) {
+            //     return true;
+            // }
             else {
                 parent_node = parent_node.parentNode;
             }
@@ -70,10 +69,25 @@
 
     function insert_space(text) {
         /*
+         ~!@#$%^&*()_+`-=
+         []\{}|
+         :;"'
+         <>?,./
+
          英文、數字、符號 ([a-z0-9~!@#&;=_\$\%\^\*\-\+\,\.\/(\\)\?\:\'\"\[\]\(\)])
          中文 ([\u4E00-\u9FFF])
          日文 ([\u3040-\u30FF])
          http://www.diybl.com/course/6_system/linux/Linuxjs/20090426/165435.html
+         */
+
+        /*
+         TODO: < > [ ] { } ( )
+         這是一個句子 < 然後就沒有然後了
+         這是一個句子 > 然後就沒有然後了
+         這是一個句子 <中文 123 漢字> 然後就沒有然後了
+         這是一個句子 [ 然後就沒有然後了
+         這是一個句子 ] 然後就沒有然後了
+         這是一個句子 [中文 123 漢字] 然後就沒有然後了
          */
 
         // 前面"字"後面 >> 前面 "字" 後面
@@ -86,10 +100,10 @@
         text = text.replace(/((\S+)#)([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $3'); // $2 是 (\S+)
 
         // 中文在前
-        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([a-z0-9@&=\|\[\$\%\^\*\-\+\(\/\\])/ig, '$1 $2');
+        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([a-z0-9@&=<\|\[\$\%\^\*\-\+\(\/\\])/ig, '$1 $2');
 
         // 中文在後
-        text = text.replace(/([a-z0-9!~&;=\|\]\,\.\:\?\$\%\^\*\-\+\)\/\\])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
+        text = text.replace(/([a-z0-9!~&;=>\|\]\,\.\:\?\$\%\^\*\-\+\)\/\\])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
 
         return text;
     }
@@ -118,13 +132,11 @@
             // console.log('next_text_node: %O', next_text_node);
 
             if (can_ignore_node(current_text_node)) {
+                next_text_node = current_text_node;
                 continue;
             }
 
-            /*
-             .data 是 XML text node 的屬性
-             http://www.w3school.com.cn/xmldom/dom_text.asp
-             */
+            // http://www.w3school.com.cn/xmldom/dom_text.asp
             var new_data = insert_space(current_text_node.data);
             if (current_text_node.data != new_data) {
                 had_spacing = true;
@@ -140,6 +152,7 @@
                  */
                 if (current_text_node.nextSibling) {
                     if (current_text_node.nextSibling.nodeName.search(/^br$/i) >= 0) {
+                        next_text_node = current_text_node;
                         continue;
                     }
                 }
@@ -148,10 +161,11 @@
                 var text = current_text_node.data.toString().substr(-1) + next_text_node.data.toString().substr(0, 1);
                 var new_text = insert_space(text);
 
-                var outside_spacing_tags = /^(a|del|p|s|strike|u)$/i;
-
                 if (text != new_text) {
                     had_spacing = true;
+
+                    // 如果不包含 <p> 的話，會造成 Twitter 每一則 tweet 之前都會多一個空格
+                    var outside_spacing_tags = /^(a|del|p|pre|s|strike|u)$/i;
 
                     /*
                      往上找 next_text_node 的 parent node
@@ -174,8 +188,7 @@
                     }
 
                     /*
-                     不要把空格加在 <not_spacing_tag> 裡文字的開頭或結尾
-                     因為會有底線
+                     不要把空格加在 <outside_spacing_tags> 裡的文字的開頭或結尾
 
                      X: <p><a>漢字 </a>abc</p>
                      O: <p><a>漢字</a> abc</p>
@@ -201,87 +214,106 @@
             next_text_node = current_text_node;
         }
 
-        // console.log('had_spacing: %O', had_spacing);
-
         return had_spacing;
     }
 
-    // 對純文字加空格
     pangu.text_spacing = function(text) {
         return insert_space(text);
     };
 
-    // 對整個 window.document 加空格
     pangu.page_spacing = function() {
+        // var p = 'page_spacing';
+        // console.profile(p);
+        // console.time(p);
         // var start = new Date().getTime();
 
         /*
-         // >> 選擇任意位置的節點
-         . >> 自己這個節點
+         // >> 任意位置的節點
+         . >> 當前節點
          .. >> 父節點
+         [] >> 條件
          text() >> 節點的文字內容，例如 hello 之於 <tag>hello</tag>
-         normalize-space() >> 字串頭和尾的空白字元都會被移除，大於兩個以上的空白字元會被置換成單一空白
-         translate() >> 將所查詢的字串轉換成小寫，因為 XML 是 case-sensitive 的
-         */
 
-        // 不要處理 <script> 和 <style> 裡的內容
-        var not_parse_tags = ['script', 'style'];
-        var extra_query = '';
-        not_parse_tags.forEach(function(tag) {
-            // ex: [translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="script"]
-            extra_query += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
+         [@contenteditable]
+         帶有 contenteditable 屬性的節點
+
+         normalize-space(.)
+         當前節點的頭尾的空白字元都會被移除，大於兩個以上的空白字元會被置換成單一空白
+         https://developer.mozilla.org/en-US/docs/XPath/Functions/normalize-space
+
+         name(..)
+         父節點的名稱
+         https://developer.mozilla.org/en-US/docs/XPath/Functions/name
+
+         translate(string, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")
+         將 string 轉換成小寫，因為 XML 是 case-sensitive 的
+         https://developer.mozilla.org/en-US/docs/XPath/Functions/translate
+
+         1. 處理 <title>
+         2. 處理 <body> 底下的節點
+         3. 略過 contentEditable 的節點
+         4. 略過特定節點，例如 <script> 和 <style>
+
+         注意，以下的 query 只會取出各節點的 text 內容！
+         */
+        var title_query = '/html/head/title/text()';
+
+        // var body_query = '/html/body//*[not(@contenteditable)]/text()[normalize-space(.)]';
+        var body_query = '/html/body//*/text()[normalize-space(.)]';
+        ['script', 'style', 'textarea'].forEach(function(tag) {
+            /*
+             理論上這幾個 tag 裡面不會包含其他 tag
+             所以可以直接用 .. 取父節點
+
+             ex: [translate(name(..), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") != "script"]
+             */
+            body_query += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
         });
 
-        // 處理 <title>
-        var xpath_query_title = '/html/head/title/text()';
-        spacing(xpath_query_title);
+        var xpath_query = title_query + '|' + body_query;
 
-        /*
-         1. 只處理 <body> 底下的節點 >> var xpath_query = '/html/body//text()[normalize-space(.)]' + extra_query;
-         2. 略過 contentEditable 的節點
-         */
-        var xpath_query = '/html/body//*[not(@contenteditable)]/text()[normalize-space(.)]' + extra_query;
         var had_spacing = spacing(xpath_query);
 
+        // console.profileEnd(p);
+        // console.timeEnd(p);
         // var end = new Date().getTime();
         // console.log(end - start);
 
         return had_spacing;
     };
 
-    // 對特定 element 加空格
-    pangu.element_spacing = function(selector_string) {
-        /*
-         http://www.w3schools.com/xpath/xpath_examples.asp
-         http://zh.wikipedia.org/wiki/XPath
-         http://mi.hosp.ncku.edu.tw/km/index.php/dotnet/48-netdisk/57-xml-xpath
-         http://stackoverflow.com/questions/1390568/xpath-how-to-match-attributes-that-contain-a-certain-string
-         */
+    // pangu.element_spacing = function(selector_string) {
+    //     /*
+    //      http://www.w3schools.com/xpath/xpath_examples.asp
+    //      http://zh.wikipedia.org/wiki/XPath
+    //      http://mi.hosp.ncku.edu.tw/km/index.php/dotnet/48-netdisk/57-xml-xpath
+    //      http://stackoverflow.com/questions/1390568/xpath-how-to-match-attributes-that-contain-a-certain-string
+    //      */
 
-        var xpath_query;
+    //     var xpath_query;
 
-        if (selector_string.indexOf('#') === 0) {
-            var target_id = selector_string.substr(1, selector_string.length - 1);
+    //     if (selector_string.indexOf('#') === 0) {
+    //         var target_id = selector_string.substr(1, selector_string.length - 1);
 
-            // ex: id("id_name")//text()
-            xpath_query = 'id("' + target_id + '")//text()';
-        }
-        else if (selector_string.indexOf('.') === 0) {
-            var target_class = selector_string.slice(1);
+    //         // ex: id("id_name")//text()
+    //         xpath_query = 'id("' + target_id + '")//text()';
+    //     }
+    //     else if (selector_string.indexOf('.') === 0) {
+    //         var target_class = selector_string.slice(1);
 
-            // ex: //*[contains(concat(' ', normalize-space(@class), ' '), ' class_name ')]/text()
-            xpath_query = '//*[contains(concat(" ", normalize-space(@class), " "), " ' + target_class + ' ")]/text()';
-        }
-        else {
-            var target_tag = selector_string;
+    //         // ex: //*[contains(concat(' ', normalize-space(@class), ' '), ' class_name ')]/text()
+    //         xpath_query = '//*[contains(concat(" ", normalize-space(@class), " "), " ' + target_class + ' ")]/text()';
+    //     }
+    //     else {
+    //         var target_tag = selector_string;
 
-            // ex: //tag_name/text()
-            xpath_query = '//' + target_tag + '//text()';
-        }
+    //         // ex: //tag_name/text()
+    //         xpath_query = '//' + target_tag + '//text()';
+    //     }
 
-        var had_spacing = spacing(xpath_query);
+    //     var had_spacing = spacing(xpath_query);
 
-        return had_spacing;
-    };
+    //     return had_spacing;
+    // };
 
 }(window.pangu = window.pangu || {}));
