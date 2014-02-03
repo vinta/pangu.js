@@ -17,8 +17,8 @@ body {
 </style>
 </head>
 <body>
-    <div id="wrapper">
 
+    <div id="wrapper">
         <p>123漢字abc</p><p>漢字abc</p><p>漢字123</p>
 
         <ul class="noty_container topRight"></ul>
@@ -76,7 +76,17 @@ body {
             <p>這是一段包含單引號'大中天'和English的文字7788，真的不是在kidding。</p>
             <p>這是一段包含雙引號"大中天"和English的文字7788，真的不是在kidding。</p>
             <p>這是一段包含單引號'大X中ZZ天'和English的文字7788，真的不是在kidding。</p>
-            <p>這是一段包含雙引號"大X中Y天"和English的文字7788，真的不是在kidding。</p>
+            <p>這是一段包含雙引號"大X中Y天"和English的文字7788，真的不是在kidding。123</p>
+        </div>
+
+        <div>
+            <p>中文asdfasdf</p>
+            <textarea>中文abc漢字5555</textarea>
+        </div>
+
+        <div>
+            <p>中文asdfasdf</p>
+            <textarea><div>中文abc漢字5555<span>漢字123</span></div></textarea>
         </div>
 
         <ul>
@@ -87,13 +97,14 @@ body {
         <div id="c1" contentEditable="true">
             <div id="c2">123中文abc</div>
         </div>
-
     </div>
+
     <script src="lib/jquery/jquery-1.10.2.min.js"></script>
-    <script src="../src/pangu.js"></script>
+    <script src="../src/pangu1.js"></script>
     <script>
-        // pangu.page_spacing();
-        // pangu.element_spacing('p');
+        var aaa = '中文abc漢字';
+
+        pangu.page_spacing();
     </script>
 </body>
 </html>
