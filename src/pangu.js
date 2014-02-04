@@ -3,7 +3,7 @@
     /*
      1.
      硬幹 contentEditable 元素的 child nodes 還是會被 spacing 的問題
-     contentEditable 的值可能是 'true', 'false', 'inherit'
+     因為 contentEditable 的值可能是 'true', 'false', 'inherit'
      如果沒有顯式地指定 contentEditable 的值
      一般都會是 'inherit' 而不是 'false'
 
@@ -18,6 +18,7 @@
     function can_ignore_node(node) {
         var parent_node = node.parentNode;
         // var ignore_tags = /^(code|pre)$/i;
+        // var ignore_tags = /^(textarea)$/i;
         while (parent_node) {
             if (parent_node.contentEditable == 'true') {
                 return true;
@@ -128,7 +129,7 @@
         // 從最下面、最裡面的節點開始
         for (var i = nodes_length - 1; i > -1; --i) {
             var current_text_node = text_nodes.snapshotItem(i);
-            // console.log('current_text_node: %O, nextSibling: %O', current_text_node, current_text_node.nextSibling);
+            // console.log('current_text_node: %O, nextSibling: %O', current_text_node.data, current_text_node.nextSibling);
             // console.log('next_text_node: %O', next_text_node);
 
             if (can_ignore_node(current_text_node)) {
@@ -151,7 +152,7 @@
                  萬一遇上嵌套的標籤就不行了
                  */
                 if (current_text_node.nextSibling) {
-                    if (current_text_node.nextSibling.nodeName.search(/^br$/i) >= 0) {
+                    if (current_text_node.nextSibling.nodeName.search(/^(br|hr)$/i) >= 0) {
                         next_text_node = current_text_node;
                         continue;
                     }
@@ -164,47 +165,52 @@
                 if (text != new_text) {
                     had_spacing = true;
 
-                    // 如果不包含 <p> 的話，會造成 Twitter 每一則 tweet 之前都會多一個空格
-                    var outside_spacing_tags = /^(a|del|p|pre|s|strike|u)$/i;
+                    /*
+                     基本上
+                     next_node 就是 next_text_node 的 parent node
+                     current_node 就是 current_text_node 的 parent node
+                     */
+
+                    // 不要把空格加在 <space_sensitive_tags> 裡的文字的開頭或結尾
+                    var space_sensitive_tags = /^(a|del|pre|s|strike|u)$/i;
+
+                    var block_tags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
 
                     /*
                      往上找 next_text_node 的 parent node
-                     直到遇到 outside_spacing_tags
+                     直到遇到 space_sensitive_tags
                      而且 next_text_node 必須是第一個 text child
                      才能把空格加在 next_text_node 的前面
                      */
                     var next_node = next_text_node;
                     while (next_node.parentNode
-                        && next_node.nodeName.search(outside_spacing_tags) == -1
+                        && next_node.nodeName.search(space_sensitive_tags) == -1
                         && is_first_text_child(next_node.parentNode, next_node)) {
                         next_node = next_node.parentNode;
                     }
+                    // console.log('next_node: %O', next_node);
 
                     var current_node = current_text_node;
                     while (current_node.parentNode
-                        && current_node.nodeName.search(outside_spacing_tags) == -1
+                        && current_node.nodeName.search(space_sensitive_tags) == -1
                         && is_last_text_child(current_node.parentNode, current_node)) {
                         current_node = current_node.parentNode;
                     }
+                    // console.log('current_node: %O, nextSibling: %O', current_node, current_node.nextSibling);
 
-                    /*
-                     不要把空格加在 <outside_spacing_tags> 裡的文字的開頭或結尾
-
-                     X: <p><a>漢字 </a>abc</p>
-                     O: <p><a>漢字</a> abc</p>
-                     */
-                    if (next_node.nodeName.search(outside_spacing_tags) == -1) {
-                        next_text_node.data = " " + next_text_node.data;
-                    }
-                    else if (current_node.nodeName.search(outside_spacing_tags) == -1) {
-                        current_text_node.data = current_text_node.data + " ";
-                    }
-                    else {
-                        /*
-                         避免 <p>123</p> <p>漢字</p> 的情況發生
-                         空格會被加在兩個 <p> 之間
-                         */
-                        if (next_node.nodeName.search(/^(p)$/i) == -1 ) {
+                    if (current_node.nodeName.search(block_tags) == -1) {
+                        if (next_node.nodeName.search(space_sensitive_tags) == -1) {
+                            if (next_node.nodeName.search(block_tags) == -1) {
+                                // console.log('spacing 1: %O', next_text_node.data);
+                                next_text_node.data = " " + next_text_node.data;
+                            }
+                        }
+                        else if (current_node.nodeName.search(space_sensitive_tags) == -1) {
+                            // console.log('spacing 2: %O', current_text_node.data);
+                            current_text_node.data = current_text_node.data + " ";
+                        }
+                        else {
+                            // console.log('spacing 3: %O', next_node.parentNode);
                             next_node.parentNode.insertBefore(document.createTextNode(" "), next_node);
                         }
                     }
@@ -257,8 +263,9 @@
          注意，以下的 query 只會取出各節點的 text 內容！
          */
         var title_query = '/html/head/title/text()';
+        spacing(title_query);
 
-        // var body_query = '/html/body//*[not(@contenteditable)]/text()[normalize-space(.)]';
+        var body_query = '/html/body//*[not(@contenteditable)]/text()[normalize-space(.)]';
         var body_query = '/html/body//*/text()[normalize-space(.)]';
         ['script', 'style', 'textarea'].forEach(function(tag) {
             /*
@@ -269,10 +276,7 @@
              */
             body_query += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
         });
-
-        var xpath_query = title_query + '|' + body_query;
-
-        var had_spacing = spacing(xpath_query);
+        var had_spacing = spacing(body_query);
 
         // console.profileEnd(p);
         // console.timeEnd(p);
@@ -282,38 +286,31 @@
         return had_spacing;
     };
 
-    // pangu.element_spacing = function(selector_string) {
-    //     /*
-    //      http://www.w3schools.com/xpath/xpath_examples.asp
-    //      http://zh.wikipedia.org/wiki/XPath
-    //      http://mi.hosp.ncku.edu.tw/km/index.php/dotnet/48-netdisk/57-xml-xpath
-    //      http://stackoverflow.com/questions/1390568/xpath-how-to-match-attributes-that-contain-a-certain-string
-    //      */
+    pangu.element_spacing = function(selector_string) {
+        var xpath_query;
 
-    //     var xpath_query;
+        if (selector_string.indexOf('#') === 0) {
+            var target_id = selector_string.substr(1, selector_string.length - 1);
 
-    //     if (selector_string.indexOf('#') === 0) {
-    //         var target_id = selector_string.substr(1, selector_string.length - 1);
+            // ex: id("id_name")//text()
+            xpath_query = 'id("' + target_id + '")//text()';
+        }
+        else if (selector_string.indexOf('.') === 0) {
+            var target_class = selector_string.slice(1);
 
-    //         // ex: id("id_name")//text()
-    //         xpath_query = 'id("' + target_id + '")//text()';
-    //     }
-    //     else if (selector_string.indexOf('.') === 0) {
-    //         var target_class = selector_string.slice(1);
+            // ex: //*[contains(concat(' ', normalize-space(@class), ' '), ' class_name ')]/text()
+            xpath_query = '//*[contains(concat(" ", normalize-space(@class), " "), " ' + target_class + ' ")]/text()';
+        }
+        else {
+            var target_tag = selector_string;
 
-    //         // ex: //*[contains(concat(' ', normalize-space(@class), ' '), ' class_name ')]/text()
-    //         xpath_query = '//*[contains(concat(" ", normalize-space(@class), " "), " ' + target_class + ' ")]/text()';
-    //     }
-    //     else {
-    //         var target_tag = selector_string;
+            // ex: //tag_name/text()
+            xpath_query = '//' + target_tag + '//text()';
+        }
 
-    //         // ex: //tag_name/text()
-    //         xpath_query = '//' + target_tag + '//text()';
-    //     }
+        var had_spacing = spacing(xpath_query);
 
-    //     var had_spacing = spacing(xpath_query);
-
-    //     return had_spacing;
-    // };
+        return had_spacing;
+    };
 
 }(window.pangu = window.pangu || {}));
