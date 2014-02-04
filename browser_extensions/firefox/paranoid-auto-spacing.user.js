@@ -2,7 +2,7 @@
 // @name         為什麼你們就是不能加個空格呢？
 // @namespace    http://vinta.ws/
 // @description  自動在網頁中所有的中文和半形的英文、數字、符號之間插入空白。（攤手）沒辦法，處女座都有強迫症。
-// @version      2.2.0
+// @version      2.2.1
 // @include      *
 //
 // @author       Vinta
@@ -85,42 +85,45 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
     }
 
     function insert_space(text) {
+        var old_text = text;
+        var new_text;
+
         /*
          ~!@#$%^&*()_+`-=
          []\{}|
          :;"'
          <>?,./
 
-         英文、數字、符號 ([a-z0-9~!@#&;=_\$\%\^\*\-\+\,\.\/(\\)\?\:\'\"\[\]\(\)])
          中文 ([\u4E00-\u9FFF])
          日文 ([\u3040-\u30FF])
          http://www.diybl.com/course/6_system/linux/Linuxjs/20090426/165435.html
          */
 
-        /*
-         TODO: < > [ ] { } ( )
-         這是一個句子 < 然後就沒有然後了
-         這是一個句子 > 然後就沒有然後了
-         這是一個句子 <中文 123 漢字> 然後就沒有然後了
-         這是一個句子 [ 然後就沒有然後了
-         這是一個句子 ] 然後就沒有然後了
-         這是一個句子 [中文 123 漢字] 然後就沒有然後了
-         */
-
         // 前面"字"後面 >> 前面 "字" 後面
-        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])(["'](\S+))/ig, '$1 $2');
-        text = text.replace(/((\S+)["'])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $3'); // $2 是 (\S+)
+        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])(["'#](\S+))/ig, '$1 $2');
+        text = text.replace(/((\S+)["'#])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $3'); // $2 是 (\S+)
 
-        // 前面#字#後面 >> 前面 #字# 後面
-        // ex: 新浪微博的 hashtag 格式
-        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])(#(\S+))/ig, '$1 $2');
-        text = text.replace(/((\S+)#)([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $3'); // $2 是 (\S+)
+        // 1. 前面<字>後面 --> 前面 <字> 後面
+        old_text = text
+        new_text = old_text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([<\[\{\(]+(.*?)[>\]\}\)]+)([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2 $4');
+        text = new_text
+        if (old_text == new_text) {
+            // 前面<後面 --> 前面 < 後面
+            text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([<>\[\]\{\}\(\)])/ig, '$1 $2');
+            text = text.replace(/([<>\[\]\{\}\(\)])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
+        }
+        // 避免出現 "前面 [ 中文123] 後面" 之類的不對稱的情況
+        text = text.replace(/([<\[\{\(]+)(\s*)(.*?)(\s*)([>\]\}\)]+)/ig, '$1$3$5');
+
+        // // 2. 前面<字>後面 --> 前面 < 字 > 後面
+        // text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([<>\[\]\{\}\(\)])/ig, '$1 $2');
+        // text = text.replace(/([<>\[\]\{\}\(\)])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
 
         // 中文在前
-        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([a-z0-9@&=<\|\[\$\%\^\*\-\+\(\/\\])/ig, '$1 $2');
+        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([a-z0-9@&=`\|\$\%\^\*\-\+\/\\])/ig, '$1 $2');
 
         // 中文在後
-        text = text.replace(/([a-z0-9!~&;=>\|\]\,\.\:\?\$\%\^\*\-\+\)\/\\])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
+        text = text.replace(/([a-z0-9!~&;=`\|\,\.\:\?\$\%\^\*\-\+\/\\])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
 
         return text;
     }
@@ -145,8 +148,6 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
         // 從最下面、最裡面的節點開始
         for (var i = nodes_length - 1; i > -1; --i) {
             var current_text_node = text_nodes.snapshotItem(i);
-            // console.log('current_text_node: %O, nextSibling: %O', current_text_node.data, current_text_node.nextSibling);
-            // console.log('next_text_node: %O', next_text_node);
 
             if (can_ignore_node(current_text_node)) {
                 next_text_node = current_text_node;
@@ -204,7 +205,6 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
                         && is_first_text_child(next_node.parentNode, next_node)) {
                         next_node = next_node.parentNode;
                     }
-                    // console.log('next_node: %O', next_node);
 
                     var current_node = current_text_node;
                     while (current_node.parentNode
@@ -212,21 +212,17 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
                         && is_last_text_child(current_node.parentNode, current_node)) {
                         current_node = current_node.parentNode;
                     }
-                    // console.log('current_node: %O, nextSibling: %O', current_node, current_node.nextSibling);
 
                     if (current_node.nodeName.search(block_tags) == -1) {
                         if (next_node.nodeName.search(space_sensitive_tags) == -1) {
                             if (next_node.nodeName.search(block_tags) == -1) {
-                                // console.log('spacing 1: %O', next_text_node.data);
                                 next_text_node.data = " " + next_text_node.data;
                             }
                         }
                         else if (current_node.nodeName.search(space_sensitive_tags) == -1) {
-                            // console.log('spacing 2: %O', current_text_node.data);
                             current_text_node.data = current_text_node.data + " ";
                         }
                         else {
-                            // console.log('spacing 3: %O', next_node.parentNode);
                             next_node.parentNode.insertBefore(document.createTextNode(" "), next_node);
                         }
                     }
@@ -240,11 +236,6 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
     }
 
     pangu.page_spacing = function() {
-        // var p = 'page_spacing';
-        // console.profile(p);
-        // console.time(p);
-        // var start = new Date().getTime();
-
         /*
          // >> 任意位置的節點
          . >> 當前節點
@@ -289,11 +280,6 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
             body_query += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
         });
         var had_spacing = spacing(body_query);
-
-        // console.profileEnd(p);
-        // console.timeEnd(p);
-        // var end = new Date().getTime();
-        // console.log(end - start);
 
         return had_spacing;
     };
