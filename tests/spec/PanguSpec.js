@@ -17,6 +17,11 @@ describe('pangu', function() {
       expect(new_text).toEqual('這是一個句子_然後，就沒有然後了');
     });
 
+    it('處理 ~ 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子~然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子~ 然後，就沒有然後了');
+    });
+
     it('處理 ! 符號', function() {
       var new_text = pangu.text_spacing('這是一個句子!然後，就沒有然後了');
       expect(new_text).toEqual('這是一個句子! 然後，就沒有然後了');
@@ -27,83 +32,33 @@ describe('pangu', function() {
       expect(new_text).toEqual('這是一個句子? 然後，就沒有然後了');
     });
 
-    it('處理 ~ 符號', function() {
-      var new_text = pangu.text_spacing('這是一個句子~然後，就沒有然後了');
-      expect(new_text).toEqual('這是一個句子~ 然後，就沒有然後了');
+    it('處理 : 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子:然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子: 然後，就沒有然後了');
     });
 
-    it('處理 | 符號', function() {
-      var new_text = pangu.text_spacing('這是一個句子|然後，就沒有然後了');
-      expect(new_text).toEqual('這是一個句子 | 然後，就沒有然後了');
+    it('處理 ; 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子;然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子; 然後，就沒有然後了');
     });
 
-    it('處理 + 符號', function() {
-      var new_text = pangu.text_spacing('這是一個句子+然後，就沒有然後了');
-      expect(new_text).toEqual('這是一個句子 + 然後，就沒有然後了');
+    it('處理 , 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子,然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子, 然後，就沒有然後了');
     });
 
-    it('處理 - 符號', function() {
-      var new_text = pangu.text_spacing('這是一個句子-然後，就沒有然後了');
-      expect(new_text).toEqual('這是一個句子 - 然後，就沒有然後了');
+    it('處理 . 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子.然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子. 然後，就沒有然後了');
     });
 
-    it('處理 * 符號', function() {
-      var new_text = pangu.text_spacing('這是一個句子*然後，就沒有然後了');
-      expect(new_text).toEqual('這是一個句子 * 然後，就沒有然後了');
-    });
-
-    it('處理 / 符號', function() {
-      var new_text = pangu.text_spacing('這是一個句子/然後，就沒有然後了');
-      expect(new_text).toEqual('這是一個句子 / 然後，就沒有然後了');
-    });
-
-    it('處理 \\ 符號', function() {
-      var new_text = pangu.text_spacing('這是一個句子\\然後，就沒有然後了');
-      expect(new_text).toEqual('這是一個句子 \\ 然後，就沒有然後了');
-    });
-
-    it('處理 % 符號', function() {
-      var new_text = pangu.text_spacing('這是一個句子%然後，就沒有然後了');
-      expect(new_text).toEqual('這是一個句子 % 然後，就沒有然後了');
-    });
-
-    it('處理 $ 符號', function() {
-      var new_text = pangu.text_spacing('這是一個句子$然後，就沒有然後了');
-      expect(new_text).toEqual('這是一個句子 $ 然後，就沒有然後了');
-    });
-
-    it('處理 ^ 符號', function() {
-      var new_text = pangu.text_spacing('這是一個句子^然後，就沒有然後了');
-      expect(new_text).toEqual('這是一個句子 ^ 然後，就沒有然後了');
-    });
-
-    it('處理 & 符號', function() {
-      var new_text = pangu.text_spacing('這是一個句子&然後，就沒有然後了');
-      expect(new_text).toEqual('這是一個句子 & 然後，就沒有然後了');
-    });
-
-    // it('處理 < 符號', function() {
-    //   var new_text = pangu.text_spacing('這是一個句子<然後，就沒有然後了');
-    //   expect(new_text).toEqual('這是一個句子 < 然後，就沒有然後了');
-    // });
-
-    // it('處理 > 符號', function() {
-    //   var new_text = pangu.text_spacing('這是一個句子>然後，就沒有然後了');
-    //   expect(new_text).toEqual('這是一個句子 > 然後，就沒有然後了');
-    // });
-
-    it('處理 = 符號', function() {
-      var new_text = pangu.text_spacing('這是一個句子=然後，就沒有然後了');
-      expect(new_text).toEqual('這是一個句子 = 然後，就沒有然後了');
-    });
-
-    // ex: Twitter, 不如就來 follow 一下 https://twitter.com/vinta
+    // ex: Twitter，不如就來 follow 一下 https://twitter.com/vinta
     it('處理 @ 符號：接著英文', function() {
       var new_text = pangu.text_spacing('請@vinta吃大便');
       expect(new_text).toEqual('請 @vinta 吃大便');
     });
 
-    // ex: 新浪微博
+    // ex: 新浪微博，不如也來 follow 一下 http://weibo.com/vintalines
     it('處理 @ 符號：接著中文', function() {
       var new_text = pangu.text_spacing('請@陳上進吃大便');
       expect(new_text).toEqual('請 @陳上進吃大便');
@@ -130,9 +85,109 @@ describe('pangu', function() {
       expect(new_text).toEqual('這是一個句子 #H2G2# 然後就沒有然後了');
     });
 
-    it('處理 [XXX]', function() {
+    it('處理 $ 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子$然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 $ 然後，就沒有然後了');
+    });
+
+    it('處理 % 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子%然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 % 然後，就沒有然後了');
+    });
+
+    it('處理 ^ 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子^然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 ^ 然後，就沒有然後了');
+    });
+
+    it('處理 & 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子&然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 & 然後，就沒有然後了');
+    });
+
+    it('處理 * 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子*然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 * 然後，就沒有然後了');
+    });
+
+    it('處理 ` 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子`然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 ` 然後，就沒有然後了');
+    });
+
+    it('處理 + 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子+然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 + 然後，就沒有然後了');
+    });
+
+    it('處理 - 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子-然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 - 然後，就沒有然後了');
+    });
+
+    it('處理 = 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子=然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 = 然後，就沒有然後了');
+    });
+
+    it('處理 | 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子|然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 | 然後，就沒有然後了');
+    });
+
+    it('處理 / 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子/然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 / 然後，就沒有然後了');
+    });
+
+    it('處理 \\ 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子\\然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 \\ 然後，就沒有然後了');
+    });
+
+    it('處理 [ 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子[然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 [ 然後，就沒有然後了');
+    });
+
+    it('處理 ] 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子]然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 ] 然後，就沒有然後了');
+    });
+
+    it('處理 [XXX] 之一', function() {
       var new_text = pangu.text_spacing('這是一個句子[中文123漢字]然後就沒有然後了');
       expect(new_text).toEqual('這是一個句子 [中文 123 漢字] 然後就沒有然後了');
+    });
+
+    it('處理 [XXX] 之二', function() {
+      var new_text = pangu.text_spacing('這是一個句子[中文123]然後就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 [中文 123] 然後就沒有然後了');
+    });
+
+    it('處理 [XXX] 之三', function() {
+      var new_text = pangu.text_spacing('這是一個句子[123中文]然後就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 [123 中文] 然後就沒有然後了');
+    });
+
+    it('處理 [XXX] 之', function() {
+      var new_text = pangu.text_spacing('這是一個句子[中文123] then');
+      expect(new_text).toEqual('這是一個句子 [中文 123] then');
+    });
+
+    it('處理 [XXX] 之', function() {
+      var new_text = pangu.text_spacing('這是一個句子[123中文] then');
+      expect(new_text).toEqual('這是一個句子 [123 中文] then');
+    });
+
+    it('處理 < 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子<然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 < 然後，就沒有然後了');
+    });
+
+    it('處理 > 符號', function() {
+      var new_text = pangu.text_spacing('這是一個句子>然後，就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 > 然後，就沒有然後了');
     });
 
     it('處理 <XXX>', function() {
