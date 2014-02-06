@@ -73,19 +73,28 @@
         var new_text;
 
         /*
-         ~!@#$%^&*()_+`-=
-         []\{}|
-         :;"'
-         <>?,./
+         Regular Expressions
+         https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
 
-         中文 ([\u4E00-\u9FFF])
-         日文 ([\u3040-\u30FF])
-         http://www.diybl.com/course/6_system/linux/Linuxjs/20090426/165435.html
+         3000−303F 中日韩符号和标点
+         3040−309F 日文平假名
+         30A0−30FF 日文片假名
+         3100−312F 注音字母
+         4E00−9FFF 中日韩统一表意文字
+         F900−FAFF 中日韩兼容表意文字
+         http://unicode-table.com/cn/
          */
 
         // 前面"字"後面 >> 前面 "字" 後面
-        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])(["'#](\S+))/ig, '$1 $2');
-        text = text.replace(/((\S+)["'#])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $3'); // $2 是 (\S+)
+        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])(["'])/ig, '$1 $2');
+        text = text.replace(/(["'])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
+
+        // 避免出現 '前面 " 字" 後面' 之類的不對稱的情況
+        text = text.replace(/(["']+)(\s*)(.*?)(\s*)(["']+)/ig, '$1$3$5');
+
+        // # 符號需要特別處理
+        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])(#(\S+))/ig, '$1 $2');
+        text = text.replace(/((\S+)#)([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $3');
 
         // 1. 前面<字>後面 --> 前面 <字> 後面
         old_text = text
@@ -96,10 +105,10 @@
             text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([<>\[\]\{\}\(\)])/ig, '$1 $2');
             text = text.replace(/([<>\[\]\{\}\(\)])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
         }
-        // 避免出現 "前面 [ 中文123] 後面" 之類的不對稱的情況
+        // 避免出現 "前面 [ 字] 後面" 之類的不對稱的情況
         text = text.replace(/([<\[\{\(]+)(\s*)(.*?)(\s*)([>\]\}\)]+)/ig, '$1$3$5');
 
-        // // 2. 前面<字>後面 --> 前面 < 字 > 後面
+        // 2. 前面<字>後面 --> 前面 < 字 > 後面
         // text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([<>\[\]\{\}\(\)])/ig, '$1 $2');
         // text = text.replace(/([<>\[\]\{\}\(\)])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
 
@@ -200,6 +209,13 @@
                         current_node = current_node.parentNode;
                     }
                     // console.log('current_node: %O, nextSibling: %O', current_node, current_node.nextSibling);
+
+                    if (current_node.nextSibling) {
+                        if (current_node.nextSibling.nodeName.search(/^(br|hr)$/i) >= 0) {
+                            next_text_node = current_text_node;
+                            continue;
+                        }
+                    }
 
                     if (current_node.nodeName.search(block_tags) == -1) {
                         if (next_node.nodeName.search(space_sensitive_tags) == -1) {

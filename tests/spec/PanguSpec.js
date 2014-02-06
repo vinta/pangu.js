@@ -69,9 +69,19 @@ describe('pangu', function() {
       expect(new_text).toEqual('這是一個句子 #H2G2 然後，就沒有然後了');
     });
 
-    it('處理 # 符號：接著中文', function() {
+    it('處理 # 符號：接著中文 之一', function() {
+      var new_text = pangu.text_spacing('這是一個句子#銀河便車指南');
+      expect(new_text).toEqual('這是一個句子 #銀河便車指南');
+    });
+
+    it('處理 # 符號：接著中文 之二', function() {
       var new_text = pangu.text_spacing('這是一個句子#銀河便車指南 就沒有然後了');
       expect(new_text).toEqual('這是一個句子 #銀河便車指南 就沒有然後了');
+    });
+
+    it('處理 # 符號：接著中文 之三', function() {
+      var new_text = pangu.text_spacing('這是一個句子#銀河便車指南 #銀河大客車指南 就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 #銀河便車指南 #銀河大客車指南 就沒有然後了');
     });
 
     // ex: 新浪微博的 hashtag 格式
@@ -170,12 +180,12 @@ describe('pangu', function() {
       expect(new_text).toEqual('這是一個句子 [123 中文] 然後就沒有然後了');
     });
 
-    it('處理 [XXX] 之', function() {
+    it('處理 [XXX] 之四', function() {
       var new_text = pangu.text_spacing('這是一個句子[中文123] then');
       expect(new_text).toEqual('這是一個句子 [中文 123] then');
     });
 
-    it('處理 [XXX] 之', function() {
+    it('處理 [XXX] 之五', function() {
       var new_text = pangu.text_spacing('這是一個句子[123中文] then');
       expect(new_text).toEqual('這是一個句子 [123 中文] then');
     });
@@ -193,6 +203,21 @@ describe('pangu', function() {
     it('處理 <XXX>', function() {
       var new_text = pangu.text_spacing('這是一個句子<中文123漢字>然後就沒有然後了');
       expect(new_text).toEqual('這是一個句子 <中文 123 漢字> 然後就沒有然後了');
+    });
+
+    it('處理 "XXX" 之一', function() {
+      var new_text = pangu.text_spacing('這是一個句子"中文123漢字"然後就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 "中文 123 漢字" 然後就沒有然後了');
+    });
+
+    it('處理 "XXX" 之二', function() {
+      var new_text = pangu.text_spacing('這是一個句子:"中文123漢字"然後就沒有然後了');
+      expect(new_text).toEqual('這是一個句子:"中文 123 漢字" 然後就沒有然後了');
+    });
+
+    it('處理 "XXX" 之三', function() {
+      var new_text = pangu.text_spacing('這是一個句子"中文123漢字"5566然後就沒有然後了');
+      expect(new_text).toEqual('這是一個句子 "中文 123 漢字"5566 然後就沒有然後了');
     });
 
   });
