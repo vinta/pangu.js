@@ -9,6 +9,9 @@ before_script:
 script:
   - grunt test
 
+after_success:
+  - grunt coverage
+
 notifications:
   email:
     - vinta.chen@gmail.com
