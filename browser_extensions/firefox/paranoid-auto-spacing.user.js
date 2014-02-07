@@ -36,8 +36,8 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
         // var ignore_tags = /^(code|pre)$/i;
         // var ignore_tags = /^(textarea)$/i;
 
-        while (parent_node.nodeName.search(/^(html|head|body|#document)$/i) == -1) {
-            if (parent_node.contentEditable === 'true') {
+        while (parent_node.nodeName.search(/^(html|head|body|#document)$/i) === -1) {
+            if (parent_node.getAttribute('contenteditable') === 'true') {
                 return true;
             }
             else if (parent_node.getAttribute('g_editable') === 'true') {
@@ -65,9 +65,9 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
 
         // 只判斷第一個含有 text 的 node
         for (var i = 0; i < child_nodes.length; i++) {
-            child_node = child_nodes[i];
+            var child_node = child_nodes[i];
             if (child_node.nodeType != 8 && child_node.textContent) {
-                return child_node == target_node;
+                return child_node === target_node;
             }
         }
 
@@ -79,9 +79,9 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
 
         // 只判斷倒數第一個含有 text 的 node
         for (var i = child_nodes.length - 1; i > -1; i--) {
-            child_node = child_nodes[i];
+            var child_node = child_nodes[i];
             if (child_node.nodeType != 8 && child_node.textContent) {
-                return child_node == target_node;
+                return child_node === target_node;
             }
         }
 
@@ -117,10 +117,10 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
         text = text.replace(/((\S+)#)([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $3');
 
         // 1. 前面<字>後面 --> 前面 <字> 後面
-        old_text = text
+        old_text = text;
         new_text = old_text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([<\[\{\(]+(.*?)[>\]\}\)]+)([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2 $4');
-        text = new_text
-        if (old_text == new_text) {
+        text = new_text;
+        if (old_text === new_text) {
             // 前面<後面 --> 前面 < 後面
             text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([<>\[\]\{\}\(\)])/ig, '$1 $2');
             text = text.replace(/([<>\[\]\{\}\(\)])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
@@ -161,7 +161,6 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
         // 從最下面、最裡面的節點開始
         for (var i = nodes_length - 1; i > -1; --i) {
             var current_text_node = text_nodes.snapshotItem(i);
-
             if (can_ignore_node(current_text_node)) {
                 next_text_node = current_text_node;
                 continue;
@@ -213,30 +212,48 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
                      才能把空格加在 next_text_node 的前面
                      */
                     var next_node = next_text_node;
-                    while (next_node.parentNode
-                        && next_node.nodeName.search(space_sensitive_tags) == -1
-                        && is_first_text_child(next_node.parentNode, next_node)) {
+                    while (next_node.parentNode &&
+                        next_node.nodeName.search(space_sensitive_tags) === -1 &&
+                        is_first_text_child(next_node.parentNode, next_node)) {
                         next_node = next_node.parentNode;
                     }
 
                     var current_node = current_text_node;
-                    while (current_node.parentNode
-                        && current_node.nodeName.search(space_sensitive_tags) == -1
-                        && is_last_text_child(current_node.parentNode, current_node)) {
+                    while (current_node.parentNode &&
+                        current_node.nodeName.search(space_sensitive_tags) === -1 &&
+                        is_last_text_child(current_node.parentNode, current_node)) {
                         current_node = current_node.parentNode;
                     }
 
-                    if (current_node.nodeName.search(block_tags) == -1) {
-                        if (next_node.nodeName.search(space_sensitive_tags) == -1) {
-                            if (next_node.nodeName.search(block_tags) == -1) {
+                    if (current_node.nextSibling) {
+                        if (current_node.nextSibling.nodeName.search(/^(br|hr)$/i) >= 0) {
+                            next_text_node = current_text_node;
+                            continue;
+                        }
+                    }
+
+                    if (current_node.nodeName.search(block_tags) === -1) {
+                        if (next_node.nodeName.search(space_sensitive_tags) === -1) {
+                            if (next_node.nodeName.search(block_tags) === -1) {
                                 next_text_node.data = " " + next_text_node.data;
                             }
                         }
-                        else if (current_node.nodeName.search(space_sensitive_tags) == -1) {
+                        else if (current_node.nodeName.search(space_sensitive_tags) === -1) {
                             current_text_node.data = current_text_node.data + " ";
                         }
                         else {
-                            next_node.parentNode.insertBefore(document.createTextNode(" "), next_node);
+                            var space_span = document.createElement('pangu');
+                            space_span.innerHTML = ' ';
+
+                            // 避免一直被加空格
+                            if (next_node.previousSibling) {
+                                if (next_node.previousSibling.nodeName.search(/^pangu$/i) == -1) {
+                                    next_node.parentNode.insertBefore(space_span, next_node);
+                                }
+                            }
+                            else {
+                                next_node.parentNode.insertBefore(space_span, next_node);
+                            }
                         }
                     }
                 }
@@ -281,7 +298,7 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
         var title_query = '/html/head/title/text()';
         spacing(title_query);
 
-        var body_query = '/html/body//*[not(@contenteditable)]/text()[normalize-space(.)]';
+        // var body_query = '/html/body//*[not(@contenteditable)]/text()[normalize-space(.)]';
         var body_query = '/html/body//*/text()[normalize-space(.)]';
         ['script', 'style', 'textarea'].forEach(function(tag) {
             /*

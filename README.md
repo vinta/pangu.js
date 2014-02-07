@@ -15,8 +15,8 @@
 
 ### for Users
 
-* [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (2014-02-07 updated)
-* [Mozilla Firefox](http://userscripts.org/scripts/show/129555) (2014-02-07 updated)
+* [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (2014-02-08 updated)
+* [Mozilla Firefox](http://userscripts.org/scripts/show/129555) (2014-02-08 updated)
 
 ### for Developers
 

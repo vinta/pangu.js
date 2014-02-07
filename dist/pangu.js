@@ -1,4 +1,5 @@
 (function(pangu) {
+    'use strict';
 
     /*
      1.
@@ -20,8 +21,8 @@
         // var ignore_tags = /^(code|pre)$/i;
         // var ignore_tags = /^(textarea)$/i;
 
-        while (parent_node.nodeName.search(/^(html|head|body|#document)$/i) == -1) {
-            if (parent_node.contentEditable === 'true') {
+        while (parent_node.nodeName.search(/^(html|head|body|#document)$/i) === -1) {
+            if (parent_node.getAttribute('contenteditable') === 'true') {
                 return true;
             }
             else if (parent_node.getAttribute('g_editable') === 'true') {
@@ -49,9 +50,9 @@
 
         // 只判斷第一個含有 text 的 node
         for (var i = 0; i < child_nodes.length; i++) {
-            child_node = child_nodes[i];
+            var child_node = child_nodes[i];
             if (child_node.nodeType != 8 && child_node.textContent) {
-                return child_node == target_node;
+                return child_node === target_node;
             }
         }
 
@@ -63,9 +64,9 @@
 
         // 只判斷倒數第一個含有 text 的 node
         for (var i = child_nodes.length - 1; i > -1; i--) {
-            child_node = child_nodes[i];
+            var child_node = child_nodes[i];
             if (child_node.nodeType != 8 && child_node.textContent) {
-                return child_node == target_node;
+                return child_node === target_node;
             }
         }
 
@@ -104,7 +105,7 @@
         old_text = text;
         new_text = old_text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([<\[\{\(]+(.*?)[>\]\}\)]+)([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2 $4');
         text = new_text;
-        if (old_text == new_text) {
+        if (old_text === new_text) {
             // 前面<後面 --> 前面 < 後面
             text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([<>\[\]\{\}\(\)])/ig, '$1 $2');
             text = text.replace(/([<>\[\]\{\}\(\)])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
@@ -199,17 +200,17 @@
                      才能把空格加在 next_text_node 的前面
                      */
                     var next_node = next_text_node;
-                    while (next_node.parentNode
-                        && next_node.nodeName.search(space_sensitive_tags) == -1
-                        && is_first_text_child(next_node.parentNode, next_node)) {
+                    while (next_node.parentNode &&
+                        next_node.nodeName.search(space_sensitive_tags) === -1 &&
+                        is_first_text_child(next_node.parentNode, next_node)) {
                         next_node = next_node.parentNode;
                     }
                     // console.log('next_node: %O', next_node);
 
                     var current_node = current_text_node;
-                    while (current_node.parentNode
-                        && current_node.nodeName.search(space_sensitive_tags) == -1
-                        && is_last_text_child(current_node.parentNode, current_node)) {
+                    while (current_node.parentNode &&
+                        current_node.nodeName.search(space_sensitive_tags) === -1 &&
+                        is_last_text_child(current_node.parentNode, current_node)) {
                         current_node = current_node.parentNode;
                     }
                     // console.log('current_node: %O, nextSibling: %O', current_node, current_node.nextSibling);
@@ -221,20 +222,31 @@
                         }
                     }
 
-                    if (current_node.nodeName.search(block_tags) == -1) {
-                        if (next_node.nodeName.search(space_sensitive_tags) == -1) {
-                            if (next_node.nodeName.search(block_tags) == -1) {
+                    if (current_node.nodeName.search(block_tags) === -1) {
+                        if (next_node.nodeName.search(space_sensitive_tags) === -1) {
+                            if (next_node.nodeName.search(block_tags) === -1) {
                                 // console.log('spacing 1: %O', next_text_node.data);
                                 next_text_node.data = " " + next_text_node.data;
                             }
                         }
-                        else if (current_node.nodeName.search(space_sensitive_tags) == -1) {
+                        else if (current_node.nodeName.search(space_sensitive_tags) === -1) {
                             // console.log('spacing 2: %O', current_text_node.data);
                             current_text_node.data = current_text_node.data + " ";
                         }
                         else {
                             // console.log('spacing 3: %O', next_node.parentNode);
-                            next_node.parentNode.insertBefore(document.createTextNode(" "), next_node);
+                            var space_span = document.createElement('pangu');
+                            space_span.innerHTML = ' ';
+
+                            // 避免一直被加空格
+                            if (next_node.previousSibling) {
+                                if (next_node.previousSibling.nodeName.search(/^pangu$/i) == -1) {
+                                    next_node.parentNode.insertBefore(space_span, next_node);
+                                }
+                            }
+                            else {
+                                next_node.parentNode.insertBefore(space_span, next_node);
+                            }
                         }
                     }
                 }
@@ -288,7 +300,7 @@
         var title_query = '/html/head/title/text()';
         spacing(title_query);
 
-        var body_query = '/html/body//*[not(@contenteditable)]/text()[normalize-space(.)]';
+        // var body_query = '/html/body//*[not(@contenteditable)]/text()[normalize-space(.)]';
         var body_query = '/html/body//*/text()[normalize-space(.)]';
         ['script', 'style', 'textarea'].forEach(function(tag) {
             /*
@@ -321,8 +333,8 @@
         else if (selector_string.indexOf('.') === 0) {
             var target_class = selector_string.slice(1);
 
-            // ex: //*[contains(concat(' ', normalize-space(@class), ' '), ' class_name ')]/text()
-            xpath_query = '//*[contains(concat(" ", normalize-space(@class), " "), " ' + target_class + ' ")]/text()';
+            // ex: //*[contains(@class, "target_class")]//*/text()
+            xpath_query = '//*[contains(@class, "' + target_class + '")]//*/text()';
         }
         else {
             var target_tag = selector_string;
