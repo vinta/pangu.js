@@ -19,8 +19,12 @@
         var parent_node = node.parentNode;
         // var ignore_tags = /^(code|pre)$/i;
         // var ignore_tags = /^(textarea)$/i;
-        while (parent_node) {
-            if (parent_node.contentEditable == 'true') {
+
+        while (parent_node.nodeName.search(/^(html|head|body|#document)$/i) == -1) {
+            if (parent_node.contentEditable === 'true') {
+                return true;
+            }
+            else if (parent_node.getAttribute('g_editable') === 'true') {
                 return true;
             }
             // else if (parent_node.nodeName.search(ignore_tags) >= 0) {
@@ -97,9 +101,9 @@
         text = text.replace(/((\S+)#)([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $3');
 
         // 1. 前面<字>後面 --> 前面 <字> 後面
-        old_text = text
+        old_text = text;
         new_text = old_text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([<\[\{\(]+(.*?)[>\]\}\)]+)([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2 $4');
-        text = new_text
+        text = new_text;
         if (old_text == new_text) {
             // 前面<後面 --> 前面 < 後面
             text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([<>\[\]\{\}\(\)])/ig, '$1 $2');

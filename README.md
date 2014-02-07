@@ -1,3 +1,8 @@
+[![Build Status](https://travis-ci.org/vinta/paranoid-auto-spacing.png?branch=master)](https://travis-ci.org/vinta/paranoid-auto-spacing)
+[![Coverage Status](https://coveralls.io/repos/vinta/paranoid-auto-spacing/badge.png?branch=master)](https://coveralls.io/r/vinta/paranoid-auto-spacing?branch=master)
+[![Dependency Status](https://gemnasium.com/vinta/paranoid-auto-spacing.png)](https://gemnasium.com/vinta/paranoid-auto-spacing)
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vinta/paranoid-auto-spacing/trend.png)](https://bitdeli.com/free)
+
 # 為什麼你們就是不能加個空格呢？
 
 如果你跟我一樣，每次看到網頁上的中文字和英文、數字、符號擠在一塊，就會坐立難安，忍不住想在它們之間加個空格。這個外掛（支援 Chrome 和 Firefox）正是你在網路世界走跳所需要的東西，它會自動替你在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。
@@ -10,8 +15,8 @@
 
 ### for Users
 
-* [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (2014-02-05 updated)
-* [Mozilla Firefox](http://userscripts.org/scripts/show/129555) (2014-02-05 updated)
+* [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (2014-02-07 updated)
+* [Mozilla Firefox](http://userscripts.org/scripts/show/129555) (2014-02-07 updated)
 
 ### for Developers
 
@@ -56,5 +61,3 @@ Released under the [MIT License](http://opensource.org/licenses/MIT).
 ## Contributors
 
 [偉哉 Open Source！](https://github.com/vinta/paranoid-auto-spacing/graphs/contributors)
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vinta/paranoid-auto-spacing/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
