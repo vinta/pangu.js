@@ -9,11 +9,14 @@
     "space",
     "spacing",
     "text",
+    "white",
     "xpath"
   ],
   "main": "src/pangu.js",
   "ignore": [
     "**/.*",
+    "browser_extensions/chrome/images/promotional_*.png",
+    "browser_extensions/chrome/images/screenshot_*.png",
     "node_modules"
   ],
   "license": "MIT",

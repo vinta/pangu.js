@@ -75,6 +75,13 @@ module.exports = function(grunt) {
       }
     },
 
+    coveralls: {
+      options: {
+        debug: true,
+        coverage_dir: 'coverage/'
+      }
+    },
+
     karma: {
       dist: {
         options: {
@@ -84,9 +91,16 @@ module.exports = function(grunt) {
           browsers: [
             'PhantomJS'
           ],
+          coverageReporter: {
+            // multiple reporters
+            reporters: [
+              {type: 'lcov', dir:'coverage/'},
+              {type: 'text'}
+            ]
+          },
           // list of files / patterns to load in the browser
           files: [
-            'dist/*.js',
+            'dist/pangu.js',
             'tests/lib/jquery/jquery-1.10.2.min.js',
             'tests/lib/jasmine-jquery/jasmine-jquery.js',
             'tests/spec/**/*.js',
@@ -102,13 +116,21 @@ module.exports = function(grunt) {
           frameworks: [
             'jasmine'
           ],
+          plugins: [
+            'karma-*'
+          ],
           // preprocessors allow you to do some work with your files before they get served to the browser.
           preprocessors: {
-            '**/*.html': []
+            '**/*.html': [],
+            // source files, that you wanna generate coverage for
+            'dist/pangu.js': [
+              'coverage'
+            ]
           },
           // test results reporter to use, possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
           reporters: [
-            'progress'
+            'progress',
+            'coverage'
           ],
           // continuous Integration mode, if true, it capture browsers, run tests and exit
           singleRun: true
@@ -162,6 +184,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-karma');
+  grunt.loadNpmTasks('grunt-karma-coveralls');
   grunt.loadNpmTasks('grunt-strip');
 
   grunt.registerTask('dev', [
@@ -183,6 +206,10 @@ module.exports = function(grunt) {
   grunt.registerTask('test', [
     'dist',
     'karma'
+  ]);
+
+  grunt.registerTask('coverage', [
+    'coveralls'
   ]);
 
   grunt.registerTask('default', [
