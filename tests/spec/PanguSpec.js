@@ -4,6 +4,20 @@ describe('pangu', function() {
     return typeof window.__karma__ !== 'undefined';
   }
 
+  function run_fixture_test(fixture_name, the_spacing) {
+    loadFixtures(fixture_name + '.html');
+
+    the_spacing();
+
+    var new_html = $('#' + fixture_name).prop('outerHTML');
+
+    var fixture_str = readFixtures(fixture_name + '_expected.html');
+    var $expected = $(fixture_str);
+    var expected_html = $expected.prop('outerHTML');
+
+    expect(new_html).toEqual(expected_html);
+  }
+
   beforeEach(function() {
   });
 
@@ -224,48 +238,42 @@ describe('pangu', function() {
 
   describe('page_spacing()', function() {
 
-    function run_fixture_test(fixture_name) {
-      loadFixtures(fixture_name + '.html');
-      pangu.page_spacing();
-      var new_html = $('#' + fixture_name).prop('outerHTML');
-
-      var fixture_str = readFixtures(fixture_name + '_expected.html');
-      var $expected = $(fixture_str);
-      var expected_html = $expected.prop('outerHTML');
-
-      expect(new_html).toEqual(expected_html);
-    }
-
     it('處理 DOM: <title>', function() {
-      // TODO
+      $('title').html('天龍8部');
+      pangu.page_spacing();
+      expect($('title').html()).toEqual('天龍 8 部');
     });
 
     it('處理 DOM: <body>', function() {
       if (run_by_karma()) {
-        run_fixture_test('p1');
+        run_fixture_test('p1', function() {
+          pangu.page_spacing();
+        });
       }
     });
 
   });
 
-  // describe('element_spacing()', function() {
+  describe('element_spacing()', function() {
 
-  //   function run_fixture_test(fixture_name) {
-  //     loadFixtures(fixture_name + '.html');
-  //     pangu.element_spacing('p');
-  //     var new_html = $('#' + fixture_name).prop('outerHTML');
+    it('處理 #id_name', function() {
+      run_fixture_test('e1', function() {
+        pangu.element_spacing('#e1');
+      });
+    });
 
-  //     var fixture_str = readFixtures(fixture_name + '_expected.html');
-  //     var $expected = $(fixture_str);
-  //     var expected_html = $expected.prop('outerHTML');
+    it('處理 .class_name', function() {
+      run_fixture_test('e2', function() {
+        pangu.element_spacing('.e2');
+      });
+    });
 
-  //     expect(new_html).toEqual(expected_html);
-  //   }
+    it('處理 tag_name', function() {
+      run_fixture_test('e3', function() {
+        pangu.element_spacing('article');
+      });
+    });
 
-  //   it('處理 XXX', function() {
-  //     // TODO
-  //   });
-
-  // });
+  });
 
 });

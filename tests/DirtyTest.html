@@ -17,8 +17,10 @@
     </style>
 </head>
 <body>
+    <p>123漢字abc</p><p>漢字abc</p><p>漢字123</p>
 
-    <div id="wrapper">
+    <div id="wrapper" class="dddd wrapper sdfsdf">
+
         <p>123漢字abc</p><p>漢字abc</p><p>漢字123</p>
 
         <div>
@@ -84,7 +86,7 @@
 
         <p><a href="#">123</a><a href="#">你看看</a></p>
 
-        <p><a href="#">123</a><span><a href="#">你看看</a></span></p>
+        <p><a href="#">123</a><span><a href="#">你G看看</a></span></p>
 
         <p><b>123</b><span><a href="#">你看看</a></span></p>
 
@@ -114,6 +116,7 @@
         <div id="c1" contentEditable="true">
             <div id="c2">123中文abc</div>
         </div>
+
     </div>
 
     <script src="lib/jquery/jquery-1.10.2.min.js"></script>
@@ -121,7 +124,8 @@
     <script>
         var aaa = '中文abc漢字';
 
-        pangu.page_spacing();
+        // pangu.page_spacing();
+        // pangu.element_spacing('.wrapper');
     </script>
 </body>
 </html>
