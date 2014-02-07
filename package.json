@@ -5,6 +5,9 @@
     "type": "git",
     "url": "git://github.com/vinta/paranoid-auto-spacing.git"
   },
+  "scripts": {
+    "test": "grunt test"
+  },
   "devDependencies": {
     "grunt": "~0.4.2",
     "grunt-contrib-clean": "~0.5.0",
