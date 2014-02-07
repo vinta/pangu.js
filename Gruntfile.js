@@ -1,6 +1,5 @@
-'use strict';
-
 module.exports = function(grunt) {
+  'use strict';
 
   grunt.initConfig({
 
@@ -8,14 +7,12 @@ module.exports = function(grunt) {
 
     clean: {
       dev: [
+        'coverage/',
         'browser_extensions/chrome_dev/',
         'browser_extensions/chrome_dist/'
       ],
       dist: [
-        'dist/',
-        'browser_extensions/chrome_dist/'
-      ],
-      all: [
+        'coverage/',
         'dist/',
         'browser_extensions/chrome_dev/',
         'browser_extensions/chrome_dist/'
@@ -83,7 +80,7 @@ module.exports = function(grunt) {
     },
 
     karma: {
-      dist: {
+      test: {
         options: {
           // base path, that will be used to resolve files and exclude
           basePath: '',
@@ -98,6 +95,8 @@ module.exports = function(grunt) {
               {type: 'text'}
             ]
           },
+          // list of files to exclude
+          exclude: [],
           // list of files / patterns to load in the browser
           files: [
             'dist/pangu.js',
@@ -110,8 +109,6 @@ module.exports = function(grunt) {
               served: true
             }
           ],
-          // list of files to exclude
-          exclude: [],
           // frameworks to use
           frameworks: [
             'jasmine'
@@ -140,7 +137,7 @@ module.exports = function(grunt) {
 
     // remove console.log()
     strip: {
-      dist: {
+      common: {
         src: 'src/pangu.js',
         dest: 'dist/pangu.js'
       },
@@ -168,6 +165,8 @@ module.exports = function(grunt) {
           'Gruntfile.js',
           'bower.json',
           'src/**/*',
+          'tests/fixtures/**/*',
+          'tests/spec/**/*',
           'browser_extensions/chrome/**/*',
           '!browser_extensions/chrome/vendors/pangu.min.js'
         ],
@@ -189,23 +188,22 @@ module.exports = function(grunt) {
 
   grunt.registerTask('dev', [
     'clean:dev',
-    'copy:dev'
+    'strip:common',
+    'copy:dev',
+    'karma'
   ]);
 
-  // 準備打包到 Chrome Web Store
-  // browser_extensions/chrome_dev/ 是開發用的
-  // browser_extensions/chrome_dist/ 是打包用的
   grunt.registerTask('dist', [
-    'clean:all',
-    'strip:dist',
+    'clean:dist',
+    'strip:common',
     'uglify',
     'copy:dist',
-    'strip:dist_chrome'
+    'strip:dist_chrome',
+    'karma'
   ]);
 
   grunt.registerTask('test', [
-    'dist',
-    'karma'
+    'dist'
   ]);
 
   grunt.registerTask('coverage', [
@@ -213,7 +211,7 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask('default', [
-    'test'
+    'dist'
   ]);
 
 };
