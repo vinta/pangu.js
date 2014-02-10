@@ -2,7 +2,7 @@
 // @name         為什麼你們就是不能加個空格呢？
 // @namespace    http://vinta.ws/
 // @description  自動在網頁中所有的中文和半形的英文、數字、符號之間插入空白。（攤手）沒辦法，處女座都有強迫症。
-// @version      2.2.3
+// @version      2.3.1
 // @include      *
 //
 // @author       Vinta
@@ -33,19 +33,14 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
      */
     function can_ignore_node(node) {
         var parent_node = node.parentNode;
-        // var ignore_tags = /^(code|pre)$/i;
-        // var ignore_tags = /^(textarea)$/i;
-
+        var ignore_tags = /^(code|pre|textarea)$/i;
         while (parent_node.nodeName.search(/^(html|head|body|#document)$/i) === -1) {
-            if (parent_node.getAttribute('contenteditable') === 'true') {
+            if ((parent_node.getAttribute('contenteditable') === 'true') || (parent_node.getAttribute('g_editable') === 'true')) {
                 return true;
             }
-            else if (parent_node.getAttribute('g_editable') === 'true') {
+            else if (parent_node.nodeName.search(ignore_tags) >= 0) {
                 return true;
             }
-            // else if (parent_node.nodeName.search(ignore_tags) >= 0) {
-            //     return true;
-            // }
             else {
                 parent_node = parent_node.parentNode;
             }
@@ -96,47 +91,52 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
          Regular Expressions
          https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
 
-         3000−303F 中日韩符号和标点
-         3040−309F 日文平假名
-         30A0−30FF 日文片假名
-         3100−312F 注音字母
-         4E00−9FFF 中日韩统一表意文字
-         F900−FAFF 中日韩兼容表意文字
+         3000-303F 中日韓符號和標點
+         3040-309F 日文平假名 (V)
+         30A0-30FF 日文片假名 (V)
+         3100-312F 注音字母 (V)
+         31C0-31EF 中日韓筆畫
+         31F0-31FF 日文片假名語音擴展
+         3200-32FF 帶圈中日韓字母和月份 (V)
+         3400-4DBF 中日韓統一表意文字擴展 A (V)
+         4E00-9FFF 中日韓統一表意文字 (V)
+         AC00-D7AF 諺文音節 (韓文)
+         F900-FAFF 中日韓兼容表意文字 (V)
          http://unicode-table.com/cn/
          */
 
         // 前面"字"後面 >> 前面 "字" 後面
-        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])(["'])/ig, '$1 $2');
-        text = text.replace(/(["'])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
+        text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])(["'])/ig, '$1 $2');
+        text = text.replace(/(["'])([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2');
 
         // 避免出現 '前面 " 字" 後面' 之類的不對稱的情況
         text = text.replace(/(["']+)(\s*)(.*?)(\s*)(["']+)/ig, '$1$3$5');
 
         // # 符號需要特別處理
-        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])(#(\S+))/ig, '$1 $2');
-        text = text.replace(/((\S+)#)([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $3');
+        text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])(#(\S+))/ig, '$1 $2');
+        text = text.replace(/((\S+)#)([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $3');
 
         // 1. 前面<字>後面 --> 前面 <字> 後面
         old_text = text;
-        new_text = old_text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([<\[\{\(]+(.*?)[>\]\}\)]+)([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2 $4');
+        new_text = old_text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([<\[\{\(]+(.*?)[>\]\}\)]+)([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2 $4');
         text = new_text;
         if (old_text === new_text) {
             // 前面<後面 --> 前面 < 後面
-            text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([<>\[\]\{\}\(\)])/ig, '$1 $2');
-            text = text.replace(/([<>\[\]\{\}\(\)])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
+            text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([<>\[\]\{\}\(\)])/ig, '$1 $2');
+            text = text.replace(/([<>\[\]\{\}\(\)])([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2');
         }
         // 避免出現 "前面 [ 字] 後面" 之類的不對稱的情況
         text = text.replace(/([<\[\{\(]+)(\s*)(.*?)(\s*)([>\]\}\)]+)/ig, '$1$3$5');
 
         // 2. 前面<字>後面 --> 前面 < 字 > 後面
-        // text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([<>\[\]\{\}\(\)])/ig, '$1 $2');
-        // text = text.replace(/([<>\[\]\{\}\(\)])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
+        // text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([<>\[\]\{\}\(\)])/ig, '$1 $2');
+        // text = text.replace(/([<>\[\]\{\}\(\)])([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2');
 
         // 中文在前
-        text = text.replace(/([\u4e00-\u9fa5\u3040-\u30FF])([a-z0-9@&=`\|\$\%\^\*\-\+\/\\])/ig, '$1 $2');
+        text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([a-z0-9@&=`\|\$\%\^\*\-\+\/\\])/ig, '$1 $2');
 
         // 中文在後
-        text = text.replace(/([a-z0-9!~&;=`\|\,\.\:\?\$\%\^\*\-\+\/\\])([\u4e00-\u9fa5\u3040-\u30FF])/ig, '$1 $2');
+        text = text.replace(/([a-z0-9!~&;=`\|\,\.\:\?\$\%\^\*\-\+\/\\])([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2');
 
         return text;
     }
@@ -161,6 +161,7 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
         // 從最下面、最裡面的節點開始
         for (var i = nodes_length - 1; i > -1; --i) {
             var current_text_node = text_nodes.snapshotItem(i);
+
             if (can_ignore_node(current_text_node)) {
                 next_text_node = current_text_node;
                 continue;
