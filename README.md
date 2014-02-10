@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/vinta/paranoid-auto-spacing.png?branch=master)](https://travis-ci.org/vinta/paranoid-auto-spacing)
-[![Coverage Status](https://coveralls.io/repos/vinta/paranoid-auto-spacing/badge.png?branch=master)](https://coveralls.io/r/vinta/paranoid-auto-spacing?branch=master)
+[![Coverage Status](https://coveralls.io/repos/vinta/paranoid-auto-spacing/badge.png)](https://coveralls.io/r/vinta/paranoid-auto-spacing)
 [![Dependency Status](https://gemnasium.com/vinta/paranoid-auto-spacing.png)](https://gemnasium.com/vinta/paranoid-auto-spacing)
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vinta/paranoid-auto-spacing/trend.png)](https://bitdeli.com/free)
 
@@ -15,8 +15,8 @@
 
 ### for Users
 
-* [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (2014-02-08 updated)
-* [Mozilla Firefox](http://userscripts.org/scripts/show/129555) (2014-02-08 updated)
+* [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (2014-02-10 updated)
+* [Mozilla Firefox](http://userscripts.org/scripts/show/129555) (2014-02-10 updated)
 
 ### for Developers
 
