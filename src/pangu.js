@@ -15,9 +15,10 @@
      TODO:
      太暴力了，應該有更好的解法
      */
+    var ignore_tags = /^(code|pre|textarea)$/i;
+
     function can_ignore_node(node) {
         var parent_node = node.parentNode;
-        var ignore_tags = /^(code|pre|textarea)$/i;
         while (parent_node.nodeName.search(/^(html|head|body|#document)$/i) === -1) {
             if ((parent_node.getAttribute('contenteditable') === 'true') || (parent_node.getAttribute('g_editable') === 'true')) {
                 return true;
@@ -215,6 +216,7 @@
 
                     if (current_node.nextSibling) {
                         if (current_node.nextSibling.nodeName.search(/^(br|hr)$/i) >= 0) {
+                            console.log('current_text_node 123: %O', current_text_node);
                             next_text_node = current_text_node;
                             continue;
                         }
@@ -222,7 +224,7 @@
 
                     if (current_node.nodeName.search(block_tags) === -1) {
                         if (next_node.nodeName.search(space_sensitive_tags) === -1) {
-                            if (next_node.nodeName.search(block_tags) === -1) {
+                            if ((next_node.nodeName.search(ignore_tags) === -1) && (next_node.nodeName.search(block_tags) === -1)) {
                                 // console.log('spacing 1: %O', next_text_node.data);
                                 next_text_node.data = " " + next_text_node.data;
                             }
