@@ -1,6 +1,11 @@
 (function(pangu) {
     'use strict';
 
+    var ignore_tags = /^(code|pre|textarea)$/i;
+    var space_sensitive_tags = /^(a|del|pre|s|strike|u)$/i;
+    var space_like_tags = /^(br|hr|i|img|pangu)$/i;
+    var block_tags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
+
     /*
      1.
      硬幹 contentEditable 元素的 child nodes 還是會被 spacing 的問題
@@ -15,8 +20,6 @@
      TODO:
      太暴力了，應該有更好的解法
      */
-    var ignore_tags = /^(code|pre|textarea)$/i;
-
     function can_ignore_node(node) {
         var parent_node = node.parentNode;
         while (parent_node.nodeName.search(/^(html|head|body|#document)$/i) === -1) {
@@ -51,7 +54,8 @@
             }
         }
 
-        return false;
+        // 沒有顯式地 return 就是 undefined，放在 if 裡面會被當成 false
+        // return false;
     }
 
     function is_last_text_child(parent_node, target_node) {
@@ -65,7 +69,7 @@
             }
         }
 
-        return false;
+        // return false;
     }
 
     function insert_space(text) {
@@ -168,7 +172,7 @@
                  萬一遇上嵌套的標籤就不行了
                  */
                 if (current_text_node.nextSibling) {
-                    if (current_text_node.nextSibling.nodeName.search(/^(br|hr)$/i) >= 0) {
+                    if (current_text_node.nextSibling.nodeName.search(space_like_tags) >= 0) {
                         next_text_node = current_text_node;
                         continue;
                     }
@@ -186,11 +190,6 @@
                      next_node 就是 next_text_node 的 parent node
                      current_node 就是 current_text_node 的 parent node
                      */
-
-                    // 不要把空格加在 <space_sensitive_tags> 裡的文字的開頭或結尾
-                    var space_sensitive_tags = /^(a|del|pre|s|strike|u)$/i;
-
-                    var block_tags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
 
                     /*
                      往上找 next_text_node 的 parent node
@@ -215,8 +214,7 @@
                     // console.log('current_node: %O, nextSibling: %O', current_node, current_node.nextSibling);
 
                     if (current_node.nextSibling) {
-                        if (current_node.nextSibling.nodeName.search(/^(br|hr)$/i) >= 0) {
-                            console.log('current_text_node 123: %O', current_text_node);
+                        if (current_node.nextSibling.nodeName.search(space_like_tags) >= 0) {
                             next_text_node = current_text_node;
                             continue;
                         }
@@ -225,8 +223,16 @@
                     if (current_node.nodeName.search(block_tags) === -1) {
                         if (next_node.nodeName.search(space_sensitive_tags) === -1) {
                             if ((next_node.nodeName.search(ignore_tags) === -1) && (next_node.nodeName.search(block_tags) === -1)) {
-                                // console.log('spacing 1: %O', next_text_node.data);
-                                next_text_node.data = " " + next_text_node.data;
+                                if (next_text_node.previousSibling) {
+                                    if (next_text_node.previousSibling.nodeName.search(space_like_tags) === -1) {
+                                        // console.log('spacing 1-1: %O', next_text_node.data);
+                                        next_text_node.data = " " + next_text_node.data;
+                                    }
+                                }
+                                else {
+                                    // console.log('spacing 1-2: %O', next_text_node.data);
+                                    next_text_node.data = " " + next_text_node.data;
+                                }
                             }
                         }
                         else if (current_node.nodeName.search(space_sensitive_tags) === -1) {
@@ -234,17 +240,18 @@
                             current_text_node.data = current_text_node.data + " ";
                         }
                         else {
-                            // console.log('spacing 3: %O', next_node.parentNode);
                             var space_span = document.createElement('pangu');
                             space_span.innerHTML = ' ';
 
                             // 避免一直被加空格
                             if (next_node.previousSibling) {
-                                if (next_node.previousSibling.nodeName.search(/^pangu$/i) == -1) {
+                                if (next_node.previousSibling.nodeName.search(space_like_tags) === -1) {
+                                    // console.log('spacing 3-1: %O', next_node.parentNode);
                                     next_node.parentNode.insertBefore(space_span, next_node);
                                 }
                             }
                             else {
+                                // console.log('spacing 3-2: %O', next_node.parentNode);
                                 next_node.parentNode.insertBefore(space_span, next_node);
                             }
                         }

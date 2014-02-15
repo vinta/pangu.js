@@ -2,7 +2,7 @@
 // @name         為什麼你們就是不能加個空格呢？
 // @namespace    http://vinta.ws/
 // @description  自動在網頁中所有的中文和半形的英文、數字、符號之間插入空白。（攤手）沒辦法，處女座都有強迫症。
-// @version      2.3.2
+// @version      2.3.3
 // @include      *
 //
 // @author       Vinta
@@ -16,6 +16,11 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
 
 (function(pangu) {
 
+    var ignore_tags = /^(code|pre|textarea)$/i;
+    var space_sensitive_tags = /^(a|del|pre|s|strike|u)$/i;
+    var space_like_tags = /^(br|hr|i|img|pangu)$/i;
+    var block_tags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
+
     /*
      1.
      硬幹 contentEditable 元素的 child nodes 還是會被 spacing 的問題
@@ -25,15 +30,13 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
 
      2.
      不要對特定 tag 裡的文字加空格
-     關於這個我還不是很確定
-     所以先註解掉
+     例如 pre
 
      TODO:
      太暴力了，應該有更好的解法
      */
     function can_ignore_node(node) {
         var parent_node = node.parentNode;
-        var ignore_tags = /^(code|pre|textarea)$/i;
         while (parent_node.nodeName.search(/^(html|head|body|#document)$/i) === -1) {
             if ((parent_node.getAttribute('contenteditable') === 'true') || (parent_node.getAttribute('g_editable') === 'true')) {
                 return true;
@@ -66,7 +69,8 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
             }
         }
 
-        return false;
+        // 沒有顯式地 return 就是 undefined，放在 if 裡面會被當成 false
+        // return false;
     }
 
     function is_last_text_child(parent_node, target_node) {
@@ -80,7 +84,7 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
             }
         }
 
-        return false;
+        // return false;
     }
 
     function insert_space(text) {
@@ -181,7 +185,7 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
                  萬一遇上嵌套的標籤就不行了
                  */
                 if (current_text_node.nextSibling) {
-                    if (current_text_node.nextSibling.nodeName.search(/^(br|hr)$/i) >= 0) {
+                    if (current_text_node.nextSibling.nodeName.search(space_like_tags) >= 0) {
                         next_text_node = current_text_node;
                         continue;
                     }
@@ -199,11 +203,6 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
                      next_node 就是 next_text_node 的 parent node
                      current_node 就是 current_text_node 的 parent node
                      */
-
-                    // 不要把空格加在 <space_sensitive_tags> 裡的文字的開頭或結尾
-                    var space_sensitive_tags = /^(a|del|pre|s|strike|u)$/i;
-
-                    var block_tags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
 
                     /*
                      往上找 next_text_node 的 parent node
@@ -226,7 +225,7 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
                     }
 
                     if (current_node.nextSibling) {
-                        if (current_node.nextSibling.nodeName.search(/^(br|hr)$/i) >= 0) {
+                        if (current_node.nextSibling.nodeName.search(space_like_tags) >= 0) {
                             next_text_node = current_text_node;
                             continue;
                         }
@@ -234,8 +233,15 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
 
                     if (current_node.nodeName.search(block_tags) === -1) {
                         if (next_node.nodeName.search(space_sensitive_tags) === -1) {
-                            if (next_node.nodeName.search(block_tags) === -1) {
-                                next_text_node.data = " " + next_text_node.data;
+                            if ((next_node.nodeName.search(ignore_tags) === -1) && (next_node.nodeName.search(block_tags) === -1)) {
+                                if (next_text_node.previousSibling) {
+                                    if (next_text_node.previousSibling.nodeName.search(space_like_tags) === -1) {
+                                        next_text_node.data = " " + next_text_node.data;
+                                    }
+                                }
+                                else {
+                                    next_text_node.data = " " + next_text_node.data;
+                                }
                             }
                         }
                         else if (current_node.nodeName.search(space_sensitive_tags) === -1) {
@@ -247,7 +253,7 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
 
                             // 避免一直被加空格
                             if (next_node.previousSibling) {
-                                if (next_node.previousSibling.nodeName.search(/^pangu$/i) == -1) {
+                                if (next_node.previousSibling.nodeName.search(space_like_tags) === -1) {
                                     next_node.parentNode.insertBefore(space_span, next_node);
                                 }
                             }
