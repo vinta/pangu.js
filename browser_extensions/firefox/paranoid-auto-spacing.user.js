@@ -16,8 +16,8 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
 
 (function(pangu) {
 
-    var ignore_tags = /^(code|pre|textarea)$/i;
-    var space_sensitive_tags = /^(a|del|pre|s|strike|u)$/i;
+    var ignore_tags = /^(pre|textarea)$/i;
+    var space_sensitive_tags = /^(a|code|del|pre|s|strike|u)$/i;
     var space_like_tags = /^(br|hr|i|img|pangu)$/i;
     var block_tags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
 
