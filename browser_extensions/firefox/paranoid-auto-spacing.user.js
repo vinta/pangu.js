@@ -2,7 +2,7 @@
 // @name         為什麼你們就是不能加個空格呢？
 // @namespace    http://vinta.ws/
 // @description  自動在網頁中所有的中文和半形的英文、數字、符號之間插入空白。（攤手）沒辦法，處女座都有強迫症。
-// @version      2.3.3
+// @version      2.3.4
 // @include      *
 //
 // @author       Vinta
@@ -64,7 +64,7 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
         // 只判斷第一個含有 text 的 node
         for (var i = 0; i < child_nodes.length; i++) {
             var child_node = child_nodes[i];
-            if (child_node.nodeType != 8 && child_node.textContent) {
+            if (child_node.nodeType !== 8 && child_node.textContent) {
                 return child_node === target_node;
             }
         }
@@ -79,7 +79,7 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
         // 只判斷倒數第一個含有 text 的 node
         for (var i = child_nodes.length - 1; i > -1; i--) {
             var child_node = child_nodes[i];
-            if (child_node.nodeType != 8 && child_node.textContent) {
+            if (child_node.nodeType !== 8 && child_node.textContent) {
                 return child_node === target_node;
             }
         }
@@ -172,7 +172,7 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
 
             // http://www.w3school.com.cn/xmldom/dom_text.asp
             var new_data = insert_space(current_text_node.data);
-            if (current_text_node.data != new_data) {
+            if (current_text_node.data !== new_data) {
                 had_spacing = true;
                 current_text_node.data = new_data;
             }
@@ -195,7 +195,7 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
                 var text = current_text_node.data.toString().substr(-1) + next_text_node.data.toString().substr(0, 1);
                 var new_text = insert_space(text);
 
-                if (text != new_text) {
+                if (text !== new_text) {
                     had_spacing = true;
 
                     /*
@@ -236,29 +236,37 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
                             if ((next_node.nodeName.search(ignore_tags) === -1) && (next_node.nodeName.search(block_tags) === -1)) {
                                 if (next_text_node.previousSibling) {
                                     if (next_text_node.previousSibling.nodeName.search(space_like_tags) === -1) {
-                                        next_text_node.data = " " + next_text_node.data;
+                                        next_text_node.data = ' ' + next_text_node.data;
                                     }
                                 }
                                 else {
-                                    next_text_node.data = " " + next_text_node.data;
+                                    next_text_node.data = ' ' + next_text_node.data;
                                 }
                             }
                         }
                         else if (current_node.nodeName.search(space_sensitive_tags) === -1) {
-                            current_text_node.data = current_text_node.data + " ";
+                            current_text_node.data = current_text_node.data + ' ';
                         }
                         else {
-                            var space_span = document.createElement('pangu');
-                            space_span.innerHTML = ' ';
+                            var pangu_space = document.createElement('pangu');
+                            pangu_space.innerHTML = ' ';
 
                             // 避免一直被加空格
                             if (next_node.previousSibling) {
                                 if (next_node.previousSibling.nodeName.search(space_like_tags) === -1) {
-                                    next_node.parentNode.insertBefore(space_span, next_node);
+                                    next_node.parentNode.insertBefore(pangu_space, next_node);
                                 }
                             }
                             else {
-                                next_node.parentNode.insertBefore(space_span, next_node);
+                                next_node.parentNode.insertBefore(pangu_space, next_node);
+                            }
+
+                            // TODO: 這部份還得再想一下，但是還是先硬上
+                            // 主要是想要避免在元素（通常都是 <li>）的開頭加空格
+                            if (!pangu_space.previousElementSibling) {
+                                if (pangu_space.parentNode) {
+                                    pangu_space.parentNode.removeChild(pangu_space);
+                                }
                             }
                         }
                     }

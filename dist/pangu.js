@@ -49,7 +49,7 @@
         // 只判斷第一個含有 text 的 node
         for (var i = 0; i < child_nodes.length; i++) {
             var child_node = child_nodes[i];
-            if (child_node.nodeType != 8 && child_node.textContent) {
+            if (child_node.nodeType !== 8 && child_node.textContent) {
                 return child_node === target_node;
             }
         }
@@ -64,7 +64,7 @@
         // 只判斷倒數第一個含有 text 的 node
         for (var i = child_nodes.length - 1; i > -1; i--) {
             var child_node = child_nodes[i];
-            if (child_node.nodeType != 8 && child_node.textContent) {
+            if (child_node.nodeType !== 8 && child_node.textContent) {
                 return child_node === target_node;
             }
         }
@@ -159,7 +159,7 @@
 
             // http://www.w3school.com.cn/xmldom/dom_text.asp
             var new_data = insert_space(current_text_node.data);
-            if (current_text_node.data != new_data) {
+            if (current_text_node.data !== new_data) {
                 had_spacing = true;
                 current_text_node.data = new_data;
             }
@@ -182,7 +182,7 @@
                 var text = current_text_node.data.toString().substr(-1) + next_text_node.data.toString().substr(0, 1);
                 var new_text = insert_space(text);
 
-                if (text != new_text) {
+                if (text !== new_text) {
                     had_spacing = true;
 
                     /*
@@ -226,33 +226,41 @@
                                 if (next_text_node.previousSibling) {
                                     if (next_text_node.previousSibling.nodeName.search(space_like_tags) === -1) {
                                         // console.log('spacing 1-1: %O', next_text_node.data);
-                                        next_text_node.data = " " + next_text_node.data;
+                                        next_text_node.data = ' ' + next_text_node.data;
                                     }
                                 }
                                 else {
                                     // console.log('spacing 1-2: %O', next_text_node.data);
-                                    next_text_node.data = " " + next_text_node.data;
+                                    next_text_node.data = ' ' + next_text_node.data;
                                 }
                             }
                         }
                         else if (current_node.nodeName.search(space_sensitive_tags) === -1) {
                             // console.log('spacing 2: %O', current_text_node.data);
-                            current_text_node.data = current_text_node.data + " ";
+                            current_text_node.data = current_text_node.data + ' ';
                         }
                         else {
-                            var space_span = document.createElement('pangu');
-                            space_span.innerHTML = ' ';
+                            var pangu_space = document.createElement('pangu');
+                            pangu_space.innerHTML = ' ';
 
                             // 避免一直被加空格
                             if (next_node.previousSibling) {
                                 if (next_node.previousSibling.nodeName.search(space_like_tags) === -1) {
                                     // console.log('spacing 3-1: %O', next_node.parentNode);
-                                    next_node.parentNode.insertBefore(space_span, next_node);
+                                    next_node.parentNode.insertBefore(pangu_space, next_node);
                                 }
                             }
                             else {
                                 // console.log('spacing 3-2: %O', next_node.parentNode);
-                                next_node.parentNode.insertBefore(space_span, next_node);
+                                next_node.parentNode.insertBefore(pangu_space, next_node);
+                            }
+
+                            // TODO: 這部份還得再想一下，但是還是先硬上
+                            // 主要是想要避免在元素（通常都是 <li>）的開頭加空格
+                            if (!pangu_space.previousElementSibling) {
+                                if (pangu_space.parentNode) {
+                                    pangu_space.parentNode.removeChild(pangu_space);
+                                }
                             }
                         }
                     }

@@ -240,19 +240,27 @@
                             current_text_node.data = current_text_node.data + ' ';
                         }
                         else {
-                            var space_span = document.createElement('pangu');
-                            space_span.innerHTML = ' ';
+                            var pangu_space = document.createElement('pangu');
+                            pangu_space.innerHTML = ' ';
 
                             // 避免一直被加空格
                             if (next_node.previousSibling) {
                                 if (next_node.previousSibling.nodeName.search(space_like_tags) === -1) {
                                     // console.log('spacing 3-1: %O', next_node.parentNode);
-                                    next_node.parentNode.insertBefore(space_span, next_node);
+                                    next_node.parentNode.insertBefore(pangu_space, next_node);
                                 }
                             }
                             else {
                                 // console.log('spacing 3-2: %O', next_node.parentNode);
-                                next_node.parentNode.insertBefore(space_span, next_node);
+                                next_node.parentNode.insertBefore(pangu_space, next_node);
+                            }
+
+                            // TODO: 這部份還得再想一下，但是還是先硬上
+                            // 主要是想要避免在元素（通常都是 <li>）的開頭加空格
+                            if (!pangu_space.previousElementSibling) {
+                                if (pangu_space.parentNode) {
+                                    pangu_space.parentNode.removeChild(pangu_space);
+                                }
                             }
                         }
                     }
