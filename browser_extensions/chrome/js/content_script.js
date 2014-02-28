@@ -30,6 +30,7 @@ var SAY_HELLOS = [
     '空格之神 報到！',
     '空格之神 合流！',
     '空格之神 久違了',
+    '空格之神 作用中',
     '空格之神 小別勝新婚',
     '空格之神 姍姍來遲',
     '空格之神 完美落地',
@@ -40,9 +41,10 @@ var SAY_HELLOS = [
     '空格之神 在此聽候差遣',
     '空格之神 射出！',
     '空格之神：寶傑好，大家好，各位觀眾朋友晚安！',
+    '空格之神：歐啦歐啦歐啦歐啦歐啦',
+    '空格之神：你知不知道什麼是噹噹噹噹噹噹噹？',
     '有請...... 空格之神！',
     '遭遇！野生的空格之神！',
-    '怕你不知道，其實空格之神正在加空格喔！',
     '就決定是你了！空格之神！'
 ];
 
@@ -50,7 +52,6 @@ function ask_can_notify(just_notify) {
     if (typeof alertify !== 'undefined') {
         alertify.custom = alertify.extend('custom');
 
-        // var msg = chrome.i18n.getMessage('hello_god_of_spacing');
         var msg = SAY_HELLOS[Math.floor(Math.random() * SAY_HELLOS.length)];
 
         // just_notify 是給 browser action 用的，強制顯示「空格之神顯靈了」
@@ -89,7 +90,7 @@ function ask_can_spacing() {
                  當頁面 DOM 有變動時
                  就再執行一次 spacing
 
-                 要怎麼分辨由 AJAX 引起的 DOM insert 和 spacing 造成的 DOM insert？
+                 要怎麼分辨由 AJAX 引起的 DOMNodeInserted 和 spacing 造成的 DOMNodeInserted？
                  只好設置一個 timeout 時間
                  */
                 var spacing_timer;

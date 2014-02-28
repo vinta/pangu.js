@@ -5,24 +5,26 @@ a {
     text-decoration: underline; }
 
 a.editable-click {
-  border: none;
+  border: 0;
   color: #646464;
-  vertical-align: middle; }
+  display: inline-block;
+  max-width: 600px;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap; }
   a.editable-click:hover {
-    color: #646464;
-    border-bottom: dotted 1px #646464; }
+    border-bottom: dotted 1px #646464;
+    color: #646464; }
 
 .editable-buttons {
   display: inline-block;
   vertical-align: middle; }
 
 .editable-error {
-  font-size: 80%;
   color: #d13b3b;
+  font-size: 80%;
   margin-top: 5px; }
-
-.alertify-log {
-  font-size: 18px; }
 
 input[type=url],
 input[type=text] {
@@ -53,15 +55,15 @@ input[type=text] {
 
 .pure-button-blue {
   background: #2e7bc8;
-  color: white; }
+  color: #fff; }
 
 .pure-button-green {
   background: #4faf4c;
-  color: white; }
+  color: #fff; }
 
 .pure-button-purple {
   background: #6c4094;
-  color: white; }
+  color: #fff; }
 
 .options_container {
   font-size: 130%;
@@ -73,14 +75,14 @@ input[type=text] {
     border-bottom-right-radius: 2px;
     padding: 30px 80px 60px 80px; }
     .options_container .header h1 {
-      color: #333333;
+      color: #333;
       font-size: 2.5em;
       margin-bottom: 5px; }
     .options_container .header p {
-      color: #999999; }
-      .options_container .header p#subtitle {
-        margin-top: 15px;
-        margin-bottom: 35px; }
+      color: #999; }
+    .options_container .header #subtitle {
+      margin-bottom: 35px;
+      margin-top: 15px; }
   .options_container .content {
     padding-bottom: 130px;
     padding-left: 80px;
@@ -97,13 +99,13 @@ input[type=text] {
         top: -1px; }
     .options_container .content ul.spacing_rule_list {
       list-style-type: none;
-      margin-top: 30px;
       margin-left: 0;
+      margin-top: 30px;
       padding-left: 5px; }
       .options_container .content ul.spacing_rule_list li {
         height: 39px;
         margin-bottom: 10px; }
-    .options_container .content p#spacing_when_click_msg {
+    .options_container .content #spacing_when_click_msg {
       margin-top: 30px; }
 
 .options_footer {
@@ -112,13 +114,13 @@ input[type=text] {
   text-align: center; }
   .options_footer p {
     font-size: 110%;
-    margin-top: 0px;
-    margin-bottom: 8px; }
+    margin-bottom: 8px;
+    margin-top: 0; }
     .options_footer p.copyleft {
       margin-top: 30px; }
 
 .popup_container {
-  padding: 0px 20px 0px 20px;
+  padding: 0 20px 0 20px;
   text-align: center;
   width: 340px; }
   .popup_container .pure-button {

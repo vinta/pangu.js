@@ -1,3 +1,12 @@
+.alertify-logs {
+  /* min-width: 300px; */
+  width: auto;
+}
+
+.alertify-log {
+  font-size: 18px !important;
+}
+
 .alertify-log-custom {
     background-color: #131212 !important;
     border-radius: 2px !important;

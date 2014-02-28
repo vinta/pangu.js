@@ -49,7 +49,7 @@
         // 只判斷第一個含有 text 的 node
         for (var i = 0; i < child_nodes.length; i++) {
             var child_node = child_nodes[i];
-            if (child_node.nodeType != 8 && child_node.textContent) {
+            if (child_node.nodeType !== 8 && child_node.textContent) {
                 return child_node === target_node;
             }
         }
@@ -64,7 +64,7 @@
         // 只判斷倒數第一個含有 text 的 node
         for (var i = child_nodes.length - 1; i > -1; i--) {
             var child_node = child_nodes[i];
-            if (child_node.nodeType != 8 && child_node.textContent) {
+            if (child_node.nodeType !== 8 && child_node.textContent) {
                 return child_node === target_node;
             }
         }
@@ -159,7 +159,7 @@
 
             // http://www.w3school.com.cn/xmldom/dom_text.asp
             var new_data = insert_space(current_text_node.data);
-            if (current_text_node.data != new_data) {
+            if (current_text_node.data !== new_data) {
                 had_spacing = true;
                 current_text_node.data = new_data;
             }
@@ -182,7 +182,7 @@
                 var text = current_text_node.data.toString().substr(-1) + next_text_node.data.toString().substr(0, 1);
                 var new_text = insert_space(text);
 
-                if (text != new_text) {
+                if (text !== new_text) {
                     had_spacing = true;
 
                     /*
@@ -226,18 +226,18 @@
                                 if (next_text_node.previousSibling) {
                                     if (next_text_node.previousSibling.nodeName.search(space_like_tags) === -1) {
                                         // console.log('spacing 1-1: %O', next_text_node.data);
-                                        next_text_node.data = " " + next_text_node.data;
+                                        next_text_node.data = ' ' + next_text_node.data;
                                     }
                                 }
                                 else {
                                     // console.log('spacing 1-2: %O', next_text_node.data);
-                                    next_text_node.data = " " + next_text_node.data;
+                                    next_text_node.data = ' ' + next_text_node.data;
                                 }
                             }
                         }
                         else if (current_node.nodeName.search(space_sensitive_tags) === -1) {
                             // console.log('spacing 2: %O', current_text_node.data);
-                            current_text_node.data = current_text_node.data + " ";
+                            current_text_node.data = current_text_node.data + ' ';
                         }
                         else {
                             var space_span = document.createElement('pangu');
