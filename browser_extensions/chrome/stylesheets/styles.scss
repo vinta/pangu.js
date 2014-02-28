@@ -12,7 +12,7 @@ a {
 }
 
 a.editable-click {
-  border: none;
+  border: 0;
   color: #646464;
   display: inline-block;
   max-width: 600px;
@@ -36,10 +36,6 @@ a.editable-click {
   color: #d13b3b;
   font-size: 80%;
   margin-top: 5px;
-}
-
-.alertify-log {
-  font-size: 18px;
 }
 
 input[type=url],
@@ -75,17 +71,17 @@ input[type=text] {
 
 .pure-button-blue {
   background: #2e7bc8;
-  color: white;
+  color: #fff;
 }
 
 .pure-button-green {
   background: #4faf4c;
-  color: white;
+  color: #fff;
 }
 
 .pure-button-purple {
   background: #6c4094;
-  color: white;
+  color: #fff;
 }
 
 .options_container {
@@ -100,13 +96,13 @@ input[type=text] {
     padding: 30px 80px 60px 80px;
 
     h1 {
-      color: #333333;
+      color: #333;
       font-size: 2.5em;
       margin-bottom: 5px;
     }
 
     p {
-      color: #999999;
+      color: #999;
     }
 
     #subtitle {

@@ -28,7 +28,7 @@
         "description": ""
     },
     "spacing_when_click_msg": {
-        "message": "你可以按右上角那個黑人頭來招喚空格之神！",
+        "message": "你可以按右上角那個黑人頭來召喚空格之神！",
         "description": ""
     },
     "label_spacing_rule": {
@@ -48,7 +48,7 @@
         "description": ""
     },
     "call_god_of_spacing": {
-        "message": "招喚空格之神",
+        "message": "召喚空格之神",
         "description": ""
     },
     "hello_god_of_spacing": {
@@ -64,7 +64,15 @@
         "description": ""
     },
     "can_not_call_god_of_spacing": {
-        "message": "在這種地方是招喚不出空格之神的，除非你在七七四十九天之內都能夠不懷著淫狎之念上網。\n\n不過看你這副人五人六的樣子，想必是不可能的。",
+        "message": "在這種地方是召喚不出空格之神的，除非你在七七四十九天之內都能夠不懷著淫狎之念上網。\n\n不過看你這副人五人六的樣子，想必是不可能的。",
+        "description": ""
+    },
+    "extension_rate": {
+        "message": "評分",
+        "description": ""
+    },
+    "extension_options": {
+        "message": "選項",
         "description": ""
     }
 }

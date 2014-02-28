@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../vendors/alertify/css/alertify.flat.css">
     <link rel="stylesheet" href="../vendors/angular-xeditable/css/xeditable.css">
     <link rel="stylesheet" href="../stylesheets/pure-min.css">
+    <link rel="stylesheet" href="../stylesheets/alertify.custom.css">
     <link rel="stylesheet" href="../stylesheets/styles.css">
     <script src="../vendors/jquery/jquery-2.1.0.min.js"></script>
     <script src="../vendors/alertify/js/alertify.min.js"></script>
@@ -36,7 +37,7 @@
                             <div ng-switch-when="blacklists">
                                 <ul class="spacing_rule_list">
                                     <li class="animate-repeat" ng-repeat="url in blacklists track by $index">
-                                        <a href="#" editable-text="blacklists[$index]" onbeforesave="update_urls($data)">{{ blacklists[$index] }}</a>
+                                        <a href="#" class="gradientEllipsis" editable-text="blacklists[$index]" onbeforesave="update_urls($data)">{{ blacklists[$index] }}</a>
                                         <button ng-click="remove_url($index)" class="pure-button small-button">remove</button>
                                     </li>
                                     <li>
@@ -74,6 +75,7 @@
         </div>
     </div>
     <div class="options_footer">
+        <p>Rate me on <a href="https://chrome.google.com/webstore/detail/為什麼你們就是不能加個空格呢？/paphcfdffjnbcgkokihcdjliihicmbpd/reviews" target="_blank">Chrome Web Store</a></p>
         <p>Fork me on <a href="https://github.com/vinta/paranoid-auto-spacing" target="_blank">GitHub</a></p>
         <p>Follow me on <a href="https://twitter.com/vinta" target="_blank">Twitter</a></p>
         <p>Icons: <a href="http://thenounproject.com/term/afro/1500/" target="_blank">NounProject</a></p>

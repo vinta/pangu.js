@@ -62,10 +62,12 @@ app.controller('PopupController', [
                             utils_chrome.BG_PAGE.alert(utils_chrome.get_i18n('can_not_call_god_of_spacing'));
                         }
                     }
-                };
+                }
             });
         };
 
+        $scope.extension_rate_display = utils_chrome.get_i18n('extension_rate');
+        $scope.extension_options_display = utils_chrome.get_i18n('extension_options');
         $scope.open_options_page = function() {
             chrome.tabs.create({url: 'pages/options.html'});
         };
