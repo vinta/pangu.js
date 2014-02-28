@@ -1,21 +1,25 @@
 /*
- Chrome
+ Only for options.js / popup.js
  */
 
-var SYNC_STORAGE = chrome.storage.sync;
-var BG_PAGE = chrome.extension.getBackgroundPage();
-var CACHED_SETTINGS = BG_PAGE.CACHED_SETTINGS;
+var utils_chrome = (function() {
 
-function print_sync_storage() {
-    SYNC_STORAGE.get(null, function(items) {
-        console.log('SYNC_STORAGE: %O', items);
-    });
-}
+    var BG_PAGE = chrome.extension.getBackgroundPage();
+    var SYNC_STORAGE = BG_PAGE.SYNC_STORAGE;
+    var CACHED_SETTINGS = BG_PAGE.CACHED_SETTINGS;
 
-function get_i18n(message_name) {
-    return chrome.i18n.getMessage(message_name);
-}
+    return {
+        BG_PAGE: BG_PAGE,
+        SYNC_STORAGE: SYNC_STORAGE,
+        CACHED_SETTINGS: CACHED_SETTINGS,
+        get_i18n: function(message_name) {
+            return chrome.i18n.getMessage(message_name);
+        },
+        print_sync_storage: function() {
+            SYNC_STORAGE.get(null, function(items) {
+                console.log('SYNC_STORAGE: %O', items);
+            });
+        }
+    };
 
-// TODO
-// (function(utils_chrome) {
-// }(window.utils_chrome = window.utils_chrome || {}));
+}());

@@ -31,7 +31,6 @@ function merge_settings() {
     SYNC_STORAGE.get(null, function(items) {
         var old_settings = items;
         var new_settings = {};
-        var is_changed = false;
 
         SETTING_KEYS.forEach(function(key) {
             if (old_settings[key] === undefined) {
@@ -56,8 +55,8 @@ chrome.storage.onChanged.addListener(
             refresh_cached_settings();
 
             // chrome.storage.sync 同步更新到 chrome.storage.local
-            obj_to_save = {}
-            for (key in changes) {
+            var obj_to_save = {};
+            for (var key in changes) {
                 obj_to_save[key] = changes[key].newValue;
             }
             LOCA_STORAGE.set(obj_to_save);
@@ -114,6 +113,7 @@ chrome.runtime.onMessage.addListener(
     // https://crxdoc-zh.appspot.com/extensions/runtime.html#event-onMessage
     function(message_obj, sender, sendResponse) {
         var purpose = message_obj.purpose;
+        var result = null;
 
         switch (purpose) {
             case 'can_spacing':

@@ -50,7 +50,6 @@ function ask_can_notify(just_notify) {
     if (typeof alertify !== 'undefined') {
         alertify.custom = alertify.extend('custom');
 
-        // var msg = chrome.i18n.getMessage('hello_god_of_spacing');
         var msg = SAY_HELLOS[Math.floor(Math.random() * SAY_HELLOS.length)];
 
         // just_notify 是給 browser action 用的，強制顯示「空格之神顯靈了」
@@ -89,7 +88,7 @@ function ask_can_spacing() {
                  當頁面 DOM 有變動時
                  就再執行一次 spacing
 
-                 要怎麼分辨由 AJAX 引起的 DOM insert 和 spacing 造成的 DOM insert？
+                 要怎麼分辨由 AJAX 引起的 DOMNodeInserted 和 spacing 造成的 DOMNodeInserted？
                  只好設置一個 timeout 時間
                  */
                 var spacing_timer;

@@ -16,9 +16,11 @@
     "nonew": true,
     "onevar": false,
     "predef": [
+        "alertify",
+        "angular",
         "chrome",
-        "FB",
-        "Modernizr"
+        "pangu",
+        "utils_chrome"
     ],
     "quotmark": "single",
     "sub": true,
