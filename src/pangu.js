@@ -255,7 +255,7 @@
                                 next_node.parentNode.insertBefore(pangu_space, next_node);
                             }
 
-                            // TODO: 這部份還得再想一下，但是還是先硬上
+                            // TODO: 這個做法真的有點蠢，但是不管還是先硬上
                             // 主要是想要避免在元素（通常都是 <li>）的開頭加空格
                             if (!pangu_space.previousElementSibling) {
                                 if (pangu_space.parentNode) {
