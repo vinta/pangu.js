@@ -2,7 +2,7 @@
 
 [![Build Status](http://img.shields.io/travis/vinta/paranoid-auto-spacing.png)](https://travis-ci.org/vinta/paranoid-auto-spacing)
 [![Coverage Status](http://img.shields.io/coveralls/vinta/paranoid-auto-spacing.png)](https://coveralls.io/r/vinta/paranoid-auto-spacing)
-[![Dependency Status](http://img.shields.io/gemnasium/vinta/paranoid-auto-spacing.png)](https://gemnasium.com/vinta/paranoid-auto-spacing)
+[![Dependency Status](http://img.shields.io/gemnasium/vinta/paranoid-auto-spacing.png)](https://gemnasium.com/vinta/paranoid-auto-spacing#development-dependencies)
 
 如果你跟我一樣，每次看到網頁上的中文字和英文、數字、符號擠在一塊，就會坐立難安，忍不住想在它們之間加個空格。這個外掛（支援 Chrome 和 Firefox）正是你在網路世界走跳所需要的東西，它會自動替你在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。
 
