@@ -19,9 +19,9 @@
 
 ### for Developers
 
-* [pangu.js](https://github.com/vinta/paranoid-auto-spacing/blob/master/src/pangu.js) in JavaScript!
-* [pangu.py](https://github.com/vinta/pangu.py) in Python!
-* [pangu.node](https://github.com/huei90/pangu.node) in Nodejs!
+* [pangu.js](https://github.com/vinta/paranoid-auto-spacing/blob/master/src/pangu.js) in JavaScript
+* [pangu.py](https://github.com/vinta/pangu.py) in Python
+* [pangu.node](https://github.com/huei90/pangu.node) in Node.js
 
 ![Pangu](https://raw.github.com/vinta/paranoid-auto-spacing/master/browser_extensions/chrome/images/pangu_260.jpg)
 
