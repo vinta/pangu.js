@@ -68,3 +68,9 @@ Released under the [MIT License](http://opensource.org/licenses/MIT).
 ## Contributors
 
 [偉哉 Open Source！](https://github.com/vinta/paranoid-auto-spacing/graphs/contributors)
+
+## Related Projects
+
+* Emacs: [pangu-spacing](http://coldnew.github.io/blog/2013/05/20_5cbb7.html)
+* WordPress: [Space Lover](https://wordpress.org/plugins/space-lover/)
+* 知乎: [Mountain Reviewer](http://zhuanlan.zhihu.com/pointless/19744560)
