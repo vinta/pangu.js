@@ -72,5 +72,6 @@ Released under the [MIT License](http://opensource.org/licenses/MIT).
 ## Related Projects
 
 * Emacs: [pangu-spacing](http://coldnew.github.io/blog/2013/05/20_5cbb7.html)
+* Ruby: [auto-correct](https://github.com/huacnlee/auto-correct)
 * WordPress: [Space Lover](https://wordpress.org/plugins/space-lover/)
 * 知乎: [Mountain Reviewer](http://zhuanlan.zhihu.com/pointless/19744560)
