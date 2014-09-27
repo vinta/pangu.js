@@ -340,7 +340,7 @@
         var xpath_query;
 
         if (selector_string.indexOf('#') === 0) {
-            var target_id = selector_string.substr(1, selector_string.length - 1);
+            var target_id = selector_string.slice(1);
 
             // ex: id("id_name")//text()
             xpath_query = 'id("' + target_id + '")//text()';
@@ -348,8 +348,8 @@
         else if (selector_string.indexOf('.') === 0) {
             var target_class = selector_string.slice(1);
 
-            // ex: //*[contains(@class, "target_class")]//*/text()
-            xpath_query = '//*[contains(@class, "' + target_class + '")]//*/text()';
+            // ex: //*[contains(concat(" ", normalize-space(@class), " "), " target_class ")]//text()
+            xpath_query = '//*[contains(concat(" ", normalize-space(@class), " "), "' + target_class + '")]//text()';
         }
         else {
             var target_tag = selector_string;
