@@ -52,6 +52,7 @@ $ bower install pangu
 You need to install [Node.js](http://vinta.ws/code/install-node-js-via-nvm.html).
 
 ``` bash
+$ npm install -g grunt-cli
 $ npm install
 $ grunt test
 ```
