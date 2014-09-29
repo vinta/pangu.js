@@ -323,6 +323,18 @@ describe('pangu', function() {
       });
     });
 
+    it('處理 .class_name 之二', function() {
+      run_fixture_test('e4', function() {
+        pangu.element_spacing('.e4');
+      });
+    });
+
+    it('處理 .class_name 之三', function() {
+      run_fixture_test('e5', function() {
+        pangu.element_spacing('.e5');
+      });
+    });
+
     it('處理 tag_name', function() {
       run_fixture_test('e3', function() {
         pangu.element_spacing('article');
