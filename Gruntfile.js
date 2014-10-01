@@ -65,7 +65,7 @@ module.exports = function(grunt) {
                         dest: 'browser_extensions/chrome_dist/'
                     },
                     {
-                        src: '/Users/vinta/Dropbox/Developer/Projects/paranoid-auto-spacing/key.pem',
+                        src: '/Users/vinta/Dropbox/Projects/paranoid-auto-spacing/key.pem',
                         dest: 'browser_extensions/chrome_dist/key.pem'
                     }
                 ]
