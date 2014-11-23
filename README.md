@@ -1,8 +1,8 @@
 # 為什麼你們就是不能加個空格呢？
 
-[![Build Status](http://img.shields.io/travis/vinta/paranoid-auto-spacing.svg?style=flat)](https://travis-ci.org/vinta/paranoid-auto-spacing)
-[![Coverage Status](http://img.shields.io/coveralls/vinta/paranoid-auto-spacing.svg?style=flat)](https://coveralls.io/r/vinta/paranoid-auto-spacing)
-[![Dependency Status](http://img.shields.io/gemnasium/vinta/paranoid-auto-spacing.svg?style=flat)](https://gemnasium.com/vinta/paranoid-auto-spacing#development-dependencies)
+[![Build Status](http://img.shields.io/travis/vinta/paranoid-auto-spacing.svg?style=flat-square)](https://travis-ci.org/vinta/paranoid-auto-spacing)
+[![Coverage Status](http://img.shields.io/coveralls/vinta/paranoid-auto-spacing.svg?style=flat-square)](https://coveralls.io/r/vinta/paranoid-auto-spacing)
+[![Dependency Status](http://img.shields.io/gemnasium/vinta/paranoid-auto-spacing.svg?style=flat-square)](https://gemnasium.com/vinta/paranoid-auto-spacing#development-dependencies)
 
 如果你跟我一樣，每次看到網頁上的中文字和英文、數字、符號擠在一塊，就會坐立難安，忍不住想在它們之間加個空格。這個外掛（支援 Chrome 和 Firefox）正是你在網路世界走跳所需要的東西，它會自動替你在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。
 
@@ -19,9 +19,10 @@
 
 ### for Developers
 
-* [pangu.js](https://github.com/vinta/paranoid-auto-spacing/blob/master/src/pangu.js) in JavaScript
-* [pangu.py](https://github.com/vinta/pangu.py) in Python
-* [pangu.node](https://github.com/huei90/pangu.node) in Node.js
+* JavaScript version: [pangu.js](https://github.com/vinta/paranoid-auto-spacing/blob/master/src/pangu.js)
+* Node.js version: [pangu.node](https://github.com/huei90/pangu.node)
+* Python version: [pangu.py](https://github.com/vinta/pangu.py)
+* Java version: [pangu.java](https://github.com/vinta/pangu.java)
 
 ![Pangu](https://raw.github.com/vinta/paranoid-auto-spacing/master/browser_extensions/chrome/images/pangu_260.jpg)
 
