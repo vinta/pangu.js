@@ -77,3 +77,4 @@ Released under the [MIT License](http://opensource.org/licenses/MIT).
 * Ruby: [auto-correct](https://github.com/huacnlee/auto-correct)
 * WordPress: [Space Lover](https://wordpress.org/plugins/space-lover/)
 * 知乎: [Mountain Reviewer](http://zhuanlan.zhihu.com/pointless/19744560)
+* Plain Text: [为什么我就是能这样娴熟地加上空格呢？](https://github.com/Dustland/daft-auto-spacing)
