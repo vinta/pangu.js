@@ -1,14 +1,21 @@
 var is_spacing = false; // 是不是正在插入空格？
-var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
 
-function go_spacing() {
-    console.log('go_spacing()');
+function go_page_spacing() {
+    console.log('go_page_spacing()');
 
     is_spacing = true;
     var _had_spacing = pangu.page_spacing();
     is_spacing = false;
 
-    last_spacing_time = new Date().getTime();
+    return _had_spacing;
+}
+
+function go_inserted_page_spacing(node) {
+    console.log('go_inserted_page_spacing()');
+
+    is_spacing = true;
+    var _had_spacing = pangu.inserted_page_spacing(node);
+    is_spacing = false;
 
     return _had_spacing;
 }
@@ -40,12 +47,13 @@ var SAY_HELLOS = [
     '空格之神 強勢回歸！',
     '空格之神 在此聽候差遣',
     '空格之神 射出！',
-    '空格之神：寶傑好，大家好，各位觀眾朋友晚安！',
+    '空格之神：寶傑好，大家好，各位觀眾朋友晚安',
     '空格之神：歐啦歐啦歐啦歐啦歐啦',
     '空格之神：你知不知道什麼是噹噹噹噹噹噹噹？',
     '有請...... 空格之神！',
     '遭遇！野生的空格之神！',
-    '就決定是你了！空格之神！'
+    '就決定是你了！空格之神！',
+    '正直、善良和空格都回來了'
 ];
 
 function ask_can_notify(just_notify) {
@@ -78,7 +86,7 @@ function ask_can_spacing() {
             console.log('can_spacing: %O', response.result);
 
             if (response.result) {
-                var had_spacing = go_spacing();
+                var had_spacing = go_page_spacing();
 
                 // 真的有插入空格才提示「空格之神顯靈了」
                 if (had_spacing) {
@@ -89,22 +97,13 @@ function ask_can_spacing() {
                  這一段是為了對付那些 AJAX 加載進來的內容
                  當頁面 DOM 有變動時
                  就再執行一次 spacing
-
-                 要怎麼分辨由 AJAX 引起的 DOMNodeInserted 和 spacing 造成的 DOMNodeInserted？
-                 只好設置一個 timeout 時間
                  */
-                var spacing_timer;
-                document.body.addEventListener('DOMNodeInserted', function() {
+                document.body.addEventListener('DOMNodeInserted', function(e) {
                     if (!is_spacing) {
-                        var interval = new Date().getTime() - last_spacing_time;
-                        if (interval >= 800) {
-                            clearTimeout(spacing_timer);
-                            spacing_timer = setTimeout(function() {
-                                go_spacing();
-                            }, 500);
-                        }
+                        // 只對有變動的 DOM 做 spacing
+                        go_inserted_page_spacing(e.target);
                     }
-                });
+                }, false);
             }
         }
     );
