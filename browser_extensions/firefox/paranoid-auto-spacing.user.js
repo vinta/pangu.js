@@ -12,7 +12,6 @@
 // ==/UserScript==
 
 var is_spacing = false; // 是不是正在插入空格？
-var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
 
 (function(pangu) {
 
@@ -37,7 +36,7 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
      */
     function can_ignore_node(node) {
         var parent_node = node.parentNode;
-        while (parent_node.nodeName.search(/^(html|head|body|#document)$/i) === -1) {
+        while (parent_node && parent_node.nodeName && parent_node.nodeName.search(/^(html|head|body|#document)$/i) === -1) {
             if ((parent_node.getAttribute('contenteditable') === 'true') || (parent_node.getAttribute('g_editable') === 'true')) {
                 return true;
             }
@@ -144,10 +143,10 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
         return text;
     }
 
-    function spacing(xpath_query) {
+    function spacing(xpath_query, contextNode) {
+        contextNode = contextNode || document;
         // 是否加了空格
         var had_spacing = false;
-
         /*
          因為 xpath_query 用的是 text()，所以這些 nodes 是 text 而不是 DOM element
          https://developer.mozilla.org/en-US/docs/DOM/document.evaluate
@@ -155,10 +154,10 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
 
          snapshotLength 要配合 XPathResult.ORDERED_NODE_SNAPSHOT_TYPE 使用
          */
-        var text_nodes = document.evaluate(xpath_query, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        var text_nodes = document.evaluate(xpath_query, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
         var nodes_length = text_nodes.snapshotLength;
-
+        console.log(nodes_length);
         var next_text_node;
 
         // 從最下面、最裡面的節點開始
@@ -327,6 +326,16 @@ var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
 
         return had_spacing;
     };
+    
+    pangu.inserted_page_spacing = function(contextNode) {
+        var inserted_query = './/*/text()[normalize-space(.)]';
+        ['script', 'style', 'textarea'].forEach(function(tag) {
+            inserted_query += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
+        });
+        var had_spacing = spacing(inserted_query, contextNode);
+
+        return had_spacing;
+    };
 
 }(window.pangu = window.pangu || {}));
 
@@ -334,8 +343,6 @@ function go_spacing() {
     is_spacing = true;
     pangu.page_spacing();
     is_spacing = false;
-
-    last_spacing_time = new Date().getTime();
 }
 
 go_spacing();
@@ -344,19 +351,16 @@ go_spacing();
  這一段是為了對付那些 AJAX 加載進來的內容
  當頁面 DOM 有變動時
  就再執行一次 spacing
-
- 要怎麼分辨由 AJAX 引起的 DOM insert 和 spacing 造成的 DOM insert？
- 只好設置一個 timeout 時間
  */
-var spacing_timer;
-document.addEventListener('DOMNodeInserted', function() {
+
+function inserted_go_spacing(node) {
+    is_spacing = true;
+    pangu.inserted_page_spacing(node);
+    is_spacing = false;
+}
+
+document.addEventListener('DOMNodeInserted', function(e) {
     if (!is_spacing) {
-        var interval = new Date().getTime() - last_spacing_time;
-        if (interval >= 800) {
-            clearTimeout(spacing_timer);
-            spacing_timer = setTimeout(function() {
-                go_spacing();
-            }, 500);
-        }
+        inserted_go_spacing(e.target);        
     }
 }, false);
