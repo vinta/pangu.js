@@ -143,10 +143,12 @@ var is_spacing = false; // 是不是正在插入空格？
         return text;
     }
 
-    function spacing(xpath_query, contextNode) {
-        contextNode = contextNode || document;
+    function spacing(xpath_query, context_node) {
+        context_node = context_node || document;
+
         // 是否加了空格
         var had_spacing = false;
+
         /*
          因為 xpath_query 用的是 text()，所以這些 nodes 是 text 而不是 DOM element
          https://developer.mozilla.org/en-US/docs/DOM/document.evaluate
@@ -154,10 +156,9 @@ var is_spacing = false; // 是不是正在插入空格？
 
          snapshotLength 要配合 XPathResult.ORDERED_NODE_SNAPSHOT_TYPE 使用
          */
-        var text_nodes = document.evaluate(xpath_query, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        var text_nodes = document.evaluate(xpath_query, context_node, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
         var nodes_length = text_nodes.snapshotLength;
-        console.log(nodes_length);
         var next_text_node;
 
         // 從最下面、最裡面的節點開始
@@ -326,13 +327,13 @@ var is_spacing = false; // 是不是正在插入空格？
 
         return had_spacing;
     };
-    
-    pangu.inserted_page_spacing = function(contextNode) {
+
+    pangu.inserted_page_spacing = function(context_node) {
         var inserted_query = './/*/text()[normalize-space(.)]';
         ['script', 'style', 'textarea'].forEach(function(tag) {
             inserted_query += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
         });
-        var had_spacing = spacing(inserted_query, contextNode);
+        var had_spacing = spacing(inserted_query, context_node);
 
         return had_spacing;
     };
@@ -352,7 +353,6 @@ go_spacing();
  當頁面 DOM 有變動時
  就再執行一次 spacing
  */
-
 function inserted_go_spacing(node) {
     is_spacing = true;
     pangu.inserted_page_spacing(node);
@@ -361,6 +361,7 @@ function inserted_go_spacing(node) {
 
 document.addEventListener('DOMNodeInserted', function(e) {
     if (!is_spacing) {
-        inserted_go_spacing(e.target);        
+        // 只對有變動的 DOM 做 spacing
+        inserted_go_spacing(e.target);
     }
 }, false);
