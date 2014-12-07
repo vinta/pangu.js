@@ -1,4 +1,5 @@
 var is_spacing = false; // 是不是正在插入空格？
+var already_bind = false;
 
 function go_page_spacing() {
     console.log('go_page_spacing()');
@@ -10,8 +11,16 @@ function go_page_spacing() {
     return _had_spacing;
 }
 
-function go_inserted_page_spacing(node) {
+function go_node_spacing(node) {
     console.log('go_inserted_page_spacing()');
+    // console.log('node: %O', node);
+    console.log('node.textContent: %O', node.textContent);
+    // console.log('node.data: %O', node.data);
+    // console.log('node.innerHTML: %O', node.innerHTML);
+
+    if (!node.textContent) {
+        return false;
+    }
 
     is_spacing = true;
     var _had_spacing = pangu.inserted_page_spacing(node);
@@ -42,7 +51,7 @@ var SAY_HELLOS = [
     '空格之神 姍姍來遲',
     '空格之神 完美落地',
     '空格之神 粉墨登場！',
-    '空格之神 旋風登場！',
+    '空格之神 颯爽登場！',
     '空格之神 強勢登場！',
     '空格之神 強勢回歸！',
     '空格之神 在此聽候差遣',
@@ -50,6 +59,7 @@ var SAY_HELLOS = [
     '空格之神：寶傑好，大家好，各位觀眾朋友晚安',
     '空格之神：歐啦歐啦歐啦歐啦歐啦',
     '空格之神：你知不知道什麼是噹噹噹噹噹噹噹？',
+    '空格之神：悄悄的我走了，正如我悄悄的來',
     '有請...... 空格之神！',
     '遭遇！野生的空格之神！',
     '就決定是你了！空格之神！',
@@ -81,6 +91,8 @@ function ask_can_notify(just_notify) {
 }
 
 function ask_can_spacing() {
+    console.log('ask_can_spacing()');
+
     chrome.runtime.sendMessage({purpose: 'can_spacing'},
         function(response) {
             console.log('can_spacing: %O', response.result);
@@ -94,16 +106,21 @@ function ask_can_spacing() {
                 }
 
                 /*
-                 這一段是為了對付那些 AJAX 加載進來的內容
+                 這一段是為了對付那些透過 JS 動態修改或 AJAX 加載的內容
                  當頁面 DOM 有變動時
                  就再執行一次 spacing
                  */
-                document.body.addEventListener('DOMNodeInserted', function(e) {
-                    if (!is_spacing) {
-                        // 只對有變動的 DOM 做 spacing
-                        go_inserted_page_spacing(e.target);
-                    }
-                }, false);
+                if (!already_bind) {
+                    // document.body.addEventListener('DOMNodeInserted', function(e) {
+                    document.body.addEventListener('DOMSubtreeModified', function(e) {
+                        if (!is_spacing) {
+                            // 只對新增的 DOM 做 spacing
+                            go_node_spacing(e.target);
+                        }
+                    }, false);
+
+                    already_bind = true;
+                }
             }
         }
     );

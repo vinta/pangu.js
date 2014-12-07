@@ -119,6 +119,9 @@ input[type=text] {
     .options_footer p.copyleft {
       margin-top: 30px; }
 
+.popup_body {
+  font-size: 100%; }
+
 .popup_container {
   padding: 0 20px 0 20px;
   text-align: center;
@@ -133,3 +136,5 @@ input[type=text] {
   text-align: center; }
   .popup_footer p {
     font-size: 90%; }
+
+/*# sourceMappingURL=styles.css.map */

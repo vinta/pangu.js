@@ -11,8 +11,8 @@ var DEFAULT_SETTINGS = {
     'blacklists': [
         '//drive.google.com',
         '//docs.google.com',
-        'http://vinta.ws',
-        'http://heelsfetishism.com'
+        '//vinta.ws',
+        '//heelsfetishism.com'
     ],
     'whitelists': [],
     'is_mute': false,
@@ -72,6 +72,10 @@ merge_settings();
 
 // 判斷能不能對這個頁面插入空格
 function can_spacing(tab) {
+    if (tab === undefined) {
+        return false;
+    }
+
     if (CACHED_SETTINGS['spacing_mode'] === 'spacing_when_load') {
         var current_url = tab.url;
 
