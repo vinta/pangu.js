@@ -1,7 +1,7 @@
 {
   "name": "pangu",
-  "version": "2.3.4",
-  "description": "Insert a white space between full-width characters (Chinese, Japanese, etc.) and half-width alphanumerics. For good readability.",
+  "version": "2.4.0",
+  "description": "Paranoid text spacing for good readability, to automatically insert whitespace between CJK (Chinese, Japanese, Korean), half-width English, digit and symbol characters.",
   "keywords": [
     "alphanumerics",
     "chinese",
@@ -9,7 +9,7 @@
     "space",
     "spacing",
     "text",
-    "white",
+    "whitespace",
     "xpath"
   ],
   "main": "src/pangu.js",

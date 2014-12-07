@@ -1,5 +1,8 @@
 var is_spacing = false; // 是不是正在插入空格？
-var already_bind = false;
+var already_bind = false; // 是不是已經對 document 綁定過 event？
+var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
+var spacing_timer;
+var node_hash = {};
 
 function go_page_spacing() {
     console.log('go_page_spacing()');
@@ -8,13 +11,15 @@ function go_page_spacing() {
     var _had_spacing = pangu.page_spacing();
     is_spacing = false;
 
+    last_spacing_time = new Date().getTime();
+
     return _had_spacing;
 }
 
 function go_node_spacing(node) {
-    console.log('go_inserted_page_spacing()');
+    console.log('go_node_spacing()');
     // console.log('node: %O', node);
-    console.log('node.textContent: %O', node.textContent);
+    // console.log('node.textContent: %O', node.textContent);
     // console.log('node.data: %O', node.data);
     // console.log('node.innerHTML: %O', node.innerHTML);
 
@@ -25,6 +30,8 @@ function go_node_spacing(node) {
     is_spacing = true;
     var _had_spacing = pangu.inserted_page_spacing(node);
     is_spacing = false;
+
+    last_spacing_time = new Date().getTime();
 
     return _had_spacing;
 }
@@ -112,10 +119,47 @@ function ask_can_spacing() {
                  */
                 if (!already_bind) {
                     // document.body.addEventListener('DOMNodeInserted', function(e) {
+                    // document.body.addEventListener('DOMSubtreeModified', function() {
+                    //     if (!is_spacing) {
+                    //         var interval = new Date().getTime() - last_spacing_time;
+                    //         if (interval >= 100) {
+                    //             clearTimeout(spacing_timer);
+                    //             spacing_timer = setTimeout(function() {
+                    //                 go_page_spacing();
+                    //             }, 500);
+                    //         }
+                    //     }
+                    // }, false);
+
+                    // document.body.addEventListener('DOMSubtreeModified', function(e) {
+                    //     if (!is_spacing) {
+                    //         var node = e.target;
+                    //         go_node_spacing(node);
+                    //     }
+                    // }, false);
+
                     document.body.addEventListener('DOMSubtreeModified', function(e) {
                         if (!is_spacing) {
-                            // 只對新增的 DOM 做 spacing
-                            go_node_spacing(e.target);
+                            setTimeout(function() {
+                                var node = e.target;
+                                var id = node.id;
+                                // console.log('id: %O', id);
+
+                                if (id) {
+                                    var _spacing_timer = node_hash[id];
+                                    clearTimeout(_spacing_timer);
+                                    node_hash[id] = setTimeout(function() {
+                                        go_node_spacing(node);
+                                    }, 10);
+                                }
+                                else {
+                                    console.log('no id');
+                                    go_node_spacing(node);
+                                }
+
+                                // console.log('node_hash');
+                                // console.log(node_hash);
+                            }, 500);
                         }
                     }, false);
 
