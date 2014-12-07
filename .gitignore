@@ -3,6 +3,7 @@ browser_extensions/chrome_dist/
 browser_extensions/chrome_dist.zip
 coverage/
 node_modules/
-*.pem
+.sass-cache/
 .DS_STORE
 .tern-port
+*.pem
