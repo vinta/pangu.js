@@ -53,6 +53,7 @@ $ bower install pangu
 You need to install [Node.js](http://vinta.ws/code/install-node-js-via-nvm.html).
 
 ``` bash
+$ gem install sass
 $ npm install -g grunt-cli
 $ npm install
 $ grunt test
@@ -74,7 +75,7 @@ Released under the [MIT License](http://opensource.org/licenses/MIT).
 ## Related Projects
 
 * Emacs: [pangu-spacing](http://coldnew.github.io/blog/2013/05/20_5cbb7.html)
+* JavaScript: [为什么我就是能这样娴熟地加上空格呢？](https://github.com/Dustland/daft-auto-spacing)
 * Ruby: [auto-correct](https://github.com/huacnlee/auto-correct)
 * WordPress: [Space Lover](https://wordpress.org/plugins/space-lover/)
 * 知乎: [Mountain Reviewer](http://zhuanlan.zhihu.com/pointless/19744560)
-* Plain Text: [为什么我就是能这样娴熟地加上空格呢？](https://github.com/Dustland/daft-auto-spacing)
