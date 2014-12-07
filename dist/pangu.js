@@ -110,21 +110,21 @@
 
         // 前面<字>後面 --> 前面 <字> 後面
         old_text = text;
-        new_text = old_text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([<\[\{\(]+(.*?)[>\]\}\)]+)([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2 $4');
+        new_text = old_text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([<\[\{\(\u201c]+(.*?)[>\]\}\)\u201d]+)([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2 $4');
         text = new_text;
         if (old_text === new_text) {
             // 前面<後面 --> 前面 < 後面
-            text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([<>\[\]\{\}\(\)])/ig, '$1 $2');
-            text = text.replace(/([<>\[\]\{\}\(\)])([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2');
+            text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([<>\[\]\{\}\(\)\u201c\u201d])/ig, '$1 $2');
+            text = text.replace(/([<>\[\]\{\}\(\)\u201c\u201d])([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2');
         }
         // 避免出現 "前面 [ 字] 後面" 之類的不對稱的情況
-        text = text.replace(/([<\[\{\(]+)(\s*)(.+?)(\s*)([>\]\}\)]+)/ig, '$1$3$5');
+        text = text.replace(/([<\[\{\(\u201c]+)(\s*)(.+?)(\s*)([>\]\}\)\u201d]+)/ig, '$1$3$5');
 
         // 中文在前
-        text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([a-z0-9`~@\$%\^&\*\-_\+=\|\\\/\u2150-\u218f])/ig, '$1 $2');
+        text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([a-z0-9`~@\$%\^&\*\-_\+=\|\\\/\u0080-\u00ff\u2022\u2150-\u218f])/ig, '$1 $2');
 
         // 中文在後
-        text = text.replace(/([a-z0-9`~!\$%\^&\*\-_\+=\|\\;\:\,\.\/\?\u2150-\u218f])([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2');
+        text = text.replace(/([a-z0-9`~!\$%\^&\*\-_\+=\|\\;\:\,\.\/\?\u0080-\u00ff\u2022\u2150-\u218f])([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2');
 
         return text;
     }
