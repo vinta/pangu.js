@@ -135,6 +135,21 @@ module.exports = function(grunt) {
             }
         },
 
+        sass: {
+            common: {
+                options: {
+                    style: 'nested'
+                },
+                files: [{
+                    expand: true,
+                    cwd: 'browser_extensions/chrome/stylesheets/',
+                    src: ['*.scss'],
+                    dest: 'browser_extensions/chrome/stylesheets/',
+                    ext: '.css'
+                }]
+            }
+        },
+
         // remove console.log()
         strip: {
             common: {
@@ -180,6 +195,7 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-karma');
@@ -188,6 +204,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('dev', [
         'clean:dev',
+        'sass:common',
         'strip:common',
         'copy:dev',
         'karma'
@@ -195,6 +212,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('dist', [
         'clean:dist',
+        'sass:common',
         'strip:common',
         'uglify',
         'copy:dist',
