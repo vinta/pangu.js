@@ -22,7 +22,7 @@
      */
     function can_ignore_node(node) {
         var parent_node = node.parentNode;
-        while (parent_node.nodeName.search(/^(html|head|body|#document)$/i) === -1) {
+        while (parent_node && parent_node.nodeName && parent_node.nodeName.search(/^(html|head|body|#document)$/i) === -1) {
             if ((parent_node.getAttribute('contenteditable') === 'true') || (parent_node.getAttribute('g_editable') === 'true')) {
                 return true;
             }
@@ -129,7 +129,9 @@
         return text;
     }
 
-    function spacing(xpath_query) {
+    function spacing(xpath_query, context_node) {
+        context_node = context_node || document;
+
         // 是否加了空格
         var had_spacing = false;
 
@@ -140,7 +142,7 @@
 
          snapshotLength 要配合 XPathResult.ORDERED_NODE_SNAPSHOT_TYPE 使用
          */
-        var text_nodes = document.evaluate(xpath_query, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        var text_nodes = document.evaluate(xpath_query, context_node, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
         var nodes_length = text_nodes.snapshotLength;
 
@@ -336,6 +338,17 @@
         return had_spacing;
     };
 
+    pangu.node_spacing = function(context_node) {
+        var inserted_query = './/*/text()[normalize-space(.)]';
+        ['script', 'style', 'textarea'].forEach(function(tag) {
+            inserted_query += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
+        });
+        var had_spacing = spacing(inserted_query, context_node);
+
+        return had_spacing;
+    };
+
+    // TODO: 用 node_spacing() 來實作 element_spacing()
     pangu.element_spacing = function(selector_string) {
         var xpath_query;
 
