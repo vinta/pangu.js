@@ -328,7 +328,7 @@ var is_spacing = false; // 是不是正在插入空格？
         return had_spacing;
     };
 
-    pangu.inserted_page_spacing = function(context_node) {
+    pangu.node_spacing = function(context_node) {
         var inserted_query = './/*/text()[normalize-space(.)]';
         ['script', 'style', 'textarea'].forEach(function(tag) {
             inserted_query += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
@@ -355,7 +355,7 @@ go_spacing();
  */
 function inserted_go_spacing(node) {
     is_spacing = true;
-    pangu.inserted_page_spacing(node);
+    pangu.node_spacing(node);
     is_spacing = false;
 }
 

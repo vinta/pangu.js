@@ -338,7 +338,7 @@
         return had_spacing;
     };
 
-    pangu.inserted_page_spacing = function(context_node) {
+    pangu.node_spacing = function(context_node) {
         var inserted_query = './/*/text()[normalize-space(.)]';
         ['script', 'style', 'textarea'].forEach(function(tag) {
             inserted_query += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
@@ -348,6 +348,7 @@
         return had_spacing;
     };
 
+    // TODO: 用 node_spacing() 來實作 element_spacing()
     pangu.element_spacing = function(selector_string) {
         var xpath_query;
 
