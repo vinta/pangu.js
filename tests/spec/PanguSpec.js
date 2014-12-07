@@ -26,14 +26,24 @@ describe('pangu', function() {
 
   describe('text_spacing()', function() {
 
-    it('不處理 _ 符號', function() {
+    // it('不處理 _ 符號', function() {
+    //   var new_text = pangu.text_spacing('前面_後面');
+    //   expect(new_text).toEqual('前面_後面');
+    // });
+
+    it('處理 _ 符號', function() {
       var new_text = pangu.text_spacing('前面_後面');
-      expect(new_text).toEqual('前面_後面');
+      expect(new_text).toEqual('前面 _ 後面');
     });
+
+    // it('處理 ~ 符號', function() {
+    //   var new_text = pangu.text_spacing('前面~後面');
+    //   expect(new_text).toEqual('前面~ 後面');
+    // });
 
     it('處理 ~ 符號', function() {
       var new_text = pangu.text_spacing('前面~後面');
-      expect(new_text).toEqual('前面~ 後面');
+      expect(new_text).toEqual('前面 ~ 後面');
     });
 
     it('處理 ! 符號', function() {

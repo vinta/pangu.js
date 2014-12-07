@@ -121,10 +121,10 @@
         text = text.replace(/([<\[\{\(]+)(\s*)(.+?)(\s*)([>\]\}\)]+)/ig, '$1$3$5');
 
         // 中文在前
-        text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([a-z0-9`@&%=\$\^\*\-\+\|\/\\])/ig, '$1 $2');
+        text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([a-z0-9`~@\$%\^&\*\-_\+=\|\\\/\u2150-\u218f])/ig, '$1 $2');
 
         // 中文在後
-        text = text.replace(/([a-z0-9`~!%&=;\|\,\.\:\?\$\^\*\-\+\/\\])([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2');
+        text = text.replace(/([a-z0-9`~!\$%\^&\*\-_\+=\|\\;\:\,\.\/\?\u2150-\u218f])([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2');
 
         return text;
     }
