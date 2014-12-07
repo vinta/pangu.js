@@ -10,10 +10,11 @@
     <script src="../js/utils_chrome.js"></script>
     <script src="../js/popup.js"></script>
 </head>
-<body ng-controller="PopupController">
+<body ng-controller="PopupController" class="popup_body">
     <div class="popup_container">
         <h1 id="god_of_spacing">空格之神</h1>
         <input ng-click="change_spacing_mode()" class="pure-button pure-button-primary" type="button" value="{{ spacing_mode_display }}" />
+        <br />
         <input ng-click="call_god_of_spacing()" class="pure-button pure-button-purple" type="button" value="{{ call_god_of_spacing_display }}" />
     </div>
     <div class="popup_footer">
