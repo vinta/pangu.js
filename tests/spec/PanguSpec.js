@@ -26,16 +26,6 @@ describe('pangu', function() {
 
   describe('text_spacing()', function() {
 
-    // it('不處理 _ 符號', function() {
-    //   var new_text = pangu.text_spacing('前面_後面');
-    //   expect(new_text).toEqual('前面_後面');
-    // });
-
-    it('處理 _ 符號', function() {
-      var new_text = pangu.text_spacing('前面_後面');
-      expect(new_text).toEqual('前面 _ 後面');
-    });
-
     // it('處理 ~ 符號', function() {
     //   var new_text = pangu.text_spacing('前面~後面');
     //   expect(new_text).toEqual('前面~ 後面');
@@ -46,34 +36,14 @@ describe('pangu', function() {
       expect(new_text).toEqual('前面 ~ 後面');
     });
 
+    it('處理 ` 符號', function() {
+      var new_text = pangu.text_spacing('前面`後面');
+      expect(new_text).toEqual('前面 ` 後面');
+    });
+
     it('處理 ! 符號', function() {
       var new_text = pangu.text_spacing('前面!後面');
       expect(new_text).toEqual('前面! 後面');
-    });
-
-    it('處理 ? 符號', function() {
-      var new_text = pangu.text_spacing('前面?後面');
-      expect(new_text).toEqual('前面? 後面');
-    });
-
-    it('處理 : 符號', function() {
-      var new_text = pangu.text_spacing('前面:後面');
-      expect(new_text).toEqual('前面: 後面');
-    });
-
-    it('處理 ; 符號', function() {
-      var new_text = pangu.text_spacing('前面;後面');
-      expect(new_text).toEqual('前面; 後面');
-    });
-
-    it('處理 , 符號', function() {
-      var new_text = pangu.text_spacing('前面,後面');
-      expect(new_text).toEqual('前面, 後面');
-    });
-
-    it('處理 . 符號', function() {
-      var new_text = pangu.text_spacing('前面.後面');
-      expect(new_text).toEqual('前面. 後面');
     });
 
     // ex: Twitter，不如就來 follow 一下 https://twitter.com/vinta
@@ -144,41 +114,6 @@ describe('pangu', function() {
       expect(new_text).toEqual('前面 * 後面');
     });
 
-    it('處理 ` 符號', function() {
-      var new_text = pangu.text_spacing('前面`後面');
-      expect(new_text).toEqual('前面 ` 後面');
-    });
-
-    it('處理 + 符號', function() {
-      var new_text = pangu.text_spacing('前面+後面');
-      expect(new_text).toEqual('前面 + 後面');
-    });
-
-    it('處理 - 符號', function() {
-      var new_text = pangu.text_spacing('前面-後面');
-      expect(new_text).toEqual('前面 - 後面');
-    });
-
-    it('處理 = 符號', function() {
-      var new_text = pangu.text_spacing('前面=後面');
-      expect(new_text).toEqual('前面 = 後面');
-    });
-
-    it('處理 | 符號', function() {
-      var new_text = pangu.text_spacing('前面|後面');
-      expect(new_text).toEqual('前面 | 後面');
-    });
-
-    it('處理 / 符號', function() {
-      var new_text = pangu.text_spacing('前面/後面');
-      expect(new_text).toEqual('前面 / 後面');
-    });
-
-    it('處理 \\ 符號', function() {
-      var new_text = pangu.text_spacing('前面\\後面');
-      expect(new_text).toEqual('前面 \\ 後面');
-    });
-
     it('處理 ( 符號', function() {
       var new_text = pangu.text_spacing('前面(後面');
       expect(new_text).toEqual('前面 ( 後面');
@@ -219,6 +154,46 @@ describe('pangu', function() {
       expect(new_text).toEqual('前面 ( ) then');
     });
 
+    it('處理 - 符號', function() {
+      var new_text = pangu.text_spacing('前面-後面');
+      expect(new_text).toEqual('前面 - 後面');
+    });
+
+    it('不處理 _ 符號', function() {
+      var new_text = pangu.text_spacing('前面_後面');
+      expect(new_text).toEqual('前面_後面');
+    });
+
+    // it('處理 _ 符號 之一', function() {
+    //   var new_text = pangu.text_spacing('前面_後面');
+    //   expect(new_text).toEqual('前面 _ 後面');
+    // });
+
+    // it('處理 _ 符號 之二', function() {
+    //   var new_text = pangu.text_spacing('前面__後面');
+    //   expect(new_text).toEqual('前面 __ 後面');
+    // });
+
+    it('處理 + 符號', function() {
+      var new_text = pangu.text_spacing('前面+後面');
+      expect(new_text).toEqual('前面 + 後面');
+    });
+
+    it('處理 = 符號', function() {
+      var new_text = pangu.text_spacing('前面=後面');
+      expect(new_text).toEqual('前面 = 後面');
+    });
+
+    it('處理 { 符號', function() {
+      var new_text = pangu.text_spacing('前面{後面');
+      expect(new_text).toEqual('前面 { 後面');
+    });
+
+    it('處理 } 符號', function() {
+      var new_text = pangu.text_spacing('前面}後面');
+      expect(new_text).toEqual('前面 } 後面');
+    });
+
     it('處理 [ 符號', function() {
       var new_text = pangu.text_spacing('前面[後面');
       expect(new_text).toEqual('前面 [ 後面');
@@ -254,29 +229,24 @@ describe('pangu', function() {
       expect(new_text).toEqual('前面 [123 中文] then');
     });
 
-    it('處理 { 符號', function() {
-      var new_text = pangu.text_spacing('前面{後面');
-      expect(new_text).toEqual('前面 { 後面');
+    it('處理 | 符號', function() {
+      var new_text = pangu.text_spacing('前面|後面');
+      expect(new_text).toEqual('前面 | 後面');
     });
 
-    it('處理 } 符號', function() {
-      var new_text = pangu.text_spacing('前面}後面');
-      expect(new_text).toEqual('前面 } 後面');
+    it('處理 \\ 符號', function() {
+      var new_text = pangu.text_spacing('前面\\後面');
+      expect(new_text).toEqual('前面 \\ 後面');
     });
 
-    it('處理 < 符號', function() {
-      var new_text = pangu.text_spacing('前面<後面');
-      expect(new_text).toEqual('前面 < 後面');
+    it('處理 : 符號', function() {
+      var new_text = pangu.text_spacing('前面:後面');
+      expect(new_text).toEqual('前面: 後面');
     });
 
-    it('處理 > 符號', function() {
-      var new_text = pangu.text_spacing('前面>後面');
-      expect(new_text).toEqual('前面 > 後面');
-    });
-
-    it('處理 <XXX>', function() {
-      var new_text = pangu.text_spacing('前面<中文123漢字>後面');
-      expect(new_text).toEqual('前面 <中文 123 漢字> 後面');
+    it('處理 ; 符號', function() {
+      var new_text = pangu.text_spacing('前面;後面');
+      expect(new_text).toEqual('前面; 後面');
     });
 
     it('處理 "XXX" 之一', function() {
@@ -302,6 +272,41 @@ describe('pangu', function() {
     it("處理 ' 符號", function() {
       var new_text = pangu.text_spacing("陳上進 likes 林依諾's status.");
       expect(new_text).toEqual("陳上進 likes 林依諾's status.");
+    });
+
+    it('處理 < 符號', function() {
+      var new_text = pangu.text_spacing('前面<後面');
+      expect(new_text).toEqual('前面 < 後面');
+    });
+
+    it('處理 > 符號', function() {
+      var new_text = pangu.text_spacing('前面>後面');
+      expect(new_text).toEqual('前面 > 後面');
+    });
+
+    it('處理 <XXX>', function() {
+      var new_text = pangu.text_spacing('前面<中文123漢字>後面');
+      expect(new_text).toEqual('前面 <中文 123 漢字> 後面');
+    });
+
+    it('處理 , 符號', function() {
+      var new_text = pangu.text_spacing('前面,後面');
+      expect(new_text).toEqual('前面, 後面');
+    });
+
+    it('處理 . 符號', function() {
+      var new_text = pangu.text_spacing('前面.後面');
+      expect(new_text).toEqual('前面. 後面');
+    });
+
+    it('處理 ? 符號', function() {
+      var new_text = pangu.text_spacing('前面?後面');
+      expect(new_text).toEqual('前面? 後面');
+    });
+
+    it('處理 / 符號', function() {
+      var new_text = pangu.text_spacing('前面/後面');
+      expect(new_text).toEqual('前面 / 後面');
     });
 
   });
