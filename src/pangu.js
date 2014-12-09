@@ -98,10 +98,10 @@
          */
 
         // 前面"字"後面 >> 前面 "字" 後面
-        text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])(["'])/ig, '$1 $2');
-        text = text.replace(/(["'])([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2');
+        text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])(["])/ig, '$1 $2');
+        text = text.replace(/(["])([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2');
 
-        // 避免出現 '前面 " 字" 後面' 之類的不對稱的情況
+        // 避免出現「前面 " 字" 後面」之類的引號內空格不對稱的情況
         text = text.replace(/(["']+)(\s*)(.+?)(\s*)(["']+)/ig, '$1$3$5');
 
         // # 符號需要特別處理
@@ -117,7 +117,7 @@
             text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([<>\[\]\{\}\(\)\u201c\u201d])/ig, '$1 $2');
             text = text.replace(/([<>\[\]\{\}\(\)\u201c\u201d])([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2');
         }
-        // 避免出現 "前面 [ 字] 後面" 之類的不對稱的情況
+        // 避免出現「前面 [ 字] 後面」之類的不對稱的情況
         text = text.replace(/([<\[\{\(\u201c]+)(\s*)(.+?)(\s*)([>\]\}\)\u201d]+)/ig, '$1$3$5');
 
         // 中文在前
@@ -125,6 +125,9 @@
 
         // 中文在後
         text = text.replace(/([a-z0-9`~!\$%\^&\*\-_\+=\|\\;\:\,\.\/\?\u0080-\u00ff\u2022\u2150-\u218f])([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2');
+
+        // 避免出現「陳上進's something」的 's 前面被加了空格
+        text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])( )(')([a-z])/ig, '$1$3$4');
 
         return text;
     }

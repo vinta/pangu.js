@@ -98,7 +98,7 @@
          */
 
         // 前面"字"後面 >> 前面 "字" 後面
-        text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])(["'])/ig, '$1 $2');
+        text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])(["])/ig, '$1 $2');
         text = text.replace(/(["'])([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2');
 
         // 避免出現 '前面 " 字" 後面' 之類的不對稱的情況
@@ -125,6 +125,9 @@
 
         // 中文在後
         text = text.replace(/([a-z0-9`~!\$%\^&\*\-_\+=\|\\;\:\,\.\/\?\u0080-\u00ff\u2022\u2150-\u218f])([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/ig, '$1 $2');
+
+        // 避免 "陳上進's something" 的 's 之前被加了空格
+        text = text.replace(/([\u3040-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])( )(')([a-z])/ig, '$1$3$4');
 
         return text;
     }

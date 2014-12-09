@@ -299,6 +299,11 @@ describe('pangu', function() {
       expect(new_text).toEqual('前面 " " 後面');
     });
 
+    it("處理 ' 符號", function() {
+      var new_text = pangu.text_spacing("陳上進 likes 林依諾's status.");
+      expect(new_text).toEqual("陳上進 likes 林依諾's status.");
+    });
+
   });
 
   describe('page_spacing()', function() {
