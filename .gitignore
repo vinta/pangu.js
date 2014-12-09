@@ -1,6 +1,7 @@
 browser_extensions/chrome_dev/
 browser_extensions/chrome_dist/
-browser_extensions/chrome_dist.zip
+browser_extensions/paranoid-auto-spacing/
+browser_extensions/paranoid-auto-spacing.zip
 coverage/
 node_modules/
 .sass-cache/

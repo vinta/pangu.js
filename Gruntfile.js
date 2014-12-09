@@ -8,14 +8,13 @@ module.exports = function(grunt) {
         clean: {
             dev: [
                 'coverage/',
-                'browser_extensions/chrome_dev/',
-                'browser_extensions/chrome_dist/'
+                'browser_extensions/chrome_dev/'
             ],
             dist: [
                 'coverage/',
                 'dist/',
-                'browser_extensions/chrome_dev/',
-                'browser_extensions/chrome_dist/'
+                'browser_extensions/chrome_dist/',
+                'browser_extensions/paranoid-auto-spacing'
             ]
         },
 
@@ -63,10 +62,22 @@ module.exports = function(grunt) {
                             'manifest.json'
                         ],
                         dest: 'browser_extensions/chrome_dist/'
+                    }
+                ]
+            },
+            pack: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: 'browser_extensions/chrome_dist/',
+                        src: [
+                            '**/*'
+                        ],
+                        dest: 'browser_extensions/paranoid-auto-spacing/'
                     },
                     {
                         src: '/Users/vinta/Dropbox/Projects/paranoid-auto-spacing/key.pem',
-                        dest: 'browser_extensions/chrome_dist/key.pem'
+                        dest: 'browser_extensions/paranoid-auto-spacing/key.pem'
                     }
                 ]
             }
@@ -218,6 +229,11 @@ module.exports = function(grunt) {
         'copy:dist',
         'strip:dist_chrome',
         'karma'
+    ]);
+
+    grunt.registerTask('pack', [
+        'dist',
+        'copy:pack'
     ]);
 
     grunt.registerTask('test', [
