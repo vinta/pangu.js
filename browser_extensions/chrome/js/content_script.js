@@ -7,12 +7,12 @@ function go_page_spacing() {
     console.log('go_page_spacing()');
 
     is_spacing = true;
-    var _had_spacing = pangu.page_spacing();
+    var had_spacing = pangu.page_spacing();
     is_spacing = false;
 
     // last_spacing_time = new Date().getTime();
 
-    return _had_spacing;
+    return had_spacing;
 }
 
 function go_node_spacing(node) {
@@ -27,12 +27,12 @@ function go_node_spacing(node) {
     }
 
     is_spacing = true;
-    var _had_spacing = pangu.node_spacing(node);
+    var had_spacing = pangu.node_spacing(node);
     is_spacing = false;
 
     // last_spacing_time = new Date().getTime();
 
-    return _had_spacing;
+    return had_spacing;
 }
 
 var SAY_HELLOS = [
@@ -53,6 +53,7 @@ var SAY_HELLOS = [
     '空格之神 合流！',
     '空格之神 久違了',
     '空格之神 作用中',
+    '空格之神 接近中',
     '空格之神 小別勝新婚',
     '空格之神 姍姍來遲',
     '空格之神 完美落地',
@@ -133,12 +134,15 @@ function ask_can_spacing() {
                     // document.body.addEventListener('DOMSubtreeModified', function(e) {
                     //     if (!is_spacing) {
                     //         var node = e.target;
+                    //         pangu.page_title_spacing();
                     //         go_node_spacing(node);
                     //     }
                     // }, false);
 
                     document.body.addEventListener('DOMSubtreeModified', function(e) {
                         if (!is_spacing) {
+                            pangu.page_title_spacing();
+
                             // 一開始拿到的 e.target 似乎不會是最終的 node，所以設個 timer
                             setTimeout(function() {
                                 var node = e.target;

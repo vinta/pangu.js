@@ -279,6 +279,13 @@
         return insert_space(text);
     };
 
+    pangu.page_title_spacing = function() {
+        var title_query = '/html/head/title/text()';
+        var had_spacing = spacing(title_query);
+
+        return had_spacing;
+    };
+
     pangu.page_spacing = function() {
         // var p = 'page_spacing';
         // console.profile(p);
@@ -314,8 +321,7 @@
 
          注意，以下的 query 只會取出各節點的 text 內容！
          */
-        var title_query = '/html/head/title/text()';
-        spacing(title_query);
+        var had_spacing_title = pangu.page_title_spacing();
 
         // var body_query = '/html/body//*[not(@contenteditable)]/text()[normalize-space(.)]';
         var body_query = '/html/body//*/text()[normalize-space(.)]';
@@ -328,14 +334,14 @@
              */
             body_query += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
         });
-        var had_spacing = spacing(body_query);
+        var had_spacing_body = spacing(body_query);
 
         // console.profileEnd(p);
         // console.timeEnd(p);
         // var end = new Date().getTime();
         // console.log(end - start);
 
-        return had_spacing;
+        return had_spacing_title || had_spacing_body;
     };
 
     pangu.node_spacing = function(context_node) {
