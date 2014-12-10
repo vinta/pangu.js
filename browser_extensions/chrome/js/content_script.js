@@ -4,7 +4,7 @@ var already_bind = false; // 是不是已經對 document 綁定過 event？
 var node_hash = {}; // 避免同一個 DOM node 一直觸發 DOMSubtreeModified
 
 function go_page_spacing() {
-    console.log('go_page_spacing()');
+    // console.log('go_page_spacing()');
 
     is_spacing = true;
     var had_spacing = pangu.page_spacing();
@@ -16,7 +16,7 @@ function go_page_spacing() {
 }
 
 function go_node_spacing(node) {
-    console.log('go_node_spacing()');
+    // console.log('go_node_spacing()');
     // console.log('node: %O', node);
     // console.log('node.textContent: %O', node.textContent);
     // console.log('node.data: %O', node.data);

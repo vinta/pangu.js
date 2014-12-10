@@ -23,10 +23,7 @@
     function can_ignore_node(node) {
         var parent_node = node.parentNode;
         while (parent_node && parent_node.nodeName && parent_node.nodeName.search(/^(html|head|body|#document)$/i) === -1) {
-            if ((parent_node.getAttribute('contenteditable') === 'true') || (parent_node.getAttribute('g_editable') === 'true')) {
-                return true;
-            }
-            else if (parent_node.nodeName.search(ignore_tags) >= 0) {
+            if ((parent_node.getAttribute('contenteditable') === 'true') || (parent_node.getAttribute('g_editable') === 'true') || (parent_node.nodeName.search(ignore_tags) >= 0)) {
                 return true;
             }
             else {
@@ -235,8 +232,11 @@
                                     }
                                 }
                                 else {
-                                    // console.log('spacing 1-2: %O', next_text_node.data);
-                                    next_text_node.data = ' ' + next_text_node.data;
+                                    // TODO: dirty hack
+                                    if (!can_ignore_node(next_text_node)) {
+                                        // console.log('spacing 1-2: %O', next_text_node.data);
+                                        next_text_node.data = ' ' + next_text_node.data;
+                                    }
                                 }
                             }
                         }
