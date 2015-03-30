@@ -81,3 +81,4 @@ Released under the [MIT License](http://opensource.org/licenses/MIT).
 * Vim: [pangu.vim](https://github.com/hotoo/pangu.vim)
 * WordPress: [Space Lover](https://wordpress.org/plugins/space-lover/)
 * 知乎: [Mountain Reviewer](http://zhuanlan.zhihu.com/pointless/19744560)
+* Gulp: [gulp-pangu](https://github.com/7kfpun/gulp-pangu)
