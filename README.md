@@ -24,6 +24,7 @@
 * JavaScript version: [pangu.js](https://github.com/vinta/paranoid-auto-spacing/blob/master/src/pangu.js)
 * Node.js version: [pangu.node](https://github.com/huei90/pangu.node)
 * Python version: [pangu.py](https://github.com/vinta/pangu.py)
+* Ruby version: [pangu.rb](https://github.com/dlackty/pangu.rb)
 
 ![Pangu](https://raw.github.com/vinta/paranoid-auto-spacing/master/browser_extensions/chrome/images/pangu_260.jpg)
 
