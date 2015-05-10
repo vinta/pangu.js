@@ -171,6 +171,7 @@ module.exports = function(grunt) {
                 src: 'browser_extensions/chrome_dist/js/*.js',
                 options: {
                     inline: true
+                    // nodes: ['console.log']
                 }
             }
         },
