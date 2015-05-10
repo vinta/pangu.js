@@ -26,14 +26,15 @@ describe('pangu', function() {
 
   describe('text_spacing()', function() {
 
-    // it('處理 ~ 符號', function() {
-    //   var new_text = pangu.text_spacing('前面~後面');
-    //   expect(new_text).toEqual('前面~ 後面');
-    // });
-
     it('處理 ~ 符號', function() {
       var new_text = pangu.text_spacing('前面~後面');
+      expect(new_text).toEqual('前面~ 後面');
+
+      var new_text = pangu.text_spacing('前面 ~ 後面');
       expect(new_text).toEqual('前面 ~ 後面');
+
+      var new_text = pangu.text_spacing('前面~ 後面');
+      expect(new_text).toEqual('前面~ 後面');
     });
 
     it('處理 ` 符號', function() {
@@ -44,59 +45,59 @@ describe('pangu', function() {
     it('處理 ! 符號', function() {
       var new_text = pangu.text_spacing('前面!後面');
       expect(new_text).toEqual('前面! 後面');
+
+      var new_text = pangu.text_spacing('前面 ! 後面');
+      expect(new_text).toEqual('前面 ! 後面');
+
+      var new_text = pangu.text_spacing('前面!後面');
+      expect(new_text).toEqual('前面! 後面');
     });
 
-    // ex: Twitter，不如就來 follow 一下 https://twitter.com/vinta
-    it('處理 @ 符號：接著英文', function() {
+    it('處理 @ 符號', function() {
+
+      // https://twitter.com/vinta
       var new_text = pangu.text_spacing('請@vinta吃大便');
       expect(new_text).toEqual('請 @vinta 吃大便');
+
+      // http://weibo.com/vintalines
+      var new_text = pangu.text_spacing('請@陳上進 吃大便');
+      expect(new_text).toEqual('請 @陳上進 吃大便');
     });
 
-    // ex: 新浪微博，不如也來 follow 一下 http://weibo.com/vintalines
-    it('處理 @ 符號：接著中文', function() {
-      var new_text = pangu.text_spacing('請@陳上進吃大便');
-      expect(new_text).toEqual('請 @陳上進吃大便');
-    });
-
-    it('處理 # 符號：接著英文', function() {
+    it('處理 # 符號', function() {
       var new_text = pangu.text_spacing('前面#H2G2後面');
       expect(new_text).toEqual('前面 #H2G2 後面');
-    });
 
-    it('處理 # 符號：接著中文 之一', function() {
-      var new_text = pangu.text_spacing('前面#銀河便車指南');
-      expect(new_text).toEqual('前面 #銀河便車指南');
-    });
-
-    it('處理 # 符號：接著中文 之二', function() {
       var new_text = pangu.text_spacing('前面#銀河便車指南 後面');
       expect(new_text).toEqual('前面 #銀河便車指南 後面');
-    });
 
-    it('處理 # 符號：接著中文 之三', function() {
-      var new_text = pangu.text_spacing('前面#銀河公車指南 #銀河卡車指南 後面');
-      expect(new_text).toEqual('前面 #銀河公車指南 #銀河卡車指南 後面');
-    });
+      var new_text = pangu.text_spacing('前面#銀河便車指南 後面');
+      expect(new_text).toEqual('前面 #銀河便車指南 後面');
 
-    // ex: 新浪微博的 hashtag 格式
-    it('處理 #中文#', function() {
-      var new_text = pangu.text_spacing('前面#銀河閃電霹靂車指南#後面');
-      expect(new_text).toEqual('前面 #銀河閃電霹靂車指南# 後面');
-    });
+      var new_text = pangu.text_spacing('前面#銀河公車指南 #銀河拖吊車指南 後面');
+      expect(new_text).toEqual('前面 #銀河公車指南 #銀河拖吊車指南 後面');
 
-    it('處理 #English#', function() {
       var new_text = pangu.text_spacing('前面#H2G2#後面');
       expect(new_text).toEqual('前面 #H2G2# 後面');
+
+      var new_text = pangu.text_spacing('前面#銀河閃電霹靂車指南#後面');
+      expect(new_text).toEqual('前面 #銀河閃電霹靂車指南# 後面');
     });
 
     it('處理 $ 符號', function() {
       var new_text = pangu.text_spacing('前面$後面');
       expect(new_text).toEqual('前面 $ 後面');
+
+      var new_text = pangu.text_spacing('前面$100後面');
+      expect(new_text).toEqual('前面 $100 後面');
     });
 
     it('處理 % 符號', function() {
       var new_text = pangu.text_spacing('前面%後面');
       expect(new_text).toEqual('前面 % 後面');
+
+      var new_text = pangu.text_spacing('前面100%後面');
+      expect(new_text).toEqual('前面 100% 後面');
     });
 
     it('處理 ^ 符號', function() {
@@ -107,56 +108,78 @@ describe('pangu', function() {
     it('處理 & 符號', function() {
       var new_text = pangu.text_spacing('前面&後面');
       expect(new_text).toEqual('前面 & 後面');
+
+      var new_text = pangu.text_spacing('Vinta&Mollie');
+      expect(new_text).toEqual('Vinta&Mollie');
+
+      var new_text = pangu.text_spacing('Vinta&陳上進');
+      expect(new_text).toEqual('Vinta & 陳上進');
+
+      var new_text = pangu.text_spacing('陳上進&Vinta');
+      expect(new_text).toEqual('陳上進 & Vinta');
+
+      var new_text = pangu.text_spacing('得到一個A&B的結果');
+      expect(new_text).toEqual('得到一個 A&B 的結果');
     });
 
     it('處理 * 符號', function() {
       var new_text = pangu.text_spacing('前面*後面');
       expect(new_text).toEqual('前面 * 後面');
+
+      var new_text = pangu.text_spacing('Vinta*Mollie');
+      expect(new_text).toEqual('Vinta*Mollie');
+
+      var new_text = pangu.text_spacing('Vinta*陳上進');
+      expect(new_text).toEqual('Vinta * 陳上進');
+
+      var new_text = pangu.text_spacing('陳上進*Vinta');
+      expect(new_text).toEqual('陳上進 * Vinta');
+
+      var new_text = pangu.text_spacing('得到一個A*B的結果');
+      expect(new_text).toEqual('得到一個 A*B 的結果');
     });
 
-    it('處理 ( 符號', function() {
+    it('處理 ( ) 符號', function() {
       var new_text = pangu.text_spacing('前面(後面');
       expect(new_text).toEqual('前面 ( 後面');
-    });
 
-    it('處理 ) 符號', function() {
       var new_text = pangu.text_spacing('前面)後面');
       expect(new_text).toEqual('前面 ) 後面');
-    });
 
-    it('處理 (XXX) 之一', function() {
       var new_text = pangu.text_spacing('前面(中文123漢字)後面');
       expect(new_text).toEqual('前面 (中文 123 漢字) 後面');
-    });
 
-    it('處理 (XXX) 之二', function() {
       var new_text = pangu.text_spacing('前面(中文123)後面');
       expect(new_text).toEqual('前面 (中文 123) 後面');
-    });
 
-    it('處理 (XXX) 之三', function() {
-      var new_text = pangu.text_spacing('前面(123中文)後面');
-      expect(new_text).toEqual('前面 (123 中文) 後面');
-    });
+      var new_text = pangu.text_spacing('前面(123漢字)後面');
+      expect(new_text).toEqual('前面 (123 漢字) 後面');
 
-    it('處理 (XXX) 之四', function() {
-      var new_text = pangu.text_spacing('前面(中文123) then');
-      expect(new_text).toEqual('前面 (中文 123) then');
-    });
+      var new_text = pangu.text_spacing('前面(中文123) tail');
+      expect(new_text).toEqual('前面 (中文 123) tail');
 
-    it('處理 (XXX) 之五', function() {
-      var new_text = pangu.text_spacing('前面(123中文) then');
-      expect(new_text).toEqual('前面 (123 中文) then');
-    });
+      var new_text = pangu.text_spacing('head (中文123漢字)後面');
+      expect(new_text).toEqual('head (中文 123 漢字) 後面');
 
-    it('處理 (XXX) 之六', function() {
-      var new_text = pangu.text_spacing('前面( ) then');
-      expect(new_text).toEqual('前面 ( ) then');
+      var new_text = pangu.text_spacing('head (中文123漢字) tail');
+      expect(new_text).toEqual('head (中文 123 漢字) tail');
     });
 
     it('處理 - 符號', function() {
       var new_text = pangu.text_spacing('前面-後面');
       expect(new_text).toEqual('前面 - 後面');
+
+      var new_text = pangu.text_spacing('Vinta-Mollie');
+      expect(new_text).toEqual('Vinta-Mollie');
+
+      var new_text = pangu.text_spacing('Vinta-陳上進');
+      expect(new_text).toEqual('Vinta - 陳上進');
+
+      var new_text = pangu.text_spacing('陳上進-Vinta');
+      expect(new_text).toEqual('陳上進 - Vinta');
+
+      var new_text = pangu.text_spacing('得到一個A-B的結果');
+      expect(new_text).toEqual('得到一個 A-B 的結果');
     });
 
     it('不處理 _ 符號', function() {
@@ -164,74 +187,110 @@ describe('pangu', function() {
       expect(new_text).toEqual('前面_後面');
     });
 
-    // it('處理 _ 符號 之一', function() {
-    //   var new_text = pangu.text_spacing('前面_後面');
-    //   expect(new_text).toEqual('前面 _ 後面');
-    // });
-
-    // it('處理 _ 符號 之二', function() {
-    //   var new_text = pangu.text_spacing('前面__後面');
-    //   expect(new_text).toEqual('前面 __ 後面');
-    // });
-
     it('處理 + 符號', function() {
       var new_text = pangu.text_spacing('前面+後面');
       expect(new_text).toEqual('前面 + 後面');
+
+      var new_text = pangu.text_spacing('Vinta+Mollie');
+      expect(new_text).toEqual('Vinta+Mollie');
+
+      var new_text = pangu.text_spacing('Vinta+陳上進');
+      expect(new_text).toEqual('Vinta + 陳上進');
+
+      var new_text = pangu.text_spacing('陳上進+Vinta');
+      expect(new_text).toEqual('陳上進 + Vinta');
+
+      var new_text = pangu.text_spacing('得到一個A+B的結果');
+      expect(new_text).toEqual('得到一個 A+B 的結果');
+
+      var new_text = pangu.text_spacing('得到一個C++的結果');
+      expect(new_text).toEqual('得到一個 C++ 的結果');
     });
 
     it('處理 = 符號', function() {
       var new_text = pangu.text_spacing('前面=後面');
       expect(new_text).toEqual('前面 = 後面');
+
+      var new_text = pangu.text_spacing('Vinta=Mollie');
+      expect(new_text).toEqual('Vinta=Mollie');
+
+      var new_text = pangu.text_spacing('Vinta=陳上進');
+      expect(new_text).toEqual('Vinta = 陳上進');
+
+      var new_text = pangu.text_spacing('陳上進=Vinta');
+      expect(new_text).toEqual('陳上進 = Vinta');
+
+      var new_text = pangu.text_spacing('得到一個A=B的結果');
+      expect(new_text).toEqual('得到一個 A=B 的結果');
     });
 
-    it('處理 { 符號', function() {
+    it('處理 { } 符號', function() {
       var new_text = pangu.text_spacing('前面{後面');
       expect(new_text).toEqual('前面 { 後面');
-    });
 
-    it('處理 } 符號', function() {
       var new_text = pangu.text_spacing('前面}後面');
       expect(new_text).toEqual('前面 } 後面');
+
+      var new_text = pangu.text_spacing('前面{中文123漢字}後面');
+      expect(new_text).toEqual('前面 {中文 123 漢字} 後面');
+
+      var new_text = pangu.text_spacing('前面{中文123}後面');
+      expect(new_text).toEqual('前面 {中文 123} 後面');
+
+      var new_text = pangu.text_spacing('前面{123漢字}後面');
+      expect(new_text).toEqual('前面 {123 漢字} 後面');
+
+      var new_text = pangu.text_spacing('前面{中文123} tail');
+      expect(new_text).toEqual('前面 {中文 123} tail');
+
+      var new_text = pangu.text_spacing('head {中文123漢字}後面');
+      expect(new_text).toEqual('head {中文 123 漢字} 後面');
+
+      var new_text = pangu.text_spacing('head {中文123漢字} tail');
+      expect(new_text).toEqual('head {中文 123 漢字} tail');
     });
 
-    it('處理 [ 符號', function() {
+    it('處理 [ ] 符號', function() {
       var new_text = pangu.text_spacing('前面[後面');
       expect(new_text).toEqual('前面 [ 後面');
-    });
 
-    it('處理 ] 符號', function() {
       var new_text = pangu.text_spacing('前面]後面');
       expect(new_text).toEqual('前面 ] 後面');
-    });
 
-    it('處理 [XXX] 之一', function() {
       var new_text = pangu.text_spacing('前面[中文123漢字]後面');
       expect(new_text).toEqual('前面 [中文 123 漢字] 後面');
-    });
 
-    it('處理 [XXX] 之二', function() {
       var new_text = pangu.text_spacing('前面[中文123]後面');
       expect(new_text).toEqual('前面 [中文 123] 後面');
-    });
 
-    it('處理 [XXX] 之三', function() {
-      var new_text = pangu.text_spacing('前面[123中文]後面');
-      expect(new_text).toEqual('前面 [123 中文] 後面');
-    });
+      var new_text = pangu.text_spacing('前面[123漢字]後面');
+      expect(new_text).toEqual('前面 [123 漢字] 後面');
 
-    it('處理 [XXX] 之四', function() {
-      var new_text = pangu.text_spacing('前面[中文123] then');
-      expect(new_text).toEqual('前面 [中文 123] then');
-    });
+      var new_text = pangu.text_spacing('前面[中文123] tail');
+      expect(new_text).toEqual('前面 [中文 123] tail');
 
-    it('處理 [XXX] 之五', function() {
-      var new_text = pangu.text_spacing('前面[123中文] then');
-      expect(new_text).toEqual('前面 [123 中文] then');
+      var new_text = pangu.text_spacing('head [中文123漢字]後面');
+      expect(new_text).toEqual('head [中文 123 漢字] 後面');
+
+      var new_text = pangu.text_spacing('head [中文123漢字] tail');
+      expect(new_text).toEqual('head [中文 123 漢字] tail');
     });
 
     it('處理 | 符號', function() {
       var new_text = pangu.text_spacing('前面|後面');
       expect(new_text).toEqual('前面 | 後面');
+
+      var new_text = pangu.text_spacing('Vinta|Mollie');
+      expect(new_text).toEqual('Vinta|Mollie');
+
+      var new_text = pangu.text_spacing('Vinta|陳上進');
+      expect(new_text).toEqual('Vinta | 陳上進');
+
+      var new_text = pangu.text_spacing('陳上進|Vinta');
+      expect(new_text).toEqual('陳上進 | Vinta');
+
+      var new_text = pangu.text_spacing('得到一個A|B的結果');
+      expect(new_text).toEqual('得到一個 A|B 的結果');
     });
 
     it('處理 \\ 符號', function() {
@@ -242,34 +301,64 @@ describe('pangu', function() {
     it('處理 : 符號', function() {
       var new_text = pangu.text_spacing('前面:後面');
       expect(new_text).toEqual('前面: 後面');
+
+      var new_text = pangu.text_spacing('前面 : 後面');
+      expect(new_text).toEqual('前面 : 後面');
+
+      var new_text = pangu.text_spacing('前面: 後面');
+      expect(new_text).toEqual('前面: 後面');
     });
 
     it('處理 ; 符號', function() {
       var new_text = pangu.text_spacing('前面;後面');
       expect(new_text).toEqual('前面; 後面');
+
+      var new_text = pangu.text_spacing('前面 ; 後面');
+      expect(new_text).toEqual('前面 ; 後面');
+
+      var new_text = pangu.text_spacing('前面; 後面');
+      expect(new_text).toEqual('前面; 後面');
     });
 
-    it('處理 "XXX" 之一', function() {
+    it('處理 " " 符號', function() {
       var new_text = pangu.text_spacing('前面"中文123漢字"後面');
       expect(new_text).toEqual('前面 "中文 123 漢字" 後面');
-    });
 
-    it('處理 "XXX" 之二', function() {
-      var new_text = pangu.text_spacing('前面:"中文123漢字"後面');
-      expect(new_text).toEqual('前面:"中文 123 漢字" 後面');
-    });
+      var new_text = pangu.text_spacing('前面"中文123"後面');
+      expect(new_text).toEqual('前面 "中文 123" 後面');
 
-    it('處理 "XXX" 之三', function() {
-      var new_text = pangu.text_spacing('前面"中文123漢字"5566後面');
-      expect(new_text).toEqual('前面 "中文 123 漢字"5566 後面');
-    });
+      var new_text = pangu.text_spacing('前面"123漢字"後面');
+      expect(new_text).toEqual('前面 "123 漢字" 後面');
 
-    it('處理 "XXX" 之四', function() {
-      var new_text = pangu.text_spacing('前面" "後面');
-      expect(new_text).toEqual('前面 " " 後面');
+      var new_text = pangu.text_spacing('前面"中文123" tail');
+      expect(new_text).toEqual('前面 "中文 123" tail');
+
+      var new_text = pangu.text_spacing('head "中文123漢字"後面');
+      expect(new_text).toEqual('head "中文 123 漢字" 後面');
+
+      var new_text = pangu.text_spacing('head "中文123漢字" tail');
+      expect(new_text).toEqual('head "中文 123 漢字" tail');
     });
 
     it("處理 ' 符號", function() {
+      var new_text = pangu.text_spacing("前面'中文123漢字'後面");
+      expect(new_text).toEqual("前面 '中文 123 漢字' 後面");
+
+      var new_text = pangu.text_spacing("前面'中文123'後面");
+      expect(new_text).toEqual("前面 '中文 123' 後面");
+
+      var new_text = pangu.text_spacing("前面'123漢字'後面");
+      expect(new_text).toEqual("前面 '123 漢字' 後面");
+
+      var new_text = pangu.text_spacing("前面'中文123' tail");
+      expect(new_text).toEqual("前面 '中文 123' tail");
+
+      var new_text = pangu.text_spacing("head '中文123漢字'後面");
+      expect(new_text).toEqual("head '中文 123 漢字' 後面");
+
+      var new_text = pangu.text_spacing("head '中文123漢字' tail");
+      expect(new_text).toEqual("head '中文 123 漢字' tail");
+
       var new_text = pangu.text_spacing("陳上進 likes 林依諾's status.");
       expect(new_text).toEqual("陳上進 likes 林依諾's status.");
     });
@@ -277,36 +366,103 @@ describe('pangu', function() {
     it('處理 < 符號', function() {
       var new_text = pangu.text_spacing('前面<後面');
       expect(new_text).toEqual('前面 < 後面');
-    });
 
-    it('處理 > 符號', function() {
-      var new_text = pangu.text_spacing('前面>後面');
-      expect(new_text).toEqual('前面 > 後面');
-    });
+      var new_text = pangu.text_spacing('Vinta<Mollie');
+      expect(new_text).toEqual('Vinta<Mollie');
 
-    it('處理 <XXX>', function() {
+      var new_text = pangu.text_spacing('Vinta<陳上進');
+      expect(new_text).toEqual('Vinta < 陳上進');
+
+      var new_text = pangu.text_spacing('陳上進<Vinta');
+      expect(new_text).toEqual('陳上進 < Vinta');
+
+      var new_text = pangu.text_spacing('得到一個A<B的結果');
+      expect(new_text).toEqual('得到一個 A<B 的結果');
+
       var new_text = pangu.text_spacing('前面<中文123漢字>後面');
       expect(new_text).toEqual('前面 <中文 123 漢字> 後面');
+
+      var new_text = pangu.text_spacing('前面<中文123>後面');
+      expect(new_text).toEqual('前面 <中文 123> 後面');
+
+      var new_text = pangu.text_spacing('前面<123漢字>後面');
+      expect(new_text).toEqual('前面 <123 漢字> 後面');
+
+      var new_text = pangu.text_spacing('前面<中文123> tail');
+      expect(new_text).toEqual('前面 <中文 123> tail');
+
+      var new_text = pangu.text_spacing('head <中文123漢字>後面');
+      expect(new_text).toEqual('head <中文 123 漢字> 後面');
+
+      var new_text = pangu.text_spacing('head <中文123漢字> tail');
+      expect(new_text).toEqual('head <中文 123 漢字> tail');
     });
 
     it('處理 , 符號', function() {
       var new_text = pangu.text_spacing('前面,後面');
       expect(new_text).toEqual('前面, 後面');
+
+      var new_text = pangu.text_spacing('前面 , 後面');
+      expect(new_text).toEqual('前面 , 後面');
+
+      var new_text = pangu.text_spacing('前面, 後面');
+      expect(new_text).toEqual('前面, 後面');
+    });
+
+    it('處理 > 符號', function() {
+      var new_text = pangu.text_spacing('前面>後面');
+      expect(new_text).toEqual('前面 > 後面');
+
+      var new_text = pangu.text_spacing('Vinta>Mollie');
+      expect(new_text).toEqual('Vinta>Mollie');
+
+      var new_text = pangu.text_spacing('Vinta>陳上進');
+      expect(new_text).toEqual('Vinta > 陳上進');
+
+      var new_text = pangu.text_spacing('陳上進>Vinta');
+      expect(new_text).toEqual('陳上進 > Vinta');
+
+      var new_text = pangu.text_spacing('得到一個A>B的結果');
+      expect(new_text).toEqual('得到一個 A>B 的結果');
     });
 
     it('處理 . 符號', function() {
       var new_text = pangu.text_spacing('前面.後面');
+      expect(new_text).toEqual('前面. 後面');
+
+      var new_text = pangu.text_spacing('前面 . 後面');
+      expect(new_text).toEqual('前面 . 後面');
+
+      var new_text = pangu.text_spacing('前面. 後面');
       expect(new_text).toEqual('前面. 後面');
     });
 
     it('處理 ? 符號', function() {
       var new_text = pangu.text_spacing('前面?後面');
       expect(new_text).toEqual('前面? 後面');
+
+      var new_text = pangu.text_spacing('前面 ? 後面');
+      expect(new_text).toEqual('前面 ? 後面');
+
+      var new_text = pangu.text_spacing('前面? 後面');
+      expect(new_text).toEqual('前面? 後面');
     });
 
     it('處理 / 符號', function() {
       var new_text = pangu.text_spacing('前面/後面');
       expect(new_text).toEqual('前面 / 後面');
+
+      var new_text = pangu.text_spacing('Vinta/Mollie');
+      expect(new_text).toEqual('Vinta/Mollie');
+
+      var new_text = pangu.text_spacing('Vinta/陳上進');
+      expect(new_text).toEqual('Vinta / 陳上進');
+
+      var new_text = pangu.text_spacing('陳上進/Vinta');
+      expect(new_text).toEqual('陳上進 / Vinta');
+
+      var new_text = pangu.text_spacing('得到一個A/B的結果');
+      expect(new_text).toEqual('得到一個 A/B 的結果');
     });
 
   });
