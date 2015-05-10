@@ -1,8 +1,9 @@
 # 為什麼你們就是不能加個空格呢？
 
-[![Build Status](http://img.shields.io/travis/vinta/paranoid-auto-spacing.svg?style=flat-square)](https://travis-ci.org/vinta/paranoid-auto-spacing)
-[![Coverage Status](http://img.shields.io/coveralls/vinta/paranoid-auto-spacing.svg?style=flat-square)](https://coveralls.io/r/vinta/paranoid-auto-spacing)
-[![Dependency Status](http://img.shields.io/gemnasium/vinta/paranoid-auto-spacing.svg?style=flat-square)](https://gemnasium.com/vinta/paranoid-auto-spacing#development-dependencies)
+[![](http://img.shields.io/travis/vinta/paranoid-auto-spacing.svg?style=flat-square)](https://travis-ci.org/vinta/paranoid-auto-spacing)
+[![](http://img.shields.io/coveralls/vinta/paranoid-auto-spacing.svg?style=flat-square)](https://coveralls.io/r/vinta/paranoid-auto-spacing)
+[![](http://img.shields.io/gemnasium/vinta/paranoid-auto-spacing.svg?style=flat-square)](https://gemnasium.com/vinta/paranoid-auto-spacing#development-dependencies)
+[![](https://img.shields.io/badge/made%20with-%e2%9d%a4-ff69b4.svg?style=flat-square)](http://vinta.ws)
 
 如果你跟我一樣，每次看到網頁上的中文字和英文、數字、符號擠在一塊，就會坐立難安，忍不住想在它們之間加個空格。這個外掛（支援 Chrome 和 Firefox）正是你在網路世界走跳所需要的東西，它會自動替你在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。
 
@@ -14,7 +15,7 @@
 
 ### for Users
 
-* [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (2014-12-10 updated)
+* [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (2015-05-11 updated)
 * [Mozilla Firefox](https://github.com/vinta/paranoid-auto-spacing/raw/master/browser_extensions/firefox/paranoid-auto-spacing.user.js) (2014-12-06 updated)
 
 ### for Developers

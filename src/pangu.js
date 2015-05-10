@@ -74,24 +74,18 @@
         var new_text;
 
         /*
-         Regular Expressions
-         https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
+         \u2e80-\u2eff CJK Radicals Supplement
+         \u2f00-\u2fdf Kangxi Radicals
+         \u3040-\u309f Hiragana
+         \u30a0-\u30ff Katakana
+         \u3100-\u312f Bopomofo
+         \u3200-\u32ff Enclosed CJK Letters and Months
+         \u3400-\u4dbf CJK Unified Ideographs Extension A
+         \u4e00-\u9fff CJK Unified Ideographs
+         \uf900-\ufaff CJK Compatibility Ideographs
 
-         Symbols
-         ` ~ ! @ # $ % ^ & * ( ) _ - + = [ ] { } \ | ; : ' " < > , . / ?
-
-         3000-303F 中日韓符號和標點
-         3040-309F 日文平假名 (V) Hiragana
-         30A0-30FF 日文片假名 (V) Katakana
-         3100-312F 注音字母 (V) Bopomofo
-         31C0-31EF 中日韓筆畫
-         31F0-31FF 日文片假名語音擴展 Katakana Phonetic Extensions
-         3200-32FF 帶圈中日韓字母和月份 (V) Enclosed CJK Letters and Months
-         3400-4DBF 中日韓統一表意文字擴展 A (V) CJK Unified Ideographs Extension A
-         4E00-9FFF 中日韓統一表意文字 (V) CJK Unified Ideographs
-         AC00-D7AF 諺文音節 (韓文)
-         F900-FAFF 中日韓兼容表意文字 (V) CJK Compatibility Ideographs
-         http://unicode-table.com/cn/
+         http://unicode-table.com/en/
+         https://github.com/vinta/pangu
          */
 
         // cjk_quote
