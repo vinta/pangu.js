@@ -16,7 +16,7 @@
 ### for Users
 
 * [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (2015-05-11 updated)
-* [Mozilla Firefox](https://github.com/vinta/paranoid-auto-spacing/raw/master/browser_extensions/firefox/paranoid-auto-spacing.user.js) (2014-12-06 updated)
+* [Mozilla Firefox](https://github.com/vinta/paranoid-auto-spacing/raw/master/browser_extensions/firefox/paranoid-auto-spacing.user.js) (2015-05-11 updated)
 
 ### for Developers
 
