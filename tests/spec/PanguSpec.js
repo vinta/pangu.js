@@ -435,6 +435,10 @@ describe('pangu', function() {
 
       var new_text = pangu.text_spacing('前面. 後面');
       expect(new_text).toEqual('前面. 後面');
+
+      // … 是 \u2026
+      var new_text = pangu.text_spacing('前面…後面');
+      expect(new_text).toEqual('前面… 後面');
     });
 
     it('處理 ? 符號', function() {
