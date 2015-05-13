@@ -2,7 +2,7 @@
 // @name         為什麼你們就是不能加個空格呢？
 // @namespace    http://vinta.ws/
 // @description  自動在網頁中所有的中文和半形的英文、數字、符號之間插入空白。（攤手）沒辦法，處女座都有強迫症。
-// @version      2.5.5
+// @version      2.5.6
 // @include      *
 //
 // @author       Vinta
