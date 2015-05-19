@@ -194,7 +194,7 @@ module.exports = function(grunt) {
                 banner: grunt.file.read('src/banner.js')
             },
             dist: {
-                src: 'dist/pangu.js',
+                src: 'src/pangu.js',
                 dest: 'dist/pangu.min.js'
             }
         },
@@ -226,7 +226,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks('grunt-karma-coveralls');
     grunt.loadNpmTasks('grunt-strip');
-    grunt.loadNpmTasks('grunt-stripjscomments');
+    grunt.loadNpmTasks('grunt-stripcomments');
 
     grunt.registerTask('dev', [
         'clean:dev',
