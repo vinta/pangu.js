@@ -6,7 +6,7 @@
     var space_like_tags = /^(br|hr|i|img|pangu)$/i;
     var block_tags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
 
-    /*
+    /**
      1.
      硬幹 contentEditable 元素的 child nodes 還是會被 spacing 的問題
      因為 contentEditable 的值可能是 'true', 'false', 'inherit'
@@ -34,7 +34,7 @@
         return false;
     }
 
-    /*
+    /**
      nodeType: http://www.w3schools.com/dom/dom_nodetype.asp
      1: ELEMENT_NODE
      3: TEXT_NODE
@@ -73,7 +73,7 @@
         var old_text = text;
         var new_text;
 
-        /*
+        /**
          \u2e80-\u2eff CJK Radicals Supplement
          \u2f00-\u2fdf Kangxi Radicals
          \u3040-\u309f Hiragana
@@ -137,7 +137,7 @@
         // 是否加了空格
         var had_spacing = false;
 
-        /*
+        /**
          因為 xpath_query 用的是 text()，所以這些 nodes 是 text 而不是 DOM element
          https://developer.mozilla.org/en-US/docs/DOM/document.evaluate
          http://www.w3cschool.cn/dom_xpathresult.html
@@ -170,7 +170,7 @@
 
             // 處理嵌套的 <tag> 中的文字
             if (next_text_node) {
-                /*
+                /**
                  TODO:
                  現在只是簡單地判斷相鄰的下一個 node 是不是 <br>
                  萬一遇上嵌套的標籤就不行了
@@ -189,13 +189,13 @@
                 if (text !== new_text) {
                     had_spacing = true;
 
-                    /*
+                    /**
                      基本上
                      next_node 就是 next_text_node 的 parent node
                      current_node 就是 current_text_node 的 parent node
                      */
 
-                    /*
+                    /**
                      往上找 next_text_node 的 parent node
                      直到遇到 space_sensitive_tags
                      而且 next_text_node 必須是第一個 text child
@@ -297,7 +297,7 @@
         // console.time(p);
         // var start = new Date().getTime();
 
-        /*
+        /**
          // >> 任意位置的節點
          . >> 當前節點
          .. >> 父節點
@@ -328,10 +328,9 @@
          */
         var had_spacing_title = pangu.page_title_spacing();
 
-        // var body_query = '/html/body//*[not(@contenteditable)]/text()[normalize-space(.)]';
         var body_query = '/html/body//*/text()[normalize-space(.)]';
         ['script', 'style', 'textarea'].forEach(function(tag) {
-            /*
+            /**
              理論上這幾個 tag 裡面不會包含其他 tag
              所以可以直接用 .. 取父節點
 
