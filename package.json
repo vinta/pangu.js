@@ -18,6 +18,7 @@
     "grunt-karma": "0.10.1",
     "grunt-karma-coveralls": "2.5.3",
     "grunt-strip": "0.2.1",
+    "grunt-stripjscomments": "0.1.0",
     "karma": "0.12.32",
     "karma-coverage": "0.3.1",
     "karma-jasmine": "0.1.5",

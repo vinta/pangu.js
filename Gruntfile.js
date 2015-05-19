@@ -18,6 +18,19 @@ module.exports = function(grunt) {
             ]
         },
 
+        // strip js comments
+        comments: {
+            common: {
+                options: {
+                    singleline: true,
+                    multiline: true
+                },
+                src: [
+                    'dist/pangu.js'
+                ]
+            },
+        },
+
         copy: {
             dev: {
                 files: [
@@ -213,6 +226,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks('grunt-karma-coveralls');
     grunt.loadNpmTasks('grunt-strip');
+    grunt.loadNpmTasks('grunt-stripjscomments');
 
     grunt.registerTask('dev', [
         'clean:dev',
@@ -226,6 +240,7 @@ module.exports = function(grunt) {
         'clean:dist',
         'sass:common',
         'strip:common',
+        'comments',
         'uglify',
         'copy:dist',
         'strip:dist_chrome',
