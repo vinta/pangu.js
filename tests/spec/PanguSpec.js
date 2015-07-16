@@ -469,6 +469,11 @@ describe('pangu', function() {
       expect(new_text).toEqual('得到一個 A/B 的結果');
     });
 
+    it('處理 Taipei, China', function() {
+      var new_text = pangu.text_spacing('Taipei,China');
+      expect(new_text).toEqual('Taipei, China');
+    });
+
   });
 
   describe('page_spacing()', function() {
