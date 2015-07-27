@@ -1,7 +1,7 @@
 # 為什麼你們就是不能加個空格呢？
 
 [![](http://img.shields.io/travis/vinta/paranoid-auto-spacing.svg?style=flat-square)](https://travis-ci.org/vinta/paranoid-auto-spacing)
-[![](http://img.shields.io/coveralls/vinta/paranoid-auto-spacing.svg?style=flat-square)](https://coveralls.io/r/vinta/paranoid-auto-spacing)
+[![](https://img.shields.io/codecov/c/github/vinta/paranoid-auto-spacing/master.svg?style=flat-square)](https://codecov.io/github/vinta/paranoid-auto-spacing)
 [![](https://www.versioneye.com/user/projects/5513b65bdf7e7b09ef0004e8/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/5513b65bdf7e7b09ef0004e8)
 [![](https://img.shields.io/badge/made%20with-%e2%9d%a4-ff69b4.svg?style=flat-square)](http://vinta.ws)
 
