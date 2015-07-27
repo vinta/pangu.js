@@ -16,7 +16,6 @@
     "grunt-contrib-uglify": "0.9.1",
     "grunt-contrib-watch": "0.6.1",
     "grunt-karma": "0.10.1",
-    "grunt-karma-coveralls": "2.5.3",
     "grunt-strip": "0.2.1",
     "grunt-stripcomments": "0.3.1",
     "karma": "0.12.32",

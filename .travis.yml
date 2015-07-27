@@ -6,12 +6,13 @@ node_js:
 before_script:
   - gem install sass
   - npm install grunt-cli -g
+  - npm install codecov.io -g
 
 script:
   - grunt test
 
 after_success:
-  - grunt coverage
+  - codecov < ./coverage/lcov.info
 
 notifications:
   email:

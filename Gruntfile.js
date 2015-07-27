@@ -96,13 +96,6 @@ module.exports = function(grunt) {
             }
         },
 
-        coveralls: {
-            options: {
-                debug: true,
-                coverage_dir: 'coverage/'
-            }
-        },
-
         karma: {
             test: {
                 options: {
@@ -115,7 +108,7 @@ module.exports = function(grunt) {
                     coverageReporter: {
                         // multiple reporters
                         reporters: [
-                            {type: 'lcov', dir:'coverage/'},
+                            {type: 'lcov', dir:'coverage/', subdir: '.'},
                             {type: 'text'}
                         ]
                     },
@@ -224,7 +217,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-karma');
-    grunt.loadNpmTasks('grunt-karma-coveralls');
     grunt.loadNpmTasks('grunt-strip');
     grunt.loadNpmTasks('grunt-stripcomments');
 
@@ -254,10 +246,6 @@ module.exports = function(grunt) {
 
     grunt.registerTask('test', [
         'dist'
-    ]);
-
-    grunt.registerTask('coverage', [
-        'coveralls'
     ]);
 
     grunt.registerTask('default', [
