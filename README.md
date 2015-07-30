@@ -25,6 +25,7 @@
 * Node.js version: [pangu.node](https://github.com/huei90/pangu.node)
 * Objective-C version: [pangu.objective-c](https://github.com/Cee/pangu.objective-c)
 * Python version: [pangu.py](https://github.com/vinta/pangu.py)
+* PHP version: [pangu.php](https://github.com/Kunr/pangu.php)
 * Ruby version: [pangu.rb](https://github.com/dlackty/pangu.rb)
 
 ![Pangu](https://raw.github.com/vinta/paranoid-auto-spacing/master/browser_extensions/chrome/images/pangu_260.jpg)
