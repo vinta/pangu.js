@@ -19,7 +19,7 @@
 
 ### for Developers
 
-* Go version: [pangu.go](https://github.com/vinta/pangu)
+* Go version: [pangu.go](https://github.com/vinta/pangu) / [pangu-axe](https://godoc.org/github.com/vinta/pangu/pangu-axe)
 * Java version: [pangu.java](https://github.com/vinta/pangu.java)
 * JavaScript version: [pangu.js](https://github.com/vinta/paranoid-auto-spacing)
 * Node.js version: [pangu.node](https://github.com/huei90/pangu.node)
