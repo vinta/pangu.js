@@ -1,9 +1,21 @@
 {
   "name": "pangu",
+  "description": "Paranoid text spacing for good readability, to automatically insert whitespace between CJK (Chinese, Japanese, Korean) and half-width characters (alphabetical letters, numerical digits and symbols).",
+  "keywords": [
+    "pangu",
+    "spacing",
+    "text",
+    "file"
+  ],
   "version": "2.5.7",
+  "author": "Vinta Chen <vinta.chen@gmail.com> (http://vinta.ws/)",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git://github.com/vinta/paranoid-auto-spacing.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vinta/paranoid-auto-spacing/issues"
   },
   "scripts": {
     "test": "grunt test"
