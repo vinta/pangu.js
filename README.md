@@ -79,6 +79,7 @@ Released under the [MIT License](http://opensource.org/licenses/MIT).
 ## Related Projects
 
 * Atom: [atom-pangu](https://github.com/7kfpun/atom-pangu)
+* Command-line interface: [pangu-cli](https://github.com/SDLyu/pangu)
 * Emacs: [pangu-spacing](http://coldnew.github.io/blog/2013/05/20_5cbb7.html)
 * Gulp: [gulp-pangu](https://github.com/7kfpun/gulp-pangu)
 * JavaScript: [为什么我就是能这样娴熟地加上空格呢？](https://github.com/Dustland/daft-auto-spacing)
