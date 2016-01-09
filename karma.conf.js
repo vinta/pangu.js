@@ -18,8 +18,8 @@ module.exports = function (config) {
     ],
     preprocessors: {
         'dist/browser/pangu.js': ['coverage'],
-        'test/_fixture/*.html': ['html2js'],
-        'test/browser/*.js': ['webpack']
+        'test/browser/*.js': ['webpack'],
+        'test/_fixture/*.html': ['html2js']
     },
     reporters: [
       'mocha',
