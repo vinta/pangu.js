@@ -12,10 +12,16 @@ describe('BrowserPangu', function () {
     return tempDiv.innerHTML;
   }
 
+  describe('spacing()', function () {
+    it('處理 text', function () {
+      assert.equal(pangu.spacing('新八的構造成分有95%是眼鏡、3%是水、2%是垃圾'), '新八的構造成分有 95% 是眼鏡、3% 是水、2% 是垃圾');
+    });
+  });
+
   describe('spacingText()', function () {
     it('處理 text', function () {
-      pangu.spacingText('新八的構造成分有95%是眼鏡、3%是水、2%是垃圾', function (error, newText) {
-        assert.equal(newText, '新八的構造成分有 95% 是眼鏡、3% 是水、2% 是垃圾');
+      pangu.spacingText('所以,請問Jackey的鼻子有幾個?3.14個', function (error, newText) {
+        assert.equal(newText, '所以, 請問 Jackey 的鼻子有幾個? 3.14 個');
       });
     });
   });
