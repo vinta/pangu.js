@@ -3,15 +3,17 @@ sudo: false
 language: node_js
 
 node_js:
-   - "4.*"
-
-before_script:
-  - gem install sass
-  - npm install grunt-cli -g
-  - npm install codecov.io -g
+  - "0.12"
+  - "1"
+  - "2"
+  - "3"
+  - "4"
 
 script:
-  - grunt test
+  - npm run test
+
+after_script:
+  - npm install -g codecov
 
 after_success:
   - codecov < ./coverage/lcov.info
