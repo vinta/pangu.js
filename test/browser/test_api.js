@@ -1,7 +1,8 @@
-/* global pangu, __html__ */
+/* global __html__, chai, pangu */
 
-import 'babel-polyfill';
-import { assert } from 'chai';
+// 這個檔案的 runtime 環境會是 browser
+
+const assert = chai.assert;
 
 describe('BrowserPangu', function () {
   // 避免某些情況 HTML 會被轉譯造成不一致，一律都塞進一個 div 裡
@@ -44,10 +45,10 @@ describe('BrowserPangu', function () {
 
   describe('spacingPage()', function () {
     it('處理 <body>', function () {
-      document.title = "Mr.龍島主道：「Let's Party!各位高明博雅君子！」";
+      document.title = '花學姊的梅杜莎';
       document.body.innerHTML = __html__['test/_fixture/body.html'];
       pangu.spacingPage();
-      assert.equal(document.title, "Mr. 龍島主道：「Let's Party! 各位高明博雅君子！」");
+      assert.equal(document.title, '花學姊的梅杜莎');
       assert.equal(document.body.innerHTML, realHTML('test/_fixture/body_expected.html'));
     });
   });
