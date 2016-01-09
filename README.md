@@ -19,48 +19,54 @@
 
 ### for Developers
 
-* Go version: [pangu.go](https://github.com/vinta/pangu) / [pangu-axe](https://godoc.org/github.com/vinta/pangu/pangu-axe)
-* Java version: [pangu.java](https://github.com/vinta/pangu.java)
-* JavaScript version: [pangu.js](https://github.com/vinta/pangu.js)
-* Node.js version: [pangu.node](https://github.com/huei90/pangu.node)
-* Objective-C version: [pangu.objective-c](https://github.com/Cee/pangu.objective-c)
-* PHP version: [pangu.php](https://github.com/Kunr/pangu.php)
-* Python version: [pangu.py](https://github.com/vinta/pangu.py)
-* Ruby version: [pangu.rb](https://github.com/dlackty/pangu.rb)
+* Go: [pangu.go](https://github.com/vinta/pangu) / [pangu-axe](https://godoc.org/github.com/vinta/pangu/pangu-axe)
+* Java: [pangu.java](https://github.com/vinta/pangu.java)
+* JavaScript: [pangu.js](https://github.com/vinta/pangu.js) (It works in Node.js and browser)
+* Objective-C: [pangu.objective-c](https://github.com/Cee/pangu.objective-c)
+* PHP: [pangu.php](https://github.com/Kunr/pangu.php)
+* Python: [pangu.py](https://github.com/vinta/pangu.py)
+* Ruby: [pangu.rb](https://github.com/dlackty/pangu.rb)
 
 ![Pangu](https://raw.github.com/vinta/pangu.js/master/browser_extensions/chrome/images/pangu_260.jpg)
 
 ## Usage
 
 ``` bash
-$ bower install pangu
+$ npm install pangu
 ```
+
+### Browser
 
 ``` html
 <head>
-  <meta charset="UTF-8">
-  <script src="bower_components/pangu/dist/pangu.min.js"></script>
+  // Files are located on ./node_modules/pangu/dist/browser/
+  <script src="pangu.min.js"></script>
 </head>
 <script>
-  pangu.page_spacing();
-  // or
-  pangu.element_spacing('#main');
-  // or
-  pangu.element_spacing('.comment');
-  // or
-  pangu.element_spacing('p');
+  pangu.spacingPage();
+  pangu.spacingElementById('main');
+  pangu.spacingElementByClassName('comment');
+  pangu.spacingElementByTagName('p');
 </script>
 ```
 
-## Run Tests
+### Node.js
+
+``` js
+var pangu = require('pangu'); // ES5
+import pangu from 'pangu'; // ES6
+
+pangu.spacingText('新八的構造成分有95%是眼鏡、3%是水、2%是垃圾');
+// outpu: 新八的構造成分有 95% 是眼鏡、3% 是水、2% 是垃圾
+```
+
+## Testing
 
 You need to install [Node.js](https://vinta.ws/code/install-node-js-via-nvm.html).
 
 ``` bash
-$ gem install sass
-$ npm install -g grunt-cli
 $ npm install
-$ grunt test
+$ npm run test
 ```
 
 ## License
@@ -72,10 +78,6 @@ Released under the [MIT License](http://opensource.org/licenses/MIT).
 * Twitter: [@vinta](https://twitter.com/vinta)
 * Website: [vinta.ws](https://vinta.ws/)
 
-## Contributors
-
-[偉哉 Open Source！](https://github.com/vinta/pangu.js/graphs/contributors)
-
 ## Related Projects
 
 * Atom: [atom-pangu](https://github.com/7kfpun/atom-pangu)
@@ -83,6 +85,7 @@ Released under the [MIT License](http://opensource.org/licenses/MIT).
 * Emacs: [pangu-spacing](http://coldnew.github.io/blog/2013/05/20_5cbb7.html)
 * Gulp: [gulp-pangu](https://github.com/7kfpun/gulp-pangu)
 * JavaScript: [为什么我就是能这样娴熟地加上空格呢？](https://github.com/Dustland/daft-auto-spacing)
+* Node.js: [pangu.node](https://github.com/huei90/pangu.node)
 * Ruby: [auto-correct](https://github.com/huacnlee/auto-correct)
 * Vim: [pangu.vim](https://github.com/hotoo/pangu.vim)
 * WordPress: [Space Lover](https://wordpress.org/plugins/space-lover/)
