@@ -19,13 +19,13 @@
 
 ### for Developers
 
-* Go: [pangu.go](https://github.com/vinta/pangu) / [pangu-axe](https://godoc.org/github.com/vinta/pangu/pangu-axe)
-* Java: [pangu.java](https://github.com/vinta/pangu.java)
-* JavaScript: [pangu.js](https://github.com/vinta/pangu.js) (It works in Node.js and browser)
-* Objective-C: [pangu.objective-c](https://github.com/Cee/pangu.objective-c)
-* PHP: [pangu.php](https://github.com/Kunr/pangu.php)
-* Python: [pangu.py](https://github.com/vinta/pangu.py)
-* Ruby: [pangu.rb](https://github.com/dlackty/pangu.rb)
+* [pangu.go](https://github.com/vinta/pangu) (Go)
+* [pangu.java](https://github.com/vinta/pangu.java) (Java)
+* [pangu.js](https://github.com/vinta/pangu.js) (JavaScript, for both Node.js and Browser)
+* [pangu.objective-c](https://github.com/Cee/pangu.objective-c) (Objective-C)
+* [pangu.php](https://github.com/Kunr/pangu.php) (PHP)
+* [pangu.py](https://github.com/vinta/pangu.py) (Python)
+* [pangu.rb](https://github.com/dlackty/pangu.rb) (Ruby)
 
 ![Pangu](https://raw.github.com/vinta/pangu.js/master/browser_extensions/chrome/images/pangu_260.jpg)
 
