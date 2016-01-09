@@ -19,7 +19,7 @@ module.exports = function (config) {
     ],
     files: [
       'node_modules/chai/chai.js',
-      'src/browser/pangu.js',
+      'dist/browser/pangu.js',
       'test/browser/*.js',
       'test/_fixture/*.html'
     ],
@@ -27,7 +27,7 @@ module.exports = function (config) {
       'mocha'
     ],
     preprocessors: {
-        'src/browser/pangu.js': ['webpack', 'coverage'],
+        'dist/browser/pangu.js': ['coverage'],
         'test/browser/*.js': ['babel'],
         'test/_fixture/*.html': ['html2js']
     },
