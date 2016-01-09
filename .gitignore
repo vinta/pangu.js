@@ -4,8 +4,5 @@ browser_extensions/paranoid-auto-spacing/
 browser_extensions/paranoid-auto-spacing.zip
 coverage/
 node_modules/
-.sass-cache/
-.DS_STORE
-.tern-port
-*.map
+*.log
 *.pem
