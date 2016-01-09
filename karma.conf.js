@@ -17,13 +17,19 @@ module.exports = function (config) {
       'mocha'
     ],
     preprocessors: {
+        'dist/browser/pangu.js': ['coverage'],
         'test/_fixture/*.html': ['html2js'],
         'test/browser/*.js': ['webpack']
     },
     reporters: [
-      'mocha'
+      'mocha',
+      'coverage'
     ],
     singleRun: true,
+    coverageReporter: {
+      dir: 'coverage/',
+      type: 'lcov',
+    },
     webpack: webpackConfig,
     webpackMiddleware: {
         noInfo: true

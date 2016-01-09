@@ -12,6 +12,14 @@ describe('BrowserPangu', function () {
     return tempDiv.innerHTML;
   }
 
+  describe('spacingText()', function () {
+    it('處理 text', function () {
+      pangu.spacingText('新八的構造成分有95%是眼鏡、3%是水、2%是垃圾', function (error, newText) {
+        assert.equal(newText, '新八的構造成分有 95% 是眼鏡、3% 是水、2% 是垃圾');
+      });
+    });
+  });
+
   describe('spacingPageTitle()', function () {
     it('處理 <title>', function () {
       document.title = "Mr.龍島主道：「Let's Party!各位高明博雅君子！」";
@@ -31,7 +39,7 @@ describe('BrowserPangu', function () {
   describe('spacingElementById()', function () {
     it('處理 #idName', function () {
       document.body.innerHTML = __html__['test/_fixture/id_name.html'];
-      pangu.spacingPageBody();
+      pangu.spacingElementById('e1');
       assert.equal(document.body.innerHTML, realHTML('test/_fixture/id_name_expected.html'));
     });
   });
@@ -39,19 +47,19 @@ describe('BrowserPangu', function () {
   describe('spacingElementByClassName()', function () {
     it('處理 #className 之一', function () {
       document.body.innerHTML = __html__['test/_fixture/class_name_1.html'];
-      pangu.spacingPageBody();
+      pangu.spacingElementByClassName('e2');
       assert.equal(document.body.innerHTML, realHTML('test/_fixture/class_name_1_expected.html'));
     });
 
     it('處理 #className 之二', function () {
       document.body.innerHTML = __html__['test/_fixture/class_name_2.html'];
-      pangu.spacingPageBody();
+      pangu.spacingElementByClassName('e4');
       assert.equal(document.body.innerHTML, realHTML('test/_fixture/class_name_2_expected.html'));
     });
 
     it('處理 #className 之三', function () {
       document.body.innerHTML = __html__['test/_fixture/class_name_3.html'];
-      pangu.spacingPageBody();
+      pangu.spacingElementByClassName('e5');
       assert.equal(document.body.innerHTML, realHTML('test/_fixture/class_name_3_expected.html'));
     });
   });
@@ -59,7 +67,7 @@ describe('BrowserPangu', function () {
   describe('spacingElementByTagName()', function () {
     it('處理 <tag>', function () {
       document.body.innerHTML = __html__['test/_fixture/tag_name.html'];
-      pangu.spacingPageBody();
+      pangu.spacingElementByTagName('article');
       assert.equal(document.body.innerHTML, realHTML('test/_fixture/tag_name_expected.html'));
     });
   });

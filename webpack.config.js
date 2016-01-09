@@ -5,7 +5,7 @@ var uglifyPlugin = new webpack.optimize.UglifyJsPlugin({
   minimize: true
 })
 
-var entryPath = './src/browser/index.js';
+var entryPath = './src/browser/pangu.js';
 
 module.exports = {
   entry: {
