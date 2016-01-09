@@ -1,14 +1,5 @@
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else if(typeof exports === 'object')
-		exports["pangu"] = factory();
-	else
-		root["pangu"] = factory();
-})(this, function() {
-return /******/ (function(modules) { // webpackBootstrap
+var pangu =
+/******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -56,7 +47,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 	
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
@@ -69,7 +60,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// https://developer.mozilla.org/en/docs/Web/API/Node/nodeType
 	var COMMENT_NODE_TYPE = 8;
 	
-	var BrowserPangu = (function (_Pangu) {
+	var BrowserPangu = function (_Pangu) {
 	  _inherits(BrowserPangu, _Pangu);
 	
 	  function BrowserPangu() {
@@ -295,14 +286,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // ex: [translate(name(..), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") != "script"]
 	        bodyQuery += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
 	      }
-	      var hasSpacingPageBody = this.spacingNodeByXPath(bodyQuery);
+	      var hasSpacing = this.spacingNodeByXPath(bodyQuery);
 	
-	      return hasSpacingPageBody;
+	      return hasSpacing;
 	    }
 	  }, {
 	    key: 'spacingPage',
 	    value: function spacingPage() {
-	      return this.spacingPageTitle() || this.spacingPageBody();
+	      var hasSpacingPageTitle = this.spacingPageTitle();
+	      var hasSpacingPageBody = this.spacingPageBody();
+	
+	      return hasSpacingPageTitle || hasSpacingPageBody;
 	    }
 	  }, {
 	    key: 'spacingElementById',
@@ -334,7 +328,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }]);
 	
 	  return BrowserPangu;
-	})(Pangu);
+	}(Pangu);
 	
 	var pangu = new BrowserPangu();
 	
@@ -346,11 +340,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 	
-	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	var Pangu = (function () {
+	var Pangu = function () {
 	  function Pangu() {
 	    _classCallCheck(this, Pangu);
 	  }
@@ -425,12 +419,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }]);
 	
 	  return Pangu;
-	})();
+	}();
 	
 	module.exports.Pangu = Pangu;
 
 /***/ }
-/******/ ])
-});
-;
+/******/ ]);
 //# sourceMappingURL=pangu.js.map

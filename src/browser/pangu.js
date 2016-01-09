@@ -214,13 +214,16 @@ class BrowserPangu extends Pangu {
       // ex: [translate(name(..), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") != "script"]
       bodyQuery += `[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
     }
-    const hasSpacingPageBody = this.spacingNodeByXPath(bodyQuery);
+    const hasSpacing = this.spacingNodeByXPath(bodyQuery);
 
-    return hasSpacingPageBody;
+    return hasSpacing;
   }
 
   spacingPage() {
-    return this.spacingPageTitle() || this.spacingPageBody();
+    const hasSpacingPageTitle = this.spacingPageTitle();
+    const hasSpacingPageBody = this.spacingPageBody();
+
+    return hasSpacingPageTitle || hasSpacingPageBody;
   }
 
   spacingElementById(idName) {

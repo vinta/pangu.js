@@ -42,6 +42,16 @@ describe('BrowserPangu', function () {
     });
   });
 
+  describe('spacingPage()', function () {
+    it('處理 <body>', function () {
+      document.title = "Mr.龍島主道：「Let's Party!各位高明博雅君子！」";
+      document.body.innerHTML = __html__['test/_fixture/body.html'];
+      pangu.spacingPage();
+      assert.equal(document.title, "Mr. 龍島主道：「Let's Party! 各位高明博雅君子！」");
+      assert.equal(document.body.innerHTML, realHTML('test/_fixture/body_expected.html'));
+    });
+  });
+
   describe('spacingElementById()', function () {
     it('處理 #idName', function () {
       document.body.innerHTML = __html__['test/_fixture/id_name.html'];
