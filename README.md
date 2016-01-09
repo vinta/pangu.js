@@ -1,8 +1,8 @@
 # 為什麼你們就是不能加個空格呢？
 
-[![](http://img.shields.io/travis/vinta/paranoid-auto-spacing.svg?style=flat-square)](https://travis-ci.org/vinta/paranoid-auto-spacing)
-[![](https://img.shields.io/codecov/c/github/vinta/paranoid-auto-spacing/master.svg?style=flat-square)](https://codecov.io/github/vinta/paranoid-auto-spacing)
-[![](https://img.shields.io/badge/made%20with-%e2%9d%a4-ff69b4.svg?style=flat-square)](http://vinta.ws)
+[![](http://img.shields.io/travis/vinta/pangu.js.svg?style=flat-square)](https://travis-ci.org/vinta/pangu.js)
+[![](https://img.shields.io/codecov/c/github/vinta/pangu.js/master.svg?style=flat-square)](https://codecov.io/github/vinta/pangu.js)
+[![](https://img.shields.io/badge/made%20with-%e2%9d%a4-ff69b4.svg?style=flat-square)](https://vinta.ws)
 
 如果你跟我一樣，每次看到網頁上的中文字和英文、數字、符號擠在一塊，就會坐立難安，忍不住想在它們之間加個空格。這個外掛（支援 Chrome 和 Firefox）正是你在網路世界走跳所需要的東西，它會自動替你在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。
 
@@ -15,20 +15,20 @@
 ### for Users
 
 * [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (2015-05-13 updated)
-* [Mozilla Firefox](https://github.com/vinta/paranoid-auto-spacing/raw/master/browser_extensions/firefox/paranoid-auto-spacing.user.js) (2015-05-13 updated)
+* [Mozilla Firefox](https://github.com/vinta/pangu.js/raw/master/browser_extensions/firefox/paranoid-auto-spacing.user.js) (2015-05-13 updated)
 
 ### for Developers
 
 * Go version: [pangu.go](https://github.com/vinta/pangu) / [pangu-axe](https://godoc.org/github.com/vinta/pangu/pangu-axe)
 * Java version: [pangu.java](https://github.com/vinta/pangu.java)
-* JavaScript version: [pangu.js](https://github.com/vinta/paranoid-auto-spacing)
+* JavaScript version: [pangu.js](https://github.com/vinta/pangu.js)
 * Node.js version: [pangu.node](https://github.com/huei90/pangu.node)
 * Objective-C version: [pangu.objective-c](https://github.com/Cee/pangu.objective-c)
 * PHP version: [pangu.php](https://github.com/Kunr/pangu.php)
 * Python version: [pangu.py](https://github.com/vinta/pangu.py)
 * Ruby version: [pangu.rb](https://github.com/dlackty/pangu.rb)
 
-![Pangu](https://raw.github.com/vinta/paranoid-auto-spacing/master/browser_extensions/chrome/images/pangu_260.jpg)
+![Pangu](https://raw.github.com/vinta/pangu.js/master/browser_extensions/chrome/images/pangu_260.jpg)
 
 ## Usage
 
@@ -54,7 +54,7 @@ $ bower install pangu
 
 ## Run Tests
 
-You need to install [Node.js](http://vinta.ws/code/install-node-js-via-nvm.html).
+You need to install [Node.js](https://vinta.ws/code/install-node-js-via-nvm.html).
 
 ``` bash
 $ gem install sass
@@ -70,11 +70,11 @@ Released under the [MIT License](http://opensource.org/licenses/MIT).
 ## Author
 
 * Twitter: [@vinta](https://twitter.com/vinta)
-* Website: [vinta.ws](http://vinta.ws/)
+* Website: [vinta.ws](https://vinta.ws/)
 
 ## Contributors
 
-[偉哉 Open Source！](https://github.com/vinta/paranoid-auto-spacing/graphs/contributors)
+[偉哉 Open Source！](https://github.com/vinta/pangu.js/graphs/contributors)
 
 ## Related Projects
 
