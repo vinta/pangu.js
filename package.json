@@ -16,8 +16,13 @@
     "text"
   ],
   "version": "3.0.0",
-  "author": "Vinta Chen <vinta.chen@gmail.com> (http://vinta.ws/)",
+  "author": {
+    "name": "Vinta Chen",
+    "email": "vinta.chen@gmail.com",
+    "url": "https://vinta.ws/"
+  },
   "license": "MIT",
+  "homepage": "http://pangu.space/",
   "repository": {
     "type": "git",
     "url": "git://github.com/vinta/pangu.js.git"
