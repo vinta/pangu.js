@@ -10,14 +10,12 @@ node_js:
   - "4"
   - "5"
 
-script:
-  - npm run test
-
-after_script:
+before_script:
   - npm install -g codecov
 
-after_success:
-  - codecov < ./coverage/lcov.info
+script:
+  - npm run test
+  - codecov
 
 notifications:
   email:
