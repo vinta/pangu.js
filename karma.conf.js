@@ -27,8 +27,8 @@ module.exports = function (config) {
     ],
     singleRun: true,
     coverageReporter: {
-      dir: 'coverage/',
       type: 'lcov',
+      subdir: '.'
     },
     webpack: webpackConfig,
     webpackMiddleware: {
