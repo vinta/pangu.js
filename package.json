@@ -67,6 +67,7 @@
     "karma-webpack": "1.7.0",
     "mocha": "2.3.4",
     "phantomjs": "1.9.19",
+    "underscore": "1.8.3",
     "webpack": "1.12.9"
   }
 }

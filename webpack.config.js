@@ -1,3 +1,4 @@
+var _ = require('underscore');
 var fs = require('fs');
 var webpack = require('webpack');
 
@@ -8,9 +9,9 @@ var uglifyPlugin = new webpack.optimize.UglifyJsPlugin({
   minimize: true
 })
 
-var bannerText = fs.readFileSync('src/browser/banner.txt');
-var bannerTemplate = eval('`' + bannerText + '`');
-var bannerPlugin = new webpack.BannerPlugin(bannerTemplate, {
+var bannerTemplate = fs.readFileSync('src/browser/banner.txt', {encoding: 'utf8'});
+var bannerText = _.template(bannerTemplate)(packageInfo);
+var bannerPlugin = new webpack.BannerPlugin(bannerText, {
   include: /^pangu/,
   raw: true,
   entryOnly: true
