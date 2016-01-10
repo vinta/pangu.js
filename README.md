@@ -63,6 +63,8 @@ pangu.spacingText('新八的構造成分有95%是眼鏡、3%是水、2%是垃圾
 You need to install [Node.js](https://vinta.ws/code/install-node-js-via-nvm.html).
 
 ``` bash
+$ git clone git@github.com:vinta/pangu.js.git
+$ cd pangu.js
 $ npm install
 $ npm run test
 ```
@@ -73,6 +75,7 @@ Released under the [MIT License](http://opensource.org/licenses/MIT).
 
 ## Author
 
+* GitHub: [@vinta](https://github.com/vinta)
 * Twitter: [@vinta](https://twitter.com/vinta)
 * Website: [vinta.ws](https://vinta.ws/)
 
