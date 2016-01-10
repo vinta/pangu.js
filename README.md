@@ -58,8 +58,8 @@ $ npm install pangu --save
 var pangu = require('pangu'); // ES5
 import pangu from 'pangu'; // ES6
 
-pangu.spacing('Sephiroth見到他這等神情,也是悚然一驚:此人來歷不小啊!不知我這Ultimate Destructive Magic是否對付得了?');
-// outpu: Sephiroth 見到他這等神情, 也是悚然一驚: 此人來歷不小啊! 不知我這 Ultimate Destructive Magic 是否對付得了?
+pangu.spacing('Sephiroth見他這等神情,也是悚然一驚:不知我這Ultimate Destructive Magic是否對付得了?');
+// outpu: Sephiroth 見他這等神情, 也是悚然一驚: 不知我這 Ultimate Destructive Magic 是否對付得了?
 ```
 
 ## Testing
