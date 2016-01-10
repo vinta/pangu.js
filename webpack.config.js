@@ -1,9 +1,20 @@
+var fs = require('fs');
 var webpack = require('webpack');
+
+var packageInfo = require('./package.json');
 
 var uglifyPlugin = new webpack.optimize.UglifyJsPlugin({
   include: /\.min\.js$/,
   minimize: true
 })
+
+var bannerText = fs.readFileSync('src/browser/banner.txt');
+var bannerTemplate = eval('`' + bannerText + '`');
+var bannerPlugin = new webpack.BannerPlugin(bannerTemplate, {
+  include: /^pangu/,
+  raw: true,
+  entryOnly: true
+});
 
 var entryPath = './src/browser/pangu.js';
 
@@ -33,6 +44,7 @@ module.exports = {
     ]
   },
   plugins: [
-    uglifyPlugin
+    uglifyPlugin,
+    bannerPlugin
   ]
 }

@@ -1,3 +1,11 @@
+/*!
+ * pangu.js
+ * --------
+ * @version: 3.0.0
+ * @homepage: https://github.com/vinta/pangu.js
+ * @license: MIT
+ * @author: Vinta Chen <vinta.chen@gmail.com> (https://github.com/vinta)
+ */
 var pangu =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache

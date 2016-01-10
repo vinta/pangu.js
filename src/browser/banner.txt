@@ -1,0 +1,8 @@
+/*!
+ * pangu.js
+ * --------
+ * @version: ${packageInfo.version}
+ * @homepage: ${packageInfo.homepage}
+ * @license: ${packageInfo.license}
+ * @author: Vinta Chen <vinta.chen@gmail.com> (https://github.com/vinta)
+ */
