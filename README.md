@@ -2,6 +2,7 @@
 
 [![](http://img.shields.io/travis/vinta/pangu.js.svg?style=flat-square)](https://travis-ci.org/vinta/pangu.js)
 [![](https://img.shields.io/codecov/c/github/vinta/pangu.js/master.svg?style=flat-square)](https://codecov.io/github/vinta/pangu.js)
+[![](https://img.shields.io/npm/v/pangu.svg?style=flat-square)](https://www.npmjs.com/package/pangu)
 [![](https://img.shields.io/badge/made%20with-%e2%9d%a4-ff69b4.svg?style=flat-square)](https://vinta.ws)
 
 如果你跟我一樣，每次看到網頁上的中文字和英文、數字、符號擠在一塊，就會坐立難安，忍不住想在它們之間加個空格。這個外掛（支援 Chrome 和 Firefox）正是你在網路世界走跳所需要的東西，它會自動替你在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。
@@ -30,17 +31,20 @@
 ## Usage
 
 ``` bash
-$ npm install pangu
+$ npm install pangu --save
 ```
 
 ### Browser
 
 ``` html
 <head>
-  // Files are located on ./node_modules/pangu/dist/browser/
+  // Files are located on /node_modules/pangu/dist/browser/
   <script src="pangu.min.js"></script>
 </head>
 <script>
+  var newText = pangu.spacing("Mr.龍島主道：「Let's Party!各位高明博雅君子！」");
+  // output: "Mr. 龍島主道：「Let's Party! 各位高明博雅君子！」"
+
   pangu.spacingPage();
   pangu.spacingElementById('main');
   pangu.spacingElementByClassName('comment');
@@ -54,8 +58,8 @@ $ npm install pangu
 var pangu = require('pangu'); // ES5
 import pangu from 'pangu'; // ES6
 
-pangu.spacingText('新八的構造成分有95%是眼鏡、3%是水、2%是垃圾');
-// outpu: 新八的構造成分有 95% 是眼鏡、3% 是水、2% 是垃圾
+pangu.spacing('Sephiroth見到他這等神情,也是悚然一驚:此人來歷不小啊!不知我這Ultimate Destructive Magic是否對付得了?');
+// outpu: Sephiroth 見到他這等神情, 也是悚然一驚: 此人來歷不小啊! 不知我這 Ultimate Destructive Magic 是否對付得了?
 ```
 
 ## Testing
