@@ -1,4 +1,5 @@
-const readFile = require('fs').readFile;
+const fs = require('fs');
+
 const Pangu = require('../shared/core').Pangu;
 
 class NodePangu extends Pangu {
@@ -9,8 +10,9 @@ class NodePangu extends Pangu {
     this.filePrefix = filePrefix;
   }
 
-  spacingFile(path, callback) {
-    readFile(path, 'utf8', (err, data) => {
+  // TODO: 改用 promise
+  spacingFile(path, callback = undefined) {
+    fs.readFile(path, 'utf8', (err, data) => {
       if (err) {
         throw err;
       }
@@ -19,9 +21,11 @@ class NodePangu extends Pangu {
     });
   }
 
+  // TODO
   // spacingFileFromURL(url, callback) {
   // }
-  //
+
+  // TODO
   // spacingHTML(html, callback) {
   // }
 

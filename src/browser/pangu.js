@@ -219,6 +219,7 @@ class BrowserPangu extends Pangu {
     return hasSpacing;
   }
 
+  // TODO: 改用 promise
   spacingPage() {
     const hasSpacingPageTitle = this.spacingPageTitle();
     const hasSpacingPageBody = this.spacingPageBody();
