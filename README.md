@@ -52,6 +52,13 @@ $ npm install pangu --save
 </script>
 ```
 
+`pangu.js` is also available on [cdnjs](http://cdnjs.com/libraries/pangu):
+
+``` html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/3.0.0/pangu.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/3.0.0/pangu.min.js"></script>
+```
+
 ### Node.js
 
 ``` js
