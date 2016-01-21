@@ -8,7 +8,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var readFile = require('fs').readFile;
+var fs = require('fs');
+
 var Pangu = require('../shared/core').Pangu;
 
 var NodePangu = function (_Pangu) {
@@ -25,10 +26,14 @@ var NodePangu = function (_Pangu) {
     return _this;
   }
 
+  // TODO: 改用 promise
+
   _createClass(NodePangu, [{
     key: 'spacingFile',
-    value: function spacingFile(path, callback) {
-      readFile(path, 'utf8', function (err, data) {
+    value: function spacingFile(path) {
+      var callback = arguments.length <= 1 || arguments[1] === undefined ? undefined : arguments[1];
+
+      fs.readFile(path, 'utf8', function (err, data) {
         if (err) {
           throw err;
         }
@@ -37,9 +42,11 @@ var NodePangu = function (_Pangu) {
       });
     }
 
+    // TODO
     // spacingFileFromURL(url, callback) {
     // }
-    //
+
+    // TODO
     // spacingHTML(html, callback) {
     // }
 
