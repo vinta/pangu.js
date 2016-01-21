@@ -6,8 +6,17 @@
  * @license: MIT
  * @author: Vinta Chen <vinta.chen@gmail.com> (https://github.com/vinta)
  */
-var pangu =
-/******/ (function(modules) { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define("pangu", [], factory);
+	else if(typeof exports === 'object')
+		exports["pangu"] = factory();
+	else
+		root["pangu"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -298,6 +307,9 @@ var pangu =
 	
 	      return hasSpacing;
 	    }
+	
+	    // TODO: 改用 promise
+	
 	  }, {
 	    key: 'spacingPage',
 	    value: function spacingPage() {
@@ -432,5 +444,7 @@ var pangu =
 	module.exports.Pangu = Pangu;
 
 /***/ }
-/******/ ]);
+/******/ ])
+});
+;
 //# sourceMappingURL=pangu.js.map

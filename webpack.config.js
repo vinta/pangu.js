@@ -28,7 +28,8 @@ module.exports = {
     path: './dist/browser/',
     filename: '[name].js',
     library: 'pangu',
-    libraryTarget: 'var'
+    libraryTarget: 'umd',
+    umdNamedDefine: true
   },
   devtool: 'source-map',
   module: {
