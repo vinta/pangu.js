@@ -5,6 +5,66 @@ describe('Pangu', function () {
   const pangu = new Pangu();
 
   describe('#spacing()', function () {
+    it('處理 Latin-1 Supplement', function () {
+      assert.equal(pangu.spacing('中文Ø漢字'), '中文 Ø 漢字');
+      assert.equal(pangu.spacing('中文 Ø 漢字'), '中文 Ø 漢字');
+    });
+
+    it('處理 General Punctuation', function () {
+      assert.equal(pangu.spacing('中文•漢字'), '中文 • 漢字');
+      assert.equal(pangu.spacing('中文 • 漢字'), '中文 • 漢字');
+    });
+
+    it('處理 Number Forms', function () {
+      assert.equal(pangu.spacing('中文Ⅶ漢字'), '中文 Ⅶ 漢字');
+      assert.equal(pangu.spacing('中文 Ⅶ 漢字'), '中文 Ⅶ 漢字');
+    });
+
+    it('處理 CJK Radicals Supplement', function () {
+      assert.equal(pangu.spacing('abc⻤123'), 'abc ⻤ 123');
+      assert.equal(pangu.spacing('abc ⻤ 123'), 'abc ⻤ 123');
+    });
+
+    it('處理 Kangxi Radicals', function () {
+      assert.equal(pangu.spacing('abc⾗123'), 'abc ⾗ 123');
+      assert.equal(pangu.spacing('abc ⾗ 123'), 'abc ⾗ 123');
+    });
+
+    it('處理 Hiragana', function () {
+      assert.equal(pangu.spacing('abcあ123'), 'abc あ 123');
+      assert.equal(pangu.spacing('abc あ 123'), 'abc あ 123');
+    });
+
+    it('處理 Katakana', function () {
+      assert.equal(pangu.spacing('abcア123'), 'abc ア 123');
+      assert.equal(pangu.spacing('abc ア 123'), 'abc ア 123');
+    });
+
+    it('處理 Bopomofo', function () {
+      assert.equal(pangu.spacing('abcㄅ123'), 'abc ㄅ 123');
+      assert.equal(pangu.spacing('abc ㄅ 123'), 'abc ㄅ 123');
+    });
+
+    it('處理 Enclosed CJK Letters And Months', function () {
+      assert.equal(pangu.spacing('abc㈱123'), 'abc ㈱ 123');
+      assert.equal(pangu.spacing('abc ㈱ 123'), 'abc ㈱ 123');
+    });
+
+    it('處理 CJK Unified Ideographs Extension-A', function () {
+      assert.equal(pangu.spacing('abc㐂123'), 'abc 㐂 123');
+      assert.equal(pangu.spacing('abc 㐂 123'), 'abc 㐂 123');
+    });
+
+    it('處理 CJK Unified Ideographs', function () {
+      assert.equal(pangu.spacing('abc丁123'), 'abc 丁 123');
+      assert.equal(pangu.spacing('abc 丁 123'), 'abc 丁 123');
+    });
+
+    it('處理 CJK Compatibility Ideographs', function () {
+      assert.equal(pangu.spacing('abc車123'), 'abc 車 123');
+      assert.equal(pangu.spacing('abc 車 123'), 'abc 車 123');
+    });
+
     it('處理 ~ 符號', function () {
       assert.equal(pangu.spacing('前面~後面'), '前面~ 後面');
       assert.equal(pangu.spacing('前面 ~ 後面'), '前面 ~ 後面');
@@ -39,20 +99,24 @@ describe('Pangu', function () {
 
     it('處理 $ 符號', function () {
       assert.equal(pangu.spacing('前面$後面'), '前面 $ 後面');
+      assert.equal(pangu.spacing('前面 $ 後面'), '前面 $ 後面');
       assert.equal(pangu.spacing('前面$100後面'), '前面 $100 後面');
     });
 
     it('處理 % 符號', function () {
       assert.equal(pangu.spacing('前面%後面'), '前面 % 後面');
+      assert.equal(pangu.spacing('前面 % 後面'), '前面 % 後面');
       assert.equal(pangu.spacing('前面100%後面'), '前面 100% 後面');
     });
 
     it('處理 ^ 符號', function () {
       assert.equal(pangu.spacing('前面^後面'), '前面 ^ 後面');
+      assert.equal(pangu.spacing('前面 ^ 後面'), '前面 ^ 後面');
     });
 
     it('處理 & 符號', function () {
       assert.equal(pangu.spacing('前面&後面'), '前面 & 後面');
+      assert.equal(pangu.spacing('前面 & 後面'), '前面 & 後面');
       assert.equal(pangu.spacing('Vinta&Mollie'), 'Vinta&Mollie');
       assert.equal(pangu.spacing('Vinta&陳上進'), 'Vinta & 陳上進');
       assert.equal(pangu.spacing('陳上進&Vinta'), '陳上進 & Vinta');
@@ -61,6 +125,7 @@ describe('Pangu', function () {
 
     it('處理 * 符號', function () {
       assert.equal(pangu.spacing('前面*後面'), '前面 * 後面');
+      assert.equal(pangu.spacing('前面 * 後面'), '前面 * 後面');
       assert.equal(pangu.spacing('Vinta*Mollie'), 'Vinta*Mollie');
       assert.equal(pangu.spacing('Vinta*陳上進'), 'Vinta * 陳上進');
       assert.equal(pangu.spacing('陳上進*Vinta'), '陳上進 * Vinta');
@@ -78,6 +143,7 @@ describe('Pangu', function () {
 
     it('處理 - 符號', function () {
       assert.equal(pangu.spacing('前面-後面'), '前面 - 後面');
+      assert.equal(pangu.spacing('前面 - 後面'), '前面 - 後面');
       assert.equal(pangu.spacing('Vinta-Mollie'), 'Vinta-Mollie');
       assert.equal(pangu.spacing('Vinta-陳上進'), 'Vinta - 陳上進');
       assert.equal(pangu.spacing('陳上進-Vinta'), '陳上進 - Vinta');
@@ -86,10 +152,12 @@ describe('Pangu', function () {
 
     it('略過 _ 符號', function () {
       assert.equal(pangu.spacing('前面_後面'), '前面_後面');
+      assert.equal(pangu.spacing('前面 _ 後面'), '前面 _ 後面');
     });
 
     it('處理 + 符號', function () {
       assert.equal(pangu.spacing('前面+後面'), '前面 + 後面');
+      assert.equal(pangu.spacing('前面 + 後面'), '前面 + 後面');
       assert.equal(pangu.spacing('Vinta+Mollie'), 'Vinta+Mollie');
       assert.equal(pangu.spacing('Vinta+陳上進'), 'Vinta + 陳上進');
       assert.equal(pangu.spacing('陳上進+Vinta'), '陳上進 + Vinta');
@@ -100,6 +168,7 @@ describe('Pangu', function () {
 
     it('處理 = 符號', function () {
       assert.equal(pangu.spacing('前面=後面'), '前面 = 後面');
+      assert.equal(pangu.spacing('前面 = 後面'), '前面 = 後面');
       assert.equal(pangu.spacing('Vinta=Mollie'), 'Vinta=Mollie');
       assert.equal(pangu.spacing('Vinta=陳上進'), 'Vinta = 陳上進');
       assert.equal(pangu.spacing('陳上進=Vinta'), '陳上進 = Vinta');
@@ -126,6 +195,7 @@ describe('Pangu', function () {
 
     it('處理 | 符號', function () {
       assert.equal(pangu.spacing('前面|後面'), '前面 | 後面');
+      assert.equal(pangu.spacing('前面 | 後面'), '前面 | 後面');
       assert.equal(pangu.spacing('Vinta|Mollie'), 'Vinta|Mollie');
       assert.equal(pangu.spacing('Vinta|陳上進'), 'Vinta | 陳上進');
       assert.equal(pangu.spacing('陳上進|Vinta'), '陳上進 | Vinta');
@@ -134,6 +204,7 @@ describe('Pangu', function () {
 
     it('處理 \\ 符號', function () {
       assert.equal(pangu.spacing('前面\\後面'), '前面 \\ 後面');
+      assert.equal(pangu.spacing('前面 \\ 後面'), '前面 \\ 後面');
     });
 
     it('處理 : 符號', function () {
@@ -173,6 +244,7 @@ describe('Pangu', function () {
 
     it('處理 < 符號', function () {
       assert.equal(pangu.spacing('前面<後面'), '前面 < 後面');
+      assert.equal(pangu.spacing('前面 < 後面'), '前面 < 後面');
       assert.equal(pangu.spacing('Vinta<Mollie'), 'Vinta<Mollie');
       assert.equal(pangu.spacing('Vinta<陳上進'), 'Vinta < 陳上進');
       assert.equal(pangu.spacing('陳上進<Vinta'), '陳上進 < Vinta');
@@ -187,6 +259,7 @@ describe('Pangu', function () {
 
     it('處理 > 符號', function () {
       assert.equal(pangu.spacing('前面>後面'), '前面 > 後面');
+      assert.equal(pangu.spacing('前面 > 後面'), '前面 > 後面');
       assert.equal(pangu.spacing('Vinta>Mollie'), 'Vinta>Mollie');
       assert.equal(pangu.spacing('Vinta>陳上進'), 'Vinta > 陳上進');
       assert.equal(pangu.spacing('陳上進>Vinta'), '陳上進 > Vinta');
@@ -207,6 +280,7 @@ describe('Pangu', function () {
 
     it('處理 / 符號', function () {
       assert.equal(pangu.spacing('前面/後面'), '前面 / 後面');
+      assert.equal(pangu.spacing('前面 / 後面'), '前面 / 後面');
       assert.equal(pangu.spacing('Vinta/Mollie'), 'Vinta/Mollie');
       assert.equal(pangu.spacing('Vinta/陳上進'), 'Vinta / 陳上進');
       assert.equal(pangu.spacing('陳上進/Vinta'), '陳上進 / Vinta');
@@ -214,11 +288,12 @@ describe('Pangu', function () {
     });
 
     it('處理特殊字元', function () {
-      // \u2022
-      assert.equal(pangu.spacing('前面•後面'), '前面 • 後面');
+      // \u201c and \u201d
+      assert.equal(pangu.spacing('前面“中文123漢字”後面'), '前面 “中文 123 漢字” 後面')
 
       // \u2026
       assert.equal(pangu.spacing('前面…後面'), '前面… 後面');
+      assert.equal(pangu.spacing('前面……後面'), '前面…… 後面');
 
       // \u2027
       assert.equal(pangu.spacing('前面‧後面'), '前面 ‧ 後面');
