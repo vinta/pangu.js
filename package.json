@@ -40,7 +40,7 @@
     "build:node": "npm run clear:node && ./node_modules/.bin/babel src/ -d dist/ --ignore browser/*",
     "build": "npm run build:browser && npm run build:node",
     "test:browser": "npm run build:browser && ./node_modules/.bin/karma start",
-    "test:node": "npm run build:node && ./node_modules/.bin/mocha --require babel-core/register test/shared/ test/node/",
+    "test:node": "npm run build:node && ./node_modules/.bin/mocha --compilers js:babel-register test/shared/ test/node/",
     "test": "npm run test:browser && npm run test:node",
     "watch:browser": "npm run test:browser -- --watch",
     "watch:node": "npm run test:node -- --watch"
