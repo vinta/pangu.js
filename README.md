@@ -27,6 +27,7 @@
 * [pangu.php](https://github.com/Kunr/pangu.php) (PHP)
 * [pangu.py](https://github.com/vinta/pangu.py) (Python)
 * [pangu.rb](https://github.com/dlackty/pangu.rb) (Ruby)
+* [pangu.clj](https://github.com/coldnew/pangu.clj) (Clojure and ClojureScript)
 
 ## Usage
 
