@@ -8,7 +8,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var readFile = require('fs').readFile;
+var fs = require('fs');
+
 var Pangu = require('../shared/core').Pangu;
 
 var NodePangu = function (_Pangu) {
@@ -27,19 +28,49 @@ var NodePangu = function (_Pangu) {
 
   _createClass(NodePangu, [{
     key: 'spacingFile',
-    value: function spacingFile(path, callback) {
-      readFile(path, 'utf8', function (err, data) {
+    value: function spacingFile(path) {
+      var _this2 = this;
+
+      var callback = arguments.length <= 1 || arguments[1] === undefined ? undefined : arguments[1];
+
+      fs.readFile(path, 'utf8', function (err, data) {
         if (err) {
           throw err;
         }
 
-        callback(err, data);
+        callback(err, _this2.spacing(data));
       });
     }
+  }, {
+    key: 'spacingFilePromise',
+    value: function spacingFilePromise(path) {
+      var _this3 = this;
 
+      return new Promise(function (resolve, reject) {
+        fs.readFile(path, 'utf8', function (err, data) {
+          if (err) {
+            reject(err);
+          }
+
+          resolve(_this3.spacing(data));
+        });
+      });
+    }
+  }, {
+    key: 'spacingFileSync',
+    value: function spacingFileSync(path) {
+      try {
+        return this.spacing(fs.readFileSync(path, 'utf8'));
+      } catch (err) {
+        throw err;
+      }
+    }
+
+    // TODO
     // spacingFileFromURL(url, callback) {
     // }
-    //
+
+    // TODO
     // spacingHTML(html, callback) {
     // }
 
