@@ -10,20 +10,41 @@ class NodePangu extends Pangu {
     this.filePrefix = filePrefix;
   }
 
-  // TODO: 改用 promise
   spacingFile(path, callback = undefined) {
     fs.readFile(path, 'utf8', (err, data) => {
       if (err) {
         throw err;
       }
 
-      callback(err, data);
+      callback(err, this.spacing(data));
+
     });
+  }
+
+  spacingFilePromise(path) {
+    return new Promise((resolve, reject) => {
+      fs.readFile(path, 'utf8', (err, data) => {
+        if (err) {
+          reject(err);
+        }
+
+        resolve(this.spacing(data));
+      });
+    })
+  }
+
+  spacingFileSync(path) {
+    try {
+      return this.spacing(fs.readFileSync(path, 'utf8'));
+    } catch (err) {
+      throw err;
+    }
   }
 
   // TODO
   // spacingFileFromURL(url, callback) {
   // }
+
 
   // TODO
   // spacingHTML(html, callback) {
