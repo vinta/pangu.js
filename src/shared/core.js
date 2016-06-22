@@ -64,9 +64,13 @@ class Pangu {
     return newText;
   }
 
-  spacingText(text, callback) {
-    const newText = this.spacing(text);
-    callback(null, newText);
+  spacingText(text, callback = () => {}) {
+    try {
+      const newText = this.spacing(text);
+      callback(null, newText);
+    } catch (err) {
+      callback(err);
+    }
   }
 
 }
