@@ -26,11 +26,11 @@ var NodePangu = function (_Pangu) {
     return _this;
   }
 
-  // TODO: 改用 promise
-
   _createClass(NodePangu, [{
     key: 'spacingFile',
     value: function spacingFile(path) {
+      var _this2 = this;
+
       var callback = arguments.length <= 1 || arguments[1] === undefined ? undefined : arguments[1];
 
       fs.readFile(path, 'utf8', function (err, data) {
@@ -38,8 +38,32 @@ var NodePangu = function (_Pangu) {
           throw err;
         }
 
-        callback(err, data);
+        callback(err, _this2.spacing(data));
       });
+    }
+  }, {
+    key: 'spacingFilePromise',
+    value: function spacingFilePromise(path) {
+      var _this3 = this;
+
+      return new Promise(function (resolve, reject) {
+        fs.readFile(path, 'utf8', function (err, data) {
+          if (err) {
+            reject(err);
+          }
+
+          resolve(_this3.spacing(data));
+        });
+      });
+    }
+  }, {
+    key: 'spacingFileSync',
+    value: function spacingFileSync(path) {
+      try {
+        return this.spacing(fs.readFileSync(path, 'utf8'));
+      } catch (err) {
+        throw err;
+      }
     }
 
     // TODO

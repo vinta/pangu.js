@@ -20,6 +20,8 @@
 
 ### for Developers
 
+* [pangu.clj](https://github.com/coldnew/pangu.clj) (Clojure)
+* [pangu.ex](https://github.com/cataska/pangu.ex) (Elixir)
 * [pangu.go](https://github.com/vinta/pangu) (Go)
 * [pangu.java](https://github.com/vinta/pangu.java) (Java)
 * [pangu.js](https://github.com/vinta/pangu.js) (JavaScript, both Node.js and Browser)
@@ -66,7 +68,22 @@ var pangu = require('pangu'); // ES5
 import pangu from 'pangu'; // ES6
 
 pangu.spacing('Sephiroth見他這等神情,也是悚然一驚:不知我這Ultimate Destructive Magic是否對付得了?');
-// outpu: Sephiroth 見他這等神情, 也是悚然一驚: 不知我這 Ultimate Destructive Magic 是否對付得了?
+// output: Sephiroth 見他這等神情, 也是悚然一驚: 不知我這 Ultimate Destructive Magic 是否對付得了?
+
+//./text.txt
+// 聖誕老人Hohoho三小
+
+pangu.spacingFile('./text.txt', function(err, result) {
+  // result = 聖誕老人 Hohoho 三小
+});
+
+pangu.spacingFilePromise('./text.txt').then(function(result) {
+  // result = 聖誕老人 Hohoho 三小
+});
+
+const result = pangu.spacingFileSync('./text.txt');
+// result = 聖誕老人 Hohoho 三小
+
 ```
 
 ## Testing
