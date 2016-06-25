@@ -4,7 +4,7 @@ import { Pangu } from '../../dist/shared/core';
 describe('Pangu', function () {
   const pangu = new Pangu();
 
-  describe('#spacing()', function () {
+  describe('spacing()', function () {
     it('處理 Latin-1 Supplement', function () {
       assert.equal(pangu.spacing('中文Ø漢字'), '中文 Ø 漢字');
       assert.equal(pangu.spacing('中文 Ø 漢字'), '中文 Ø 漢字');
@@ -289,7 +289,7 @@ describe('Pangu', function () {
 
     it('處理特殊字元', function () {
       // \u201c and \u201d
-      assert.equal(pangu.spacing('前面“中文123漢字”後面'), '前面 “中文 123 漢字” 後面')
+      assert.equal(pangu.spacing('前面“中文123漢字”後面'), '前面 “中文 123 漢字” 後面');
 
       // \u2026
       assert.equal(pangu.spacing('前面…後面'), '前面… 後面');
@@ -300,7 +300,7 @@ describe('Pangu', function () {
     });
   });
 
-  describe('#spacingText()', function () {
+  describe('spacingText()', function () {
     it('callback', function (done) {
       pangu.spacingText('中文123漢字abc', function (err, newText) {
         assert.equal(newText, '中文 123 漢字 abc');
