@@ -90,6 +90,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
 	    _this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
 	    _this.blockTags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
+	
+	    // TODO
+	    // this.ignoreClasses
+	    // this.ignoreAttributes
 	    return _this;
 	  }
 	
@@ -99,7 +103,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var parentNode = node.parentNode;
 	
 	      while (parentNode && parentNode.nodeName && parentNode.nodeName.search(this.topTags) === -1) {
-	        if (parentNode.getAttribute('contenteditable') === 'true' || parentNode.getAttribute('g_editable') === 'true' || parentNode.nodeName.search(this.ignoreTags) >= 0) {
+	        if (parentNode.nodeName.search(this.ignoreTags) >= 0 || parentNode.isContentEditable || parentNode.getAttribute('g_editable') === 'true') {
 	          return true;
 	        }
 	
@@ -352,7 +356,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var pangu = new BrowserPangu();
 	
-	module.exports = pangu;
+	exports = module.exports = pangu;
+	exports.Pangu = BrowserPangu;
 
 /***/ },
 /* 1 */

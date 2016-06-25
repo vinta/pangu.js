@@ -11,8 +11,7 @@ var DEFAULT_SETTINGS = {
     'blacklists': [
         '//drive.google.com',
         '//docs.google.com',
-        '//vinta.ws',
-        '//heelsfetishism.com'
+        '&tbm=isch'
     ],
     'whitelists': [],
     'is_mute': false,

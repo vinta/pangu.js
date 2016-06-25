@@ -13,13 +13,17 @@ class BrowserPangu extends Pangu {
     this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
     this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
     this.blockTags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
+
+    // TODO
+    // this.ignoreClasses
+    // this.ignoreAttributes
   }
 
   canIgnoreNode(node) {
     let parentNode = node.parentNode;
 
     while (parentNode && parentNode.nodeName && parentNode.nodeName.search(this.topTags) === -1) {
-      if ((parentNode.getAttribute('contenteditable') === 'true') || (parentNode.getAttribute('g_editable') === 'true') || (parentNode.nodeName.search(this.ignoreTags) >= 0)) {
+      if ((parentNode.nodeName.search(this.ignoreTags) >= 0) || (parentNode.isContentEditable) || (parentNode.getAttribute('g_editable') === 'true')) {
         return true;
       }
 
@@ -141,7 +145,7 @@ class BrowserPangu extends Pangu {
             } else if (currentNode.nodeName.search(this.spaceSensitiveTags) === -1) {
               currentTextNode.data = currentTextNode.data + ' ';
             } else {
-              let panguSpace = document.createElement('pangu');
+              const panguSpace = document.createElement('pangu');
               panguSpace.innerHTML = ' ';
 
               // 避免一直被加空格
@@ -255,4 +259,5 @@ class BrowserPangu extends Pangu {
 
 const pangu = new BrowserPangu();
 
-module.exports = pangu;
+exports = module.exports = pangu;
+exports.Pangu = BrowserPangu;
