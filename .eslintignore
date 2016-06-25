@@ -1,4 +1,4 @@
 dist/*
-node_modules/*
 karma.conf.js
+node_modules/*
 webpack.config.js
