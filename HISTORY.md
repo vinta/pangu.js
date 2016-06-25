@@ -1,5 +1,17 @@
 # History
 
+v3.1.0 / 2016-06-25
+-------------------
+
+- NodePangu 新增 `spacingFile()`，支援 callback 與 promise
+- NodePangu 新增 `spacingFileSync()`
+
+v3.0.0 / 2016-01-10
+-------------------
+
+- Isomorphic!
+
+
 v2.5.7 / 2015-07-16
 -------------------
 

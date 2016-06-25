@@ -72,9 +72,15 @@ var Pangu = function () {
     }
   }, {
     key: 'spacingText',
-    value: function spacingText(text, callback) {
-      var newText = this.spacing(text);
-      callback(null, newText);
+    value: function spacingText(text) {
+      var callback = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
+
+      try {
+        var newText = this.spacing(text);
+        callback(null, newText);
+      } catch (err) {
+        callback(err);
+      }
     }
   }]);
 

@@ -1,7 +1,7 @@
 /*!
  * pangu.js
  * --------
- * @version: 3.0.0
+ * @version: 3.1.0
  * @homepage: https://github.com/vinta/pangu.js
  * @license: MIT
  * @author: Vinta Chen <vinta.chen@gmail.com> (https://github.com/vinta)
@@ -432,9 +432,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }, {
 	    key: 'spacingText',
-	    value: function spacingText(text, callback) {
-	      var newText = this.spacing(text);
-	      callback(null, newText);
+	    value: function spacingText(text) {
+	      var callback = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
+	
+	      try {
+	        var newText = this.spacing(text);
+	        callback(null, newText);
+	      } catch (err) {
+	        callback(err);
+	      }
 	    }
 	  }]);
 	

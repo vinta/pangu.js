@@ -31,28 +31,19 @@ var NodePangu = function (_Pangu) {
     value: function spacingFile(path) {
       var _this2 = this;
 
-      var callback = arguments.length <= 1 || arguments[1] === undefined ? undefined : arguments[1];
-
-      fs.readFile(path, 'utf8', function (err, data) {
-        if (err) {
-          throw err;
-        }
-
-        callback(err, _this2.spacing(data));
-      });
-    }
-  }, {
-    key: 'spacingFilePromise',
-    value: function spacingFilePromise(path) {
-      var _this3 = this;
+      var callback = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
 
       return new Promise(function (resolve, reject) {
         fs.readFile(path, 'utf8', function (err, data) {
           if (err) {
             reject(err);
+            return callback(err);
           }
 
-          resolve(_this3.spacing(data));
+          var spacingData = _this2.spacing(data);
+
+          resolve(spacingData);
+          return callback(null, spacingData);
         });
       });
     }
