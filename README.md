@@ -57,13 +57,13 @@ $ npm install pangu --save
 `pangu.js` is also available on [cdnjs](http://cdnjs.com/libraries/pangu):
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/3.1.1/pangu.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/3.1.1/pangu.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/3.0.0/pangu.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/3.0.0/pangu.min.js"></script>
 ```
 
 ### Node.js
 
-Learn more about [pangu](https://www.npmjs.com/package/pangu) on npm.
+Learn more on [npm](https://www.npmjs.com/package/pangu).
 
 ```js
 var pangu = require('pangu'); // ES5
@@ -73,10 +73,12 @@ pangu.spacing('Sephiroth見他這等神情,也是悚然一驚:不知我這Ultima
 // output: Sephiroth 見他這等神情, 也是悚然一驚: 不知我這 Ultimate Destructive Magic 是否對付得了?
 
 pangu.spacingFile('/path/to/text.txt', function(err, data) {
+  // callback
   console.log(data);
 });
 
 pangu.spacingFile('/path/to/text.txt').then(function(data) {
+  // promise
   console.log(data);
 });
 
