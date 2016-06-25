@@ -15,7 +15,7 @@ var DEFAULT_SETTINGS = {
   ],
   'whitelists': [],
   'is_mute': false,
-  'can_notify': true
+  'can_notify': false
 };
 var CACHED_SETTINGS = Object.create(DEFAULT_SETTINGS);
 var SETTING_KEYS = Object.keys(DEFAULT_SETTINGS);

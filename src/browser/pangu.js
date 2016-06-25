@@ -63,10 +63,7 @@ class BrowserPangu extends Pangu {
     // return false;
   }
 
-  spacingNodeByXPath(xPathQuery, contextNode = document) {
-    // 是否加了空格
-    let hasSpacing = false;
-
+  spacingNodeByXPath(xPathQuery, contextNode) {
     // 因為 xPathQuery 會是用 text() 結尾，所以這些 nodes 會是 text 而不是 DOM element
     // snapshotLength 要配合 XPathResult.ORDERED_NODE_SNAPSHOT_TYPE 使用
     // https://developer.mozilla.org/en-US/docs/DOM/document.evaluate
@@ -87,7 +84,6 @@ class BrowserPangu extends Pangu {
 
       const newText = this.spacing(currentTextNode.data);
       if (currentTextNode.data !== newText) {
-        hasSpacing = true;
         currentTextNode.data = newText;
       }
 
@@ -105,8 +101,6 @@ class BrowserPangu extends Pangu {
         const testText = currentTextNode.data.toString().substr(-1) + nextTextNode.data.toString().substr(0, 1);
         const testNewText = this.spacing(testText);
         if (testNewText !== testText) {
-          hasSpacing = true;
-
           // 往上找 nextTextNode 的 parent node
           // 直到遇到 spaceSensitiveTags
           // 而且 nextTextNode 必須是第一個 text child
@@ -172,46 +166,31 @@ class BrowserPangu extends Pangu {
 
       nextTextNode = currentTextNode;
     }
-
-    return hasSpacing;
   }
 
   spacingNode(contextNode) {
     const xPathQuery = './/*/text()[normalize-space(.)]';
-    const hasSpacing = this.spacingNodeByXPath(xPathQuery, contextNode);
-
-    return hasSpacing;
+    this.spacingNodeByXPath(xPathQuery, contextNode);
   }
 
   spacingElementById(idName) {
     const xPathQuery = `id("${idName}")//text()`;
-
-    const hasSpacing = this.spacingNodeByXPath(xPathQuery);
-
-    return hasSpacing;
+    this.spacingNodeByXPath(xPathQuery, document);
   }
 
   spacingElementByClassName(className) {
     const xPathQuery = `//*[contains(concat(" ", normalize-space(@class), " "), "${className}")]//text()`;
-
-    const hasSpacing = this.spacingNodeByXPath(xPathQuery);
-
-    return hasSpacing;
+    this.spacingNodeByXPath(xPathQuery, document);
   }
 
   spacingElementByTagName(tagName) {
     const xPathQuery = `//${tagName}//text()`;
-
-    const hasSpacing = this.spacingNodeByXPath(xPathQuery);
-
-    return hasSpacing;
+    this.spacingNodeByXPath(xPathQuery, document);
   }
 
   spacingPageTitle() {
-    const titleQuery = '/html/head/title/text()';
-    const hasSpacing = this.spacingNodeByXPath(titleQuery);
-
-    return hasSpacing;
+    const xPathQuery = '/html/head/title/text()';
+    this.spacingNodeByXPath(xPathQuery, document);
   }
 
   spacingPageBody() {
@@ -242,24 +221,20 @@ class BrowserPangu extends Pangu {
     // 4. 略過特定節點，例如 <script> 和 <style>
     //
     // 注意，以下的 query 只會取出各節點的 text 內容！
-    let bodyQuery = '/html/body//*/text()[normalize-space(.)]';
+    let xPathQuery = '/html/body//*/text()[normalize-space(.)]';
     for (const tag of ['script', 'style', 'textarea']) {
       // 理論上這幾個 tag 裡面不會包含其他 tag
       // 所以可以直接用 .. 取父節點
       // ex: [translate(name(..), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") != "script"]
-      bodyQuery += `[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
+      xPathQuery += `[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
     }
-    const hasSpacing = this.spacingNodeByXPath(bodyQuery);
-
-    return hasSpacing;
+    this.spacingNodeByXPath(xPathQuery, document);
   }
 
   // TODO: 支援 callback 和 promise
   spacingPage() {
-    const hasSpacingPageTitle = this.spacingPageTitle();
-    const hasSpacingPageBody = this.spacingPageBody();
-
-    return hasSpacingPageTitle || hasSpacingPageBody;
+    this.spacingPageTitle();
+    this.spacingPageBody();
   }
 
 }

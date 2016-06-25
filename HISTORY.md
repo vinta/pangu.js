@@ -1,5 +1,11 @@
 # History
 
+v3.2.0 / 2016-06-26
+-------------------
+
+- 修正效能問題
+
+
 v3.1.1 / 2016-06-26
 -------------------
 
@@ -9,8 +15,8 @@ v3.1.1 / 2016-06-26
 v3.1.0 / 2016-06-25
 -------------------
 
-- NodePangu 新增 `spacingFile()`，支援 callback 與 promise
-- NodePangu 新增 `spacingFileSync()`
+- `NodePangu` 新增 `spacingFile()`，支援 callback 與 promise
+- `NodePangu` 新增 `spacingFileSync()`
 
 
 v3.0.0 / 2016-01-10

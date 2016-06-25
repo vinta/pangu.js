@@ -1,7 +1,7 @@
 /*!
  * pangu.js
  * --------
- * @version: 3.1.1
+ * @version: 3.2.0
  * @homepage: https://github.com/vinta/pangu.js
  * @license: MIT
  * @author: Vinta Chen <vinta.chen@gmail.com> (https://github.com/vinta)
@@ -146,20 +146,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }, {
 	    key: 'spacingNodeByXPath',
-	    value: function spacingNodeByXPath(xPathQuery) {
-	      var contextNode = arguments.length <= 1 || arguments[1] === undefined ? document : arguments[1];
-	
-	      // 是否加了空格
-	      var hasSpacing = false;
-	
+	    value: function spacingNodeByXPath(xPathQuery, contextNode) {
 	      // 因為 xPathQuery 會是用 text() 結尾，所以這些 nodes 會是 text 而不是 DOM element
 	      // snapshotLength 要配合 XPathResult.ORDERED_NODE_SNAPSHOT_TYPE 使用
 	      // https://developer.mozilla.org/en-US/docs/DOM/document.evaluate
 	      // https://developer.mozilla.org/en-US/docs/Web/API/XPathResult
 	      var textNodes = document.evaluate(xPathQuery, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 	
-	      var currentTextNode = undefined;
-	      var nextTextNode = undefined;
+	      var currentTextNode = void 0;
+	      var nextTextNode = void 0;
 	
 	      // 從最下面、最裡面的節點開始，所以是倒序的
 	      for (var i = textNodes.snapshotLength - 1; i > -1; --i) {
@@ -172,7 +167,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        var newText = this.spacing(currentTextNode.data);
 	        if (currentTextNode.data !== newText) {
-	          hasSpacing = true;
 	          currentTextNode.data = newText;
 	        }
 	
@@ -190,8 +184,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	          var testText = currentTextNode.data.toString().substr(-1) + nextTextNode.data.toString().substr(0, 1);
 	          var testNewText = this.spacing(testText);
 	          if (testNewText !== testText) {
-	            hasSpacing = true;
-	
 	            // 往上找 nextTextNode 的 parent node
 	            // 直到遇到 spaceSensitiveTags
 	            // 而且 nextTextNode 必須是第一個 text child
@@ -257,51 +249,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        nextTextNode = currentTextNode;
 	      }
-	
-	      return hasSpacing;
 	    }
 	  }, {
 	    key: 'spacingNode',
 	    value: function spacingNode(contextNode) {
 	      var xPathQuery = './/*/text()[normalize-space(.)]';
-	      var hasSpacing = this.spacingNodeByXPath(xPathQuery, contextNode);
-	
-	      return hasSpacing;
+	      this.spacingNodeByXPath(xPathQuery, contextNode);
 	    }
 	  }, {
 	    key: 'spacingElementById',
 	    value: function spacingElementById(idName) {
 	      var xPathQuery = 'id("' + idName + '")//text()';
-	
-	      var hasSpacing = this.spacingNodeByXPath(xPathQuery);
-	
-	      return hasSpacing;
+	      this.spacingNodeByXPath(xPathQuery, document);
 	    }
 	  }, {
 	    key: 'spacingElementByClassName',
 	    value: function spacingElementByClassName(className) {
 	      var xPathQuery = '//*[contains(concat(" ", normalize-space(@class), " "), "' + className + '")]//text()';
-	
-	      var hasSpacing = this.spacingNodeByXPath(xPathQuery);
-	
-	      return hasSpacing;
+	      this.spacingNodeByXPath(xPathQuery, document);
 	    }
 	  }, {
 	    key: 'spacingElementByTagName',
 	    value: function spacingElementByTagName(tagName) {
 	      var xPathQuery = '//' + tagName + '//text()';
-	
-	      var hasSpacing = this.spacingNodeByXPath(xPathQuery);
-	
-	      return hasSpacing;
+	      this.spacingNodeByXPath(xPathQuery, document);
 	    }
 	  }, {
 	    key: 'spacingPageTitle',
 	    value: function spacingPageTitle() {
-	      var titleQuery = '/html/head/title/text()';
-	      var hasSpacing = this.spacingNodeByXPath(titleQuery);
-	
-	      return hasSpacing;
+	      var xPathQuery = '/html/head/title/text()';
+	      this.spacingNodeByXPath(xPathQuery, document);
 	    }
 	  }, {
 	    key: 'spacingPageBody',
@@ -333,18 +310,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // 4. 略過特定節點，例如 <script> 和 <style>
 	      //
 	      // 注意，以下的 query 只會取出各節點的 text 內容！
-	      var bodyQuery = '/html/body//*/text()[normalize-space(.)]';
+	      var xPathQuery = '/html/body//*/text()[normalize-space(.)]';
 	      var _arr = ['script', 'style', 'textarea'];
 	      for (var _i = 0; _i < _arr.length; _i++) {
 	        var tag = _arr[_i];
 	        // 理論上這幾個 tag 裡面不會包含其他 tag
 	        // 所以可以直接用 .. 取父節點
 	        // ex: [translate(name(..), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") != "script"]
-	        bodyQuery += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
+	        xPathQuery += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
 	      }
-	      var hasSpacing = this.spacingNodeByXPath(bodyQuery);
-	
-	      return hasSpacing;
+	      this.spacingNodeByXPath(xPathQuery, document);
 	    }
 	
 	    // TODO: 支援 callback 和 promise
@@ -352,10 +327,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'spacingPage',
 	    value: function spacingPage() {
-	      var hasSpacingPageTitle = this.spacingPageTitle();
-	      var hasSpacingPageBody = this.spacingPageBody();
-	
-	      return hasSpacingPageTitle || hasSpacingPageBody;
+	      this.spacingPageTitle();
+	      this.spacingPageBody();
 	    }
 	  }]);
 	
@@ -411,10 +384,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      newText = newText.replace(/([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/g, '$1$3$5');
 	      newText = newText.replace(/([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])( )(')([A-Za-z])/g, '$1$3$4');
 	
+	      // hash_anscjk_hash
 	      // cjk_hash
 	      // hash_cjk
-	      newText = newText.replace(/([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])(#(\S+))/g, '$1 $2');
-	      newText = newText.replace(/((\S+)#)([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g, '$1 $3');
+	      newText = newText.replace(/([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])(#)([A-Za-z0-9\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]+)(#)([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g, '$1 $2$3$4 $5');
+	      newText = newText.replace(/([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])(#([^ ]))/g, '$1 $2');
+	      newText = newText.replace(/(([^ ])#)([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g, '$1 $3');
 	
 	      // cjk_operator_ans
 	      // ans_operator_cjk

@@ -1,16 +1,11 @@
 var is_spacing = false; // 是不是正在插入空格？
 var already_bind = false; // 是不是已經對 document 綁定過 event？
-// var last_spacing_time = 0; // 避免短時間內一直在執行 go_spacing()
 var node_hash = {}; // 避免同一個 DOM node 一直觸發 DOMSubtreeModified
 
 function go_page_spacing() {
   is_spacing = true;
-  var had_spacing = pangu.spacingPage();
+  pangu.spacingPage();
   is_spacing = false;
-
-  // last_spacing_time = new Date().getTime();
-
-  return had_spacing;
 }
 
 function go_node_spacing(node) {
@@ -19,12 +14,8 @@ function go_node_spacing(node) {
   }
 
   is_spacing = true;
-  var had_spacing = pangu.spacingNode(node);
+  pangu.spacingNode(node);
   is_spacing = false;
-
-  // last_spacing_time = new Date().getTime();
-
-  return had_spacing;
 }
 
 var SAY_HELLOS = [
@@ -91,40 +82,19 @@ function ask_can_spacing() {
   chrome.runtime.sendMessage({purpose: 'can_spacing'},
     function(response) {
       if (response.result) {
-        var had_spacing = go_page_spacing();
+        go_page_spacing();
 
+        // TODO
+        // 改用 callback / promise
         // 真的有插入空格才提示「空格之神顯靈了」
-        if (had_spacing) {
-          ask_can_notify(false);
-        }
+        // ask_can_notify(false);
 
         /*
-         這一段是為了對付那些透過 JS 動態修改或 AJAX 加載的內容
+         這一段是為了對付那些透過 JavaScript 動態修改或 AJAX 加載的內容
          當頁面 DOM 有變動時
          就再執行一次 spacing
          */
         if (!already_bind) {
-          // var spacing_timer;
-          // document.body.addEventListener('DOMNodeInserted', function() {
-          //   if (!is_spacing) {
-          //     var interval = new Date().getTime() - last_spacing_time;
-          //     if (interval >= 100) {
-          //       clearTimeout(spacing_timer);
-          //       spacing_timer = setTimeout(function() {
-          //         go_page_spacing();
-          //       }, 500);
-          //     }
-          //   }
-          // }, false);
-
-          // document.body.addEventListener('DOMSubtreeModified', function(e) {
-          //   if (!is_spacing) {
-          //     var node = e.target;
-          //     pangu.spacingPageTitle();
-          //     go_node_spacing(node);
-          //   }
-          // }, false);
-
           document.body.addEventListener('DOMSubtreeModified', function(e) {
             if (!is_spacing) {
               pangu.spacingPageTitle();

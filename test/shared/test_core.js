@@ -90,7 +90,7 @@ describe('Pangu', function () {
 
     it('處理 # 符號', function () {
       assert.equal(pangu.spacing('前面#H2G2後面'), '前面 #H2G2 後面');
-      assert.equal(pangu.spacing('前面#銀河便車指南 後面'), '前面 #銀河便車指南 後面');
+      assert.equal(pangu.spacing('前面 #銀河便車指南 後面'), '前面 #銀河便車指南 後面');
       assert.equal(pangu.spacing('前面#銀河便車指南 後面'), '前面 #銀河便車指南 後面');
       assert.equal(pangu.spacing('前面#銀河公車指南 #銀河拖吊車指南 後面'), '前面 #銀河公車指南 #銀河拖吊車指南 後面');
       assert.equal(pangu.spacing('前面#H2G2#後面'), '前面 #H2G2# 後面');
