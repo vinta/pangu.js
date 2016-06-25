@@ -15,7 +15,7 @@
 
 ### for Users
 
-* [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (2015-05-13 updated)
+* [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (2016-06-26 updated)
 * [Mozilla Firefox](https://github.com/vinta/pangu.js/raw/master/browser_extensions/firefox/paranoid-auto-spacing.user.js) (2015-05-13 updated)
 
 ### for Developers
@@ -32,13 +32,13 @@
 
 ## Usage
 
-``` bash
+```bash
 $ npm install pangu --save
 ```
 
 ### Browser
 
-``` html
+```html
 <head>
   // Files are located on /node_modules/pangu/dist/browser/
   <script src="pangu.min.js"></script>
@@ -56,43 +56,37 @@ $ npm install pangu --save
 
 `pangu.js` is also available on [cdnjs](http://cdnjs.com/libraries/pangu):
 
-``` html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/3.0.0/pangu.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/3.0.0/pangu.min.js"></script>
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/3.1.1/pangu.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/3.1.1/pangu.min.js"></script>
 ```
 
 ### Node.js
 
-``` js
+```js
 var pangu = require('pangu'); // ES5
 import pangu from 'pangu'; // ES6
 
 pangu.spacing('Sephiroth見他這等神情,也是悚然一驚:不知我這Ultimate Destructive Magic是否對付得了?');
 // output: Sephiroth 見他這等神情, 也是悚然一驚: 不知我這 Ultimate Destructive Magic 是否對付得了?
 
-//./text.txt
-// 聖誕老人Hohoho三小
-
-pangu.spacingFile('./text.txt', function(err, result) {
-  // result = 聖誕老人 Hohoho 三小
+pangu.spacingFile('/path/to/text.txt', function(err, data) {
+  console.log(data);
 });
 
-pangu.spacingFilePromise('./text.txt').then(function(result) {
-  // result = 聖誕老人 Hohoho 三小
+pangu.spacingFile('/path/to/text.txt').then(function(data) {
+  console.log(data);
 });
 
-const result = pangu.spacingFileSync('./text.txt');
-// result = 聖誕老人 Hohoho 三小
-
+const data = pangu.spacingFileSync('/path/to/text.txt');
 ```
 
 ## Testing
 
 You need to install [Node.js](https://vinta.ws/code/install-node-js-via-nvm.html).
 
-``` bash
-$ git clone git@github.com:vinta/pangu.js.git
-$ cd pangu.js
+```bash
+$ git clone git@github.com:vinta/pangu.js.git && cd pangu.js
 $ npm install
 $ npm run test
 ```

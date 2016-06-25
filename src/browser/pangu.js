@@ -176,6 +176,37 @@ class BrowserPangu extends Pangu {
     return hasSpacing;
   }
 
+  spacingNode(contextNode) {
+    const xPathQuery = './/*/text()[normalize-space(.)]';
+    const hasSpacing = this.spacingNodeByXPath(xPathQuery, contextNode);
+
+    return hasSpacing;
+  }
+
+  spacingElementById(idName) {
+    const xPathQuery = `id("${idName}")//text()`;
+
+    const hasSpacing = this.spacingNodeByXPath(xPathQuery);
+
+    return hasSpacing;
+  }
+
+  spacingElementByClassName(className) {
+    const xPathQuery = `//*[contains(concat(" ", normalize-space(@class), " "), "${className}")]//text()`;
+
+    const hasSpacing = this.spacingNodeByXPath(xPathQuery);
+
+    return hasSpacing;
+  }
+
+  spacingElementByTagName(tagName) {
+    const xPathQuery = `//${tagName}//text()`;
+
+    const hasSpacing = this.spacingNodeByXPath(xPathQuery);
+
+    return hasSpacing;
+  }
+
   spacingPageTitle() {
     const titleQuery = '/html/head/title/text()';
     const hasSpacing = this.spacingNodeByXPath(titleQuery);
@@ -223,36 +254,12 @@ class BrowserPangu extends Pangu {
     return hasSpacing;
   }
 
-  // TODO: 改用 promise
+  // TODO: 支援 callback 和 promise
   spacingPage() {
     const hasSpacingPageTitle = this.spacingPageTitle();
     const hasSpacingPageBody = this.spacingPageBody();
 
     return hasSpacingPageTitle || hasSpacingPageBody;
-  }
-
-  spacingElementById(idName) {
-    const xPathQuery = `id("${idName}")//text()`;
-
-    const hasSpacing = this.spacingNodeByXPath(xPathQuery);
-
-    return hasSpacing;
-  }
-
-  spacingElementByClassName(className) {
-    const xPathQuery = `//*[contains(concat(" ", normalize-space(@class), " "), "${className}")]//text()`;
-
-    const hasSpacing = this.spacingNodeByXPath(xPathQuery);
-
-    return hasSpacing;
-  }
-
-  spacingElementByTagName(tagName) {
-    const xPathQuery = `//${tagName}//text()`;
-
-    const hasSpacing = this.spacingNodeByXPath(xPathQuery);
-
-    return hasSpacing;
   }
 
 }

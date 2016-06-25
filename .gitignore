@@ -1,7 +1,4 @@
-browser_extensions/chrome_dev/
-browser_extensions/chrome_dist/
-browser_extensions/paranoid-auto-spacing/
-browser_extensions/paranoid-auto-spacing.zip
+browser_extensions/paranoid-auto-spacing*
 coverage/
 node_modules/
 *.log

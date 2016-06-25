@@ -15,7 +15,7 @@
     "spacing",
     "text"
   ],
-  "version": "3.1.0",
+  "version": "3.1.1",
   "author": {
     "name": "Vinta Chen",
     "email": "vinta.chen@gmail.com",
@@ -40,7 +40,7 @@
     "clear": "npm run clear:browser && npm run clear:node",
     "build:browser": "npm run clear:browser && webpack",
     "build:node": "npm run clear:node && babel src/ -d dist/ --ignore browser/*",
-    "build": "npm run build:browser && npm run build:node",
+    "build": "npm run build:browser && npm run build:node && npm run pack",
     "test:browser": "npm run build:browser && karma start",
     "test:node": "npm run build:node && mocha --compilers js:babel-register test/shared/ test/node/",
     "test": "npm run test:browser && npm run test:node",

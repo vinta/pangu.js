@@ -1,21 +1,22 @@
 # History
 
+v3.1.1 / 2016-06-26
+-------------------
+
+- 剛吃完烤肉來改進一下 Paranoid Text Spacing 演算法
+
+
 v3.1.0 / 2016-06-25
 -------------------
 
 - NodePangu 新增 `spacingFile()`，支援 callback 與 promise
 - NodePangu 新增 `spacingFileSync()`
 
+
 v3.0.0 / 2016-01-10
 -------------------
 
 - Isomorphic!
-
-
-v2.5.7 / 2015-07-16
--------------------
-
-- 幫 [Taipei, China](http://newtalk.tw/news/view/2015-07-16/62294) 加上空格
 
 
 v2.5.6 / 2015-05-13
