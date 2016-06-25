@@ -63,6 +63,8 @@ $ npm install pangu --save
 
 ### Node.js
 
+Learn more about [pangu](https://www.npmjs.com/package/pangu) on npm.
+
 ```js
 var pangu = require('pangu'); // ES5
 import pangu from 'pangu'; // ES6
