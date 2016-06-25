@@ -33,7 +33,7 @@
   "main": "./dist/node/index.js",
   "browser": "./dist/browser/pangu.js",
   "scripts": {
-    "pack:chrome": "cp -rf ./dist/browser/pangu.min.js ./browser_extensions/chrome/vendors/pangu.min.js",
+    "pack:chrome": "cp -rf ./dist/browser/pangu.min.js ./browser_extensions/chrome/vendors/pangu.min.js && cp -rf ./browser_extensions/chrome/ ./browser_extensions/paranoid-auto-spacing/",
     "pack": "npm run pack:chrome",
     "clear:browser": "rm -rf ./dist/browser/",
     "clear:node": "rm -rf ./dist/node/ ./dist/shared/",
