@@ -139,6 +139,8 @@ describe('Pangu', function () {
       assert.equal(pangu.spacing('前面(中文123) tail'), '前面 (中文 123) tail');
       assert.equal(pangu.spacing('head (中文123漢字)後面'), 'head (中文 123 漢字) 後面');
       assert.equal(pangu.spacing('head (中文123漢字) tail'), 'head (中文 123 漢字) tail');
+      assert.equal(pangu.spacing('(or simply "React")'), '(or simply "React")');
+      assert.equal(pangu.spacing("OperationalError: (2006, 'MySQL server has gone away')"), "OperationalError: (2006, 'MySQL server has gone away')");
     });
 
     it('處理 - 符號', function () {
@@ -229,7 +231,6 @@ describe('Pangu', function () {
     });
 
     it("處理 ' ' 符號", function () {
-      // TODO
       assert.equal(pangu.spacing("陳上進 likes 林依諾's status."), "陳上進 likes 林依諾's status.");
     });
 
