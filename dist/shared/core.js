@@ -104,4 +104,7 @@ var Pangu = function () {
   return Pangu;
 }();
 
-module.exports.Pangu = Pangu;
+var pangu = new Pangu();
+
+exports = module.exports = pangu;
+exports.Pangu = Pangu;

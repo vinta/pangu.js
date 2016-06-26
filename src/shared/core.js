@@ -88,4 +88,7 @@ class Pangu {
 
 }
 
-module.exports.Pangu = Pangu;
+const pangu = new Pangu();
+
+exports = module.exports = pangu;
+exports.Pangu = Pangu;

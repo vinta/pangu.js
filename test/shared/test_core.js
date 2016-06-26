@@ -1,10 +1,8 @@
 const assert = require('chai').assert;
 
-const Pangu = require('../../dist/shared/core').Pangu;
+const pangu = require('../../dist/shared/core');
 
 describe('Pangu', () => {
-  const pangu = new Pangu();
-
   describe('spacing()', () => {
     it('處理 Latin-1 Supplement', () => {
       assert.equal(pangu.spacing('中文Ø漢字'), '中文 Ø 漢字');

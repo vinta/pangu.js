@@ -125,8 +125,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }
 	
-	      // 沒有顯式地 return 就是 undefined，放在 if 裡面會被當成 false
-	      // return false;
+	      return false;
 	    }
 	  }, {
 	    key: 'isLastTextChild',
@@ -141,8 +140,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }
 	
-	      // 沒有顯式地 return 就是 undefined，放在 if 裡面會被當成 false
-	      // return false;
+	      return false;
 	    }
 	  }, {
 	    key: 'spacingNodeByXPath',
@@ -450,7 +448,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return Pangu;
 	}();
 	
-	module.exports.Pangu = Pangu;
+	var pangu = new Pangu();
+	
+	exports = module.exports = pangu;
+	exports.Pangu = Pangu;
 
 /***/ }
 /******/ ])

@@ -3,10 +3,9 @@ const path = require('path');
 
 const assert = require('chai').assert;
 
-const Pangu = require('../../dist/node').Pangu;
+const pangu = require('../../dist/node');
 
 describe('NodePangu', () => {
-  const pangu = new Pangu();
   const fixtureDir = path.resolve(__dirname, '../_fixture');
 
   describe('spacingFile()', () => {

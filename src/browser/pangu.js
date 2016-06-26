@@ -44,8 +44,7 @@ class BrowserPangu extends Pangu {
       }
     }
 
-    // 沒有顯式地 return 就是 undefined，放在 if 裡面會被當成 false
-    // return false;
+    return false;
   }
 
   isLastTextChild(parentNode, targetNode) {
@@ -59,8 +58,7 @@ class BrowserPangu extends Pangu {
       }
     }
 
-    // 沒有顯式地 return 就是 undefined，放在 if 裡面會被當成 false
-    // return false;
+    return false;
   }
 
   spacingNodeByXPath(xPathQuery, contextNode) {
@@ -127,17 +125,17 @@ class BrowserPangu extends Pangu {
               if ((nextNode.nodeName.search(this.ignoreTags) === -1) && (nextNode.nodeName.search(this.blockTags) === -1)) {
                 if (nextTextNode.previousSibling) {
                   if (nextTextNode.previousSibling.nodeName.search(this.spaceLikeTags) === -1) {
-                    nextTextNode.data = ' ' + nextTextNode.data;
+                    nextTextNode.data = ` ${nextTextNode.data}`;
                   }
                 } else {
                   // dirty hack
                   if (!this.canIgnoreNode(nextTextNode)) {
-                    nextTextNode.data = ' ' + nextTextNode.data;
+                    nextTextNode.data = ` ${nextTextNode.data}`;
                   }
                 }
               }
             } else if (currentNode.nodeName.search(this.spaceSensitiveTags) === -1) {
-              currentTextNode.data = currentTextNode.data + ' ';
+              currentTextNode.data = `${currentTextNode.data} `;
             } else {
               const panguSpace = document.createElement('pangu');
               panguSpace.innerHTML = ' ';

@@ -1,9 +1,8 @@
 const Benchmark = require('benchmark');
 
-const Pangu = require('../../dist/shared/core').Pangu;
+const pangu = require('../../dist/shared/core');
 
 const suite = new Benchmark.Suite();
-const pangu = new Pangu();
 
 suite
 .add('pangu.spacing()', () => {
