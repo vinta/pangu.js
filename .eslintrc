@@ -9,6 +9,7 @@
   "rules": {
     "curly": 2,
     "indent": [2, 2],
+    "max-len": 0,
     "quotes": [1, "single"]
   }
 }
