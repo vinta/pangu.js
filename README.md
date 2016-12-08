@@ -29,6 +29,7 @@
 * [pangu.php](https://github.com/Kunr/pangu.php) (PHP)
 * [pangu.py](https://github.com/vinta/pangu.py) (Python)
 * [pangu.rb](https://github.com/dlackty/pangu.rb) (Ruby)
+* [pangu.swift](https://github.com/X140Yu/pangu.Swift) (Swift)
 
 ## Usage
 
