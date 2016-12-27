@@ -1,7 +1,7 @@
 /*!
  * pangu.js
  * --------
- * @version: 3.2.1
+ * @version: 3.3.0
  * @homepage: https://github.com/vinta/pangu.js
  * @license: MIT
  * @author: Vinta Chen <vinta.chen@gmail.com> (https://github.com/vinta)
@@ -86,7 +86,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(BrowserPangu).call(this));
 	
 	    _this.topTags = /^(html|head|body|#document)$/i;
-	    _this.ignoreTags = /^(code|pre|textarea)$/i;
+	    _this.ignoreTags = /^(script|code|pre|textarea)$/i;
 	    _this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
 	    _this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
 	    _this.blockTags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
