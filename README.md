@@ -119,5 +119,5 @@ Released under the [MIT License](http://opensource.org/licenses/MIT).
 * Node.js: [pangu.node](https://github.com/huei90/pangu.node)
 * Ruby: [auto-correct](https://github.com/huacnlee/auto-correct)
 * Vim: [pangu.vim](https://github.com/hotoo/pangu.vim)
+* VS Code: [vscode-pangu](https://github.com/baurine/vscode-pangu)
 * WordPress: [Space Lover](https://wordpress.org/plugins/space-lover/)
-* 知乎: [Mountain Reviewer](http://zhuanlan.zhihu.com/pointless/19744560)
