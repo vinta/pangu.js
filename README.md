@@ -71,7 +71,7 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 
 ```js
 var pangu = require('pangu'); // ES5
-import pangu from 'pangu'; // ES6
+import * as pangu from 'pangu'; // ES6
 
 pangu.spacing('Sephiroth見他這等神情,也是悚然一驚:不知我這Ultimate Destructive Magic是否對付得了?');
 // output: Sephiroth 見他這等神情, 也是悚然一驚: 不知我這 Ultimate Destructive Magic 是否對付得了?
