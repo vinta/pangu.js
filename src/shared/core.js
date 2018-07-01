@@ -46,6 +46,13 @@ const ansCJK = /([A-Za-z0-9`~\$%\^&\*\-=\+\\\|/!;:,\.\?\u00a1-\u00ff\u2022\u2026
 class Pangu {
 
   spacing(text) {
+    if (typeof text !== 'string') {
+      if (text) {
+        console.warn(`Warning: pangu.js 可接收的參數類型為 string ，但是收到的參數類型為 ${typeof text}`);
+      }
+      return '';
+    }
+    
     let newText = text;
 
     newText = newText.replace(cjkQuote, '$1 $2');
