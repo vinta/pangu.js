@@ -47,12 +47,10 @@ class Pangu {
 
   spacing(text) {
     if (typeof text !== 'string') {
-      if (text) {
-        console.warn(`Warning: pangu.js 可接收的參數類型為 string ，但是收到的參數類型為 ${typeof text}`);
-      }
-      return '';
+      console.warn(`Pangu.spacing(text) only accepts string but got ${typeof text}`);
+      return text;
     }
-    
+
     let newText = text;
 
     newText = newText.replace(cjkQuote, '$1 $2');
