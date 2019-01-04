@@ -6,7 +6,7 @@ const assert = require('chai').assert;
 const pangu = require('../../dist/node');
 
 describe('NodePangu', () => {
-  const fixtureDir = path.resolve(__dirname, '../_fixture');
+  const fixtureDir = path.resolve(__dirname, '../_fixtures');
 
   describe('spacingFile()', () => {
     it('performs on a text file (callback)', (done) => {

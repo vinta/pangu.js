@@ -37,55 +37,55 @@ describe('BrowserPangu', () => {
 
   describe('spacingPageBody()', () => {
     it('處理 <body>', () => {
-      document.body.innerHTML = __html__['test/_fixture/body.html'];
+      document.body.innerHTML = __html__['test/_fixtures/body.html'];
       pangu.spacingPageBody();
-      assert.equal(document.body.innerHTML, realHTML('test/_fixture/body_expected.html'));
+      assert.equal(document.body.innerHTML, realHTML('test/_fixtures/body_expected.html'));
     });
   });
 
   describe('spacingPage()', () => {
     it('處理 <body>', () => {
       document.title = '花學姊的梅杜莎';
-      document.body.innerHTML = __html__['test/_fixture/body.html'];
+      document.body.innerHTML = __html__['test/_fixtures/body.html'];
       pangu.spacingPage();
       assert.equal(document.title, '花學姊的梅杜莎');
-      assert.equal(document.body.innerHTML, realHTML('test/_fixture/body_expected.html'));
+      assert.equal(document.body.innerHTML, realHTML('test/_fixtures/body_expected.html'));
     });
   });
 
   describe('spacingElementById()', () => {
     it('處理 #idName', () => {
-      document.body.innerHTML = __html__['test/_fixture/id_name.html'];
+      document.body.innerHTML = __html__['test/_fixtures/id_name.html'];
       pangu.spacingElementById('e1');
-      assert.equal(document.body.innerHTML, realHTML('test/_fixture/id_name_expected.html'));
+      assert.equal(document.body.innerHTML, realHTML('test/_fixtures/id_name_expected.html'));
     });
   });
 
   describe('spacingElementByClassName()', () => {
     it('處理 #className 之一', () => {
-      document.body.innerHTML = __html__['test/_fixture/class_name_1.html'];
+      document.body.innerHTML = __html__['test/_fixtures/class_name_1.html'];
       pangu.spacingElementByClassName('e2');
-      assert.equal(document.body.innerHTML, realHTML('test/_fixture/class_name_1_expected.html'));
+      assert.equal(document.body.innerHTML, realHTML('test/_fixtures/class_name_1_expected.html'));
     });
 
     it('處理 #className 之二', () => {
-      document.body.innerHTML = __html__['test/_fixture/class_name_2.html'];
+      document.body.innerHTML = __html__['test/_fixtures/class_name_2.html'];
       pangu.spacingElementByClassName('e4');
-      assert.equal(document.body.innerHTML, realHTML('test/_fixture/class_name_2_expected.html'));
+      assert.equal(document.body.innerHTML, realHTML('test/_fixtures/class_name_2_expected.html'));
     });
 
     it('處理 #className 之三', () => {
-      document.body.innerHTML = __html__['test/_fixture/class_name_3.html'];
+      document.body.innerHTML = __html__['test/_fixtures/class_name_3.html'];
       pangu.spacingElementByClassName('e5');
-      assert.equal(document.body.innerHTML, realHTML('test/_fixture/class_name_3_expected.html'));
+      assert.equal(document.body.innerHTML, realHTML('test/_fixtures/class_name_3_expected.html'));
     });
   });
 
   describe('spacingElementByTagName()', () => {
     it('處理 <tag>', () => {
-      document.body.innerHTML = __html__['test/_fixture/tag_name.html'];
+      document.body.innerHTML = __html__['test/_fixtures/tag_name.html'];
       pangu.spacingElementByTagName('article');
-      assert.equal(document.body.innerHTML, realHTML('test/_fixture/tag_name_expected.html'));
+      assert.equal(document.body.innerHTML, realHTML('test/_fixtures/tag_name_expected.html'));
     });
   });
 });

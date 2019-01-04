@@ -1,5 +1,8 @@
-module.exports = function (config) {
+module.exports = function(config) {
   config.set({
+    frameworks: [
+      'mocha'
+    ],
     browsers: [
       'ChromeHeadless'
     ],
@@ -7,15 +10,11 @@ module.exports = function (config) {
       'node_modules/chai/chai.js',
       'dist/browser/pangu.js',
       'test/browser/*.js',
-      'test/_fixture/*.html'
-    ],
-    frameworks: [
-      'mocha'
+      'test/_fixtures/*.html'
     ],
     preprocessors: {
-        'dist/browser/pangu.js': ['babel', 'coverage'],
-        'test/browser/*.js': ['babel'],
-        'test/_fixture/*.html': ['html2js']
+        'dist/browser/pangu.js': ['coverage'],
+        'test/_fixtures/*.html': ['html2js']
     },
     reporters: [
       'mocha',
