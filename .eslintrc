@@ -1,11 +1,12 @@
 {
+  "extends": ["airbnb/base"],
   "env": {
     "browser": true,
     "es6": true,
     "mocha": true,
-    "node": true
+    "node": true,
+    "shared-node-browser": true
   },
-  "extends": ["airbnb/base"],
   "rules": {
     "curly": 2,
     "indent": [2, 2],
