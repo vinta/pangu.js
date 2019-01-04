@@ -3,10 +3,11 @@ sudo: false
 language: node_js
 
 node_js:
-  - "4"
+  - "lts/*"
   - "6"
   - "8"
   - "10"
+  - "11"
 
 before_script:
   - npm install -g codecov
