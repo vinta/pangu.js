@@ -72,7 +72,7 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 
 ```js
 var pangu = require('pangu'); // ES5
-import pangu from 'pangu'; // ES6
+import * as pangu from 'pangu'; // ES6
 
 pangu.spacing('與PM戰鬥的人，應當小心自己不要成為PM');
 // output: 與 PM 戰鬥的人，應當小心自己不要成為 PM
