@@ -29,7 +29,7 @@
                 "file:///*/*"
             ],
             "js": [
-                "vendors/pangu.min.js",
+                "vendors/pangu/pangu.min.js",
                 "js/content_script.js"
             ],
             "run_at": "document_idle",
