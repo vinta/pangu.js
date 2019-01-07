@@ -6,5 +6,5 @@ module.exports = function(api) {
       "@babel/preset-env"
     ],
     comments: false
-  }
+  };
 };
