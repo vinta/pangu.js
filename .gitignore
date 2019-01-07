@@ -1,6 +1,5 @@
 *.log
 *.pem
 browser_extensions/paranoid-auto-spacing.zip
-browser_extensions/paranoid-auto-spacing/
 coverage/
 node_modules/
