@@ -54,12 +54,11 @@ app.controller('PopupController', [
           // 略過 chrome:// 之類的 URL
           if (is_valid_url_for_spacing(tab.url)) {
             chrome.tabs.executeScript(tab.id, {code: 'is_spacing = true;', allFrames: true});
-            chrome.tabs.executeScript(tab.id, {code: 'ask_can_notify(true);', allFrames: true});
             chrome.tabs.executeScript(tab.id, {code: 'go_page_spacing();', allFrames: true});
           }
           else {
             if (i === 0) {
-              utils_chrome.BG_PAGE.alert(utils_chrome.get_i18n('can_not_call_god_of_spacing'));
+              alert(utils_chrome.get_i18n('can_not_call_god_of_spacing'));
             }
           }
         }

@@ -28,22 +28,6 @@
                 "https://*/*",
                 "file:///*/*"
             ],
-            "css": [
-                "vendors/alertify/css/alertify.core.css",
-                "vendors/alertify/css/alertify.flat.css",
-                "stylesheets/alertify.custom.css"
-            ],
-            "js": [
-                "vendors/alertify/js/alertify.min.js"
-            ],
-            "all_frames": false
-        },
-        {
-            "matches": [
-                "http://*/*",
-                "https://*/*",
-                "file:///*/*"
-            ],
             "js": [
                 "vendors/pangu.min.js",
                 "js/content_script.js"

@@ -29,14 +29,6 @@ function is_valid_url(url) {
 }
 
 /*
- Alertify
- */
-
-alertify.set({
-  delay: 2000
-});
-
-/*
  Angular
  */
 
@@ -115,7 +107,7 @@ app.controller('OptionsController', [
       }
       else {
         play_sound('WahWahWaaah');
-        alertify.error('Fail to save');
+        alert('Fail to save');
 
         return '';
       }
@@ -156,7 +148,7 @@ app.controller('OptionsController', [
       }
       else {
         play_sound('WahWahWaaah');
-        alertify.error('Fail to save');
+        alert('Fail to save');
 
         return '';
       }
@@ -183,20 +175,6 @@ app.controller('OptionsController', [
       }
 
       IS_MUTE = new_val;
-    });
-
-    /*
-     不要再他媽「空格之神顯靈了」！
-     */
-    $scope.label_shut_the_fuck_up = utils_chrome.get_i18n('label_shut_the_fuck_up');
-    $scope.can_notify = !utils_chrome.CACHED_SETTINGS['can_notify'];
-    $scope.$watch('can_notify', function(new_val, old_val) {
-      if (new_val !== old_val) {
-        // 注意這裡用的是 ! (not)
-        utils_chrome.SYNC_STORAGE.set({'can_notify': !new_val}, function() {
-          // utils_chrome.print_sync_storage();
-        });
-      }
     });
 
   }

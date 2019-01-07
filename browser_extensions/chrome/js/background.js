@@ -14,8 +14,7 @@ var DEFAULT_SETTINGS = {
     '&tbm=isch'
   ],
   'whitelists': [],
-  'is_mute': false,
-  'can_notify': false
+  'is_mute': false
 };
 var CACHED_SETTINGS = Object.create(DEFAULT_SETTINGS);
 var SETTING_KEYS = Object.keys(DEFAULT_SETTINGS);
@@ -106,11 +105,6 @@ function can_spacing(tab) {
   return true;
 }
 
-// 要不要顯示「空格之神顯靈了」
-function can_notify() {
-  return CACHED_SETTINGS['can_notify'];
-}
-
 // 監聽來自 content_script.js 的訊息
 chrome.runtime.onMessage.addListener(
   // https://crxdoc-zh.appspot.com/extensions/runtime.html#event-onMessage
@@ -121,10 +115,6 @@ chrome.runtime.onMessage.addListener(
     switch (purpose) {
       case 'can_spacing':
         result = can_spacing(sender.tab);
-        sendResponse({result: result});
-        break;
-      case 'can_notify':
-        result = can_notify();
         sendResponse({result: result});
         break;
     }
