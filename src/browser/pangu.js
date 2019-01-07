@@ -1,4 +1,4 @@
-const Pangu = require('../shared/core').Pangu;
+import { Pangu } from '../shared/core.js';
 
 // https://developer.mozilla.org/en/docs/Web/API/Node/nodeType
 const COMMENT_NODE_TYPE = 8;
@@ -239,5 +239,6 @@ class BrowserPangu extends Pangu {
 
 const pangu = new BrowserPangu();
 
-exports = module.exports = pangu;
-exports.Pangu = BrowserPangu;
+module.exports = pangu;
+// module.exports.default = pangu;
+module.exports.Pangu = BrowserPangu;

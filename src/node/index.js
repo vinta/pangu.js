@@ -34,18 +34,10 @@ class NodePangu extends Pangu {
     }
   }
 
-  // TODO
-  // spacingFileFromURL(url, callback) {
-  // }
-
-
-  // TODO
-  // spacingHTML(html, callback) {
-  // }
-
 }
 
 const pangu = new NodePangu();
 
-exports = module.exports = pangu;
-exports.Pangu = NodePangu;
+module.exports = pangu;
+module.exports.default = pangu;
+module.exports.Pangu = NodePangu;
