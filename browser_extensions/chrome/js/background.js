@@ -3,7 +3,7 @@
  */
 
 var SYNC_STORAGE = chrome.storage.sync;
-var LOCA_STORAGE = chrome.storage.local;
+var LOCAL_STORAGE = chrome.storage.local;
 
 var DEFAULT_SETTINGS = {
   'spacing_mode': 'spacing_when_load', // or spacing_when_click
@@ -58,7 +58,7 @@ chrome.storage.onChanged.addListener(
       for (var key in changes) {
         obj_to_save[key] = changes[key].newValue;
       }
-      LOCA_STORAGE.set(obj_to_save);
+      LOCAL_STORAGE.set(obj_to_save);
     }
   }
 );
