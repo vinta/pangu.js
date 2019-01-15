@@ -78,5 +78,8 @@
     "phantomjs-prebuilt": "2.1.7",
     "underscore": "1.8.3",
     "webpack": "1.13.1"
+  },
+  "dependencies": {
+    "meow": "^5.0.0"
   }
 }

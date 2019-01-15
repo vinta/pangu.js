@@ -1,24 +1,63 @@
 #!/usr/bin/env node
 'use strict'
 
-const fs = require('fs');
-const path = require("path");
-const pangu = require('../src/node');
+var meow = require('meow');
+var fs = require('fs');
+var path = require("path");
+var pangu = require('../src/node');
 
-const argv = process.argv;
-const ENCODING = 'utf-8';
+var cli = meow(`
+  Usage:
+    $ pangu "當你凝視著bug，bug也凝視著你"
+    $ pangu -t "當你凝視著bug，bug也凝視著你"
+    $ pangu -f file.txt
 
-if (argv.length < 3) {
-  console.log('-: require a file as arguments');
-  console.log('usage: pangu file\n');
-  process.exit(1);
-}
+  Options:
+    --text -t Input text
+    --file -f Input file
+    --output -o Output file
 
-pangu.spacingFile(path.resolve(argv[2]), function(err, data) {
-  // callback
-  if (err) {
-    console.error(err);
-  } else {
-    fs.writeFileSync(path.resolve(argv[2]), data, ENCODING);
+  Examples:
+    $ pangu "與PM戰鬥的人，應當小心自己不要成為PM"
+    與 PM 戰鬥的人，應當小心自己不要成為 PM
+    $ pangu -t "當你凝視著bug，bug也凝視著你"
+    當你凝視著 bug，bug 也凝視著你
+    $ pangu -f file.txt
+`, {
+  flags: {
+    text: {
+      type: 'string',
+      alias: 't'
+    },
+    file: {
+      type: 'string',
+      alias: 'f'
+    },
+    output: {
+      type: 'string',
+      alias: 'o'
+    }
   }
 });
+
+var argv = process.argv;
+var ENCODING = 'utf-8';
+
+if (argv.length < 3) {
+  cli.showHelp(1);
+}
+
+if (cli.flags.text) {
+  console.log(pangu.spacing(cli.flags.text));
+} else if (cli.flags.file) {
+  var input = cli.flags.file;
+  pangu.spacingFile(path.resolve(input), function(err, data) {
+    // callback
+    if (err) {
+      console.error(err);
+    } else {
+      var output = cli.flags.output ? cli.flags.output : cli.flags.file;
+      fs.writeFileSync(path.resolve(output), data, ENCODING);
+    }
+  });
+}
