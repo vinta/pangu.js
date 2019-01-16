@@ -47,9 +47,24 @@ if (argv.length < 3) {
   cli.showHelp(1);
 }
 
+var input;
+var outcome;
+if (cli.input.length === 1) {
+  input = cli.input[0]
+}
 if (cli.flags.text) {
-  console.log(pangu.spacing(cli.flags.text));
-} else if (cli.flags.file) {
+  input = cli.flags.text
+}
+
+if (input) {
+  outcome = pangu.spacing(input)
+  console.log(outcome);
+
+  if (cli.flags.output) {
+    fs.writeFileSync(path.resolve(cli.flags.output), outcome, ENCODING);
+  }
+}
+if (cli.flags.file) {
   var input = cli.flags.file;
   pangu.spacingFile(path.resolve(input), function(err, data) {
     // callback
