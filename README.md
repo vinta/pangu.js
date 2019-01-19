@@ -42,6 +42,20 @@
 $ npm install pangu --save
 ```
 
+### Command
+
+npm 5.0 以上版本不須先安裝，可以用 `npx pangu` 指令直接將 `pangu` 當作命令列工具使用。
+
+```sh
+$ pangu "與PM戰鬥的人，應當小心自己不要成為PM"
+與 PM 戰鬥的人，應當小心自己不要成為 PM
+
+$ pangu -t "當你凝視著bug，bug也凝視著你"
+當你凝視著 bug，bug 也凝視著你
+
+$ pangu -f file.txt
+```
+
 ### Browser
 
 ```html

@@ -32,6 +32,9 @@
   },
   "main": "./dist/node/index.js",
   "browser": "./dist/browser/pangu.js",
+  "bin": {
+    "pangu": "./bin/pangu.js"
+  },
   "scripts": {
     "pack:chrome": "cp -rf ./dist/browser/pangu.min.js ./browser_extensions/chrome/vendors/pangu.min.js && cp -rf ./browser_extensions/chrome/ ./browser_extensions/paranoid-auto-spacing/",
     "pack": "npm run pack:chrome",
@@ -75,5 +78,8 @@
     "phantomjs-prebuilt": "2.1.7",
     "underscore": "1.8.3",
     "webpack": "1.13.1"
+  },
+  "dependencies": {
+    "meow": "^5.0.0"
   }
 }
