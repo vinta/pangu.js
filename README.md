@@ -1,6 +1,7 @@
 # 為什麼你們就是不能加個空格呢？
 
-[![](http://img.shields.io/travis/vinta/pangu.js.svg?style=flat-square)](https://travis-ci.org/vinta/pangu.js)
+[![](https://data.jsdelivr.com/v1/package/npm/pangu/badge)](https://www.jsdelivr.com/package/npm/pangu)
+[![](https://img.shields.io/travis/vinta/pangu.js.svg?style=flat-square)](https://travis-ci.org/vinta/pangu.js)
 [![](https://img.shields.io/codecov/c/github/vinta/pangu.js/master.svg?style=flat-square)](https://codecov.io/github/vinta/pangu.js)
 [![](https://img.shields.io/npm/v/pangu.svg?style=flat-square)](https://www.npmjs.com/package/pangu)
 [![](https://img.shields.io/badge/made%20with-%e2%9d%a4-ff69b4.svg?style=flat-square)](https://vinta.ws/code/)
@@ -15,12 +16,12 @@
 
 ## Installation
 
-### for Users
+### For Users
 
 - [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (2016-12-28 updated)
 - [Mozilla Firefox](https://github.com/vinta/pangu.js/raw/master/browser_extensions/firefox/paranoid-auto-spacing.user.js) (2015-05-13 updated)
 
-### for Developers
+### For Developers
 
 - [pangu.dart](https://github.com/SemonCat/pangu.dart) (Dart)
 - [pangu.go](https://github.com/vinta/pangu) (Go)
@@ -74,9 +75,12 @@ $ pangu -f file.txt
 </script>
 ```
 
-`pangu.js` is also available on [cdnjs](http://cdnjs.com/libraries/pangu):
+`pangu.js` is also available on [jsDelivr](https://www.jsdelivr.com/package/npm/pangu) and [cdnjs](https://cdnjs.com/libraries/pangu):
 
 ```html
+<script src="https://cdn.jsdelivr.net/npm/pangu@3.3.0/dist/browser/pangu.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pangu@3.3.0/dist/browser/pangu.min.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/3.3.0/pangu.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/3.3.0/pangu.min.js"></script>
 ```
@@ -117,23 +121,10 @@ $ npm run test
 
 ## License
 
-Released under the [MIT License](http://opensource.org/licenses/MIT).
+Released under the [MIT License](https://opensource.org/licenses/MIT).
 
 ## Author
 
 - GitHub: [@vinta](https://github.com/vinta)
 - Twitter: [@vinta](https://twitter.com/vinta)
 - Website: [vinta.ws](https://vinta.ws/code/)
-
-## Related Projects
-
-- Atom: [atom-pangu](https://github.com/7kfpun/atom-pangu)
-- Command-line interface: [pangu-cli](https://github.com/SDLyu/pangu)
-- Emacs: [pangu-spacing](http://coldnew.github.io/blog/2013/05/20_5cbb7.html)
-- Gulp: [gulp-pangu](https://github.com/7kfpun/gulp-pangu)
-- JavaScript: [为什么我就是能这样娴熟地加上空格呢？](https://github.com/Dustland/daft-auto-spacing)
-- Node.js: [pangu.node](https://github.com/huei90/pangu.node)
-- Ruby: [auto-correct](https://github.com/huacnlee/auto-correct)
-- Vim: [pangu.vim](https://github.com/hotoo/pangu.vim)
-- VS Code: [vscode-pangu](https://github.com/baurine/vscode-pangu)
-- WordPress: [Space Lover](https://wordpress.org/plugins/space-lover/)
