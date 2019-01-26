@@ -311,6 +311,7 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('(or simply "React")'), '(or simply "React")');
       assert.equal(pangu.spacing("OperationalError: (2006, 'MySQL server has gone away')"), "OperationalError: (2006, 'MySQL server has gone away')");
       assert.equal(pangu.spacing('我看过的电影(1404)'), '我看过的电影 (1404)');
+      assert.equal(pangu.spacing('Chang Stream(变更记录流)是指collection(数据库集合)的变更事件流'), 'Chang Stream (变更记录流) 是指 collection (数据库集合) 的变更事件流');
     });
 
     it('處理 { } 符號', () => {

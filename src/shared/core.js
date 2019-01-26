@@ -58,6 +58,9 @@ const cjkLeftBracket = new RegExp(`([${cjk}])([\\(\\[\\{<>\u201c])`, 'g');
 const rightBracketCjk = new RegExp(`([\\)\\]\\}<>\u201d])([${cjk}])`, 'g');
 const leftBracketAnyRightBracket = /([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/;
 
+const aLeftBracket = new RegExp(`([A-Za-z])([\\(\\[\\{<>])`, 'g');
+const rightBracketA = new RegExp(`([\\)\\]\\}<>])([A-Za-z])`, 'g');
+
 const cjkAns = new RegExp(`([${cjk}])([A-Za-z0-9\\$%\\^&\\*\\-=\\+\\\\\|/@\u00a1-\u00ff\u2022\u2027\u2150-\u218f\u2700—\u27bf])`, 'g');
 const ansCjk = new RegExp(`([A-Za-z0-9~\\$%\\^&\\*\\-=\\+\\\\\|/!;:,\\.\\?\u00a1-\u00ff\u2022\u2026\u2027\u2150-\u218f\u2700—\u27bf])([${cjk}])`, 'g');
 
@@ -120,6 +123,9 @@ class Pangu {
     newText = newText.replace(cjkLeftBracket, '$1 $2');
     newText = newText.replace(rightBracketCjk, '$1 $2');
     newText = newText.replace(leftBracketAnyRightBracket, '$1$3$5');
+
+    newText = newText.replace(aLeftBracket, '$1 $2');
+    newText = newText.replace(rightBracketA, '$1 $2');
 
     newText = newText.replace(cjkAns, '$1 $2');
     newText = newText.replace(ansCjk, '$1 $2');
