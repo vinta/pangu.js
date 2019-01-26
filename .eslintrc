@@ -1,5 +1,5 @@
 {
-  "extends": ["airbnb/base"],
+  "extends": ["airbnb-base"],
   "env": {
     "browser": true,
     "es6": true,
@@ -8,9 +8,11 @@
     "shared-node-browser": true
   },
   "rules": {
+    "class-methods-use-this": 0,
     "curly": 2,
     "indent": [2, 2],
     "max-len": 0,
+    "no-useless-escape": 0,
     "quotes": [1, "single"]
   }
 }

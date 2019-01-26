@@ -1,4 +1,5 @@
 babel.config.js
+browser_extensions/*
 dist/*
 karma.conf.js
 node_modules/*
