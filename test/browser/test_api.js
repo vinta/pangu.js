@@ -22,7 +22,7 @@ describe('BrowserPangu', () => {
   describe('spacingText()', () => {
     it('處理 text', () => {
       pangu.spacingText('所以,請問Jackey的鼻子有幾個?3.14個', (error, newText) => {
-        assert.equal(newText, '所以, 請問 Jackey 的鼻子有幾個? 3.14 個');
+        assert.equal(newText, '所以，請問 Jackey 的鼻子有幾個？3.14 個');
       });
     });
   });

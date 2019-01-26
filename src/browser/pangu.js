@@ -1,15 +1,14 @@
-import { Pangu } from '../shared/core.js';
+import { Pangu } from '../shared/core';
 
 // https://developer.mozilla.org/en/docs/Web/API/Node/nodeType
 const COMMENT_NODE_TYPE = 8;
 
 class BrowserPangu extends Pangu {
-
   constructor() {
     super();
 
     this.topTags = /^(html|head|body|#document)$/i;
-    this.ignoreTags = /^(script|code|pre|textarea)$/i;
+    this.ignoreTags = /^(script|code|pre|textarea)$/i; // TODO: iframe|pangu
     this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
     this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
     this.blockTags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
@@ -234,7 +233,6 @@ class BrowserPangu extends Pangu {
     this.spacingPageTitle();
     this.spacingPageBody();
   }
-
 }
 
 const pangu = new BrowserPangu();
