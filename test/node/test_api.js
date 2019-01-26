@@ -11,7 +11,7 @@ describe('NodePangu', () => {
   describe('spacingFile()', () => {
     it('performs on a text file (callback)', (done) => {
       pangu.spacingFile(`${fixtureDir}/test_file.txt`, (err, data) => {
-        const expected = fs.readFileSync(`${fixtureDir}/test_file.expected.txt`);
+        const expected = fs.readFileSync(`${fixtureDir}/test_file.expected.txt`, 'utf8');
         assert.equal(data, expected);
         done();
       });
@@ -22,7 +22,7 @@ describe('NodePangu', () => {
     it('performs on a text file (promise)', (done) => {
       pangu.spacingFile(`${fixtureDir}/test_file.txt`)
       .then((data) => {
-        const expected = fs.readFileSync(`${fixtureDir}/test_file.expected.txt`);
+        const expected = fs.readFileSync(`${fixtureDir}/test_file.expected.txt`, 'utf8');
         assert.equal(data, expected);
         done();
       });
@@ -32,7 +32,7 @@ describe('NodePangu', () => {
   describe('spacingFileSync()', () => {
     it('performs on a text file', (done) => {
       const data = pangu.spacingFileSync(`${fixtureDir}/test_file.txt`);
-      const expected = fs.readFileSync(`${fixtureDir}/test_file.expected.txt`);
+      const expected = fs.readFileSync(`${fixtureDir}/test_file.expected.txt`, 'utf8');
       assert.equal(data, expected);
       done();
     });
