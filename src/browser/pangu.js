@@ -223,7 +223,7 @@ class BrowserPangu extends Pangu {
       // 理論上這幾個 tag 裡面不會包含其他 tag
       // 所以可以直接用 .. 取父節點
       // ex: [translate(name(..), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") != "script"]
-      xPathQuery += `[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
+      xPathQuery = `${xPathQuery}[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
     }
     this.spacingNodeByXPath(xPathQuery, document);
   }
@@ -238,5 +238,5 @@ class BrowserPangu extends Pangu {
 const pangu = new BrowserPangu();
 
 module.exports = pangu;
-// module.exports.default = pangu;
+module.exports.default = pangu;
 module.exports.Pangu = BrowserPangu;
