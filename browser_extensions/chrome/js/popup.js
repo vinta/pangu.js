@@ -53,8 +53,7 @@ app.controller('PopupController', [
 
           // 略過 chrome:// 之類的 URL
           if (is_valid_url_for_spacing(tab.url)) {
-            chrome.tabs.executeScript(tab.id, {code: 'is_spacing = true;', allFrames: true});
-            chrome.tabs.executeScript(tab.id, {code: 'go_page_spacing();', allFrames: true});
+            chrome.tabs.executeScript(tab.id, {code: 'pangu.spacingPage();', allFrames: true});
           }
           else {
             if (i === 0) {
