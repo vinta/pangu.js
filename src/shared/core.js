@@ -58,8 +58,8 @@ const cjkLeftBracket = new RegExp(`([${cjk}])([\\(\\[\\{<>\u201c])`, 'g');
 const rightBracketCjk = new RegExp(`([\\)\\]\\}<>\u201d])([${cjk}])`, 'g');
 const leftBracketAnyRightBracket = /([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/;
 
-const cjkAns = new RegExp(`([${cjk}])([A-Za-z0-9\\$%\\^&\\*\\-=\\+\\\\\|/@\u00a1-\u00ff\u2022\u2027\u2150-\u218f])`, 'g');
-const ansCjk = new RegExp(`([A-Za-z0-9~\\$%\\^&\\*\\-=\\+\\\\\|/!;:,\\.\\?\u00a1-\u00ff\u2022\u2026\u2027\u2150-\u218f])([${cjk}])`, 'g');
+const cjkAns = new RegExp(`([${cjk}])([A-Za-z0-9\\$%\\^&\\*\\-=\\+\\\\\|/@\u00a1-\u00ff\u2022\u2027\u2150-\u218f\u2700—\u27bf])`, 'g');
+const ansCjk = new RegExp(`([A-Za-z0-9~\\$%\\^&\\*\\-=\\+\\\\\|/!;:,\\.\\?\u00a1-\u00ff\u2022\u2026\u2027\u2150-\u218f\u2700—\u27bf])([${cjk}])`, 'g');
 
 class Pangu {
   convertToFullwidth(symbols) {
