@@ -23,19 +23,22 @@
 
 ### For Developers
 
-- [pangu.dart](https://github.com/SemonCat/pangu.dart) (Dart)
-- [pangu.go](https://github.com/vinta/pangu) (Go)
-- [pangu.java](https://github.com/vinta/pangu.java) (Java)
-- [pangu.js](https://github.com/vinta/pangu.js) (JavaScript)
-- [pangu.py](https://github.com/vinta/pangu.py) (Python)
-- [pangu.space](https://github.com/vinta/pangu.space) (Web API)
-- [pangu.clj](https://github.com/coldnew/pangu.clj) (Clojure)
-- [pangu.ex](https://github.com/cataska/pangu.ex) (Elixir)
-- [pangu.objective-c](https://github.com/Cee/pangu.objective-c) (Objective-C)
-- [pangu.php](https://github.com/Kunr/pangu.php) (PHP)
-- [pangu.rb](https://github.com/dlackty/pangu.rb) (Ruby)
-- [pangu.rs](https://github.com/airt/pangu.rs) (Rust)
-- [pangu.swift](https://github.com/X140Yu/pangu.Swift) (Swift)
+- Official supports:
+  - [pangu.go](https://github.com/vinta/pangu) (Go)
+  - [pangu.java](https://github.com/vinta/pangu.java) (Java)
+  - [pangu.js](https://github.com/vinta/pangu.js) (JavaScript)
+  - [pangu.py](https://github.com/vinta/pangu.py) (Python)
+  - [pangu.space](https://github.com/vinta/pangu.space) (Web API)
+
+- Community supports:
+  - [pangu.clj](https://github.com/coldnew/pangu.clj) (Clojure)
+  - [pangu.dart](https://github.com/SemonCat/pangu.dart) (Dart)
+  - [pangu.ex](https://github.com/cataska/pangu.ex) (Elixir)
+  - [pangu.objective-c](https://github.com/Cee/pangu.objective-c) (Objective-C)
+  - [pangu.php](https://github.com/Kunr/pangu.php) (PHP)
+  - [pangu.rb](https://github.com/dlackty/pangu.rb) (Ruby)
+  - [pangu.rs](https://github.com/airt/pangu.rs) (Rust)
+  - [pangu.swift](https://github.com/X140Yu/pangu.Swift) (Swift)
 
 ## Usage
 
