@@ -1,53 +1,42 @@
-'use strict';
+"use strict";
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-// CJK is short for Chinese, Japanese and Korean.
-//
-// The constant cjk contains following Unicode blocks:
-// 	\u2e80-\u2eff CJK Radicals Supplement
-// 	\u2f00-\u2fdf Kangxi Radicals
-// 	\u3040-\u309f Hiragana
-// 	\u30a0-\u30ff Katakana
-// 	\u3100-\u312f Bopomofo
-// 	\u3200-\u32ff Enclosed CJK Letters and Months
-// 	\u3400-\u4dbf CJK Unified Ideographs Extension A
-// 	\u4e00-\u9fff CJK Unified Ideographs
-// 	\uf900-\ufaff CJK Compatibility Ideographs
-//
-// For more information about Unicode blocks, see
-// 	http://unicode-table.com/en/
-//  https://github.com/vinta/pangu
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-// ANS is short for Alphabets, Numbers and Symbols (`~!@#$%^&*()-_=+[]{}\|;:'",<.>/?).
-//
-// CAUTION: those ANS in following constants do not contain all symbols above.
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-// cjkQuote >> 跟 Go 版差了一個 '
-// quoteCJK >> 跟 Go 版差了一個 '
-var cjkQuote = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])(["])/g;
-var quoteCJK = /(["])([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g;
-var fixQuote = /(["']+)(\s*)(.+?)(\s*)(["']+)/g;
-var fixSingleQuote = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])( )(')([A-Za-z])/g;
-
-var hashANSCJKhash = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])(#)([A-Za-z0-9\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]+)(#)([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g;
-var cjkHash = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])(#([^ ]))/g;
-var hashCJK = /(([^ ])#)([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g;
-
-var cjkOperatorANS = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([\+\-\*\/=&\\|<>])([A-Za-z0-9])/g;
-var ansOperatorCJK = /([A-Za-z0-9])([\+\-\*\/=&\\|<>])([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g;
-
-var cjkBracketCJK = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([\(\[\{<\u201c]+(.*?)[\)\]\}>\u201d]+)([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g;
-var cjkBracket = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([\(\[\{<\u201c>])/g;
-var bracketCJK = /([\)\]\}>\u201d<])([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g;
-var fixBracket = /([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/;
-
-var fixSymbol = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([~!;:,\.\?\u2026])([A-Za-z0-9])/g;
-
-var cjkANS = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([A-Za-z0-9`\$%\^&\*\-=\+\\\|/@\u00a1-\u00ff\u2022\u2027\u2150-\u218f])/g;
-var ansCJK = /([A-Za-z0-9`~\$%\^&\*\-=\+\\\|/!;:,\.\?\u00a1-\u00ff\u2022\u2026\u2027\u2150-\u218f])([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g;
+var cjk = "\u2E80-\u2EFF\u2F00-\u2FDF\u3040-\u309F\u30A0-\u30FF\u3100-\u312F\u3200-\u32FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF";
+var a = 'A-Za-z';
+var n = '0-9';
+var anyCjk = new RegExp("[".concat(cjk, "]"));
+var convertToFullwidthCjkSpaceSymbolsSpaceCjk = new RegExp("([".concat(cjk, "])[ ]*([~\\!;\\:,\\?]+|\\.)[ ]*([").concat(cjk, "])"), 'g');
+var convertToFullwidthCjkSymbolsAn = new RegExp("([".concat(cjk, "])([~\\!;\\?]+)([A-Za-z0-9])"), 'g');
+var dotsCjk = new RegExp("([\\.]{2,}|\u2026)([".concat(cjk, "])"), 'g');
+var fixCjkColonAns = new RegExp("([".concat(cjk, "])\\:([A-Z0-9\\(\\)])"), 'g');
+var cjkQuote = new RegExp("([".concat(cjk, "])([`\"\u05F4])"), 'g');
+var quoteCJK = new RegExp("([`\"\u05F4])([".concat(cjk, "])"), 'g');
+var fixQuote = /([`"\u05f4]+)(\s*)(.+?)(\s*)([`"\u05f4]+)/g;
+var cjkSingleQuoteButPossessive = new RegExp("([".concat(cjk, "])('[^s])"), 'g');
+var singleQuoteCjk = new RegExp("(')([".concat(cjk, "])"), 'g');
+var possessiveSingleQuote = new RegExp("([".concat(cjk, "A-Za-z0-9])( )('s)"), 'g');
+var hashAnsCjkHash = new RegExp("([".concat(cjk, "])(#)([").concat(cjk, "]+)(#)([").concat(cjk, "])"), 'g');
+var cjkHash = new RegExp("([".concat(cjk, "])(#([^ ]))"), 'g');
+var hashCjk = new RegExp("(([^ ])#)([".concat(cjk, "])"), 'g');
+var cjkOperatorAns = new RegExp("([".concat(cjk, "])([\\+\\-\\*\\/=&\\|<>])([A-Za-z0-9])"), 'g');
+var ansOperatorCjk = new RegExp("([A-Za-z0-9])([\\+\\-\\*\\/=&\\|<>])([".concat(cjk, "])"), 'g');
+var fixSlashSpaceAns = new RegExp('([\\/])( )([a-z\\-_\\.\\/]+)', 'g');
+var fixAnsSlashSpace = new RegExp('([\\/\\.])([A-Za-z\\-_\\.\\/]+)( )([\\/])', 'g');
+var cjkLeftBracket = new RegExp("([".concat(cjk, "])([\\(\\[\\{<>\u201C])"), 'g');
+var rightBracketCjk = new RegExp("([\\)\\]\\}<>\u201D])([".concat(cjk, "])"), 'g');
+var leftBracketAnyRightBracket = /([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/;
+var aLeftBracket = /([A-Za-z0-9])([\(\[\{])/g;
+var rightBracketA = /([\)\]\}])([A-Za-z0-9])/g;
+var cjkAns = new RegExp("([".concat(cjk, "])([A-Za-z0-9\\$%\\^&\\*\\-=\\+\\\\|/@\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])"), 'g');
+var ansCjk = new RegExp("([A-Za-z0-9~\\$%\\^&\\*\\-=\\+\\\\|/!;:,\\.\\?\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])([".concat(cjk, "])"), 'g');
+var middleDot = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
 var Pangu = function () {
   function Pangu() {
@@ -55,49 +44,76 @@ var Pangu = function () {
   }
 
   _createClass(Pangu, [{
-    key: 'spacing',
+    key: "convertToFullwidth",
+    value: function convertToFullwidth(symbols) {
+      return symbols.replace(/~/g, '～').replace(/!/g, '！').replace(/;/g, '；').replace(/:/g, '：').replace(/,/g, '，').replace(/\./g, '。').replace(/\?/g, '？');
+    }
+  }, {
+    key: "spacing",
     value: function spacing(text) {
-      var newText = text;
+      if (typeof text !== 'string') {
+        console.warn("spacing(text) only accepts string but got ".concat(_typeof(text)));
+        return text;
+      }
 
+      if (text.length <= 1 || !anyCjk.test(text)) {
+        return text;
+      }
+
+      var self = this;
+      var newText = text;
+      newText = newText.replace(convertToFullwidthCjkSpaceSymbolsSpaceCjk, function (match, leftCjk, symbols, rightCjk) {
+        var fullwidthSymbols = self.convertToFullwidth(symbols);
+        return "".concat(leftCjk).concat(fullwidthSymbols).concat(rightCjk);
+      });
+      newText = newText.replace(convertToFullwidthCjkSymbolsAn, function (match, cjk, symbols, an) {
+        var fullwidthSymbols = self.convertToFullwidth(symbols);
+        return "".concat(cjk).concat(fullwidthSymbols).concat(an);
+      });
+      newText = newText.replace(dotsCjk, '$1 $2');
+      newText = newText.replace(fixCjkColonAns, '$1：$2');
       newText = newText.replace(cjkQuote, '$1 $2');
       newText = newText.replace(quoteCJK, '$1 $2');
       newText = newText.replace(fixQuote, '$1$3$5');
-      newText = newText.replace(fixSingleQuote, '$1$3$4');
-
-      newText = newText.replace(hashANSCJKhash, '$1 $2$3$4 $5');
+      newText = newText.replace(cjkSingleQuoteButPossessive, '$1 $2');
+      newText = newText.replace(singleQuoteCjk, '$1 $2');
+      newText = newText.replace(possessiveSingleQuote, "$1's");
+      newText = newText.replace(hashAnsCjkHash, '$1 $2$3$4 $5');
       newText = newText.replace(cjkHash, '$1 $2');
-      newText = newText.replace(hashCJK, '$1 $3');
-
-      newText = newText.replace(cjkOperatorANS, '$1 $2 $3');
-      newText = newText.replace(ansOperatorCJK, '$1 $2 $3');
-
-      var oldText = newText;
-      var tmpText = newText.replace(cjkBracketCJK, '$1 $2 $4');
-      newText = tmpText;
-      if (oldText === tmpText) {
-        newText = newText.replace(cjkBracket, '$1 $2');
-        newText = newText.replace(bracketCJK, '$1 $2');
-      }
-      newText = newText.replace(fixBracket, '$1$3$5');
-
-      newText = newText.replace(fixSymbol, '$1$2 $3');
-
-      newText = newText.replace(cjkANS, '$1 $2');
-      newText = newText.replace(ansCJK, '$1 $2');
-
+      newText = newText.replace(hashCjk, '$1 $3');
+      newText = newText.replace(cjkOperatorAns, '$1 $2 $3');
+      newText = newText.replace(ansOperatorCjk, '$1 $2 $3');
+      newText = newText.replace(fixSlashSpaceAns, '$1$3');
+      newText = newText.replace(fixAnsSlashSpace, '$1$2$4');
+      newText = newText.replace(cjkLeftBracket, '$1 $2');
+      newText = newText.replace(rightBracketCjk, '$1 $2');
+      newText = newText.replace(leftBracketAnyRightBracket, '$1$3$5');
+      newText = newText.replace(aLeftBracket, '$1 $2');
+      newText = newText.replace(rightBracketA, '$1 $2');
+      newText = newText.replace(cjkAns, '$1 $2');
+      newText = newText.replace(ansCjk, '$1 $2');
+      newText = newText.replace(middleDot, '・');
       return newText;
     }
   }, {
-    key: 'spacingText',
+    key: "spacingText",
     value: function spacingText(text) {
-      var callback = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
+      var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {};
+      var newText;
 
       try {
-        var newText = this.spacing(text);
-        callback(null, newText);
+        newText = this.spacing(text);
       } catch (err) {
         callback(err);
+        return;
       }
+
+      callback(null, newText);
+    }
+  }, {
+    key: "spacingTextSync",
+    value: function spacingTextSync(text) {
+      return this.spacing(text);
     }
   }]);
 
@@ -105,6 +121,6 @@ var Pangu = function () {
 }();
 
 var pangu = new Pangu();
-
-exports = module.exports = pangu;
-exports.Pangu = Pangu;
+module.exports = pangu;
+module.exports.default = pangu;
+module.exports.Pangu = Pangu;

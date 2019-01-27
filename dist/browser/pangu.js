@@ -1,7 +1,7 @@
 /*!
  * pangu.js
  * --------
- * @version: 3.3.0
+ * @version: 4.0.0
  * @homepage: https://github.com/vinta/pangu.js
  * @license: MIT
  * @author: Vinta Chen <vinta.chen@gmail.com> (https://github.com/vinta)
@@ -15,7 +15,7 @@
 		exports["pangu"] = factory();
 	else
 		root["pangu"] = factory();
-})(this, function() {
+})(window, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -24,21 +24,21 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	function __webpack_require__(moduleId) {
 /******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
+/******/ 		if(installedModules[moduleId]) {
 /******/ 			return installedModules[moduleId].exports;
-/******/
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
-/******/ 			exports: {},
-/******/ 			id: moduleId,
-/******/ 			loaded: false
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
 /******/ 		};
 /******/
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
 /******/
 /******/ 		// Flag the module as loaded
-/******/ 		module.loaded = true;
+/******/ 		module.l = true;
 /******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
@@ -51,410 +51,444 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
 /******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
 /******/
+/******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
-	'use strict';
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var Pangu = __webpack_require__(1).Pangu;
-	
-	// https://developer.mozilla.org/en/docs/Web/API/Node/nodeType
-	var COMMENT_NODE_TYPE = 8;
-	
-	var BrowserPangu = function (_Pangu) {
-	  _inherits(BrowserPangu, _Pangu);
-	
-	  function BrowserPangu() {
-	    _classCallCheck(this, BrowserPangu);
-	
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(BrowserPangu).call(this));
-	
-	    _this.topTags = /^(html|head|body|#document)$/i;
-	    _this.ignoreTags = /^(script|code|pre|textarea)$/i;
-	    _this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-	    _this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
-	    _this.blockTags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
-	
-	    // TODO
-	    // this.ignoreClasses
-	    // this.ignoreAttributes
-	    return _this;
-	  }
-	
-	  _createClass(BrowserPangu, [{
-	    key: 'canIgnoreNode',
-	    value: function canIgnoreNode(node) {
-	      var parentNode = node.parentNode;
-	
-	      while (parentNode && parentNode.nodeName && parentNode.nodeName.search(this.topTags) === -1) {
-	        if (parentNode.nodeName.search(this.ignoreTags) >= 0 || parentNode.isContentEditable || parentNode.getAttribute('g_editable') === 'true') {
-	          return true;
-	        }
-	
-	        parentNode = parentNode.parentNode;
-	      }
-	
-	      return false;
-	    }
-	  }, {
-	    key: 'isFirstTextChild',
-	    value: function isFirstTextChild(parentNode, targetNode) {
-	      var childNodes = parentNode.childNodes;
-	
-	      // 只判斷第一個含有 text 的 node
-	      for (var i = 0; i < childNodes.length; i++) {
-	        var childNode = childNodes[i];
-	        if (childNode.nodeType !== COMMENT_NODE_TYPE && childNode.textContent) {
-	          return childNode === targetNode;
-	        }
-	      }
-	
-	      return false;
-	    }
-	  }, {
-	    key: 'isLastTextChild',
-	    value: function isLastTextChild(parentNode, targetNode) {
-	      var childNodes = parentNode.childNodes;
-	
-	      // 只判斷倒數第一個含有 text 的 node
-	      for (var i = childNodes.length - 1; i > -1; i--) {
-	        var childNode = childNodes[i];
-	        if (childNode.nodeType !== COMMENT_NODE_TYPE && childNode.textContent) {
-	          return childNode === targetNode;
-	        }
-	      }
-	
-	      return false;
-	    }
-	  }, {
-	    key: 'spacingNodeByXPath',
-	    value: function spacingNodeByXPath(xPathQuery, contextNode) {
-	      // 因為 xPathQuery 會是用 text() 結尾，所以這些 nodes 會是 text 而不是 DOM element
-	      // snapshotLength 要配合 XPathResult.ORDERED_NODE_SNAPSHOT_TYPE 使用
-	      // https://developer.mozilla.org/en-US/docs/DOM/document.evaluate
-	      // https://developer.mozilla.org/en-US/docs/Web/API/XPathResult
-	      var textNodes = document.evaluate(xPathQuery, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-	
-	      var currentTextNode = void 0;
-	      var nextTextNode = void 0;
-	
-	      // 從最下面、最裡面的節點開始，所以是倒序的
-	      for (var i = textNodes.snapshotLength - 1; i > -1; --i) {
-	        currentTextNode = textNodes.snapshotItem(i);
-	
-	        if (this.canIgnoreNode(currentTextNode)) {
-	          nextTextNode = currentTextNode;
-	          continue;
-	        }
-	
-	        var newText = this.spacing(currentTextNode.data);
-	        if (currentTextNode.data !== newText) {
-	          currentTextNode.data = newText;
-	        }
-	
-	        // 處理嵌套的 <tag> 中的文字
-	        if (nextTextNode) {
-	          // TODO
-	          // 現在只是簡單地判斷相鄰的下一個 node 是不是 <br>
-	          // 萬一遇上嵌套的標籤就不行了
-	          if (currentTextNode.nextSibling && currentTextNode.nextSibling.nodeName.search(this.spaceLikeTags) >= 0) {
-	            nextTextNode = currentTextNode;
-	            continue;
-	          }
-	
-	          // currentTextNode 的最後一個字 + nextTextNode 的第一個字
-	          var testText = currentTextNode.data.toString().substr(-1) + nextTextNode.data.toString().substr(0, 1);
-	          var testNewText = this.spacing(testText);
-	          if (testNewText !== testText) {
-	            // 往上找 nextTextNode 的 parent node
-	            // 直到遇到 spaceSensitiveTags
-	            // 而且 nextTextNode 必須是第一個 text child
-	            // 才能把空格加在 nextTextNode 的前面
-	            var nextNode = nextTextNode;
-	            while (nextNode.parentNode && nextNode.nodeName.search(this.spaceSensitiveTags) === -1 && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
-	              nextNode = nextNode.parentNode;
-	            }
-	
-	            var currentNode = currentTextNode;
-	            while (currentNode.parentNode && currentNode.nodeName.search(this.spaceSensitiveTags) === -1 && this.isLastTextChild(currentNode.parentNode, currentNode)) {
-	              currentNode = currentNode.parentNode;
-	            }
-	
-	            if (currentNode.nextSibling) {
-	              if (currentNode.nextSibling.nodeName.search(this.spaceLikeTags) >= 0) {
-	                nextTextNode = currentTextNode;
-	                continue;
-	              }
-	            }
-	
-	            if (currentNode.nodeName.search(this.blockTags) === -1) {
-	              if (nextNode.nodeName.search(this.spaceSensitiveTags) === -1) {
-	                if (nextNode.nodeName.search(this.ignoreTags) === -1 && nextNode.nodeName.search(this.blockTags) === -1) {
-	                  if (nextTextNode.previousSibling) {
-	                    if (nextTextNode.previousSibling.nodeName.search(this.spaceLikeTags) === -1) {
-	                      nextTextNode.data = ' ' + nextTextNode.data;
-	                    }
-	                  } else {
-	                    // dirty hack
-	                    if (!this.canIgnoreNode(nextTextNode)) {
-	                      nextTextNode.data = ' ' + nextTextNode.data;
-	                    }
-	                  }
-	                }
-	              } else if (currentNode.nodeName.search(this.spaceSensitiveTags) === -1) {
-	                currentTextNode.data = currentTextNode.data + ' ';
-	              } else {
-	                var panguSpace = document.createElement('pangu');
-	                panguSpace.innerHTML = ' ';
-	
-	                // 避免一直被加空格
-	                if (nextNode.previousSibling) {
-	                  if (nextNode.previousSibling.nodeName.search(this.spaceLikeTags) === -1) {
-	                    nextNode.parentNode.insertBefore(panguSpace, nextNode);
-	                  }
-	                } else {
-	                  nextNode.parentNode.insertBefore(panguSpace, nextNode);
-	                }
-	
-	                // TODO
-	                // 主要是想要避免在元素（通常都是 <li>）的開頭加空格
-	                // 這個做法有點蠢，但是不管還是先硬上
-	                if (!panguSpace.previousElementSibling) {
-	                  if (panguSpace.parentNode) {
-	                    panguSpace.parentNode.removeChild(panguSpace);
-	                  }
-	                }
-	              }
-	            }
-	          }
-	        }
-	
-	        nextTextNode = currentTextNode;
-	      }
-	    }
-	  }, {
-	    key: 'spacingNode',
-	    value: function spacingNode(contextNode) {
-	      var xPathQuery = './/*/text()[normalize-space(.)]';
-	      this.spacingNodeByXPath(xPathQuery, contextNode);
-	    }
-	  }, {
-	    key: 'spacingElementById',
-	    value: function spacingElementById(idName) {
-	      var xPathQuery = 'id("' + idName + '")//text()';
-	      this.spacingNodeByXPath(xPathQuery, document);
-	    }
-	  }, {
-	    key: 'spacingElementByClassName',
-	    value: function spacingElementByClassName(className) {
-	      var xPathQuery = '//*[contains(concat(" ", normalize-space(@class), " "), "' + className + '")]//text()';
-	      this.spacingNodeByXPath(xPathQuery, document);
-	    }
-	  }, {
-	    key: 'spacingElementByTagName',
-	    value: function spacingElementByTagName(tagName) {
-	      var xPathQuery = '//' + tagName + '//text()';
-	      this.spacingNodeByXPath(xPathQuery, document);
-	    }
-	  }, {
-	    key: 'spacingPageTitle',
-	    value: function spacingPageTitle() {
-	      var xPathQuery = '/html/head/title/text()';
-	      this.spacingNodeByXPath(xPathQuery, document);
-	    }
-	  }, {
-	    key: 'spacingPageBody',
-	    value: function spacingPageBody() {
-	      // // >> 任意位置的節點
-	      // . >> 當前節點
-	      // .. >> 父節點
-	      // [] >> 條件
-	      // text() >> 節點的文字內容，例如 hello 之於 <tag>hello</tag>
-	      //
-	      // [@contenteditable]
-	      // 帶有 contenteditable 屬性的節點
-	      //
-	      // normalize-space(.)
-	      // 當前節點的頭尾的空白字元都會被移除，大於兩個以上的空白字元會被置換成單一空白
-	      // https://developer.mozilla.org/en-US/docs/XPath/Functions/normalize-space
-	      //
-	      // name(..)
-	      // 父節點的名稱
-	      // https://developer.mozilla.org/en-US/docs/XPath/Functions/name
-	      //
-	      // translate(string, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")
-	      // 將 string 轉換成小寫，因為 XML 是 case-sensitive 的
-	      // https://developer.mozilla.org/en-US/docs/XPath/Functions/translate
-	      //
-	      // 1. 處理 <title>
-	      // 2. 處理 <body> 底下的節點
-	      // 3. 略過 contentEditable 的節點
-	      // 4. 略過特定節點，例如 <script> 和 <style>
-	      //
-	      // 注意，以下的 query 只會取出各節點的 text 內容！
-	      var xPathQuery = '/html/body//*/text()[normalize-space(.)]';
-	      var _arr = ['script', 'style', 'textarea'];
-	      for (var _i = 0; _i < _arr.length; _i++) {
-	        var tag = _arr[_i];
-	        // 理論上這幾個 tag 裡面不會包含其他 tag
-	        // 所以可以直接用 .. 取父節點
-	        // ex: [translate(name(..), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") != "script"]
-	        xPathQuery += '[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="' + tag + '"]';
-	      }
-	      this.spacingNodeByXPath(xPathQuery, document);
-	    }
-	
-	    // TODO: 支援 callback 和 promise
-	
-	  }, {
-	    key: 'spacingPage',
-	    value: function spacingPage() {
-	      this.spacingPageTitle();
-	      this.spacingPageBody();
-	    }
-	  }]);
-	
-	  return BrowserPangu;
-	}(Pangu);
-	
-	var pangu = new BrowserPangu();
-	
-	exports = module.exports = pangu;
-	exports.Pangu = BrowserPangu;
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+  if (true) {
+    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+  } else { var mod; }
+})(this, function (_core) {
+  "use strict";
 
-/***/ },
-/* 1 */
-/***/ function(module, exports) {
+  function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-	'use strict';
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	// CJK is short for Chinese, Japanese and Korean.
-	//
-	// The constant cjk contains following Unicode blocks:
-	// 	\u2e80-\u2eff CJK Radicals Supplement
-	// 	\u2f00-\u2fdf Kangxi Radicals
-	// 	\u3040-\u309f Hiragana
-	// 	\u30a0-\u30ff Katakana
-	// 	\u3100-\u312f Bopomofo
-	// 	\u3200-\u32ff Enclosed CJK Letters and Months
-	// 	\u3400-\u4dbf CJK Unified Ideographs Extension A
-	// 	\u4e00-\u9fff CJK Unified Ideographs
-	// 	\uf900-\ufaff CJK Compatibility Ideographs
-	//
-	// For more information about Unicode blocks, see
-	// 	http://unicode-table.com/en/
-	//  https://github.com/vinta/pangu
-	
-	// ANS is short for Alphabets, Numbers and Symbols (`~!@#$%^&*()-_=+[]{}\|;:'",<.>/?).
-	//
-	// CAUTION: those ANS in following constants do not contain all symbols above.
-	
-	// cjkQuote >> 跟 Go 版差了一個 '
-	// quoteCJK >> 跟 Go 版差了一個 '
-	var cjkQuote = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])(["])/g;
-	var quoteCJK = /(["])([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g;
-	var fixQuote = /(["']+)(\s*)(.+?)(\s*)(["']+)/g;
-	var fixSingleQuote = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])( )(')([A-Za-z])/g;
-	
-	var hashANSCJKhash = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])(#)([A-Za-z0-9\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]+)(#)([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g;
-	var cjkHash = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])(#([^ ]))/g;
-	var hashCJK = /(([^ ])#)([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g;
-	
-	var cjkOperatorANS = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([\+\-\*\/=&\\|<>])([A-Za-z0-9])/g;
-	var ansOperatorCJK = /([A-Za-z0-9])([\+\-\*\/=&\\|<>])([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g;
-	
-	var cjkBracketCJK = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([\(\[\{<\u201c]+(.*?)[\)\]\}>\u201d]+)([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g;
-	var cjkBracket = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([\(\[\{<\u201c>])/g;
-	var bracketCJK = /([\)\]\}>\u201d<])([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g;
-	var fixBracket = /([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/;
-	
-	var fixSymbol = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([~!;:,\.\?\u2026])([A-Za-z0-9])/g;
-	
-	var cjkANS = /([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])([A-Za-z0-9`\$%\^&\*\-=\+\\\|/@\u00a1-\u00ff\u2022\u2027\u2150-\u218f])/g;
-	var ansCJK = /([A-Za-z0-9`~\$%\^&\*\-=\+\\\|/!;:,\.\?\u00a1-\u00ff\u2022\u2026\u2027\u2150-\u218f])([\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])/g;
-	
-	var Pangu = function () {
-	  function Pangu() {
-	    _classCallCheck(this, Pangu);
-	  }
-	
-	  _createClass(Pangu, [{
-	    key: 'spacing',
-	    value: function spacing(text) {
-	      var newText = text;
-	
-	      newText = newText.replace(cjkQuote, '$1 $2');
-	      newText = newText.replace(quoteCJK, '$1 $2');
-	      newText = newText.replace(fixQuote, '$1$3$5');
-	      newText = newText.replace(fixSingleQuote, '$1$3$4');
-	
-	      newText = newText.replace(hashANSCJKhash, '$1 $2$3$4 $5');
-	      newText = newText.replace(cjkHash, '$1 $2');
-	      newText = newText.replace(hashCJK, '$1 $3');
-	
-	      newText = newText.replace(cjkOperatorANS, '$1 $2 $3');
-	      newText = newText.replace(ansOperatorCJK, '$1 $2 $3');
-	
-	      var oldText = newText;
-	      var tmpText = newText.replace(cjkBracketCJK, '$1 $2 $4');
-	      newText = tmpText;
-	      if (oldText === tmpText) {
-	        newText = newText.replace(cjkBracket, '$1 $2');
-	        newText = newText.replace(bracketCJK, '$1 $2');
-	      }
-	      newText = newText.replace(fixBracket, '$1$3$5');
-	
-	      newText = newText.replace(fixSymbol, '$1$2 $3');
-	
-	      newText = newText.replace(cjkANS, '$1 $2');
-	      newText = newText.replace(ansCJK, '$1 $2');
-	
-	      return newText;
-	    }
-	  }, {
-	    key: 'spacingText',
-	    value: function spacingText(text) {
-	      var callback = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
-	
-	      try {
-	        var newText = this.spacing(text);
-	        callback(null, newText);
-	      } catch (err) {
-	        callback(err);
-	      }
-	    }
-	  }]);
-	
-	  return Pangu;
-	}();
-	
-	var pangu = new Pangu();
-	
-	exports = module.exports = pangu;
-	exports.Pangu = Pangu;
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/***/ }
-/******/ ])
+  function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+  function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+  function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+  function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+  function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+  function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+  function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+  var COMMENT_NODE_TYPE = 8;
+
+  var BrowserPangu = function (_Pangu) {
+    _inherits(BrowserPangu, _Pangu);
+
+    function BrowserPangu() {
+      var _this;
+
+      _classCallCheck(this, BrowserPangu);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(BrowserPangu).call(this));
+      _this.topTags = /^(html|head|body|#document)$/i;
+      _this.ignoreTags = /^(script|code|pre|textarea)$/i;
+      _this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
+      _this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
+      _this.blockTags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
+      return _this;
+    }
+
+    _createClass(BrowserPangu, [{
+      key: "canIgnoreNode",
+      value: function canIgnoreNode(node) {
+        var parentNode = node.parentNode;
+
+        while (parentNode && parentNode.nodeName && parentNode.nodeName.search(this.topTags) === -1) {
+          if (parentNode.nodeName.search(this.ignoreTags) >= 0 || parentNode.isContentEditable || parentNode.getAttribute('g_editable') === 'true') {
+            return true;
+          }
+
+          parentNode = parentNode.parentNode;
+        }
+
+        return false;
+      }
+    }, {
+      key: "isFirstTextChild",
+      value: function isFirstTextChild(parentNode, targetNode) {
+        var childNodes = parentNode.childNodes;
+
+        for (var i = 0; i < childNodes.length; i++) {
+          var childNode = childNodes[i];
+
+          if (childNode.nodeType !== COMMENT_NODE_TYPE && childNode.textContent) {
+            return childNode === targetNode;
+          }
+        }
+
+        return false;
+      }
+    }, {
+      key: "isLastTextChild",
+      value: function isLastTextChild(parentNode, targetNode) {
+        var childNodes = parentNode.childNodes;
+
+        for (var i = childNodes.length - 1; i > -1; i--) {
+          var childNode = childNodes[i];
+
+          if (childNode.nodeType !== COMMENT_NODE_TYPE && childNode.textContent) {
+            return childNode === targetNode;
+          }
+        }
+
+        return false;
+      }
+    }, {
+      key: "spacingNodeByXPath",
+      value: function spacingNodeByXPath(xPathQuery, contextNode) {
+        var textNodes = document.evaluate(xPathQuery, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        var currentTextNode;
+        var nextTextNode;
+
+        for (var i = textNodes.snapshotLength - 1; i > -1; --i) {
+          currentTextNode = textNodes.snapshotItem(i);
+
+          if (this.canIgnoreNode(currentTextNode)) {
+            nextTextNode = currentTextNode;
+            continue;
+          }
+
+          var newText = this.spacing(currentTextNode.data);
+
+          if (currentTextNode.data !== newText) {
+            currentTextNode.data = newText;
+          }
+
+          if (nextTextNode) {
+            if (currentTextNode.nextSibling && currentTextNode.nextSibling.nodeName.search(this.spaceLikeTags) >= 0) {
+              nextTextNode = currentTextNode;
+              continue;
+            }
+
+            var testText = currentTextNode.data.toString().substr(-1) + nextTextNode.data.toString().substr(0, 1);
+            var testNewText = this.spacing(testText);
+
+            if (testNewText !== testText) {
+              var nextNode = nextTextNode;
+
+              while (nextNode.parentNode && nextNode.nodeName.search(this.spaceSensitiveTags) === -1 && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
+                nextNode = nextNode.parentNode;
+              }
+
+              var currentNode = currentTextNode;
+
+              while (currentNode.parentNode && currentNode.nodeName.search(this.spaceSensitiveTags) === -1 && this.isLastTextChild(currentNode.parentNode, currentNode)) {
+                currentNode = currentNode.parentNode;
+              }
+
+              if (currentNode.nextSibling) {
+                if (currentNode.nextSibling.nodeName.search(this.spaceLikeTags) >= 0) {
+                  nextTextNode = currentTextNode;
+                  continue;
+                }
+              }
+
+              if (currentNode.nodeName.search(this.blockTags) === -1) {
+                if (nextNode.nodeName.search(this.spaceSensitiveTags) === -1) {
+                  if (nextNode.nodeName.search(this.ignoreTags) === -1 && nextNode.nodeName.search(this.blockTags) === -1) {
+                    if (nextTextNode.previousSibling) {
+                      if (nextTextNode.previousSibling.nodeName.search(this.spaceLikeTags) === -1) {
+                        nextTextNode.data = " ".concat(nextTextNode.data);
+                      }
+                    } else {
+                      if (!this.canIgnoreNode(nextTextNode)) {
+                        nextTextNode.data = " ".concat(nextTextNode.data);
+                      }
+                    }
+                  }
+                } else if (currentNode.nodeName.search(this.spaceSensitiveTags) === -1) {
+                  currentTextNode.data = "".concat(currentTextNode.data, " ");
+                } else {
+                  var panguSpace = document.createElement('pangu');
+                  panguSpace.innerHTML = ' ';
+
+                  if (nextNode.previousSibling) {
+                    if (nextNode.previousSibling.nodeName.search(this.spaceLikeTags) === -1) {
+                      nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                    }
+                  } else {
+                    nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                  }
+
+                  if (!panguSpace.previousElementSibling) {
+                    if (panguSpace.parentNode) {
+                      panguSpace.parentNode.removeChild(panguSpace);
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          nextTextNode = currentTextNode;
+        }
+      }
+    }, {
+      key: "spacingNode",
+      value: function spacingNode(contextNode) {
+        var xPathQuery = './/*/text()[normalize-space(.)]';
+
+        if (contextNode.children && contextNode.children.length === 0) {
+          xPathQuery = './/text()[normalize-space(.)]';
+        }
+
+        this.spacingNodeByXPath(xPathQuery, contextNode);
+      }
+    }, {
+      key: "spacingElementById",
+      value: function spacingElementById(idName) {
+        var xPathQuery = "id(\"".concat(idName, "\")//text()");
+        this.spacingNodeByXPath(xPathQuery, document);
+      }
+    }, {
+      key: "spacingElementByClassName",
+      value: function spacingElementByClassName(className) {
+        var xPathQuery = "//*[contains(concat(\" \", normalize-space(@class), \" \"), \"".concat(className, "\")]//text()");
+        this.spacingNodeByXPath(xPathQuery, document);
+      }
+    }, {
+      key: "spacingElementByTagName",
+      value: function spacingElementByTagName(tagName) {
+        var xPathQuery = "//".concat(tagName, "//text()");
+        this.spacingNodeByXPath(xPathQuery, document);
+      }
+    }, {
+      key: "spacingPageTitle",
+      value: function spacingPageTitle() {
+        var xPathQuery = '/html/head/title/text()';
+        this.spacingNodeByXPath(xPathQuery, document);
+      }
+    }, {
+      key: "spacingPageBody",
+      value: function spacingPageBody() {
+        var xPathQuery = '/html/body//*/text()[normalize-space(.)]';
+        ['script', 'style', 'textarea'].forEach(function (tag) {
+          xPathQuery = "".concat(xPathQuery, "[translate(name(..),\"ABCDEFGHIJKLMNOPQRSTUVWXYZ\",\"abcdefghijklmnopqrstuvwxyz\")!=\"").concat(tag, "\"]");
+        });
+        this.spacingNodeByXPath(xPathQuery, document);
+      }
+    }, {
+      key: "spacingPage",
+      value: function spacingPage() {
+        this.spacingPageTitle();
+        this.spacingPageBody();
+      }
+    }]);
+
+    return BrowserPangu;
+  }(_core.Pangu);
+
+  var pangu = new BrowserPangu();
+  module.exports = pangu;
+  module.exports.default = pangu;
+  module.exports.Pangu = BrowserPangu;
 });
-;
-//# sourceMappingURL=pangu.js.map
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+  if (true) {
+    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+  } else { var mod; }
+})(this, function () {
+  "use strict";
+
+  function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+  function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+  function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+  var cjk = "\u2E80-\u2EFF\u2F00-\u2FDF\u3040-\u309F\u30A0-\u30FF\u3100-\u312F\u3200-\u32FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF";
+  var a = 'A-Za-z';
+  var n = '0-9';
+  var anyCjk = new RegExp("[".concat(cjk, "]"));
+  var convertToFullwidthCjkSpaceSymbolsSpaceCjk = new RegExp("([".concat(cjk, "])[ ]*([~\\!;\\:,\\?]+|\\.)[ ]*([").concat(cjk, "])"), 'g');
+  var convertToFullwidthCjkSymbolsAn = new RegExp("([".concat(cjk, "])([~\\!;\\?]+)([A-Za-z0-9])"), 'g');
+  var dotsCjk = new RegExp("([\\.]{2,}|\u2026)([".concat(cjk, "])"), 'g');
+  var fixCjkColonAns = new RegExp("([".concat(cjk, "])\\:([A-Z0-9\\(\\)])"), 'g');
+  var cjkQuote = new RegExp("([".concat(cjk, "])([`\"\u05F4])"), 'g');
+  var quoteCJK = new RegExp("([`\"\u05F4])([".concat(cjk, "])"), 'g');
+  var fixQuote = /([`"\u05f4]+)(\s*)(.+?)(\s*)([`"\u05f4]+)/g;
+  var cjkSingleQuoteButPossessive = new RegExp("([".concat(cjk, "])('[^s])"), 'g');
+  var singleQuoteCjk = new RegExp("(')([".concat(cjk, "])"), 'g');
+  var possessiveSingleQuote = new RegExp("([".concat(cjk, "A-Za-z0-9])( )('s)"), 'g');
+  var hashAnsCjkHash = new RegExp("([".concat(cjk, "])(#)([").concat(cjk, "]+)(#)([").concat(cjk, "])"), 'g');
+  var cjkHash = new RegExp("([".concat(cjk, "])(#([^ ]))"), 'g');
+  var hashCjk = new RegExp("(([^ ])#)([".concat(cjk, "])"), 'g');
+  var cjkOperatorAns = new RegExp("([".concat(cjk, "])([\\+\\-\\*\\/=&\\|<>])([A-Za-z0-9])"), 'g');
+  var ansOperatorCjk = new RegExp("([A-Za-z0-9])([\\+\\-\\*\\/=&\\|<>])([".concat(cjk, "])"), 'g');
+  var fixSlashSpaceAns = new RegExp('([\\/])( )([a-z\\-_\\.\\/]+)', 'g');
+  var fixAnsSlashSpace = new RegExp('([\\/\\.])([A-Za-z\\-_\\.\\/]+)( )([\\/])', 'g');
+  var cjkLeftBracket = new RegExp("([".concat(cjk, "])([\\(\\[\\{<>\u201C])"), 'g');
+  var rightBracketCjk = new RegExp("([\\)\\]\\}<>\u201D])([".concat(cjk, "])"), 'g');
+  var leftBracketAnyRightBracket = /([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/;
+  var aLeftBracket = /([A-Za-z0-9])([\(\[\{])/g;
+  var rightBracketA = /([\)\]\}])([A-Za-z0-9])/g;
+  var cjkAns = new RegExp("([".concat(cjk, "])([A-Za-z0-9\\$%\\^&\\*\\-=\\+\\\\|/@\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])"), 'g');
+  var ansCjk = new RegExp("([A-Za-z0-9~\\$%\\^&\\*\\-=\\+\\\\|/!;:,\\.\\?\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])([".concat(cjk, "])"), 'g');
+  var middleDot = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
+
+  var Pangu = function () {
+    function Pangu() {
+      _classCallCheck(this, Pangu);
+    }
+
+    _createClass(Pangu, [{
+      key: "convertToFullwidth",
+      value: function convertToFullwidth(symbols) {
+        return symbols.replace(/~/g, '～').replace(/!/g, '！').replace(/;/g, '；').replace(/:/g, '：').replace(/,/g, '，').replace(/\./g, '。').replace(/\?/g, '？');
+      }
+    }, {
+      key: "spacing",
+      value: function spacing(text) {
+        if (typeof text !== 'string') {
+          console.warn("spacing(text) only accepts string but got ".concat(_typeof(text)));
+          return text;
+        }
+
+        if (text.length <= 1 || !anyCjk.test(text)) {
+          return text;
+        }
+
+        var self = this;
+        var newText = text;
+        newText = newText.replace(convertToFullwidthCjkSpaceSymbolsSpaceCjk, function (match, leftCjk, symbols, rightCjk) {
+          var fullwidthSymbols = self.convertToFullwidth(symbols);
+          return "".concat(leftCjk).concat(fullwidthSymbols).concat(rightCjk);
+        });
+        newText = newText.replace(convertToFullwidthCjkSymbolsAn, function (match, cjk, symbols, an) {
+          var fullwidthSymbols = self.convertToFullwidth(symbols);
+          return "".concat(cjk).concat(fullwidthSymbols).concat(an);
+        });
+        newText = newText.replace(dotsCjk, '$1 $2');
+        newText = newText.replace(fixCjkColonAns, '$1：$2');
+        newText = newText.replace(cjkQuote, '$1 $2');
+        newText = newText.replace(quoteCJK, '$1 $2');
+        newText = newText.replace(fixQuote, '$1$3$5');
+        newText = newText.replace(cjkSingleQuoteButPossessive, '$1 $2');
+        newText = newText.replace(singleQuoteCjk, '$1 $2');
+        newText = newText.replace(possessiveSingleQuote, "$1's");
+        newText = newText.replace(hashAnsCjkHash, '$1 $2$3$4 $5');
+        newText = newText.replace(cjkHash, '$1 $2');
+        newText = newText.replace(hashCjk, '$1 $3');
+        newText = newText.replace(cjkOperatorAns, '$1 $2 $3');
+        newText = newText.replace(ansOperatorCjk, '$1 $2 $3');
+        newText = newText.replace(fixSlashSpaceAns, '$1$3');
+        newText = newText.replace(fixAnsSlashSpace, '$1$2$4');
+        newText = newText.replace(cjkLeftBracket, '$1 $2');
+        newText = newText.replace(rightBracketCjk, '$1 $2');
+        newText = newText.replace(leftBracketAnyRightBracket, '$1$3$5');
+        newText = newText.replace(aLeftBracket, '$1 $2');
+        newText = newText.replace(rightBracketA, '$1 $2');
+        newText = newText.replace(cjkAns, '$1 $2');
+        newText = newText.replace(ansCjk, '$1 $2');
+        newText = newText.replace(middleDot, '・');
+        return newText;
+      }
+    }, {
+      key: "spacingText",
+      value: function spacingText(text) {
+        var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {};
+        var newText;
+
+        try {
+          newText = this.spacing(text);
+        } catch (err) {
+          callback(err);
+          return;
+        }
+
+        callback(null, newText);
+      }
+    }, {
+      key: "spacingTextSync",
+      value: function spacingTextSync(text) {
+        return this.spacing(text);
+      }
+    }]);
+
+    return Pangu;
+  }();
+
+  var pangu = new Pangu();
+  module.exports = pangu;
+  module.exports.default = pangu;
+  module.exports.Pangu = Pangu;
+});
+
+/***/ })
+/******/ ]);
+});
