@@ -131,6 +131,7 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('Vinta-陳上進'), 'Vinta - 陳上進');
       assert.equal(pangu.spacing('陳上進-Vinta'), '陳上進 - Vinta');
       assert.equal(pangu.spacing('得到一個A-B的結果'), '得到一個 A-B 的結果');
+      assert.equal(pangu.spacing('长者的智慧和复杂的维斯特洛- 文章'), '长者的智慧和复杂的维斯特洛 - 文章');
 
       // TODO
       // assert.equal(pangu.spacing('陳上進--Vinta'), '陳上進 -- Vinta');
