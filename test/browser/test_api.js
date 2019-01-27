@@ -88,4 +88,6 @@ describe('BrowserPangu', () => {
       assert.equal(document.body.innerHTML, realHTML('test/_fixtures/tag_name_expected.html'));
     });
   });
+
+  // TODO: autoSpacingPage()
 });

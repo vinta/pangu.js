@@ -1,5 +1,30 @@
 import { Pangu } from '../shared/core';
 
+function debounce(fn, delay, mustRunDelay) {
+  let timer = null;
+  let startTime = null;
+  return () => {
+    const self = this;
+    const args = arguments;
+    const currentTime = + new Date();
+
+    clearTimeout(timer);
+
+    if (!startTime) {
+      startTime = currentTime;
+    }
+
+    if (currentTime - startTime >= mustRunDelay) {
+      fn.apply(self, args);
+      startTime = currentTime;
+    } else {
+      timer = setTimeout(() => {
+        fn.apply(self, args);
+      }, delay);
+    }
+  };
+}
+
 // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
 const COMMENT_NODE_TYPE = 8;
 
@@ -237,6 +262,71 @@ class BrowserPangu extends Pangu {
   spacingPage() {
     this.spacingPageTitle();
     this.spacingPageBody();
+  }
+
+  autoSpacingPage() {
+    if (!(document.body instanceof Node)) {
+      return;
+    }
+
+    const self = this;
+    const queue = [];
+
+    setTimeout(() => {
+      self.spacingPage();
+    }, 1000);
+
+    // it's possible that multiple workers process the queue at the same time
+    const debouncedSpacingNodes = debounce(() => {
+      // a single node could be very big which contains a lot of child nodes
+      while (queue.length) {
+        const node = queue.shift();
+        if (node) {
+          if (node.nodeType === Node.TEXT_NODE) {
+            const newText = self.spacingTextSync(node.nodeValue);
+            if (node.nodeValue !== newText) {
+              node.nodeValue = newText;
+            }
+          } else {
+            self.spacingNode(node);
+          }
+        }
+      }
+    }, 500, {'maxWait': 2000});
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+    const mutationObserver = new MutationObserver((mutations, observer) => {
+      // Element: https://developer.mozilla.org/en-US/docs/Web/API/Element
+      // Text: https://developer.mozilla.org/en-US/docs/Web/API/Text
+      mutations.forEach((mutation) => {
+        switch (mutation.type) { /* eslint-disable indent */
+          case 'childList':
+            mutation.addedNodes.forEach((node) => {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                queue.push(node);
+              } else if (node.nodeType === Node.TEXT_NODE) {
+                queue.push(node.parentNode);
+              }
+            });
+            break;
+          case 'characterData':
+            const node = mutation.target;
+            if (node.nodeType === Node.TEXT_NODE) {
+              queue.push(node);
+            }
+            break;
+          default:
+            break;
+        }
+      });
+
+      debouncedSpacingNodes();
+    });
+    mutationObserver.observe(document.body, {
+      characterData: true,
+      childList: true,
+      subtree: true,
+    });
   }
 }
 
