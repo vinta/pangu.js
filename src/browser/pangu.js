@@ -48,7 +48,7 @@ class BrowserPangu extends Pangu {
     let parentNode = node.parentNode;
 
     while (parentNode && parentNode.nodeName && parentNode.nodeName.search(this.topTags) === -1) {
-      if ((parentNode.nodeName.search(this.ignoreTags) >= 0) || (parentNode.isContentEditable) || (parentNode.getAttribute('g_editable') === 'true')) {
+      if ((parentNode.nodeName.search(this.ignoreTags) >= 0) || (parentNode.isContentEditable) || (parentNode.getAttribute && parentNode.getAttribute('g_editable') === 'true')) {
         return true;
       }
 
