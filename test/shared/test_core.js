@@ -304,6 +304,7 @@ describe('Pangu', () => {
     it('處理 • 符號', () => {
       assert.equal(pangu.spacing('前面•後面'), '前面・後面');
       assert.equal(pangu.spacing('喬治•R•R•馬丁'), '喬治・R・R・馬丁');
+      assert.equal(pangu.spacing('M·奈特·沙马兰'), 'M・奈特・沙马兰');
     });
 
     // \u2027

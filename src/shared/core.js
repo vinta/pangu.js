@@ -14,7 +14,9 @@
 // For more information about Unicode blocks, see
 // http://unicode-table.com/en/
 // https://github.com/vinta/pangu
-const cjk = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
+//
+// all J below does not include \u30fb
+const cjk = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
 
 // ANS is short for Alphabets, Numbers, and Symbols.
 //
@@ -22,19 +24,19 @@ const cjk = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f\u
 // N includes 0-9
 // S includes `~!@#$%^&*()-_=+[]{}\|;:'",<.>/?
 //
-// Some S does not include all symbols.
+// some S below does not include all symbols
 const a = 'A-Za-z';
 const n = '0-9';
 
 const anyCjk = new RegExp(`[${cjk}]`);
 
-// The symbols part only includes ~ ! ; : , . ? but . only matches one character
+// the symbol part only includes ~ ! ; : , . ? but . only matches one character
 const convertToFullwidthCjkSpaceSymbolsSpaceCjk = new RegExp(`([${cjk}])[ ]*([~\\!;\\:,\\?]+|\\.)[ ]*([${cjk}])`, 'g');
 const convertToFullwidthCjkSymbolsAn = new RegExp(`([${cjk}])([~\\!;\\?]+)([A-Za-z0-9])`, 'g');
 const dotsCjk = new RegExp(`([\\.]{2,}|\u2026)([${cjk}])`, 'g');
 const fixCjkColonAns = new RegExp(`([${cjk}])\\:([A-Z0-9\\(\\)])`, 'g');
 
-// The symbols part does not include '
+// the symbol part does not include '
 const cjkQuote = new RegExp(`([${cjk}])([\`"\u05f4])`, 'g');
 const quoteCJK = new RegExp(`([\`"\u05f4])([${cjk}])`, 'g');
 const fixQuote = /([`"\u05f4]+)(\s*)(.+?)(\s*)([`"\u05f4]+)/g;
@@ -47,14 +49,14 @@ const hashAnsCjkHash = new RegExp(`([${cjk}])(#)([${cjk}]+)(#)([${cjk}])`, 'g');
 const cjkHash = new RegExp(`([${cjk}])(#([^ ]))`, 'g');
 const hashCjk = new RegExp(`(([^ ])#)([${cjk}])`, 'g');
 
-// The symbols part only includes + - * / = & | < >
+// the symbol part only includes + - * / = & | < >
 const cjkOperatorAns = new RegExp(`([${cjk}])([\\+\\-\\*\\/=&\\|<>])([A-Za-z0-9])`, 'g');
 const ansOperatorCjk = new RegExp(`([A-Za-z0-9])([\\+\\-\\*\\/=&\\|<>])([${cjk}])`, 'g');
 
 const fixSlashSpaceAns = new RegExp('([\\/])( )([a-z\\-_\\.\\/]+)', 'g');
 const fixAnsSlashSpace = new RegExp('([\\/\\.])([A-Za-z\\-_\\.\\/]+)( )([\\/])', 'g');
 
-// The bracket part only includes ( ) [ ] { } < > “ ”
+// the bracket part only includes ( ) [ ] { } < > “ ”
 const cjkLeftBracket = new RegExp(`([${cjk}])([\\(\\[\\{<>\u201c])`, 'g');
 const rightBracketCjk = new RegExp(`([\\)\\]\\}<>\u201d])([${cjk}])`, 'g');
 const leftBracketAnyRightBracket = /([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/;
