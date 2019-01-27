@@ -6,13 +6,14 @@ var webpack = require('webpack');
 
 var packageInfo = require('./package.json');
 
-var bannerTemplate = fs.readFileSync('src/browser/banner.txt', {encoding: 'utf8'});
+var bannerTemplate = fs.readFileSync('src/browser/banner.txt', 'utf8');
 var bannerText = _.template(bannerTemplate)(packageInfo);
 
 var entryPath = './src/browser/pangu.js';
 
 module.exports = {
   target: 'web',
+  // mode: 'development',
   mode: 'production',
   entry: {
     'pangu': entryPath,
