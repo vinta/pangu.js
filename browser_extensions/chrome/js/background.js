@@ -8,9 +8,10 @@ var LOCAL_STORAGE = chrome.storage.local;
 var DEFAULT_SETTINGS = {
   'spacing_mode': 'spacing_when_load', // or spacing_when_click
   'spacing_rule': 'blacklists', // or whitelists
-  'blacklists': [
+  'blacklists': [ // TODO: support regex
     '//drive.google.com',
-    '//docs.google.com'
+    '//docs.google.com',
+    '/blob/'
   ],
   'whitelists': [],
   'is_mute': false
