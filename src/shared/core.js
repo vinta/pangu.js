@@ -28,9 +28,10 @@ const n = '0-9';
 
 const anyCjk = new RegExp(`[${cjk}]`);
 
-// The symbols part only includes ~ ! ; : , . ?
-const convertToFullwidthCjkSpaceSymbolsSpaceCjk = new RegExp(`([${cjk}])[ ]*([~\\!;\\:,\\.\\?]+)[ ]*([${cjk}])`, 'g');
+// The symbols part only includes ~ ! ; : , . ? but . only matches one character
+const convertToFullwidthCjkSpaceSymbolsSpaceCjk = new RegExp(`([${cjk}])[ ]*([~\\!;\\:,\\?]+|\\.)[ ]*([${cjk}])`, 'g');
 const convertToFullwidthCjkSymbolsAn = new RegExp(`([${cjk}])([~\\!;\\?]+)([A-Za-z0-9])`, 'g');
+const dotsCjk = new RegExp(`([\\.]{2,}|\u2026)([${cjk}])`, 'g');
 const fixCjkColonAns = new RegExp(`([${cjk}])\\:([A-Z0-9\\(\\)])`, 'g');
 
 // The symbols part does not include '
@@ -50,19 +51,21 @@ const hashCjk = new RegExp(`(([^ ])#)([${cjk}])`, 'g');
 const cjkOperatorAns = new RegExp(`([${cjk}])([\\+\\-\\*\\/=&\\|<>])([A-Za-z0-9])`, 'g');
 const ansOperatorCjk = new RegExp(`([A-Za-z0-9])([\\+\\-\\*\\/=&\\|<>])([${cjk}])`, 'g');
 
-const fixSlashSpaceAns = new RegExp('([\\/])( )([a-z0-9\\-_\\.\\/]+)', 'g');
-const fixAnsSlashSpace = new RegExp('([\\/\\.])([A-Za-z0-9\\-_\\.\\/]+)( )([\\/])', 'g');
+const fixSlashSpaceAns = new RegExp('([\\/])( )([a-z\\-_\\.\\/]+)', 'g');
+const fixAnsSlashSpace = new RegExp('([\\/\\.])([A-Za-z\\-_\\.\\/]+)( )([\\/])', 'g');
 
 // The bracket part only includes ( ) [ ] { } < > “ ”
 const cjkLeftBracket = new RegExp(`([${cjk}])([\\(\\[\\{<>\u201c])`, 'g');
 const rightBracketCjk = new RegExp(`([\\)\\]\\}<>\u201d])([${cjk}])`, 'g');
 const leftBracketAnyRightBracket = /([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/;
 
-const aLeftBracket = new RegExp(`([A-Za-z])([\\(\\[\\{<>])`, 'g');
-const rightBracketA = new RegExp(`([\\)\\]\\}<>])([A-Za-z])`, 'g');
+const aLeftBracket = /([A-Za-z0-9])([\(\[\{])/g;
+const rightBracketA = /([\)\]\}])([A-Za-z0-9])/g;
 
-const cjkAns = new RegExp(`([${cjk}])([A-Za-z0-9\\$%\\^&\\*\\-=\\+\\\\\|/@\u00a1-\u00ff\u2022\u2027\u2150-\u218f\u2700—\u27bf])`, 'g');
-const ansCjk = new RegExp(`([A-Za-z0-9~\\$%\\^&\\*\\-=\\+\\\\\|/!;:,\\.\\?\u00a1-\u00ff\u2022\u2026\u2027\u2150-\u218f\u2700—\u27bf])([${cjk}])`, 'g');
+const cjkAns = new RegExp(`([${cjk}])([A-Za-z0-9\\$%\\^&\\*\\-=\\+\\\\\|/@\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])`, 'g');
+const ansCjk = new RegExp(`([A-Za-z0-9~\\$%\\^&\\*\\-=\\+\\\\\|/!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])([${cjk}])`, 'g');
+
+const middleDot = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
 class Pangu {
   convertToFullwidth(symbols) {
@@ -88,6 +91,19 @@ class Pangu {
 
     const self = this;
 
+    // DEBUG
+    // String.prototype.rawReplace = String.prototype.replace;
+    // String.prototype.replace = function(regexp, newSubstr) {
+    //   const oldText = this;
+    //   const newText = this.rawReplace(regexp, newSubstr);
+    //   if (oldText !== newText) {
+    //     console.log(`regexp: ${regexp}`);
+    //     console.log(`oldText: ${oldText}`);
+    //     console.log(`newText: ${newText}`);
+    //   }
+    //   return newText;
+    // };
+
     let newText = text;
 
     // https://stackoverflow.com/questions/4285472/multiple-regex-replace
@@ -100,6 +116,7 @@ class Pangu {
       return `${cjk}${fullwidthSymbols}${an}`;
     });
 
+    newText = newText.replace(dotsCjk, '$1 $2');
     newText = newText.replace(fixCjkColonAns, '$1：$2');
 
     newText = newText.replace(cjkQuote, '$1 $2');
@@ -129,6 +146,11 @@ class Pangu {
 
     newText = newText.replace(cjkAns, '$1 $2');
     newText = newText.replace(ansCjk, '$1 $2');
+
+    newText = newText.replace(middleDot, '・');
+
+    // DEBUG
+    // String.prototype.replace = String.prototype.rawReplace;
 
     return newText;
   }

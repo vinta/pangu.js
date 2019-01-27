@@ -1,4 +1,4 @@
-const assert = require('chai').assert;
+const { assert } = require('chai');
 
 const pangu = require('../../dist/shared/core');
 
@@ -30,10 +30,11 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('中文 Ø 漢字'), '中文 Ø 漢字');
     });
 
-    it('處理 General Punctuation', () => {
-      assert.equal(pangu.spacing('中文•漢字'), '中文 • 漢字');
-      assert.equal(pangu.spacing('中文 • 漢字'), '中文 • 漢字');
-    });
+    // TODO
+    // it('處理 General Punctuation', () => {
+    //   assert.equal(pangu.spacing('中文⁜漢字'), '中文 ⁜ 漢字');
+    //   assert.equal(pangu.spacing('中文 ⁜ 漢字'), '中文 ⁜ 漢字');
+    // });
 
     it('處理 Number Forms', () => {
       assert.equal(pangu.spacing('中文Ⅶ漢字'), '中文 Ⅶ 漢字');
@@ -130,6 +131,7 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('Vinta-陳上進'), 'Vinta - 陳上進');
       assert.equal(pangu.spacing('陳上進-Vinta'), '陳上進 - Vinta');
       assert.equal(pangu.spacing('得到一個A-B的結果'), '得到一個 A-B 的結果');
+
       // TODO
       // assert.equal(pangu.spacing('陳上進--Vinta'), '陳上進 -- Vinta');
       // assert.equal(pangu.spacing('丁螺环酮是1A型5-羟色胺受体的特异性拮抗剂'), '丁螺环酮是 1A 型 5-羟色胺受体的特异性拮抗剂');
@@ -179,6 +181,7 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('得到一個A/B的結果'), '得到一個 A/B 的結果');
 
       // 跟以上的結果是互斥的
+      assert.equal(pangu.spacing('2016-12-26(奇幻电影节) / 2017-01-20(美国) / 詹姆斯麦卡沃伊'), '2016-12-26 (奇幻电影节) / 2017-01-20 (美国) / 詹姆斯麦卡沃伊');
       assert.equal(pangu.spacing('/home/和/root是Linux中的頂級目錄'), '/home/ 和 /root 是 Linux 中的頂級目錄');
       assert.equal(pangu.spacing('當你用cat和od指令查看/dev/random和/dev/urandom的內容時'), '當你用 cat 和 od 指令查看 /dev/random 和 /dev/urandom 的內容時');
     });
@@ -201,19 +204,6 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('得到一個A>B的結果'), '得到一個 A>B 的結果');
     });
 
-    // \u2027
-    it('處理 ‧ 符號', () => {
-      assert.equal(pangu.spacing('前面‧後面'), '前面 ‧ 後面');
-    });
-
-    // 只加右空格
-
-    // \u2026
-    it('處理 … 符號', () => {
-      assert.equal(pangu.spacing('前面…後面'), '前面… 後面');
-      assert.equal(pangu.spacing('前面……後面'), '前面…… 後面');
-    });
-
     // 只加左空格
 
     it('處理 @ 符號', () => {
@@ -230,6 +220,19 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('前面 #銀河便車指南 後面'), '前面 #銀河便車指南 後面');
       assert.equal(pangu.spacing('前面#銀河便車指南 後面'), '前面 #銀河便車指南 後面');
       assert.equal(pangu.spacing('前面#銀河公車指南 #銀河拖吊車指南 後面'), '前面 #銀河公車指南 #銀河拖吊車指南 後面');
+    });
+
+    // 只加右空格
+
+    it('處理 ... 符號', () => {
+      assert.equal(pangu.spacing('前面...後面'), '前面... 後面');
+      assert.equal(pangu.spacing('前面..後面'), '前面.. 後面');
+    });
+
+    // \u2026
+    it('處理 … 符號', () => {
+      assert.equal(pangu.spacing('前面…後面'), '前面… 後面');
+      assert.equal(pangu.spacing('前面……後面'), '前面…… 後面');
     });
 
     // 換成全形符號
@@ -288,6 +291,24 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('前面? 後面'), '前面？後面');
       assert.equal(pangu.spacing('前面 ?後面'), '前面？後面');
       assert.equal(pangu.spacing('所以，請問Jackey的鼻子有幾個?3.14個'), '所以，請問 Jackey 的鼻子有幾個？3.14 個');
+    });
+
+    // \u00b7
+    it('處理 · 符號', () => {
+      assert.equal(pangu.spacing('前面·後面'), '前面・後面');
+      assert.equal(pangu.spacing('喬治·R·R·馬丁'), '喬治・R・R・馬丁');
+    });
+
+    // \u2022
+    it('處理 • 符號', () => {
+      assert.equal(pangu.spacing('前面•後面'), '前面・後面');
+      assert.equal(pangu.spacing('喬治•R•R•馬丁'), '喬治・R・R・馬丁');
+    });
+
+    // \u2027
+    it('處理 ‧ 符號', () => {
+      assert.equal(pangu.spacing('前面‧後面'), '前面・後面');
+      assert.equal(pangu.spacing('喬治‧R‧R‧馬丁'), '喬治・R・R・馬丁');
     });
 
     // 成對符號：相異
