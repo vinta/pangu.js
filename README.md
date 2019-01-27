@@ -44,20 +44,8 @@
 
 ```bash
 $ npm install pangu --save
-```
-
-### Command
-
-npm 5.0 以上版本不須先安裝，可以用 `npx pangu` 指令直接將 `pangu` 當作命令列工具使用。
-
-```sh
-$ pangu "與PM戰鬥的人，應當小心自己不要成為PM"
-與 PM 戰鬥的人，應當小心自己不要成為 PM
-
-$ pangu -t "當你凝視著bug，bug也凝視著你"
-當你凝視著 bug，bug 也凝視著你
-
-$ pangu -f file.txt
+# or
+$ yarn add pangu
 ```
 
 ### Browser
@@ -81,11 +69,11 @@ $ pangu -f file.txt
 `pangu.js` is also available on [jsDelivr](https://www.jsdelivr.com/package/npm/pangu) and [cdnjs](https://cdnjs.com/libraries/pangu):
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/pangu@3.3.0/dist/browser/pangu.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pangu@3.3.0/dist/browser/pangu.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pangu@4.0.0/dist/browser/pangu.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pangu@4.0.0/dist/browser/pangu.min.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/3.3.0/pangu.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/3.3.0/pangu.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.0/pangu.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.0/pangu.min.js"></script>
 ```
 
 ### Node.js
@@ -93,19 +81,20 @@ $ pangu -f file.txt
 Learn more on [npm](https://www.npmjs.com/package/pangu).
 
 ```js
-var pangu = require('pangu'); // ES5
-import * as pangu from 'pangu'; // ES6
+var pangu = require('pangu');
+// or
+import * as pangu from 'pangu';
 
-pangu.spacing('與PM戰鬥的人，應當小心自己不要成為PM');
-// output: 與 PM 戰鬥的人，應當小心自己不要成為 PM
+const text = pangu.spacing('與PM戰鬥的人，應當小心自己不要成為PM');
+// text = '與 PM 戰鬥的人，應當小心自己不要成為 PM'
 
+// callback
 pangu.spacingFile('/path/to/text.txt', function(err, data) {
-  // callback
   console.log(data);
 });
 
+// promise
 pangu.spacingFile('/path/to/text.txt').then(function(data) {
-  // promise
   console.log(data);
 });
 
