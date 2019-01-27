@@ -45,14 +45,13 @@ chrome.runtime.sendMessage({purpose: 'can_spacing'}, function(response) {
       var node = queue.shift();
       if (node) {
         if (node.nodeType == Node.TEXT_NODE) {
-          // console.dir(node);
-          // node.data = pangu.spacingTextSync(node.data);
-          // pangu.spacingNode(node);
+          const newText = pangu.spacingTextSync(node.nodeValue);
+          if (node.nodeValue !== newText) {
+            node.nodeValue = newText;
+          }
         } else {
           pangu.spacingNode(node);
         }
-        // TODO: there could be node.textContent or node.data
-        // pangu.spacingNode(node);
       }
 
     }
@@ -77,7 +76,6 @@ chrome.runtime.sendMessage({purpose: 'can_spacing'}, function(response) {
         case 'characterData':
           const node = mutation.target;
           if (node.nodeType === Node.TEXT_NODE) {
-            // queue.push(node.parentNode);
             queue.push(node);
           }
           break;

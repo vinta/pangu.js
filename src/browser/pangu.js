@@ -1,6 +1,6 @@
 import { Pangu } from '../shared/core';
 
-// https://developer.mozilla.org/en/docs/Web/API/Node/nodeType
+// https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
 const COMMENT_NODE_TYPE = 8;
 
 class BrowserPangu extends Pangu {
@@ -8,12 +8,13 @@ class BrowserPangu extends Pangu {
     super();
 
     this.topTags = /^(html|head|body|#document)$/i;
-    this.ignoreTags = /^(script|code|pre|textarea)$/i; // TODO: iframe|pangu
+    this.ignoreTags = /^(script|code|pre|textarea)$/i;
     this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
     this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
     this.blockTags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
 
     // TODO
+    // this.ignoreTags adds iframe|pangu
     // this.ignoreClasses
     // this.ignoreAttributes
   }
@@ -166,7 +167,10 @@ class BrowserPangu extends Pangu {
   }
 
   spacingNode(contextNode) {
-    const xPathQuery = './/*/text()[normalize-space(.)]';
+    let xPathQuery = './/*/text()[normalize-space(.)]';
+    if (contextNode.children && contextNode.children.length === 0) {
+      xPathQuery = './/text()[normalize-space(.)]';
+    }
     this.spacingNodeByXPath(xPathQuery, contextNode);
   }
 
@@ -196,21 +200,22 @@ class BrowserPangu extends Pangu {
     // .. >> 父節點
     // [] >> 條件
     // text() >> 節點的文字內容，例如 hello 之於 <tag>hello</tag>
+    // https://www.w3schools.com/xml/xpath_syntax.asp
     //
     // [@contenteditable]
     // 帶有 contenteditable 屬性的節點
     //
     // normalize-space(.)
     // 當前節點的頭尾的空白字元都會被移除，大於兩個以上的空白字元會被置換成單一空白
-    // https://developer.mozilla.org/en-US/docs/XPath/Functions/normalize-space
+    // https://developer.mozilla.org/en-US/docs/Web/XPath/Functions/normalize-space
     //
     // name(..)
     // 父節點的名稱
-    // https://developer.mozilla.org/en-US/docs/XPath/Functions/name
+    // https://developer.mozilla.org/en-US/docs/Web/XPath/Functions/name
     //
     // translate(string, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")
     // 將 string 轉換成小寫，因為 XML 是 case-sensitive 的
-    // https://developer.mozilla.org/en-US/docs/XPath/Functions/translate
+    // https://developer.mozilla.org/en-US/docs/Web/XPath/Functions/translate
     //
     // 1. 處理 <title>
     // 2. 處理 <body> 底下的節點
@@ -219,12 +224,12 @@ class BrowserPangu extends Pangu {
     //
     // 注意，以下的 query 只會取出各節點的 text 內容！
     let xPathQuery = '/html/body//*/text()[normalize-space(.)]';
-    for (const tag of ['script', 'style', 'textarea']) {
+    ['script', 'style', 'textarea'].forEach((tag) => {
       // 理論上這幾個 tag 裡面不會包含其他 tag
       // 所以可以直接用 .. 取父節點
       // ex: [translate(name(..), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") != "script"]
       xPathQuery = `${xPathQuery}[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
-    }
+    });
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
