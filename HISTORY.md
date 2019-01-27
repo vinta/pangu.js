@@ -1,5 +1,14 @@
 # History
 
+v4.0.0 / 2019-01-27
+-------------------
+
+- 各位觀眾，Paranoid Text Spacing 演算法 v4！
+- 大幅地改進 Chrome extension 的效能，使用 `MutationObserver` 和 `debounce`
+- 忍痛拿掉「空格之神顯靈了」
+- 修正 `Pangu.spacingText()` 的 error callback
+- 新增 `BrowserPangu.autoSpacingPage()`
+
 v3.3.0 / 2016-12-28
 -------------------
 
