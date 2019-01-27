@@ -20,7 +20,8 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 var fs = require('fs');
 
-var Pangu = require('../shared/core').Pangu;
+var _require = require('../shared/core'),
+    Pangu = _require.Pangu;
 
 var NodePangu = function (_Pangu) {
   _inherits(NodePangu, _Pangu);

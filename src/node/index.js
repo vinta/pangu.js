@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const Pangu = require('../shared/core').Pangu;
+const { Pangu } = require('../shared/core');
 
 class NodePangu extends Pangu {
 
