@@ -134,23 +134,50 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
   function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+  function debounce(fn, delay, mustRunDelay) {
+    var _this = this,
+        _arguments = arguments;
+
+    var timer = null;
+    var startTime = null;
+    return function () {
+      var self = _this;
+      var args = _arguments;
+      var currentTime = +new Date();
+      clearTimeout(timer);
+
+      if (!startTime) {
+        startTime = currentTime;
+      }
+
+      if (currentTime - startTime >= mustRunDelay) {
+        fn.apply(self, args);
+        startTime = currentTime;
+      } else {
+        timer = setTimeout(function () {
+          fn.apply(self, args);
+        }, delay);
+      }
+    };
+  }
+
   var COMMENT_NODE_TYPE = 8;
 
   var BrowserPangu = function (_Pangu) {
     _inherits(BrowserPangu, _Pangu);
 
     function BrowserPangu() {
-      var _this;
+      var _this2;
 
       _classCallCheck(this, BrowserPangu);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(BrowserPangu).call(this));
-      _this.topTags = /^(html|head|body|#document)$/i;
-      _this.ignoreTags = /^(script|code|pre|textarea)$/i;
-      _this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-      _this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
-      _this.blockTags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
-      return _this;
+      _this2 = _possibleConstructorReturn(this, _getPrototypeOf(BrowserPangu).call(this));
+      _this2.topTags = /^(html|head|body|#document)$/i;
+      _this2.ignoreTags = /^(script|code|pre|textarea)$/i;
+      _this2.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
+      _this2.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
+      _this2.blockTags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
+      return _this2;
     }
 
     _createClass(BrowserPangu, [{
@@ -337,6 +364,71 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
       value: function spacingPage() {
         this.spacingPageTitle();
         this.spacingPageBody();
+      }
+    }, {
+      key: "autoSpacingPage",
+      value: function autoSpacingPage() {
+        if (!(document.body instanceof Node)) {
+          return;
+        }
+
+        var self = this;
+        var queue = [];
+        setTimeout(function () {
+          self.spacingPage();
+        }, 1000);
+        var debouncedSpacingNodes = debounce(function () {
+          while (queue.length) {
+            var node = queue.shift();
+
+            if (node) {
+              if (node.nodeType === Node.TEXT_NODE) {
+                var newText = self.spacingTextSync(node.nodeValue);
+
+                if (node.nodeValue !== newText) {
+                  node.nodeValue = newText;
+                }
+              } else {
+                self.spacingNode(node);
+              }
+            }
+          }
+        }, 500, {
+          'maxWait': 2000
+        });
+        var mutationObserver = new MutationObserver(function (mutations, observer) {
+          mutations.forEach(function (mutation) {
+            switch (mutation.type) {
+              case 'childList':
+                mutation.addedNodes.forEach(function (node) {
+                  if (node.nodeType === Node.ELEMENT_NODE) {
+                    queue.push(node);
+                  } else if (node.nodeType === Node.TEXT_NODE) {
+                    queue.push(node.parentNode);
+                  }
+                });
+                break;
+
+              case 'characterData':
+                var node = mutation.target;
+
+                if (node.nodeType === Node.TEXT_NODE) {
+                  queue.push(node);
+                }
+
+                break;
+
+              default:
+                break;
+            }
+          });
+          debouncedSpacingNodes();
+        });
+        mutationObserver.observe(document.body, {
+          characterData: true,
+          childList: true,
+          subtree: true
+        });
       }
     }]);
 
