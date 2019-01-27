@@ -52,12 +52,15 @@ $ yarn add pangu
 
 ```html
 <head>
-  // Files are located on /node_modules/pangu/dist/browser/
+  // files are located in ./node_modules/pangu/dist/browser/
   <script src="pangu.min.js"></script>
 </head>
 <script>
-  var newText = pangu.spacing("當你凝視著bug，bug也凝視著你");
-  // output: 當你凝視著 bug，bug 也凝視著你
+  var text = pangu.spacing("當你凝視著bug，bug也凝視著你");
+  // text = '當你凝視著 bug，bug 也凝視著你'
+
+  // listen to any DOM change and automatically perform spacing via MutationObserver()
+  pangu.autoSpacingPage();
 
   pangu.spacingPage();
   pangu.spacingElementById('main');
@@ -66,14 +69,11 @@ $ yarn add pangu
 </script>
 ```
 
-`pangu.js` is also available on [jsDelivr](https://www.jsdelivr.com/package/npm/pangu) and [cdnjs](https://cdnjs.com/libraries/pangu):
+`pangu.js` is also available on [jsDelivr](https://www.jsdelivr.com/package/npm/pangu):
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/pangu@4.0.0/dist/browser/pangu.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pangu@4.0.0/dist/browser/pangu.min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.0/pangu.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.0/pangu.min.js"></script>
 ```
 
 ### Node.js
