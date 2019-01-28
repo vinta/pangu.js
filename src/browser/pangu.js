@@ -31,7 +31,7 @@ class BrowserPangu extends Pangu {
   constructor() {
     super();
 
-    this.cjkPunctuation = '\u3001\u3002\uff1b\uff0c\uff1a\uff1b\uff1f';
+    this.cjkPunctuation = '\u3001\u3002\uff01\uff1b\uff0c\uff1a\uff1b\uff1f';
     this.cjkPunctuationRegex = new RegExp(`[${this.cjkPunctuation}]`);
     this.stopCharRegex = new RegExp(`[ \n\t${this.cjkPunctuation}]`);
 

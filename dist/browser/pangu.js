@@ -170,7 +170,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
       _classCallCheck(this, BrowserPangu);
 
       _this2 = _possibleConstructorReturn(this, _getPrototypeOf(BrowserPangu).call(this));
-      _this2.cjkPunctuation = "\u3001\u3002\uFF1B\uFF0C\uFF1A\uFF1B\uFF1F";
+      _this2.cjkPunctuation = "\u3001\u3002\uFF01\uFF1B\uFF0C\uFF1A\uFF1B\uFF1F";
       _this2.cjkPunctuationRegex = new RegExp("[".concat(_this2.cjkPunctuation, "]"));
       _this2.stopCharRegex = new RegExp("[ \n\t".concat(_this2.cjkPunctuation, "]"));
       _this2.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
