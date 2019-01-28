@@ -49,7 +49,8 @@
     "test": "npm run test:shared && npm run test:browser && npm run test:node",
     "watch:shared": "watch 'npm run test:shared' src/shared test/shared/",
     "watch:browser": "watch 'npm run test:browser' src/shared src/browser test/browser/",
-    "watch:node": "watch 'npm run test:node' src/shared src/node test/node/"
+    "watch:node": "watch 'npm run test:node' src/shared src/node test/node/",
+    "watch:pack": "watch 'npm run pack' src/shared src/browser test/browser/"
   },
   "devDependencies": {
     "@babel/cli": "7.2.3",
