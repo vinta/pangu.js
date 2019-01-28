@@ -1,2 +1,6 @@
+.eslintignore
+.eslintrc
+.travis.yml
 browser_extensions/
+coverage/
 test/
