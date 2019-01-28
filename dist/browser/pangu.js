@@ -170,9 +170,9 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
       _classCallCheck(this, BrowserPangu);
 
       _this2 = _possibleConstructorReturn(this, _getPrototypeOf(BrowserPangu).call(this));
-      _this2.cjkPunctuation = "\u3001\u3002\uFF01\uFF1B\uFF0C\uFF1A\uFF1B\uFF1F";
-      _this2.cjkPunctuationRegex = new RegExp("[".concat(_this2.cjkPunctuation, "]"));
-      _this2.stopCharRegex = new RegExp("[ \n\t".concat(_this2.cjkPunctuation, "]"));
+      _this2.punctuation = "\u3001\u3002\uFF01\uFF1B\uFF0C\uFF1A\uFF1B\uFF1F";
+      _this2.punctuationRegex = new RegExp("[".concat(_this2.punctuation, "]"));
+      _this2.stopCharRegex = new RegExp("[ \n\t\\(\\)\\[\\]\\\"\\'".concat(_this2.punctuation, "]"));
       _this2.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
       _this2.ignoredTags = /^(script|code|pre|textarea)$/i;
       _this2.presentationalTags = /^(b|code|del|em|i|s|strong)$/i;
@@ -272,7 +272,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
           if (this.isInsideSpecificTag(currentTextNode, this.presentationalTags)) {
             var elementNode = currentTextNode.parentNode;
 
-            if (currentTextNode.data.charAt(0).search(this.cjkPunctuationRegex) === -1) {
+            if (currentTextNode.data.charAt(0).search(this.punctuationRegex) === -1) {
               if (elementNode.previousSibling) {
                 var previousSibling = elementNode.previousSibling;
 
@@ -284,7 +284,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
               }
             }
 
-            if (currentTextNode.data.substr(-1).search(this.cjkPunctuationRegex) === -1) {
+            if (currentTextNode.data.substr(-1).search(this.punctuationRegex) === -1) {
               if (elementNode.nextSibling) {
                 var nextSibling = elementNode.nextSibling;
 

@@ -31,9 +31,9 @@ class BrowserPangu extends Pangu {
   constructor() {
     super();
 
-    this.cjkPunctuation = '\u3001\u3002\uff01\uff1b\uff0c\uff1a\uff1b\uff1f';
-    this.cjkPunctuationRegex = new RegExp(`[${this.cjkPunctuation}]`);
-    this.stopCharRegex = new RegExp(`[ \n\t${this.cjkPunctuation}]`);
+    this.punctuation = '\u3001\u3002\uff01\uff1b\uff0c\uff1a\uff1b\uff1f';
+    this.punctuationRegex = new RegExp(`[${this.punctuation}]`);
+    this.stopCharRegex = new RegExp(`[ \n\t\\(\\)\\[\\]\\"\\'${this.punctuation}]`);
 
     this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
     this.ignoredTags = /^(script|code|pre|textarea)$/i;
@@ -126,7 +126,7 @@ class BrowserPangu extends Pangu {
       if (this.isInsideSpecificTag(currentTextNode, this.presentationalTags)) {
         const elementNode = currentTextNode.parentNode;
 
-        if (currentTextNode.data.charAt(0).search(this.cjkPunctuationRegex) === -1) {
+        if (currentTextNode.data.charAt(0).search(this.punctuationRegex) === -1) {
           // TODO
           // 如果 previousSibling 或 nextSibling 是 <pre> 的話不應該加空格
           if (elementNode.previousSibling) {
@@ -139,7 +139,7 @@ class BrowserPangu extends Pangu {
           }
         }
 
-        if (currentTextNode.data.substr(-1).search(this.cjkPunctuationRegex) === -1) {
+        if (currentTextNode.data.substr(-1).search(this.punctuationRegex) === -1) {
           if (elementNode.nextSibling) {
             const { nextSibling } = elementNode;
             if (nextSibling.nodeType === Node.TEXT_NODE) {
