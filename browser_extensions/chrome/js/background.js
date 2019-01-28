@@ -10,6 +10,7 @@ var DEFAULT_SETTINGS = {
   'spacing_rule': 'blacklists',
   'blacklists': [ // TODO: support regex
     '//docs.google.com',
+    '//gist.github.com',
     '/blob/',
     '/commit/',
     '/pull/'

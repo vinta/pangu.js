@@ -161,8 +161,6 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     };
   }
 
-  var COMMENT_NODE_TYPE = 8;
-
   var BrowserPangu = function (_Pangu) {
     _inherits(BrowserPangu, _Pangu);
 
@@ -172,25 +170,61 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
       _classCallCheck(this, BrowserPangu);
 
       _this2 = _possibleConstructorReturn(this, _getPrototypeOf(BrowserPangu).call(this));
-      _this2.topTags = /^(html|head|body|#document)$/i;
-      _this2.ignoreTags = /^(script|code|pre|textarea)$/i;
-      _this2.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
+      _this2.cjkPunctuation = "\u3001\u3002\uFF1B\uFF0C\uFF1A\uFF1B\uFF1F";
+      _this2.cjkPunctuationRegex = new RegExp("[".concat(_this2.cjkPunctuation, "]"));
+      _this2.stopCharRegex = new RegExp("[ \n\t".concat(_this2.cjkPunctuation, "]"));
+      _this2.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
+      _this2.ignoredTags = /^(script|code|pre|textarea)$/i;
+      _this2.presentationalTags = /^(b|code|del|em|i|s|strong)$/i;
       _this2.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
-      _this2.blockTags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
+      _this2.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
       return _this2;
     }
 
     _createClass(BrowserPangu, [{
-      key: "canIgnoreNode",
-      value: function canIgnoreNode(node) {
-        var parentNode = node.parentNode;
+      key: "isContentEditable",
+      value: function isContentEditable(node) {
+        return node.isContentEditable || node.getAttribute && node.getAttribute('g_editable') === 'true';
+      }
+    }, {
+      key: "isSpecificTag",
+      value: function isSpecificTag(node, tagRegex) {
+        return node && node.nodeName && node.nodeName.search(tagRegex) >= 0;
+      }
+    }, {
+      key: "isInsideSpecificTag",
+      value: function isInsideSpecificTag(node, tagRegex) {
+        var currentNode = node;
 
-        while (parentNode && parentNode.nodeName && parentNode.nodeName.search(this.topTags) === -1) {
-          if (parentNode.nodeName.search(this.ignoreTags) >= 0 || parentNode.isContentEditable || parentNode.getAttribute && parentNode.getAttribute('g_editable') === 'true') {
+        if (this.isSpecificTag(currentNode, tagRegex)) {
+          return true;
+        }
+
+        while (currentNode.parentNode) {
+          currentNode = currentNode.parentNode;
+
+          if (this.isSpecificTag(currentNode, tagRegex)) {
             return true;
           }
+        }
 
-          parentNode = parentNode.parentNode;
+        return false;
+      }
+    }, {
+      key: "canIgnoreNode",
+      value: function canIgnoreNode(node) {
+        var currentNode = node;
+
+        if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+          return true;
+        }
+
+        while (currentNode.parentNode) {
+          currentNode = currentNode.parentNode;
+
+          if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+            return true;
+          }
         }
 
         return false;
@@ -203,7 +237,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
         for (var i = 0; i < childNodes.length; i++) {
           var childNode = childNodes[i];
 
-          if (childNode.nodeType !== COMMENT_NODE_TYPE && childNode.textContent) {
+          if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
             return childNode === targetNode;
           }
         }
@@ -218,7 +252,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
         for (var i = childNodes.length - 1; i > -1; i--) {
           var childNode = childNodes[i];
 
-          if (childNode.nodeType !== COMMENT_NODE_TYPE && childNode.textContent) {
+          if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
             return childNode === targetNode;
           }
         }
@@ -234,6 +268,34 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
         for (var i = textNodes.snapshotLength - 1; i > -1; --i) {
           currentTextNode = textNodes.snapshotItem(i);
+
+          if (this.isInsideSpecificTag(currentTextNode, this.presentationalTags)) {
+            var elementNode = currentTextNode.parentNode;
+
+            if (currentTextNode.data.charAt(0).search(this.cjkPunctuationRegex) === -1) {
+              if (elementNode.previousSibling) {
+                var previousSibling = elementNode.previousSibling;
+
+                if (previousSibling.nodeType === Node.TEXT_NODE) {
+                  if (previousSibling.data.substr(-1).search(this.stopCharRegex) === -1) {
+                    previousSibling.data = "".concat(previousSibling.data, " ");
+                  }
+                }
+              }
+            }
+
+            if (currentTextNode.data.substr(-1).search(this.cjkPunctuationRegex) === -1) {
+              if (elementNode.nextSibling) {
+                var nextSibling = elementNode.nextSibling;
+
+                if (nextSibling.nodeType === Node.TEXT_NODE) {
+                  if (nextSibling.data.charAt(0).search(this.stopCharRegex) === -1) {
+                    nextSibling.data = " ".concat(nextSibling.data);
+                  }
+                }
+              }
+            }
+          }
 
           if (this.canIgnoreNode(currentTextNode)) {
             nextTextNode = currentTextNode;
@@ -277,7 +339,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
               if (currentNode.nodeName.search(this.blockTags) === -1) {
                 if (nextNode.nodeName.search(this.spaceSensitiveTags) === -1) {
-                  if (nextNode.nodeName.search(this.ignoreTags) === -1 && nextNode.nodeName.search(this.blockTags) === -1) {
+                  if (nextNode.nodeName.search(this.ignoredTags) === -1 && nextNode.nodeName.search(this.blockTags) === -1) {
                     if (nextTextNode.previousSibling) {
                       if (nextTextNode.previousSibling.nodeName.search(this.spaceLikeTags) === -1) {
                         nextTextNode.data = " ".concat(nextTextNode.data);
