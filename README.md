@@ -18,7 +18,7 @@
 
 ### For Users
 
-- [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) **2019-01-29 updated** ✨
+- [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (**2019-01-29 updated**)
 
 ### For Developers
 
