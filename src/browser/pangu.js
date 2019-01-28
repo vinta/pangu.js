@@ -26,63 +26,86 @@ function debounce(fn, delay, mustRunDelay) {
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
-const COMMENT_NODE_TYPE = 8;
 
 class BrowserPangu extends Pangu {
   constructor() {
     super();
 
-    this.topTags = /^(html|head|body|#document)$/i;
-    this.ignoreTags = /^(script|code|pre|textarea)$/i;
-    this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
+    this.cjkPunctuation = '\u3001\u3002\uff1b\uff0c\uff1a\uff1b\uff1f';
+    this.cjkPunctuationRegex = new RegExp(`[${this.cjkPunctuation}]`);
+    this.stopCharRegex = new RegExp(`[ \n\t${this.cjkPunctuation}]`);
+
+    this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
+    this.ignoredTags = /^(script|code|pre|textarea)$/i;
+    this.presentationalTags = /^(b|code|del|em|i|s|strong)$/i;
     this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
-    this.blockTags = /^(div|h1|h2|h3|h4|h5|h6|p)$/i;
+    this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
 
     // TODO
-    // this.ignoreTags adds iframe|pangu
+    // this.ignoredTags adds iframe|pangu
     // this.ignoreClasses
     // this.ignoreAttributes
   }
 
-  canIgnoreNode(node) {
-    let parentNode = node.parentNode;
+  isContentEditable(node) {
+    return ((node.isContentEditable) || (node.getAttribute && node.getAttribute('g_editable') === 'true'));
+  }
 
-    while (parentNode && parentNode.nodeName && parentNode.nodeName.search(this.topTags) === -1) {
-      if ((parentNode.nodeName.search(this.ignoreTags) >= 0) || (parentNode.isContentEditable) || (parentNode.getAttribute && parentNode.getAttribute('g_editable') === 'true')) {
+  isSpecificTag(node, tagRegex) {
+    return (node && node.nodeName && node.nodeName.search(tagRegex) >= 0);
+  }
+
+  isInsideSpecificTag(node, tagRegex) {
+    let currentNode = node;
+    if (this.isSpecificTag(currentNode, tagRegex)) {
+      return true;
+    }
+    while (currentNode.parentNode) {
+      currentNode = currentNode.parentNode;
+      if (this.isSpecificTag(currentNode, tagRegex)) {
         return true;
       }
-
-      parentNode = parentNode.parentNode;
     }
+    return false;
+  }
 
+  canIgnoreNode(node) {
+    let currentNode = node;
+    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+      return true;
+    }
+    while (currentNode.parentNode) {
+      currentNode = currentNode.parentNode;
+      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+        return true;
+      }
+    }
     return false;
   }
 
   isFirstTextChild(parentNode, targetNode) {
-    const childNodes = parentNode.childNodes;
+    const { childNodes } = parentNode;
 
     // 只判斷第一個含有 text 的 node
     for (let i = 0; i < childNodes.length; i++) {
       const childNode = childNodes[i];
-      if (childNode.nodeType !== COMMENT_NODE_TYPE && childNode.textContent) {
+      if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
         return childNode === targetNode;
       }
     }
-
     return false;
   }
 
   isLastTextChild(parentNode, targetNode) {
-    const childNodes = parentNode.childNodes;
+    const { childNodes } = parentNode;
 
     // 只判斷倒數第一個含有 text 的 node
     for (let i = childNodes.length - 1; i > -1; i--) {
       const childNode = childNodes[i];
-      if (childNode.nodeType !== COMMENT_NODE_TYPE && childNode.textContent) {
+      if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
         return childNode === targetNode;
       }
     }
-
     return false;
   }
 
@@ -99,6 +122,34 @@ class BrowserPangu extends Pangu {
     // 從最下面、最裡面的節點開始，所以是倒序的
     for (let i = textNodes.snapshotLength - 1; i > -1; --i) {
       currentTextNode = textNodes.snapshotItem(i);
+
+      if (this.isInsideSpecificTag(currentTextNode, this.presentationalTags)) {
+        const elementNode = currentTextNode.parentNode;
+
+        if (currentTextNode.data.charAt(0).search(this.cjkPunctuationRegex) === -1) {
+          // TODO
+          // 如果 previousSibling 或 nextSibling 是 <pre> 的話不應該加空格
+          if (elementNode.previousSibling) {
+            const { previousSibling } = elementNode;
+            if (previousSibling.nodeType === Node.TEXT_NODE) {
+              if (previousSibling.data.substr(-1).search(this.stopCharRegex) === -1) {
+                previousSibling.data = `${previousSibling.data} `;
+              }
+            }
+          }
+        }
+
+        if (currentTextNode.data.substr(-1).search(this.cjkPunctuationRegex) === -1) {
+          if (elementNode.nextSibling) {
+            const { nextSibling } = elementNode;
+            if (nextSibling.nodeType === Node.TEXT_NODE) {
+              if (nextSibling.data.charAt(0).search(this.stopCharRegex) === -1) {
+                nextSibling.data = ` ${nextSibling.data}`;
+              }
+            }
+          }
+        }
+      }
 
       if (this.canIgnoreNode(currentTextNode)) {
         nextTextNode = currentTextNode;
@@ -147,7 +198,7 @@ class BrowserPangu extends Pangu {
 
           if (currentNode.nodeName.search(this.blockTags) === -1) {
             if (nextNode.nodeName.search(this.spaceSensitiveTags) === -1) {
-              if ((nextNode.nodeName.search(this.ignoreTags) === -1) && (nextNode.nodeName.search(this.blockTags) === -1)) {
+              if ((nextNode.nodeName.search(this.ignoredTags) === -1) && (nextNode.nodeName.search(this.blockTags) === -1)) {
                 if (nextTextNode.previousSibling) {
                   if (nextTextNode.previousSibling.nodeName.search(this.spaceLikeTags) === -1) {
                     nextTextNode.data = ` ${nextTextNode.data}`;
