@@ -7,7 +7,7 @@ const pangu = require('.');
 const usage = `
 usage: pangu [-h] [-v] [-t] [-f] text_or_path
 
-Paranoid text spacing for good readability, to automatically insert whitespace
+pangu.js -- Paranoid text spacing for good readability, to automatically insert whitespace
 between CJK and half-width characters.
 
 positional arguments:
