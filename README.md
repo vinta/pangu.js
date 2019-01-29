@@ -71,11 +71,11 @@ $ yarn add pangu
 `pangu.js` is also available on [jsDelivr](https://www.jsdelivr.com/package/npm/pangu) and [cdnjs](https://cdnjs.com/libraries/pangu):
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/pangu@4.0.2/dist/browser/pangu.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pangu@4.0.2/dist/browser/pangu.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pangu@4.0.3/dist/browser/pangu.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pangu@4.0.3/dist/browser/pangu.min.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.2/pangu.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.2/pangu.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.3/pangu.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.3/pangu.min.js"></script>
 ```
 
 ### Node.js

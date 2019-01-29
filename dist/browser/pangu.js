@@ -1,7 +1,7 @@
 /*!
  * pangu.js
  * --------
- * @version: 4.0.2
+ * @version: 4.0.3
  * @homepage: https://github.com/vinta/pangu.js
  * @license: MIT
  * @author: Vinta Chen <vinta.chen@gmail.com> (https://github.com/vinta)
@@ -444,15 +444,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
             var node = queue.shift();
 
             if (node) {
-              if (node.nodeType === Node.TEXT_NODE) {
-                var newText = self.spacingTextSync(node.nodeValue);
-
-                if (node.nodeValue !== newText) {
-                  node.nodeValue = newText;
-                }
-              } else {
-                self.spacingNode(node);
-              }
+              self.spacingNode(node);
             }
           }
         }, 500, {
@@ -475,7 +467,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
                 var node = mutation.target;
 
                 if (node.nodeType === Node.TEXT_NODE) {
-                  queue.push(node);
+                  queue.push(node.parentNode);
                 }
 
                 break;
