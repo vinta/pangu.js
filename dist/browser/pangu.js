@@ -1,7 +1,7 @@
 /*!
  * pangu.js
  * --------
- * @version: 4.0.3
+ * @version: 4.0.4
  * @homepage: https://github.com/vinta/pangu.js
  * @license: MIT
  * @author: Vinta Chen <vinta.chen@gmail.com> (https://github.com/vinta)
@@ -134,15 +134,31 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
   function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-  function debounce(fn, delay, mustRunDelay) {
+  function once(func) {
     var _this = this,
         _arguments = arguments;
+
+    var executed = false;
+    return function () {
+      if (executed) {
+        return;
+      }
+
+      var self = _this;
+      executed = true;
+      func.apply(self, _arguments);
+    };
+  }
+
+  function debounce(func, delay, mustRunDelay) {
+    var _this2 = this,
+        _arguments2 = arguments;
 
     var timer = null;
     var startTime = null;
     return function () {
-      var self = _this;
-      var args = _arguments;
+      var self = _this2;
+      var args = _arguments2;
       var currentTime = +new Date();
       clearTimeout(timer);
 
@@ -151,11 +167,11 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
       }
 
       if (currentTime - startTime >= mustRunDelay) {
-        fn.apply(self, args);
+        func.apply(self, args);
         startTime = currentTime;
       } else {
         timer = setTimeout(function () {
-          fn.apply(self, args);
+          func.apply(self, args);
         }, delay);
       }
     };
@@ -165,20 +181,21 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     _inherits(BrowserPangu, _Pangu);
 
     function BrowserPangu() {
-      var _this2;
+      var _this3;
 
       _classCallCheck(this, BrowserPangu);
 
-      _this2 = _possibleConstructorReturn(this, _getPrototypeOf(BrowserPangu).call(this));
-      _this2.punctuation = "\u3001\u3002\uFF01\uFF1B\uFF0C\uFF1A\uFF1B\uFF1F";
-      _this2.punctuationRegex = new RegExp("[".concat(_this2.punctuation, "]"));
-      _this2.stopCharRegex = new RegExp("[ \n\t\\(\\)\\[\\]\\\"\\'".concat(_this2.punctuation, "]"));
-      _this2.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
-      _this2.ignoredTags = /^(script|code|pre|textarea)$/i;
-      _this2.presentationalTags = /^(b|code|del|em|i|s|strong)$/i;
-      _this2.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
-      _this2.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-      return _this2;
+      _this3 = _possibleConstructorReturn(this, _getPrototypeOf(BrowserPangu).call(this));
+      _this3.punctuation = "\u3001\u3002\uFF01\uFF1B\uFF0C\uFF1A\uFF1B\uFF1F";
+      _this3.punctuationRegex = new RegExp("[".concat(_this3.punctuation, "]"));
+      _this3.stopCharRegex = new RegExp("[ \n\t\\(\\)\\[\\]\\\"\\'".concat(_this3.punctuation, "]"));
+      _this3.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
+      _this3.ignoredTags = /^(script|code|pre|textarea)$/i;
+      _this3.presentationalTags = /^(b|code|del|em|i|s|strong)$/i;
+      _this3.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
+      _this3.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
+      _this3.isAutoSpacingPageExecuted = false;
+      return _this3;
     }
 
     _createClass(BrowserPangu, [{
@@ -430,15 +447,41 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     }, {
       key: "autoSpacingPage",
       value: function autoSpacingPage() {
+        var pageDelay = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1000;
+        var nodeDelay = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 500;
+        var nodeMaxWait = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 2000;
+
         if (!(document.body instanceof Node)) {
           return;
         }
 
+        if (this.isAutoSpacingPageExecuted) {
+          return;
+        }
+
+        this.isAutoSpacingPageExecuted = true;
         var self = this;
-        var queue = [];
-        setTimeout(function () {
+        var onceSpacingPage = once(function () {
           self.spacingPage();
-        }, 1000);
+        });
+        var videos = document.getElementsByTagName('video');
+
+        if (videos.length === 0) {
+          setTimeout(function () {
+            self.spacingPage();
+          }, pageDelay);
+        } else {
+          for (var i = 0; i < videos.length; i++) {
+            var video = videos[i];
+            video.addEventListener('loadeddata', function () {
+              setTimeout(function () {
+                onceSpacingPage();
+              }, 4000);
+            });
+          }
+        }
+
+        var queue = [];
         var debouncedSpacingNodes = debounce(function () {
           while (queue.length) {
             var node = queue.shift();
@@ -447,8 +490,8 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
               self.spacingNode(node);
             }
           }
-        }, 500, {
-          'maxWait': 2000
+        }, nodeDelay, {
+          'maxWait': nodeMaxWait
         });
         var mutationObserver = new MutationObserver(function (mutations, observer) {
           mutations.forEach(function (mutation) {

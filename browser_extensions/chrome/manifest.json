@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "__MSG_extension_name__",
-    "version": "4.0.3",
+    "version": "4.0.4",
     "default_locale": "zh_TW",
     "description": "__MSG_extension_description__",
     "icons": {
@@ -32,8 +32,7 @@
                 "vendors/pangu/pangu.min.js",
                 "js/content_script.js"
             ],
-            "run_at": "document_idle",
-            "all_frames": true
+            "run_at": "document_idle"
         }
     ],
     "minimum_chrome_version": "26.0",

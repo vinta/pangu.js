@@ -1,6 +1,18 @@
 import { Pangu } from '../shared/core';
 
-function debounce(fn, delay, mustRunDelay) {
+function once(func) {
+  let executed = false;
+  return () => {
+    if (executed) {
+      return;
+    }
+    const self = this;
+    executed = true;
+    func.apply(self, arguments);
+  };
+}
+
+function debounce(func, delay, mustRunDelay) {
   let timer = null;
   let startTime = null;
   return () => {
@@ -15,11 +27,11 @@ function debounce(fn, delay, mustRunDelay) {
     }
 
     if (currentTime - startTime >= mustRunDelay) {
-      fn.apply(self, args);
+      func.apply(self, args);
       startTime = currentTime;
     } else {
       timer = setTimeout(() => {
-        fn.apply(self, args);
+        func.apply(self, args);
       }, delay);
     }
   };
@@ -40,6 +52,8 @@ class BrowserPangu extends Pangu {
     this.presentationalTags = /^(b|code|del|em|i|s|strong)$/i;
     this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
     this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
+
+    this.isAutoSpacingPageExecuted = false;
 
     // TODO
     // this.ignoredTags adds iframe|pangu
@@ -315,17 +329,41 @@ class BrowserPangu extends Pangu {
     this.spacingPageBody();
   }
 
-  autoSpacingPage() {
+  autoSpacingPage(pageDelay = 1000, nodeDelay = 500, nodeMaxWait = 2000) {
     if (!(document.body instanceof Node)) {
       return;
     }
 
-    const self = this;
-    const queue = [];
+    if (this.isAutoSpacingPageExecuted) {
+      return;
+    }
+    this.isAutoSpacingPageExecuted = true;
 
-    setTimeout(() => {
+    const self = this;
+
+    const onceSpacingPage = once(() => {
       self.spacingPage();
-    }, 1000);
+    });
+
+    // TODO
+    // this is a dirty hack for https://github.com/vinta/pangu.js/issues/117
+    const videos = document.getElementsByTagName('video');
+    if (videos.length === 0) {
+      setTimeout(() => {
+        self.spacingPage();
+      }, pageDelay);
+    } else {
+      for (let i = 0; i < videos.length; i++) {
+        const video = videos[i];
+        video.addEventListener('loadeddata', () => {
+          setTimeout(() => {
+            onceSpacingPage();
+          }, 4000);
+        });
+      }
+    }
+
+    const queue = [];
 
     // it's possible that multiple workers process the queue at the same time
     const debouncedSpacingNodes = debounce(() => {
@@ -336,7 +374,7 @@ class BrowserPangu extends Pangu {
           self.spacingNode(node);
         }
       }
-    }, 500, {'maxWait': 2000});
+    }, nodeDelay, {'maxWait': nodeMaxWait});
 
     // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
     const mutationObserver = new MutationObserver((mutations, observer) => {
