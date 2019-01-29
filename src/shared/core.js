@@ -70,6 +70,10 @@ const ansCjk = new RegExp(`([A-Za-z0-9~\\$%\\^&\\*\\-=\\+\\\\\|/!;:,\\.\\?\u00a1
 const middleDot = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
 class Pangu {
+  constructor() {
+    this.VERSION = '4.0.5';
+  }
+
   convertToFullwidth(symbols) {
     return symbols
       .replace(/~/g, '～')
