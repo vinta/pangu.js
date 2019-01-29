@@ -27,21 +27,15 @@ var NodePangu = function (_Pangu) {
   _inherits(NodePangu, _Pangu);
 
   function NodePangu() {
-    var _this;
-
-    var filePrefix = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'readable.';
-
     _classCallCheck(this, NodePangu);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(NodePangu).call(this));
-    _this.filePrefix = filePrefix;
-    return _this;
+    return _possibleConstructorReturn(this, _getPrototypeOf(NodePangu).apply(this, arguments));
   }
 
   _createClass(NodePangu, [{
     key: "spacingFile",
     value: function spacingFile(path) {
-      var _this2 = this;
+      var _this = this;
 
       var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {};
       return new Promise(function (resolve, reject) {
@@ -51,7 +45,7 @@ var NodePangu = function (_Pangu) {
             return callback(err);
           }
 
-          var spacingData = _this2.spacing(data);
+          var spacingData = _this.spacing(data);
 
           resolve(spacingData);
           return callback(null, spacingData);
@@ -61,11 +55,7 @@ var NodePangu = function (_Pangu) {
   }, {
     key: "spacingFileSync",
     value: function spacingFileSync(path) {
-      try {
-        return this.spacing(fs.readFileSync(path, 'utf8'));
-      } catch (err) {
-        throw err;
-      }
+      return this.spacing(fs.readFileSync(path, 'utf8'));
     }
   }]);
 

@@ -31,6 +31,9 @@
     "url": "https://github.com/vinta/pangu.js/issues"
   },
   "main": "./dist/node/index.js",
+  "bin": {
+    "pangu": "./dist/node/cli.js"
+  },
   "browser": "./dist/browser/pangu.js",
   "scripts": {
     "pack:chrome": "npm run build:browser && cp -rf ./dist/browser/pangu.min.js ./browser_extensions/chrome/vendors/pangu/pangu.min.js && cd ./browser_extensions/chrome/ && zip -q -r -0 ../paranoid-auto-spacing.zip . && zip -j ../paranoid-auto-spacing.zip ~/Dropbox/Projects/paranoid-auto-spacing/key.pem",

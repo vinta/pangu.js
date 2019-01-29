@@ -3,13 +3,6 @@ const fs = require('fs');
 const { Pangu } = require('../shared/core');
 
 class NodePangu extends Pangu {
-
-  constructor(filePrefix = 'readable.') {
-    super();
-
-    this.filePrefix = filePrefix;
-  }
-
   spacingFile(path, callback = () => {}) {
     return new Promise((resolve, reject) => {
       fs.readFile(path, 'utf8', (err, data) => {
@@ -19,7 +12,6 @@ class NodePangu extends Pangu {
         }
 
         const spacingData = this.spacing(data);
-
         resolve(spacingData);
         return callback(null, spacingData);
       });
@@ -27,13 +19,8 @@ class NodePangu extends Pangu {
   }
 
   spacingFileSync(path) {
-    try {
-      return this.spacing(fs.readFileSync(path, 'utf8'));
-    } catch (err) {
-      throw err;
-    }
+    return this.spacing(fs.readFileSync(path, 'utf8'));
   }
-
 }
 
 const pangu = new NodePangu();
