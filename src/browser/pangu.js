@@ -69,10 +69,12 @@ class BrowserPangu extends Pangu {
     return (node && node.nodeName && node.nodeName.search(tagRegex) >= 0);
   }
 
-  isInsideSpecificTag(node, tagRegex) {
+  isInsideSpecificTag(node, tagRegex, checkCurrent = false) {
     let currentNode = node;
-    if (this.isSpecificTag(currentNode, tagRegex)) {
-      return true;
+    if (checkCurrent) {
+      if (this.isSpecificTag(currentNode, tagRegex)) {
+        return true;
+      }
     }
     while (currentNode.parentNode) {
       currentNode = currentNode.parentNode;
@@ -137,29 +139,27 @@ class BrowserPangu extends Pangu {
     for (let i = textNodes.snapshotLength - 1; i > -1; --i) {
       currentTextNode = textNodes.snapshotItem(i);
 
-      if (this.isInsideSpecificTag(currentTextNode, this.presentationalTags)) {
+      if (this.isSpecificTag(currentTextNode.parentNode, this.presentationalTags) && !this.isInsideSpecificTag(currentTextNode.parentNode, this.ignoredTags)) {
         const elementNode = currentTextNode.parentNode;
 
-        if (currentTextNode.data.charAt(0).search(this.punctuationRegex) === -1) {
-          // TODO
-          // 如果 previousSibling 或 nextSibling 是 <pre> 的話不應該加空格
-          if (elementNode.previousSibling) {
-            const { previousSibling } = elementNode;
-            if (previousSibling.nodeType === Node.TEXT_NODE) {
-              if (previousSibling.data.substr(-1).search(this.stopCharRegex) === -1) {
-                previousSibling.data = `${previousSibling.data} `;
-              }
+        if (elementNode.previousSibling) {
+          const { previousSibling } = elementNode;
+          if (previousSibling.nodeType === Node.TEXT_NODE) {
+            const testText = previousSibling.data.substr(-1) + currentTextNode.data.toString().charAt(0);
+            const testNewText = this.spacing(testText);
+            if (testText !== testNewText) {
+              previousSibling.data = `${previousSibling.data} `;
             }
           }
         }
 
-        if (currentTextNode.data.substr(-1).search(this.punctuationRegex) === -1) {
-          if (elementNode.nextSibling) {
-            const { nextSibling } = elementNode;
-            if (nextSibling.nodeType === Node.TEXT_NODE) {
-              if (nextSibling.data.charAt(0).search(this.stopCharRegex) === -1) {
-                nextSibling.data = ` ${nextSibling.data}`;
-              }
+        if (elementNode.nextSibling) {
+          const { nextSibling } = elementNode;
+          if (nextSibling.nodeType === Node.TEXT_NODE) {
+            const testText = currentTextNode.data.substr(-1) + nextSibling.data.toString().charAt(0);
+            const testNewText = this.spacing(testText);
+            if (testText !== testNewText) {
+              nextSibling.data = ` ${nextSibling.data}`;
             }
           }
         }
