@@ -42,7 +42,9 @@
     "permissions": [
         "storage",
         "tabs",
-        "<all_urls>"
+        "http://*/*",
+        "https://*/*",
+        "file:///*/*"
     ],
     "short_name": "__MSG_god_of_spacing__"
 }
