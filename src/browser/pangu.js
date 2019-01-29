@@ -1,4 +1,4 @@
-import { Pangu } from '../shared/core';
+const { Pangu } = require('../shared/core');
 
 function once(func) {
   let executed = false;
@@ -42,10 +42,6 @@ function debounce(func, delay, mustRunDelay) {
 class BrowserPangu extends Pangu {
   constructor() {
     super();
-
-    this.punctuation = '\u3001\u3002\uff01\uff1b\uff0c\uff1a\uff1b\uff1f';
-    this.punctuationRegex = new RegExp(`[${this.punctuation}]`);
-    this.stopCharRegex = new RegExp(`[ \n\t\\(\\)\\[\\]\\"\\'${this.punctuation}]`);
 
     this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
     this.ignoredTags = /^(script|code|pre|textarea)$/i;

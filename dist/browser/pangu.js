@@ -108,12 +108,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
   if (true) {
-    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(1)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
   } else { var mod; }
-})(this, function (_core) {
+})(this, function () {
   "use strict";
 
   function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -133,6 +133,9 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
   function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
   function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+  var _require = __webpack_require__(1),
+      Pangu = _require.Pangu;
 
   function once(func) {
     var _this = this,
@@ -186,9 +189,6 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
       _classCallCheck(this, BrowserPangu);
 
       _this3 = _possibleConstructorReturn(this, _getPrototypeOf(BrowserPangu).call(this));
-      _this3.punctuation = "\u3001\u3002\uFF01\uFF1B\uFF0C\uFF1A\uFF1B\uFF1F";
-      _this3.punctuationRegex = new RegExp("[".concat(_this3.punctuation, "]"));
-      _this3.stopCharRegex = new RegExp("[ \n\t\\(\\)\\[\\]\\\"\\'".concat(_this3.punctuation, "]"));
       _this3.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
       _this3.ignoredTags = /^(script|code|pre|textarea)$/i;
       _this3.presentationalTags = /^(b|code|del|em|i|s|strong)$/i;
@@ -537,7 +537,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     }]);
 
     return BrowserPangu;
-  }(_core.Pangu);
+  }(Pangu);
 
   var pangu = new BrowserPangu();
   module.exports = pangu;
@@ -600,6 +600,8 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
   var Pangu = function () {
     function Pangu() {
       _classCallCheck(this, Pangu);
+
+      this.VERSION = '4.0.5';
     }
 
     _createClass(Pangu, [{

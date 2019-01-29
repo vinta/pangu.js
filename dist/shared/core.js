@@ -41,6 +41,8 @@ var middleDot = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 var Pangu = function () {
   function Pangu() {
     _classCallCheck(this, Pangu);
+
+    this.VERSION = '4.0.5';
   }
 
   _createClass(Pangu, [{
