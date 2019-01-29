@@ -49,22 +49,24 @@ $ yarn add pangu
 
 ### Browser
 
+Files are located in `./node_modules/pangu/dist/browser/`.
+
 ```html
 <head>
-  // files are located in ./node_modules/pangu/dist/browser/
   <script src="pangu.min.js"></script>
 </head>
 <script>
-  var text = pangu.spacing("當你凝視著bug，bug也凝視著你");
+  const text = pangu.spacing("當你凝視著bug，bug也凝視著你");
   // text = '當你凝視著 bug，bug 也凝視著你'
 
-  // listen to any DOM change and automatically perform spacing via MutationObserver()
-  pangu.autoSpacingPage();
-
-  pangu.spacingPage();
   pangu.spacingElementById('main');
   pangu.spacingElementByClassName('comment');
   pangu.spacingElementByTagName('p');
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // listen to any DOM change and automatically perform spacing via MutationObserver()
+    pangu.autoSpacingPage();
+  });
 </script>
 ```
 
@@ -83,22 +85,22 @@ $ yarn add pangu
 Learn more on [npm](https://www.npmjs.com/package/pangu).
 
 ```js
-var pangu = require('pangu');
-// or
-import * as pangu from 'pangu';
+const pangu = require('pangu');
 
 const text = pangu.spacing('與PM戰鬥的人，應當小心自己不要成為PM');
 // text = '與 PM 戰鬥的人，應當小心自己不要成為 PM'
 
-// callback
-pangu.spacingFile('/path/to/text.txt', function(err, data) {
+pangu.spacingFile('/path/to/text.txt', (err, data) => {
   console.log(data);
 });
 
-// promise
-pangu.spacingFile('/path/to/text.txt').then(function(data) {
-  console.log(data);
-});
+pangu.spacingFile('/path/to/text.txt')
+  .then((data) => {
+    console.log(data);
+  })
+  .catch((err) => {
+    console.error(err);
+  });
 
 const data = pangu.spacingFileSync('/path/to/text.txt');
 ```
