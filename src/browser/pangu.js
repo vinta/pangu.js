@@ -333,14 +333,7 @@ class BrowserPangu extends Pangu {
       while (queue.length) {
         const node = queue.shift();
         if (node) {
-          if (node.nodeType === Node.TEXT_NODE) {
-            const newText = self.spacingTextSync(node.nodeValue);
-            if (node.nodeValue !== newText) {
-              node.nodeValue = newText;
-            }
-          } else {
-            self.spacingNode(node);
-          }
+          self.spacingNode(node);
         }
       }
     }, 500, {'maxWait': 2000});
@@ -361,9 +354,9 @@ class BrowserPangu extends Pangu {
             });
             break;
           case 'characterData':
-            const node = mutation.target;
+            const { target: node } = mutation;
             if (node.nodeType === Node.TEXT_NODE) {
-              queue.push(node);
+              queue.push(node.parentNode);
             }
             break;
           default:
