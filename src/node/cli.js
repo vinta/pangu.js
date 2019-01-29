@@ -8,7 +8,7 @@ const usage = `
 usage: pangu [-h] [-v] [-t] [-f] text_or_path
 
 pangu.js -- Paranoid text spacing for good readability, to automatically insert whitespace
-between CJK and half-width characters.
+between CJK and half-width characters (alphabetical letters, numerical digits and symbols).
 
 positional arguments:
   text_or_path   the text or file path to perform spacing
