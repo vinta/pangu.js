@@ -82,6 +82,8 @@ Files are located in `./node_modules/pangu/dist/browser/`.
 
 ### Node.js
 
+CAUTION: you **SHOULD NOT** use `pangu.js` to spacing a Markdown document, it is only designed for HTML webpages and plain texts without any markup language.
+
 Learn more on [npm](https://www.npmjs.com/package/pangu).
 
 ```js
