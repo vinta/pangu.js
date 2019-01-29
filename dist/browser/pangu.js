@@ -1,7 +1,7 @@
 /*!
  * pangu.js
  * --------
- * @version: 4.0.4
+ * @version: 4.0.5
  * @homepage: https://github.com/vinta/pangu.js
  * @license: MIT
  * @author: Vinta Chen <vinta.chen@gmail.com> (https://github.com/vinta)
@@ -211,10 +211,13 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     }, {
       key: "isInsideSpecificTag",
       value: function isInsideSpecificTag(node, tagRegex) {
+        var checkCurrent = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
         var currentNode = node;
 
-        if (this.isSpecificTag(currentNode, tagRegex)) {
-          return true;
+        if (checkCurrent) {
+          if (this.isSpecificTag(currentNode, tagRegex)) {
+            return true;
+          }
         }
 
         while (currentNode.parentNode) {
@@ -286,29 +289,32 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
         for (var i = textNodes.snapshotLength - 1; i > -1; --i) {
           currentTextNode = textNodes.snapshotItem(i);
 
-          if (this.isInsideSpecificTag(currentTextNode, this.presentationalTags)) {
+          if (this.isSpecificTag(currentTextNode.parentNode, this.presentationalTags) && !this.isInsideSpecificTag(currentTextNode.parentNode, this.ignoredTags)) {
             var elementNode = currentTextNode.parentNode;
 
-            if (currentTextNode.data.charAt(0).search(this.punctuationRegex) === -1) {
-              if (elementNode.previousSibling) {
-                var previousSibling = elementNode.previousSibling;
+            if (elementNode.previousSibling) {
+              var previousSibling = elementNode.previousSibling;
 
-                if (previousSibling.nodeType === Node.TEXT_NODE) {
-                  if (previousSibling.data.substr(-1).search(this.stopCharRegex) === -1) {
-                    previousSibling.data = "".concat(previousSibling.data, " ");
-                  }
+              if (previousSibling.nodeType === Node.TEXT_NODE) {
+                var testText = previousSibling.data.substr(-1) + currentTextNode.data.toString().charAt(0);
+                var testNewText = this.spacing(testText);
+
+                if (testText !== testNewText) {
+                  previousSibling.data = "".concat(previousSibling.data, " ");
                 }
               }
             }
 
-            if (currentTextNode.data.substr(-1).search(this.punctuationRegex) === -1) {
-              if (elementNode.nextSibling) {
-                var nextSibling = elementNode.nextSibling;
+            if (elementNode.nextSibling) {
+              var nextSibling = elementNode.nextSibling;
 
-                if (nextSibling.nodeType === Node.TEXT_NODE) {
-                  if (nextSibling.data.charAt(0).search(this.stopCharRegex) === -1) {
-                    nextSibling.data = " ".concat(nextSibling.data);
-                  }
+              if (nextSibling.nodeType === Node.TEXT_NODE) {
+                var _testText = currentTextNode.data.substr(-1) + nextSibling.data.toString().charAt(0);
+
+                var _testNewText = this.spacing(_testText);
+
+                if (_testText !== _testNewText) {
+                  nextSibling.data = " ".concat(nextSibling.data);
                 }
               }
             }
@@ -331,10 +337,11 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
               continue;
             }
 
-            var testText = currentTextNode.data.toString().substr(-1) + nextTextNode.data.toString().substr(0, 1);
-            var testNewText = this.spacing(testText);
+            var _testText2 = currentTextNode.data.toString().substr(-1) + nextTextNode.data.toString().substr(0, 1);
 
-            if (testNewText !== testText) {
+            var _testNewText2 = this.spacing(_testText2);
+
+            if (_testNewText2 !== _testText2) {
               var nextNode = nextTextNode;
 
               while (nextNode.parentNode && nextNode.nodeName.search(this.spaceSensitiveTags) === -1 && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
