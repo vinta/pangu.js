@@ -346,11 +346,17 @@ class BrowserPangu extends Pangu {
     const videos = document.getElementsByTagName('video');
     if (videos.length === 0) {
       setTimeout(() => {
-        self.spacingPage();
+        onceSpacingPage();
       }, pageDelay);
     } else {
       for (let i = 0; i < videos.length; i++) {
         const video = videos[i];
+        if (video.readyState === 4) {
+          setTimeout(() => {
+            onceSpacingPage();
+          }, 3000);
+          break;
+        }
         video.addEventListener('loadeddata', () => {
           setTimeout(() => {
             onceSpacingPage();

@@ -475,11 +475,19 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
         if (videos.length === 0) {
           setTimeout(function () {
-            self.spacingPage();
+            onceSpacingPage();
           }, pageDelay);
         } else {
           for (var i = 0; i < videos.length; i++) {
             var video = videos[i];
+
+            if (video.readyState === 4) {
+              setTimeout(function () {
+                onceSpacingPage();
+              }, 3000);
+              break;
+            }
+
             video.addEventListener('loadeddata', function () {
               setTimeout(function () {
                 onceSpacingPage();
