@@ -19,6 +19,7 @@
 ### For Users
 
 - [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (**2019-01-31 UPDATED**)
+- [Mozilla Firefox](https://github.com/vinta/pangu.js/blob/master/browser_extensions/firefox/paranoid-auto-spacing.user.js) (**2019-02-01 UPDATED**)
 
 ### For Developers
 
