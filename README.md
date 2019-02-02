@@ -83,8 +83,6 @@ Files are located in `./node_modules/pangu/dist/browser/`.
 
 ### Node.js
 
-CAUTION: you **SHOULD NOT** use `pangu.js` to spacing a Markdown document, it is only designed for HTML webpages and plain texts without any markup language. See [issue #127](https://github.com/vinta/pangu.js/issues/127).
-
 Learn more on [npm](https://www.npmjs.com/package/pangu).
 
 ```js
@@ -107,6 +105,8 @@ pangu.spacingFile('/path/to/text.txt')
 
 const data = pangu.spacingFileSync('/path/to/text.txt');
 ```
+
+You **SHOULD NOT** use `pangu.js` directly to spacing Markdown documents, this library is specially designed for HTML webpages and plain texts without any markup language. See [issue #127](https://github.com/vinta/pangu.js/issues/127).
 
 ## Testing
 
