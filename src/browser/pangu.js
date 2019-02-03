@@ -18,7 +18,7 @@ function debounce(func, delay, mustRunDelay) {
   return () => {
     const self = this;
     const args = arguments;
-    const currentTime = + new Date();
+    const currentTime = +new Date();
 
     clearTimeout(timer);
 
