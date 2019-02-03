@@ -31,8 +31,8 @@ const n = '0-9';
 const anyCjk = new RegExp(`[${cjk}]`);
 
 // the symbol part only includes ~ ! ; : , . ? but . only matches one character
-const convertToFullwidthCjkSpaceSymbolsSpaceCjk = new RegExp(`([${cjk}])[ ]*([~\\!;\\:,\\?]+|\\.)[ ]*([${cjk}])`, 'g');
-const convertToFullwidthCjkSymbolsAn = new RegExp(`([${cjk}])([~\\!;\\?]+)([A-Za-z0-9])`, 'g');
+const convertToFullwidthCjkSpaceSymbolsSpaceCjk = new RegExp(`([${cjk}])[ ]*([\\:]+|\\.)[ ]*([${cjk}])`, 'g');
+const convertToFullwidthCjkSymbols = new RegExp(`([${cjk}])[ ]*([~\\!;,\\?]+)[ ]*`, 'g');
 const dotsCjk = new RegExp(`([\\.]{2,}|\u2026)([${cjk}])`, 'g');
 const fixCjkColonAns = new RegExp(`([${cjk}])\\:([A-Z0-9\\(\\)])`, 'g');
 
@@ -71,7 +71,7 @@ const middleDot = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
 class Pangu {
   constructor() {
-    this.VERSION = '4.0.5';
+    this.VERSION = '4.0.6';
   }
 
   convertToFullwidth(symbols) {
@@ -117,9 +117,10 @@ class Pangu {
       const fullwidthSymbols = self.convertToFullwidth(symbols);
       return `${leftCjk}${fullwidthSymbols}${rightCjk}`;
     });
-    newText = newText.replace(convertToFullwidthCjkSymbolsAn, (match, cjk, symbols, an) => {
+
+    newText = newText.replace(convertToFullwidthCjkSymbols, (match, cjk, symbols) => {
       const fullwidthSymbols = self.convertToFullwidth(symbols);
-      return `${cjk}${fullwidthSymbols}${an}`;
+      return `${cjk}${fullwidthSymbols}`;
     });
 
     newText = newText.replace(dotsCjk, '$1 $2');

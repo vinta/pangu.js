@@ -1,7 +1,7 @@
 /*!
  * pangu.js
  * --------
- * @version: 4.0.5
+ * @version: 4.0.6
  * @homepage: https://github.com/vinta/pangu.js
  * @license: MIT
  * @author: Vinta Chen <vinta.chen@gmail.com> (https://github.com/vinta)
@@ -579,8 +579,8 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
   var a = 'A-Za-z';
   var n = '0-9';
   var anyCjk = new RegExp("[".concat(cjk, "]"));
-  var convertToFullwidthCjkSpaceSymbolsSpaceCjk = new RegExp("([".concat(cjk, "])[ ]*([~\\!;\\:,\\?]+|\\.)[ ]*([").concat(cjk, "])"), 'g');
-  var convertToFullwidthCjkSymbolsAn = new RegExp("([".concat(cjk, "])([~\\!;\\?]+)([A-Za-z0-9])"), 'g');
+  var convertToFullwidthCjkSpaceSymbolsSpaceCjk = new RegExp("([".concat(cjk, "])[ ]*([\\:]+|\\.)[ ]*([").concat(cjk, "])"), 'g');
+  var convertToFullwidthCjkSymbols = new RegExp("([".concat(cjk, "])[ ]*([~\\!;,\\?]+)[ ]*"), 'g');
   var dotsCjk = new RegExp("([\\.]{2,}|\u2026)([".concat(cjk, "])"), 'g');
   var fixCjkColonAns = new RegExp("([".concat(cjk, "])\\:([A-Z0-9\\(\\)])"), 'g');
   var cjkQuote = new RegExp("([".concat(cjk, "])([`\"\u05F4])"), 'g');
@@ -609,7 +609,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     function Pangu() {
       _classCallCheck(this, Pangu);
 
-      this.VERSION = '4.0.5';
+      this.VERSION = '4.0.6';
     }
 
     _createClass(Pangu, [{
@@ -635,9 +635,9 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
           var fullwidthSymbols = self.convertToFullwidth(symbols);
           return "".concat(leftCjk).concat(fullwidthSymbols).concat(rightCjk);
         });
-        newText = newText.replace(convertToFullwidthCjkSymbolsAn, function (match, cjk, symbols, an) {
+        newText = newText.replace(convertToFullwidthCjkSymbols, function (match, cjk, symbols) {
           var fullwidthSymbols = self.convertToFullwidth(symbols);
-          return "".concat(cjk).concat(fullwidthSymbols).concat(an);
+          return "".concat(cjk).concat(fullwidthSymbols);
         });
         newText = newText.replace(dotsCjk, '$1 $2');
         newText = newText.replace(fixCjkColonAns, '$1：$2');

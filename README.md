@@ -74,11 +74,11 @@ Files are located in `./node_modules/pangu/dist/browser/`.
 `pangu.js` is also available on [jsDelivr](https://www.jsdelivr.com/package/npm/pangu) and [cdnjs](https://cdnjs.com/libraries/pangu):
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/pangu@4.0.5/dist/browser/pangu.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pangu@4.0.5/dist/browser/pangu.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pangu@4.0.6/dist/browser/pangu.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pangu@4.0.6/dist/browser/pangu.min.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.5/pangu.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.5/pangu.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.6/pangu.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.6/pangu.min.js"></script>
 ```
 
 ### Node.js
@@ -107,6 +107,28 @@ const data = pangu.spacingFileSync('/path/to/text.txt');
 ```
 
 You **SHOULD NOT** use `pangu.js` directly to spacing Markdown documents, this library is specially designed for HTML webpages and plain texts without any markup language. See [issue #127](https://github.com/vinta/pangu.js/issues/127).
+
+### CLI
+
+```console
+$ pangu "不能信任那些Terminal或Editor用白底的人"
+不能信任那些 Terminal 或 Editor 用白底的人
+
+$ pangu --help
+usage: pangu [-h] [-v] [-t] [-f] text_or_path
+
+pangu.js -- Paranoid text spacing for good readability, to automatically insert whitespace
+between CJK and half-width characters (alphabetical letters, numerical digits and symbols).
+
+positional arguments:
+  text_or_path   the text or file path to perform spacing
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -v, --version  show program's version number and exit
+  -t, --text     specify the input value is a text
+  -f, --file     specify the input value is a file path
+```
 
 ## Testing
 

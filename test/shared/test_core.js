@@ -276,6 +276,8 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('前面 , 後面'), '前面，後面');
       assert.equal(pangu.spacing('前面, 後面'), '前面，後面');
       assert.equal(pangu.spacing('前面 ,後面'), '前面，後面');
+      assert.equal(pangu.spacing('前面,'), '前面，');
+      assert.equal(pangu.spacing('前面, '), '前面，');
     });
 
     it('處理 . 符號', () => {
