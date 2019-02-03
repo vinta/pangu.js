@@ -1,6 +1,9 @@
 .eslintignore
 .eslintrc
 .travis.yml
+babel.config.js
 browser_extensions/
 coverage/
+karma.conf.js
 test/
+webpack.config.js
