@@ -25,56 +25,67 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('123中文'), '123 中文');
     });
 
+    // https://unicode-table.com/en/blocks/latin-1-supplement/
     it('處理 Latin-1 Supplement', () => {
       assert.equal(pangu.spacing('中文Ø漢字'), '中文 Ø 漢字');
       assert.equal(pangu.spacing('中文 Ø 漢字'), '中文 Ø 漢字');
     });
 
+    // https://unicode-table.com/en/blocks/number-forms/
     it('處理 Number Forms', () => {
       assert.equal(pangu.spacing('中文Ⅶ漢字'), '中文 Ⅶ 漢字');
       assert.equal(pangu.spacing('中文 Ⅶ 漢字'), '中文 Ⅶ 漢字');
     });
 
+    // https://unicode-table.com/en/blocks/cjk-radicals-supplement/
     it('處理 CJK Radicals Supplement', () => {
       assert.equal(pangu.spacing('abc⻤123'), 'abc ⻤ 123');
       assert.equal(pangu.spacing('abc ⻤ 123'), 'abc ⻤ 123');
     });
 
+    // https://unicode-table.com/en/blocks/kangxi-radicals/
     it('處理 Kangxi Radicals', () => {
       assert.equal(pangu.spacing('abc⾗123'), 'abc ⾗ 123');
       assert.equal(pangu.spacing('abc ⾗ 123'), 'abc ⾗ 123');
     });
 
+    // https://unicode-table.com/en/blocks/hiragana/
     it('處理 Hiragana', () => {
       assert.equal(pangu.spacing('abcあ123'), 'abc あ 123');
       assert.equal(pangu.spacing('abc あ 123'), 'abc あ 123');
     });
 
+    // https://unicode-table.com/en/blocks/katakana/
     it('處理 Katakana', () => {
       assert.equal(pangu.spacing('abcア123'), 'abc ア 123');
       assert.equal(pangu.spacing('abc ア 123'), 'abc ア 123');
     });
 
+    // https://unicode-table.com/en/blocks/bopomofo/
     it('處理 Bopomofo', () => {
       assert.equal(pangu.spacing('abcㄅ123'), 'abc ㄅ 123');
       assert.equal(pangu.spacing('abc ㄅ 123'), 'abc ㄅ 123');
     });
 
+    // https://unicode-table.com/en/blocks/enclosed-cjk-letters-and-months/
     it('處理 Enclosed CJK Letters And Months', () => {
       assert.equal(pangu.spacing('abc㈱123'), 'abc ㈱ 123');
       assert.equal(pangu.spacing('abc ㈱ 123'), 'abc ㈱ 123');
     });
 
+    // https://unicode-table.com/en/blocks/cjk-unified-ideographs-extension-a/
     it('處理 CJK Unified Ideographs Extension-A', () => {
       assert.equal(pangu.spacing('abc㐂123'), 'abc 㐂 123');
       assert.equal(pangu.spacing('abc 㐂 123'), 'abc 㐂 123');
     });
 
+    // https://unicode-table.com/en/blocks/cjk-unified-ideographs/
     it('處理 CJK Unified Ideographs', () => {
       assert.equal(pangu.spacing('abc丁123'), 'abc 丁 123');
       assert.equal(pangu.spacing('abc 丁 123'), 'abc 丁 123');
     });
 
+    // https://unicode-table.com/en/blocks/cjk-compatibility-ideographs/
     it('處理 CJK Compatibility Ideographs', () => {
       assert.equal(pangu.spacing('abc車123'), 'abc 車 123');
       assert.equal(pangu.spacing('abc 車 123'), 'abc 車 123');
