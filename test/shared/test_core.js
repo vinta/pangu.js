@@ -31,6 +31,14 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('中文 Ø 漢字'), '中文 Ø 漢字');
     });
 
+    // TODO
+    // https://unicode-table.com/en/blocks/greek-coptic/
+    // it('Greek and Coptic', () => {
+    //   assert.equal(pangu.spacing('中文β漢字'), '中文 β 漢字');
+    //   assert.equal(pangu.spacing('中文 β 漢字'), '中文 β 漢字');
+    //   assert.equal(pangu.spacing('我是α，我是Ω'), '我是 α，我是 Ω');
+    // });
+
     // https://unicode-table.com/en/blocks/number-forms/
     it('處理 Number Forms', () => {
       assert.equal(pangu.spacing('中文Ⅶ漢字'), '中文 Ⅶ 漢字');
@@ -140,7 +148,6 @@ describe('Pangu', () => {
 
       // TODO
       // assert.equal(pangu.spacing('陳上進--Vinta'), '陳上進 -- Vinta');
-      // assert.equal(pangu.spacing('丁螺环酮是1A型5-羟色胺受体的特异性拮抗剂'), '丁螺环酮是 1A 型 5-羟色胺受体的特异性拮抗剂');
     });
 
     it('處理 = 符號', () => {
@@ -395,6 +402,18 @@ describe('Pangu', () => {
     it('處理 ״ ״ \\u05f4 \\u05f4 符號', () => {
       assert.equal(pangu.spacing('前面״中間״後面'), '前面 ״中間״ 後面');
     });
+
+    // 英文與符號
+
+    // TODO
+    // it('處理英文與 ״ \\u05f4 符號', () => {
+    //   assert.equal(pangu.spacing('阿里云开源“计算王牌”Blink，实时计算时代已来'), '阿里云开源 “计算王牌” Blink，实时计算时代已来');
+    // });
+
+    // TODO
+    // it('處理英文與 % 符號', () => {
+    //   assert.equal(pangu.spacing("丹寧控注意Levi's全館任2件25%OFF滿額再享85折！"), "丹寧控注意 Levi's 全館任 2 件 25% OFF 滿額再享 85 折！");
+    // });
   });
 
   describe('spacingText()', () => {
