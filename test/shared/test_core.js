@@ -30,12 +30,6 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('中文 Ø 漢字'), '中文 Ø 漢字');
     });
 
-    // TODO
-    // it('處理 General Punctuation', () => {
-    //   assert.equal(pangu.spacing('中文⁜漢字'), '中文 ⁜ 漢字');
-    //   assert.equal(pangu.spacing('中文 ⁜ 漢字'), '中文 ⁜ 漢字');
-    // });
-
     it('處理 Number Forms', () => {
       assert.equal(pangu.spacing('中文Ⅶ漢字'), '中文 Ⅶ 漢字');
       assert.equal(pangu.spacing('中文 Ⅶ 漢字'), '中文 Ⅶ 漢字');

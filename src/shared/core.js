@@ -25,8 +25,6 @@ const cjk = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u
 // S includes `~!@#$%^&*()-_=+[]{}\|;:'",<.>/?
 //
 // some S below does not include all symbols
-const a = 'A-Za-z';
-const n = '0-9';
 
 const anyCjk = new RegExp(`[${cjk}]`);
 
@@ -64,14 +62,14 @@ const leftBracketAnyRightBracket = /([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u
 const aLeftBracket = /([A-Za-z0-9])([\(\[\{])/g;
 const rightBracketA = /([\)\]\}])([A-Za-z0-9])/g;
 
-const cjkAns = new RegExp(`([${cjk}])([A-Za-z0-9\\$%\\^&\\*\\-=\\+\\\\\|/@\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])`, 'g');
-const ansCjk = new RegExp(`([A-Za-z0-9~\\$%\\^&\\*\\-=\\+\\\\\|/!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])([${cjk}])`, 'g');
+const cjkAns = new RegExp(`([${cjk}])([A-Za-z0-9@\\$%\\^&\\*\\-\\+\\\\=\\|/\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])`, 'g');
+const ansCjk = new RegExp(`([A-Za-z0-9~\\$%\\^&\\*\\-\\+\\\\=\\|/!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])([${cjk}])`, 'g');
 
 const middleDot = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
 class Pangu {
   constructor() {
-    this.VERSION = '4.0.6';
+    this.version = '4.0.6';
   }
 
   convertToFullwidth(symbols) {

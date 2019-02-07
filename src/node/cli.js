@@ -50,7 +50,7 @@ if (args.length === 0) {
       break;
     case '-v':
     case '--version':
-      console.log(pangu.VERSION);
+      console.log(pangu.version);
       break;
     case '-t':
       printSpacingText(args[1]);

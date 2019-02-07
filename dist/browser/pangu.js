@@ -576,8 +576,6 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
   function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
   var cjk = "\u2E80-\u2EFF\u2F00-\u2FDF\u3040-\u309F\u30A0-\u30FA\u30FC-\u30FF\u3100-\u312F\u3200-\u32FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF";
-  var a = 'A-Za-z';
-  var n = '0-9';
   var anyCjk = new RegExp("[".concat(cjk, "]"));
   var convertToFullwidthCjkSpaceSymbolsSpaceCjk = new RegExp("([".concat(cjk, "])[ ]*([\\:]+|\\.)[ ]*([").concat(cjk, "])"), 'g');
   var convertToFullwidthCjkSymbols = new RegExp("([".concat(cjk, "])[ ]*([~\\!;,\\?]+)[ ]*"), 'g');
@@ -601,15 +599,15 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
   var leftBracketAnyRightBracket = /([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/;
   var aLeftBracket = /([A-Za-z0-9])([\(\[\{])/g;
   var rightBracketA = /([\)\]\}])([A-Za-z0-9])/g;
-  var cjkAns = new RegExp("([".concat(cjk, "])([A-Za-z0-9\\$%\\^&\\*\\-=\\+\\\\|/@\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])"), 'g');
-  var ansCjk = new RegExp("([A-Za-z0-9~\\$%\\^&\\*\\-=\\+\\\\|/!;:,\\.\\?\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])([".concat(cjk, "])"), 'g');
+  var cjkAns = new RegExp("([".concat(cjk, "])([A-Za-z0-9@\\$%\\^&\\*\\-\\+\\\\=\\|/\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])"), 'g');
+  var ansCjk = new RegExp("([A-Za-z0-9~\\$%\\^&\\*\\-\\+\\\\=\\|/!;:,\\.\\?\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])([".concat(cjk, "])"), 'g');
   var middleDot = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
   var Pangu = function () {
     function Pangu() {
       _classCallCheck(this, Pangu);
 
-      this.VERSION = '4.0.6';
+      this.version = '4.0.6';
     }
 
     _createClass(Pangu, [{
