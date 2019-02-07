@@ -16,7 +16,7 @@
 // https://github.com/vinta/pangu
 //
 // all J below does not include \u30fb
-const cjk = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
+const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
 
 // ANS is short for Alphabets, Numbers, and Symbols.
 //
@@ -26,46 +26,46 @@ const cjk = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u
 //
 // some S below does not include all symbols
 
-const anyCjk = new RegExp(`[${cjk}]`);
+const ANY_CJK = new RegExp(`[${CJK}]`);
 
 // the symbol part only includes ~ ! ; : , . ? but . only matches one character
-const convertToFullwidthCjkSpaceSymbolsSpaceCjk = new RegExp(`([${cjk}])[ ]*([\\:]+|\\.)[ ]*([${cjk}])`, 'g');
-const convertToFullwidthCjkSymbols = new RegExp(`([${cjk}])[ ]*([~\\!;,\\?]+)[ ]*`, 'g');
-const dotsCjk = new RegExp(`([\\.]{2,}|\u2026)([${cjk}])`, 'g');
-const fixCjkColonAns = new RegExp(`([${cjk}])\\:([A-Z0-9\\(\\)])`, 'g');
+const CONVERT_TO_FULLWIDTH_CJK_SPACE_SYMBOLS_SPACE_CJK = new RegExp(`([${CJK}])[ ]*([\\:]+|\\.)[ ]*([${CJK}])`, 'g');
+const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS = new RegExp(`([${CJK}])[ ]*([~\\!;,\\?]+)[ ]*`, 'g');
+const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, 'g');
+const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([A-Z0-9\\(\\)])`, 'g');
 
 // the symbol part does not include '
-const cjkQuote = new RegExp(`([${cjk}])([\`"\u05f4])`, 'g');
-const quoteCJK = new RegExp(`([\`"\u05f4])([${cjk}])`, 'g');
-const fixQuote = /([`"\u05f4]+)(\s*)(.+?)(\s*)([`"\u05f4]+)/g;
+const CJK_QUOTE = new RegExp(`([${CJK}])([\`"\u05f4])`, 'g');
+const QUOTE_CJK = new RegExp(`([\`"\u05f4])([${CJK}])`, 'g');
+const FIX_QUOTE = /([`"\u05f4]+)(\s*)(.+?)(\s*)([`"\u05f4]+)/g;
 
-const cjkSingleQuoteButPossessive = new RegExp(`([${cjk}])('[^s])`, 'g');
-const singleQuoteCjk = new RegExp(`(')([${cjk}])`, 'g');
-const possessiveSingleQuote = new RegExp(`([${cjk}A-Za-z0-9])( )('s)`, 'g');
+const CJK_SINGLE_QUOTE_BUT_POSSESSIVE = new RegExp(`([${CJK}])('[^s])`, 'g');
+const SINGLE_QUOTE_CJK = new RegExp(`(')([${CJK}])`, 'g');
+const POSSESSIVE_SINGLE_QUOTE = new RegExp(`([${CJK}A-Za-z0-9])( )('s)`, 'g');
 
-const hashAnsCjkHash = new RegExp(`([${cjk}])(#)([${cjk}]+)(#)([${cjk}])`, 'g');
-const cjkHash = new RegExp(`([${cjk}])(#([^ ]))`, 'g');
-const hashCjk = new RegExp(`(([^ ])#)([${cjk}])`, 'g');
+const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, 'g');
+const CJK_HASH = new RegExp(`([${CJK}])(#([^ ]))`, 'g');
+const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, 'g');
 
 // the symbol part only includes + - * / = & | < >
-const cjkOperatorAns = new RegExp(`([${cjk}])([\\+\\-\\*\\/=&\\|<>])([A-Za-z0-9])`, 'g');
-const ansOperatorCjk = new RegExp(`([A-Za-z0-9])([\\+\\-\\*\\/=&\\|<>])([${cjk}])`, 'g');
+const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*\\/=&\\|<>])([A-Za-z0-9])`, 'g');
+const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*\\/=&\\|<>])([${CJK}])`, 'g');
 
-const fixSlashSpaceAns = new RegExp('([\\/])( )([a-z\\-_\\.\\/]+)', 'g');
-const fixAnsSlashSpace = new RegExp('([\\/\\.])([A-Za-z\\-_\\.\\/]+)( )([\\/])', 'g');
+const FIX_SLASH_SPACE_ANS = new RegExp('([\\/])( )([a-z\\-_\\.\\/]+)', 'g');
+const FIX_ANS_SLASH_SPACE = new RegExp('([\\/\\.])([A-Za-z\\-_\\.\\/]+)( )([\\/])', 'g');
 
 // the bracket part only includes ( ) [ ] { } < > “ ”
-const cjkLeftBracket = new RegExp(`([${cjk}])([\\(\\[\\{<>\u201c])`, 'g');
-const rightBracketCjk = new RegExp(`([\\)\\]\\}<>\u201d])([${cjk}])`, 'g');
-const leftBracketAnyRightBracket = /([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/;
+const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>\u201c])`, 'g');
+const RIGHT_BRACKET_CJK = new RegExp(`([\\)\\]\\}<>\u201d])([${CJK}])`, 'g');
+const LEFT_BRACKET_ANY_RIGHT_BRACKET = /([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/;
 
-const aLeftBracket = /([A-Za-z0-9])([\(\[\{])/g;
-const rightBracketA = /([\)\]\}])([A-Za-z0-9])/g;
+const A_LEFT_BRACKET = /([A-Za-z0-9])([\(\[\{])/g;
+const RIGHT_BRACKET_A = /([\)\]\}])([A-Za-z0-9])/g;
 
-const cjkAns = new RegExp(`([${cjk}])([A-Za-z0-9@\\$%\\^&\\*\\-\\+\\\\=\\|/\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])`, 'g');
-const ansCjk = new RegExp(`([A-Za-z0-9~\\$%\\^&\\*\\-\\+\\\\=\\|/!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])([${cjk}])`, 'g');
+const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z0-9@\\$%\\^&\\*\\-\\+\\\\=\\|/\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])`, 'g');
+const ANS_CJK = new RegExp(`([A-Za-z0-9~\\$%\\^&\\*\\-\\+\\\\=\\|/!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])([${CJK}])`, 'g');
 
-const middleDot = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
+const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
 class Pangu {
   constructor() {
@@ -85,11 +85,11 @@ class Pangu {
 
   spacing(text) {
     if (typeof text !== 'string') {
-      console.warn(`spacing(text) only accepts string but got ${typeof text}`);
+      console.warn(`spacing(text) only accepts string but got ${typeof text}`); // eslint-disable-line no-console
       return text;
     }
 
-    if (text.length <= 1 || !anyCjk.test(text)) {
+    if (text.length <= 1 || !ANY_CJK.test(text)) {
       return text;
     }
 
@@ -111,48 +111,48 @@ class Pangu {
     let newText = text;
 
     // https://stackoverflow.com/questions/4285472/multiple-regex-replace
-    newText = newText.replace(convertToFullwidthCjkSpaceSymbolsSpaceCjk, (match, leftCjk, symbols, rightCjk) => {
+    newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SPACE_SYMBOLS_SPACE_CJK, (match, leftCjk, symbols, rightCjk) => {
       const fullwidthSymbols = self.convertToFullwidth(symbols);
       return `${leftCjk}${fullwidthSymbols}${rightCjk}`;
     });
 
-    newText = newText.replace(convertToFullwidthCjkSymbols, (match, cjk, symbols) => {
+    newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS, (match, cjk, symbols) => {
       const fullwidthSymbols = self.convertToFullwidth(symbols);
       return `${cjk}${fullwidthSymbols}`;
     });
 
-    newText = newText.replace(dotsCjk, '$1 $2');
-    newText = newText.replace(fixCjkColonAns, '$1：$2');
+    newText = newText.replace(DOTS_CJK, '$1 $2');
+    newText = newText.replace(FIX_CJK_COLON_ANS, '$1：$2');
 
-    newText = newText.replace(cjkQuote, '$1 $2');
-    newText = newText.replace(quoteCJK, '$1 $2');
-    newText = newText.replace(fixQuote, '$1$3$5');
+    newText = newText.replace(CJK_QUOTE, '$1 $2');
+    newText = newText.replace(QUOTE_CJK, '$1 $2');
+    newText = newText.replace(FIX_QUOTE, '$1$3$5');
 
-    newText = newText.replace(cjkSingleQuoteButPossessive, '$1 $2');
-    newText = newText.replace(singleQuoteCjk, '$1 $2');
-    newText = newText.replace(possessiveSingleQuote, "$1's");
+    newText = newText.replace(CJK_SINGLE_QUOTE_BUT_POSSESSIVE, '$1 $2');
+    newText = newText.replace(SINGLE_QUOTE_CJK, '$1 $2');
+    newText = newText.replace(POSSESSIVE_SINGLE_QUOTE, "$1's"); // eslint-disable-line quotes
 
-    newText = newText.replace(hashAnsCjkHash, '$1 $2$3$4 $5');
-    newText = newText.replace(cjkHash, '$1 $2');
-    newText = newText.replace(hashCjk, '$1 $3');
+    newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
+    newText = newText.replace(CJK_HASH, '$1 $2');
+    newText = newText.replace(HASH_CJK, '$1 $3');
 
-    newText = newText.replace(cjkOperatorAns, '$1 $2 $3');
-    newText = newText.replace(ansOperatorCjk, '$1 $2 $3');
+    newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
+    newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
 
-    newText = newText.replace(fixSlashSpaceAns, '$1$3');
-    newText = newText.replace(fixAnsSlashSpace, '$1$2$4');
+    newText = newText.replace(FIX_SLASH_SPACE_ANS, '$1$3');
+    newText = newText.replace(FIX_ANS_SLASH_SPACE, '$1$2$4');
 
-    newText = newText.replace(cjkLeftBracket, '$1 $2');
-    newText = newText.replace(rightBracketCjk, '$1 $2');
-    newText = newText.replace(leftBracketAnyRightBracket, '$1$3$5');
+    newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
+    newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
+    newText = newText.replace(LEFT_BRACKET_ANY_RIGHT_BRACKET, '$1$3$5');
 
-    newText = newText.replace(aLeftBracket, '$1 $2');
-    newText = newText.replace(rightBracketA, '$1 $2');
+    newText = newText.replace(A_LEFT_BRACKET, '$1 $2');
+    newText = newText.replace(RIGHT_BRACKET_A, '$1 $2');
 
-    newText = newText.replace(cjkAns, '$1 $2');
-    newText = newText.replace(ansCjk, '$1 $2');
+    newText = newText.replace(CJK_ANS, '$1 $2');
+    newText = newText.replace(ANS_CJK, '$1 $2');
 
-    newText = newText.replace(middleDot, '・');
+    newText = newText.replace(MIDDLE_DOT, '・');
 
     // DEBUG
     // String.prototype.replace = String.prototype.rawReplace;
