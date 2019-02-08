@@ -31,13 +31,12 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('中文 Ø 漢字'), '中文 Ø 漢字');
     });
 
-    // TODO
     // https://unicode-table.com/en/blocks/greek-coptic/
-    // it('Greek and Coptic', () => {
-    //   assert.equal(pangu.spacing('中文β漢字'), '中文 β 漢字');
-    //   assert.equal(pangu.spacing('中文 β 漢字'), '中文 β 漢字');
-    //   assert.equal(pangu.spacing('我是α，我是Ω'), '我是 α，我是 Ω');
-    // });
+    it('處理 Greek and Coptic', () => {
+      assert.equal(pangu.spacing('中文β漢字'), '中文 β 漢字');
+      assert.equal(pangu.spacing('中文 β 漢字'), '中文 β 漢字');
+      assert.equal(pangu.spacing('我是α，我是Ω'), '我是 α，我是 Ω');
+    });
 
     // https://unicode-table.com/en/blocks/number-forms/
     it('處理 Number Forms', () => {
@@ -280,7 +279,6 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('前面:)後面'), '前面：) 後面');
       assert.equal(pangu.spacing('前面:I have no idea後面'), '前面：I have no idea 後面');
       assert.equal(pangu.spacing('前面: I have no idea後面'), '前面: I have no idea 後面');
-      // assert.equal(pangu.spacing('前面:poop:後面'), '前面 :poop: 後面');
     });
 
     it('處理 , 符號', () => {
@@ -346,7 +344,7 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('head (中文123漢字)後面'), 'head (中文 123 漢字) 後面');
       assert.equal(pangu.spacing('head (中文123漢字) tail'), 'head (中文 123 漢字) tail');
       assert.equal(pangu.spacing('(or simply "React")'), '(or simply "React")');
-      assert.equal(pangu.spacing("OperationalError: (2006, 'MySQL server has gone away')"), "OperationalError: (2006, 'MySQL server has gone away')");
+      assert.equal(pangu.spacing("OperationalError: (2006, 'MySQL server has gone away')"), "OperationalError: (2006, 'MySQL server has gone away')"); // eslint-disable-line quotes
       assert.equal(pangu.spacing('我看过的电影(1404)'), '我看过的电影 (1404)');
       assert.equal(pangu.spacing('Chang Stream(变更记录流)是指collection(数据库集合)的变更事件流'), 'Chang Stream (变更记录流) 是指 collection (数据库集合) 的变更事件流');
     });
@@ -393,10 +391,10 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('head "中文123漢字" tail'), 'head "中文 123 漢字" tail');
     });
 
-    it("處理 ' ' 符號", () => {
-      assert.equal(pangu.spacing("Why are Python's 'private' methods not actually private?"), "Why are Python's 'private' methods not actually private?");
-      assert.equal(pangu.spacing("陳上進 likes 林依諾's status."), "陳上進 likes 林依諾's status.");
-      assert.equal(pangu.spacing("举个栗子，如果一道题只包含'A' ~ 'Z'意味着字符集大小是"), "举个栗子，如果一道题只包含 'A' ~ 'Z' 意味着字符集大小是");
+    it("處理 ' ' 符號", () => { // eslint-disable-line quotes
+      assert.equal(pangu.spacing("Why are Python's 'private' methods not actually private?"), "Why are Python's 'private' methods not actually private?"); // eslint-disable-line quotes
+      assert.equal(pangu.spacing("陳上進 likes 林依諾's status."), "陳上進 likes 林依諾's status."); // eslint-disable-line quotes
+      assert.equal(pangu.spacing("举个栗子，如果一道题只包含'A' ~ 'Z'意味着字符集大小是"), "举个栗子，如果一道题只包含 'A' ~ 'Z' 意味着字符集大小是"); // eslint-disable-line quotes
     });
 
     it('處理 ״ ״ \\u05f4 \\u05f4 符號', () => {
@@ -405,15 +403,14 @@ describe('Pangu', () => {
 
     // 英文與符號
 
-    // TODO
-    // it('處理英文與 ״ \\u05f4 符號', () => {
-    //   assert.equal(pangu.spacing('阿里云开源“计算王牌”Blink，实时计算时代已来'), '阿里云开源 “计算王牌” Blink，实时计算时代已来');
-    // });
+    it('處理英文與 “ ” \\u201c \\u201d 符號', () => {
+      assert.equal(pangu.spacing('阿里云开源“计算王牌”Blink，实时计算时代已来'), '阿里云开源 “计算王牌” Blink，实时计算时代已来');
+      assert.equal(pangu.spacing('苹果撤销Facebook“企业证书”后者股价一度短线走低'), '苹果撤销 Facebook “企业证书” 后者股价一度短线走低');
+    });
 
-    // TODO
-    // it('處理英文與 % 符號', () => {
-    //   assert.equal(pangu.spacing("丹寧控注意Levi's全館任2件25%OFF滿額再享85折！"), "丹寧控注意 Levi's 全館任 2 件 25% OFF 滿額再享 85 折！");
-    // });
+    it('處理英文與 % 符號', () => {
+      assert.equal(pangu.spacing("丹寧控注意Levi's全館任2件25%OFF滿額再享85折！"), "丹寧控注意 Levi's 全館任 2 件 25% OFF 滿額再享 85 折！"); // eslint-disable-line quotes
+    });
   });
 
   describe('spacingText()', () => {

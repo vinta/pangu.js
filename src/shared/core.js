@@ -20,7 +20,7 @@ const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u
 
 // ANS is short for Alphabets, Numbers, and Symbols.
 //
-// A includes A-Za-z
+// A includes A-Za-z\u0370-\u03ff
 // N includes 0-9
 // S includes `~!@#$%^&*()-_=+[]{}\|;:'",<.>/?
 //
@@ -58,12 +58,15 @@ const FIX_SLASH_AS_SLASH = /([/\\.])([A-Za-z\\-_\\./]+) ([/])/g;
 const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>\u201c])`, 'g');
 const RIGHT_BRACKET_CJK = new RegExp(`([\\)\\]\\}<>\u201d])([${CJK}])`, 'g');
 const FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET = /([\(\[\{<\u201c]+)[ ]*(.+?)[ ]*([\)\]\}>\u201d]+)/;
+const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([A-Za-z0-9${CJK}])[ ]*([\u201c])([A-Za-z0-9${CJK}\-_ ]+)([\u201d])[ ]*([A-Za-z0-9${CJK}])`, 'g');
 
 const AN_LEFT_BRACKET = /([A-Za-z0-9])([\(\[\{])/g;
 const RIGHT_BRACKET_AN = /([\)\]\}])([A-Za-z0-9])/g;
 
-const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z0-9@\\$%\\^&\\*\\-\\+\\\\=\\|/\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])`, 'g');
-const ANS_CJK = new RegExp(`([A-Za-z0-9~\\$%\\^&\\*\\-\\+\\\\=\\|/!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])([${CJK}])`, 'g');
+const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=\\|/\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])`, 'g');
+const ANS_CJK = new RegExp(`([A-Za-z\u0370-\u03ff0-9~\\$%\\^&\\*\\-\\+\\\\=\\|/!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])([${CJK}])`, 'g');
+
+const S_A = /(%)([A-Za-z])/g;
 
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
@@ -145,12 +148,15 @@ class Pangu {
     newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
     newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
     newText = newText.replace(FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET, '$1$2$3');
+    newText = newText.replace(ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK, '$1 $2$3$4 $5');
 
     newText = newText.replace(AN_LEFT_BRACKET, '$1 $2');
     newText = newText.replace(RIGHT_BRACKET_AN, '$1 $2');
 
     newText = newText.replace(CJK_ANS, '$1 $2');
     newText = newText.replace(ANS_CJK, '$1 $2');
+
+    newText = newText.replace(S_A, '$1 $2');
 
     newText = newText.replace(MIDDLE_DOT, '・');
 
