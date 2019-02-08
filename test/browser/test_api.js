@@ -27,29 +27,9 @@ describe('BrowserPangu', () => {
     });
   });
 
-  describe('spacingPageTitle()', () => {
-    it('處理 <title>', () => {
-      document.title = "Mr.龍島主道：「Let's Party!各位高明博雅君子！」";
-      pangu.spacingPageTitle();
-      assert.equal(document.title, "Mr. 龍島主道：「Let's Party! 各位高明博雅君子！」");
-    });
-  });
-
-  describe('spacingPageBody()', () => {
-    it('處理 <body>', () => {
-      document.body.innerHTML = __html__['test/_fixtures/body.html'];
-      pangu.spacingPageBody();
-      assert.equal(document.body.innerHTML, realHTML('test/_fixtures/body_expected.html'));
-    });
-  });
-
-  describe('spacingPage()', () => {
-    it('處理 <body>', () => {
-      document.title = '花學姊的梅杜莎';
-      document.body.innerHTML = __html__['test/_fixtures/body.html'];
-      pangu.spacingPage();
-      assert.equal(document.title, '花學姊的梅杜莎');
-      assert.equal(document.body.innerHTML, realHTML('test/_fixtures/body_expected.html'));
+  describe('spacingNode()', () => {
+    it('處理 document', () => {
+      // TODO
     });
   });
 
@@ -89,5 +69,35 @@ describe('BrowserPangu', () => {
     });
   });
 
-  // TODO: autoSpacingPage()
+  describe('spacingPageTitle()', () => {
+    it('處理 <title>', () => {
+      document.title = "Mr.龍島主道：「Let's Party!各位高明博雅君子！」";
+      pangu.spacingPageTitle();
+      assert.equal(document.title, "Mr. 龍島主道：「Let's Party! 各位高明博雅君子！」");
+    });
+  });
+
+  describe('spacingPageBody()', () => {
+    it('處理 <body>', () => {
+      document.body.innerHTML = __html__['test/_fixtures/body.html'];
+      pangu.spacingPageBody();
+      assert.equal(document.body.innerHTML, realHTML('test/_fixtures/body_expected.html'));
+    });
+  });
+
+  describe('spacingPage()', () => {
+    it('處理 <body>', () => {
+      document.title = '花學姊的梅杜莎';
+      document.body.innerHTML = __html__['test/_fixtures/body.html'];
+      pangu.spacingPage();
+      assert.equal(document.title, '花學姊的梅杜莎');
+      assert.equal(document.body.innerHTML, realHTML('test/_fixtures/body_expected.html'));
+    });
+  });
+
+  describe('autoSpacingPage()', () => {
+    it('處理 document', () => {
+      // TODO
+    });
+  });
 });

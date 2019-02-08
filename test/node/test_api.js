@@ -1,7 +1,6 @@
+const { assert } = require('chai');
 const fs = require('fs');
 const path = require('path');
-
-const assert = require('chai').assert;
 
 const pangu = require('../../dist/node');
 
@@ -21,11 +20,11 @@ describe('NodePangu', () => {
   describe('spacingFile()', () => {
     it('performs on a text file (promise)', (done) => {
       pangu.spacingFile(`${fixtureDir}/test_file.txt`)
-      .then((data) => {
-        const expected = fs.readFileSync(`${fixtureDir}/test_file.expected.txt`, 'utf8');
-        assert.equal(data, expected);
-        done();
-      });
+        .then((data) => {
+          const expected = fs.readFileSync(`${fixtureDir}/test_file.expected.txt`, 'utf8');
+          assert.equal(data, expected);
+          done();
+        });
     });
   });
 
