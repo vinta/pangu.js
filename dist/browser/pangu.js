@@ -583,10 +583,10 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
   var FIX_CJK_COLON_ANS = new RegExp("([".concat(CJK, "])\\:([A-Z0-9\\(\\)])"), 'g');
   var CJK_QUOTE = new RegExp("([".concat(CJK, "])([`\"\u05F4])"), 'g');
   var QUOTE_CJK = new RegExp("([`\"\u05F4])([".concat(CJK, "])"), 'g');
-  var FIX_QUOTE = /([`"\u05f4]+)(\s*)(.+?)(\s*)([`"\u05f4]+)/g;
+  var FIX_QUOTE_ANY_QUOTE = /([`"\u05f4]+)[ ]*(.+?)[ ]*([`"\u05f4]+)/g;
   var CJK_SINGLE_QUOTE_BUT_POSSESSIVE = new RegExp("([".concat(CJK, "])('[^s])"), 'g');
   var SINGLE_QUOTE_CJK = new RegExp("(')([".concat(CJK, "])"), 'g');
-  var POSSESSIVE_SINGLE_QUOTE = new RegExp("([".concat(CJK, "A-Za-z0-9])( )('s)"), 'g');
+  var FIX_POSSESSIVE_SINGLE_QUOTE = new RegExp("([A-Za-z0-9".concat(CJK, "])( )('s)"), 'g');
   var HASH_ANS_CJK_HASH = new RegExp("([".concat(CJK, "])(#)([").concat(CJK, "]+)(#)([").concat(CJK, "])"), 'g');
   var CJK_HASH = new RegExp("([".concat(CJK, "])(#([^ ]))"), 'g');
   var HASH_CJK = new RegExp("(([^ ])#)([".concat(CJK, "])"), 'g');
@@ -596,11 +596,13 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
   var FIX_SLASH_AS_SLASH = /([/\\.])([A-Za-z\\-_\\./]+) ([/])/g;
   var CJK_LEFT_BRACKET = new RegExp("([".concat(CJK, "])([\\(\\[\\{<>\u201C])"), 'g');
   var RIGHT_BRACKET_CJK = new RegExp("([\\)\\]\\}<>\u201D])([".concat(CJK, "])"), 'g');
-  var LEFT_BRACKET_ANY_RIGHT_BRACKET = /([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/;
+  var FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET = /([\(\[\{<\u201c]+)[ ]*(.+?)[ ]*([\)\]\}>\u201d]+)/;
+  var ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp("([A-Za-z0-9".concat(CJK, "])[ ]*([\u201C])([A-Za-z0-9").concat(CJK, "-_ ]+)([\u201D])[ ]*([A-Za-z0-9").concat(CJK, "])"), 'g');
   var AN_LEFT_BRACKET = /([A-Za-z0-9])([\(\[\{])/g;
   var RIGHT_BRACKET_AN = /([\)\]\}])([A-Za-z0-9])/g;
-  var CJK_ANS = new RegExp("([".concat(CJK, "])([A-Za-z0-9@\\$%\\^&\\*\\-\\+\\\\=\\|/\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])"), 'g');
-  var ANS_CJK = new RegExp("([A-Za-z0-9~\\$%\\^&\\*\\-\\+\\\\=\\|/!;:,\\.\\?\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])([".concat(CJK, "])"), 'g');
+  var CJK_ANS = new RegExp("([".concat(CJK, "])([A-Za-z\u0370-\u03FF0-9@\\$%\\^&\\*\\-\\+\\\\=\\|/\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])"), 'g');
+  var ANS_CJK = new RegExp("([A-Za-z\u0370-\u03FF0-9~\\$%\\^&\\*\\-\\+\\\\=\\|/!;:,\\.\\?\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])([".concat(CJK, "])"), 'g');
+  var S_A = /(%)([A-Za-z])/g;
   var MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
   var Pangu = function () {
@@ -641,10 +643,10 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
         newText = newText.replace(FIX_CJK_COLON_ANS, '$1：$2');
         newText = newText.replace(CJK_QUOTE, '$1 $2');
         newText = newText.replace(QUOTE_CJK, '$1 $2');
-        newText = newText.replace(FIX_QUOTE, '$1$3$5');
+        newText = newText.replace(FIX_QUOTE_ANY_QUOTE, '$1$2$3');
         newText = newText.replace(CJK_SINGLE_QUOTE_BUT_POSSESSIVE, '$1 $2');
         newText = newText.replace(SINGLE_QUOTE_CJK, '$1 $2');
-        newText = newText.replace(POSSESSIVE_SINGLE_QUOTE, "$1's");
+        newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
         newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
         newText = newText.replace(CJK_HASH, '$1 $2');
         newText = newText.replace(HASH_CJK, '$1 $3');
@@ -654,11 +656,13 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
         newText = newText.replace(FIX_SLASH_AS_SLASH, '$1$2$3');
         newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
         newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
-        newText = newText.replace(LEFT_BRACKET_ANY_RIGHT_BRACKET, '$1$3$5');
+        newText = newText.replace(FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET, '$1$2$3');
+        newText = newText.replace(ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK, '$1 $2$3$4 $5');
         newText = newText.replace(AN_LEFT_BRACKET, '$1 $2');
         newText = newText.replace(RIGHT_BRACKET_AN, '$1 $2');
         newText = newText.replace(CJK_ANS, '$1 $2');
         newText = newText.replace(ANS_CJK, '$1 $2');
+        newText = newText.replace(S_A, '$1 $2');
         newText = newText.replace(MIDDLE_DOT, '・');
         return newText;
       }
