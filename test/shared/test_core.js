@@ -416,17 +416,23 @@ describe('Pangu', () => {
 
   describe('spacingText()', () => {
     it('callback', (done) => {
-      pangu.spacingText('中文123漢字abc', (err, newText) => {
-        assert.equal(newText, '中文 123 漢字 abc');
+      pangu.spacingText('請使用uname -m指令來檢查你的Linux作業系統是32位元或是[敏感词已被屏蔽]位元', (err, newText) => {
+        assert.equal(newText, '請使用 uname -m 指令來檢查你的 Linux 作業系統是 32 位元或是 [敏感词已被屏蔽] 位元');
         done();
       });
     });
 
     it('promise', (done) => {
-      pangu.spacingText('中文123漢字abc', (err, newText) => {
-        assert.equal(newText, '中文 123 漢字 abc');
+      pangu.spacingText('心裡想的是Microservice，手裡做的是Distributed Monolith', (err, newText) => {
+        assert.equal(newText, '心裡想的是 Microservice，手裡做的是 Distributed Monolith');
         done();
       });
+    });
+  });
+
+  describe('spacingTextSync()', () => {
+    it('sync', () => {
+      assert.equal(pangu.spacingTextSync('你從什麼時候開始產生了我沒使用Monkey Patch的錯覺?'), '你從什麼時候開始產生了我沒使用 Monkey Patch 的錯覺？');
     });
   });
 });
