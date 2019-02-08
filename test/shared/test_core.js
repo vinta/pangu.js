@@ -165,8 +165,10 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('Vinta+陳上進'), 'Vinta + 陳上進');
       assert.equal(pangu.spacing('陳上進+Vinta'), '陳上進 + Vinta');
       assert.equal(pangu.spacing('得到一個A+B的結果'), '得到一個 A+B 的結果');
-      assert.equal(pangu.spacing('得到一個C+的結果'), '得到一個 C + 的結果');
       assert.equal(pangu.spacing('得到一個C++的結果'), '得到一個 C++ 的結果');
+
+      // TODO
+      // assert.equal(pangu.spacing('得到一個A+的結果'), '得到一個 A+ 的結果');
     });
 
     it('處理 | 符號', () => {
@@ -191,8 +193,6 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('陳上進/Vinta'), '陳上進 / Vinta');
       assert.equal(pangu.spacing('Mollie/陳上進/Vinta'), 'Mollie / 陳上進 / Vinta');
       assert.equal(pangu.spacing('得到一個A/B的結果'), '得到一個 A/B 的結果');
-
-      // 跟以上的結果是互斥的
       assert.equal(pangu.spacing('2016-12-26(奇幻电影节) / 2017-01-20(美国) / 詹姆斯麦卡沃伊'), '2016-12-26 (奇幻电影节) / 2017-01-20 (美国) / 詹姆斯麦卡沃伊');
       assert.equal(pangu.spacing('/home/和/root是Linux中的頂級目錄'), '/home/ 和 /root 是 Linux 中的頂級目錄');
       assert.equal(pangu.spacing('當你用cat和od指令查看/dev/random和/dev/urandom的內容時'), '當你用 cat 和 od 指令查看 /dev/random 和 /dev/urandom 的內容時');
@@ -310,19 +310,21 @@ describe('Pangu', () => {
     it('處理 · 符號', () => {
       assert.equal(pangu.spacing('前面·後面'), '前面・後面');
       assert.equal(pangu.spacing('喬治·R·R·馬丁'), '喬治・R・R・馬丁');
+      assert.equal(pangu.spacing('M·奈特·沙马兰'), 'M・奈特・沙马兰');
     });
 
     // \u2022
     it('處理 • 符號', () => {
       assert.equal(pangu.spacing('前面•後面'), '前面・後面');
       assert.equal(pangu.spacing('喬治•R•R•馬丁'), '喬治・R・R・馬丁');
-      assert.equal(pangu.spacing('M·奈特·沙马兰'), 'M・奈特・沙马兰');
+      assert.equal(pangu.spacing('M•奈特•沙马兰'), 'M・奈特・沙马兰');
     });
 
     // \u2027
     it('處理 ‧ 符號', () => {
       assert.equal(pangu.spacing('前面‧後面'), '前面・後面');
       assert.equal(pangu.spacing('喬治‧R‧R‧馬丁'), '喬治・R・R・馬丁');
+      assert.equal(pangu.spacing('M‧奈特‧沙马兰'), 'M・奈特・沙马兰');
     });
 
     // 成對符號：相異
