@@ -37,11 +37,11 @@ const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([A-Z0-9\\(\\)])`, 'g');
 // the symbol part does not include '
 const CJK_QUOTE = new RegExp(`([${CJK}])([\`"\u05f4])`, 'g');
 const QUOTE_CJK = new RegExp(`([\`"\u05f4])([${CJK}])`, 'g');
-const FIX_QUOTE = /([`"\u05f4]+)(\s*)(.+?)(\s*)([`"\u05f4]+)/g;
+const FIX_QUOTE_ANY_QUOTE = /([`"\u05f4]+)[ ]*(.+?)[ ]*([`"\u05f4]+)/g;
 
 const CJK_SINGLE_QUOTE_BUT_POSSESSIVE = new RegExp(`([${CJK}])('[^s])`, 'g');
 const SINGLE_QUOTE_CJK = new RegExp(`(')([${CJK}])`, 'g');
-const POSSESSIVE_SINGLE_QUOTE = new RegExp(`([${CJK}A-Za-z0-9])( )('s)`, 'g');
+const FIX_POSSESSIVE_SINGLE_QUOTE = new RegExp(`([A-Za-z0-9${CJK}])( )('s)`, 'g');
 
 const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, 'g');
 const CJK_HASH = new RegExp(`([${CJK}])(#([^ ]))`, 'g');
@@ -57,7 +57,7 @@ const FIX_SLASH_AS_SLASH = /([/\\.])([A-Za-z\\-_\\./]+) ([/])/g;
 // the bracket part only includes ( ) [ ] { } < > “ ”
 const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>\u201c])`, 'g');
 const RIGHT_BRACKET_CJK = new RegExp(`([\\)\\]\\}<>\u201d])([${CJK}])`, 'g');
-const LEFT_BRACKET_ANY_RIGHT_BRACKET = /([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/;
+const FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET = /([\(\[\{<\u201c]+)[ ]*(.+?)[ ]*([\)\]\}>\u201d]+)/;
 
 const AN_LEFT_BRACKET = /([A-Za-z0-9])([\(\[\{])/g;
 const RIGHT_BRACKET_AN = /([\)\]\}])([A-Za-z0-9])/g;
@@ -126,11 +126,11 @@ class Pangu {
 
     newText = newText.replace(CJK_QUOTE, '$1 $2');
     newText = newText.replace(QUOTE_CJK, '$1 $2');
-    newText = newText.replace(FIX_QUOTE, '$1$3$5');
+    newText = newText.replace(FIX_QUOTE_ANY_QUOTE, '$1$2$3');
 
     newText = newText.replace(CJK_SINGLE_QUOTE_BUT_POSSESSIVE, '$1 $2');
     newText = newText.replace(SINGLE_QUOTE_CJK, '$1 $2');
-    newText = newText.replace(POSSESSIVE_SINGLE_QUOTE, "$1's"); // eslint-disable-line quotes
+    newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's"); // eslint-disable-line quotes
 
     newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
     newText = newText.replace(CJK_HASH, '$1 $2');
@@ -144,7 +144,7 @@ class Pangu {
 
     newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
     newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
-    newText = newText.replace(LEFT_BRACKET_ANY_RIGHT_BRACKET, '$1$3$5');
+    newText = newText.replace(FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET, '$1$2$3');
 
     newText = newText.replace(AN_LEFT_BRACKET, '$1 $2');
     newText = newText.replace(RIGHT_BRACKET_AN, '$1 $2');
