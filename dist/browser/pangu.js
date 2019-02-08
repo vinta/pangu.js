@@ -1,7 +1,7 @@
 /*!
  * pangu.js
  * --------
- * @version: 4.0.6
+ * @version: 4.0.7
  * @homepage: https://github.com/vinta/pangu.js
  * @license: MIT
  * @author: Vinta Chen <vinta.chen@gmail.com> (https://github.com/vinta)
@@ -597,7 +597,8 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
   var CJK_LEFT_BRACKET = new RegExp("([".concat(CJK, "])([\\(\\[\\{<>\u201C])"), 'g');
   var RIGHT_BRACKET_CJK = new RegExp("([\\)\\]\\}<>\u201D])([".concat(CJK, "])"), 'g');
   var FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET = /([\(\[\{<\u201c]+)[ ]*(.+?)[ ]*([\)\]\}>\u201d]+)/;
-  var ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp("([A-Za-z0-9".concat(CJK, "])[ ]*([\u201C])([A-Za-z0-9").concat(CJK, "-_ ]+)([\u201D])[ ]*([A-Za-z0-9").concat(CJK, "])"), 'g');
+  var ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp("([A-Za-z0-9".concat(CJK, "])[ ]*([\u201C])([A-Za-z0-9").concat(CJK, "-_ ]+)([\u201D])"), 'g');
+  var LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp("([\u201C])([A-Za-z0-9".concat(CJK, "-_ ]+)([\u201D])[ ]*([A-Za-z0-9").concat(CJK, "])"), 'g');
   var AN_LEFT_BRACKET = /([A-Za-z0-9])([\(\[\{])/g;
   var RIGHT_BRACKET_AN = /([\)\]\}])([A-Za-z0-9])/g;
   var CJK_ANS = new RegExp("([".concat(CJK, "])([A-Za-z\u0370-\u03FF0-9@\\$%\\^&\\*\\-\\+\\\\=\\|/\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])"), 'g');
@@ -609,7 +610,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     function Pangu() {
       _classCallCheck(this, Pangu);
 
-      this.version = '4.0.6';
+      this.version = '4.0.7';
     }
 
     _createClass(Pangu, [{
@@ -657,7 +658,8 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
         newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
         newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
         newText = newText.replace(FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET, '$1$2$3');
-        newText = newText.replace(ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK, '$1 $2$3$4 $5');
+        newText = newText.replace(ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET, '$1 $2$3$4');
+        newText = newText.replace(LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK, '$1$2$3 $4');
         newText = newText.replace(AN_LEFT_BRACKET, '$1 $2');
         newText = newText.replace(RIGHT_BRACKET_AN, '$1 $2');
         newText = newText.replace(CJK_ANS, '$1 $2');

@@ -73,7 +73,7 @@ const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
 class Pangu {
   constructor() {
-    this.version = '4.0.6';
+    this.version = '4.0.7';
   }
 
   convertToFullwidth(symbols) {
