@@ -406,6 +406,7 @@ describe('Pangu', () => {
     it('處理英文與 “ ” \\u201c \\u201d 符號', () => {
       assert.equal(pangu.spacing('阿里云开源“计算王牌”Blink，实时计算时代已来'), '阿里云开源 “计算王牌” Blink，实时计算时代已来');
       assert.equal(pangu.spacing('苹果撤销Facebook“企业证书”后者股价一度短线走低'), '苹果撤销 Facebook “企业证书” 后者股价一度短线走低');
+      assert.equal(pangu.spacing('【UCG中字】“數毛社”DF的《戰神4》全新演示解析'), '【UCG 中字】“數毛社” DF 的《戰神 4》全新演示解析');
     });
 
     it('處理英文與 % 符號', () => {
