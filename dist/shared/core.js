@@ -10,7 +10,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 var CJK = "\u2E80-\u2EFF\u2F00-\u2FDF\u3040-\u309F\u30A0-\u30FA\u30FC-\u30FF\u3100-\u312F\u3200-\u32FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF";
 var ANY_CJK = new RegExp("[".concat(CJK, "]"));
-var CONVERT_TO_FULLWIDTH_CJK_SPACE_SYMBOLS_SPACE_CJK = new RegExp("([".concat(CJK, "])[ ]*([\\:]+|\\.)[ ]*([").concat(CJK, "])"), 'g');
+var CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK = new RegExp("([".concat(CJK, "])[ ]*([\\:]+|\\.)[ ]*([").concat(CJK, "])"), 'g');
 var CONVERT_TO_FULLWIDTH_CJK_SYMBOLS = new RegExp("([".concat(CJK, "])[ ]*([~\\!;,\\?]+)[ ]*"), 'g');
 var DOTS_CJK = new RegExp("([\\.]{2,}|\u2026)([".concat(CJK, "])"), 'g');
 var FIX_CJK_COLON_ANS = new RegExp("([".concat(CJK, "])\\:([A-Z0-9\\(\\)])"), 'g');
@@ -25,13 +25,13 @@ var CJK_HASH = new RegExp("([".concat(CJK, "])(#([^ ]))"), 'g');
 var HASH_CJK = new RegExp("(([^ ])#)([".concat(CJK, "])"), 'g');
 var CJK_OPERATOR_ANS = new RegExp("([".concat(CJK, "])([\\+\\-\\*\\/=&\\|<>])([A-Za-z0-9])"), 'g');
 var ANS_OPERATOR_CJK = new RegExp("([A-Za-z0-9])([\\+\\-\\*\\/=&\\|<>])([".concat(CJK, "])"), 'g');
-var FIX_SLASH_SPACE_ANS = new RegExp('([\\/])( )([a-z\\-_\\.\\/]+)', 'g');
-var FIX_ANS_SLASH_SPACE = new RegExp('([\\/\\.])([A-Za-z\\-_\\.\\/]+)( )([\\/])', 'g');
+var FIX_SLASH_AS = /([/]) ([a-z\\-_\\./]+)/g;
+var FIX_SLASH_AS_SLASH = /([/\\.])([A-Za-z\\-_\\./]+) ([/])/g;
 var CJK_LEFT_BRACKET = new RegExp("([".concat(CJK, "])([\\(\\[\\{<>\u201C])"), 'g');
 var RIGHT_BRACKET_CJK = new RegExp("([\\)\\]\\}<>\u201D])([".concat(CJK, "])"), 'g');
 var LEFT_BRACKET_ANY_RIGHT_BRACKET = /([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/;
-var A_LEFT_BRACKET = /([A-Za-z0-9])([\(\[\{])/g;
-var RIGHT_BRACKET_A = /([\)\]\}])([A-Za-z0-9])/g;
+var AN_LEFT_BRACKET = /([A-Za-z0-9])([\(\[\{])/g;
+var RIGHT_BRACKET_AN = /([\)\]\}])([A-Za-z0-9])/g;
 var CJK_ANS = new RegExp("([".concat(CJK, "])([A-Za-z0-9@\\$%\\^&\\*\\-\\+\\\\=\\|/\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])"), 'g');
 var ANS_CJK = new RegExp("([A-Za-z0-9~\\$%\\^&\\*\\-\\+\\\\=\\|/!;:,\\.\\?\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])([".concat(CJK, "])"), 'g');
 var MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
@@ -62,7 +62,7 @@ var Pangu = function () {
 
       var self = this;
       var newText = text;
-      newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SPACE_SYMBOLS_SPACE_CJK, function (match, leftCjk, symbols, rightCjk) {
+      newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK, function (match, leftCjk, symbols, rightCjk) {
         var fullwidthSymbols = self.convertToFullwidth(symbols);
         return "".concat(leftCjk).concat(fullwidthSymbols).concat(rightCjk);
       });
@@ -83,13 +83,13 @@ var Pangu = function () {
       newText = newText.replace(HASH_CJK, '$1 $3');
       newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
       newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
-      newText = newText.replace(FIX_SLASH_SPACE_ANS, '$1$3');
-      newText = newText.replace(FIX_ANS_SLASH_SPACE, '$1$2$4');
+      newText = newText.replace(FIX_SLASH_AS, '$1$2');
+      newText = newText.replace(FIX_SLASH_AS_SLASH, '$1$2$3');
       newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
       newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
       newText = newText.replace(LEFT_BRACKET_ANY_RIGHT_BRACKET, '$1$3$5');
-      newText = newText.replace(A_LEFT_BRACKET, '$1 $2');
-      newText = newText.replace(RIGHT_BRACKET_A, '$1 $2');
+      newText = newText.replace(AN_LEFT_BRACKET, '$1 $2');
+      newText = newText.replace(RIGHT_BRACKET_AN, '$1 $2');
       newText = newText.replace(CJK_ANS, '$1 $2');
       newText = newText.replace(ANS_CJK, '$1 $2');
       newText = newText.replace(MIDDLE_DOT, '・');

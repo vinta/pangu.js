@@ -29,7 +29,7 @@ const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u
 const ANY_CJK = new RegExp(`[${CJK}]`);
 
 // the symbol part only includes ~ ! ; : , . ? but . only matches one character
-const CONVERT_TO_FULLWIDTH_CJK_SPACE_SYMBOLS_SPACE_CJK = new RegExp(`([${CJK}])[ ]*([\\:]+|\\.)[ ]*([${CJK}])`, 'g');
+const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK = new RegExp(`([${CJK}])[ ]*([\\:]+|\\.)[ ]*([${CJK}])`, 'g');
 const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS = new RegExp(`([${CJK}])[ ]*([~\\!;,\\?]+)[ ]*`, 'g');
 const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, 'g');
 const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([A-Z0-9\\(\\)])`, 'g');
@@ -51,16 +51,16 @@ const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, 'g');
 const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*\\/=&\\|<>])([A-Za-z0-9])`, 'g');
 const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*\\/=&\\|<>])([${CJK}])`, 'g');
 
-const FIX_SLASH_SPACE_ANS = new RegExp('([\\/])( )([a-z\\-_\\.\\/]+)', 'g');
-const FIX_ANS_SLASH_SPACE = new RegExp('([\\/\\.])([A-Za-z\\-_\\.\\/]+)( )([\\/])', 'g');
+const FIX_SLASH_AS = /([/]) ([a-z\\-_\\./]+)/g;
+const FIX_SLASH_AS_SLASH = /([/\\.])([A-Za-z\\-_\\./]+) ([/])/g;
 
 // the bracket part only includes ( ) [ ] { } < > “ ”
 const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>\u201c])`, 'g');
 const RIGHT_BRACKET_CJK = new RegExp(`([\\)\\]\\}<>\u201d])([${CJK}])`, 'g');
 const LEFT_BRACKET_ANY_RIGHT_BRACKET = /([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/;
 
-const A_LEFT_BRACKET = /([A-Za-z0-9])([\(\[\{])/g;
-const RIGHT_BRACKET_A = /([\)\]\}])([A-Za-z0-9])/g;
+const AN_LEFT_BRACKET = /([A-Za-z0-9])([\(\[\{])/g;
+const RIGHT_BRACKET_AN = /([\)\]\}])([A-Za-z0-9])/g;
 
 const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z0-9@\\$%\\^&\\*\\-\\+\\\\=\\|/\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])`, 'g');
 const ANS_CJK = new RegExp(`([A-Za-z0-9~\\$%\\^&\\*\\-\\+\\\\=\\|/!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])([${CJK}])`, 'g');
@@ -111,7 +111,7 @@ class Pangu {
     let newText = text;
 
     // https://stackoverflow.com/questions/4285472/multiple-regex-replace
-    newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SPACE_SYMBOLS_SPACE_CJK, (match, leftCjk, symbols, rightCjk) => {
+    newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK, (match, leftCjk, symbols, rightCjk) => {
       const fullwidthSymbols = self.convertToFullwidth(symbols);
       return `${leftCjk}${fullwidthSymbols}${rightCjk}`;
     });
@@ -139,15 +139,15 @@ class Pangu {
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
 
-    newText = newText.replace(FIX_SLASH_SPACE_ANS, '$1$3');
-    newText = newText.replace(FIX_ANS_SLASH_SPACE, '$1$2$4');
+    newText = newText.replace(FIX_SLASH_AS, '$1$2');
+    newText = newText.replace(FIX_SLASH_AS_SLASH, '$1$2$3');
 
     newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
     newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
     newText = newText.replace(LEFT_BRACKET_ANY_RIGHT_BRACKET, '$1$3$5');
 
-    newText = newText.replace(A_LEFT_BRACKET, '$1 $2');
-    newText = newText.replace(RIGHT_BRACKET_A, '$1 $2');
+    newText = newText.replace(AN_LEFT_BRACKET, '$1 $2');
+    newText = newText.replace(RIGHT_BRACKET_AN, '$1 $2');
 
     newText = newText.replace(CJK_ANS, '$1 $2');
     newText = newText.replace(ANS_CJK, '$1 $2');
