@@ -2,18 +2,20 @@
   "name": "pangu",
   "description": "Paranoid text spacing for good readability, to automatically insert whitespace between CJK (Chinese, Japanese, Korean) and half-width characters (alphabetical letters, numerical digits and symbols).",
   "keywords": [
+    "pangu",
+    "text-spacing",
+    "spacing",
+    "text",
+    "html",
+    "typesetting",
+    "readability",
+    "cli",
     "chinese",
-    "file",
     "japanese",
     "korean",
-    "obsessive-compulsive disorder",
+    "obsessive-compulsive-disorder",
     "ocd",
-    "pangu",
-    "paranoia",
-    "paranoid",
-    "readability",
-    "spacing",
-    "text"
+    "paranoia"
   ],
   "version": "4.0.7",
   "author": {
@@ -31,10 +33,10 @@
     "url": "https://github.com/vinta/pangu.js/issues"
   },
   "main": "./dist/node/index.js",
+  "browser": "./dist/browser/pangu.js",
   "bin": {
     "pangu": "./dist/node/cli.js"
   },
-  "browser": "./dist/browser/pangu.js",
   "scripts": {
     "pack:chrome": "npm run build:browser && cp -rf ./dist/browser/pangu.min.js ./browser_extensions/chrome/vendors/pangu/pangu.min.js && cd ./browser_extensions/chrome/ && zip -q -r -0 ../paranoid-auto-spacing.zip . && zip -j ../paranoid-auto-spacing.zip ~/Dropbox/Projects/paranoid-auto-spacing/key.pem",
     "pack:firefox": "node ./browser_extensions/firefox/pack.js",
