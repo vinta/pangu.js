@@ -122,6 +122,10 @@ class BrowserPangu extends Pangu {
   }
 
   spacingNodeByXPath(xPathQuery, contextNode) {
+    if (!(contextNode instanceof Node) || (contextNode instanceof DocumentFragment)) {
+      return;
+    }
+
     // 因為 xPathQuery 會是用 text() 結尾，所以這些 nodes 會是 text 而不是 DOM element
     // snapshotLength 要配合 XPathResult.ORDERED_NODE_SNAPSHOT_TYPE 使用
     // https://developer.mozilla.org/en-US/docs/DOM/document.evaluate

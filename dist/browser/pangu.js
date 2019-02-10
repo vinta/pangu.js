@@ -282,6 +282,10 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     }, {
       key: "spacingNodeByXPath",
       value: function spacingNodeByXPath(xPathQuery, contextNode) {
+        if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
+          return;
+        }
+
         var textNodes = document.evaluate(xPathQuery, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
         var currentTextNode;
         var nextTextNode;
