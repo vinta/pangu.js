@@ -74,11 +74,11 @@ Files are located in `./node_modules/pangu/dist/browser/`.
 `pangu.js` is also available on [jsDelivr](https://www.jsdelivr.com/package/npm/pangu) and [cdnjs](https://cdnjs.com/libraries/pangu):
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/pangu@4.0.6/dist/browser/pangu.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pangu@4.0.6/dist/browser/pangu.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pangu@4.0.7/dist/browser/pangu.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pangu@4.0.7/dist/browser/pangu.min.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.6/pangu.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.6/pangu.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js"></script>
 ```
 
 ### Node.js
