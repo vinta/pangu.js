@@ -191,7 +191,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
       _this3 = _possibleConstructorReturn(this, _getPrototypeOf(BrowserPangu).call(this));
       _this3.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
       _this3.ignoredTags = /^(script|code|pre|textarea)$/i;
-      _this3.presentationalTags = /^(b|code|del|em|i|s|strong)$/i;
+      _this3.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
       _this3.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
       _this3.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
       _this3.isAutoSpacingPageExecuted = false;
