@@ -1,7 +1,7 @@
 # 為什麼你們就是不能加個空格呢？
 
 [![](https://data.jsdelivr.com/v1/package/npm/pangu/badge)](https://www.jsdelivr.com/package/npm/pangu)
-[![](https://img.shields.io/travis/vinta/pangu.js.svg?style=flat-square)](https://travis-ci.org/vinta/pangu.js)
+[![Financial Contributors on Open Collective](https://opencollective.com/pangu/all/badge.svg?label=financial+contributors)](https://opencollective.com/pangu) [![](https://img.shields.io/travis/vinta/pangu.js.svg?style=flat-square)](https://travis-ci.org/vinta/pangu.js)
 [![](https://img.shields.io/codecov/c/github/vinta/pangu.js/master.svg?style=flat-square)](https://codecov.io/github/vinta/pangu.js)
 [![](https://img.shields.io/npm/v/pangu.svg?style=flat-square)](https://www.npmjs.com/package/pangu)
 [![](https://img.shields.io/badge/made%20with-%e2%9d%a4-ff69b4.svg?style=flat-square)](https://vinta.ws/code/)
@@ -139,6 +139,36 @@ $ git clone git@github.com:vinta/pangu.js.git && cd pangu.js
 $ npm install
 $ npm run test
 ```
+
+## Contributors
+
+### Code Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+<a href="https://github.com/vinta/pangu.js/graphs/contributors"><img src="https://opencollective.com/pangu/contributors.svg?width=890&button=false" /></a>
+
+### Financial Contributors
+
+Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/pangu/contribute)]
+
+#### Individuals
+
+<a href="https://opencollective.com/pangu"><img src="https://opencollective.com/pangu/individuals.svg?width=890"></a>
+
+#### Organizations
+
+Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/pangu/contribute)]
+
+<a href="https://opencollective.com/pangu/organization/0/website"><img src="https://opencollective.com/pangu/organization/0/avatar.svg"></a>
+<a href="https://opencollective.com/pangu/organization/1/website"><img src="https://opencollective.com/pangu/organization/1/avatar.svg"></a>
+<a href="https://opencollective.com/pangu/organization/2/website"><img src="https://opencollective.com/pangu/organization/2/avatar.svg"></a>
+<a href="https://opencollective.com/pangu/organization/3/website"><img src="https://opencollective.com/pangu/organization/3/avatar.svg"></a>
+<a href="https://opencollective.com/pangu/organization/4/website"><img src="https://opencollective.com/pangu/organization/4/avatar.svg"></a>
+<a href="https://opencollective.com/pangu/organization/5/website"><img src="https://opencollective.com/pangu/organization/5/avatar.svg"></a>
+<a href="https://opencollective.com/pangu/organization/6/website"><img src="https://opencollective.com/pangu/organization/6/avatar.svg"></a>
+<a href="https://opencollective.com/pangu/organization/7/website"><img src="https://opencollective.com/pangu/organization/7/avatar.svg"></a>
+<a href="https://opencollective.com/pangu/organization/8/website"><img src="https://opencollective.com/pangu/organization/8/avatar.svg"></a>
+<a href="https://opencollective.com/pangu/organization/9/website"><img src="https://opencollective.com/pangu/organization/9/avatar.svg"></a>
 
 ## License
 
