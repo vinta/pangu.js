@@ -56,7 +56,8 @@
     "watch:shared": "watch 'npm run test:shared' src/shared test/shared/",
     "watch:browser": "watch 'npm run test:browser' src/shared src/browser test/browser/",
     "watch:node": "watch 'npm run test:node' src/shared src/node test/node/",
-    "watch:pack": "watch 'npm run pack' src/shared src/browser test/browser/"
+    "watch:pack": "watch 'npm run pack' src/shared src/browser test/browser/",
+    "postinstall": "opencollective-postinstall || true"
   },
   "devDependencies": {
     "@babel/cli": "7.2.3",
@@ -85,5 +86,12 @@
     "watch": "1.0.2",
     "webpack": "4.28.3",
     "webpack-cli": "3.1.2"
+  },
+  "dependencies": {
+    "opencollective-postinstall": "^2.0.2"
+  },
+  "collective": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/pangu"
   }
 }
