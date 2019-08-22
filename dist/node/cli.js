@@ -11,7 +11,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 var pangu = require('.');
 
-var usage = "\nusage: pangu [-h] [-v] [-t] [-f] text_or_path\n\npangu.js -- Paranoid text spacing for good readability, to automatically insert whitespace\nbetween CJK and half-width characters (alphabetical letters, numerical digits and symbols).\n\npositional arguments:\n  text_or_path   the text or file path to perform spacing\n\noptional arguments:\n  -h, --help     show this help message and exit\n  -v, --version  show program's version number and exit\n  -t, --text     specify the input value is a text\n  -f, --file     specify the input value is a file path\n".trim();
+var usage = "\nusage: pangu [-h] [-v] [-t] [-f] text_or_path\n\npangu.js -- Paranoid text spacing for good readability, to automatically\ninsert whitespace between CJK and half-width characters (alphabetical letters,\nnumerical digits and symbols).\n\npositional arguments:\n  text_or_path   the text or file path to apply spacing\n\noptional arguments:\n  -h, --help     show this help message and exit\n  -v, --version  show program's version number and exit\n  -t, --text     specify the input value is a text\n  -f, --file     specify the input value is a file path\n".trim();
 
 var _process$argv = _toArray(process.argv),
     args = _process$argv.slice(2);

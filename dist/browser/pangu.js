@@ -594,7 +594,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
   var HASH_ANS_CJK_HASH = new RegExp("([".concat(CJK, "])(#)([").concat(CJK, "]+)(#)([").concat(CJK, "])"), 'g');
   var CJK_HASH = new RegExp("([".concat(CJK, "])(#([^ ]))"), 'g');
   var HASH_CJK = new RegExp("(([^ ])#)([".concat(CJK, "])"), 'g');
-  var CJK_OPERATOR_ANS = new RegExp("([".concat(CJK, "])([\\+\\-\\*\\/=&\\|<>])([A-Za-z0-9])"), 'g');
+  var CJK_OPERATOR_ANS = new RegExp("([".concat(CJK, "])(?!&nbsp;)([\\+\\-\\*\\/=&\\|<>])([A-Za-z0-9])"), 'g');
   var ANS_OPERATOR_CJK = new RegExp("([A-Za-z0-9])([\\+\\-\\*\\/=&\\|<>])([".concat(CJK, "])"), 'g');
   var FIX_SLASH_AS = /([/]) ([a-z\-_\./]+)/g;
   var FIX_SLASH_AS_SLASH = /([/\.])([A-Za-z\-_\./]+) ([/])/g;

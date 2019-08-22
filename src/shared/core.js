@@ -48,7 +48,8 @@ const CJK_HASH = new RegExp(`([${CJK}])(#([^ ]))`, 'g');
 const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, 'g');
 
 // the symbol part only includes + - * / = & | < >
-const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*\\/=&\\|<>])([A-Za-z0-9])`, 'g');
+// Don't match `${CJK}&nbsp;`!!!
+const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])(?!&nbsp;)([\\+\\-\\*\\/=&\\|<>])([A-Za-z0-9])`, 'g');
 const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*\\/=&\\|<>])([${CJK}])`, 'g');
 
 const FIX_SLASH_AS = /([/]) ([a-z\-_\./]+)/g;
