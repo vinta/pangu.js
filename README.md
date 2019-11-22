@@ -64,6 +64,9 @@ Files are located in `./node_modules/pangu/dist/browser/`.
   pangu.spacingElementByClassName('comment');
   pangu.spacingElementByTagName('p');
 
+  // set ignoreclass
+  pangu.setIgnoreClasses(['ignore', '...'])
+
   document.addEventListener('DOMContentLoaded', () => {
     // listen to any DOM change and automatically perform spacing via MutationObserver()
     pangu.autoSpacingPage();

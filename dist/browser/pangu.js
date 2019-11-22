@@ -195,10 +195,29 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
       _this3.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
       _this3.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
       _this3.isAutoSpacingPageExecuted = false;
+      _this3.ignoreClasses = null;
       return _this3;
     }
 
     _createClass(BrowserPangu, [{
+      key: "setIgnoreClasses",
+      value: function setIgnoreClasses(cls) {
+        if (!cls) {
+          this.ignoreClasses = null;
+        } else if (typeof cls === 'string') {
+          this.ignoreClasses = new RegExp("(".concat(cls.replace(/\s+/g, '|'), ")"));
+        } else if (Array.isArray(cls) && cls.length) {
+          this.ignoreClasses = new RegExp("(".concat(cls.join('|'), ")"));
+        } else {
+          throw 'invalid ignoreClasses!';
+        }
+      }
+    }, {
+      key: "isInsideIgnoreClasses",
+      value: function isInsideIgnoreClasses(node) {
+        return this.ignoreClasses && node.parentNode && this.ignoreClasses.test(node.parentNode.className);
+      }
+    }, {
       key: "isContentEditable",
       value: function isContentEditable(node) {
         return node.isContentEditable || node.getAttribute && node.getAttribute('g_editable') === 'true';
@@ -235,7 +254,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
       value: function canIgnoreNode(node) {
         var currentNode = node;
 
-        if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+        if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.isInsideIgnoreClasses(currentNode))) {
           return true;
         }
 

@@ -53,8 +53,24 @@ class BrowserPangu extends Pangu {
 
     // TODO
     // this.ignoredTags adds iframe|pangu
-    // this.ignoreClasses
+    this.ignoreClasses = null
     // this.ignoreAttributes
+  }
+
+  setIgnoreClasses(cls) {
+    if (!cls) {
+      this.ignoreClasses = null;
+    } else if (typeof cls === 'string') {
+      this.ignoreClasses = new RegExp(`(${cls.replace(/\s+/g, '|')})`);
+    } else if (Array.isArray(cls) && cls.length) {
+      this.ignoreClasses = new RegExp(`(${cls.join('|')})`);
+    } else {
+      throw 'invalid ignoreClasses!';
+    }
+  }
+  
+  isInsideIgnoreClasses(node) {
+    return (this.ignoreClasses && node.parentNode && this.ignoreClasses.test(node.parentNode.className));
   }
 
   isContentEditable(node) {
@@ -83,7 +99,7 @@ class BrowserPangu extends Pangu {
 
   canIgnoreNode(node) {
     let currentNode = node;
-    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.isInsideIgnoreClasses(currentNode))) {
       return true;
     }
     while (currentNode.parentNode) {
