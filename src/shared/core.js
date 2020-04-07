@@ -1,6 +1,6 @@
-// CJK is short for Chinese, Japanese, and Korean.
+// CJK is an acronym for Chinese, Japanese, and Korean.
 //
-// CJK includes following Unicode blocks:
+// CJK includes the following Unicode blocks:
 // \u2e80-\u2eff CJK Radicals Supplement
 // \u2f00-\u2fdf Kangxi Radicals
 // \u3040-\u309f Hiragana
