@@ -81,6 +81,15 @@ Files are located in `./node_modules/pangu/dist/browser/`.
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js"></script>
 ```
 
+You can also import `pangu.js` as an ES Module via [jspm](https://jspm.org/) or [Skypack](https://www.skypack.dev/):
+
+```html
+<script type="module">
+  import pangu from 'https://jspm.dev/pangu@4.0.7';
+  import pangu from 'https://cdn.skypack.dev/pangu@4.0.7';
+</script>
+```
+
 ### Node.js
 
 Learn more on [npm](https://www.npmjs.com/package/pangu).
