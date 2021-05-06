@@ -81,7 +81,7 @@
     "puppeteer": "1.13.0",
     "terser": "3.13.1",
     "terser-webpack-plugin": "1.2.1",
-    "underscore": "1.9.1",
+    "underscore": "1.12.1",
     "watch": "1.0.2",
     "webpack": "4.28.3",
     "webpack-cli": "3.1.2"
