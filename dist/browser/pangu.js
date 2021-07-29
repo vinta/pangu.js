@@ -292,13 +292,13 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
         for (var i = textNodes.snapshotLength - 1; i > -1; --i) {
           currentTextNode = textNodes.snapshotItem(i);
-
+          
           if (this.isSpecificTag(currentTextNode.parentNode, this.presentationalTags) && !this.isInsideSpecificTag(currentTextNode.parentNode, this.ignoredTags)) {
             var elementNode = currentTextNode.parentNode;
 
             if (elementNode.previousSibling) {
               var previousSibling = elementNode.previousSibling;
-
+              
               if (previousSibling.nodeType === Node.TEXT_NODE) {
                 var testText = previousSibling.data.substr(-1) + currentTextNode.data.toString().charAt(0);
                 var testNewText = this.spacing(testText);
@@ -330,7 +330,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
           }
 
           var newText = this.spacing(currentTextNode.data);
-
+          
           if (currentTextNode.data !== newText) {
             currentTextNode.data = newText;
           }
@@ -409,7 +409,10 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
       key: "spacingNode",
       value: function spacingNode(contextNode) {
         var xPathQuery = './/*/text()[normalize-space(.)]';
-
+        ['script', 'style', 'textarea'].forEach(function (tag) {
+          xPathQuery = "".concat(xPathQuery, "[translate(name(..),\"ABCDEFGHIJKLMNOPQRSTUVWXYZ\",\"abcdefghijklmnopqrstuvwxyz\")!=\"").concat(tag, "\"]");
+          console.log('spacingPageBody', xPathQuery);
+        });
         if (contextNode.children && contextNode.children.length === 0) {
           xPathQuery = './/text()[normalize-space(.)]';
         }
