@@ -596,7 +596,6 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
   var HASH_CJK = new RegExp("(([^ ])#)([".concat(CJK, "])"), 'g');
   var CJK_OPERATOR_ANS = new RegExp("([".concat(CJK, "])([\\+\\-\\*\\/=&\\|<>])([A-Za-z0-9])"), 'g');
   var ANS_OPERATOR_CJK = new RegExp("([A-Za-z0-9])([\\+\\-\\*\\/=&\\|<>])([".concat(CJK, "])"), 'g');
-  var FIX_SLASH_AS = /([/]) ([a-z\-_\./]+)/g;
   var FIX_SLASH_AS_SLASH = /([/\.])([A-Za-z\-_\./]+) ([/])/g;
   var CJK_LEFT_BRACKET = new RegExp("([".concat(CJK, "])([\\(\\[\\{<>\u201C])"), 'g');
   var RIGHT_BRACKET_CJK = new RegExp("([\\)\\]\\}<>\u201D])([".concat(CJK, "])"), 'g');
@@ -657,7 +656,6 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
         newText = newText.replace(HASH_CJK, '$1 $3');
         newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
         newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
-        newText = newText.replace(FIX_SLASH_AS, '$1$2');
         newText = newText.replace(FIX_SLASH_AS_SLASH, '$1$2$3');
         newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
         newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');

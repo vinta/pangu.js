@@ -191,11 +191,19 @@ describe('Pangu', () => {
       assert.equal(pangu.spacing('Vinta/Mollie'), 'Vinta/Mollie');
       assert.equal(pangu.spacing('Vinta/陳上進'), 'Vinta / 陳上進');
       assert.equal(pangu.spacing('陳上進/Vinta'), '陳上進 / Vinta');
+      assert.equal(pangu.spacing('陳上進/vinta'), '陳上進 / vinta');
+      assert.equal(pangu.spacing('陳上進 / vinta'), '陳上進 / vinta');
       assert.equal(pangu.spacing('Mollie/陳上進/Vinta'), 'Mollie / 陳上進 / Vinta');
+      assert.equal(pangu.spacing('mollie/陳上進/vinta'), 'mollie / 陳上進 / vinta');
+      assert.equal(pangu.spacing('陳上進/mollie / vinta'), '陳上進 / mollie / vinta');
       assert.equal(pangu.spacing('得到一個A/B的結果'), '得到一個 A/B 的結果');
       assert.equal(pangu.spacing('2016-12-26(奇幻电影节) / 2017-01-20(美国) / 詹姆斯麦卡沃伊'), '2016-12-26 (奇幻电影节) / 2017-01-20 (美国) / 詹姆斯麦卡沃伊');
-      assert.equal(pangu.spacing('/home/和/root是Linux中的頂級目錄'), '/home/ 和 /root 是 Linux 中的頂級目錄');
-      assert.equal(pangu.spacing('當你用cat和od指令查看/dev/random和/dev/urandom的內容時'), '當你用 cat 和 od 指令查看 /dev/random 和 /dev/urandom 的內容時');
+      assert.equal(pangu.spacing('issue / pull request幫助人類進步'), 'issue / pull request 幫助人類進步');
+      assert.equal(pangu.spacing('當你用cat和od指令查看"/dev/random"和"/dev/urandom"的內容時'), '當你用 cat 和 od 指令查看 "/dev/random" 和 "/dev/urandom" 的內容時');
+      assert.equal(pangu.spacing('"/home/"和"/root"是Linux中的頂級目錄'), '"/home/" 和 "/root" 是 Linux 中的頂級目錄');
+
+      // This one is not good, but we couldn't find a better way:
+      assert.equal(pangu.spacing('/home/和/root是Linux中的頂級目錄'), '/home/ 和 / root 是 Linux 中的頂級目錄');
     });
 
     it('處理 < 符號', () => {

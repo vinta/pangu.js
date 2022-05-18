@@ -51,7 +51,6 @@ const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, 'g');
 const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*\\/=&\\|<>])([A-Za-z0-9])`, 'g');
 const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*\\/=&\\|<>])([${CJK}])`, 'g');
 
-const FIX_SLASH_AS = /([/]) ([a-z\-_\./]+)/g;
 const FIX_SLASH_AS_SLASH = /([/\.])([A-Za-z\-_\./]+) ([/])/g;
 
 // the bracket part only includes ( ) [ ] { } < > “ ”
@@ -143,7 +142,6 @@ class Pangu {
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
 
-    newText = newText.replace(FIX_SLASH_AS, '$1$2');
     newText = newText.replace(FIX_SLASH_AS_SLASH, '$1$2$3');
 
     newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
