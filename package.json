@@ -84,6 +84,6 @@
     "underscore": "1.9.1",
     "watch": "1.0.2",
     "webpack": "4.28.3",
-    "webpack-cli": "3.1.2"
+    "webpack-cli": "3.3.12"
   }
 }
