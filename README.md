@@ -1,8 +1,6 @@
 # 為什麼你們就是不能加個空格呢？
 
 [![](https://data.jsdelivr.com/v1/package/npm/pangu/badge)](https://www.jsdelivr.com/package/npm/pangu)
-[![](https://img.shields.io/travis/vinta/pangu.js.svg?style=flat-square)](https://travis-ci.org/vinta/pangu.js)
-[![](https://img.shields.io/codecov/c/github/vinta/pangu.js/master.svg?style=flat-square)](https://codecov.io/github/vinta/pangu.js)
 [![](https://img.shields.io/npm/v/pangu.svg?style=flat-square)](https://www.npmjs.com/package/pangu)
 [![](https://img.shields.io/badge/made%20with-%e2%9d%a4-ff69b4.svg?style=flat-square)](https://vinta.ws/code/)
 
