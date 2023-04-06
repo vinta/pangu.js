@@ -182,6 +182,10 @@ class Pangu {
   spacingTextSync(text) {
     return this.spacing(text);
   }
+  
+  validate(text) {
+    return this.spacing(text) === text
+  }
 }
 
 const pangu = new Pangu();
