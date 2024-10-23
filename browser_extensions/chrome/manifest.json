@@ -1,7 +1,7 @@
 {
-    "manifest_version": 2,
+    "manifest_version": 3,
     "name": "__MSG_extension_name__",
-    "version": "4.0.7",
+    "version": "5.0.0",
     "default_locale": "zh_TW",
     "description": "__MSG_extension_description__",
     "icons": {
@@ -9,17 +9,19 @@
         "48": "images/icon_48.png",
         "128": "images/icon_128.png"
     },
-    "browser_action": {
-        "default_icon": "images/icon_19.png",
+    "action": {
+        "default_icon": {
+            "16": "images/icon_16.png",
+            "32": "images/icon_32.png",
+            "48": "images/icon_48.png"
+        },
         "default_title": "__MSG_god_of_spacing__",
         "default_popup": "pages/popup.html"
     },
     "author": "Vinta",
     "background": {
-        "scripts": [
-            "js/background.js"
-        ],
-        "persistent": true
+        "service_worker": "js/service_worker.js",
+        "type": "module"
     },
     "content_scripts": [
         {
@@ -39,10 +41,15 @@
     "offline_enabled": true,
     "options_page": "pages/options.html",
     "permissions": [
+        "scripting",
         "storage",
-        "tabs",
+        "tabs"
+    ],
+    "host_permissions": [
         "http://*/*",
-        "https://*/*",
+        "https://*/*"
+    ],
+    "optional_host_permissions": [
         "file:///*/*"
     ],
     "short_name": "__MSG_god_of_spacing__"

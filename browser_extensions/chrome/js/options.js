@@ -36,7 +36,7 @@ var app = angular.module('app', ['xeditable']);
 
 app.controller('OptionsController', [
   '$scope',
-  function OptionsController($scope) {
+  async function OptionsController($scope) {
     angular.element('#page_title').html(utils_chrome.get_i18n('extension_name'));
     angular.element('#header_title').html(utils_chrome.get_i18n('extension_name'));
     angular.element('#subtitle').html(utils_chrome.get_i18n('subtitle'));
@@ -47,10 +47,10 @@ app.controller('OptionsController', [
     /*
      什麼時候作用？
      */
-    $scope.spacing_mode = utils_chrome.CACHED_SETTINGS['spacing_mode'];
+    $scope.spacing_mode = await chrome.runtime.sendMessage({purpose: 'get_cache_setting', key: 'spacing_mode'});
     $scope.spacing_mode_display = utils_chrome.get_i18n($scope.spacing_mode);
     $scope.spacing_when_click_msg = utils_chrome.get_i18n('spacing_when_click_msg');
-    $scope.change_spacing_mode = function() {
+    $scope.change_spacing_mode = async function() {
       play_sound('Hadouken');
 
       if ($scope.spacing_mode === 'spacing_when_load') {
@@ -61,19 +61,16 @@ app.controller('OptionsController', [
       }
 
       $scope.spacing_mode_display = utils_chrome.get_i18n($scope.spacing_mode);
-
-      utils_chrome.SYNC_STORAGE.set({'spacing_mode': $scope.spacing_mode}, function() {
-        // utils_chrome.print_sync_storage();
-      });
+      chrome.runtime.sendMessage({purpose: 'set_cache_setting', key: 'spacing_mode', value: $scope.spacing_mode});
     };
 
     /*
      然後，你是否希望：
      */
-    $scope.spacing_rule = utils_chrome.CACHED_SETTINGS['spacing_rule'];
+    $scope.spacing_rule = await chrome.runtime.sendMessage({purpose: 'get_cache_setting', key: 'spacing_rule'});
     $scope.spacing_rule_display = utils_chrome.get_i18n($scope.spacing_rule);
-    $scope.blacklists = utils_chrome.CACHED_SETTINGS['blacklists'];
-    $scope.whitelists = utils_chrome.CACHED_SETTINGS['whitelists'];
+    $scope.blacklists = await chrome.runtime.sendMessage({purpose: 'get_cache_setting', key: 'blacklists'});
+    $scope.whitelists = await chrome.runtime.sendMessage({purpose: 'get_cache_setting', key: 'whitelists'});
     $scope.change_spacing_rule = function() {
       play_sound('Shouryuuken');
 
@@ -86,10 +83,7 @@ app.controller('OptionsController', [
       }
 
       $scope.spacing_rule_display = utils_chrome.get_i18n($scope.spacing_rule);
-
-      utils_chrome.SYNC_STORAGE.set({'spacing_rule': $scope.spacing_rule}, function() {
-        // print_sync_storage();
-      });
+      chrome.runtime.sendMessage({purpose: 'set_cache_setting', key: 'spacing_rule', value: $scope.spacing_rule});
     };
 
     $scope.update_urls = function(url) {
@@ -98,12 +92,8 @@ app.controller('OptionsController', [
 
         var spacing_rule = $scope.spacing_rule; // 'blacklists' or 'whitelists'
         var urls = $scope[spacing_rule];
-        var obj_to_save = {};
-        obj_to_save[spacing_rule] = urls;
+        chrome.runtime.sendMessage({purpose: 'set_cache_setting', key: spacing_rule, value: urls});
 
-        utils_chrome.SYNC_STORAGE.set(obj_to_save, function() {
-          // utils_chrome.print_sync_storage();
-        });
       }
       else {
         play_sound('WahWahWaaah');
@@ -120,11 +110,7 @@ app.controller('OptionsController', [
       var urls = $scope[spacing_rule];
       urls.splice(array_index, 1);
 
-      var obj_to_save = {};
-      obj_to_save[spacing_rule] = urls;
-      utils_chrome.SYNC_STORAGE.set(obj_to_save, function() {
-        // utils_chrome.print_sync_storage();
-      });
+      chrome.runtime.sendMessage({purpose: 'set_cache_setting', key: spacing_rule, value: urls});
 
       event.preventDefault();
     };
@@ -139,12 +125,8 @@ app.controller('OptionsController', [
         var spacing_rule = $scope.spacing_rule;
         var urls = $scope[spacing_rule];
         urls.push(new_url);
+        chrome.runtime.sendMessage({purpose: 'set_cache_setting', key: spacing_rule, value: urls});
 
-        var obj_to_save = {};
-        obj_to_save[spacing_rule] = urls;
-        utils_chrome.SYNC_STORAGE.set(obj_to_save, function() {
-          // utils_chrome.print_sync_storage();
-        });
       }
       else {
         play_sound('WahWahWaaah');
@@ -166,17 +148,16 @@ app.controller('OptionsController', [
      在這個頁面靜音
      */
     $scope.label_is_mute = utils_chrome.get_i18n('label_is_mute');
-    $scope.is_mute = utils_chrome.CACHED_SETTINGS['is_mute'];
+    $scope.is_mute = await chrome.runtime.sendMessage({purpose: 'get_cache_setting', key: 'is_mute'});
     $scope.$watch('is_mute', function(new_val, old_val) {
       if (new_val !== old_val) {
-        utils_chrome.SYNC_STORAGE.set({'is_mute': new_val}, function() {
-          // utils_chrome.print_sync_storage();
-        });
+        chrome.runtime.sendMessage({purpose: 'set_cache_setting', key: 'is_mute', value: new_val});
       }
 
       IS_MUTE = new_val;
     });
 
+    $scope.$apply()
   }
 ]);
 

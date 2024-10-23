@@ -11,6 +11,10 @@ function is_valid_url_for_spacing(url) {
   }
 }
 
+function spacing_page() {
+  pangu.spacingPage();
+}
+
 /*
  Angular
  */
@@ -19,11 +23,11 @@ var app = angular.module('app', []);
 
 app.controller('PopupController', [
   '$scope',
-  function PopupController($scope) {
+  async function PopupController($scope) {
     angular.element('#god_of_spacing').html(utils_chrome.get_i18n('god_of_spacing'));
 
     // 切換 spacing_mode
-    $scope.spacing_mode = utils_chrome.CACHED_SETTINGS['spacing_mode'];
+    $scope.spacing_mode = await chrome.runtime.sendMessage({purpose: 'get_cache_setting', key: 'spacing_mode'});
     $scope.spacing_mode_display = utils_chrome.get_i18n($scope.spacing_mode);
     $scope.change_spacing_mode = function() {
       if ($scope.spacing_mode === 'spacing_when_load') {
@@ -35,9 +39,7 @@ app.controller('PopupController', [
 
       $scope.spacing_mode_display = utils_chrome.get_i18n($scope.spacing_mode);
 
-      utils_chrome.SYNC_STORAGE.set({'spacing_mode': $scope.spacing_mode}, function() {
-        // utils_chrome.print_sync_storage();
-      });
+      chrome.runtime.sendMessage({purpose: 'set_cache_setting', key: 'spacing_mode', value: $scope.spacing_mode});
     };
 
     // 招喚空格之神
@@ -53,7 +55,10 @@ app.controller('PopupController', [
 
           // 略過 chrome:// 之類的 URL
           if (is_valid_url_for_spacing(tab.url)) {
-            chrome.tabs.executeScript(tab.id, {code: 'pangu.spacingPage();', allFrames: true});
+            chrome.scripting.executeScript({
+              target: {tabId: tab.id},
+              func: spacing_page
+            });
           }
           else {
             if (i === 0) {
@@ -69,5 +74,6 @@ app.controller('PopupController', [
     $scope.open_options_page = function() {
       chrome.tabs.create({url: 'pages/options.html'});
     };
+    $scope.$apply()
   }
 ]);
