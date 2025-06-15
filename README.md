@@ -26,7 +26,7 @@
   - [pangu.java](https://github.com/vinta/pangu.java) (Java)
   - [pangu.js](https://github.com/vinta/pangu.js) (JavaScript)
   - [pangu.py](https://github.com/vinta/pangu.py) (Python)
-  - [pangu.dart](https://github.com/SemonCat/pangu.dart)(Dart)
+  - [pangu.dart](https://github.com/SemonCat/pangu.dart) (Dart)
   - [pangu.space](https://github.com/vinta/pangu.space) (Web API)
 
 - Community supports:
