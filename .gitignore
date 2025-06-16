@@ -1,5 +1,30 @@
 *.log
 *.pem
 browser_extensions/paranoid-auto-spacing.zip
-coverage/
 node_modules/
+
+# Test results
+test-results/
+playwright-report/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Test coverage
+.nyc_output/
+
+# Environment files
+.env
+.env.*
+
+# Temporary files
+tmp/
+temp/

@@ -16,7 +16,7 @@
 
 ### For Users
 
-- [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (**2019-02-09 UPDATED**)
+- [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (**2025-06-16 UPDATED**)
 - [Mozilla Firefox](https://github.com/vinta/pangu.js/blob/master/browser_extensions/firefox/paranoid-auto-spacing.user.js) (**2019-02-09 UPDATED**)
 
 ### For Developers
@@ -49,12 +49,19 @@ $ yarn add pangu
 
 ### Browser
 
-Files are located in `./node_modules/pangu/dist/browser/`.
+Files are located in `./node_modules/pangu/dist/`.
 
 ```html
-<head>
-  <script src="pangu.min.js"></script>
-</head>
+<!-- For modern browsers with ES modules support -->
+<script type="module">
+  import pangu from './node_modules/pangu/dist/browser.js';
+  
+  const text = pangu.spacing("當你凝視著bug，bug也凝視著你");
+  // text = '當你凝視著 bug，bug 也凝視著你'
+</script>
+
+<!-- For legacy browsers or direct script tag usage -->
+<script src="./node_modules/pangu/dist/browser.umd.js"></script>
 <script>
   const text = pangu.spacing("當你凝視著bug，bug也凝視著你");
   // text = '當你凝視著 bug，bug 也凝視著你'
@@ -80,38 +87,19 @@ Files are located in `./node_modules/pangu/dist/browser/`.
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js"></script>
 ```
 
-You can also import `pangu.js` as an ES Module via [jspm](https://jspm.org/) or [Skypack](https://www.skypack.dev/):
-
-```html
-<script type="module">
-  import pangu from 'https://jspm.dev/pangu@4.0.7';
-  import pangu from 'https://cdn.skypack.dev/pangu@4.0.7';
-</script>
-```
-
 ### Node.js
 
 Learn more on [npm](https://www.npmjs.com/package/pangu).
 
 ```js
+import pangu from 'pangu';
+// or
 const pangu = require('pangu');
 
 const text = pangu.spacing('與PM戰鬥的人，應當小心自己不要成為PM');
 // text = '與 PM 戰鬥的人，應當小心自己不要成為 PM'
 
-pangu.spacingFile('/path/to/text.txt', (err, data) => {
-  console.log(data);
-});
-
-pangu.spacingFile('/path/to/text.txt')
-  .then((data) => {
-    console.log(data);
-  })
-  .catch((err) => {
-    console.error(err);
-  });
-
-const data = pangu.spacingFileSync('/path/to/text.txt');
+const content = await pangu.spacingFile('/path/to/text.txt');
 ```
 
 You **SHOULD NOT** use `pangu.js` directly to spacing Markdown documents, this library is specially designed for HTML webpages and plain texts without any markup language. See [issue #127](https://github.com/vinta/pangu.js/issues/127).
