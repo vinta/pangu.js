@@ -84,7 +84,7 @@ export class Pangu {
   version: string;
 
   constructor() {
-    this.version = '4.0.7';
+    this.version = '5.0.0'; 
   }
 
   convertToFullwidth(symbols: string): string {
