@@ -288,61 +288,39 @@
         nextTextNode = currentTextNode;
       }
     }
-    spacingNodeSync(contextNode) {
+    spacingNode(contextNode) {
       let xPathQuery = ".//*/text()[normalize-space(.)]";
       if (contextNode instanceof Element && contextNode.children && contextNode.children.length === 0) {
         xPathQuery = ".//text()[normalize-space(.)]";
       }
       this.spacingNodeByXPath(xPathQuery, contextNode);
     }
-    async spacingNode(contextNode) {
-      return this.spacingNodeSync(contextNode);
-    }
-    spacingElementByIdSync(idName) {
+    spacingElementById(idName) {
       const xPathQuery = `id("${idName}")//text()`;
       this.spacingNodeByXPath(xPathQuery, document);
     }
-    async spacingElementById(idName) {
-      return this.spacingElementByIdSync(idName);
-    }
-    spacingElementByClassNameSync(className) {
+    spacingElementByClassName(className) {
       const xPathQuery = `//*[contains(concat(" ", normalize-space(@class), " "), "${className}")]//text()`;
       this.spacingNodeByXPath(xPathQuery, document);
     }
-    async spacingElementByClassName(className) {
-      return this.spacingElementByClassNameSync(className);
-    }
-    spacingElementByTagNameSync(tagName) {
+    spacingElementByTagName(tagName) {
       const xPathQuery = `//${tagName}//text()`;
       this.spacingNodeByXPath(xPathQuery, document);
     }
-    async spacingElementByTagName(tagName) {
-      return this.spacingElementByTagNameSync(tagName);
-    }
-    spacingPageTitleSync() {
+    spacingPageTitle() {
       const xPathQuery = "/html/head/title/text()";
       this.spacingNodeByXPath(xPathQuery, document);
     }
-    async spacingPageTitle() {
-      return this.spacingPageTitleSync();
-    }
-    spacingPageBodySync() {
+    spacingPageBody() {
       let xPathQuery = "/html/body//*/text()[normalize-space(.)]";
       ["script", "style", "textarea"].forEach((tag) => {
         xPathQuery = `${xPathQuery}[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
       });
       this.spacingNodeByXPath(xPathQuery, document);
     }
-    async spacingPageBody() {
-      return this.spacingPageBodySync();
-    }
-    spacingPageSync() {
-      this.spacingPageTitleSync();
-      this.spacingPageBodySync();
-    }
-    async spacingPage() {
-      await this.spacingPageTitle();
-      await this.spacingPageBody();
+    spacingPage() {
+      this.spacingPageTitle();
+      this.spacingPageBody();
     }
     autoSpacingPage(pageDelay = 1e3, nodeDelay = 500, nodeMaxWait = 2e3) {
       if (!(document.body instanceof Node)) {
@@ -353,7 +331,7 @@
       }
       this.isAutoSpacingPageExecuted = true;
       const onceSpacingPage = once(() => {
-        this.spacingPageSync();
+        this.spacingPage();
       });
       const videos = document.getElementsByTagName("video");
       if (videos.length === 0) {
@@ -382,7 +360,7 @@
         while (queue.length) {
           const node = queue.shift();
           if (node) {
-            self2.spacingNodeSync(node);
+            self2.spacingNode(node);
           }
         }
       }, nodeDelay, nodeMaxWait);

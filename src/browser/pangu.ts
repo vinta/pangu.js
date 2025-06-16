@@ -266,7 +266,7 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  spacingNodeSync(contextNode: Node): void {
+  spacingNode(contextNode: Node): void {
     let xPathQuery = './/*/text()[normalize-space(.)]';
     if (contextNode instanceof Element && contextNode.children && contextNode.children.length === 0) {
       xPathQuery = './/text()[normalize-space(.)]';
@@ -274,47 +274,27 @@ export class BrowserPangu extends Pangu {
     this.spacingNodeByXPath(xPathQuery, contextNode);
   }
 
-  async spacingNode(contextNode: Node): Promise<void> {
-    return this.spacingNodeSync(contextNode);
-  }
-
-  spacingElementByIdSync(idName: string): void {
+  spacingElementById(idName: string): void {
     const xPathQuery = `id("${idName}")//text()`;
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
-  async spacingElementById(idName: string): Promise<void> {
-    return this.spacingElementByIdSync(idName);
-  }
-
-  spacingElementByClassNameSync(className: string): void {
+  spacingElementByClassName(className: string): void {
     const xPathQuery = `//*[contains(concat(" ", normalize-space(@class), " "), "${className}")]//text()`;
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
-  async spacingElementByClassName(className: string): Promise<void> {
-    return this.spacingElementByClassNameSync(className);
-  }
-
-  spacingElementByTagNameSync(tagName: string): void {
+  spacingElementByTagName(tagName: string): void {
     const xPathQuery = `//${tagName}//text()`;
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
-  async spacingElementByTagName(tagName: string): Promise<void> {
-    return this.spacingElementByTagNameSync(tagName);
-  }
-
-  spacingPageTitleSync(): void {
+  spacingPageTitle(): void {
     const xPathQuery = '/html/head/title/text()';
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
-  async spacingPageTitle(): Promise<void> {
-    return this.spacingPageTitleSync();
-  }
-
-  spacingPageBodySync(): void {
+  spacingPageBody(): void {
     // // >> 任意位置的節點
     // . >> 當前節點
     // .. >> 父節點
@@ -353,18 +333,9 @@ export class BrowserPangu extends Pangu {
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
-  async spacingPageBody(): Promise<void> {
-    return this.spacingPageBodySync();
-  }
-
-  spacingPageSync(): void {
-    this.spacingPageTitleSync();
-    this.spacingPageBodySync();
-  }
-
-  async spacingPage(): Promise<void> {
-    await this.spacingPageTitle();
-    await this.spacingPageBody();
+  spacingPage(): void {
+    this.spacingPageTitle();
+    this.spacingPageBody();
   }
 
   autoSpacingPage(pageDelay = 1000, nodeDelay = 500, nodeMaxWait = 2000): void {
@@ -378,7 +349,7 @@ export class BrowserPangu extends Pangu {
     this.isAutoSpacingPageExecuted = true;
 
     const onceSpacingPage = once(() => {
-      this.spacingPageSync();
+      this.spacingPage();
     });
 
     // TODO
@@ -414,7 +385,7 @@ export class BrowserPangu extends Pangu {
       while (queue.length) {
         const node = queue.shift();
         if (node) {
-          self.spacingNodeSync(node);
+          self.spacingNode(node);
         }
       }
     }, nodeDelay, nodeMaxWait);

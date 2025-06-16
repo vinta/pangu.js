@@ -29,9 +29,9 @@ test.describe('Browser UMD imports', () => {
   test('should have working spacing functionality', async ({ page }) => {
     await page.addScriptTag({ path: path.join(__dirname, '../../dist/browser/pangu.umd.js') });
     
-    const result = await page.evaluate(async () => {
+    const result = await page.evaluate(() => {
       const text = 'Hello世界';
-      const spaced = await window.pangu.spacing(text);
+      const spaced = window.pangu.spacing(text);
       return { original: text, spaced };
     });
 

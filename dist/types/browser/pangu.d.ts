@@ -14,20 +14,13 @@ export declare class BrowserPangu extends Pangu {
     isFirstTextChild(parentNode: Node, targetNode: Node): boolean;
     isLastTextChild(parentNode: Node, targetNode: Node): boolean;
     spacingNodeByXPath(xPathQuery: string, contextNode: Node): void;
-    spacingNodeSync(contextNode: Node): void;
-    spacingNode(contextNode: Node): Promise<void>;
-    spacingElementByIdSync(idName: string): void;
-    spacingElementById(idName: string): Promise<void>;
-    spacingElementByClassNameSync(className: string): void;
-    spacingElementByClassName(className: string): Promise<void>;
-    spacingElementByTagNameSync(tagName: string): void;
-    spacingElementByTagName(tagName: string): Promise<void>;
-    spacingPageTitleSync(): void;
-    spacingPageTitle(): Promise<void>;
-    spacingPageBodySync(): void;
-    spacingPageBody(): Promise<void>;
-    spacingPageSync(): void;
-    spacingPage(): Promise<void>;
+    spacingNode(contextNode: Node): void;
+    spacingElementById(idName: string): void;
+    spacingElementByClassName(className: string): void;
+    spacingElementByTagName(tagName: string): void;
+    spacingPageTitle(): void;
+    spacingPageBody(): void;
+    spacingPage(): void;
     autoSpacingPage(pageDelay?: number, nodeDelay?: number, nodeMaxWait?: number): void;
 }
 declare const pangu: BrowserPangu;

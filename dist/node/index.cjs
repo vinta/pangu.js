@@ -1,39 +1,15 @@
 "use strict";
 Object.defineProperties(exports, { __esModule: { value: true }, [Symbol.toStringTag]: { value: "Module" } });
-const fs = require("fs");
+const promises = require("node:fs/promises");
+const node_fs = require("node:fs");
 const shared_index = require("../shared/index.cjs");
-function _interopNamespaceDefault(e) {
-  const n = Object.create(null, { [Symbol.toStringTag]: { value: "Module" } });
-  if (e) {
-    for (const k in e) {
-      if (k !== "default") {
-        const d = Object.getOwnPropertyDescriptor(e, k);
-        Object.defineProperty(n, k, d.get ? d : {
-          enumerable: true,
-          get: () => e[k]
-        });
-      }
-    }
-  }
-  n.default = e;
-  return Object.freeze(n);
-}
-const fs__namespace = /* @__PURE__ */ _interopNamespaceDefault(fs);
 class NodePangu extends shared_index.Pangu {
-  spacingFile(path) {
-    return new Promise((resolve, reject) => {
-      fs__namespace.readFile(path, "utf8", (err, data) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        const spacingData = this.spacingText(data);
-        resolve(spacingData);
-      });
-    });
+  async spacingFile(path) {
+    const data = await promises.readFile(path, "utf8");
+    return this.spacingText(data);
   }
   spacingFileSync(path) {
-    return this.spacingText(fs__namespace.readFileSync(path, "utf8"));
+    return this.spacingText(node_fs.readFileSync(path, "utf8"));
   }
 }
 const pangu = new NodePangu();
