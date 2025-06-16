@@ -337,6 +337,7 @@ export class BrowserPangu extends Pangu {
     const queue: Node[] = [];
 
     // it's possible that multiple workers process the queue at the same time
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     const debouncedSpacingNodes = debounce(
       () => {
@@ -357,7 +358,7 @@ export class BrowserPangu extends Pangu {
       // Element: https://developer.mozilla.org/en-US/docs/Web/API/Element
       // Text: https://developer.mozilla.org/en-US/docs/Web/API/Text
       mutations.forEach((mutation) => {
-        switch (mutation.type /* eslint-disable indent */) {
+        switch (mutation.type) {
           case 'childList':
             mutation.addedNodes.forEach((node) => {
               if (node.nodeType === Node.ELEMENT_NODE) {
@@ -387,15 +388,16 @@ export class BrowserPangu extends Pangu {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected isContentEditable(node: any) {
     return node.isContentEditable || (node.getAttribute && node.getAttribute('g_editable') === 'true');
   }
 
-  protected isSpecificTag(node: any, tagRegex: RegExp) {
+  protected isSpecificTag(node: Node, tagRegex: RegExp) {
     return node && node.nodeName && node.nodeName.search(tagRegex) >= 0;
   }
 
-  protected isInsideSpecificTag(node: any, tagRegex: RegExp, checkCurrent = false) {
+  protected isInsideSpecificTag(node: Node, tagRegex: RegExp, checkCurrent = false) {
     let currentNode = node;
     if (checkCurrent) {
       if (this.isSpecificTag(currentNode, tagRegex)) {
