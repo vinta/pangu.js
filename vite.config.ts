@@ -1,7 +1,6 @@
 import { defineConfig, build } from 'vite';
 import { resolve } from 'path';
 import dts from 'vite-plugin-dts';
-import fs from 'fs/promises';
 
 const projectRoot = process.cwd();
 
@@ -26,9 +25,9 @@ const multiBuildPlugin = () => {
             sourcemap: true,
             lib: {
               entry: {
+                'shared/index': resolve(projectRoot, 'src/shared/index.ts'),
                 'node/index': resolve(projectRoot, 'src/node/index.ts'),
-                'node/cli': resolve(projectRoot, 'src/node/cli.ts'),
-                'shared/index': resolve(projectRoot, 'src/shared/index.ts')
+                'node/cli': resolve(projectRoot, 'src/node/cli.ts')
               },
               formats: ['cjs']
             },
@@ -100,9 +99,9 @@ export default defineConfig({
     lib: {
       entry: {
         'shared/index': resolve(projectRoot, 'src/shared/index.ts'),
-        'browser/pangu': resolve(projectRoot, 'src/browser/pangu.ts'),
         'node/index': resolve(projectRoot, 'src/node/index.ts'),
-        'node/cli': resolve(projectRoot, 'src/node/cli.ts')
+        'node/cli': resolve(projectRoot, 'src/node/cli.ts'),
+        'browser/pangu': resolve(projectRoot, 'src/browser/pangu.ts')
       },
       formats: ['es']
     },
