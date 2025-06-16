@@ -69,68 +69,12 @@ export class BrowserPangu extends Pangu {
     // this.ignoreAttributes
   }
 
-  isContentEditable(node: any): boolean {
-    return ((node.isContentEditable) || (node.getAttribute && node.getAttribute('g_editable') === 'true'));
-  }
-
-  isSpecificTag(node: any, tagRegex: RegExp): boolean {
-    return (node && node.nodeName && node.nodeName.search(tagRegex) >= 0);
-  }
-
-  isInsideSpecificTag(node: any, tagRegex: RegExp, checkCurrent = false): boolean {
-    let currentNode = node;
-    if (checkCurrent) {
-      if (this.isSpecificTag(currentNode, tagRegex)) {
-        return true;
-      }
+  public spacingNode(contextNode: Node): void {
+    let xPathQuery = './/*/text()[normalize-space(.)]';
+    if (contextNode instanceof Element && contextNode.children && contextNode.children.length === 0) {
+      xPathQuery = './/text()[normalize-space(.)]';
     }
-    while (currentNode.parentNode) {
-      currentNode = currentNode.parentNode;
-      if (this.isSpecificTag(currentNode, tagRegex)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  canIgnoreNode(node: Node): boolean {
-    let currentNode = node;
-    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
-      return true;
-    }
-    while (currentNode.parentNode) {
-      currentNode = currentNode.parentNode;
-      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  isFirstTextChild(parentNode: Node, targetNode: Node): boolean {
-    const { childNodes } = parentNode;
-
-    // 只判斷第一個含有 text 的 node
-    for (let i = 0; i < childNodes.length; i++) {
-      const childNode = childNodes[i];
-      if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
-        return childNode === targetNode;
-      }
-    }
-    return false;
-  }
-
-  isLastTextChild(parentNode: Node, targetNode: Node): boolean {
-    const { childNodes } = parentNode;
-
-    // 只判斷倒數第一個含有 text 的 node
-    for (let i = childNodes.length - 1; i > -1; i--) {
-      const childNode = childNodes[i];
-      if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
-        return childNode === targetNode;
-      }
-    }
-    return false;
+    this.spacingNodeByXPath(xPathQuery, contextNode);
   }
 
   spacingNodeByXPath(xPathQuery: string, contextNode: Node): void {
@@ -268,35 +212,27 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  spacingNode(contextNode: Node): void {
-    let xPathQuery = './/*/text()[normalize-space(.)]';
-    if (contextNode instanceof Element && contextNode.children && contextNode.children.length === 0) {
-      xPathQuery = './/text()[normalize-space(.)]';
-    }
-    this.spacingNodeByXPath(xPathQuery, contextNode);
-  }
-
-  spacingElementById(idName: string): void {
+  public spacingElementById(idName: string): void {
     const xPathQuery = `id("${idName}")//text()`;
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
-  spacingElementByClassName(className: string): void {
+  public spacingElementByClassName(className: string): void {
     const xPathQuery = `//*[contains(concat(" ", normalize-space(@class), " "), "${className}")]//text()`;
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
-  spacingElementByTagName(tagName: string): void {
+  public spacingElementByTagName(tagName: string): void {
     const xPathQuery = `//${tagName}//text()`;
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
-  spacingPageTitle(): void {
+  public spacingPageTitle(): void {
     const xPathQuery = '/html/head/title/text()';
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
-  spacingPageBody(): void {
+  public spacingPageBody(): void {
     // // >> 任意位置的節點
     // . >> 當前節點
     // .. >> 父節點
@@ -335,12 +271,12 @@ export class BrowserPangu extends Pangu {
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
-  spacingPage(): void {
+  public spacingPage(): void {
     this.spacingPageTitle();
     this.spacingPageBody();
   }
 
-  autoSpacingPage(pageDelay = 1000, nodeDelay = 500, nodeMaxWait = 2000): void {
+  public autoSpacingPage(pageDelay = 1000, nodeDelay = 500, nodeMaxWait = 2000): void {
     if (!(document.body instanceof Node)) {
       return;
     }
@@ -426,6 +362,71 @@ export class BrowserPangu extends Pangu {
       subtree: true,
     });
   }
+
+  protected isContentEditable(node: any): boolean {
+    return ((node.isContentEditable) || (node.getAttribute && node.getAttribute('g_editable') === 'true'));
+  }
+
+  protected isSpecificTag(node: any, tagRegex: RegExp): boolean {
+    return (node && node.nodeName && node.nodeName.search(tagRegex) >= 0);
+  }
+
+  protected isInsideSpecificTag(node: any, tagRegex: RegExp, checkCurrent = false): boolean {
+    let currentNode = node;
+    if (checkCurrent) {
+      if (this.isSpecificTag(currentNode, tagRegex)) {
+        return true;
+      }
+    }
+    while (currentNode.parentNode) {
+      currentNode = currentNode.parentNode;
+      if (this.isSpecificTag(currentNode, tagRegex)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  protected canIgnoreNode(node: Node): boolean {
+    let currentNode = node;
+    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+      return true;
+    }
+    while (currentNode.parentNode) {
+      currentNode = currentNode.parentNode;
+      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  protected isFirstTextChild(parentNode: Node, targetNode: Node): boolean {
+    const { childNodes } = parentNode;
+
+    // 只判斷第一個含有 text 的 node
+    for (let i = 0; i < childNodes.length; i++) {
+      const childNode = childNodes[i];
+      if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
+        return childNode === targetNode;
+      }
+    }
+    return false;
+  }
+
+  protected isLastTextChild(parentNode: Node, targetNode: Node): boolean {
+    const { childNodes } = parentNode;
+
+    // 只判斷倒數第一個含有 text 的 node
+    for (let i = childNodes.length - 1; i > -1; i--) {
+      const childNode = childNodes[i];
+      if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
+        return childNode === targetNode;
+      }
+    }
+    return false;
+  }
+
 }
 
 // Create default instance
