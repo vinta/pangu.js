@@ -1,10 +1,9 @@
-import { Pangu } from "../shared";
+import { Pangu } from '../shared';
 
-function once<T extends (...args: any[]) => any>(
-  func: T
-): (...args: Parameters<T>) => ReturnType<T> | undefined {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function once<T extends (...args: any[]) => any>(func: T) {
   let executed = false;
-  return function (...args: Parameters<T>): ReturnType<T> | undefined {
+  return function (...args: Parameters<T>) {
     if (executed) {
       return undefined;
     }
@@ -13,15 +12,12 @@ function once<T extends (...args: any[]) => any>(
   };
 }
 
-function debounce<T extends (...args: any[]) => void>(
-  func: T,
-  delay: number,
-  mustRunDelay: number = Infinity
-): (...args: Parameters<T>) => void {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mustRunDelay: number = Infinity) {
   let timer: number | null = null;
   let startTime: number | null = null;
 
-  return function (...args: Parameters<T>): void {
+  return function (...args: Parameters<T>) {
     const currentTime = Date.now();
 
     if (timer) {
@@ -64,8 +60,8 @@ export class BrowserPangu extends Pangu {
     this.isAutoSpacingPageExecuted = false;
   }
 
-  public spacingNodeByXPath(xPathQuery: string, contextNode: Node): void {
-    if (!(contextNode instanceof Node) || (contextNode instanceof DocumentFragment)) {
+  public spacingNodeByXPath(xPathQuery: string, contextNode: Node) {
+    if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
       return;
     }
 
@@ -83,7 +79,11 @@ export class BrowserPangu extends Pangu {
       currentTextNode = textNodes.snapshotItem(i);
       if (!currentTextNode) continue;
 
-      if (currentTextNode.parentNode && this.isSpecificTag(currentTextNode.parentNode, this.presentationalTags) && !this.isInsideSpecificTag(currentTextNode.parentNode, this.ignoredTags)) {
+      if (
+        currentTextNode.parentNode &&
+        this.isSpecificTag(currentTextNode.parentNode, this.presentationalTags) &&
+        !this.isInsideSpecificTag(currentTextNode.parentNode, this.ignoredTags)
+      ) {
         const elementNode = currentTextNode.parentNode;
 
         if (elementNode.previousSibling) {
@@ -143,12 +143,20 @@ export class BrowserPangu extends Pangu {
           // 而且 nextTextNode 必須是第一個 text child
           // 才能把空格加在 nextTextNode 的前面
           let nextNode: Node = nextTextNode;
-          while (nextNode.parentNode && nextNode.nodeName.search(this.spaceSensitiveTags) === -1 && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
+          while (
+            nextNode.parentNode &&
+            nextNode.nodeName.search(this.spaceSensitiveTags) === -1 &&
+            this.isFirstTextChild(nextNode.parentNode, nextNode)
+          ) {
             nextNode = nextNode.parentNode;
           }
 
           let currentNode: Node = currentTextNode;
-          while (currentNode.parentNode && currentNode.nodeName.search(this.spaceSensitiveTags) === -1 && this.isLastTextChild(currentNode.parentNode, currentNode)) {
+          while (
+            currentNode.parentNode &&
+            currentNode.nodeName.search(this.spaceSensitiveTags) === -1 &&
+            this.isLastTextChild(currentNode.parentNode, currentNode)
+          ) {
             currentNode = currentNode.parentNode;
           }
 
@@ -161,7 +169,10 @@ export class BrowserPangu extends Pangu {
 
           if (currentNode.nodeName.search(this.blockTags) === -1) {
             if (nextNode.nodeName.search(this.spaceSensitiveTags) === -1) {
-              if ((nextNode.nodeName.search(this.ignoredTags) === -1) && (nextNode.nodeName.search(this.blockTags) === -1)) {
+              if (
+                nextNode.nodeName.search(this.ignoredTags) === -1 &&
+                nextNode.nodeName.search(this.blockTags) === -1
+              ) {
                 if (nextTextNode.previousSibling) {
                   if (nextTextNode.previousSibling.nodeName.search(this.spaceLikeTags) === -1) {
                     if (nextTextNode instanceof Text) {
@@ -213,7 +224,7 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  public spacingNode(contextNode: Node): void {
+  public spacingNode(contextNode: Node) {
     let xPathQuery = './/*/text()[normalize-space(.)]';
     if (contextNode instanceof Element && contextNode.children && contextNode.children.length === 0) {
       xPathQuery = './/text()[normalize-space(.)]';
@@ -221,27 +232,27 @@ export class BrowserPangu extends Pangu {
     this.spacingNodeByXPath(xPathQuery, contextNode);
   }
 
-  public spacingElementById(idName: string): void {
+  public spacingElementById(idName: string) {
     const xPathQuery = `id("${idName}")//text()`;
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
-  public spacingElementByClassName(className: string): void {
+  public spacingElementByClassName(className: string) {
     const xPathQuery = `//*[contains(concat(" ", normalize-space(@class), " "), "${className}")]//text()`;
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
-  public spacingElementByTagName(tagName: string): void {
+  public spacingElementByTagName(tagName: string) {
     const xPathQuery = `//${tagName}//text()`;
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
-  public spacingPageTitle(): void {
+  public spacingPageTitle() {
     const xPathQuery = '/html/head/title/text()';
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
-  public spacingPageBody(): void {
+  public spacingPageBody() {
     // // >> 任意位置的節點
     // . >> 當前節點
     // .. >> 父節點
@@ -280,12 +291,12 @@ export class BrowserPangu extends Pangu {
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
-  public spacingPage(): void {
+  public spacingPage() {
     this.spacingPageTitle();
     this.spacingPageBody();
   }
 
-  public autoSpacingPage(pageDelay = 1000, nodeDelay = 500, nodeMaxWait = 2000): void {
+  public autoSpacingPage(pageDelay = 1000, nodeDelay = 500, nodeMaxWait = 2000) {
     if (!(document.body instanceof Node)) {
       return;
     }
@@ -326,23 +337,28 @@ export class BrowserPangu extends Pangu {
     const queue: Node[] = [];
 
     // it's possible that multiple workers process the queue at the same time
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
-    const debouncedSpacingNodes = debounce(() => {
-      // a single node could be very big which contains a lot of child nodes
-      while (queue.length) {
-        const node = queue.shift();
-        if (node) {
-          self.spacingNode(node);
+    const debouncedSpacingNodes = debounce(
+      () => {
+        // a single node could be very big which contains a lot of child nodes
+        while (queue.length) {
+          const node = queue.shift();
+          if (node) {
+            self.spacingNode(node);
+          }
         }
-      }
-    }, nodeDelay, nodeMaxWait);
+      },
+      nodeDelay,
+      nodeMaxWait,
+    );
 
     // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
     const mutationObserver = new MutationObserver((mutations) => {
       // Element: https://developer.mozilla.org/en-US/docs/Web/API/Element
       // Text: https://developer.mozilla.org/en-US/docs/Web/API/Text
       mutations.forEach((mutation) => {
-        switch (mutation.type) { /* eslint-disable indent */
+        switch (mutation.type) {
           case 'childList':
             mutation.addedNodes.forEach((node) => {
               if (node.nodeType === Node.ELEMENT_NODE) {
@@ -372,15 +388,16 @@ export class BrowserPangu extends Pangu {
     });
   }
 
-  protected isContentEditable(node: any): boolean {
-    return ((node.isContentEditable) || (node.getAttribute && node.getAttribute('g_editable') === 'true'));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected isContentEditable(node: any) {
+    return node.isContentEditable || (node.getAttribute && node.getAttribute('g_editable') === 'true');
   }
 
-  protected isSpecificTag(node: any, tagRegex: RegExp): boolean {
-    return (node && node.nodeName && node.nodeName.search(tagRegex) >= 0);
+  protected isSpecificTag(node: Node, tagRegex: RegExp) {
+    return node && node.nodeName && node.nodeName.search(tagRegex) >= 0;
   }
 
-  protected isInsideSpecificTag(node: any, tagRegex: RegExp, checkCurrent = false): boolean {
+  protected isInsideSpecificTag(node: Node, tagRegex: RegExp, checkCurrent = false) {
     let currentNode = node;
     if (checkCurrent) {
       if (this.isSpecificTag(currentNode, tagRegex)) {
@@ -396,7 +413,7 @@ export class BrowserPangu extends Pangu {
     return false;
   }
 
-  protected canIgnoreNode(node: Node): boolean {
+  protected canIgnoreNode(node: Node) {
     let currentNode = node;
     if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
       return true;
@@ -410,7 +427,7 @@ export class BrowserPangu extends Pangu {
     return false;
   }
 
-  protected isFirstTextChild(parentNode: Node, targetNode: Node): boolean {
+  protected isFirstTextChild(parentNode: Node, targetNode: Node) {
     const { childNodes } = parentNode;
 
     // 只判斷第一個含有 text 的 node
@@ -423,7 +440,7 @@ export class BrowserPangu extends Pangu {
     return false;
   }
 
-  protected isLastTextChild(parentNode: Node, targetNode: Node): boolean {
+  protected isLastTextChild(parentNode: Node, targetNode: Node) {
     const { childNodes } = parentNode;
 
     // 只判斷倒數第一個含有 text 的 node
@@ -435,9 +452,7 @@ export class BrowserPangu extends Pangu {
     }
     return false;
   }
-
 }
-
 
 export const pangu = new BrowserPangu();
 

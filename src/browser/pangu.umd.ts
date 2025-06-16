@@ -1,7 +1,6 @@
-// UMD build entry that exports pangu instance with BrowserPangu class attached
-import pangu, { BrowserPangu } from "./pangu";
+import pangu, { BrowserPangu } from './pangu';
 
-// Attach the class to the instance for UMD builds
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (pangu as any).BrowserPangu = BrowserPangu;
 
 export default pangu;

@@ -6,8 +6,5 @@
     "lib": ["ES2015", "DOM", "DOM.Iterable"],
     "outDir": "./dist/browser"
   },
-  "include": [
-    "src/shared/**/*",
-    "src/browser/**/*"
-  ]
+  "include": ["src/shared/**/*", "src/browser/**/*"]
 }
