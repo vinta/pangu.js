@@ -64,15 +64,7 @@ export class BrowserPangu extends Pangu {
     this.isAutoSpacingPageExecuted = false;
   }
 
-  public spacingNode(contextNode: Node): void {
-    let xPathQuery = './/*/text()[normalize-space(.)]';
-    if (contextNode instanceof Element && contextNode.children && contextNode.children.length === 0) {
-      xPathQuery = './/text()[normalize-space(.)]';
-    }
-    this.spacingNodeByXPath(xPathQuery, contextNode);
-  }
-
-  spacingNodeByXPath(xPathQuery: string, contextNode: Node): void {
+  public spacingNodeByXPath(xPathQuery: string, contextNode: Node): void {
     if (!(contextNode instanceof Node) || (contextNode instanceof DocumentFragment)) {
       return;
     }
@@ -205,6 +197,14 @@ export class BrowserPangu extends Pangu {
 
       nextTextNode = currentTextNode;
     }
+  }
+
+  public spacingNode(contextNode: Node): void {
+    let xPathQuery = './/*/text()[normalize-space(.)]';
+    if (contextNode instanceof Element && contextNode.children && contextNode.children.length === 0) {
+      xPathQuery = './/text()[normalize-space(.)]';
+    }
+    this.spacingNodeByXPath(xPathQuery, contextNode);
   }
 
   public spacingElementById(idName: string): void {
