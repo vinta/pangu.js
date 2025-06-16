@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2018", // Node 10+ support
+    "lib": ["ES2018"],
+    "outDir": "./dist/node",
+    "types": ["node"]
+  },
+  "include": [
+    "src/shared/**/*",
+    "src/node/**/*"
+  ]
+}
