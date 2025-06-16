@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    // Type checking
+    "strict": true,
+    "noImplicitAny": false, // Start loose, gradually enable
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    
+    // Module resolution
+    "module": "ESNext",
+    "target": "ES2015", // Same as current Babel target
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    
+    // Emit
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    
+    // JavaScript support
+    "allowJs": true, // Allow gradual migration
+    "checkJs": false, // Don't type-check JS files yet
+    
+    // Other
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test",
+    "browser_extensions"
+  ]
+}
