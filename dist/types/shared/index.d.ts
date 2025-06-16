@@ -11,4 +11,3 @@ export declare class Pangu {
 }
 export declare const pangu: Pangu;
 export default pangu;
-//# sourceMappingURL=index.d.ts.map

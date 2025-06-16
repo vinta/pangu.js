@@ -58,7 +58,7 @@
     "HISTORY.md"
   ],
   "scripts": {
-    "build": "npm run clean && vite build && vite build --mode browser",
+    "build": "npm run clean && vite build",
     "clean": "rm -rf dist/ playwright-report/ test-results/",
     "test": "npm run build && vitest run && playwright test",
     "test:shared": "npm run build && vitest run tests/shared/",

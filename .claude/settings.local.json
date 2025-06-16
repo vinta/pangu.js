@@ -33,7 +33,8 @@
       "Bash(npm run test:*)",
       "Bash(npm view:*)",
       "Bash(tree:*)",
-      "Bash(npm run clean:*)"
+      "Bash(npm run clean:*)",
+      "Bash(npx vite build:*)"
     ],
     "deny": []
   }

@@ -1,76 +1,124 @@
-/// <reference types="vitest" />
-import { defineConfig } from 'vite';
+import { defineConfig, build } from 'vite';
 import { resolve } from 'path';
 import dts from 'vite-plugin-dts';
+import fs from 'fs/promises';
 
-export default defineConfig(({ mode }) => {
-  // Browser builds (ES + UMD)
-  if (mode === 'browser') {
-    return {
-      build: {
-        target: 'es2015',
-        sourcemap: true,
-        emptyOutDir: false,
-        lib: {
-          entry: resolve(__dirname, 'src/browser/pangu.ts'),
-          formats: ['es', 'umd'],
-          name: 'pangu',
-          fileName: (format) => {
-            if (format === 'es') return 'browser/pangu.js';
-            if (format === 'umd') return 'browser/pangu.umd.js';
-          },
-        },
-        rollupOptions: {
-          external: [], // No externals for browser
-          output: {
-            exports: 'named',
-          },
-        },
-      },
-      plugins: [
-        dts({
-          include: ['src/browser/**/*.ts'],
-          outDir: 'dist/types',
-          rollupTypes: true,
-        }),
-      ],
-    };
-  }
+const projectRoot = process.cwd();
 
-  // Default build: ES modules and CommonJS for Node and shared
+// Plugin to handle multiple builds
+const multiBuildPlugin = () => {
+  let buildCount = 0;
+  
   return {
-    build: {
-      target: 'es2015',
-      sourcemap: true,
-      lib: {
-        entry: {
-          'node/index': resolve(__dirname, 'src/node/index.ts'),
-          'shared/index': resolve(__dirname, 'src/shared/index.ts'),
-          'node/cli': resolve(__dirname, 'src/node/cli.ts'),
-        },
-        formats: ['es', 'cjs'],
-        fileName: (format, entryName) => format === 'es' ? `${entryName}.js` : `${entryName}.cjs`,
-      },
-      rollupOptions: {
-        external: ['fs', 'path'],
-        output: {
-          exports: 'named',
-        },
-      },
-    },
-    plugins: [
-      dts({
-        include: ['src/**/*.ts'],
-        outDir: 'dist/types',
-        rollupTypes: true,
-        copyDtsFiles: true,
-      }),
-    ],
-    test: {
-      globals: true,
-      environment: 'node',
-      include: ['tests/**/*.test.{js,ts}'],
-      exclude: ['tests/browser/**/*.playwright.ts'],
-    },
+    name: 'multi-build',
+    async closeBundle() {
+      buildCount++;
+      
+      // After the first build (ES modules), run additional builds
+      if (buildCount === 1) {
+        // Build CommonJS for Node and shared modules
+        console.log('\nBuilding CommonJS modules...');
+        await build({
+          configFile: false,
+          build: {
+            outDir: 'dist',
+            emptyOutDir: false,
+            sourcemap: true,
+            lib: {
+              entry: {
+                'node/index': resolve(projectRoot, 'src/node/index.ts'),
+                'node/cli': resolve(projectRoot, 'src/node/cli.ts'),
+                'shared/index': resolve(projectRoot, 'src/shared/index.ts')
+              },
+              formats: ['cjs']
+            },
+            rollupOptions: {
+              output: {
+                entryFileNames: '[name].cjs',
+                chunkFileNames: '[name]-[hash].cjs',
+                exports: 'named'
+              },
+              external: (id) => {
+                return id.startsWith('node:') || ['fs', 'path', 'process'].includes(id);
+              }
+            }
+          },
+          plugins: [],
+          logLevel: 'error'
+        });
+        console.log('✓ CommonJS modules built');
+        
+        // Build UMD for browser
+        console.log('\nBuilding browser UMD bundle...');
+        await build({
+          configFile: false,
+          build: {
+            outDir: 'dist',
+            emptyOutDir: false,
+            sourcemap: true,
+            lib: {
+              entry: resolve(projectRoot, 'src/browser/pangu.ts'),
+              name: 'pangu',
+              formats: ['umd'],
+              fileName: () => 'browser/pangu.umd.js'
+            },
+            rollupOptions: {
+              external: (id) => {
+                return id.startsWith('node:') || ['fs', 'path', 'process'].includes(id);
+              }
+            }
+          },
+          plugins: [],
+          logLevel: 'error'
+        });
+        console.log('✓ Browser UMD bundle built');
+      }
+    }
   };
+};
+
+export default defineConfig({
+  plugins: [
+    dts({
+      include: ['src/**/*.ts'],
+      outDir: 'dist/types',
+      insertTypesEntry: true,
+      rollupTypes: false,
+      copyDtsFiles: true,
+      compilerOptions: {
+        declaration: true,
+        declarationMap: false,
+        emitDeclarationOnly: true
+      }
+    }),
+    multiBuildPlugin()
+  ],
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
+    emptyOutDir: true,
+    lib: {
+      entry: {
+        'shared/index': resolve(projectRoot, 'src/shared/index.ts'),
+        'browser/pangu': resolve(projectRoot, 'src/browser/pangu.ts'),
+        'node/index': resolve(projectRoot, 'src/node/index.ts'),
+        'node/cli': resolve(projectRoot, 'src/node/cli.ts')
+      },
+      formats: ['es']
+    },
+    rollupOptions: {
+      output: {
+        entryFileNames: '[name].js',
+        chunkFileNames: '[name]-[hash].js'
+      },
+      external: (id) => {
+        return id.startsWith('node:') || ['fs', 'path', 'process'].includes(id);
+      }
+    }
+  },
+  resolve: {
+    alias: {
+      '@': resolve(projectRoot, 'src')
+    }
+  }
 });
