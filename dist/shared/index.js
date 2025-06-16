@@ -37,9 +37,9 @@ class Pangu {
   convertToFullwidth(symbols) {
     return symbols.replace(/~/g, "～").replace(/!/g, "！").replace(/;/g, "；").replace(/:/g, "：").replace(/,/g, "，").replace(/\./g, "。").replace(/\?/g, "？");
   }
-  spacingSync(text) {
+  spacingText(text) {
     if (typeof text !== "string") {
-      console.warn(`spacing(text) only accepts string but got ${typeof text}`);
+      console.warn(`spacingText(text) only accepts string but got ${typeof text}`);
       return text;
     }
     if (text.length <= 1 || !ANY_CJK.test(text)) {
@@ -85,8 +85,9 @@ class Pangu {
     newText = newText.replace(MIDDLE_DOT, "・");
     return newText;
   }
+  // alias for spacingText()
   spacing(text) {
-    return this.spacingSync(text);
+    return this.spacingText(text);
   }
 }
 const pangu = new Pangu();

@@ -27,13 +27,13 @@ class NodePangu extends shared_index.Pangu {
           reject(err);
           return;
         }
-        const spacingData = this.spacingSync(data);
+        const spacingData = this.spacingText(data);
         resolve(spacingData);
       });
     });
   }
   spacingFileSync(path) {
-    return this.spacingSync(fs__namespace.readFileSync(path, "utf8"));
+    return this.spacingText(fs__namespace.readFileSync(path, "utf8"));
   }
 }
 const pangu = new NodePangu();

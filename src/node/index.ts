@@ -9,14 +9,14 @@ export class NodePangu extends Pangu {
           reject(err);
           return;
         }
-        const spacingData = this.spacingSync(data);
+        const spacingData = this.spacingText(data);
         resolve(spacingData);
       });
     });
   }
 
   spacingFileSync(path: string): string {
-    return this.spacingSync(fs.readFileSync(path, 'utf8'));
+    return this.spacingText(fs.readFileSync(path, 'utf8'));
   }
 }
 

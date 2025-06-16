@@ -14,7 +14,7 @@ describe('Node.js ESM imports', () => {
   it('should support named import of pangu', () => {
     expect(panguNamed).toBeDefined();
     expect(typeof panguNamed.spacing).toBe('function');
-    expect(typeof panguNamed.spacingSync).toBe('function');
+    expect(typeof panguNamed.spacingText).toBe('function');
   });
 
   it('should support named import of NodePangu', () => {
@@ -35,7 +35,7 @@ describe('Node.js ESM imports', () => {
   });
 
   it('should have working spacing functionality', () => {
-    const result = panguDefault.spacingSync('Hello世界');
+    const result = panguDefault.spacingText('Hello世界');
     expect(result).toBe('Hello 世界');
   });
 });
@@ -46,7 +46,7 @@ describe('Node.js CommonJS imports', () => {
     const pangu = module.default || module;
     expect(pangu).toBeDefined();
     expect(typeof pangu.spacing).toBe('function');
-    expect(typeof pangu.spacingSync).toBe('function');
+    expect(typeof pangu.spacingText).toBe('function');
   });
 
   it('should support destructured require', () => {

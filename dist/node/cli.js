@@ -19,7 +19,7 @@ optional arguments:
 const [, , ...args] = process.argv;
 function printSpacingText(text) {
   if (typeof text === "string") {
-    console.log(pangu.spacingSync(text));
+    console.log(pangu.spacingText(text));
   } else {
     console.log(usage);
     process.exit(1);

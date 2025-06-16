@@ -156,7 +156,7 @@ export class BrowserPangu extends Pangu {
           const { previousSibling } = elementNode;
           if (previousSibling.nodeType === Node.TEXT_NODE) {
             const testText = previousSibling.data.substr(-1) + currentTextNode.data.toString().charAt(0);
-            const testNewText = this.spacingSync(testText);
+            const testNewText = this.spacingText(testText);
             if (testText !== testNewText) {
               previousSibling.data = `${previousSibling.data} `;
             }
@@ -167,7 +167,7 @@ export class BrowserPangu extends Pangu {
           const { nextSibling } = elementNode;
           if (nextSibling.nodeType === Node.TEXT_NODE) {
             const testText = currentTextNode.data.substr(-1) + nextSibling.data.toString().charAt(0);
-            const testNewText = this.spacingSync(testText);
+            const testNewText = this.spacingText(testText);
             if (testText !== testNewText) {
               nextSibling.data = ` ${nextSibling.data}`;
             }
@@ -180,7 +180,7 @@ export class BrowserPangu extends Pangu {
         continue;
       }
 
-      const newText = this.spacingSync(currentTextNode.data);
+      const newText = this.spacingText(currentTextNode.data);
       if (currentTextNode.data !== newText) {
         currentTextNode.data = newText;
       }
@@ -197,7 +197,7 @@ export class BrowserPangu extends Pangu {
 
         // currentTextNode 的最後一個字 + nextTextNode 的第一個字
         const testText = currentTextNode.data.toString().substr(-1) + nextTextNode.data.toString().substr(0, 1);
-        const testNewText = this.spacingSync(testText);
+        const testNewText = this.spacingText(testText);
         if (testNewText !== testText) {
           // 往上找 nextTextNode 的 parent node
           // 直到遇到 spaceSensitiveTags

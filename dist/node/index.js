@@ -8,13 +8,13 @@ class NodePangu extends Pangu {
           reject(err);
           return;
         }
-        const spacingData = this.spacingSync(data);
+        const spacingData = this.spacingText(data);
         resolve(spacingData);
       });
     });
   }
   spacingFileSync(path) {
-    return this.spacingSync(fs.readFileSync(path, "utf8"));
+    return this.spacingText(fs.readFileSync(path, "utf8"));
   }
 }
 const pangu = new NodePangu();

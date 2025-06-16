@@ -98,9 +98,9 @@ export class Pangu {
       .replace(/\?/g, '？');
   }
 
-  spacingSync(text: string): string {
+  spacingText(text: string): string {
     if (typeof text !== 'string') {
-      console.warn(`spacing(text) only accepts string but got ${typeof text}`); // eslint-disable-line no-console
+      console.warn(`spacingText(text) only accepts string but got ${typeof text}`); // eslint-disable-line no-console
       return text;
     }
 
@@ -186,9 +186,9 @@ export class Pangu {
     return newText;
   }
 
-  // alias for spacingSync()
+  // alias for spacingText()
   spacing(text: string): string {
-    return this.spacingSync(text);
+    return this.spacingText(text);
   }
 }
 

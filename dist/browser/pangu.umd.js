@@ -41,9 +41,9 @@
     convertToFullwidth(symbols) {
       return symbols.replace(/~/g, "～").replace(/!/g, "！").replace(/;/g, "；").replace(/:/g, "：").replace(/,/g, "，").replace(/\./g, "。").replace(/\?/g, "？");
     }
-    spacingSync(text) {
+    spacingText(text) {
       if (typeof text !== "string") {
-        console.warn(`spacing(text) only accepts string but got ${typeof text}`);
+        console.warn(`spacingText(text) only accepts string but got ${typeof text}`);
         return text;
       }
       if (text.length <= 1 || !ANY_CJK.test(text)) {
@@ -89,8 +89,9 @@
       newText = newText.replace(MIDDLE_DOT, "・");
       return newText;
     }
+    // alias for spacingText()
     spacing(text) {
-      return this.spacingSync(text);
+      return this.spacingText(text);
     }
   }
   function once(func) {
@@ -203,7 +204,7 @@
             const { previousSibling } = elementNode;
             if (previousSibling.nodeType === Node.TEXT_NODE) {
               const testText = previousSibling.data.substr(-1) + currentTextNode.data.toString().charAt(0);
-              const testNewText = this.spacingSync(testText);
+              const testNewText = this.spacingText(testText);
               if (testText !== testNewText) {
                 previousSibling.data = `${previousSibling.data} `;
               }
@@ -213,7 +214,7 @@
             const { nextSibling } = elementNode;
             if (nextSibling.nodeType === Node.TEXT_NODE) {
               const testText = currentTextNode.data.substr(-1) + nextSibling.data.toString().charAt(0);
-              const testNewText = this.spacingSync(testText);
+              const testNewText = this.spacingText(testText);
               if (testText !== testNewText) {
                 nextSibling.data = ` ${nextSibling.data}`;
               }
@@ -224,7 +225,7 @@
           nextTextNode = currentTextNode;
           continue;
         }
-        const newText = this.spacingSync(currentTextNode.data);
+        const newText = this.spacingText(currentTextNode.data);
         if (currentTextNode.data !== newText) {
           currentTextNode.data = newText;
         }
@@ -234,7 +235,7 @@
             continue;
           }
           const testText = currentTextNode.data.toString().substr(-1) + nextTextNode.data.toString().substr(0, 1);
-          const testNewText = this.spacingSync(testText);
+          const testNewText = this.spacingText(testText);
           if (testNewText !== testText) {
             let nextNode = nextTextNode;
             while (nextNode.parentNode && nextNode.nodeName.search(this.spaceSensitiveTags) === -1 && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
