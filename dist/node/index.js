@@ -1,25 +1,32 @@
-import * as s from "fs";
-import { Pangu as f } from "../shared/index.js";
-class o extends f {
-  spacingFile(e, n) {
-    return new Promise((r, u) => {
-      s.readFile(e, "utf8", (i, a) => {
-        if (i)
-          return u(i), n ? n(i) : void 0;
-        const t = this.spacingSync(a);
-        if (r(t), n)
-          return n(null, t);
+import * as fs from "fs";
+import { Pangu } from "../shared/index.js";
+class NodePangu extends Pangu {
+  spacingFile(path, callback) {
+    return new Promise((resolve, reject) => {
+      fs.readFile(path, "utf8", (err, data) => {
+        if (err) {
+          reject(err);
+          if (callback) {
+            return callback(err);
+          }
+          return;
+        }
+        const spacingData = this.spacingSync(data);
+        resolve(spacingData);
+        if (callback) {
+          return callback(null, spacingData);
+        }
       });
     });
   }
-  spacingFileSync(e) {
-    return this.spacingSync(s.readFileSync(e, "utf8"));
+  spacingFileSync(path) {
+    return this.spacingSync(fs.readFileSync(path, "utf8"));
   }
 }
-const c = new o();
+const pangu = new NodePangu();
 export {
-  o as NodePangu,
-  c as default,
-  c as pangu
+  NodePangu,
+  pangu as default,
+  pangu
 };
 //# sourceMappingURL=index.js.map

@@ -23,6 +23,7 @@ const multiBuildPlugin = () => {
             outDir: 'dist',
             emptyOutDir: false,
             sourcemap: true,
+            minify: false,
             lib: {
               entry: {
                 'shared/index': resolve(projectRoot, 'src/shared/index.ts'),
@@ -55,6 +56,7 @@ const multiBuildPlugin = () => {
             outDir: 'dist',
             emptyOutDir: false,
             sourcemap: true,
+            minify: false,
             lib: {
               entry: resolve(projectRoot, 'src/browser/pangu.ts'),
               name: 'pangu',
@@ -96,6 +98,7 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     emptyOutDir: true,
+    minify: false,
     lib: {
       entry: {
         'shared/index': resolve(projectRoot, 'src/shared/index.ts'),

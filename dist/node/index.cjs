@@ -1,2 +1,49 @@
-"use strict";Object.defineProperties(exports,{__esModule:{value:!0},[Symbol.toStringTag]:{value:"Module"}});const g=require("fs"),d=require("../shared/index.cjs");function l(n){const t=Object.create(null,{[Symbol.toStringTag]:{value:"Module"}});if(n){for(const e in n)if(e!=="default"){const r=Object.getOwnPropertyDescriptor(n,e);Object.defineProperty(t,e,r.get?r:{enumerable:!0,get:()=>n[e]})}}return t.default=n,Object.freeze(t)}const s=l(g);class a extends d.Pangu{spacingFile(t,e){return new Promise((r,c)=>{s.readFile(t,"utf8",(u,f)=>{if(u)return c(u),e?e(u):void 0;const i=this.spacingSync(f);if(r(i),e)return e(null,i)})})}spacingFileSync(t){return this.spacingSync(s.readFileSync(t,"utf8"))}}const o=new a;exports.NodePangu=a;exports.default=o;exports.pangu=o;
+"use strict";
+Object.defineProperties(exports, { __esModule: { value: true }, [Symbol.toStringTag]: { value: "Module" } });
+const fs = require("fs");
+const shared_index = require("../shared/index.cjs");
+function _interopNamespaceDefault(e) {
+  const n = Object.create(null, { [Symbol.toStringTag]: { value: "Module" } });
+  if (e) {
+    for (const k in e) {
+      if (k !== "default") {
+        const d = Object.getOwnPropertyDescriptor(e, k);
+        Object.defineProperty(n, k, d.get ? d : {
+          enumerable: true,
+          get: () => e[k]
+        });
+      }
+    }
+  }
+  n.default = e;
+  return Object.freeze(n);
+}
+const fs__namespace = /* @__PURE__ */ _interopNamespaceDefault(fs);
+class NodePangu extends shared_index.Pangu {
+  spacingFile(path, callback) {
+    return new Promise((resolve, reject) => {
+      fs__namespace.readFile(path, "utf8", (err, data) => {
+        if (err) {
+          reject(err);
+          if (callback) {
+            return callback(err);
+          }
+          return;
+        }
+        const spacingData = this.spacingSync(data);
+        resolve(spacingData);
+        if (callback) {
+          return callback(null, spacingData);
+        }
+      });
+    });
+  }
+  spacingFileSync(path) {
+    return this.spacingSync(fs__namespace.readFileSync(path, "utf8"));
+  }
+}
+const pangu = new NodePangu();
+exports.NodePangu = NodePangu;
+exports.default = pangu;
+exports.pangu = pangu;
 //# sourceMappingURL=index.cjs.map

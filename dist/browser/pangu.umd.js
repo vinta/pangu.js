@@ -1,2 +1,448 @@
-(function(d,i){typeof exports=="object"&&typeof module<"u"?i(exports):typeof define=="function"&&define.amd?define(["exports"],i):(d=typeof globalThis<"u"?globalThis:d||self,i(d.pangu={}))})(this,function(d){"use strict";const i="⺀-⻿⼀-⿟぀-ゟ゠-ヺー-ヿ㄀-ㄯ㈀-㋿㐀-䶿一-鿿豈-﫿",S=new RegExp(`[${i}]`),f=new RegExp(`([${i}])[ ]*([\\:]+|\\.)[ ]*([${i}])`,"g"),E=new RegExp(`([${i}])[ ]*([~\\!;,\\?]+)[ ]*`,"g"),_=new RegExp(`([\\.]{2,}|…)([${i}])`,"g"),y=new RegExp(`([${i}])\\:([A-Z0-9\\(\\)])`,"g"),m=new RegExp(`([${i}])([\`"״])`,"g"),A=new RegExp(`([\`"״])([${i}])`,"g"),x=/([`"\u05f4]+)[ ]*(.+?)[ ]*([`"\u05f4]+)/g,w=/([\u201d])([A-Za-z0-9])/g,C=new RegExp(`([${i}])(")([A-Za-z0-9])`,"g"),b=new RegExp(`([${i}])('[^s])`,"g"),R=new RegExp(`(')([${i}])`,"g"),P=new RegExp(`([A-Za-z0-9${i}])( )('s)`,"g"),O=new RegExp(`([${i}])(#)([${i}]+)(#)([${i}])`,"g"),B=new RegExp(`([${i}])(#([^ ]))`,"g"),K=new RegExp(`(([^ ])#)([${i}])`,"g"),L=new RegExp(`([${i}])([\\+\\-\\*\\/=&\\|<>])([A-Za-z0-9])`,"g"),v=new RegExp(`([A-Za-z0-9])([\\+\\-\\*\\/=&\\|<>])([${i}])`,"g"),I=/([/]) ([a-z\-_\./]+)/g,J=/([/\.])([A-Za-z\-_\./]+) ([/])/g,z=new RegExp(`([${i}])([\\(\\[\\{<>“])`,"g"),D=new RegExp(`([\\)\\]\\}<>”])([${i}])`,"g"),H=/([\(\[\{<\u201c]+)[ ]*(.+?)[ ]*([\)\]\}>\u201d]+)/,F=new RegExp(`([A-Za-z0-9${i}])[ ]*([“])([A-Za-z0-9${i}\\-_ ]+)([”])`,"g"),X=new RegExp(`([“])([A-Za-z0-9${i}\\-_ ]+)([”])[ ]*([A-Za-z0-9${i}])`,"g"),Q=/([A-Za-z0-9])([\(\[\{])/g,Z=/([\)\]\}])([A-Za-z0-9])/g,M=new RegExp(`([${i}])([A-Za-zͰ-Ͽ0-9@\\$%\\^&\\*\\-\\+\\\\=\\|/¡-ÿ⅐-↏✀—➿])`,"g"),U=new RegExp(`([A-Za-zͰ-Ͽ0-9~\\$%\\^&\\*\\-\\+\\\\=\\|/!;:,\\.\\?¡-ÿ⅐-↏✀—➿])([${i}])`,"g"),k=/(%)([A-Za-z])/g,G=/([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;class Y{constructor(){this.version="4.0.7"}convertToFullwidth(t){return t.replace(/~/g,"～").replace(/!/g,"！").replace(/;/g,"；").replace(/:/g,"：").replace(/,/g,"，").replace(/\./g,"。").replace(/\?/g,"？")}spacingSync(t){if(typeof t!="string")return console.warn(`spacing(text) only accepts string but got ${typeof t}`),t;if(t.length<=1||!S.test(t))return t;const s=this;let e=t;return e=e.replace(f,(n,a,o,u)=>{const g=s.convertToFullwidth(o);return`${a}${g}${u}`}),e=e.replace(E,(n,a,o)=>{const u=s.convertToFullwidth(o);return`${a}${u}`}),e=e.replace(_,"$1 $2"),e=e.replace(y,"$1：$2"),e=e.replace(m,"$1 $2"),e=e.replace(A,"$1 $2"),e=e.replace(x,"$1$2$3"),e=e.replace(w,"$1 $2"),e=e.replace(C,"$1$2 $3"),e=e.replace(b,"$1 $2"),e=e.replace(R,"$1 $2"),e=e.replace(P,"$1's"),e=e.replace(O,"$1 $2$3$4 $5"),e=e.replace(B,"$1 $2"),e=e.replace(K,"$1 $3"),e=e.replace(L,"$1 $2 $3"),e=e.replace(v,"$1 $2 $3"),e=e.replace(I,"$1$2"),e=e.replace(J,"$1$2$3"),e=e.replace(z,"$1 $2"),e=e.replace(D,"$1 $2"),e=e.replace(H,"$1$2$3"),e=e.replace(F,"$1 $2$3$4"),e=e.replace(X,"$1$2$3 $4"),e=e.replace(Q,"$1 $2"),e=e.replace(Z,"$1 $2"),e=e.replace(M,"$1 $2"),e=e.replace(U,"$1 $2"),e=e.replace(k,"$1 $2"),e=e.replace(G,"・"),e}spacing(t,s){if(s){let e;try{e=this.spacingSync(t)}catch(n){s(n);return}s(null,e)}else return new Promise((e,n)=>{try{const a=this.spacingSync(t);e(a)}catch(a){n(a)}})}spacingText(t,s){return this.spacing(t,s)}spacingTextSync(t){return this.spacingSync(t)}}function V(h){let t=!1;return function(...s){if(!t)return t=!0,h.apply(this,s)}}function j(h,t,s=1/0){let e=null,n=null;return function(...a){const o=Date.now();e&&clearTimeout(e),n||(n=o),o-n>=s?(h.apply(this,a),n=o):e=window.setTimeout(()=>{h.apply(this,a)},t)}}class $ extends Y{constructor(){super(),this.blockTags=/^(div|p|h1|h2|h3|h4|h5|h6)$/i,this.ignoredTags=/^(script|code|pre|textarea)$/i,this.presentationalTags=/^(b|code|del|em|i|s|strong|kbd)$/i,this.spaceLikeTags=/^(br|hr|i|img|pangu)$/i,this.spaceSensitiveTags=/^(a|del|pre|s|strike|u)$/i,this.isAutoSpacingPageExecuted=!1}isContentEditable(t){return t.isContentEditable||t.getAttribute&&t.getAttribute("g_editable")==="true"}isSpecificTag(t,s){return t&&t.nodeName&&t.nodeName.search(s)>=0}isInsideSpecificTag(t,s,e=!1){let n=t;if(e&&this.isSpecificTag(n,s))return!0;for(;n.parentNode;)if(n=n.parentNode,this.isSpecificTag(n,s))return!0;return!1}canIgnoreNode(t){let s=t;if(s&&(this.isSpecificTag(s,this.ignoredTags)||this.isContentEditable(s)))return!0;for(;s.parentNode;)if(s=s.parentNode,s&&(this.isSpecificTag(s,this.ignoredTags)||this.isContentEditable(s)))return!0;return!1}isFirstTextChild(t,s){const{childNodes:e}=t;for(let n=0;n<e.length;n++){const a=e[n];if(a.nodeType!==Node.COMMENT_NODE&&a.textContent)return a===s}return!1}isLastTextChild(t,s){const{childNodes:e}=t;for(let n=e.length-1;n>-1;n--){const a=e[n];if(a.nodeType!==Node.COMMENT_NODE&&a.textContent)return a===s}return!1}spacingNodeByXPath(t,s){if(!(s instanceof Node)||s instanceof DocumentFragment)return;const e=document.evaluate(t,s,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);let n,a;for(let o=e.snapshotLength-1;o>-1;--o){if(n=e.snapshotItem(o),this.isSpecificTag(n.parentNode,this.presentationalTags)&&!this.isInsideSpecificTag(n.parentNode,this.ignoredTags)){const g=n.parentNode;if(g.previousSibling){const{previousSibling:p}=g;if(p.nodeType===Node.TEXT_NODE){const c=p.data.substr(-1)+n.data.toString().charAt(0),r=this.spacingSync(c);c!==r&&(p.data=`${p.data} `)}}if(g.nextSibling){const{nextSibling:p}=g;if(p.nodeType===Node.TEXT_NODE){const c=n.data.substr(-1)+p.data.toString().charAt(0),r=this.spacingSync(c);c!==r&&(p.data=` ${p.data}`)}}}if(this.canIgnoreNode(n)){a=n;continue}const u=this.spacingSync(n.data);if(n.data!==u&&(n.data=u),a){if(n.nextSibling&&n.nextSibling.nodeName.search(this.spaceLikeTags)>=0){a=n;continue}const g=n.data.toString().substr(-1)+a.data.toString().substr(0,1);if(this.spacingSync(g)!==g){let c=a;for(;c.parentNode&&c.nodeName.search(this.spaceSensitiveTags)===-1&&this.isFirstTextChild(c.parentNode,c);)c=c.parentNode;let r=n;for(;r.parentNode&&r.nodeName.search(this.spaceSensitiveTags)===-1&&this.isLastTextChild(r.parentNode,r);)r=r.parentNode;if(r.nextSibling&&r.nextSibling.nodeName.search(this.spaceLikeTags)>=0){a=n;continue}if(r.nodeName.search(this.blockTags)===-1)if(c.nodeName.search(this.spaceSensitiveTags)===-1)c.nodeName.search(this.ignoredTags)===-1&&c.nodeName.search(this.blockTags)===-1&&(a.previousSibling?a.previousSibling.nodeName.search(this.spaceLikeTags)===-1&&(a.data=` ${a.data}`):this.canIgnoreNode(a)||(a.data=` ${a.data}`));else if(r.nodeName.search(this.spaceSensitiveTags)===-1)n.data=`${n.data} `;else{const l=document.createElement("pangu");l.innerHTML=" ",c.previousSibling?c.previousSibling.nodeName.search(this.spaceLikeTags)===-1&&c.parentNode.insertBefore(l,c):c.parentNode.insertBefore(l,c),l.previousElementSibling||l.parentNode&&l.parentNode.removeChild(l)}}}a=n}}spacingNodeSync(t){let s=".//*/text()[normalize-space(.)]";t instanceof Element&&t.children&&t.children.length===0&&(s=".//text()[normalize-space(.)]"),this.spacingNodeByXPath(s,t)}async spacingNode(t){return this.spacingNodeSync(t)}spacingElementByIdSync(t){const s=`id("${t}")//text()`;this.spacingNodeByXPath(s,document)}async spacingElementById(t){return this.spacingElementByIdSync(t)}spacingElementByClassNameSync(t){const s=`//*[contains(concat(" ", normalize-space(@class), " "), "${t}")]//text()`;this.spacingNodeByXPath(s,document)}async spacingElementByClassName(t){return this.spacingElementByClassNameSync(t)}spacingElementByTagNameSync(t){const s=`//${t}//text()`;this.spacingNodeByXPath(s,document)}async spacingElementByTagName(t){return this.spacingElementByTagNameSync(t)}spacingPageTitleSync(){this.spacingNodeByXPath("/html/head/title/text()",document)}async spacingPageTitle(){return this.spacingPageTitleSync()}spacingPageBodySync(){let t="/html/body//*/text()[normalize-space(.)]";["script","style","textarea"].forEach(s=>{t=`${t}[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${s}"]`}),this.spacingNodeByXPath(t,document)}async spacingPageBody(){return this.spacingPageBodySync()}spacingPageSync(){this.spacingPageTitleSync(),this.spacingPageBodySync()}async spacingPage(){await this.spacingPageTitle(),await this.spacingPageBody()}autoSpacingPage(t=1e3,s=500,e=2e3){if(!(document.body instanceof Node)||this.isAutoSpacingPageExecuted)return;this.isAutoSpacingPageExecuted=!0;const n=V(()=>{this.spacingPageSync()}),a=document.getElementsByTagName("video");if(a.length===0)setTimeout(()=>{n()},t);else for(let c=0;c<a.length;c++){const r=a[c];if(r.readyState===4){setTimeout(()=>{n()},3e3);break}r.addEventListener("loadeddata",()=>{setTimeout(()=>{n()},4e3)})}const o=[],u=this,g=j(()=>{for(;o.length;){const c=o.shift();c&&u.spacingNodeSync(c)}},s,e);new MutationObserver(c=>{c.forEach(r=>{switch(r.type){case"childList":r.addedNodes.forEach(T=>{T.nodeType===Node.ELEMENT_NODE?o.push(T):T.nodeType===Node.TEXT_NODE&&T.parentNode&&o.push(T.parentNode)});break;case"characterData":const{target:l}=r;l.nodeType===Node.TEXT_NODE&&l.parentNode&&o.push(l.parentNode);break}}),g()}).observe(document.body,{characterData:!0,childList:!0,subtree:!0})}}const N=new $;d.BrowserPangu=$,d.default=N,d.pangu=N,Object.defineProperties(d,{__esModule:{value:!0},[Symbol.toStringTag]:{value:"Module"}})});
+(function(global, factory) {
+  typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory(global.pangu = {}));
+})(this, function(exports2) {
+  "use strict";
+  const CJK = "⺀-⻿⼀-⿟぀-ゟ゠-ヺー-ヿ㄀-ㄯ㈀-㋿㐀-䶿一-鿿豈-﫿";
+  const ANY_CJK = new RegExp(`[${CJK}]`);
+  const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK = new RegExp(`([${CJK}])[ ]*([\\:]+|\\.)[ ]*([${CJK}])`, "g");
+  const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS = new RegExp(`([${CJK}])[ ]*([~\\!;,\\?]+)[ ]*`, "g");
+  const DOTS_CJK = new RegExp(`([\\.]{2,}|…)([${CJK}])`, "g");
+  const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([A-Z0-9\\(\\)])`, "g");
+  const CJK_QUOTE = new RegExp(`([${CJK}])([\`"״])`, "g");
+  const QUOTE_CJK = new RegExp(`([\`"״])([${CJK}])`, "g");
+  const FIX_QUOTE_ANY_QUOTE = /([`"\u05f4]+)[ ]*(.+?)[ ]*([`"\u05f4]+)/g;
+  const QUOTE_AN = /([\u201d])([A-Za-z0-9])/g;
+  const CJK_QUOTE_AN = new RegExp(`([${CJK}])(")([A-Za-z0-9])`, "g");
+  const CJK_SINGLE_QUOTE_BUT_POSSESSIVE = new RegExp(`([${CJK}])('[^s])`, "g");
+  const SINGLE_QUOTE_CJK = new RegExp(`(')([${CJK}])`, "g");
+  const FIX_POSSESSIVE_SINGLE_QUOTE = new RegExp(`([A-Za-z0-9${CJK}])( )('s)`, "g");
+  const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, "g");
+  const CJK_HASH = new RegExp(`([${CJK}])(#([^ ]))`, "g");
+  const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, "g");
+  const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*\\/=&\\|<>])([A-Za-z0-9])`, "g");
+  const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*\\/=&\\|<>])([${CJK}])`, "g");
+  const FIX_SLASH_AS = /([/]) ([a-z\-_\./]+)/g;
+  const FIX_SLASH_AS_SLASH = /([/\.])([A-Za-z\-_\./]+) ([/])/g;
+  const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>“])`, "g");
+  const RIGHT_BRACKET_CJK = new RegExp(`([\\)\\]\\}<>”])([${CJK}])`, "g");
+  const FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET = /([\(\[\{<\u201c]+)[ ]*(.+?)[ ]*([\)\]\}>\u201d]+)/;
+  const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([A-Za-z0-9${CJK}])[ ]*([“])([A-Za-z0-9${CJK}\\-_ ]+)([”])`, "g");
+  const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([“])([A-Za-z0-9${CJK}\\-_ ]+)([”])[ ]*([A-Za-z0-9${CJK}])`, "g");
+  const AN_LEFT_BRACKET = /([A-Za-z0-9])([\(\[\{])/g;
+  const RIGHT_BRACKET_AN = /([\)\]\}])([A-Za-z0-9])/g;
+  const CJK_ANS = new RegExp(`([${CJK}])([A-Za-zͰ-Ͽ0-9@\\$%\\^&\\*\\-\\+\\\\=\\|/¡-ÿ⅐-↏✀—➿])`, "g");
+  const ANS_CJK = new RegExp(`([A-Za-zͰ-Ͽ0-9~\\$%\\^&\\*\\-\\+\\\\=\\|/!;:,\\.\\?¡-ÿ⅐-↏✀—➿])([${CJK}])`, "g");
+  const S_A = /(%)([A-Za-z])/g;
+  const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
+  class Pangu {
+    constructor() {
+      this.version = "4.0.7";
+    }
+    convertToFullwidth(symbols) {
+      return symbols.replace(/~/g, "～").replace(/!/g, "！").replace(/;/g, "；").replace(/:/g, "：").replace(/,/g, "，").replace(/\./g, "。").replace(/\?/g, "？");
+    }
+    spacingSync(text) {
+      if (typeof text !== "string") {
+        console.warn(`spacing(text) only accepts string but got ${typeof text}`);
+        return text;
+      }
+      if (text.length <= 1 || !ANY_CJK.test(text)) {
+        return text;
+      }
+      const self2 = this;
+      let newText = text;
+      newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK, (_match, leftCjk, symbols, rightCjk) => {
+        const fullwidthSymbols = self2.convertToFullwidth(symbols);
+        return `${leftCjk}${fullwidthSymbols}${rightCjk}`;
+      });
+      newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS, (_match, cjk, symbols) => {
+        const fullwidthSymbols = self2.convertToFullwidth(symbols);
+        return `${cjk}${fullwidthSymbols}`;
+      });
+      newText = newText.replace(DOTS_CJK, "$1 $2");
+      newText = newText.replace(FIX_CJK_COLON_ANS, "$1：$2");
+      newText = newText.replace(CJK_QUOTE, "$1 $2");
+      newText = newText.replace(QUOTE_CJK, "$1 $2");
+      newText = newText.replace(FIX_QUOTE_ANY_QUOTE, "$1$2$3");
+      newText = newText.replace(QUOTE_AN, "$1 $2");
+      newText = newText.replace(CJK_QUOTE_AN, "$1$2 $3");
+      newText = newText.replace(CJK_SINGLE_QUOTE_BUT_POSSESSIVE, "$1 $2");
+      newText = newText.replace(SINGLE_QUOTE_CJK, "$1 $2");
+      newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
+      newText = newText.replace(HASH_ANS_CJK_HASH, "$1 $2$3$4 $5");
+      newText = newText.replace(CJK_HASH, "$1 $2");
+      newText = newText.replace(HASH_CJK, "$1 $3");
+      newText = newText.replace(CJK_OPERATOR_ANS, "$1 $2 $3");
+      newText = newText.replace(ANS_OPERATOR_CJK, "$1 $2 $3");
+      newText = newText.replace(FIX_SLASH_AS, "$1$2");
+      newText = newText.replace(FIX_SLASH_AS_SLASH, "$1$2$3");
+      newText = newText.replace(CJK_LEFT_BRACKET, "$1 $2");
+      newText = newText.replace(RIGHT_BRACKET_CJK, "$1 $2");
+      newText = newText.replace(FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET, "$1$2$3");
+      newText = newText.replace(ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET, "$1 $2$3$4");
+      newText = newText.replace(LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK, "$1$2$3 $4");
+      newText = newText.replace(AN_LEFT_BRACKET, "$1 $2");
+      newText = newText.replace(RIGHT_BRACKET_AN, "$1 $2");
+      newText = newText.replace(CJK_ANS, "$1 $2");
+      newText = newText.replace(ANS_CJK, "$1 $2");
+      newText = newText.replace(S_A, "$1 $2");
+      newText = newText.replace(MIDDLE_DOT, "・");
+      return newText;
+    }
+    spacing(text, callback) {
+      if (callback) {
+        let newText;
+        try {
+          newText = this.spacingSync(text);
+        } catch (err) {
+          callback(err);
+          return;
+        }
+        callback(null, newText);
+      } else {
+        return new Promise((resolve, reject) => {
+          try {
+            const newText = this.spacingSync(text);
+            resolve(newText);
+          } catch (err) {
+            reject(err);
+          }
+        });
+      }
+    }
+    spacingText(text, callback) {
+      return this.spacing(text, callback);
+    }
+    spacingTextSync(text) {
+      return this.spacingSync(text);
+    }
+  }
+  function once(func) {
+    let executed = false;
+    return function(...args) {
+      if (executed) {
+        return;
+      }
+      executed = true;
+      return func.apply(this, args);
+    };
+  }
+  function debounce(func, delay, mustRunDelay = Infinity) {
+    let timer = null;
+    let startTime = null;
+    return function(...args) {
+      const currentTime = Date.now();
+      if (timer) {
+        clearTimeout(timer);
+      }
+      if (!startTime) {
+        startTime = currentTime;
+      }
+      if (currentTime - startTime >= mustRunDelay) {
+        func.apply(this, args);
+        startTime = currentTime;
+      } else {
+        timer = window.setTimeout(() => {
+          func.apply(this, args);
+        }, delay);
+      }
+    };
+  }
+  class BrowserPangu extends Pangu {
+    constructor() {
+      super();
+      this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
+      this.ignoredTags = /^(script|code|pre|textarea)$/i;
+      this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
+      this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
+      this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
+      this.isAutoSpacingPageExecuted = false;
+    }
+    isContentEditable(node) {
+      return node.isContentEditable || node.getAttribute && node.getAttribute("g_editable") === "true";
+    }
+    isSpecificTag(node, tagRegex) {
+      return node && node.nodeName && node.nodeName.search(tagRegex) >= 0;
+    }
+    isInsideSpecificTag(node, tagRegex, checkCurrent = false) {
+      let currentNode = node;
+      if (checkCurrent) {
+        if (this.isSpecificTag(currentNode, tagRegex)) {
+          return true;
+        }
+      }
+      while (currentNode.parentNode) {
+        currentNode = currentNode.parentNode;
+        if (this.isSpecificTag(currentNode, tagRegex)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    canIgnoreNode(node) {
+      let currentNode = node;
+      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+        return true;
+      }
+      while (currentNode.parentNode) {
+        currentNode = currentNode.parentNode;
+        if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+          return true;
+        }
+      }
+      return false;
+    }
+    isFirstTextChild(parentNode, targetNode) {
+      const { childNodes } = parentNode;
+      for (let i = 0; i < childNodes.length; i++) {
+        const childNode = childNodes[i];
+        if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
+          return childNode === targetNode;
+        }
+      }
+      return false;
+    }
+    isLastTextChild(parentNode, targetNode) {
+      const { childNodes } = parentNode;
+      for (let i = childNodes.length - 1; i > -1; i--) {
+        const childNode = childNodes[i];
+        if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
+          return childNode === targetNode;
+        }
+      }
+      return false;
+    }
+    spacingNodeByXPath(xPathQuery, contextNode) {
+      if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
+        return;
+      }
+      const textNodes = document.evaluate(xPathQuery, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+      let currentTextNode;
+      let nextTextNode;
+      for (let i = textNodes.snapshotLength - 1; i > -1; --i) {
+        currentTextNode = textNodes.snapshotItem(i);
+        if (this.isSpecificTag(currentTextNode.parentNode, this.presentationalTags) && !this.isInsideSpecificTag(currentTextNode.parentNode, this.ignoredTags)) {
+          const elementNode = currentTextNode.parentNode;
+          if (elementNode.previousSibling) {
+            const { previousSibling } = elementNode;
+            if (previousSibling.nodeType === Node.TEXT_NODE) {
+              const testText = previousSibling.data.substr(-1) + currentTextNode.data.toString().charAt(0);
+              const testNewText = this.spacingSync(testText);
+              if (testText !== testNewText) {
+                previousSibling.data = `${previousSibling.data} `;
+              }
+            }
+          }
+          if (elementNode.nextSibling) {
+            const { nextSibling } = elementNode;
+            if (nextSibling.nodeType === Node.TEXT_NODE) {
+              const testText = currentTextNode.data.substr(-1) + nextSibling.data.toString().charAt(0);
+              const testNewText = this.spacingSync(testText);
+              if (testText !== testNewText) {
+                nextSibling.data = ` ${nextSibling.data}`;
+              }
+            }
+          }
+        }
+        if (this.canIgnoreNode(currentTextNode)) {
+          nextTextNode = currentTextNode;
+          continue;
+        }
+        const newText = this.spacingSync(currentTextNode.data);
+        if (currentTextNode.data !== newText) {
+          currentTextNode.data = newText;
+        }
+        if (nextTextNode) {
+          if (currentTextNode.nextSibling && currentTextNode.nextSibling.nodeName.search(this.spaceLikeTags) >= 0) {
+            nextTextNode = currentTextNode;
+            continue;
+          }
+          const testText = currentTextNode.data.toString().substr(-1) + nextTextNode.data.toString().substr(0, 1);
+          const testNewText = this.spacingSync(testText);
+          if (testNewText !== testText) {
+            let nextNode = nextTextNode;
+            while (nextNode.parentNode && nextNode.nodeName.search(this.spaceSensitiveTags) === -1 && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
+              nextNode = nextNode.parentNode;
+            }
+            let currentNode = currentTextNode;
+            while (currentNode.parentNode && currentNode.nodeName.search(this.spaceSensitiveTags) === -1 && this.isLastTextChild(currentNode.parentNode, currentNode)) {
+              currentNode = currentNode.parentNode;
+            }
+            if (currentNode.nextSibling) {
+              if (currentNode.nextSibling.nodeName.search(this.spaceLikeTags) >= 0) {
+                nextTextNode = currentTextNode;
+                continue;
+              }
+            }
+            if (currentNode.nodeName.search(this.blockTags) === -1) {
+              if (nextNode.nodeName.search(this.spaceSensitiveTags) === -1) {
+                if (nextNode.nodeName.search(this.ignoredTags) === -1 && nextNode.nodeName.search(this.blockTags) === -1) {
+                  if (nextTextNode.previousSibling) {
+                    if (nextTextNode.previousSibling.nodeName.search(this.spaceLikeTags) === -1) {
+                      nextTextNode.data = ` ${nextTextNode.data}`;
+                    }
+                  } else {
+                    if (!this.canIgnoreNode(nextTextNode)) {
+                      nextTextNode.data = ` ${nextTextNode.data}`;
+                    }
+                  }
+                }
+              } else if (currentNode.nodeName.search(this.spaceSensitiveTags) === -1) {
+                currentTextNode.data = `${currentTextNode.data} `;
+              } else {
+                const panguSpace = document.createElement("pangu");
+                panguSpace.innerHTML = " ";
+                if (nextNode.previousSibling) {
+                  if (nextNode.previousSibling.nodeName.search(this.spaceLikeTags) === -1) {
+                    nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                  }
+                } else {
+                  nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                }
+                if (!panguSpace.previousElementSibling) {
+                  if (panguSpace.parentNode) {
+                    panguSpace.parentNode.removeChild(panguSpace);
+                  }
+                }
+              }
+            }
+          }
+        }
+        nextTextNode = currentTextNode;
+      }
+    }
+    spacingNodeSync(contextNode) {
+      let xPathQuery = ".//*/text()[normalize-space(.)]";
+      if (contextNode instanceof Element && contextNode.children && contextNode.children.length === 0) {
+        xPathQuery = ".//text()[normalize-space(.)]";
+      }
+      this.spacingNodeByXPath(xPathQuery, contextNode);
+    }
+    async spacingNode(contextNode) {
+      return this.spacingNodeSync(contextNode);
+    }
+    spacingElementByIdSync(idName) {
+      const xPathQuery = `id("${idName}")//text()`;
+      this.spacingNodeByXPath(xPathQuery, document);
+    }
+    async spacingElementById(idName) {
+      return this.spacingElementByIdSync(idName);
+    }
+    spacingElementByClassNameSync(className) {
+      const xPathQuery = `//*[contains(concat(" ", normalize-space(@class), " "), "${className}")]//text()`;
+      this.spacingNodeByXPath(xPathQuery, document);
+    }
+    async spacingElementByClassName(className) {
+      return this.spacingElementByClassNameSync(className);
+    }
+    spacingElementByTagNameSync(tagName) {
+      const xPathQuery = `//${tagName}//text()`;
+      this.spacingNodeByXPath(xPathQuery, document);
+    }
+    async spacingElementByTagName(tagName) {
+      return this.spacingElementByTagNameSync(tagName);
+    }
+    spacingPageTitleSync() {
+      const xPathQuery = "/html/head/title/text()";
+      this.spacingNodeByXPath(xPathQuery, document);
+    }
+    async spacingPageTitle() {
+      return this.spacingPageTitleSync();
+    }
+    spacingPageBodySync() {
+      let xPathQuery = "/html/body//*/text()[normalize-space(.)]";
+      ["script", "style", "textarea"].forEach((tag) => {
+        xPathQuery = `${xPathQuery}[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
+      });
+      this.spacingNodeByXPath(xPathQuery, document);
+    }
+    async spacingPageBody() {
+      return this.spacingPageBodySync();
+    }
+    spacingPageSync() {
+      this.spacingPageTitleSync();
+      this.spacingPageBodySync();
+    }
+    async spacingPage() {
+      await this.spacingPageTitle();
+      await this.spacingPageBody();
+    }
+    autoSpacingPage(pageDelay = 1e3, nodeDelay = 500, nodeMaxWait = 2e3) {
+      if (!(document.body instanceof Node)) {
+        return;
+      }
+      if (this.isAutoSpacingPageExecuted) {
+        return;
+      }
+      this.isAutoSpacingPageExecuted = true;
+      const onceSpacingPage = once(() => {
+        this.spacingPageSync();
+      });
+      const videos = document.getElementsByTagName("video");
+      if (videos.length === 0) {
+        setTimeout(() => {
+          onceSpacingPage();
+        }, pageDelay);
+      } else {
+        for (let i = 0; i < videos.length; i++) {
+          const video = videos[i];
+          if (video.readyState === 4) {
+            setTimeout(() => {
+              onceSpacingPage();
+            }, 3e3);
+            break;
+          }
+          video.addEventListener("loadeddata", () => {
+            setTimeout(() => {
+              onceSpacingPage();
+            }, 4e3);
+          });
+        }
+      }
+      const queue = [];
+      const self2 = this;
+      const debouncedSpacingNodes = debounce(() => {
+        while (queue.length) {
+          const node = queue.shift();
+          if (node) {
+            self2.spacingNodeSync(node);
+          }
+        }
+      }, nodeDelay, nodeMaxWait);
+      const mutationObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          switch (mutation.type) {
+            /* eslint-disable indent */
+            case "childList":
+              mutation.addedNodes.forEach((node2) => {
+                if (node2.nodeType === Node.ELEMENT_NODE) {
+                  queue.push(node2);
+                } else if (node2.nodeType === Node.TEXT_NODE && node2.parentNode) {
+                  queue.push(node2.parentNode);
+                }
+              });
+              break;
+            case "characterData":
+              const { target: node } = mutation;
+              if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
+                queue.push(node.parentNode);
+              }
+              break;
+          }
+        });
+        debouncedSpacingNodes();
+      });
+      mutationObserver.observe(document.body, {
+        characterData: true,
+        childList: true,
+        subtree: true
+      });
+    }
+  }
+  const pangu = new BrowserPangu();
+  exports2.BrowserPangu = BrowserPangu;
+  exports2.default = pangu;
+  exports2.pangu = pangu;
+  Object.defineProperties(exports2, { __esModule: { value: true }, [Symbol.toStringTag]: { value: "Module" } });
+});
 //# sourceMappingURL=pangu.umd.js.map

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { pangu as a } from "./index.js";
-const t = `
+import { pangu } from "./index.js";
+const usage = `
 usage: pangu [-h] [-v] [-t] [-f] text_or_path
 
 pangu.js -- Paranoid text spacing for good readability, to automatically
@@ -15,34 +15,46 @@ optional arguments:
   -v, --version  show program's version number and exit
   -t, --text     specify the input value is a text
   -f, --file     specify the input value is a file path
-`.trim(), [, , ...s] = process.argv;
-function o(e) {
-  typeof e == "string" ? console.log(a.spacingSync(e)) : (console.log(t), process.exit(1));
+`.trim();
+const [, , ...args] = process.argv;
+function printSpacingText(text) {
+  if (typeof text === "string") {
+    console.log(pangu.spacingSync(text));
+  } else {
+    console.log(usage);
+    process.exit(1);
+  }
 }
-function i(e) {
-  typeof e == "string" ? console.log(a.spacingFileSync(e)) : (console.log(t), process.exit(1));
+function printSpacingFile(path) {
+  if (typeof path === "string") {
+    console.log(pangu.spacingFileSync(path));
+  } else {
+    console.log(usage);
+    process.exit(1);
+  }
 }
-if (s.length === 0)
-  console.log(t);
-else
-  switch (s[0]) {
+if (args.length === 0) {
+  console.log(usage);
+} else {
+  switch (args[0]) {
     /* eslint-disable indent */
     case "-h":
     case "--help":
-      console.log(t);
+      console.log(usage);
       break;
     case "-v":
     case "--version":
-      console.log(a.version);
+      console.log(pangu.version);
       break;
     case "-t":
-      o(s[1]);
+      printSpacingText(args[1]);
       break;
     case "-f":
-      i(s[1]);
+      printSpacingFile(args[1]);
       break;
     default:
-      o(s[0]);
+      printSpacingText(args[0]);
   }
+}
 process.exit(0);
 //# sourceMappingURL=cli.js.map
