@@ -456,7 +456,8 @@ export class BrowserPangu extends Pangu {
 }
 
 // Create default instance
-export const pangu = new BrowserPangu();
+const pangu = new BrowserPangu();
 
-// Default export
+// Export for TypeScript/ESM
+export { pangu };
 export default pangu;

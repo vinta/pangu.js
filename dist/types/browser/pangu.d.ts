@@ -30,5 +30,6 @@ export declare class BrowserPangu extends Pangu {
     spacingPage(): Promise<void>;
     autoSpacingPage(pageDelay?: number, nodeDelay?: number, nodeMaxWait?: number): void;
 }
-export declare const pangu: BrowserPangu;
+declare const pangu: BrowserPangu;
+export { pangu };
 export default pangu;

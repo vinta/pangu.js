@@ -30,7 +30,8 @@ export class NodePangu extends Pangu {
 }
 
 // Create default instance
-export const pangu = new NodePangu();
+const pangu = new NodePangu();
 
-// Default export
+// Export for TypeScript/ESM
+export { pangu };
 export default pangu;

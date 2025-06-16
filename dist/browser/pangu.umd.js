@@ -440,6 +440,7 @@
     }
   }
   const pangu = new BrowserPangu();
+  pangu.BrowserPangu = BrowserPangu;
   return pangu;
 });
 //# sourceMappingURL=pangu.umd.js.map

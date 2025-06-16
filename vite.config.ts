@@ -66,7 +66,9 @@ const multiBuildPlugin = () => {
             rollupOptions: {
               output: {
                 // Export the default directly as the global variable
-                exports: 'default'
+                exports: 'default',
+                // Ensure the UMD global name is 'pangu'
+                name: 'pangu'
               },
               external: (id) => {
                 return id.startsWith('node:') || ['fs', 'path', 'process'].includes(id);
