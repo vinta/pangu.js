@@ -1,11 +1,9 @@
-﻿/*
- Storage
+/*
+ * Background Service Worker for Manifest V3
+ * Service workers don't have persistent state, so we rely on chrome.storage
  */
 
-var SYNC_STORAGE = chrome.storage.sync;
-var LOCAL_STORAGE = chrome.storage.local;
-
-var DEFAULT_SETTINGS = {
+const DEFAULT_SETTINGS = {
   'spacing_mode': 'spacing_when_load',
   'spacing_rule': 'blacklists',
   'blacklists': [ // TODO: support regex
@@ -18,102 +16,117 @@ var DEFAULT_SETTINGS = {
   'whitelists': [],
   'is_mute': false
 };
-var CACHED_SETTINGS = Object.create(DEFAULT_SETTINGS);
-var SETTING_KEYS = Object.keys(DEFAULT_SETTINGS);
 
-function refresh_cached_settings() {
-  SYNC_STORAGE.get(null, function(items) {
-    CACHED_SETTINGS = items;
-  });
-}
+// Initialize settings on installation
+chrome.runtime.onInstalled.addListener(async () => {
+  await initializeSettings();
+});
 
-function merge_settings() {
-  SYNC_STORAGE.get(null, function(items) {
-    var old_settings = items;
-    var new_settings = {};
-
-    SETTING_KEYS.forEach(function(key) {
-      if (old_settings[key] === undefined) {
-        new_settings[key] = DEFAULT_SETTINGS[key];
-      }
-      else {
-        new_settings[key] = old_settings[key];
-      }
-    });
-
-    // 如果 new_settings 跟 old_settings 一樣的話，並不會觸發 chrome.storage.onChanged
-    // 所以這裡強制 refresh，確保 CACHED_SETTINGS 一定有東西
-    SYNC_STORAGE.set(new_settings, function() {
-      refresh_cached_settings();
-    });
-  });
-}
-
-chrome.storage.onChanged.addListener(
-  function(changes, areaName) {
-    if (areaName === 'sync') {
-      refresh_cached_settings();
-
-      // chrome.storage.sync 同步更新到 chrome.storage.local
-      var obj_to_save = {};
-      for (var key in changes) {
-        obj_to_save[key] = changes[key].newValue;
-      }
-      LOCAL_STORAGE.set(obj_to_save);
+// Initialize or merge settings with defaults
+async function initializeSettings() {
+  const items = await chrome.storage.sync.get(null);
+  const newSettings = {};
+  
+  Object.keys(DEFAULT_SETTINGS).forEach(key => {
+    if (items[key] === undefined) {
+      newSettings[key] = DEFAULT_SETTINGS[key];
     }
+  });
+  
+  // Only set if there are new settings to add
+  if (Object.keys(newSettings).length > 0) {
+    await chrome.storage.sync.set(newSettings);
   }
-);
+}
 
-merge_settings();
+// Get settings from storage
+async function getSettings() {
+  const items = await chrome.storage.sync.get(DEFAULT_SETTINGS);
+  return items;
+}
 
-/*
- Message Passing
- */
+// Sync storage.sync changes to storage.local
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'sync') {
+    // Sync to local storage
+    const objToSave = {};
+    for (const key in changes) {
+      objToSave[key] = changes[key].newValue;
+    }
+    chrome.storage.local.set(objToSave);
+  }
+});
 
-// 判斷能不能對這個頁面插入空格
-function can_spacing(tab) {
-  if (tab === undefined) {
+// Check if spacing should be applied to the given tab
+async function canSpacing(tab) {
+  if (!tab || !tab.url) {
     return false;
   }
 
-  if (CACHED_SETTINGS['spacing_mode'] === 'spacing_when_load') {
-    var current_url = tab.url;
-
-    if (CACHED_SETTINGS['spacing_rule'] === 'blacklists') {
-      for (var i in CACHED_SETTINGS['blacklists']) {
-        var blacklist_url = CACHED_SETTINGS['blacklists'][i];
-        if (current_url.indexOf(blacklist_url) >= 0) {
+  const settings = await getSettings();
+  
+  if (settings.spacing_mode === 'spacing_when_load') {
+    const currentUrl = tab.url;
+    
+    if (settings.spacing_rule === 'blacklists') {
+      for (const blacklistUrl of settings.blacklists) {
+        if (currentUrl.indexOf(blacklistUrl) >= 0) {
           return false;
         }
       }
-
       return true;
-    }
-    else if (CACHED_SETTINGS['spacing_rule'] === 'whitelists') {
-      for (var j in CACHED_SETTINGS['whitelists']) {
-        var whitelist_url = CACHED_SETTINGS['whitelists'][j];
-        if (current_url.indexOf(whitelist_url) >= 0) {
+    } else if (settings.spacing_rule === 'whitelists') {
+      for (const whitelistUrl of settings.whitelists) {
+        if (currentUrl.indexOf(whitelistUrl) >= 0) {
           return true;
         }
       }
-
       return false;
     }
-  }
-  else if (CACHED_SETTINGS['spacing_mode'] === 'spacing_when_click') {
+  } else if (settings.spacing_mode === 'spacing_when_click') {
     return false;
   }
-
+  
   return true;
 }
 
-// 監聽來自 content_script.js 的訊息
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-  switch (message.purpose) {
-    case 'can_spacing':
-      sendResponse({'result': can_spacing(sender.tab)});
-      break;
-    default:
-      sendResponse({'result': false});
-  }
+// Listen for messages from content scripts and popup
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // Handle async response
+  (async () => {
+    try {
+      switch (message.purpose || message.action) {
+        case 'can_spacing':
+          const result = await canSpacing(sender.tab);
+          sendResponse({ result });
+          break;
+          
+        case 'get_settings':
+          const settings = await getSettings();
+          sendResponse({ settings });
+          break;
+          
+        case 'get_setting':
+          if (message.key) {
+            const value = await chrome.storage.sync.get(message.key);
+            sendResponse({ value: value[message.key] });
+          } else {
+            sendResponse({ error: 'No key specified' });
+          }
+          break;
+          
+        default:
+          sendResponse({ result: false });
+      }
+    } catch (error) {
+      console.error('Error in message handler:', error);
+      sendResponse({ error: error.message });
+    }
+  })();
+  
+  // Return true to indicate async response
+  return true;
 });
+
+// Export functions for use by popup and options (via message passing)
+// Note: In service workers, we can't export directly, everything goes through messages

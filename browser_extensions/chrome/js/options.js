@@ -44,10 +44,27 @@ app.controller('OptionsController', [
     angular.element('#label_spacing_mode').html(utils_chrome.get_i18n('label_spacing_mode'));
     angular.element('#label_spacing_rule').html(utils_chrome.get_i18n('label_spacing_rule'));
 
+    // Initialize with defaults
+    $scope.spacing_mode = 'spacing_when_load';
+    $scope.spacing_rule = 'blacklists';
+    $scope.blacklists = [];
+    $scope.whitelists = [];
+    $scope.is_mute = false;
+
+    // Load settings from storage
+    utils_chrome.getCachedSettings().then(function(settings) {
+      $scope.spacing_mode = settings['spacing_mode'];
+      $scope.spacing_rule = settings['spacing_rule'];
+      $scope.blacklists = settings['blacklists'];
+      $scope.whitelists = settings['whitelists'];
+      $scope.is_mute = settings['is_mute'];
+      IS_MUTE = settings['is_mute'];
+      $scope.$apply();
+    });
+
     /*
      什麼時候作用？
      */
-    $scope.spacing_mode = utils_chrome.CACHED_SETTINGS['spacing_mode'];
     $scope.spacing_mode_display = utils_chrome.get_i18n($scope.spacing_mode);
     $scope.spacing_when_click_msg = utils_chrome.get_i18n('spacing_when_click_msg');
     $scope.change_spacing_mode = function() {
@@ -70,10 +87,10 @@ app.controller('OptionsController', [
     /*
      然後，你是否希望：
      */
-    $scope.spacing_rule = utils_chrome.CACHED_SETTINGS['spacing_rule'];
+    // spacing_rule already initialized above
     $scope.spacing_rule_display = utils_chrome.get_i18n($scope.spacing_rule);
-    $scope.blacklists = utils_chrome.CACHED_SETTINGS['blacklists'];
-    $scope.whitelists = utils_chrome.CACHED_SETTINGS['whitelists'];
+    // blacklists already initialized above
+    // whitelists already initialized above
     $scope.change_spacing_rule = function() {
       play_sound('Shouryuuken');
 
@@ -166,7 +183,7 @@ app.controller('OptionsController', [
      在這個頁面靜音
      */
     $scope.label_is_mute = utils_chrome.get_i18n('label_is_mute');
-    $scope.is_mute = utils_chrome.CACHED_SETTINGS['is_mute'];
+    // is_mute already initialized above
     $scope.$watch('is_mute', function(new_val, old_val) {
       if (new_val !== old_val) {
         utils_chrome.SYNC_STORAGE.set({'is_mute': new_val}, function() {
