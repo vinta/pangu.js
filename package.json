@@ -2,22 +2,16 @@
   "name": "pangu",
   "description": "Paranoid text spacing for good readability, to automatically insert whitespace between CJK (Chinese, Japanese, Korean) and half-width characters (alphabetical letters, numerical digits and symbols).",
   "keywords": [
-    "pangu",
-    "text-spacing",
-    "spacing",
-    "text",
-    "html",
-    "typesetting",
-    "readability",
-    "cli",
     "chinese",
     "japanese",
     "korean",
-    "obsessive-compulsive-disorder",
-    "ocd",
-    "paranoia"
+    "cjk",
+    "text-spacing",
+    "typography",
+    "formatting",
+    "readability"
   ],
-  "version": "4.0.7",
+  "version": "5.0.0",
   "author": {
     "name": "Vinta Chen",
     "email": "vinta.chen@gmail.com",
@@ -32,58 +26,54 @@
   "bugs": {
     "url": "https://github.com/vinta/pangu.js/issues"
   },
-  "main": "./dist/node/index.js",
-  "browser": "./dist/browser/pangu.js",
+  "type": "module",
+  "main": "./dist/node/index.cjs",
+  "module": "./dist/node/index.js",
+  "browser": {
+    "./dist/node/index.js": "./dist/browser/pangu.js",
+    "./dist/node/index.cjs": "./dist/browser/pangu.umd.js"
+  },
   "bin": {
     "pangu": "./dist/node/cli.js"
   },
+  "exports": {
+    ".": {
+      "types": "./dist/types/node/index.d.ts",
+      "import": "./dist/node/index.js",
+      "require": "./dist/node/index.cjs",
+      "default": "./dist/node/index.js"
+    },
+    "./browser": {
+      "types": "./dist/types/browser/pangu.d.ts",
+      "import": "./dist/browser/pangu.js",
+      "require": "./dist/browser/pangu.umd.js",
+      "default": "./dist/browser/pangu.js"
+    }
+  },
+  "files": [
+    "dist/",
+    "src/",
+    "LICENSE",
+    "README.md",
+    "HISTORY.md"
+  ],
   "scripts": {
-    "pack:chrome": "npm run build:browser && cp -rf ./dist/browser/pangu.min.js ./browser_extensions/chrome/vendors/pangu/pangu.min.js && cd ./browser_extensions/chrome/ && zip -q -r -0 ../paranoid-auto-spacing.zip . && zip -j ../paranoid-auto-spacing.zip ~/Dropbox/Projects/paranoid-auto-spacing/key.pem",
-    "pack:firefox": "node ./browser_extensions/firefox/pack.js",
+    "build": "npm run clean && vite build",
+    "clean": "rm -rf dist/ playwright-report/ test-results/",
+    "test": "npm run build && vitest run && playwright test",
+    "test:shared": "npm run build && vitest run tests/shared/",
+    "test:node": "npm run build && vitest run tests/node/",
+    "test:browser": "npm run build && playwright test",
     "pack": "npm run pack:chrome && npm run pack:firefox",
-    "clear:shared": "rm -rf ./dist/shared/",
-    "clear:browser": "rm -rf ./dist/browser/",
-    "clear:node": "rm -rf ./dist/node/",
-    "clear": "npm run clear:shared && npm run clear:browser && npm run clear:node",
-    "build:shared": "npm run clear:shared && babel src/shared/ -d dist/shared/",
-    "build:browser": "npm run clear:browser && webpack",
-    "build:node": "npm run clear:node && babel src/node/ -d dist/node/",
-    "build": "npm run build:shared && npm run build:browser && npm run build:node",
-    "test:shared": "npm run build:shared && mocha --require @babel/register test/shared/",
-    "test:browser": "npm run build:browser && karma start",
-    "test:node": "npm run build:node && mocha --require @babel/register test/node/",
-    "test": "npm run test:shared && npm run test:browser && npm run test:node",
-    "watch:shared": "watch 'npm run test:shared' src/shared test/shared/",
-    "watch:browser": "watch 'npm run test:browser' src/shared src/browser test/browser/",
-    "watch:node": "watch 'npm run test:node' src/shared src/node test/node/",
-    "watch:pack": "watch 'npm run pack' src/shared src/browser test/browser/"
+    "pack:chrome": "./scripts/pack-chrome.sh",
+    "pack:firefox": "node ./browser_extensions/firefox/pack.js"
   },
   "devDependencies": {
-    "@babel/cli": "7.2.3",
-    "@babel/core": "7.2.2",
-    "@babel/preset-env": "7.2.3",
-    "@babel/register": "7.0.0",
-    "babel-loader": "8.0.4",
-    "benchmark": "2.1.4",
-    "chai": "4.2.0",
-    "eslint": "5.11.1",
-    "eslint-config-airbnb-base": "13.1.0",
-    "eslint-plugin-import": "2.14.0",
-    "karma": "3.1.4",
-    "karma-babel-preprocessor": "8.0.0-beta.0",
-    "karma-chrome-launcher": "2.2.0",
-    "karma-coverage": "1.1.2",
-    "karma-html2js-preprocessor": "1.1.0",
-    "karma-mocha": "1.3.0",
-    "karma-mocha-reporter": "2.2.5",
-    "karma-sourcemap-loader": "0.3.7",
-    "mocha": "5.2.0",
-    "puppeteer": "1.13.0",
-    "terser": "3.13.1",
-    "terser-webpack-plugin": "1.2.1",
-    "underscore": "1.9.1",
-    "watch": "1.0.2",
-    "webpack": "4.28.3",
-    "webpack-cli": "3.1.2"
+    "@playwright/test": "1.53.0",
+    "@types/node": "24.0.2",
+    "typescript": "5.8.3",
+    "vite": "6.3.5",
+    "vite-plugin-dts": "4.5.4",
+    "vitest": "3.2.3"
   }
 }

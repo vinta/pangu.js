@@ -1,5 +1,9 @@
 #!/usr/bin/env node
-import { pangu } from "./index.js";
+
+/* eslint no-console: 0 */
+
+import pangu from '.';
+
 const usage = `
 usage: pangu [-h] [-v] [-t] [-f] text_or_path
 
@@ -16,45 +20,48 @@ optional arguments:
   -t, --text     specify the input value is a text
   -f, --file     specify the input value is a file path
 `.trim();
+
 const [, , ...args] = process.argv;
-function printSpacingText(text) {
-  if (typeof text === "string") {
+
+function printSpacingText(text: string | undefined): void {
+  if (typeof text === 'string') {
     console.log(pangu.spacingText(text));
   } else {
     console.log(usage);
     process.exit(1);
   }
 }
-function printSpacingFile(path) {
-  if (typeof path === "string") {
+
+function printSpacingFile(path: string | undefined): void {
+  if (typeof path === 'string') {
     console.log(pangu.spacingFileSync(path));
   } else {
     console.log(usage);
     process.exit(1);
   }
 }
+
 if (args.length === 0) {
   console.log(usage);
 } else {
-  switch (args[0]) {
-    /* eslint-disable indent */
-    case "-h":
-    case "--help":
+  switch (args[0]) { /* eslint-disable indent */
+    case '-h':
+    case '--help':
       console.log(usage);
       break;
-    case "-v":
-    case "--version":
+    case '-v':
+    case '--version':
       console.log(pangu.version);
       break;
-    case "-t":
+    case '-t':
       printSpacingText(args[1]);
       break;
-    case "-f":
+    case '-f':
       printSpacingFile(args[1]);
       break;
     default:
       printSpacingText(args[0]);
   }
 }
+
 process.exit(0);
-//# sourceMappingURL=cli.js.map

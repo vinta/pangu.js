@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { pangu } from "./index.js";
+"use strict";
+const node_index = require("./index.cjs");
 const usage = `
 usage: pangu [-h] [-v] [-t] [-f] text_or_path
 
@@ -19,7 +20,7 @@ optional arguments:
 const [, , ...args] = process.argv;
 function printSpacingText(text) {
   if (typeof text === "string") {
-    console.log(pangu.spacingText(text));
+    console.log(node_index.pangu.spacingText(text));
   } else {
     console.log(usage);
     process.exit(1);
@@ -27,7 +28,7 @@ function printSpacingText(text) {
 }
 function printSpacingFile(path) {
   if (typeof path === "string") {
-    console.log(pangu.spacingFileSync(path));
+    console.log(node_index.pangu.spacingFileSync(path));
   } else {
     console.log(usage);
     process.exit(1);
@@ -44,7 +45,7 @@ if (args.length === 0) {
       break;
     case "-v":
     case "--version":
-      console.log(pangu.version);
+      console.log(node_index.pangu.version);
       break;
     case "-t":
       printSpacingText(args[1]);
@@ -57,4 +58,4 @@ if (args.length === 0) {
   }
 }
 process.exit(0);
-//# sourceMappingURL=cli.js.map
+//# sourceMappingURL=cli.cjs.map

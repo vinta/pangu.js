@@ -22,9 +22,14 @@ app.controller('PopupController', [
   function PopupController($scope) {
     angular.element('#god_of_spacing').html(utils_chrome.get_i18n('god_of_spacing'));
 
+    // Initialize settings when popup opens
+    utils_chrome.getCachedSettings().then(function(settings) {
+      $scope.spacing_mode = settings['spacing_mode'];
+      $scope.spacing_mode_display = utils_chrome.get_i18n($scope.spacing_mode);
+      $scope.$apply();
+    });
+
     // 切換 spacing_mode
-    $scope.spacing_mode = utils_chrome.CACHED_SETTINGS['spacing_mode'];
-    $scope.spacing_mode_display = utils_chrome.get_i18n($scope.spacing_mode);
     $scope.change_spacing_mode = function() {
       if ($scope.spacing_mode === 'spacing_when_load') {
         $scope.spacing_mode = 'spacing_when_click';
@@ -47,13 +52,28 @@ app.controller('PopupController', [
        取得當前的 tabs（如果有多個螢幕的話，就可能會有很多個）
        也可能包含 Developer Tools 的 tab
        */
-      chrome.tabs.query({active: true}, function(tab_array) {
+      chrome.tabs.query({active: true}, async function(tab_array) {
         for (var i = 0; i < tab_array.length; i++) {
           var tab = tab_array[i];
 
           // 略過 chrome:// 之類的 URL
           if (is_valid_url_for_spacing(tab.url)) {
-            chrome.tabs.executeScript(tab.id, {code: 'pangu.spacingPage();', allFrames: true});
+            try {
+              // Manifest V3: Use chrome.scripting.executeScript
+              await chrome.scripting.executeScript({
+                target: { tabId: tab.id, allFrames: true },
+                func: function() {
+                  if (typeof pangu !== 'undefined' && pangu.spacingPage) {
+                    pangu.spacingPage();
+                  }
+                }
+              });
+            } catch (error) {
+              console.error('Failed to execute script:', error);
+              if (i === 0) {
+                alert(utils_chrome.get_i18n('can_not_call_god_of_spacing'));
+              }
+            }
           }
           else {
             if (i === 0) {
