@@ -5,9 +5,9 @@ export default tseslint.config(
   {
     // Global ignores
     ignores: [
-      'dist/',
       'node_modules/',
       'browser_extensions/',
+      'dist/',
     ],
   },
   {
@@ -23,6 +23,8 @@ export default tseslint.config(
     rules: {
       // TypeScript specific rules
       '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'warn',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -37,8 +39,6 @@ export default tseslint.config(
           fixStyle: 'separate-type-imports',
         },
       ],
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-non-null-assertion': 'warn',
     },
   },
   // Apply prettier config last to disable formatting rules
