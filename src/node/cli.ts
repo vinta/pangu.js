@@ -23,7 +23,7 @@ optional arguments:
 
 const [, , ...args] = process.argv;
 
-function printSpacingText(text: string | undefined): void {
+function printSpacingText(text: string | undefined) {
   if (typeof text === 'string') {
     console.log(pangu.spacingText(text));
   } else {
@@ -32,7 +32,7 @@ function printSpacingText(text: string | undefined): void {
   }
 }
 
-function printSpacingFile(path: string | undefined): void {
+function printSpacingFile(path: string | undefined) {
   if (typeof path === 'string') {
     console.log(pangu.spacingFileSync(path));
   } else {

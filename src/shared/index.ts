@@ -42,7 +42,7 @@ const FIX_QUOTE_ANY_QUOTE = /([`"\u05f4]+)[ ]*(.+?)[ ]*([`"\u05f4]+)/g;
 // Handle curly quotes with alphanumeric characters
 // These patterns should only apply to curly quotes, not straight quotes
 // Straight quotes are already handled by CJK_QUOTE, QUOTE_CJK and FIX_QUOTE_ANY_QUOTE
-const QUOTE_AN = /([\u201d])([A-Za-z0-9])/g;  // Only closing curly quotes + AN
+const QUOTE_AN = /([\u201d])([A-Za-z0-9])/g; // Only closing curly quotes + AN
 
 // Special handling for straight quotes followed by alphanumeric after CJK
 // This catches patterns like: 社"DF where the quote appears to be closing a quoted CJK phrase
@@ -84,10 +84,10 @@ export class Pangu {
   version: string;
 
   constructor() {
-    this.version = '5.0.0'; 
+    this.version = '5.0.0';
   }
 
-  public spacingText(text: string): string {
+  public spacingText(text: string) {
     if (typeof text !== 'string') {
       console.warn(`spacingText(text) only accepts string but got ${typeof text}`); // eslint-disable-line no-console
       return text;
@@ -131,11 +131,11 @@ export class Pangu {
     newText = newText.replace(CJK_QUOTE, '$1 $2');
     newText = newText.replace(QUOTE_CJK, '$1 $2');
     newText = newText.replace(FIX_QUOTE_ANY_QUOTE, '$1$2$3');
-    
+
     // Handle quotes with alphanumeric - closing quotes followed by AN need space
     newText = newText.replace(QUOTE_AN, '$1 $2');
     // Opening quotes preceded by AN don't need space (they're handled by other patterns)
-    
+
     // Handle CJK followed by closing quote followed by alphanumeric
     newText = newText.replace(CJK_QUOTE_AN, '$1$2 $3');
 
@@ -176,11 +176,12 @@ export class Pangu {
   }
 
   // alias for spacingText()
-  public spacing(text: string): string {
+  public spacing(text: string) {
     return this.spacingText(text);
   }
 
   protected convertToFullwidth(symbols: string): string {
+    // prettier-ignore
     return symbols
       .replace(/~/g, '～')
       .replace(/!/g, '！')

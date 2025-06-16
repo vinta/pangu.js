@@ -13,10 +13,13 @@
       "Bash(ls:*)",
       "Bash(mkdir:*)",
       "Bash(mv:*)",
+      "Bash(npm build)",
+      "Bash(npm clean)",
       "Bash(npm ls:*)",
       "Bash(npm run build:*)",
       "Bash(npm run clean:*)",
       "Bash(npm run test:*)",
+      "Bash(npm test)",
       "Bash(tree:*)"
     ],
     "deny": []
