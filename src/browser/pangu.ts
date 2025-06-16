@@ -62,11 +62,6 @@ export class BrowserPangu extends Pangu {
     this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
     this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
     this.isAutoSpacingPageExecuted = false;
-
-    // TODO
-    // this.ignoredTags adds pangu
-    // this.ignoreClasses
-    // this.ignoreAttributes
   }
 
   public spacingNode(contextNode: Node): void {
