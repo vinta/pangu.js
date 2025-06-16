@@ -41,3 +41,10 @@ Use one of these formats based on the type of change:
 - Ensure code is in a working state before committing
 - Do NOT commit if tests are failing or code has syntax errors
 - Each commit should represent a logical unit of work
+- Always include co-authorship:
+
+```
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
