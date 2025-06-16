@@ -87,7 +87,7 @@ export class Pangu {
     this.version = '5.0.0'; 
   }
 
-  convertToFullwidth(symbols: string): string {
+  protected convertToFullwidth(symbols: string): string {
     return symbols
       .replace(/~/g, '～')
       .replace(/!/g, '！')
@@ -98,7 +98,7 @@ export class Pangu {
       .replace(/\?/g, '？');
   }
 
-  spacingText(text: string): string {
+  public spacingText(text: string): string {
     if (typeof text !== 'string') {
       console.warn(`spacingText(text) only accepts string but got ${typeof text}`); // eslint-disable-line no-console
       return text;
@@ -187,7 +187,7 @@ export class Pangu {
   }
 
   // alias for spacingText()
-  spacing(text: string): string {
+  public spacing(text: string): string {
     return this.spacingText(text);
   }
 }
