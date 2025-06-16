@@ -64,10 +64,6 @@
     "test:shared": "npm run build && vitest run tests/shared/",
     "test:node": "npm run build && vitest run tests/node/",
     "test:browser": "npm run build && playwright test",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
     "pack": "npm run pack:chrome && npm run pack:firefox",
     "pack:chrome": "./scripts/pack-chrome.sh",
     "pack:firefox": "node ./browser_extensions/firefox/pack.js"
