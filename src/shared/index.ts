@@ -212,7 +212,7 @@ export class Pangu {
     }
   }
 
-  // Deprecated: Use spacing() instead
+  // alias for spacing
   spacingText(text: string): Promise<string>;
   spacingText(text: string, callback: (err: any, result?: string) => void): void;
   spacingText(text: string, callback?: (err: any, result?: string) => void): Promise<string> | void {
