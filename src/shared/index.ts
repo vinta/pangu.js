@@ -186,40 +186,8 @@ export class Pangu {
     return newText;
   }
 
-  spacing(text: string): Promise<string>;
-  spacing(text: string, callback: (err: any, result?: string) => void): void;
-  spacing(text: string, callback?: (err: any, result?: string) => void): Promise<string> | void {
-    if (callback) {
-      // Callback mode
-      let newText;
-      try {
-        newText = this.spacingSync(text);
-      } catch (err) {
-        callback(err);
-        return;
-      }
-      callback(null, newText);
-    } else {
-      // Promise mode
-      return new Promise((resolve, reject) => {
-        try {
-          const newText = this.spacingSync(text);
-          resolve(newText);
-        } catch (err) {
-          reject(err);
-        }
-      });
-    }
-  }
-
-  // alias for spacing
-  spacingText(text: string): Promise<string>;
-  spacingText(text: string, callback: (err: any, result?: string) => void): void;
-  spacingText(text: string, callback?: (err: any, result?: string) => void): Promise<string> | void {
-    return this.spacing(text, callback as any);
-  }
-
-  spacingTextSync(text: string): string {
+  // alias for spacingSync()
+  spacing(text: string): string {
     return this.spacingSync(text);
   }
 }

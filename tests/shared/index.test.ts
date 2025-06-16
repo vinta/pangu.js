@@ -419,72 +419,19 @@ describe('Pangu', () => {
     });
   });
 
-  describe('spacing() - async version', () => {
-    const testText = '請使用uname -m指令來檢查你的Linux作業系統是32位元或是[64位元](x86_64)';
-    const expectedText = '請使用 uname -m 指令來檢查你的 Linux 作業系統是 32 位元或是 [64 位元](x86_64)';
-
-    it('should support callback pattern', () => {
-      return new Promise<void>((resolve) => {
-        pangu.spacing(testText, (err, result) => {
-          expect(err).toBeNull();
-          expect(result).toBe(expectedText);
-          resolve();
-        });
-      });
-    });
-
-    it('should support promise pattern', async () => {
-      const result = await pangu.spacing(testText);
-      expect(result).toBe(expectedText);
-    });
-
-    it('should support promise pattern with then/catch', () => {
-      return pangu.spacing('心裡想的是Microservice，手裡做的是Distributed Monolith')
-        .then((result) => {
-          expect(result).toBe('心裡想的是 Microservice，手裡做的是 Distributed Monolith');
-        });
-    });
-
-    it('should work with async/await', async () => {
-      const result = await pangu.spacing('當你凝視著bug，bug也凝視著你');
-      expect(result).toBe('當你凝視著 bug，bug 也凝視著你');
-    });
-
-    it('should work with multiple texts in parallel', async () => {
-      const results = await Promise.all([
+  describe('spacing()', () => {
+    it('should work with multiple texts sequentially', () => {
+      const results = [
         pangu.spacing('Xcode 7.1配備了全新的AppleTV開發工具'),
         pangu.spacing('新MacBook Pro有15寸和13寸兩個版本'),
         pangu.spacing('ChromeDriver 2.20支援Chrome v43-48')
-      ]);
+      ];
 
       expect(results).toEqual([
         'Xcode 7.1 配備了全新的 AppleTV 開發工具',
         '新 MacBook Pro 有 15 寸和 13 寸兩個版本',
         'ChromeDriver 2.20 支援 Chrome v43-48'
       ]);
-    });
-  });
-
-  describe('spacingTextSync()', () => {
-    it('sync', () => {
-      expect(pangu.spacingTextSync('你從什麼時候開始產生了我沒使用Monkey Patch的錯覺?')).toBe('你從什麼時候開始產生了我沒使用 Monkey Patch 的錯覺？');
-    });
-  });
-
-  describe('spacingText() - deprecated', () => {
-    it('should still work for backward compatibility', async () => {
-      const result = await pangu.spacingText('心裡想的是Microservice，手裡做的是Distributed Monolith');
-      expect(result).toBe('心裡想的是 Microservice，手裡做的是 Distributed Monolith');
-    });
-
-    it('should support callback pattern', () => {
-      return new Promise<void>((resolve) => {
-        pangu.spacingText('當你凝視著bug，bug也凝視著你', (err, result) => {
-          expect(err).toBeNull();
-          expect(result).toBe('當你凝視著 bug，bug 也凝視著你');
-          resolve();
-        });
-      });
     });
   });
 });

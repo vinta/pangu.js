@@ -11,18 +11,7 @@ describe('NodePangu', () => {
   const fixtureDir = path.resolve(__dirname, '../_fixtures');
 
   describe('spacingFile()', () => {
-    it('performs on a text file (callback)', () => {
-      return new Promise<void>((resolve) => {
-        pangu.spacingFile(`${fixtureDir}/test_file.txt`, (err, data) => {
-          expect(err).toBeNull();
-          const expected = fs.readFileSync(`${fixtureDir}/test_file.expected.txt`, 'utf8');
-          expect(data).toBe(expected);
-          resolve();
-        });
-      });
-    });
-
-    it('performs on a text file (promise)', async () => {
+    it('performs on a text file', async () => {
       const data = await pangu.spacingFile(`${fixtureDir}/test_file.txt`);
       const expected = fs.readFileSync(`${fixtureDir}/test_file.expected.txt`, 'utf8');
       expect(data).toBe(expected);

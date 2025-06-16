@@ -20,21 +20,15 @@ function _interopNamespaceDefault(e) {
 }
 const fs__namespace = /* @__PURE__ */ _interopNamespaceDefault(fs);
 class NodePangu extends shared_index.Pangu {
-  spacingFile(path, callback) {
+  spacingFile(path) {
     return new Promise((resolve, reject) => {
       fs__namespace.readFile(path, "utf8", (err, data) => {
         if (err) {
           reject(err);
-          if (callback) {
-            return callback(err);
-          }
           return;
         }
         const spacingData = this.spacingSync(data);
         resolve(spacingData);
-        if (callback) {
-          return callback(null, spacingData);
-        }
       });
     });
   }

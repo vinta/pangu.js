@@ -82,7 +82,7 @@ npx eslint test/      # Lint test code
 ### Core API
 The main functionality is exposed through these methods:
 - `spacing(text)` - Process text strings (all platforms)
-- `spacingFile(path, callback)` - Process files (Node.js only)
+- `spacingFile(path)` - Process files asynchronously (Node.js only)
 - `spacingElement*()` - Process DOM elements (Browser only)
 - `autoSpacingPage()` - Auto-spacing with MutationObserver (Browser only)
 

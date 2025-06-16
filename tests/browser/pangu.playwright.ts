@@ -46,20 +46,6 @@ test.describe('BrowserPangu', () => {
     });
   });
 
-  test.describe('spacingText()', () => {
-    test('處理 text', async ({ page }) => {
-      const result = await page.evaluate(() => {
-        return new Promise((resolve) => {
-          window.pangu.spacingText('所以,請問Jackey的鼻子有幾個?3.14個', (error: any, newText: string) => {
-            resolve({ error, newText });
-          });
-        });
-      });
-      
-      expect(result.error).toBeNull();
-      expect(result.newText).toBe('所以，請問 Jackey 的鼻子有幾個？3.14 個');
-    });
-  });
 
   test.describe('spacingNode()', () => {
     test('處理 text node', async ({ page }) => {

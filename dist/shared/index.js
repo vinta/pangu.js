@@ -32,7 +32,7 @@ const S_A = /(%)([A-Za-z])/g;
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 class Pangu {
   constructor() {
-    this.version = "4.0.7";
+    this.version = "5.0.0";
   }
   convertToFullwidth(symbols) {
     return symbols.replace(/~/g, "～").replace(/!/g, "！").replace(/;/g, "；").replace(/:/g, "：").replace(/,/g, "，").replace(/\./g, "。").replace(/\?/g, "？");
@@ -85,31 +85,7 @@ class Pangu {
     newText = newText.replace(MIDDLE_DOT, "・");
     return newText;
   }
-  spacing(text, callback) {
-    if (callback) {
-      let newText;
-      try {
-        newText = this.spacingSync(text);
-      } catch (err) {
-        callback(err);
-        return;
-      }
-      callback(null, newText);
-    } else {
-      return new Promise((resolve, reject) => {
-        try {
-          const newText = this.spacingSync(text);
-          resolve(newText);
-        } catch (err) {
-          reject(err);
-        }
-      });
-    }
-  }
-  spacingText(text, callback) {
-    return this.spacing(text, callback);
-  }
-  spacingTextSync(text) {
+  spacing(text) {
     return this.spacingSync(text);
   }
 }
