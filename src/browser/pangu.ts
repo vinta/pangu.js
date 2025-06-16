@@ -1,44 +1,46 @@
-import { Pangu } from '../shared';
+import { Pangu } from "../shared";
 
-function once<T extends (...args: any[]) => any>(func: T): T {
+function once<T extends (...args: any[]) => any>(
+  func: T
+): (...args: Parameters<T>) => ReturnType<T> | undefined {
   let executed = false;
-  return function(this: any, ...args: Parameters<T>) {
+  return function (...args: Parameters<T>): ReturnType<T> | undefined {
     if (executed) {
-      return;
+      return undefined;
     }
     executed = true;
-    return func.apply(this, args);
-  } as T;
+    return func(...args);
+  };
 }
 
-function debounce<T extends (...args: any[]) => any>(
+function debounce<T extends (...args: any[]) => void>(
   func: T,
   delay: number,
   mustRunDelay: number = Infinity
-): T {
+): (...args: Parameters<T>) => void {
   let timer: number | null = null;
   let startTime: number | null = null;
-  
-  return function(this: any, ...args: Parameters<T>) {
+
+  return function (...args: Parameters<T>): void {
     const currentTime = Date.now();
-    
+
     if (timer) {
       clearTimeout(timer);
     }
-    
+
     if (!startTime) {
       startTime = currentTime;
     }
-    
+
     if (currentTime - startTime >= mustRunDelay) {
-      func.apply(this, args);
+      func(...args);
       startTime = currentTime;
     } else {
       timer = window.setTimeout(() => {
-        func.apply(this, args);
+        func(...args);
       }, delay);
     }
-  } as T;
+  };
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
