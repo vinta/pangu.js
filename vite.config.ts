@@ -58,12 +58,16 @@ const multiBuildPlugin = () => {
             sourcemap: true,
             minify: false,
             lib: {
-              entry: resolve(projectRoot, 'src/browser/pangu.ts'),
+              entry: resolve(projectRoot, 'src/browser/pangu.umd.ts'),
               name: 'pangu',
               formats: ['umd'],
               fileName: () => 'browser/pangu.umd.js'
             },
             rollupOptions: {
+              output: {
+                // Export the default directly as the global variable
+                exports: 'default'
+              },
               external: (id) => {
                 return id.startsWith('node:') || ['fs', 'path', 'process'].includes(id);
               }

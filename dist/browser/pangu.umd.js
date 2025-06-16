@@ -1,6 +1,6 @@
 (function(global, factory) {
-  typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory(global.pangu = {}));
-})(this, function(exports2) {
+  typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory() : typeof define === "function" && define.amd ? define(factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, global.pangu = factory());
+})(this, function() {
   "use strict";
   const CJK = "⺀-⻿⼀-⿟぀-ゟ゠-ヺー-ヿ㄀-ㄯ㈀-㋿㐀-䶿一-鿿豈-﫿";
   const ANY_CJK = new RegExp(`[${CJK}]`);
@@ -440,9 +440,6 @@
     }
   }
   const pangu = new BrowserPangu();
-  exports2.BrowserPangu = BrowserPangu;
-  exports2.default = pangu;
-  exports2.pangu = pangu;
-  Object.defineProperties(exports2, { __esModule: { value: true }, [Symbol.toStringTag]: { value: "Module" } });
+  return pangu;
 });
 //# sourceMappingURL=pangu.umd.js.map

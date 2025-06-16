@@ -26,7 +26,7 @@ test.describe('BrowserPangu', () => {
     
     // Load pangu.js into the page
     const panguScript = fs.readFileSync(
-      path.join(__dirname, '../../browser_extensions/chrome/vendors/pangu/pangu.min.js'),
+      path.join(__dirname, '../../dist/browser/pangu.umd.js'),
       'utf8'
     );
     await page.addScriptTag({ content: panguScript });
