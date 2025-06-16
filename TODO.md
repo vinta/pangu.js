@@ -15,6 +15,8 @@
 - [x] Update CLAUDE.md with TypeScript commands
 - [x] Add source maps for debugging (enabled in vite.config.ts)
 - [x] Enable full TypeScript strict mode (noImplicitAny: true)
+- [x] Set up ESLint for linting
+- [x] Set up Prettier for formatting
 
 ## 📋 To Do
 
@@ -24,11 +26,6 @@
 - [ ] Remove Angular.js from Chrome Extension (200KB+ savings)
 - [ ] Rewrite popup.js and options.js in TypeScript
 - [ ] Set up GitHub Actions CI/CD
-
-### Code Quality
-
-- [ ] Set up ESLint 9 with TypeScript support
-- [ ] Add Prettier or Biome for code formatting
 
 ### Chrome Extension Enhancement
 

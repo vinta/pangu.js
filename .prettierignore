@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Test results
+coverage/
+playwright-report/
+test-results/
+
+# Browser extensions
+browser_extensions/
