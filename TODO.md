@@ -17,6 +17,7 @@
 - [x] Add source maps for debugging (enabled in vite.config.ts)
 - [x] Chrome Extension Manifest V3 compatibility
 - [x] Add minification for production builds (Vite default)
+- [x] Enable full TypeScript strict mode (noImplicitAny: true)
 
 ## 📋 To Do
 
@@ -35,7 +36,6 @@
 
 - [ ] Set up ESLint 9 with TypeScript support
 - [ ] Add Prettier or Biome for code formatting
-- [ ] Enable full TypeScript strict mode (currently `noImplicitAny: false`)
 - [ ] Configure TypeScript coverage reporting
 - [ ] Add pre-commit hooks for linting and formatting
 

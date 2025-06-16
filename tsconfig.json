@@ -2,7 +2,7 @@
   "compilerOptions": {
     // Type checking
     "strict": true,
-    "noImplicitAny": false, // Start loose, gradually enable
+    "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "noImplicitThis": true,

@@ -75,23 +75,24 @@ export class BrowserPangu extends Pangu {
     // https://developer.mozilla.org/en-US/docs/Web/API/XPathResult
     const textNodes = document.evaluate(xPathQuery, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
-    let currentTextNode;
-    let nextTextNode;
+    let currentTextNode: Node | null;
+    let nextTextNode: Node | null = null;
 
     // 從最下面、最裡面的節點開始，所以是倒序的
     for (let i = textNodes.snapshotLength - 1; i > -1; --i) {
       currentTextNode = textNodes.snapshotItem(i);
+      if (!currentTextNode) continue;
 
-      if (this.isSpecificTag(currentTextNode.parentNode, this.presentationalTags) && !this.isInsideSpecificTag(currentTextNode.parentNode, this.ignoredTags)) {
+      if (currentTextNode.parentNode && this.isSpecificTag(currentTextNode.parentNode, this.presentationalTags) && !this.isInsideSpecificTag(currentTextNode.parentNode, this.ignoredTags)) {
         const elementNode = currentTextNode.parentNode;
 
         if (elementNode.previousSibling) {
           const { previousSibling } = elementNode;
           if (previousSibling.nodeType === Node.TEXT_NODE) {
-            const testText = previousSibling.data.substr(-1) + currentTextNode.data.toString().charAt(0);
+            const testText = (previousSibling as Text).data.slice(-1) + (currentTextNode as Text).data.charAt(0);
             const testNewText = this.spacingText(testText);
             if (testText !== testNewText) {
-              previousSibling.data = `${previousSibling.data} `;
+              (previousSibling as Text).data = `${(previousSibling as Text).data} `;
             }
           }
         }
@@ -99,10 +100,10 @@ export class BrowserPangu extends Pangu {
         if (elementNode.nextSibling) {
           const { nextSibling } = elementNode;
           if (nextSibling.nodeType === Node.TEXT_NODE) {
-            const testText = currentTextNode.data.substr(-1) + nextSibling.data.toString().charAt(0);
+            const testText = (currentTextNode as Text).data.slice(-1) + (nextSibling as Text).data.charAt(0);
             const testNewText = this.spacingText(testText);
             if (testText !== testNewText) {
-              nextSibling.data = ` ${nextSibling.data}`;
+              (nextSibling as Text).data = ` ${(nextSibling as Text).data}`;
             }
           }
         }
@@ -113,9 +114,11 @@ export class BrowserPangu extends Pangu {
         continue;
       }
 
-      const newText = this.spacingText(currentTextNode.data);
-      if (currentTextNode.data !== newText) {
-        currentTextNode.data = newText;
+      if (currentTextNode instanceof Text) {
+        const newText = this.spacingText(currentTextNode.data);
+        if (currentTextNode.data !== newText) {
+          currentTextNode.data = newText;
+        }
       }
 
       // 處理嵌套的 <tag> 中的文字
@@ -129,19 +132,22 @@ export class BrowserPangu extends Pangu {
         }
 
         // currentTextNode 的最後一個字 + nextTextNode 的第一個字
-        const testText = currentTextNode.data.toString().substr(-1) + nextTextNode.data.toString().substr(0, 1);
+        if (!(currentTextNode instanceof Text) || !(nextTextNode instanceof Text)) {
+          continue;
+        }
+        const testText = currentTextNode.data.slice(-1) + nextTextNode.data.slice(0, 1);
         const testNewText = this.spacingText(testText);
         if (testNewText !== testText) {
           // 往上找 nextTextNode 的 parent node
           // 直到遇到 spaceSensitiveTags
           // 而且 nextTextNode 必須是第一個 text child
           // 才能把空格加在 nextTextNode 的前面
-          let nextNode = nextTextNode;
+          let nextNode: Node = nextTextNode;
           while (nextNode.parentNode && nextNode.nodeName.search(this.spaceSensitiveTags) === -1 && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
             nextNode = nextNode.parentNode;
           }
 
-          let currentNode = currentTextNode;
+          let currentNode: Node = currentTextNode;
           while (currentNode.parentNode && currentNode.nodeName.search(this.spaceSensitiveTags) === -1 && this.isLastTextChild(currentNode.parentNode, currentNode)) {
             currentNode = currentNode.parentNode;
           }
@@ -158,28 +164,36 @@ export class BrowserPangu extends Pangu {
               if ((nextNode.nodeName.search(this.ignoredTags) === -1) && (nextNode.nodeName.search(this.blockTags) === -1)) {
                 if (nextTextNode.previousSibling) {
                   if (nextTextNode.previousSibling.nodeName.search(this.spaceLikeTags) === -1) {
-                    nextTextNode.data = ` ${nextTextNode.data}`;
+                    if (nextTextNode instanceof Text) {
+                      nextTextNode.data = ` ${nextTextNode.data}`;
+                    }
                   }
                 } else {
                   // dirty hack
                   if (!this.canIgnoreNode(nextTextNode)) {
-                    nextTextNode.data = ` ${nextTextNode.data}`;
+                    if (nextTextNode instanceof Text) {
+                      nextTextNode.data = ` ${nextTextNode.data}`;
+                    }
                   }
                 }
               }
             } else if (currentNode.nodeName.search(this.spaceSensitiveTags) === -1) {
-              currentTextNode.data = `${currentTextNode.data} `;
+              if (currentTextNode instanceof Text) {
+                currentTextNode.data = `${currentTextNode.data} `;
+              }
             } else {
               const panguSpace = document.createElement('pangu');
               panguSpace.innerHTML = ' ';
 
               // 避免一直被加空格
-              if (nextNode.previousSibling) {
-                if (nextNode.previousSibling.nodeName.search(this.spaceLikeTags) === -1) {
+              if (nextNode.parentNode) {
+                if (nextNode.previousSibling) {
+                  if (nextNode.previousSibling.nodeName.search(this.spaceLikeTags) === -1) {
+                    nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                  }
+                } else {
                   nextNode.parentNode.insertBefore(panguSpace, nextNode);
                 }
-              } else {
-                nextNode.parentNode.insertBefore(panguSpace, nextNode);
               }
 
               // TODO
