@@ -43,6 +43,10 @@ const multiBuildPlugin = () => {
               },
             },
           },
+          esbuild: {
+            target: 'es2018', // Node.js target
+            format: 'cjs',
+          },
           plugins: [],
           logLevel: 'error',
         });
@@ -65,8 +69,6 @@ const multiBuildPlugin = () => {
             },
             rollupOptions: {
               output: {
-                // Export the default directly as the global variable
-                exports: 'default',
                 // Ensure the UMD global name is 'pangu'
                 name: 'pangu',
               },
@@ -74,6 +76,9 @@ const multiBuildPlugin = () => {
                 return id.startsWith('node:') || ['fs', 'path', 'process'].includes(id);
               },
             },
+          },
+          esbuild: {
+            target: 'es2015', // Browser target for broader compatibility
           },
           plugins: [],
           logLevel: 'error',
@@ -123,5 +128,8 @@ export default defineConfig({
         return id.startsWith('node:') || ['fs', 'path', 'process'].includes(id);
       },
     },
+  },
+  esbuild: {
+    target: 'es2018', // Default target for ES modules
   },
 });
