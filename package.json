@@ -66,13 +66,15 @@
     "test:browser": "npm run build && playwright test",
     "pack": "npm run pack:chrome && npm run pack:firefox",
     "pack:chrome": "./scripts/pack-chrome.sh",
-    "pack:firefox": "node ./browser_extensions/firefox/pack.js"
+    "pack:firefox": "node ./browser_extensions/firefox/pack.js",
+    "postversion": "node ./scripts/update-version.js"
   },
   "devDependencies": {
     "@playwright/test": "1.53.0",
     "@types/node": "24.0.2",
     "eslint": "9.29.0",
     "eslint-config-prettier": "10.1.5",
+    "eslint-plugin-unicorn": "59.0.1",
     "prettier": "3.5.3",
     "typescript": "5.8.3",
     "typescript-eslint": "8.34.1",
