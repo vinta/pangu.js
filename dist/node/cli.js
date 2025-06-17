@@ -37,7 +37,6 @@ if (args.length === 0) {
   console.log(usage);
 } else {
   switch (args[0]) {
-    /* eslint-disable indent */
     case "-h":
     case "--help":
       console.log(usage);

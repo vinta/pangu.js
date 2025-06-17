@@ -38,13 +38,13 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/types/node/index.d.ts",
+      "types": "./dist/node/index.d.ts",
       "import": "./dist/node/index.js",
       "require": "./dist/node/index.cjs",
       "default": "./dist/node/index.js"
     },
     "./browser": {
-      "types": "./dist/types/browser/pangu.d.ts",
+      "types": "./dist/browser/pangu.d.ts",
       "import": "./dist/browser/pangu.js",
       "require": "./dist/browser/pangu.umd.js",
       "default": "./dist/browser/pangu.js"
@@ -64,15 +64,19 @@
     "test:shared": "npm run build && vitest run tests/shared/",
     "test:node": "npm run build && vitest run tests/node/",
     "test:browser": "npm run build && playwright test",
-    "pack": "npm run pack:chrome && npm run pack:firefox",
-    "pack:chrome": "./scripts/pack-chrome.sh",
-    "pack:firefox": "node ./browser_extensions/firefox/pack.js"
+    "lint": "eslint src/ scripts/",
+    "lint:fix": "eslint src/ scripts/ --fix",
+    "publish-package": "node ./scripts/publish-package.js",
+    "pack-extension": "npm run pack:chrome && npm run pack:firefox",
+    "pack-extension:chrome": "./scripts/pack-extension-chrome.sh",
+    "pack-extension:firefox": "node ./browser_extensions/firefox/pack.js"
   },
   "devDependencies": {
     "@playwright/test": "1.53.0",
     "@types/node": "24.0.2",
     "eslint": "9.29.0",
     "eslint-config-prettier": "10.1.5",
+    "eslint-plugin-unicorn": "59.0.1",
     "prettier": "3.5.3",
     "typescript": "5.8.3",
     "typescript-eslint": "8.34.1",

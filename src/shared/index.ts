@@ -89,7 +89,7 @@ export class Pangu {
 
   public spacingText(text: string) {
     if (typeof text !== 'string') {
-      console.warn(`spacingText(text) only accepts string but got ${typeof text}`); // eslint-disable-line no-console
+      console.warn(`spacingText(text) only accepts string but got ${typeof text}`);
       return text;
     }
 
@@ -97,6 +97,7 @@ export class Pangu {
       return text;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
     // DEBUG
@@ -141,7 +142,7 @@ export class Pangu {
 
     newText = newText.replace(CJK_SINGLE_QUOTE_BUT_POSSESSIVE, '$1 $2');
     newText = newText.replace(SINGLE_QUOTE_CJK, '$1 $2');
-    newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's"); // eslint-disable-line quotes
+    newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
 
     newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
     newText = newText.replace(CJK_HASH, '$1 $2');

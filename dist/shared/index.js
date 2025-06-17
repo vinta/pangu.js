@@ -34,9 +34,6 @@ class Pangu {
   constructor() {
     this.version = "5.0.0";
   }
-  convertToFullwidth(symbols) {
-    return symbols.replace(/~/g, "～").replace(/!/g, "！").replace(/;/g, "；").replace(/:/g, "：").replace(/,/g, "，").replace(/\./g, "。").replace(/\?/g, "？");
-  }
   spacingText(text) {
     if (typeof text !== "string") {
       console.warn(`spacingText(text) only accepts string but got ${typeof text}`);
@@ -88,6 +85,9 @@ class Pangu {
   // alias for spacingText()
   spacing(text) {
     return this.spacingText(text);
+  }
+  convertToFullwidth(symbols) {
+    return symbols.replace(/~/g, "～").replace(/!/g, "！").replace(/;/g, "；").replace(/:/g, "：").replace(/,/g, "，").replace(/\./g, "。").replace(/\?/g, "？");
   }
 }
 const pangu = new Pangu();

@@ -221,18 +221,21 @@ class BrowserPangu extends Pangu {
     }
     const queue = [];
     const self = this;
-    const debouncedSpacingNodes = debounce(() => {
-      while (queue.length) {
-        const node = queue.shift();
-        if (node) {
-          self.spacingNode(node);
+    const debouncedSpacingNodes = debounce(
+      () => {
+        while (queue.length) {
+          const node = queue.shift();
+          if (node) {
+            self.spacingNode(node);
+          }
         }
-      }
-    }, nodeDelay, nodeMaxWait);
+      },
+      nodeDelay,
+      nodeMaxWait
+    );
     const mutationObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         switch (mutation.type) {
-          /* eslint-disable indent */
           case "childList":
             mutation.addedNodes.forEach((node2) => {
               if (node2.nodeType === Node.ELEMENT_NODE) {
@@ -258,6 +261,7 @@ class BrowserPangu extends Pangu {
       subtree: true
     });
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   isContentEditable(node) {
     return node.isContentEditable || node.getAttribute && node.getAttribute("g_editable") === "true";
   }

@@ -1,17 +1,14 @@
 import tseslint from 'typescript-eslint';
 import prettierConfig from 'eslint-config-prettier';
+import unicorn from 'eslint-plugin-unicorn';
 
 export default tseslint.config(
   {
     // Global ignores
-    ignores: [
-      'node_modules/',
-      'browser_extensions/',
-      'dist/',
-    ],
+    ignores: ['node_modules/', 'browser_extensions/', 'dist/'],
   },
   {
-    // Source TypeScript files
+    // TypeScript files
     files: ['src/**/*.ts'],
     extends: [...tseslint.configs.recommended],
     languageOptions: {
@@ -20,8 +17,11 @@ export default tseslint.config(
         project: './tsconfig.json',
       },
     },
+    plugins: {
+      unicorn,
+    },
     rules: {
-      // TypeScript specific rules
+      'unicorn/prefer-node-protocol': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-non-null-assertion': 'warn',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -39,6 +39,16 @@ export default tseslint.config(
           fixStyle: 'separate-type-imports',
         },
       ],
+    },
+  },
+  {
+    // JavaScript files
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+    plugins: {
+      unicorn,
+    },
+    rules: {
+      'unicorn/prefer-node-protocol': 'error',
     },
   },
   // Apply prettier config last to disable formatting rules
