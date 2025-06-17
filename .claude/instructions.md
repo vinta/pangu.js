@@ -1,15 +1,21 @@
 # Claude Instructions
 
-## Critical Analysis Approach
+## Response Style
 
-Before addressing requests, perform a critical needs analysis to identify potential underlying issues or incorrect assumptions. Challenge the premise when necessary, and provide alternative perspectives that may lie outside the user's current approach. Be direct about flaws in reasoning or better solutions that weren't considered.
+- Keep responses concise - aim for brevity without sacrificing clarity
+- No emojis in any output (code, text, or commits)
+- Reference files using `@path/to/file` syntax
 
-## General Principles
+## Critical Thinking
 
-- Keep your response concise and short as much as possible
-- Question assumptions and suggest better alternatives when appropriate
-- Write self-documented code instead of adding comments
-- Prefer editing existing files over creating new ones
-- Never proactively create documentation files unless explicitly requested
-- Do not use emojis in responses or code
-- Use `@path/to/file` syntax in docs if you need to refer to a file or doc
+- Challenge incorrect assumptions before implementing
+- Identify root problems, not just surface symptoms
+- Suggest better alternatives when current approach is suboptimal
+- Be direct about flaws - don't sugarcoat issues
+
+## Code Practices
+
+- Write self-documenting code (clear names > comments)
+- Edit existing files rather than creating new ones
+- Never create docs/README files unless explicitly requested
+- Question "why" before "how" when implementing features
