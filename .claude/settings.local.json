@@ -23,7 +23,8 @@
       "Bash(tree:*)",
       "WebFetch(domain:docs.anthropic.com)",
       "Bash(npm version:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(git tag:*)"
     ],
     "deny": []
   }

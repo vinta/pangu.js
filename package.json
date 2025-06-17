@@ -64,10 +64,10 @@
     "test:shared": "npm run build && vitest run tests/shared/",
     "test:node": "npm run build && vitest run tests/node/",
     "test:browser": "npm run build && playwright test",
-    "pack": "npm run pack:chrome && npm run pack:firefox",
-    "pack:chrome": "./scripts/pack-chrome.sh",
-    "pack:firefox": "node ./browser_extensions/firefox/pack.js",
-    "postversion": "node ./scripts/update-version.js"
+    "publish-package": "node ./scripts/publish-package.js",
+    "pack-extension": "npm run pack:chrome && npm run pack:firefox",
+    "pack-extension:chrome": "./scripts/pack-extension-chrome.sh",
+    "pack-extension:firefox": "node ./browser_extensions/firefox/pack.js"
   },
   "devDependencies": {
     "@playwright/test": "1.53.0",
