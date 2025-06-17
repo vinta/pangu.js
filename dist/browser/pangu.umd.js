@@ -38,9 +38,6 @@
     constructor() {
       this.version = "5.0.0";
     }
-    convertToFullwidth(symbols) {
-      return symbols.replace(/~/g, "～").replace(/!/g, "！").replace(/;/g, "；").replace(/:/g, "：").replace(/,/g, "，").replace(/\./g, "。").replace(/\?/g, "？");
-    }
     spacingText(text) {
       if (typeof text !== "string") {
         console.warn(`spacingText(text) only accepts string but got ${typeof text}`);
@@ -92,6 +89,9 @@
     // alias for spacingText()
     spacing(text) {
       return this.spacingText(text);
+    }
+    convertToFullwidth(symbols) {
+      return symbols.replace(/~/g, "～").replace(/!/g, "！").replace(/;/g, "；").replace(/:/g, "：").replace(/,/g, "，").replace(/\./g, "。").replace(/\?/g, "？");
     }
   }
   function once(func) {
@@ -316,18 +316,21 @@
       }
       const queue = [];
       const self2 = this;
-      const debouncedSpacingNodes = debounce(() => {
-        while (queue.length) {
-          const node = queue.shift();
-          if (node) {
-            self2.spacingNode(node);
+      const debouncedSpacingNodes = debounce(
+        () => {
+          while (queue.length) {
+            const node = queue.shift();
+            if (node) {
+              self2.spacingNode(node);
+            }
           }
-        }
-      }, nodeDelay, nodeMaxWait);
+        },
+        nodeDelay,
+        nodeMaxWait
+      );
       const mutationObserver = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           switch (mutation.type) {
-            /* eslint-disable indent */
             case "childList":
               mutation.addedNodes.forEach((node2) => {
                 if (node2.nodeType === Node.ELEMENT_NODE) {
@@ -353,6 +356,7 @@
         subtree: true
       });
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     isContentEditable(node) {
       return node.isContentEditable || node.getAttribute && node.getAttribute("g_editable") === "true";
     }

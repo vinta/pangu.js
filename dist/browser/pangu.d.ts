@@ -16,13 +16,12 @@ export declare class BrowserPangu extends Pangu {
     spacingPageBody(): void;
     spacingPage(): void;
     autoSpacingPage(pageDelay?: number, nodeDelay?: number, nodeMaxWait?: number): void;
-    protected isContentEditable(node: any): boolean;
-    protected isSpecificTag(node: any, tagRegex: RegExp): boolean;
-    protected isInsideSpecificTag(node: any, tagRegex: RegExp, checkCurrent?: boolean): boolean;
+    protected isContentEditable(node: any): any;
+    protected isSpecificTag(node: Node, tagRegex: RegExp): boolean | "";
+    protected isInsideSpecificTag(node: Node, tagRegex: RegExp, checkCurrent?: boolean): boolean;
     protected canIgnoreNode(node: Node): boolean;
     protected isFirstTextChild(parentNode: Node, targetNode: Node): boolean;
     protected isLastTextChild(parentNode: Node, targetNode: Node): boolean;
 }
-declare const pangu: BrowserPangu;
-export { pangu };
+export declare const pangu: BrowserPangu;
 export default pangu;

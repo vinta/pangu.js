@@ -88,7 +88,7 @@ export default defineConfig({
   plugins: [
     dts({
       include: ['src/**/*.ts'],
-      outDir: 'dist/types',
+      outDir: 'dist',
       insertTypesEntry: true,
       rollupTypes: false,
       copyDtsFiles: true,
