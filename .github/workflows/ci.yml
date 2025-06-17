@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  node-tests:
+  node-test:
     runs-on: ubuntu-latest
 
     strategy:
@@ -32,10 +32,10 @@ jobs:
       - name: Run build
         run: npm run build
 
-      - name: Run Node.js tests
+      - name: Run Node.js test
         run: npm run test:shared && npm run test:node
 
-  browser-tests:
+  browser-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -56,5 +56,5 @@ jobs:
       - name: Run build
         run: npm run build
 
-      - name: Run browser tests
+      - name: Run browser test
         run: npm run test:browser
