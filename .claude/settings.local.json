@@ -21,7 +21,9 @@
       "Bash(npm run test:*)",
       "Bash(npm test)",
       "Bash(tree:*)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(npm version:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": []
   }
