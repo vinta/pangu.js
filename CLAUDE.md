@@ -22,8 +22,8 @@ pangu.js is a text spacing library that automatically inserts whitespace between
 ```bash
 npm run build              # Build all targets (shared, browser, node)
 npm run build:shared       # Build shared/core module
-npm run build:browser      # Build browser bundles (ESM + UMD)
 npm run build:node         # Build Node.js modules (ESM + CommonJS)
+npm run build:browser      # Build browser bundles (ESM + UMD)
 npm run clean              # Clean all build artifacts
 ```
 
@@ -32,9 +32,8 @@ npm run clean              # Clean all build artifacts
 ```bash
 npm run test               # Run all tests (vitest + playwright)
 npm run test:shared        # Test core/shared logic
-npm run test:browser       # Test browser code (uses Playwright)
 npm run test:node          # Test Node.js-specific code
-npm run test:watch         # Run vitest in watch mode
+npm run test:browser       # Test browser code (uses Playwright)
 ```
 
 ### Publishing & Packaging
@@ -102,7 +101,7 @@ dist/
 - `spacingFile(path)` - Process files asynchronously
 - `spacingFileSync(path)` - Process files synchronously
 
-### Import/Export Patterns
+### Import Patterns
 
 ```javascript
 // Browser ESM
@@ -168,7 +167,7 @@ The library supports comprehensive CJK character ranges:
 - ESLint with unicorn/prefer-node-protocol enabled
 - Maintain zero runtime dependencies
 - Keep regex patterns readable with comments
-- Always use `node:` prefix for Node.js built-ins
+- Always use `node:` prefix for Node.js built-in modules
 
 ## Project-Specific Requirements
 
@@ -177,11 +176,6 @@ The library supports comprehensive CJK character ranges:
 - Use `npm run publish-package <x.y.z>` for version updates
 - This updates: package.json, Chrome manifest, and src/shared/index.ts
 - Creates git commit and tag automatically
-
-### Import Style
-
-- Always use `node:` prefix for Node.js built-in modules
-- Example: `import { readFile } from 'node:fs'`
 
 ## Future Improvements
 
