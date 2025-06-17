@@ -20,7 +20,8 @@
       "Bash(npm run clean:*)",
       "Bash(npm run test:*)",
       "Bash(npm test)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "WebFetch(domain:docs.anthropic.com)"
     ],
     "deny": []
   }
