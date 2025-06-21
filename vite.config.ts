@@ -1,6 +1,7 @@
 import { defineConfig, build } from 'vite';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import dts from 'vite-plugin-dts';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const projectRoot = __dirname;
@@ -29,7 +30,7 @@ const multiBuildPlugin = () => {
           rollupOptions: {
             output: {
               entryFileNames: '[name].cjs',
-              chunkFileNames: '[name]-[hash].cjs',
+              chunkFileNames: 'shared/[name]-[hash].cjs',
               exports: 'named',
             },
             external: (id) => {
@@ -105,5 +106,17 @@ export default defineConfig({
   esbuild: {
     target: 'es2022',
   },
-  plugins: [multiBuildPlugin()],
+  plugins: [
+    dts({
+      include: ['src/**/*.ts'],
+      outDir: 'dist',
+      rollupTypes: false,
+      insertTypesEntry: false,
+      compilerOptions: {
+        declaration: true,
+        declarationMap: true,
+      },
+    }),
+    multiBuildPlugin()
+  ],
 });

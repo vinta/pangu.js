@@ -13,27 +13,23 @@
 
     // Module resolution
     "module": "ESNext",
-    "target": "ES2022", // Node.js 18+ and modern browsers
+    "target": "ES2022",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "lib": ["ES2022"],
 
-    // Emit
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "outDir": "./dist",
+    // Emit - turned off at base level
+    "noEmit": true,
+    "declaration": false,
 
     // JavaScript support
-    "allowJs": true, // Allow gradual migration
-    "checkJs": false, // Don't type-check JS files yet
+    "allowJs": true,
+    "checkJs": false,
 
     // Other
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "files": [],
-  "references": [{ "path": "./src/node/tsconfig.json" }, { "path": "./src/browser/tsconfig.json" }]
+  "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.spec.ts"]
 }

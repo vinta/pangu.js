@@ -1,28 +1,7 @@
 "use strict";
 var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __export = (target, all) => {
-  for (var name in all)
-    __defProp(target, name, { get: all[name], enumerable: true });
-};
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
-  }
-  return to;
-};
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-var shared_exports = {};
-__export(shared_exports, {
-  Pangu: () => Pangu,
-  default: () => shared_default,
-  pangu: () => pangu
-});
-module.exports = __toCommonJS(shared_exports);
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, key + "", value);
 const CJK = "⺀-⻿⼀-⿟぀-ゟ゠-ヺー-ヿ㄀-ㄯ㈀-㋿㐀-䶿一-鿿豈-﫿";
 const ANY_CJK = new RegExp(`[${CJK}]`);
 const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK = new RegExp(`([${CJK}])[ ]*([\\:]+|\\.)[ ]*([${CJK}])`, "g");
@@ -57,6 +36,7 @@ const S_A = /(%)([A-Za-z])/g;
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 class Pangu {
   constructor() {
+    __publicField(this, "version");
     this.version = "5.0.0";
   }
   spacingText(text) {
@@ -115,6 +95,6 @@ class Pangu {
     return symbols.replace(/~/g, "～").replace(/!/g, "！").replace(/;/g, "；").replace(/:/g, "：").replace(/,/g, "，").replace(/\./g, "。").replace(/\?/g, "？");
   }
 }
-const pangu = new Pangu();
-var shared_default = pangu;
-//# sourceMappingURL=index.cjs.map
+new Pangu();
+exports.Pangu = Pangu;
+//# sourceMappingURL=index-D3O23pV7.cjs.map
