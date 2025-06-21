@@ -1,6 +1,6 @@
 import { ExtensionSettings } from './types';
 import { translatePage } from './i18n';
-import utils_chrome from './utils-chrome';
+import utils from './utils';
 
 class OptionsController {
   private settings: ExtensionSettings = {
@@ -37,14 +37,14 @@ class OptionsController {
 
   private setI18nText(): void {
     const elements = {
-      'page_title': utils_chrome.get_i18n('extension_name'),
-      'header_title': utils_chrome.get_i18n('extension_name'),
-      'subtitle': utils_chrome.get_i18n('subtitle'),
-      'quote': utils_chrome.get_i18n('quote'),
-      'label_spacing_mode': utils_chrome.get_i18n('label_spacing_mode'),
-      'label_spacing_rule': utils_chrome.get_i18n('label_spacing_rule'),
+      'page_title': utils.get_i18n('extension_name'),
+      'header_title': utils.get_i18n('extension_name'),
+      'subtitle': utils.get_i18n('subtitle'),
+      'quote': utils.get_i18n('quote'),
+      'label_spacing_mode': utils.get_i18n('label_spacing_mode'),
+      'label_spacing_rule': utils.get_i18n('label_spacing_rule'),
       'label_other_options': '其他：',
-      'spacing_when_click_msg': utils_chrome.get_i18n('spacing_when_click_msg')
+      'spacing_when_click_msg': utils.get_i18n('spacing_when_click_msg')
     };
 
     for (const [id, text] of Object.entries(elements)) {
@@ -55,17 +55,17 @@ class OptionsController {
     }
 
     // Set page title
-    document.title = utils_chrome.get_i18n('extension_name');
+    document.title = utils.get_i18n('extension_name');
 
     // Set mute label
     const muteLabel = document.getElementById('label_is_mute');
     if (muteLabel) {
-      muteLabel.textContent = utils_chrome.get_i18n('label_is_mute');
+      muteLabel.textContent = utils.get_i18n('label_is_mute');
     }
   }
 
   private async loadSettings(): Promise<void> {
-    const settings = await utils_chrome.getCachedSettings();
+    const settings = await utils.getCachedSettings();
     this.settings = settings;
   }
 
@@ -123,7 +123,7 @@ class OptionsController {
       const i18nKey = this.settings.spacing_mode === 'spacing_when_load'
         ? 'auto_spacing_mode'
         : 'manual_spacing_mode';
-      button.textContent = utils_chrome.get_i18n(i18nKey);
+      button.textContent = utils.get_i18n(i18nKey);
     }
 
     // Show/hide spacing rule section
@@ -142,7 +142,7 @@ class OptionsController {
   private renderSpacingRule(): void {
     const button = document.getElementById('spacing_rule_btn') as HTMLButtonElement;
     if (button) {
-      button.textContent = utils_chrome.get_i18n(this.settings.spacing_rule);
+      button.textContent = utils.get_i18n(this.settings.spacing_rule);
     }
   }
 
@@ -213,8 +213,8 @@ class OptionsController {
     const newIsAutoMode = !isCurrentlyAutoMode;
 
     // Use shared toggle function
-    await utils_chrome.toggleAutoSpacing(newIsAutoMode);
-    await utils_chrome.playSound(newIsAutoMode ? 'Shouryuuken' : 'Hadouken');
+    await utils.toggleAutoSpacing(newIsAutoMode);
+    await utils.playSound(newIsAutoMode ? 'Shouryuuken' : 'Hadouken');
 
     // Update local settings
     this.settings.spacing_mode = newIsAutoMode ? 'spacing_when_load' : 'spacing_when_click';
@@ -227,7 +227,7 @@ class OptionsController {
     this.settings.spacing_rule = this.settings.spacing_rule === 'blacklists'
       ? 'whitelists'
       : 'blacklists';
-    await utils_chrome.playSound(this.settings.spacing_rule === 'blacklists' ? 'Shouryuuken' : 'Hadouken');
+    await utils.playSound(this.settings.spacing_rule === 'blacklists' ? 'Shouryuuken' : 'Hadouken');
 
     this.saveSettings({ spacing_rule: this.settings.spacing_rule });
     this.render();
@@ -251,7 +251,7 @@ class OptionsController {
     const newUrl = input?.value.trim();
 
     if (this.isValidUrl(newUrl)) {
-      await utils_chrome.playSound('YeahBaby');
+      await utils.playSound('YeahBaby');
       const urls = this.settings[this.settings.spacing_rule];
       urls[index] = newUrl;
       this.editingUrls.delete(index);
@@ -261,7 +261,7 @@ class OptionsController {
       this.saveSettings(update);
       this.renderUrlList();
     } else {
-      await utils_chrome.playSound('WahWahWaaah');
+      await utils.playSound('WahWahWaaah');
       alert('Invalid URL');
     }
   }
@@ -296,7 +296,7 @@ class OptionsController {
     const newUrl = input?.value.trim();
 
     if (this.isValidUrl(newUrl)) {
-      await utils_chrome.playSound('YeahBaby');
+      await utils.playSound('YeahBaby');
       const urls = this.settings[this.settings.spacing_rule];
       urls.push(newUrl);
 
@@ -307,7 +307,7 @@ class OptionsController {
       this.addUrlInput = null;
       this.renderUrlList();
     } else {
-      await utils_chrome.playSound('WahWahWaaah');
+      await utils.playSound('WahWahWaaah');
       alert('Invalid URL');
     }
   }
@@ -317,7 +317,7 @@ class OptionsController {
   }
 
   private saveSettings(update: Partial<ExtensionSettings>): void {
-    utils_chrome.SYNC_STORAGE.set(update);
+    utils.SYNC_STORAGE.set(update);
   }
 
 

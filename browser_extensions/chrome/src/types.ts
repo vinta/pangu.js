@@ -6,18 +6,6 @@ export interface ExtensionSettings {
   is_mute_sound_effects: boolean;
 }
 
-export interface MessageRequest {
-  purpose?: string;
-  text?: string;
-  [key: string]: any;
-}
-
-export interface MessageResponse {
-  isAllowed?: boolean;
-  settings?: ExtensionSettings;
-  [key: string]: any;
-}
-
 export const DEFAULT_SETTINGS: ExtensionSettings = {
   spacing_mode: 'spacing_when_load',
   spacing_rule: 'blacklists',
@@ -31,3 +19,15 @@ export const DEFAULT_SETTINGS: ExtensionSettings = {
   whitelists: [],
   is_mute_sound_effects: false
 };
+
+export interface MessageRequest {
+  purpose?: string;
+  text?: string;
+  [key: string]: any;
+}
+
+export interface MessageResponse {
+  isAllowed?: boolean;
+  settings?: ExtensionSettings;
+  [key: string]: any;
+}

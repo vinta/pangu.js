@@ -1,5 +1,5 @@
 import { t as translatePage } from "./i18n.js";
-import { e as extensionManager } from "./utils-chrome.js";
+import { u as utils } from "./utils.js";
 class OptionsController {
   settings = {
     spacing_mode: "spacing_when_load",
@@ -22,14 +22,14 @@ class OptionsController {
   }
   setI18nText() {
     const elements = {
-      "page_title": extensionManager.get_i18n("extension_name"),
-      "header_title": extensionManager.get_i18n("extension_name"),
-      "subtitle": extensionManager.get_i18n("subtitle"),
-      "quote": extensionManager.get_i18n("quote"),
-      "label_spacing_mode": extensionManager.get_i18n("label_spacing_mode"),
-      "label_spacing_rule": extensionManager.get_i18n("label_spacing_rule"),
+      "page_title": utils.get_i18n("extension_name"),
+      "header_title": utils.get_i18n("extension_name"),
+      "subtitle": utils.get_i18n("subtitle"),
+      "quote": utils.get_i18n("quote"),
+      "label_spacing_mode": utils.get_i18n("label_spacing_mode"),
+      "label_spacing_rule": utils.get_i18n("label_spacing_rule"),
       "label_other_options": "其他：",
-      "spacing_when_click_msg": extensionManager.get_i18n("spacing_when_click_msg")
+      "spacing_when_click_msg": utils.get_i18n("spacing_when_click_msg")
     };
     for (const [id, text] of Object.entries(elements)) {
       const element = document.getElementById(id);
@@ -37,14 +37,14 @@ class OptionsController {
         element.textContent = text;
       }
     }
-    document.title = extensionManager.get_i18n("extension_name");
+    document.title = utils.get_i18n("extension_name");
     const muteLabel = document.getElementById("label_is_mute");
     if (muteLabel) {
-      muteLabel.textContent = extensionManager.get_i18n("label_is_mute");
+      muteLabel.textContent = utils.get_i18n("label_is_mute");
     }
   }
   async loadSettings() {
-    const settings = await extensionManager.getCachedSettings();
+    const settings = await utils.getCachedSettings();
     this.settings = settings;
   }
   setupEventListeners() {
@@ -92,7 +92,7 @@ class OptionsController {
     const button = document.getElementById("spacing_mode_btn");
     if (button) {
       const i18nKey = this.settings.spacing_mode === "spacing_when_load" ? "auto_spacing_mode" : "manual_spacing_mode";
-      button.textContent = extensionManager.get_i18n(i18nKey);
+      button.textContent = utils.get_i18n(i18nKey);
     }
     const ruleSection = document.querySelector(".spacing_rule_group");
     const clickMessage = document.getElementById("spacing_when_click_msg");
@@ -107,7 +107,7 @@ class OptionsController {
   renderSpacingRule() {
     const button = document.getElementById("spacing_rule_btn");
     if (button) {
-      button.textContent = extensionManager.get_i18n(this.settings.spacing_rule);
+      button.textContent = utils.get_i18n(this.settings.spacing_rule);
     }
   }
   renderUrlList() {
@@ -164,14 +164,14 @@ class OptionsController {
   async changeSpacingMode() {
     const isCurrentlyAutoMode = this.settings.spacing_mode === "spacing_when_load";
     const newIsAutoMode = !isCurrentlyAutoMode;
-    await extensionManager.toggleAutoSpacing(newIsAutoMode);
-    await extensionManager.playSound(newIsAutoMode ? "Shouryuuken" : "Hadouken");
+    await utils.toggleAutoSpacing(newIsAutoMode);
+    await utils.playSound(newIsAutoMode ? "Shouryuuken" : "Hadouken");
     this.settings.spacing_mode = newIsAutoMode ? "spacing_when_load" : "spacing_when_click";
     this.render();
   }
   async changeSpacingRule() {
     this.settings.spacing_rule = this.settings.spacing_rule === "blacklists" ? "whitelists" : "blacklists";
-    await extensionManager.playSound(this.settings.spacing_rule === "blacklists" ? "Shouryuuken" : "Hadouken");
+    await utils.playSound(this.settings.spacing_rule === "blacklists" ? "Shouryuuken" : "Hadouken");
     this.saveSettings({ spacing_rule: this.settings.spacing_rule });
     this.render();
   }
@@ -189,7 +189,7 @@ class OptionsController {
     const input = document.querySelector(`input[data-index="${index}"]`);
     const newUrl = input?.value.trim();
     if (this.isValidUrl(newUrl)) {
-      await extensionManager.playSound("YeahBaby");
+      await utils.playSound("YeahBaby");
       const urls = this.settings[this.settings.spacing_rule];
       urls[index] = newUrl;
       this.editingUrls.delete(index);
@@ -198,7 +198,7 @@ class OptionsController {
       this.saveSettings(update);
       this.renderUrlList();
     } else {
-      await extensionManager.playSound("WahWahWaaah");
+      await utils.playSound("WahWahWaaah");
       alert("Invalid URL");
     }
   }
@@ -226,7 +226,7 @@ class OptionsController {
     const input = document.getElementById("new-url-input");
     const newUrl = input?.value.trim();
     if (this.isValidUrl(newUrl)) {
-      await extensionManager.playSound("YeahBaby");
+      await utils.playSound("YeahBaby");
       const urls = this.settings[this.settings.spacing_rule];
       urls.push(newUrl);
       const update = {};
@@ -235,15 +235,15 @@ class OptionsController {
       this.addUrlInput = null;
       this.renderUrlList();
     } else {
-      await extensionManager.playSound("WahWahWaaah");
+      await utils.playSound("WahWahWaaah");
       alert("Invalid URL");
     }
   }
   isValidUrl(url) {
-    return url && url.length > 0;
+    return Boolean(url && url.length > 0);
   }
   saveSettings(update) {
-    extensionManager.SYNC_STORAGE.set(update);
+    utils.SYNC_STORAGE.set(update);
   }
   escapeHtml(text) {
     const div = document.createElement("div");

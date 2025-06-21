@@ -5,7 +5,7 @@ import unicorn from 'eslint-plugin-unicorn';
 export default tseslint.config(
   {
     // Global ignores
-    ignores: ['node_modules/', 'browser_extensions/', 'dist/'],
+    ignores: ['node_modules/', 'dist/'],
   },
   {
     // TypeScript files

@@ -1,5 +1,5 @@
 import { translatePage } from './i18n';
-import utils_chrome from './utils-chrome';
+import utils from './utils';
 
 class PopupController {
   private isAutoSpacingEnabled: boolean = true;
@@ -22,7 +22,7 @@ class PopupController {
       this.currentTabUrl = activeTab?.url;
 
       // Get cached settings
-      const settings = await utils_chrome.getCachedSettings();
+      const settings = await utils.getCachedSettings();
       this.isAutoSpacingEnabled = settings.spacing_mode === 'spacing_when_load';
 
       // Update UI
@@ -86,7 +86,7 @@ class PopupController {
 
     // Check if spacing is active on this site
     if (this.isAutoSpacingEnabled) {
-      const settings = await utils_chrome.getCachedSettings();
+      const settings = await utils.getCachedSettings();
 
       let isActive = false;
       if (settings.spacing_rule === 'blacklists') {
@@ -124,8 +124,8 @@ class PopupController {
     this.isAutoSpacingEnabled = toggle.checked;
 
     // Use shared toggle function
-    await utils_chrome.toggleAutoSpacing(this.isAutoSpacingEnabled);
-    await utils_chrome.playSound(this.isAutoSpacingEnabled ? 'Shouryuuken' : 'Hadouken');
+    await utils.toggleAutoSpacing(this.isAutoSpacingEnabled);
+    await utils.playSound(this.isAutoSpacingEnabled ? 'Shouryuuken' : 'Hadouken');
 
     // Update status
     this.updateStatus();
@@ -184,7 +184,7 @@ class PopupController {
       }
 
       // Play sound effect
-      await utils_chrome.playSound('YeahBaby');
+      await utils.playSound('YeahBaby');
 
       // Show success feedback
       if (btn) {
@@ -215,7 +215,7 @@ class PopupController {
     this.showMessage(chrome.i18n.getMessage('cannot_summon_here') || '沒辦法在這個頁面召喚空格之神', 'error');
 
     // Play error sound effect
-    await utils_chrome.playSound('WahWahWaaah');
+    await utils.playSound('WahWahWaaah');
   }
 
   private showSuccess(): void {

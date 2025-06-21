@@ -12,7 +12,7 @@ export default defineConfig({
         'service-worker': resolve(__dirname, 'browser_extensions/chrome/src/service-worker.ts'),
         'content-script': resolve(__dirname, 'browser_extensions/chrome/src/content-script.ts'),
         i18n: resolve(__dirname, 'browser_extensions/chrome/src/i18n.ts'),
-        'utils-chrome': resolve(__dirname, 'browser_extensions/chrome/src/utils-chrome.ts')
+        'utils': resolve(__dirname, 'browser_extensions/chrome/src/utils.ts')
       },
       output: {
         entryFileNames: '[name].js',

@@ -1,4 +1,4 @@
-class ExtensionManager {
+class Utils {
   settingsCache = {};
   cacheInitialized = false;
   // Sound file mappings
@@ -63,7 +63,7 @@ class ExtensionManager {
     }
   }
 }
-const extensionManager = new ExtensionManager();
+const utils = new Utils();
 export {
-  extensionManager as e
+  utils as u
 };
