@@ -63,15 +63,20 @@ async function registerContentScripts() {
     };
 
     // Apply filtering based on rules
-    if (settings.spacing_rule === 'blacklists' && settings.blacklists.length > 0) {
-      // For blacklists, we register for all HTTP/HTTPS URLs and filter in the content script
-      // Chrome doesn't support negative matches directly
+    if (settings.spacing_rule === 'blacklist' && settings.blacklist.length > 0) {
+      // Use excludeMatches for blacklist
+      contentScript.matches = ['http://*/*', 'https://*/*'];
+      contentScript.excludeMatches = settings.blacklist;
+    } else if (settings.spacing_rule === 'whitelist' && settings.whitelist.length > 0) {
+      // Use whitelist patterns directly as matches
+      contentScript.matches = settings.whitelist;
+    } else if (settings.spacing_rule === 'blacklists' && settings.blacklists.length > 0) {
+      // Legacy support for old blacklists
       contentScript.matches = ['http://*/*', 'https://*/*'];
     } else if (settings.spacing_rule === 'whitelists' && settings.whitelists.length > 0) {
-      // For whitelists, we can use specific match patterns
+      // Legacy support for old whitelists
       const matchPatterns: string[] = [];
       for (const url of settings.whitelists) {
-        // Convert URL fragments to match patterns
         if (url.includes('://')) {
           matchPatterns.push(url.includes('*') ? url : `*://*${url}*`);
         } else {
@@ -113,7 +118,7 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
     chrome.storage.local.set(objToSave);
 
     // Re-register content scripts if relevant settings changed
-    const relevantKeys = ['spacing_mode', 'spacing_rule', 'blacklists', 'whitelists'];
+    const relevantKeys = ['spacing_mode', 'spacing_rule', 'blacklists', 'whitelists', 'blacklist', 'whitelist'];
     const hasRelevantChanges = Object.keys(changes).some((key) => relevantKeys.includes(key));
 
     if (hasRelevantChanges) {

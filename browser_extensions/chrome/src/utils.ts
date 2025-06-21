@@ -4,7 +4,7 @@ type SoundName = 'Hadouken' | 'Shouryuuken' | 'YeahBaby' | 'WahWahWaaah';
 
 export const DEFAULT_SETTINGS: Settings = {
   spacing_mode: 'spacing_when_load',
-  spacing_rule: 'blacklists',
+  spacing_rule: 'blacklist',
   blacklists: [
     // TODO: support regex
     '//docs.google.com',
@@ -14,6 +14,15 @@ export const DEFAULT_SETTINGS: Settings = {
     '/pull/',
   ],
   whitelists: [],
+  blacklist: [
+    // Default blacklist with valid match patterns
+    '*://docs.google.com/*',
+    '*://gist.github.com/*',
+    '*://github.com/*/blob/*',
+    '*://github.com/*/commit/*',
+    '*://github.com/*/pull/*',
+  ],
+  whitelist: [],
   is_mute_sound_effects: false,
 };
 

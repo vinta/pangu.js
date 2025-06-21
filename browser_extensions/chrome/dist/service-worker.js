@@ -40,7 +40,12 @@ async function registerContentScripts() {
       matches: ["http://*/*", "https://*/*"],
       runAt: "document_idle"
     };
-    if (settings.spacing_rule === "blacklists" && settings.blacklists.length > 0) {
+    if (settings.spacing_rule === "blacklist" && settings.blacklist.length > 0) {
+      contentScript.matches = ["http://*/*", "https://*/*"];
+      contentScript.excludeMatches = settings.blacklist;
+    } else if (settings.spacing_rule === "whitelist" && settings.whitelist.length > 0) {
+      contentScript.matches = settings.whitelist;
+    } else if (settings.spacing_rule === "blacklists" && settings.blacklists.length > 0) {
       contentScript.matches = ["http://*/*", "https://*/*"];
     } else if (settings.spacing_rule === "whitelists" && settings.whitelists.length > 0) {
       const matchPatterns = [];
@@ -76,7 +81,7 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
       objToSave[key] = changes[key].newValue;
     }
     chrome.storage.local.set(objToSave);
-    const relevantKeys = ["spacing_mode", "spacing_rule", "blacklists", "whitelists"];
+    const relevantKeys = ["spacing_mode", "spacing_rule", "blacklists", "whitelists", "blacklist", "whitelist"];
     const hasRelevantChanges = Object.keys(changes).some((key) => relevantKeys.includes(key));
     if (hasRelevantChanges) {
       await registerContentScripts();

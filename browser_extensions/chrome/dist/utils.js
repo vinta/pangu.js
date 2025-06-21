@@ -1,6 +1,6 @@
 const DEFAULT_SETTINGS = {
   spacing_mode: "spacing_when_load",
-  spacing_rule: "blacklists",
+  spacing_rule: "blacklist",
   blacklists: [
     // TODO: support regex
     "//docs.google.com",
@@ -10,6 +10,15 @@ const DEFAULT_SETTINGS = {
     "/pull/"
   ],
   whitelists: [],
+  blacklist: [
+    // Default blacklist with valid match patterns
+    "*://docs.google.com/*",
+    "*://gist.github.com/*",
+    "*://github.com/*/blob/*",
+    "*://github.com/*/commit/*",
+    "*://github.com/*/pull/*"
+  ],
+  whitelist: [],
   is_mute_sound_effects: false
 };
 class Utils {

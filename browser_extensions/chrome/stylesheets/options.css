@@ -86,6 +86,21 @@
   padding-top: var(--spacing-4);
 }
 
+.url-list-help {
+  margin-top: var(--spacing-3);
+  text-align: right;
+}
+
+.url-list-help a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: var(--text-sm);
+}
+
+.url-list-help a:hover {
+  text-decoration: underline;
+}
+
 /* URL list styles */
 .spacing_rule_list {
   list-style: none;
