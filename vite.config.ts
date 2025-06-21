@@ -44,7 +44,7 @@ const multiBuildPlugin = () => {
             },
           },
           esbuild: {
-            target: 'es2018', // Node.js target
+            target: 'es2022', // Node.js 18+ target
             format: 'cjs',
           },
           plugins: [],
@@ -78,7 +78,7 @@ const multiBuildPlugin = () => {
             },
           },
           esbuild: {
-            target: 'es2015', // Browser target for broader compatibility
+            target: 'es2022', // Modern browsers (2022+)
           },
           plugins: [],
           logLevel: 'error',
@@ -127,6 +127,6 @@ export default defineConfig({
     },
   },
   esbuild: {
-    target: 'es2018', // Default target for ES modules
+    target: 'es2022', // Default target matching our TypeScript config
   },
 });

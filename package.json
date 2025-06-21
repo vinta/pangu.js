@@ -83,5 +83,8 @@
     "vite": "6.3.5",
     "vite-plugin-dts": "4.5.4",
     "vitest": "3.2.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

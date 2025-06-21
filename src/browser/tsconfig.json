@@ -1,14 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "ES2015",
-    "lib": ["ES2015", "DOM", "DOM.Iterable"],
+    "target": "ES2022", // Modern browsers (2022+)
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "outDir": "../../dist/browser",
     "rootDir": "../..",
     "composite": true
   },
-  "include": [
-    "../shared/**/*",
-    "./**/*"
-  ]
+  "include": ["../shared/**/*", "./**/*"]
 }

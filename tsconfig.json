@@ -13,11 +13,11 @@
 
     // Module resolution
     "module": "ESNext",
-    "target": "ES2018", // Node.js baseline
+    "target": "ES2022", // Node.js 18+ and modern browsers
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "lib": ["ES2018"], // Base library
+    "lib": ["ES2022"],
 
     // Emit
     "declaration": true,
@@ -35,8 +35,5 @@
     "skipLibCheck": true
   },
   "files": [],
-  "references": [
-    { "path": "./src/browser/tsconfig.json" },
-    { "path": "./src/node/tsconfig.json" }
-  ]
+  "references": [{ "path": "./src/node/tsconfig.json" }, { "path": "./src/browser/tsconfig.json" }]
 }
