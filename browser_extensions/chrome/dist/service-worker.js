@@ -18,6 +18,9 @@ async function initializeSettings() {
     await chrome.storage.sync.set(missingSettings);
   }
 }
+async function getSettings() {
+  return await chrome.storage.sync.get(DEFAULT_SETTINGS);
+}
 async function unregisterAllContentScripts() {
   try {
     const existingScripts = await chrome.scripting.getRegisteredContentScripts();
@@ -40,10 +43,9 @@ async function registerContentScripts() {
       matches: ["http://*/*", "https://*/*"],
       runAt: "document_idle"
     };
-    if (settings.spacing_rule === "blacklist" && settings.blacklist.length > 0) {
-      contentScript.matches = ["http://*/*", "https://*/*"];
+    if (settings.filter_mode === "blacklist" && settings.blacklist.length > 0) {
       contentScript.excludeMatches = settings.blacklist;
-    } else if (settings.spacing_rule === "whitelist" && settings.whitelist.length > 0) {
+    } else if (settings.filter_mode === "whitelist" && settings.whitelist.length > 0) {
       contentScript.matches = settings.whitelist;
     }
     try {
@@ -59,9 +61,6 @@ async function registerContentScripts() {
     await unregisterAllContentScripts();
   }
 }
-async function getSettings() {
-  return await chrome.storage.sync.get(DEFAULT_SETTINGS);
-}
 chrome.storage.onChanged.addListener(async (changes, areaName) => {
   if (areaName === "sync") {
     const objToSave = {};
@@ -69,7 +68,7 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
       objToSave[key] = changes[key].newValue;
     }
     chrome.storage.local.set(objToSave);
-    const relevantKeys = ["spacing_mode", "spacing_rule", "blacklist", "whitelist"];
+    const relevantKeys = ["spacing_mode", "filter_mode", "blacklist", "whitelist"];
     const hasRelevantChanges = Object.keys(changes).some((key) => relevantKeys.includes(key));
     if (hasRelevantChanges) {
       await registerContentScripts();

@@ -31,8 +31,16 @@
         "message": "你可以按右上角那個黑人頭來召喚空格之神！",
         "description": ""
     },
-    "label_spacing_rule": {
+    "label_filter_mode": {
         "message": "你是否希望：",
+        "description": ""
+    },
+    "blacklist": {
+        "message": "不要在這些網站作用",
+        "description": ""
+    },
+    "whitelist": {
+        "message": "只在這些網站作用",
         "description": ""
     },
     "god_of_spacing": {

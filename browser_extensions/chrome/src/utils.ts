@@ -4,7 +4,7 @@ type SoundName = 'Hadouken' | 'Shouryuuken' | 'YeahBaby' | 'WahWahWaaah';
 
 export const DEFAULT_SETTINGS: Settings = {
   spacing_mode: 'spacing_when_load',
-  spacing_rule: 'blacklist',
+  filter_mode: 'blacklist',
   blacklist: [
     // Default blacklist with valid match patterns
     '*://docs.google.com/*',
@@ -33,10 +33,14 @@ export class Utils {
     // Listen for storage changes to update cache
     chrome.storage.onChanged.addListener((changes, areaName) => {
       if (areaName === 'sync') {
-        for (const key in changes) {
+        // Update each changed setting
+        for (const [key, change] of Object.entries(changes)) {
           if (key in this.cachedSettings) {
-            const settingsKey = key as keyof Settings;
-            (this.cachedSettings[settingsKey] as unknown) = changes[key].newValue;
+            // Create a new object to satisfy TypeScript's type checking
+            this.cachedSettings = {
+              ...this.cachedSettings,
+              [key]: change.newValue
+            };
           }
         }
       }

@@ -1,6 +1,6 @@
 const DEFAULT_SETTINGS = {
   spacing_mode: "spacing_when_load",
-  spacing_rule: "blacklist",
+  filter_mode: "blacklist",
   blacklist: [
     // Default blacklist with valid match patterns
     "*://docs.google.com/*",
@@ -25,10 +25,12 @@ class Utils {
   constructor() {
     chrome.storage.onChanged.addListener((changes, areaName) => {
       if (areaName === "sync") {
-        for (const key in changes) {
+        for (const [key, change] of Object.entries(changes)) {
           if (key in this.cachedSettings) {
-            const settingsKey = key;
-            this.cachedSettings[settingsKey] = changes[key].newValue;
+            this.cachedSettings = {
+              ...this.cachedSettings,
+              [key]: change.newValue
+            };
           }
         }
       }

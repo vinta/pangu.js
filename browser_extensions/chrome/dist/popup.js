@@ -1,5 +1,5 @@
 import { t as translatePage } from "./i18n.js";
-import { u as utils } from "./utils.js";
+import { D as DEFAULT_SETTINGS, u as utils } from "./utils.js";
 class PopupController {
   isAutoSpacingEnabled = true;
   currentTabId;
@@ -14,7 +14,7 @@ class PopupController {
       const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
       this.currentTabId = activeTab?.id;
       this.currentTabUrl = activeTab?.url;
-      const settings = await utils.getCachedSettings();
+      const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS);
       this.isAutoSpacingEnabled = settings.spacing_mode === "spacing_when_load";
       this.updateUI();
       this.updateStatus();
@@ -61,7 +61,7 @@ class PopupController {
       return;
     }
     if (this.isAutoSpacingEnabled) {
-      await utils.getCachedSettings();
+      await chrome.storage.sync.get(DEFAULT_SETTINGS);
       statusEl.className = "status status-active";
       const textEl = statusEl.querySelector(".status-text");
       if (textEl) {

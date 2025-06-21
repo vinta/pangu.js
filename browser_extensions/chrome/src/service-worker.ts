@@ -31,6 +31,11 @@ async function initializeSettings() {
   }
 }
 
+// Get settings from storage
+async function getSettings(): Promise<Settings> {
+  return (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
+}
+
 // Unregister all content scripts
 async function unregisterAllContentScripts(): Promise<void> {
   try {
@@ -63,11 +68,10 @@ async function registerContentScripts() {
     };
 
     // Apply filtering based on rules
-    if (settings.spacing_rule === 'blacklist' && settings.blacklist.length > 0) {
+    if (settings.filter_mode === 'blacklist' && settings.blacklist.length > 0) {
       // Use excludeMatches for blacklist
-      contentScript.matches = ['http://*/*', 'https://*/*'];
       contentScript.excludeMatches = settings.blacklist;
-    } else if (settings.spacing_rule === 'whitelist' && settings.whitelist.length > 0) {
+    } else if (settings.filter_mode === 'whitelist' && settings.whitelist.length > 0) {
       // Use whitelist patterns directly as matches
       contentScript.matches = settings.whitelist;
     }
@@ -88,11 +92,6 @@ async function registerContentScripts() {
   }
 }
 
-// Get settings from storage
-async function getSettings(): Promise<Settings> {
-  return (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
-}
-
 // Sync storage.sync changes to storage.local
 chrome.storage.onChanged.addListener(async (changes, areaName) => {
   if (areaName === 'sync') {
@@ -104,7 +103,7 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
     chrome.storage.local.set(objToSave);
 
     // Re-register content scripts if relevant settings changed
-    const relevantKeys = ['spacing_mode', 'spacing_rule', 'blacklist', 'whitelist'];
+    const relevantKeys = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist'];
     const hasRelevantChanges = Object.keys(changes).some((key) => relevantKeys.includes(key));
 
     if (hasRelevantChanges) {

@@ -1,13 +1,7 @@
 import { t as translatePage } from "./i18n.js";
-import { u as utils } from "./utils.js";
+import { D as DEFAULT_SETTINGS, u as utils } from "./utils.js";
 class OptionsController {
-  settings = {
-    spacing_mode: "spacing_when_load",
-    spacing_rule: "blacklist",
-    blacklist: [],
-    whitelist: [],
-    is_mute_sound_effects: false
-  };
+  settings = { ...DEFAULT_SETTINGS };
   editingUrls = /* @__PURE__ */ new Map();
   addUrlInput = null;
   constructor() {
@@ -22,14 +16,14 @@ class OptionsController {
   }
   setI18nText() {
     const elements = {
-      "page_title": utils.get_i18n("extension_name"),
-      "header_title": utils.get_i18n("extension_name"),
-      "subtitle": utils.get_i18n("subtitle"),
-      "quote": utils.get_i18n("quote"),
-      "label_spacing_mode": utils.get_i18n("label_spacing_mode"),
-      "label_spacing_rule": utils.get_i18n("label_spacing_rule"),
-      "label_other_options": "其他：",
-      "spacing_when_click_msg": utils.get_i18n("spacing_when_click_msg")
+      page_title: utils.get_i18n("extension_name"),
+      header_title: utils.get_i18n("extension_name"),
+      subtitle: utils.get_i18n("subtitle"),
+      quote: utils.get_i18n("quote"),
+      label_spacing_mode: utils.get_i18n("label_spacing_mode"),
+      label_filter_mode: utils.get_i18n("label_filter_mode"),
+      label_other_options: "其他：",
+      spacing_when_click_msg: utils.get_i18n("spacing_when_click_msg")
     };
     for (const [id, text] of Object.entries(elements)) {
       const element = document.getElementById(id);
@@ -44,16 +38,15 @@ class OptionsController {
     }
   }
   async loadSettings() {
-    const settings = await utils.getCachedSettings();
-    this.settings = settings;
+    this.settings = await chrome.storage.sync.get(this.settings);
   }
   setupEventListeners() {
     document.addEventListener("click", (e) => {
       const target = e.target;
       if (target.id === "spacing_mode_btn") {
         this.changeSpacingMode().catch(console.error);
-      } else if (target.id === "spacing_rule_btn") {
-        this.changeSpacingRule().catch(console.error);
+      } else if (target.id === "filter_mode_btn") {
+        this.changeFilterMode().catch(console.error);
       } else if (target.classList.contains("remove-url-btn")) {
         const index = parseInt(target.dataset.index || "0");
         this.removeUrl(index);
@@ -84,7 +77,7 @@ class OptionsController {
   }
   render() {
     this.renderSpacingMode();
-    this.renderSpacingRule();
+    this.renderFilterMode();
     this.renderUrlList();
     this.renderMuteCheckbox();
   }
@@ -94,7 +87,7 @@ class OptionsController {
       const i18nKey = this.settings.spacing_mode === "spacing_when_load" ? "auto_spacing_mode" : "manual_spacing_mode";
       button.textContent = utils.get_i18n(i18nKey);
     }
-    const ruleSection = document.querySelector(".spacing_rule_group");
+    const ruleSection = document.querySelector(".filter_mode_group");
     const clickMessage = document.getElementById("spacing_when_click_msg");
     if (this.settings.spacing_mode === "spacing_when_load") {
       ruleSection?.style.setProperty("display", "block");
@@ -104,18 +97,18 @@ class OptionsController {
       clickMessage?.style.setProperty("display", "block");
     }
   }
-  renderSpacingRule() {
-    const button = document.getElementById("spacing_rule_btn");
+  renderFilterMode() {
+    const button = document.getElementById("filter_mode_btn");
     if (button) {
-      button.textContent = utils.get_i18n(this.settings.spacing_rule);
+      button.textContent = utils.get_i18n(this.settings.filter_mode);
     }
   }
   renderUrlList() {
     const container = document.getElementById("url-list-container");
     if (!container) return;
-    const urls = this.settings[this.settings.spacing_rule];
-    let html = '<ul class="spacing_rule_list">';
-    urls.forEach((url, index) => {
+    const urls = this.settings[this.settings.filter_mode] || [];
+    let html = '<ul class="filter_mode_list">';
+    for (const [index, url] of urls.entries()) {
       if (this.editingUrls.has(index)) {
         html += `
           <li class="animate-repeat">
@@ -132,7 +125,7 @@ class OptionsController {
           </li>
         `;
       }
-    });
+    }
     if (this.addUrlInput) {
       html += `
         <li>
@@ -178,14 +171,14 @@ class OptionsController {
     this.settings.spacing_mode = newIsAutoMode ? "spacing_when_load" : "spacing_when_click";
     this.render();
   }
-  async changeSpacingRule() {
-    this.settings.spacing_rule = this.settings.spacing_rule === "blacklist" ? "whitelist" : "blacklist";
-    await utils.playSound(this.settings.spacing_rule === "blacklist" ? "Shouryuuken" : "Hadouken");
-    this.saveSettings({ spacing_rule: this.settings.spacing_rule });
+  async changeFilterMode() {
+    this.settings.filter_mode = this.settings.filter_mode === "blacklist" ? "whitelist" : "blacklist";
+    await utils.playSound(this.settings.filter_mode === "blacklist" ? "Shouryuuken" : "Hadouken");
+    this.saveSettings({ filter_mode: this.settings.filter_mode });
     this.render();
   }
   startEditingUrl(index) {
-    const urls = this.settings[this.settings.spacing_rule];
+    const urls = this.settings[this.settings.filter_mode];
     this.editingUrls.set(index, urls[index]);
     this.renderUrlList();
     setTimeout(() => {
@@ -199,7 +192,7 @@ class OptionsController {
     const newUrl = input?.value.trim();
     if (this.isValidUrl(newUrl)) {
       await utils.playSound("YeahBaby");
-      const ruleKey = this.settings.spacing_rule;
+      const ruleKey = this.settings.filter_mode;
       this.settings[ruleKey][index] = newUrl;
       const update = {};
       update[ruleKey] = [...this.settings[ruleKey]];
@@ -216,7 +209,7 @@ class OptionsController {
     this.renderUrlList();
   }
   removeUrl(index) {
-    const ruleKey = this.settings.spacing_rule;
+    const ruleKey = this.settings.filter_mode;
     this.settings[ruleKey].splice(index, 1);
     const update = {};
     update[ruleKey] = [...this.settings[ruleKey]];
@@ -236,7 +229,7 @@ class OptionsController {
     const newUrl = input?.value.trim();
     if (this.isValidUrl(newUrl)) {
       await utils.playSound("YeahBaby");
-      const ruleKey = this.settings.spacing_rule;
+      const ruleKey = this.settings.filter_mode;
       this.settings[ruleKey].push(newUrl);
       const update = {};
       update[ruleKey] = [...this.settings[ruleKey]];

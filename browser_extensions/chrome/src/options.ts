@@ -1,15 +1,9 @@
 import type { Settings } from './types';
 import { translatePage } from './i18n';
-import utils from './utils';
+import utils, { DEFAULT_SETTINGS } from './utils';
 
 class OptionsController {
-  private settings: Settings = {
-    spacing_mode: 'spacing_when_load',
-    spacing_rule: 'blacklist',
-    blacklist: [],
-    whitelist: [],
-    is_mute_sound_effects: false
-  };
+  private settings: Settings = { ...DEFAULT_SETTINGS };
 
   private editingUrls: Map<number, string> = new Map();
   private addUrlInput: HTMLInputElement | null = null;
@@ -37,14 +31,14 @@ class OptionsController {
 
   private setI18nText(): void {
     const elements = {
-      'page_title': utils.get_i18n('extension_name'),
-      'header_title': utils.get_i18n('extension_name'),
-      'subtitle': utils.get_i18n('subtitle'),
-      'quote': utils.get_i18n('quote'),
-      'label_spacing_mode': utils.get_i18n('label_spacing_mode'),
-      'label_spacing_rule': utils.get_i18n('label_spacing_rule'),
-      'label_other_options': '其他：',
-      'spacing_when_click_msg': utils.get_i18n('spacing_when_click_msg')
+      page_title: utils.get_i18n('extension_name'),
+      header_title: utils.get_i18n('extension_name'),
+      subtitle: utils.get_i18n('subtitle'),
+      quote: utils.get_i18n('quote'),
+      label_spacing_mode: utils.get_i18n('label_spacing_mode'),
+      label_filter_mode: utils.get_i18n('label_filter_mode'),
+      label_other_options: '其他：',
+      spacing_when_click_msg: utils.get_i18n('spacing_when_click_msg'),
     };
 
     for (const [id, text] of Object.entries(elements)) {
@@ -65,9 +59,11 @@ class OptionsController {
   }
 
   private async loadSettings(): Promise<void> {
-    const settings = await utils.getCachedSettings();
-    this.settings = settings;
+    // Load settings directly from chrome.storage instead of messaging
+    // chrome.storage.sync.get with defaults will return merged values
+    this.settings = (await chrome.storage.sync.get(this.settings)) as Settings;
   }
+
 
   private setupEventListeners(): void {
     // Spacing mode button
@@ -76,8 +72,8 @@ class OptionsController {
 
       if (target.id === 'spacing_mode_btn') {
         this.changeSpacingMode().catch(console.error);
-      } else if (target.id === 'spacing_rule_btn') {
-        this.changeSpacingRule().catch(console.error);
+      } else if (target.id === 'filter_mode_btn') {
+        this.changeFilterMode().catch(console.error);
       } else if (target.classList.contains('remove-url-btn')) {
         const index = parseInt(target.dataset.index || '0');
         this.removeUrl(index);
@@ -111,7 +107,7 @@ class OptionsController {
 
   private render(): void {
     this.renderSpacingMode();
-    this.renderSpacingRule();
+    this.renderFilterMode();
     this.renderUrlList();
     this.renderMuteCheckbox();
   }
@@ -120,14 +116,12 @@ class OptionsController {
     const button = document.getElementById('spacing_mode_btn') as HTMLButtonElement;
     if (button) {
       // Show "auto_spacing_mode" text when in auto mode, otherwise show manual mode text
-      const i18nKey = this.settings.spacing_mode === 'spacing_when_load'
-        ? 'auto_spacing_mode'
-        : 'manual_spacing_mode';
+      const i18nKey = this.settings.spacing_mode === 'spacing_when_load' ? 'auto_spacing_mode' : 'manual_spacing_mode';
       button.textContent = utils.get_i18n(i18nKey);
     }
 
-    // Show/hide spacing rule section
-    const ruleSection = document.querySelector('.spacing_rule_group') as HTMLElement;
+    // Show/hide filter mode section
+    const ruleSection = document.querySelector('.filter_mode_group') as HTMLElement;
     const clickMessage = document.getElementById('spacing_when_click_msg') as HTMLElement;
 
     if (this.settings.spacing_mode === 'spacing_when_load') {
@@ -139,10 +133,10 @@ class OptionsController {
     }
   }
 
-  private renderSpacingRule(): void {
-    const button = document.getElementById('spacing_rule_btn') as HTMLButtonElement;
+  private renderFilterMode(): void {
+    const button = document.getElementById('filter_mode_btn') as HTMLButtonElement;
     if (button) {
-      button.textContent = utils.get_i18n(this.settings.spacing_rule);
+      button.textContent = utils.get_i18n(this.settings.filter_mode);
     }
   }
 
@@ -150,12 +144,12 @@ class OptionsController {
     const container = document.getElementById('url-list-container');
     if (!container) return;
 
-    // Get URLs from the current rule
-    const urls = this.settings[this.settings.spacing_rule as 'blacklist' | 'whitelist'];
+    // Get URLs from the current rule, ensure it's always an array
+    const urls = this.settings[this.settings.filter_mode as 'blacklist' | 'whitelist'] || [];
 
-    let html = '<ul class="spacing_rule_list">';
+    let html = '<ul class="filter_mode_list">';
 
-    urls.forEach((url, index) => {
+    for (const [index, url] of urls.entries()) {
       if (this.editingUrls.has(index)) {
         html += `
           <li class="animate-repeat">
@@ -172,7 +166,7 @@ class OptionsController {
           </li>
         `;
       }
-    });
+    }
 
     // Add new URL input
     if (this.addUrlInput) {
@@ -192,7 +186,7 @@ class OptionsController {
     }
 
     html += '</ul>';
-    
+
     // Add help link for match patterns
     html += `
       <div class="url-list-help">
@@ -203,7 +197,7 @@ class OptionsController {
         </small>
       </div>
     `;
-    
+
     container.innerHTML = html;
 
     // Focus on input if adding new URL
@@ -236,19 +230,17 @@ class OptionsController {
     this.render();
   }
 
-  private async changeSpacingRule(): Promise<void> {
+  private async changeFilterMode(): Promise<void> {
     // Toggle between new rules (blacklist/whitelist)
-    this.settings.spacing_rule = this.settings.spacing_rule === 'blacklist'
-      ? 'whitelist'
-      : 'blacklist';
-    await utils.playSound(this.settings.spacing_rule === 'blacklist' ? 'Shouryuuken' : 'Hadouken');
+    this.settings.filter_mode = this.settings.filter_mode === 'blacklist' ? 'whitelist' : 'blacklist';
+    await utils.playSound(this.settings.filter_mode === 'blacklist' ? 'Shouryuuken' : 'Hadouken');
 
-    this.saveSettings({ spacing_rule: this.settings.spacing_rule });
+    this.saveSettings({ filter_mode: this.settings.filter_mode });
     this.render();
   }
 
   private startEditingUrl(index: number): void {
-    const urls = this.settings[this.settings.spacing_rule as 'blacklist' | 'whitelist'];
+    const urls = this.settings[this.settings.filter_mode as 'blacklist' | 'whitelist'];
     this.editingUrls.set(index, urls[index]);
     this.renderUrlList();
 
@@ -266,13 +258,13 @@ class OptionsController {
 
     if (this.isValidUrl(newUrl)) {
       await utils.playSound('YeahBaby');
-      
-      const ruleKey = this.settings.spacing_rule as 'blacklist' | 'whitelist';
+
+      const ruleKey = this.settings.filter_mode as 'blacklist' | 'whitelist';
       this.settings[ruleKey][index] = newUrl;
       const update: Partial<Settings> = {};
       update[ruleKey] = [...this.settings[ruleKey]];
       this.saveSettings(update);
-      
+
       this.editingUrls.delete(index);
       this.renderUrlList();
     } else {
@@ -287,12 +279,12 @@ class OptionsController {
   }
 
   private removeUrl(index: number): void {
-    const ruleKey = this.settings.spacing_rule as 'blacklist' | 'whitelist';
+    const ruleKey = this.settings.filter_mode as 'blacklist' | 'whitelist';
     this.settings[ruleKey].splice(index, 1);
     const update: Partial<Settings> = {};
     update[ruleKey] = [...this.settings[ruleKey]];
     this.saveSettings(update);
-    
+
     this.renderUrlList();
   }
 
@@ -312,8 +304,8 @@ class OptionsController {
 
     if (this.isValidUrl(newUrl)) {
       await utils.playSound('YeahBaby');
-      
-      const ruleKey = this.settings.spacing_rule as 'blacklist' | 'whitelist';
+
+      const ruleKey = this.settings.filter_mode as 'blacklist' | 'whitelist';
       this.settings[ruleKey].push(newUrl);
       const update: Partial<Settings> = {};
       update[ruleKey] = [...this.settings[ruleKey]];
@@ -335,19 +327,18 @@ class OptionsController {
     // Basic match pattern validation
     // Format: <scheme>://<host><path>
     const matchPatternRegex = /^(\*|https?|file|ftp):\/\/(\*|\*\.[^\/]+|[^\/]+)(\/.*)?$/;
-    
+
     // Special case for <all_urls>
     if (pattern === '<all_urls>') {
       return true;
     }
-    
+
     return matchPatternRegex.test(pattern);
   }
 
   private saveSettings(update: Partial<Settings>): void {
     chrome.storage.sync.set(update);
   }
-
 
   private escapeHtml(text: string): string {
     const div = document.createElement('div');

@@ -1,5 +1,6 @@
 import { translatePage } from './i18n';
-import utils from './utils';
+import utils, { DEFAULT_SETTINGS } from './utils';
+import type { Settings } from './types';
 
 class PopupController {
   private isAutoSpacingEnabled: boolean = true;
@@ -21,8 +22,8 @@ class PopupController {
       this.currentTabId = activeTab?.id;
       this.currentTabUrl = activeTab?.url;
 
-      // Get cached settings
-      const settings = await utils.getCachedSettings();
+      // Get settings directly from chrome.storage
+      const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS) as Settings;
       this.isAutoSpacingEnabled = settings.spacing_mode === 'spacing_when_load';
 
       // Update UI
@@ -86,7 +87,7 @@ class PopupController {
 
     // Check if spacing is active on this site
     if (this.isAutoSpacingEnabled) {
-      const settings = await utils.getCachedSettings();
+      const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS) as Settings;
 
       // For new match pattern based rules, we can't easily check if the current URL matches
       // because Chrome's match pattern system is more complex than simple string matching
