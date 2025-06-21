@@ -16,9 +16,9 @@
     },
     "author": "Vinta",
     "background": {
-        "service_worker": "dist/background.js"
+        "service_worker": "dist/service-worker.js"
     },
-    "minimum_chrome_version": "88",
+    "minimum_chrome_version": "91",
     "offline_enabled": true,
     "options_page": "pages/options.html",
     "permissions": [

@@ -9,7 +9,7 @@ export default defineConfig({
       input: {
         popup: resolve(__dirname, 'browser_extensions/chrome/src/popup.ts'),
         options: resolve(__dirname, 'browser_extensions/chrome/src/options.ts'),
-        background: resolve(__dirname, 'browser_extensions/chrome/src/background.ts'),
+        'service-worker': resolve(__dirname, 'browser_extensions/chrome/src/service-worker.ts'),
         'content-script': resolve(__dirname, 'browser_extensions/chrome/src/content-script.ts'),
         i18n: resolve(__dirname, 'browser_extensions/chrome/src/i18n.ts'),
         'utils-chrome': resolve(__dirname, 'browser_extensions/chrome/src/utils-chrome.ts')
