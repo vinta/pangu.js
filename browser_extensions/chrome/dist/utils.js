@@ -56,16 +56,6 @@ class Utils {
     const settings = await this.initializeCache();
     return settings[key];
   }
-  // Get i18n message
-  get_i18n(message_name) {
-    return chrome.i18n.getMessage(message_name);
-  }
-  // Debug helper to print sync storage
-  print_sync_storage() {
-    chrome.storage.sync.get(null, (items) => {
-      console.log("SYNC_STORAGE: %O", items);
-    });
-  }
   // Toggle auto spacing mode
   async toggleAutoSpacing(isEnabled) {
     const spacing_mode = isEnabled ? "spacing_when_load" : "spacing_when_click";

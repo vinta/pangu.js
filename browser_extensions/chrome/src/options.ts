@@ -31,14 +31,14 @@ class OptionsController {
 
   private setI18nText(): void {
     const elements = {
-      page_title: utils.get_i18n('extension_name'),
-      header_title: utils.get_i18n('extension_name'),
-      subtitle: utils.get_i18n('subtitle'),
-      quote: utils.get_i18n('quote'),
-      label_spacing_mode: utils.get_i18n('label_spacing_mode'),
-      label_filter_mode: utils.get_i18n('label_filter_mode'),
+      page_title: chrome.i18n.getMessage('extension_name'),
+      header_title: chrome.i18n.getMessage('extension_name'),
+      subtitle: chrome.i18n.getMessage('subtitle'),
+      quote: chrome.i18n.getMessage('quote'),
+      label_spacing_mode: chrome.i18n.getMessage('label_spacing_mode'),
+      label_filter_mode: chrome.i18n.getMessage('label_filter_mode'),
       label_other_options: '其他：',
-      spacing_when_click_msg: utils.get_i18n('spacing_when_click_msg'),
+      spacing_when_click_msg: chrome.i18n.getMessage('spacing_when_click_msg'),
     };
 
     for (const [id, text] of Object.entries(elements)) {
@@ -49,12 +49,12 @@ class OptionsController {
     }
 
     // Set page title
-    document.title = utils.get_i18n('extension_name');
+    document.title = chrome.i18n.getMessage('extension_name');
 
     // Set mute label
     const muteLabel = document.getElementById('label_is_mute');
     if (muteLabel) {
-      muteLabel.textContent = utils.get_i18n('label_is_mute');
+      muteLabel.textContent = chrome.i18n.getMessage('label_is_mute');
     }
   }
 
@@ -117,7 +117,7 @@ class OptionsController {
     if (button) {
       // Show "auto_spacing_mode" text when in auto mode, otherwise show manual mode text
       const i18nKey = this.settings.spacing_mode === 'spacing_when_load' ? 'auto_spacing_mode' : 'manual_spacing_mode';
-      button.textContent = utils.get_i18n(i18nKey);
+      button.textContent = chrome.i18n.getMessage(i18nKey);
     }
 
     // Show/hide filter mode section
@@ -136,7 +136,7 @@ class OptionsController {
   private renderFilterMode(): void {
     const button = document.getElementById('filter_mode_btn') as HTMLButtonElement;
     if (button) {
-      button.textContent = utils.get_i18n(this.settings.filter_mode);
+      button.textContent = chrome.i18n.getMessage(this.settings.filter_mode);
     }
   }
 

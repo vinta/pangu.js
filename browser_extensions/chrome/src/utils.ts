@@ -39,7 +39,7 @@ export class Utils {
             // Create a new object to satisfy TypeScript's type checking
             this.cachedSettings = {
               ...this.cachedSettings,
-              [key]: change.newValue
+              [key]: change.newValue,
             };
           }
         }
@@ -68,18 +68,6 @@ export class Utils {
   async getSetting<K extends keyof Settings>(key: K): Promise<Settings[K]> {
     const settings = await this.initializeCache();
     return settings[key];
-  }
-
-  // Get i18n message
-  get_i18n(message_name: string): string {
-    return chrome.i18n.getMessage(message_name);
-  }
-
-  // Debug helper to print sync storage
-  print_sync_storage(): void {
-    chrome.storage.sync.get(null, (items) => {
-      console.log('SYNC_STORAGE: %O', items);
-    });
   }
 
   // Toggle auto spacing mode
