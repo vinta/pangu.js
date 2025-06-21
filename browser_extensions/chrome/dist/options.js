@@ -1,5 +1,5 @@
 import { t as translatePage } from "./i18n.js";
-import { u as utils_chrome } from "./utils_chrome.js";
+import { u as utils_chrome } from "./utils-chrome.js";
 class OptionsController {
   settings = {
     spacing_mode: "spacing_when_load",

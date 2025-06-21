@@ -1,6 +1,6 @@
 import { ExtensionSettings } from './types';
 import { translatePage } from './i18n';
-import utils_chrome from './utils_chrome';
+import utils_chrome from './utils-chrome';
 
 class OptionsController {
   private settings: ExtensionSettings = {

@@ -8,12 +8,18 @@ import { ExtensionSettings, DEFAULT_SETTINGS } from './types';
 // Initialize settings on installation
 chrome.runtime.onInstalled.addListener(async () => {
   await initializeSettings();
+  await registerContentScripts();
+});
+
+// Also register content scripts when extension starts
+chrome.runtime.onStartup.addListener(async () => {
+  await registerContentScripts();
 });
 
 // Initialize or merge settings with defaults
 async function initializeSettings(): Promise<void> {
   const items = await chrome.storage.sync.get(null);
-  const newSettings: Partial<ExtensionSettings> = {};
+  const newSettings: Record<string, any> = {};
   
   (Object.keys(DEFAULT_SETTINGS) as Array<keyof ExtensionSettings>).forEach(key => {
     if (items[key] === undefined) {
@@ -27,6 +33,57 @@ async function initializeSettings(): Promise<void> {
   }
 }
 
+// Register content scripts dynamically based on user settings
+async function registerContentScripts(): Promise<void> {
+  // First, unregister any existing scripts
+  try {
+    const scripts = await chrome.scripting.getRegisteredContentScripts();
+    const scriptIds = scripts.map(script => script.id);
+    if (scriptIds.length > 0) {
+      await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
+    }
+  } catch (error) {
+    console.error('Error unregistering content scripts:', error);
+  }
+
+  const settings = await getSettings();
+  
+  // Only register if auto-spacing is enabled
+  if (settings.spacing_mode === 'spacing_when_load') {
+    const contentScript: chrome.scripting.RegisteredContentScript = {
+      id: 'pangu-auto-spacing',
+      js: ['vendors/pangu/pangu.umd.js', 'dist/content-script.js'],
+      matches: ['<all_urls>'],
+      runAt: 'document_idle'
+    };
+
+    // Apply filtering based on rules
+    if (settings.spacing_rule === 'blacklists' && settings.blacklists.length > 0) {
+      // For blacklists, we register for all URLs and filter in the content script
+      // Chrome doesn't support negative matches directly
+      contentScript.matches = ['<all_urls>'];
+    } else if (settings.spacing_rule === 'whitelists' && settings.whitelists.length > 0) {
+      // For whitelists, we can use specific match patterns
+      const matchPatterns: string[] = [];
+      for (const url of settings.whitelists) {
+        // Convert URL fragments to match patterns
+        if (url.includes('://')) {
+          matchPatterns.push(url.includes('*') ? url : `*://*${url}*`);
+        } else {
+          matchPatterns.push(`*://*${url}*`);
+        }
+      }
+      contentScript.matches = matchPatterns.length > 0 ? matchPatterns : ['<all_urls>'];
+    }
+
+    try {
+      await chrome.scripting.registerContentScripts([contentScript]);
+    } catch (error) {
+      console.error('Error registering content scripts:', error);
+    }
+  }
+}
+
 // Get settings from storage
 async function getSettings(): Promise<ExtensionSettings> {
   const items = await chrome.storage.sync.get(DEFAULT_SETTINGS) as ExtensionSettings;
@@ -34,7 +91,7 @@ async function getSettings(): Promise<ExtensionSettings> {
 }
 
 // Sync storage.sync changes to storage.local
-chrome.storage.onChanged.addListener((changes, areaName) => {
+chrome.storage.onChanged.addListener(async (changes, areaName) => {
   if (areaName === 'sync') {
     // Sync to local storage
     const objToSave: Record<string, any> = {};
@@ -42,6 +99,14 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
       objToSave[key] = changes[key].newValue;
     }
     chrome.storage.local.set(objToSave);
+    
+    // Re-register content scripts if relevant settings changed
+    const relevantKeys = ['spacing_mode', 'spacing_rule', 'blacklists', 'whitelists'];
+    const hasRelevantChanges = Object.keys(changes).some(key => relevantKeys.includes(key));
+    
+    if (hasRelevantChanges) {
+      await registerContentScripts();
+    }
   }
 });
 

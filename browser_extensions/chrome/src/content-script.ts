@@ -53,6 +53,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'manual_spacing') {
     applySpacing();
     sendResponse({ success: true });
+  } else if (message.action === 'ping') {
+    // Respond to ping to indicate content script is loaded
+    sendResponse({ success: true });
   }
   return true;
 });

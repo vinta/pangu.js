@@ -1,12 +1,26 @@
-# pangu.js TODO List
+# TODO List
 
-**Last Updated:** June 21, 2025, 7:13 PM
+**Last Updated:** December 21, 2024, 2:45 PM
 
-> Note: When completing a task, move it from "To Do" to "Completed" section to maintain history.
+## 🎯 Completed
 
-## Completed
-
+### Chrome Extension Migration (Completed December 2024)
 - [x] Chrome Extension Manifest V3 compatibility
+- [x] Remove Angular.js from Chrome Extension (saved ~194KB)
+  - Migrated popup.js and options.js to TypeScript
+  - Removed jQuery 2.1.0 and angular-xeditable dependencies
+  - Implemented native contenteditable for URL editing
+- [x] Convert all Chrome Extension JS files to TypeScript
+  - background.js → background.ts
+  - content_script.js → content-script.ts
+  - utils_chrome.js → utils-chrome.ts
+- [x] Set up Vite build configuration for Chrome Extension
+- [x] Add TypeScript types for Chrome Extension APIs (@types/chrome)
+- [x] Implement modern i18n with data-i18n attributes
+- [x] Add service worker keep-alive mechanism
+- [x] Improve error handling for invalidated contexts
+
+### Core Library Improvements
 - [x] Migrate all source code to TypeScript
 - [x] Replace Webpack/Babel with Vite
 - [x] Replace Mocha/Chai/Karma with Vitest/Playwright
@@ -15,33 +29,42 @@
 - [x] Set up ESLint and Prettier
 - [x] Create `publish-package` script for version management
 - [x] Set up GitHub Actions CI/CD workflow
-- [x] Refactor TypeScript configuration with separate tsconfig files for node/browser
-- [x] Add ES2020+ features with proper transpilation (target: ES2022)
+- [x] Refactor TypeScript configuration with separate tsconfig files
 
-## To Do
+### Chrome Extension Optimization (Completed December 2024)
+- [x] Replace `tabs` permission with `activeTab`
+  - Removes "Read browsing history" warning
+  - Already uses currentWindow: true in popup.ts
+- [x] Implement dynamic content script registration
+  - Uses chrome.scripting.registerContentScripts()
+  - Only loads scripts based on user settings
+  - Respects blacklist/whitelist rules at registration time
+- [x] Optimize pangu.js loading with on-demand injection
+  - Content scripts load dynamically based on settings
+  - Manual spacing only injects scripts when needed
+- [x] Rename files to Chrome's kebab-case convention
+  - utils_chrome.ts → utils-chrome.ts
+  - content_script.ts → content-script.ts
 
-### High Priority
+## 🚧 In Progress
 
-- [x] Update Chrome Extension to use new TypeScript builds
-  - ~~Currently using old pangu.min.js v4.0.7 instead of new dist/ builds~~ ✅ Updated to v5.0.0
-- [x] Remove Angular.js from Chrome Extension (200KB+ savings)
-  - ~~Still using Angular.js 1.2.9 with jQuery 2.1.0~~ ✅ Removed, saved ~194KB
-- [x] Rewrite popup.js and options.js in TypeScript
-  - ~~Both files are still plain JavaScript in browser_extensions/chrome/js/~~ ✅ Converted to TypeScript, renamed js/ to src/
+## 📋 Next Steps
 
-### Chrome Extension Enhancement
+### Medium Priority - Code Quality
+- [ ] Add proper Chrome API error handling
+  - Implement retry logic for script injection
+  - User-friendly error messages
+- [ ] Create optimized content script bundle
+  - Separate minimal bundle for content scripts
+  - Reduce memory footprint
+- [ ] Update declarativeContent for action button state
 
-- [ ] Use Vite to build Chrome Extension
-  - No Vite config exists for extension build
-- [ ] Modernize UI (remove jQuery/Angular dependencies)
-  - jQuery 2.1.0 and Angular.js 1.2.9 still in use
-- [ ] Add TypeScript types for Chrome Extension API
-  - No @types/chrome package installed
+### Low Priority - Future Enhancements
 - [ ] Update extension icons for high DPI displays
-
-### Future Enhancements
-
+- [ ] Implement performance monitoring
+- [ ] Add optional_host_permissions for user control
+- [ ] Progressive enhancement for older Chrome versions
 - [ ] Implement tree-shaking optimizations
-- [ ] Consider monorepo structure for better organization
+- [ ] Consider monorepo structure
 - [ ] Add changelog generation with standard-version
-- [ ] Publish to JSR (JavaScript Registry) in addition to npm
+- [ ] Publish to JSR (JavaScript Registry)

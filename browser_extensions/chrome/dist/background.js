@@ -14,6 +14,10 @@ const DEFAULT_SETTINGS = {
 };
 chrome.runtime.onInstalled.addListener(async () => {
   await initializeSettings();
+  await registerContentScripts();
+});
+chrome.runtime.onStartup.addListener(async () => {
+  await registerContentScripts();
 });
 async function initializeSettings() {
   const items = await chrome.storage.sync.get(null);
@@ -27,17 +31,60 @@ async function initializeSettings() {
     await chrome.storage.sync.set(newSettings);
   }
 }
+async function registerContentScripts() {
+  try {
+    const scripts = await chrome.scripting.getRegisteredContentScripts();
+    const scriptIds = scripts.map((script) => script.id);
+    if (scriptIds.length > 0) {
+      await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
+    }
+  } catch (error) {
+    console.error("Error unregistering content scripts:", error);
+  }
+  const settings = await getSettings();
+  if (settings.spacing_mode === "spacing_when_load") {
+    const contentScript = {
+      id: "pangu-auto-spacing",
+      js: ["vendors/pangu/pangu.umd.js", "dist/content-script.js"],
+      matches: ["<all_urls>"],
+      runAt: "document_idle"
+    };
+    if (settings.spacing_rule === "blacklists" && settings.blacklists.length > 0) {
+      contentScript.matches = ["<all_urls>"];
+    } else if (settings.spacing_rule === "whitelists" && settings.whitelists.length > 0) {
+      const matchPatterns = [];
+      for (const url of settings.whitelists) {
+        if (url.includes("://")) {
+          matchPatterns.push(url.includes("*") ? url : `*://*${url}*`);
+        } else {
+          matchPatterns.push(`*://*${url}*`);
+        }
+      }
+      contentScript.matches = matchPatterns.length > 0 ? matchPatterns : ["<all_urls>"];
+    }
+    try {
+      await chrome.scripting.registerContentScripts([contentScript]);
+    } catch (error) {
+      console.error("Error registering content scripts:", error);
+    }
+  }
+}
 async function getSettings() {
   const items = await chrome.storage.sync.get(DEFAULT_SETTINGS);
   return items;
 }
-chrome.storage.onChanged.addListener((changes, areaName) => {
+chrome.storage.onChanged.addListener(async (changes, areaName) => {
   if (areaName === "sync") {
     const objToSave = {};
     for (const key in changes) {
       objToSave[key] = changes[key].newValue;
     }
     chrome.storage.local.set(objToSave);
+    const relevantKeys = ["spacing_mode", "spacing_rule", "blacklists", "whitelists"];
+    const hasRelevantChanges = Object.keys(changes).some((key) => relevantKeys.includes(key));
+    if (hasRelevantChanges) {
+      await registerContentScripts();
+    }
   }
 });
 async function canSpacing(tab) {

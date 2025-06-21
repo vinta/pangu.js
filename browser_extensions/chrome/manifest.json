@@ -18,26 +18,12 @@
     "background": {
         "service_worker": "dist/background.js"
     },
-    "content_scripts": [
-        {
-            "matches": [
-                "http://*/*",
-                "https://*/*",
-                "file:///*/*"
-            ],
-            "js": [
-                "vendors/pangu/pangu.umd.js",
-                "dist/content_script.js"
-            ],
-            "run_at": "document_idle"
-        }
-    ],
     "minimum_chrome_version": "88",
     "offline_enabled": true,
     "options_page": "pages/options.html",
     "permissions": [
         "storage",
-        "tabs",
+        "activeTab",
         "scripting",
         "alarms"
     ],

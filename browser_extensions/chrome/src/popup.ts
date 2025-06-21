@@ -1,6 +1,6 @@
 import { ExtensionSettings } from './types';
 import { translatePage } from './i18n';
-import utils_chrome from './utils_chrome';
+import utils_chrome from './utils-chrome';
 
 class PopupController {
   private spacing_mode: 'spacing_when_load' | 'spacing_when_click' = 'spacing_when_load';
@@ -101,21 +101,37 @@ class PopupController {
       
       // Send message to content script instead of injecting code
       try {
+        // First check if content script is already loaded
+        let contentScriptLoaded = false;
+        try {
+          const response = await chrome.tabs.sendMessage(activeTab.id, { 
+            action: 'ping' 
+          });
+          contentScriptLoaded = response?.success === true;
+        } catch (e) {
+          // Content script not loaded
+        }
+        
+        if (!contentScriptLoaded) {
+          // Inject scripts on-demand only when needed
+          await chrome.scripting.executeScript({
+            target: { tabId: activeTab.id },
+            files: ['vendors/pangu/pangu.umd.js']
+          });
+          
+          await chrome.scripting.executeScript({
+            target: { tabId: activeTab.id },
+            files: ['dist/content-script.js']
+          });
+        }
+        
+        // Now send the spacing command
         const response = await chrome.tabs.sendMessage(activeTab.id, { 
           action: 'manual_spacing' 
         });
         
         if (!response?.success) {
-          // If content script not loaded, inject it first
-          await chrome.scripting.executeScript({
-            target: { tabId: activeTab.id },
-            files: ['vendors/pangu/pangu.umd.js', 'dist/content_script.js']
-          });
-          
-          // Try again after injection
-          await chrome.tabs.sendMessage(activeTab.id, { 
-            action: 'manual_spacing' 
-          });
+          throw new Error('Failed to apply spacing');
         }
         
         // Play sound effect if enabled

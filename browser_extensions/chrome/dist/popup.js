@@ -1,5 +1,5 @@
 import { t as translatePage } from "./i18n.js";
-import { u as utils_chrome } from "./utils_chrome.js";
+import { u as utils_chrome } from "./utils-chrome.js";
 class PopupController {
   spacing_mode = "spacing_when_load";
   constructor() {
@@ -62,17 +62,29 @@ class PopupController {
         return;
       }
       try {
+        let contentScriptLoaded = false;
+        try {
+          const response2 = await chrome.tabs.sendMessage(activeTab.id, {
+            action: "ping"
+          });
+          contentScriptLoaded = response2?.success === true;
+        } catch (e) {
+        }
+        if (!contentScriptLoaded) {
+          await chrome.scripting.executeScript({
+            target: { tabId: activeTab.id },
+            files: ["vendors/pangu/pangu.umd.js"]
+          });
+          await chrome.scripting.executeScript({
+            target: { tabId: activeTab.id },
+            files: ["dist/content-script.js"]
+          });
+        }
         const response = await chrome.tabs.sendMessage(activeTab.id, {
           action: "manual_spacing"
         });
         if (!response?.success) {
-          await chrome.scripting.executeScript({
-            target: { tabId: activeTab.id },
-            files: ["vendors/pangu/pangu.umd.js", "dist/content_script.js"]
-          });
-          await chrome.tabs.sendMessage(activeTab.id, {
-            action: "manual_spacing"
-          });
+          throw new Error("Failed to apply spacing");
         }
         const settings = await utils_chrome.getCachedSettings();
         if (!settings.is_mute_sound_effects) {
