@@ -9,7 +9,13 @@ cp -f dist/browser/pangu.umd.js browser_extensions/chrome/vendors/pangu/pangu.um
 
 echo "3. Creating extension package..."
 cd browser_extensions/chrome/
-zip -r ../paranoid-auto-spacing.zip .
+rm -f ../paranoid-auto-spacing.zip
+zip -r ../paranoid-auto-spacing.zip . \
+  -x "images/*" \
+  -x "src/*" \
+  -x "*.md" \
+  -x "*.ts" \
+  -x ".DS_Store"
 cd ../..
 
 echo "Ready to upload to Chrome Web Store!"
