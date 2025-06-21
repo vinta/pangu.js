@@ -132,14 +132,10 @@ async function canSpacing(tab: chrome.tabs.Tab | undefined): Promise<boolean> {
 // Message types
 interface MessageRequest {
   purpose?: string;
-  action?: string;
-  key?: string;
 }
 
 interface MessageResponse {
   result?: boolean;
-  settings?: Settings;
-  value?: unknown;
   error?: string;
 }
 
@@ -148,24 +144,10 @@ chrome.runtime.onMessage.addListener((message: MessageRequest, sender: chrome.ru
   // Handle async response
   (async () => {
     try {
-      switch (message.purpose || message.action) {
+      switch (message.purpose) {
         case 'can_spacing':
           const result = await canSpacing(sender.tab);
           sendResponse({ result });
-          break;
-
-        case 'get_settings':
-          const settings = await getSettings();
-          sendResponse({ settings });
-          break;
-
-        case 'get_setting':
-          if (message.key) {
-            const value = await chrome.storage.sync.get(message.key);
-            sendResponse({ value: value[message.key] });
-          } else {
-            sendResponse({ error: 'No key specified' });
-          }
           break;
 
         default:
