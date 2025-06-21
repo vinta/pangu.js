@@ -3,7 +3,7 @@
  * Service workers don't have persistent state, so we rely on chrome.storage
  */
 
-import { ExtensionSettings, DEFAULT_SETTINGS } from './types';
+import { Settings, DEFAULT_SETTINGS } from './types';
 
 // Initialize settings on installation
 chrome.runtime.onInstalled.addListener(async () => {
@@ -21,7 +21,7 @@ async function initializeSettings(): Promise<void> {
   const items = await chrome.storage.sync.get(null);
   const newSettings: Record<string, any> = {};
   
-  (Object.keys(DEFAULT_SETTINGS) as Array<keyof ExtensionSettings>).forEach(key => {
+  (Object.keys(DEFAULT_SETTINGS) as Array<keyof Settings>).forEach(key => {
     if (items[key] === undefined) {
       newSettings[key] = DEFAULT_SETTINGS[key];
     }
@@ -85,8 +85,8 @@ async function registerContentScripts(): Promise<void> {
 }
 
 // Get settings from storage
-async function getSettings(): Promise<ExtensionSettings> {
-  const items = await chrome.storage.sync.get(DEFAULT_SETTINGS) as ExtensionSettings;
+async function getSettings(): Promise<Settings> {
+  const items = await chrome.storage.sync.get(DEFAULT_SETTINGS) as Settings;
   return items;
 }
 
@@ -152,7 +152,7 @@ interface MessageRequest {
 
 interface MessageResponse {
   result?: boolean;
-  settings?: ExtensionSettings;
+  settings?: Settings;
   value?: any;
   error?: string;
 }

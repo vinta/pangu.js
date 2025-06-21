@@ -1,9 +1,9 @@
-import { ExtensionSettings } from "./types";
+import { Settings } from "./types";
 
 type SoundName = 'Hadouken' | 'Shouryuuken' | 'YeahBaby' | 'WahWahWaaah';
 
 export class Utils {
-  private settingsCache: ExtensionSettings = {} as ExtensionSettings;
+  private settingsCache: Settings = {} as Settings;
   private cacheInitialized: boolean = false;
 
   // Sound file mappings
@@ -29,7 +29,7 @@ export class Utils {
   }
 
   // Initialize settings cache
-  private async initializeCache(): Promise<ExtensionSettings> {
+  private async initializeCache(): Promise<Settings> {
     if (!this.cacheInitialized) {
       const response = await chrome.runtime.sendMessage({ action: 'get_settings' });
       if (response && response.settings) {
@@ -41,12 +41,12 @@ export class Utils {
   }
 
   // Get cached settings
-  async getCachedSettings(): Promise<ExtensionSettings> {
+  async getCachedSettings(): Promise<Settings> {
     return await this.initializeCache();
   }
 
   // Get a specific setting
-  async getSetting(key: keyof ExtensionSettings): Promise<any> {
+  async getSetting(key: keyof Settings): Promise<any> {
     const settings = await this.initializeCache();
     return settings[key];
   }

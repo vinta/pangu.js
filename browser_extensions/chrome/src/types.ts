@@ -1,4 +1,4 @@
-export interface ExtensionSettings {
+export interface Settings {
   spacing_mode: 'spacing_when_load' | 'spacing_when_click';
   spacing_rule: 'blacklists' | 'whitelists';
   blacklists: string[];
@@ -6,7 +6,7 @@ export interface ExtensionSettings {
   is_mute_sound_effects: boolean;
 }
 
-export const DEFAULT_SETTINGS: ExtensionSettings = {
+export const DEFAULT_SETTINGS: Settings = {
   spacing_mode: 'spacing_when_load',
   spacing_rule: 'blacklists',
   blacklists: [ // TODO: support regex
@@ -28,6 +28,6 @@ export interface MessageRequest {
 
 export interface MessageResponse {
   isAllowed?: boolean;
-  settings?: ExtensionSettings;
+  settings?: Settings;
   [key: string]: any;
 }

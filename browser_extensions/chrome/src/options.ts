@@ -1,9 +1,9 @@
-import { ExtensionSettings } from './types';
+import { Settings } from './types';
 import { translatePage } from './i18n';
 import utils from './utils';
 
 class OptionsController {
-  private settings: ExtensionSettings = {
+  private settings: Settings = {
     spacing_mode: 'spacing_when_load',
     spacing_rule: 'blacklists',
     blacklists: [],
@@ -256,7 +256,7 @@ class OptionsController {
       urls[index] = newUrl;
       this.editingUrls.delete(index);
 
-      const update: Partial<ExtensionSettings> = {};
+      const update: Partial<Settings> = {};
       update[this.settings.spacing_rule] = urls;
       this.saveSettings(update);
       this.renderUrlList();
@@ -275,7 +275,7 @@ class OptionsController {
     const urls = this.settings[this.settings.spacing_rule];
     urls.splice(index, 1);
 
-    const update: Partial<ExtensionSettings> = {};
+    const update: Partial<Settings> = {};
     update[this.settings.spacing_rule] = urls;
     this.saveSettings(update);
     this.renderUrlList();
@@ -300,7 +300,7 @@ class OptionsController {
       const urls = this.settings[this.settings.spacing_rule];
       urls.push(newUrl);
 
-      const update: Partial<ExtensionSettings> = {};
+      const update: Partial<Settings> = {};
       update[this.settings.spacing_rule] = urls;
       this.saveSettings(update);
 
@@ -316,7 +316,7 @@ class OptionsController {
     return Boolean(url && url.length > 0);
   }
 
-  private saveSettings(update: Partial<ExtensionSettings>): void {
+  private saveSettings(update: Partial<Settings>): void {
     utils.SYNC_STORAGE.set(update);
   }
 
