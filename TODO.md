@@ -1,6 +1,6 @@
 # TODO List
 
-**Last Updated:** December 21, 2024, 2:45 PM
+**Last Updated:** December 24, 2024, 11:45 AM
 
 ## 🎯 Completed
 
@@ -45,6 +45,31 @@
 - [x] Rename files to Chrome's kebab-case convention
   - utils_chrome.ts → utils-chrome.ts
   - content_script.ts → content-script.ts
+
+### Code Refactoring (Completed December 24, 2024)
+- [x] Refactor utils-chrome.ts to class-based ExtensionManager
+  - Converted interface to proper class structure
+  - Improved encapsulation and type safety
+- [x] Rename ExtensionManager to Utils and utils-chrome.ts to utils.ts
+  - Simplified naming convention
+  - Updated all imports and references
+- [x] Rename ExtensionSettings interface to Settings
+  - More concise naming throughout codebase
+- [x] Fix TypeScript type errors
+  - Fixed service-worker.ts type issues (Partial<Settings>, unknown types)
+  - Fixed utils.ts initialization with DEFAULT_SETTINGS
+  - Removed unused keepAlive function
+- [x] Improve code separation of concerns
+  - Moved playSound() out of toggleAutoSpacing()
+  - Better modularity in utils.ts
+- [x] UI/UX improvements
+  - Fixed footer separator margins consistency
+  - Added !important to margin utility classes
+  - Removed custom footer link styling
+- [x] Code quality improvements
+  - Added ESLint array formatting rules
+  - Fixed TypeScript strict mode compliance
+  - Renamed settingsCache to cachedSettings
 
 ## 🚧 In Progress
 
