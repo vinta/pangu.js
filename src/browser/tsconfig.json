@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2015",
+    "lib": ["ES2015", "DOM", "DOM.Iterable"],
+    "outDir": "../../dist/browser",
+    "rootDir": "../..",
+    "composite": true
+  },
+  "include": [
+    "../shared/**/*",
+    "./**/*"
+  ]
+}

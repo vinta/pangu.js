@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2018",
+    "lib": ["ES2018"],
+    "outDir": "../../dist/node",
+    "rootDir": "../..",
+    "composite": true
+  },
+  "include": [
+    "../shared/**/*",
+    "./**/*"
+  ]
+}

@@ -91,17 +91,14 @@ const multiBuildPlugin = () => {
 
 export default defineConfig({
   plugins: [
+    // Generate types using project references
     dts({
-      include: ['src/**/*.ts'],
       outDir: 'dist',
       insertTypesEntry: true,
       rollupTypes: false,
       copyDtsFiles: true,
-      compilerOptions: {
-        declaration: true,
-        declarationMap: false,
-        emitDeclarationOnly: true,
-      },
+      // Use the root tsconfig which has project references
+      tsconfigPath: resolve(projectRoot, 'tsconfig.json'),
     }),
     multiBuildPlugin(),
   ],

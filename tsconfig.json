@@ -13,11 +13,11 @@
 
     // Module resolution
     "module": "ESNext",
-    "target": "ES2018", // Modern baseline that works for both Node and browser
+    "target": "ES2018", // Node.js baseline
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "lib": ["ES2018", "DOM", "DOM.Iterable"], // Include all needed libs
+    "lib": ["ES2018"], // Base library
 
     // Emit
     "declaration": true,
@@ -34,6 +34,9 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "test", "browser_extensions"]
+  "files": [],
+  "references": [
+    { "path": "./src/browser/tsconfig.json" },
+    { "path": "./src/node/tsconfig.json" }
+  ]
 }
