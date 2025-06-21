@@ -64,12 +64,6 @@ export class Utils {
     return await this.initializeCache();
   }
 
-  // Get a specific setting
-  async getSetting<K extends keyof Settings>(key: K): Promise<Settings[K]> {
-    const settings = await this.initializeCache();
-    return settings[key];
-  }
-
   // Toggle auto spacing mode
   async toggleAutoSpacing(isEnabled: boolean): Promise<void> {
     // Update spacing mode

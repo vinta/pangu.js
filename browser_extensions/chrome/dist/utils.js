@@ -51,11 +51,6 @@ class Utils {
   async getCachedSettings() {
     return await this.initializeCache();
   }
-  // Get a specific setting
-  async getSetting(key) {
-    const settings = await this.initializeCache();
-    return settings[key];
-  }
   // Toggle auto spacing mode
   async toggleAutoSpacing(isEnabled) {
     const spacing_mode = isEnabled ? "spacing_when_load" : "spacing_when_click";
