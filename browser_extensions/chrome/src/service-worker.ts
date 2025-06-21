@@ -31,11 +31,8 @@ async function initializeSettings() {
   }
 }
 
-// Register content scripts dynamically based on user settings
-async function registerContentScripts() {
-  const SCRIPT_ID = 'pangu-auto-spacing';
-  
-  // First, unregister any existing scripts
+// Unregister all content scripts
+async function unregisterAllContentScripts(): Promise<void> {
   try {
     const existingScripts = await chrome.scripting.getRegisteredContentScripts();
     if (existingScripts.length > 0) {
@@ -43,9 +40,16 @@ async function registerContentScripts() {
       await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
     }
   } catch (error) {
-    // Log but continue - registration is more important than cleanup
     console.warn('Failed to unregister existing scripts:', error);
   }
+}
+
+// Register content scripts dynamically based on user settings
+async function registerContentScripts() {
+  const SCRIPT_ID = 'pangu-auto-spacing';
+
+  // First, unregister any existing scripts
+  await unregisterAllContentScripts();
 
   const settings = await getSettings();
 
@@ -89,15 +93,7 @@ async function registerContentScripts() {
     }
   } else {
     // If auto-spacing is disabled, ensure all scripts are unregistered
-    try {
-      const existingScripts = await chrome.scripting.getRegisteredContentScripts();
-      if (existingScripts.length > 0) {
-        const scriptIds = existingScripts.map((script) => script.id);
-        await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
-      }
-    } catch (error) {
-      console.error('Error unregistering content scripts:', error);
-    }
+    await unregisterAllContentScripts();
   }
 }
 

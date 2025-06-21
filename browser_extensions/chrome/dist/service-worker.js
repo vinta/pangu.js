@@ -18,8 +18,7 @@ async function initializeSettings() {
     await chrome.storage.sync.set(missingSettings);
   }
 }
-async function registerContentScripts() {
-  const SCRIPT_ID = "pangu-auto-spacing";
+async function unregisterAllContentScripts() {
   try {
     const existingScripts = await chrome.scripting.getRegisteredContentScripts();
     if (existingScripts.length > 0) {
@@ -29,6 +28,10 @@ async function registerContentScripts() {
   } catch (error) {
     console.warn("Failed to unregister existing scripts:", error);
   }
+}
+async function registerContentScripts() {
+  const SCRIPT_ID = "pangu-auto-spacing";
+  await unregisterAllContentScripts();
   const settings = await getSettings();
   if (settings.spacing_mode === "spacing_when_load") {
     const contentScript = {
@@ -60,15 +63,7 @@ async function registerContentScripts() {
       }
     }
   } else {
-    try {
-      const existingScripts = await chrome.scripting.getRegisteredContentScripts();
-      if (existingScripts.length > 0) {
-        const scriptIds = existingScripts.map((script) => script.id);
-        await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
-      }
-    } catch (error) {
-      console.error("Error unregistering content scripts:", error);
-    }
+    await unregisterAllContentScripts();
   }
 }
 async function getSettings() {
