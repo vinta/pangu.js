@@ -1,7 +1,7 @@
 import type { Settings } from './types';
 import { DEFAULT_SETTINGS } from './utils';
 
-// Initialize settings on installation
+// Initialize settings when extension is installed or updated to a new version
 chrome.runtime.onInstalled.addListener(async () => {
   await initializeSettings();
   await registerContentScripts();
@@ -13,42 +13,38 @@ chrome.runtime.onStartup.addListener(async () => {
 });
 
 // Initialize or merge settings with defaults
-async function initializeSettings(): Promise<void> {
-  const items = await chrome.storage.sync.get(null);
-  const newSettings: Record<string, unknown> = {};
+async function initializeSettings() {
+  // Get what's currently in storage
+  const syncedSettings = await chrome.storage.sync.get(null);
 
-  for (const key of Object.keys(DEFAULT_SETTINGS) as Array<keyof Settings>) {
-    if (items[key] === undefined) {
-      newSettings[key] = DEFAULT_SETTINGS[key];
+  // Find missing settings
+  const missingSettings: Partial<Settings> = {};
+  for (const [key, defaultValue] of Object.entries(DEFAULT_SETTINGS)) {
+    if (!(key in syncedSettings)) {
+      missingSettings[key as keyof Settings] = defaultValue;
     }
   }
 
-  // Only set if there are new settings to add
-  if (Object.keys(newSettings).length > 0) {
-    await chrome.storage.sync.set(newSettings);
+  // Only write if there are missing settings
+  if (Object.keys(missingSettings).length > 0) {
+    await chrome.storage.sync.set(missingSettings);
   }
 }
 
 // Register content scripts dynamically based on user settings
-async function registerContentScripts(): Promise<void> {
+async function registerContentScripts() {
   const SCRIPT_ID = 'pangu-auto-spacing';
-
-  // First, check if any scripts exist and unregister them
+  
+  // First, unregister any existing scripts
   try {
     const existingScripts = await chrome.scripting.getRegisteredContentScripts();
-    
-    // If scripts exist, unregister them
     if (existingScripts.length > 0) {
-      const scriptIds = existingScripts.map(script => script.id);
-      try {
-        await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
-      } catch (unregisterError) {
-        console.error('Error unregistering content scripts:', unregisterError);
-        // Don't return here, continue to try registering
-      }
+      const scriptIds = existingScripts.map((script) => script.id);
+      await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
     }
   } catch (error) {
-    console.error('Error checking existing scripts:', error);
+    // Log but continue - registration is more important than cleanup
+    console.warn('Failed to unregister existing scripts:', error);
   }
 
   const settings = await getSettings();
@@ -96,7 +92,7 @@ async function registerContentScripts(): Promise<void> {
     try {
       const existingScripts = await chrome.scripting.getRegisteredContentScripts();
       if (existingScripts.length > 0) {
-        const scriptIds = existingScripts.map(script => script.id);
+        const scriptIds = existingScripts.map((script) => script.id);
         await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
       }
     } catch (error) {

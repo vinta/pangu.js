@@ -7,15 +7,15 @@ chrome.runtime.onStartup.addListener(async () => {
   await registerContentScripts();
 });
 async function initializeSettings() {
-  const items = await chrome.storage.sync.get(null);
-  const newSettings = {};
-  for (const key of Object.keys(DEFAULT_SETTINGS)) {
-    if (items[key] === void 0) {
-      newSettings[key] = DEFAULT_SETTINGS[key];
+  const syncedSettings = await chrome.storage.sync.get(null);
+  const missingSettings = {};
+  for (const [key, defaultValue] of Object.entries(DEFAULT_SETTINGS)) {
+    if (!(key in syncedSettings)) {
+      missingSettings[key] = defaultValue;
     }
   }
-  if (Object.keys(newSettings).length > 0) {
-    await chrome.storage.sync.set(newSettings);
+  if (Object.keys(missingSettings).length > 0) {
+    await chrome.storage.sync.set(missingSettings);
   }
 }
 async function registerContentScripts() {
@@ -24,14 +24,10 @@ async function registerContentScripts() {
     const existingScripts = await chrome.scripting.getRegisteredContentScripts();
     if (existingScripts.length > 0) {
       const scriptIds = existingScripts.map((script) => script.id);
-      try {
-        await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
-      } catch (unregisterError) {
-        console.error("Error unregistering content scripts:", unregisterError);
-      }
+      await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
     }
   } catch (error) {
-    console.error("Error checking existing scripts:", error);
+    console.warn("Failed to unregister existing scripts:", error);
   }
   const settings = await getSettings();
   if (settings.spacing_mode === "spacing_when_load") {
