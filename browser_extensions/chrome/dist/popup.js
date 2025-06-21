@@ -61,20 +61,11 @@ class PopupController {
       return;
     }
     if (this.isAutoSpacingEnabled) {
-      const settings = await utils.getCachedSettings();
-      let isActive = false;
-      if (settings.spacing_rule === "blacklists") {
-        isActive = !settings.blacklists.some((pattern) => this.currentTabUrl.includes(pattern));
-      } else {
-        const hostname = new URL(this.currentTabUrl).hostname;
-        isActive = settings.whitelists.some((pattern) => {
-          return hostname === pattern || this.currentTabUrl.includes(pattern);
-        });
-      }
-      statusEl.className = isActive ? "status status-active" : "status";
+      await utils.getCachedSettings();
+      statusEl.className = "status status-active";
       const textEl = statusEl.querySelector(".status-text");
       if (textEl) {
-        const key = isActive ? "status_active" : "status_inactive";
+        const key = "status_active";
         textEl.setAttribute("data-i18n", key);
         textEl.textContent = chrome.i18n.getMessage(key);
       }

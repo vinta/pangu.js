@@ -1,15 +1,6 @@
 const DEFAULT_SETTINGS = {
   spacing_mode: "spacing_when_load",
   spacing_rule: "blacklist",
-  blacklists: [
-    // TODO: support regex
-    "//docs.google.com",
-    "//gist.github.com",
-    "/blob/",
-    "/commit/",
-    "/pull/"
-  ],
-  whitelists: [],
   blacklist: [
     // Default blacklist with valid match patterns
     "*://docs.google.com/*",

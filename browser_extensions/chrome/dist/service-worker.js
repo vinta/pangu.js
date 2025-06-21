@@ -45,18 +45,6 @@ async function registerContentScripts() {
       contentScript.excludeMatches = settings.blacklist;
     } else if (settings.spacing_rule === "whitelist" && settings.whitelist.length > 0) {
       contentScript.matches = settings.whitelist;
-    } else if (settings.spacing_rule === "blacklists" && settings.blacklists.length > 0) {
-      contentScript.matches = ["http://*/*", "https://*/*"];
-    } else if (settings.spacing_rule === "whitelists" && settings.whitelists.length > 0) {
-      const matchPatterns = [];
-      for (const url of settings.whitelists) {
-        if (url.includes("://")) {
-          matchPatterns.push(url.includes("*") ? url : `*://*${url}*`);
-        } else {
-          matchPatterns.push(`*://*${url}*`);
-        }
-      }
-      contentScript.matches = matchPatterns.length > 0 ? matchPatterns : ["http://*/*", "https://*/*"];
     }
     try {
       await chrome.scripting.registerContentScripts([contentScript]);
@@ -81,7 +69,7 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
       objToSave[key] = changes[key].newValue;
     }
     chrome.storage.local.set(objToSave);
-    const relevantKeys = ["spacing_mode", "spacing_rule", "blacklists", "whitelists", "blacklist", "whitelist"];
+    const relevantKeys = ["spacing_mode", "spacing_rule", "blacklist", "whitelist"];
     const hasRelevantChanges = Object.keys(changes).some((key) => relevantKeys.includes(key));
     if (hasRelevantChanges) {
       await registerContentScripts();
@@ -94,22 +82,7 @@ async function canSpacing(tab) {
   }
   const settings = await getSettings();
   if (settings.spacing_mode === "spacing_when_load") {
-    const currentUrl = tab.url;
-    if (settings.spacing_rule === "blacklists") {
-      for (const blacklistUrl of settings.blacklists) {
-        if (currentUrl.indexOf(blacklistUrl) >= 0) {
-          return false;
-        }
-      }
-      return true;
-    } else if (settings.spacing_rule === "whitelists") {
-      for (const whitelistUrl of settings.whitelists) {
-        if (currentUrl.indexOf(whitelistUrl) >= 0) {
-          return true;
-        }
-      }
-      return false;
-    }
+    return true;
   } else if (settings.spacing_mode === "spacing_when_click") {
     return false;
   }

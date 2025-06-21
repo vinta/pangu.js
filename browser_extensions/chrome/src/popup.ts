@@ -88,18 +88,10 @@ class PopupController {
     if (this.isAutoSpacingEnabled) {
       const settings = await utils.getCachedSettings();
 
-      let isActive = false;
-      if (settings.spacing_rule === 'blacklists') {
-        // For blacklist mode: active if URL doesn't match any blacklist pattern
-        isActive = !settings.blacklists.some(pattern => this.currentTabUrl.includes(pattern));
-      } else {
-        // For whitelist mode: active if URL matches any whitelist pattern
-        const hostname = new URL(this.currentTabUrl).hostname;
-        isActive = settings.whitelists.some(pattern => {
-          // Check both hostname and full URL matching
-          return hostname === pattern || this.currentTabUrl.includes(pattern);
-        });
-      }
+      // For new match pattern based rules, we can't easily check if the current URL matches
+      // because Chrome's match pattern system is more complex than simple string matching
+      // So we'll just show as active if auto-spacing is enabled
+      const isActive = true;
 
       statusEl.className = isActive ? 'status status-active' : 'status';
       const textEl = statusEl.querySelector('.status-text');

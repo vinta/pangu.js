@@ -1,10 +1,8 @@
 export interface Settings {
   spacing_mode: 'spacing_when_load' | 'spacing_when_click';
-  spacing_rule: 'blacklists' | 'whitelists' | 'blacklist' | 'whitelist';
-  blacklists: string[];  // Deprecated: use blacklist
-  whitelists: string[];  // Deprecated: use whitelist
-  blacklist: string[];   // New: valid match patterns only
-  whitelist: string[];   // New: valid match patterns only
+  spacing_rule: 'blacklist' | 'whitelist';
+  blacklist: string[];   // Valid match patterns only
+  whitelist: string[];   // Valid match patterns only
   is_mute_sound_effects: boolean;
 }
 

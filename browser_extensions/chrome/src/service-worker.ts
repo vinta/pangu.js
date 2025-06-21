@@ -70,20 +70,6 @@ async function registerContentScripts() {
     } else if (settings.spacing_rule === 'whitelist' && settings.whitelist.length > 0) {
       // Use whitelist patterns directly as matches
       contentScript.matches = settings.whitelist;
-    } else if (settings.spacing_rule === 'blacklists' && settings.blacklists.length > 0) {
-      // Legacy support for old blacklists
-      contentScript.matches = ['http://*/*', 'https://*/*'];
-    } else if (settings.spacing_rule === 'whitelists' && settings.whitelists.length > 0) {
-      // Legacy support for old whitelists
-      const matchPatterns: string[] = [];
-      for (const url of settings.whitelists) {
-        if (url.includes('://')) {
-          matchPatterns.push(url.includes('*') ? url : `*://*${url}*`);
-        } else {
-          matchPatterns.push(`*://*${url}*`);
-        }
-      }
-      contentScript.matches = matchPatterns.length > 0 ? matchPatterns : ['http://*/*', 'https://*/*'];
     }
 
     try {
@@ -118,7 +104,7 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
     chrome.storage.local.set(objToSave);
 
     // Re-register content scripts if relevant settings changed
-    const relevantKeys = ['spacing_mode', 'spacing_rule', 'blacklists', 'whitelists', 'blacklist', 'whitelist'];
+    const relevantKeys = ['spacing_mode', 'spacing_rule', 'blacklist', 'whitelist'];
     const hasRelevantChanges = Object.keys(changes).some((key) => relevantKeys.includes(key));
 
     if (hasRelevantChanges) {
@@ -136,23 +122,7 @@ async function canSpacing(tab: chrome.tabs.Tab | undefined): Promise<boolean> {
   const settings = await getSettings();
 
   if (settings.spacing_mode === 'spacing_when_load') {
-    const currentUrl = tab.url;
-
-    if (settings.spacing_rule === 'blacklists') {
-      for (const blacklistUrl of settings.blacklists) {
-        if (currentUrl.indexOf(blacklistUrl) >= 0) {
-          return false;
-        }
-      }
-      return true;
-    } else if (settings.spacing_rule === 'whitelists') {
-      for (const whitelistUrl of settings.whitelists) {
-        if (currentUrl.indexOf(whitelistUrl) >= 0) {
-          return true;
-        }
-      }
-      return false;
-    }
+    return true;
   } else if (settings.spacing_mode === 'spacing_when_click') {
     return false;
   }

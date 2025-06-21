@@ -35,14 +35,6 @@
         "message": "你是否希望：",
         "description": ""
     },
-    "whitelists": {
-        "message": "只在這些網站作用",
-        "description": ""
-    },
-    "blacklists": {
-        "message": "不要在這些網站作用",
-        "description": ""
-    },
     "god_of_spacing": {
         "message": "空格之神",
         "description": ""

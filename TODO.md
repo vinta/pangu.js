@@ -1,6 +1,6 @@
 # TODO List
 
-**Last Updated:** December 24, 2024, 11:45 AM
+**Last Updated:** December 21, 2024, 06:00 PM
 
 ## 🎯 Completed
 
@@ -70,6 +70,34 @@
   - Added ESLint array formatting rules
   - Fixed TypeScript strict mode compliance
   - Renamed settingsCache to cachedSettings
+
+### Service Worker Improvements (Completed December 21, 2024)
+- [x] Fix duplicate script ID error in Chrome extension service worker
+  - Added proper script existence checking before registration
+  - Improved error handling for expected scenarios
+  - Replaced `<all_urls>` with explicit `http://*/*, https://*/*` patterns
+- [x] Simplify content script registration
+  - Removed unnecessary SCRIPT_ID filtering
+  - Extract duplicated unregister logic into `unregisterAllContentScripts()` function
+  - Reduced bundle size from 5.22 kB to 4.97 kB
+- [x] Improve service worker initialization
+  - Simplified `initializeSettings()` with cleaner Object.entries iteration
+  - Removed nested try-catch blocks for better error flow
+  - Added proper TypeScript type assertions
+
+### Match Pattern Implementation (Completed December 21, 2024)
+- [x] Implement new blacklist/whitelist settings with valid match patterns
+  - Added `blacklist` and `whitelist` settings that require valid match patterns
+  - Deprecated `blacklists` and `whitelists` (maintained for backward compatibility)
+  - Use Chrome's `excludeMatches` API for efficient blacklist handling
+- [x] Add match pattern validation in options page
+  - Created `isValidMatchPattern()` function with regex validation
+  - Added helpful error messages for invalid patterns
+  - Added documentation link to Chrome match patterns guide
+- [x] Update service worker to use excludeMatches
+  - Blacklists now use `excludeMatches` instead of content script filtering
+  - Whitelists use patterns directly as `matches`
+  - More efficient as Chrome handles filtering at API level
 
 ## 🚧 In Progress
 

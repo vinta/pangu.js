@@ -1,4 +1,4 @@
-import { Settings } from './types';
+import type { Settings } from './types';
 import { translatePage } from './i18n';
 import utils from './utils';
 
@@ -6,8 +6,6 @@ class OptionsController {
   private settings: Settings = {
     spacing_mode: 'spacing_when_load',
     spacing_rule: 'blacklist',
-    blacklists: [],
-    whitelists: [],
     blacklist: [],
     whitelist: [],
     is_mute_sound_effects: false
@@ -152,11 +150,8 @@ class OptionsController {
     const container = document.getElementById('url-list-container');
     if (!container) return;
 
-    // Use new settings (blacklist/whitelist) or fall back to legacy (blacklists/whitelists)
-    const isNewRule = this.settings.spacing_rule === 'blacklist' || this.settings.spacing_rule === 'whitelist';
-    const urls = isNewRule 
-      ? this.settings[this.settings.spacing_rule as 'blacklist' | 'whitelist']
-      : this.settings[this.settings.spacing_rule as 'blacklists' | 'whitelists'];
+    // Get URLs from the current rule
+    const urls = this.settings[this.settings.spacing_rule as 'blacklist' | 'whitelist'];
 
     let html = '<ul class="spacing_rule_list">';
 
@@ -253,10 +248,7 @@ class OptionsController {
   }
 
   private startEditingUrl(index: number): void {
-    const isNewRule = this.settings.spacing_rule === 'blacklist' || this.settings.spacing_rule === 'whitelist';
-    const urls = isNewRule 
-      ? this.settings[this.settings.spacing_rule as 'blacklist' | 'whitelist']
-      : this.settings[this.settings.spacing_rule as 'blacklists' | 'whitelists'];
+    const urls = this.settings[this.settings.spacing_rule as 'blacklist' | 'whitelist'];
     this.editingUrls.set(index, urls[index]);
     this.renderUrlList();
 
@@ -275,28 +267,17 @@ class OptionsController {
     if (this.isValidUrl(newUrl)) {
       await utils.playSound('YeahBaby');
       
-      const isNewRule = this.settings.spacing_rule === 'blacklist' || this.settings.spacing_rule === 'whitelist';
-      if (isNewRule) {
-        const ruleKey = this.settings.spacing_rule as 'blacklist' | 'whitelist';
-        this.settings[ruleKey][index] = newUrl;
-        const update: Partial<Settings> = {};
-        update[ruleKey] = [...this.settings[ruleKey]];
-        this.saveSettings(update);
-      } else {
-        const ruleKey = this.settings.spacing_rule as 'blacklists' | 'whitelists';
-        this.settings[ruleKey][index] = newUrl;
-        const update: Partial<Settings> = {};
-        update[ruleKey] = [...this.settings[ruleKey]];
-        this.saveSettings(update);
-      }
+      const ruleKey = this.settings.spacing_rule as 'blacklist' | 'whitelist';
+      this.settings[ruleKey][index] = newUrl;
+      const update: Partial<Settings> = {};
+      update[ruleKey] = [...this.settings[ruleKey]];
+      this.saveSettings(update);
       
       this.editingUrls.delete(index);
       this.renderUrlList();
     } else {
       await utils.playSound('WahWahWaaah');
-      alert(this.settings.spacing_rule === 'blacklist' || this.settings.spacing_rule === 'whitelist' 
-        ? 'Invalid match pattern. Format: <scheme>://<host><path>\nExample: *://example.com/*' 
-        : 'Invalid URL');
+      alert('Invalid match pattern. Format: <scheme>://<host><path>\nExample: *://example.com/*');
     }
   }
 
@@ -306,21 +287,11 @@ class OptionsController {
   }
 
   private removeUrl(index: number): void {
-    const isNewRule = this.settings.spacing_rule === 'blacklist' || this.settings.spacing_rule === 'whitelist';
-    
-    if (isNewRule) {
-      const ruleKey = this.settings.spacing_rule as 'blacklist' | 'whitelist';
-      this.settings[ruleKey].splice(index, 1);
-      const update: Partial<Settings> = {};
-      update[ruleKey] = [...this.settings[ruleKey]];
-      this.saveSettings(update);
-    } else {
-      const ruleKey = this.settings.spacing_rule as 'blacklists' | 'whitelists';
-      this.settings[ruleKey].splice(index, 1);
-      const update: Partial<Settings> = {};
-      update[ruleKey] = [...this.settings[ruleKey]];
-      this.saveSettings(update);
-    }
+    const ruleKey = this.settings.spacing_rule as 'blacklist' | 'whitelist';
+    this.settings[ruleKey].splice(index, 1);
+    const update: Partial<Settings> = {};
+    update[ruleKey] = [...this.settings[ruleKey]];
+    this.saveSettings(update);
     
     this.renderUrlList();
   }
@@ -342,38 +313,22 @@ class OptionsController {
     if (this.isValidUrl(newUrl)) {
       await utils.playSound('YeahBaby');
       
-      const isNewRule = this.settings.spacing_rule === 'blacklist' || this.settings.spacing_rule === 'whitelist';
-      if (isNewRule) {
-        const ruleKey = this.settings.spacing_rule as 'blacklist' | 'whitelist';
-        this.settings[ruleKey].push(newUrl);
-        const update: Partial<Settings> = {};
-        update[ruleKey] = [...this.settings[ruleKey]];
-        this.saveSettings(update);
-      } else {
-        const ruleKey = this.settings.spacing_rule as 'blacklists' | 'whitelists';
-        this.settings[ruleKey].push(newUrl);
-        const update: Partial<Settings> = {};
-        update[ruleKey] = [...this.settings[ruleKey]];
-        this.saveSettings(update);
-      }
+      const ruleKey = this.settings.spacing_rule as 'blacklist' | 'whitelist';
+      this.settings[ruleKey].push(newUrl);
+      const update: Partial<Settings> = {};
+      update[ruleKey] = [...this.settings[ruleKey]];
+      this.saveSettings(update);
 
       this.addUrlInput = null;
       this.renderUrlList();
     } else {
       await utils.playSound('WahWahWaaah');
-      alert(this.settings.spacing_rule === 'blacklist' || this.settings.spacing_rule === 'whitelist' 
-        ? 'Invalid match pattern. Format: <scheme>://<host><path>\nExample: *://example.com/*' 
-        : 'Invalid URL');
+      alert('Invalid match pattern. Format: <scheme>://<host><path>\nExample: *://example.com/*');
     }
   }
 
   private isValidUrl(url: string): boolean {
-    // For new rules, validate as match pattern
-    if (this.settings.spacing_rule === 'blacklist' || this.settings.spacing_rule === 'whitelist') {
-      return this.isValidMatchPattern(url);
-    }
-    // For legacy rules, basic validation
-    return Boolean(url && url.length > 0);
+    return this.isValidMatchPattern(url);
   }
 
   private isValidMatchPattern(pattern: string): boolean {
