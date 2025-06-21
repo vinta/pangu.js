@@ -1,6 +1,6 @@
 # TODO List
 
-**Last Updated:** December 21, 2024, 06:00 PM
+**Last Updated:** December 22, 2024, 12:30 PM
 
 ## 🎯 Completed
 
@@ -98,6 +98,26 @@
   - Blacklists now use `excludeMatches` instead of content script filtering
   - Whitelists use patterns directly as `matches`
   - More efficient as Chrome handles filtering at API level
+
+### Deprecated Properties Removal (Completed December 22, 2024)
+- [x] Remove deprecated blacklists/whitelists properties completely
+  - Removed from Settings interface in types.ts
+  - Removed from DEFAULT_SETTINGS in utils.ts
+  - Removed all legacy handling logic from service-worker.ts
+  - Simplified popup.ts status checking
+  - Cleaned up options.ts to only use new properties
+  - Updated zh_TW localization messages
+  - Deleted unnecessary i18n-keys.md documentation
+- [x] Fix options page errors
+  - Fixed chrome.storage.sync access in options.ts and popup.ts
+  - Added proper fallback for undefined URL arrays
+  - Fixed forEach ESLint warnings with for...of loops
+  - Fixed TypeScript type errors in utils.ts
+- [x] Replace spacing_rule with filter_mode
+  - Created new filter_mode setting key for cleaner separation
+  - Updated all references throughout the codebase
+  - Updated HTML, CSS, and i18n messages
+  - No migration logic needed - clean break from old data
 
 ## 🚧 In Progress
 
