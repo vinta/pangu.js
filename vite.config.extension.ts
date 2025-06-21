@@ -9,9 +9,10 @@ export default defineConfig({
       input: {
         popup: resolve(__dirname, 'browser_extensions/chrome/src/popup.ts'),
         options: resolve(__dirname, 'browser_extensions/chrome/src/options.ts'),
-        background: resolve(__dirname, 'browser_extensions/chrome/src/background.js'),
-        content_script: resolve(__dirname, 'browser_extensions/chrome/src/content_script.js'),
-        i18n: resolve(__dirname, 'browser_extensions/chrome/src/i18n.ts')
+        background: resolve(__dirname, 'browser_extensions/chrome/src/background.ts'),
+        content_script: resolve(__dirname, 'browser_extensions/chrome/src/content_script.ts'),
+        i18n: resolve(__dirname, 'browser_extensions/chrome/src/i18n.ts'),
+        utils_chrome: resolve(__dirname, 'browser_extensions/chrome/src/utils_chrome.ts')
       },
       output: {
         entryFileNames: '[name].js',

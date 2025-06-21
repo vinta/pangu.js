@@ -3,19 +3,7 @@
  * Service workers don't have persistent state, so we rely on chrome.storage
  */
 
-const DEFAULT_SETTINGS = {
-  'spacing_mode': 'spacing_when_load',
-  'spacing_rule': 'blacklists',
-  'blacklists': [ // TODO: support regex
-    '//docs.google.com',
-    '//gist.github.com',
-    '/blob/',
-    '/commit/',
-    '/pull/'
-  ],
-  'whitelists': [],
-  'is_mute': false
-};
+import { ExtensionSettings, DEFAULT_SETTINGS } from './types';
 
 // Initialize settings on installation
 chrome.runtime.onInstalled.addListener(async () => {
@@ -23,11 +11,11 @@ chrome.runtime.onInstalled.addListener(async () => {
 });
 
 // Initialize or merge settings with defaults
-async function initializeSettings() {
+async function initializeSettings(): Promise<void> {
   const items = await chrome.storage.sync.get(null);
-  const newSettings = {};
+  const newSettings: Partial<ExtensionSettings> = {};
   
-  Object.keys(DEFAULT_SETTINGS).forEach(key => {
+  (Object.keys(DEFAULT_SETTINGS) as Array<keyof ExtensionSettings>).forEach(key => {
     if (items[key] === undefined) {
       newSettings[key] = DEFAULT_SETTINGS[key];
     }
@@ -40,8 +28,8 @@ async function initializeSettings() {
 }
 
 // Get settings from storage
-async function getSettings() {
-  const items = await chrome.storage.sync.get(DEFAULT_SETTINGS);
+async function getSettings(): Promise<ExtensionSettings> {
+  const items = await chrome.storage.sync.get(DEFAULT_SETTINGS) as ExtensionSettings;
   return items;
 }
 
@@ -49,7 +37,7 @@ async function getSettings() {
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName === 'sync') {
     // Sync to local storage
-    const objToSave = {};
+    const objToSave: Record<string, any> = {};
     for (const key in changes) {
       objToSave[key] = changes[key].newValue;
     }
@@ -58,7 +46,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 });
 
 // Check if spacing should be applied to the given tab
-async function canSpacing(tab) {
+async function canSpacing(tab: chrome.tabs.Tab | undefined): Promise<boolean> {
   if (!tab || !tab.url) {
     return false;
   }
@@ -90,8 +78,26 @@ async function canSpacing(tab) {
   return true;
 }
 
+// Message types
+interface MessageRequest {
+  purpose?: string;
+  action?: string;
+  key?: string;
+}
+
+interface MessageResponse {
+  result?: boolean;
+  settings?: ExtensionSettings;
+  value?: any;
+  error?: string;
+}
+
 // Listen for messages from content scripts and popup
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((
+  message: MessageRequest,
+  sender: chrome.runtime.MessageSender,
+  sendResponse: (response: MessageResponse) => void
+) => {
   // Handle async response
   (async () => {
     try {
@@ -120,7 +126,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }
     } catch (error) {
       console.error('Error in message handler:', error);
-      sendResponse({ error: error.message });
+      sendResponse({ error: (error as Error).message });
     }
   })();
   

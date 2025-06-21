@@ -1,14 +1,6 @@
 import { ExtensionSettings } from './types';
-
-declare global {
-  interface Window {
-    utils_chrome: {
-      getCachedSettings(): Promise<ExtensionSettings>;
-      SYNC_STORAGE: chrome.storage.SyncStorageArea;
-      get_i18n(message_name: string): string;
-    };
-  }
-}
+import { translatePage } from './i18n';
+import utils_chrome from './utils_chrome';
 
 class OptionsController {
   private settings: ExtensionSettings = {
@@ -27,7 +19,10 @@ class OptionsController {
   }
 
   private async initialize(): Promise<void> {
-    // Set i18n text
+    // Translate page
+    translatePage();
+    
+    // Set i18n text for dynamic elements
     this.setI18nText();
     
     // Load settings
@@ -42,14 +37,14 @@ class OptionsController {
 
   private setI18nText(): void {
     const elements = {
-      'page_title': window.utils_chrome.get_i18n('extension_name'),
-      'header_title': window.utils_chrome.get_i18n('extension_name'),
-      'subtitle': window.utils_chrome.get_i18n('subtitle'),
-      'quote': window.utils_chrome.get_i18n('quote'),
-      'label_spacing_mode': window.utils_chrome.get_i18n('label_spacing_mode'),
-      'label_spacing_rule': window.utils_chrome.get_i18n('label_spacing_rule'),
+      'page_title': utils_chrome.get_i18n('extension_name'),
+      'header_title': utils_chrome.get_i18n('extension_name'),
+      'subtitle': utils_chrome.get_i18n('subtitle'),
+      'quote': utils_chrome.get_i18n('quote'),
+      'label_spacing_mode': utils_chrome.get_i18n('label_spacing_mode'),
+      'label_spacing_rule': utils_chrome.get_i18n('label_spacing_rule'),
       'label_other_options': '其他：',
-      'spacing_when_click_msg': window.utils_chrome.get_i18n('spacing_when_click_msg')
+      'spacing_when_click_msg': utils_chrome.get_i18n('spacing_when_click_msg')
     };
 
     for (const [id, text] of Object.entries(elements)) {
@@ -60,17 +55,17 @@ class OptionsController {
     }
 
     // Set page title
-    document.title = window.utils_chrome.get_i18n('extension_name');
+    document.title = utils_chrome.get_i18n('extension_name');
     
     // Set mute label
     const muteLabel = document.getElementById('label_is_mute');
     if (muteLabel) {
-      muteLabel.textContent = window.utils_chrome.get_i18n('label_is_mute');
+      muteLabel.textContent = utils_chrome.get_i18n('label_is_mute');
     }
   }
 
   private async loadSettings(): Promise<void> {
-    const settings = await window.utils_chrome.getCachedSettings();
+    const settings = await utils_chrome.getCachedSettings();
     this.settings = settings;
   }
 
@@ -124,7 +119,7 @@ class OptionsController {
   private renderSpacingMode(): void {
     const button = document.getElementById('spacing_mode_btn') as HTMLInputElement;
     if (button) {
-      button.value = window.utils_chrome.get_i18n(this.settings.spacing_mode);
+      button.value = utils_chrome.get_i18n(this.settings.spacing_mode);
     }
 
     // Show/hide spacing rule section
@@ -143,7 +138,7 @@ class OptionsController {
   private renderSpacingRule(): void {
     const button = document.getElementById('spacing_rule_btn') as HTMLInputElement;
     if (button) {
-      button.value = window.utils_chrome.get_i18n(this.settings.spacing_rule);
+      button.value = utils_chrome.get_i18n(this.settings.spacing_rule);
     }
   }
 
@@ -314,7 +309,7 @@ class OptionsController {
   }
 
   private saveSettings(update: Partial<ExtensionSettings>): void {
-    window.utils_chrome.SYNC_STORAGE.set(update);
+    utils_chrome.SYNC_STORAGE.set(update);
   }
 
   private playSound(name: string): void {

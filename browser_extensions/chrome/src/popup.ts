@@ -1,14 +1,6 @@
 import { ExtensionSettings } from './types';
 import { translatePage } from './i18n';
-
-declare global {
-  interface Window {
-    utils_chrome: {
-      getCachedSettings(): Promise<ExtensionSettings>;
-      SYNC_STORAGE: chrome.storage.SyncStorageArea;
-    };
-  }
-}
+import utils_chrome from './utils_chrome';
 
 class PopupController {
   private spacing_mode: 'spacing_when_load' | 'spacing_when_click' = 'spacing_when_load';
@@ -22,14 +14,8 @@ class PopupController {
       // Translate the page
       translatePage();
       
-      // Wait for utils_chrome to be available
-      if (!window.utils_chrome) {
-        console.error('utils_chrome not available');
-        return;
-      }
-      
       // Get cached settings
-      const settings = await window.utils_chrome.getCachedSettings();
+      const settings = await utils_chrome.getCachedSettings();
       this.spacing_mode = settings.spacing_mode;
       
       // Update UI
@@ -94,7 +80,7 @@ class PopupController {
     this.updateSpacingModeButton();
     
     // Save to storage
-    window.utils_chrome.SYNC_STORAGE.set({ spacing_mode: this.spacing_mode });
+    utils_chrome.SYNC_STORAGE.set({ spacing_mode: this.spacing_mode });
   }
 
   private async callGodOfSpacing(): Promise<void> {

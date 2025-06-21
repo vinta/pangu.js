@@ -1,4 +1,5 @@
 import { t as translatePage } from "./i18n.js";
+import { u as utils_chrome } from "./utils_chrome.js";
 class PopupController {
   spacing_mode = "spacing_when_load";
   constructor() {
@@ -7,11 +8,7 @@ class PopupController {
   async initialize() {
     try {
       translatePage();
-      if (!window.utils_chrome) {
-        console.error("utils_chrome not available");
-        return;
-      }
-      const settings = await window.utils_chrome.getCachedSettings();
+      const settings = await utils_chrome.getCachedSettings();
       this.spacing_mode = settings.spacing_mode;
       this.updateSpacingModeButton();
       this.setupEventListeners();
@@ -51,7 +48,7 @@ class PopupController {
   changeSpacingMode() {
     this.spacing_mode = this.spacing_mode === "spacing_when_load" ? "spacing_when_click" : "spacing_when_load";
     this.updateSpacingModeButton();
-    window.utils_chrome.SYNC_STORAGE.set({ spacing_mode: this.spacing_mode });
+    utils_chrome.SYNC_STORAGE.set({ spacing_mode: this.spacing_mode });
   }
   async callGodOfSpacing() {
     const tabs = await chrome.tabs.query({ active: true });
