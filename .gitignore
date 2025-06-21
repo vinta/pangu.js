@@ -13,3 +13,6 @@ playwright-report/
 # Environment files
 .env
 .env.*
+
+# Chrome Extension build output
+browser_extensions/chrome/dist/
