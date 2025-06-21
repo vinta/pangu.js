@@ -47,8 +47,8 @@ export class Utils {
     });
   }
 
-  // Initialize settings cache
-  private async initializeCache(): Promise<Settings> {
+  // Get cached settings
+  async getCachedSettings(): Promise<Settings> {
     if (!this.cacheInitialized) {
       const response = await chrome.runtime.sendMessage({ action: 'get_settings' });
       if (response && response.settings) {
@@ -57,11 +57,6 @@ export class Utils {
       }
     }
     return this.cachedSettings;
-  }
-
-  // Get cached settings
-  async getCachedSettings(): Promise<Settings> {
-    return await this.initializeCache();
   }
 
   // Toggle auto spacing mode

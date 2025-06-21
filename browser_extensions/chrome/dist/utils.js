@@ -36,8 +36,8 @@ class Utils {
       }
     });
   }
-  // Initialize settings cache
-  async initializeCache() {
+  // Get cached settings
+  async getCachedSettings() {
     if (!this.cacheInitialized) {
       const response = await chrome.runtime.sendMessage({ action: "get_settings" });
       if (response && response.settings) {
@@ -46,10 +46,6 @@ class Utils {
       }
     }
     return this.cachedSettings;
-  }
-  // Get cached settings
-  async getCachedSettings() {
-    return await this.initializeCache();
   }
   // Toggle auto spacing mode
   async toggleAutoSpacing(isEnabled) {
