@@ -74,5 +74,37 @@
     "extension_options": {
         "message": "選項",
         "description": ""
+    },
+    "smart_spacing_desc": {
+        "message": "空格之神赦免他們不加空格的罪",
+        "description": ""
+    },
+    "auto_spacing_mode": {
+        "message": "網頁載入時自動召喚空格之神",
+        "description": ""
+    },
+    "auto_spacing_desc": {
+        "message": "網頁載入時自動加入空格",
+        "description": ""
+    },
+    "status_inactive": {
+        "message": "空格之神神隱中",
+        "description": ""
+    },
+    "status_active": {
+        "message": "空格之神顯靈中",
+        "description": ""
+    },
+    "manual_spacing": {
+        "message": "召喚空格之神",
+        "description": ""
+    },
+    "settings": {
+        "message": "設定",
+        "description": ""
+    },
+    "rate": {
+        "message": "評分",
+        "description": ""
     }
 }
