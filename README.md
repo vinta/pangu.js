@@ -22,6 +22,7 @@
 ### For Developers
 
 - Official supports:
+
   - [pangu.go](https://github.com/vinta/pangu) (Go)
   - [pangu.java](https://github.com/vinta/pangu.java) (Java)
   - [pangu.js](https://github.com/vinta/pangu.js) (JavaScript)
@@ -52,18 +53,9 @@ $ yarn add pangu
 Files are located in `./node_modules/pangu/dist/`.
 
 ```html
-<!-- For modern browsers with ES modules support -->
-<script type="module">
-  import pangu from './node_modules/pangu/dist/browser.js';
-  
-  const text = pangu.spacing("當你凝視著bug，bug也凝視著你");
-  // text = '當你凝視著 bug，bug 也凝視著你'
-</script>
-
-<!-- For legacy browsers or direct script tag usage -->
-<script src="./node_modules/pangu/dist/browser.umd.js"></script>
+<script src="dist/browser/pangu.umd.js"></script>
 <script>
-  const text = pangu.spacing("當你凝視著bug，bug也凝視著你");
+  const text = pangu.spacing('當你凝視著bug，bug也凝視著你');
   // text = '當你凝視著 bug，bug 也凝視著你'
 
   pangu.spacingElementById('main');
@@ -131,7 +123,7 @@ optional arguments:
 You need to install [Node.js](https://vinta.ws/code/install-node-js-via-nvm.html).
 
 ```bash
-$ git clone git@github.com:vinta/pangu.js.git && cd pangu.js
+$ git clone https://github.com/vinta/pangu.js.git && cd pangu.js
 $ npm install
 $ npm run test
 ```

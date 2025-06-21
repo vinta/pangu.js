@@ -22,8 +22,8 @@
 
 ### High Priority
 
-- [ ] Update Chrome Extension to use new TypeScript builds
-  - Currently using old pangu.min.js v4.0.7 instead of new dist/ builds
+- [x] Update Chrome Extension to use new TypeScript builds
+  - ~~Currently using old pangu.min.js v4.0.7 instead of new dist/ builds~~ ✅ Updated to v5.0.0
 - [ ] Remove Angular.js from Chrome Extension (200KB+ savings)
   - Still using Angular.js 1.2.9 with jQuery 2.1.0
 - [ ] Rewrite popup.js and options.js in TypeScript
