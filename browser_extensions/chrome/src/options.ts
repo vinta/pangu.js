@@ -117,9 +117,17 @@ class OptionsController {
   }
 
   private renderSpacingMode(): void {
-    const button = document.getElementById('spacing_mode_btn') as HTMLInputElement;
+    const button = document.getElementById('spacing_mode_btn') as HTMLButtonElement;
     if (button) {
-      button.value = utils_chrome.get_i18n(this.settings.spacing_mode);
+      button.textContent = utils_chrome.get_i18n(this.settings.spacing_mode);
+      // Update button style based on mode
+      if (this.settings.spacing_mode === 'spacing_when_click') {
+        button.classList.remove('btn-primary');
+        button.classList.add('btn-secondary');
+      } else {
+        button.classList.remove('btn-secondary');
+        button.classList.add('btn-primary');
+      }
     }
 
     // Show/hide spacing rule section
@@ -136,9 +144,17 @@ class OptionsController {
   }
 
   private renderSpacingRule(): void {
-    const button = document.getElementById('spacing_rule_btn') as HTMLInputElement;
+    const button = document.getElementById('spacing_rule_btn') as HTMLButtonElement;
     if (button) {
-      button.value = utils_chrome.get_i18n(this.settings.spacing_rule);
+      button.textContent = utils_chrome.get_i18n(this.settings.spacing_rule);
+      // Update button style based on rule
+      if (this.settings.spacing_rule === 'whitelists') {
+        button.classList.remove('btn-secondary');
+        button.classList.add('btn-primary');
+      } else {
+        button.classList.remove('btn-primary');
+        button.classList.add('btn-secondary');
+      }
     }
   }
 
@@ -155,15 +171,15 @@ class OptionsController {
         html += `
           <li class="animate-repeat">
             <input type="text" class="url-edit-input" value="${this.escapeHtml(this.editingUrls.get(index) || url)}" data-index="${index}" />
-            <button class="pure-button small-button save-url-btn" data-index="${index}">save</button>
-            <button class="pure-button small-button cancel-edit-btn" data-index="${index}">cancel</button>
+            <button class="btn btn-sm save-url-btn" data-index="${index}">Save</button>
+            <button class="btn btn-sm btn-ghost cancel-edit-btn" data-index="${index}">Cancel</button>
           </li>
         `;
       } else {
         html += `
           <li class="animate-repeat">
-            <a href="#" class="gradientEllipsis edit-url-btn" data-index="${index}">${this.escapeHtml(url)}</a>
-            <button class="pure-button small-button remove-url-btn" data-index="${index}">remove</button>
+            <a href="#" class="gradientEllipsis edit-url-btn" data-index="${index}" title="${this.escapeHtml(url)}">${this.escapeHtml(url)}</a>
+            <button class="btn btn-sm btn-ghost remove-url-btn" data-index="${index}">Remove</button>
           </li>
         `;
       }
@@ -174,14 +190,14 @@ class OptionsController {
       html += `
         <li>
           <input type="text" class="url-edit-input" id="new-url-input" placeholder="Enter URL" />
-          <button class="pure-button small-button" id="save-new-url-btn">save</button>
-          <button class="pure-button small-button" id="cancel-new-url-btn">cancel</button>
+          <button class="btn btn-sm save-url-btn" id="save-new-url-btn">Save</button>
+          <button class="btn btn-sm btn-ghost cancel-edit-btn" id="cancel-new-url-btn">Cancel</button>
         </li>
       `;
     } else {
       html += `
         <li>
-          <a href="#" id="add-url-btn">click to add</a>
+          <a href="#" id="add-url-btn">Add new URL</a>
         </li>
       `;
     }

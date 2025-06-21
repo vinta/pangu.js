@@ -4,43 +4,101 @@
     <meta charset="UTF-8">
     <title data-i18n="extension_name">為什麼你們就是不能加個空格呢？</title>
     <link rel="stylesheet" href="../stylesheets/styles.css">
+    <link rel="stylesheet" href="../stylesheets/options.css">
     <script type="module" src="../dist/options.js"></script>
 </head>
 <body>
-    <div class="options_container">
-        <div class="header">
-            <h1 data-i18n="extension_name">為什麼你們就是不能加個空格呢？</h1>
-            <p data-i18n="subtitle">自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。</p>
-            <p data-i18n="quote">漢學家稱這個空白字元為「盤古之白」，因為它劈開了全形字和半形字之間的混沌。另有研究顯示，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有七成的比例會在 34 歲的時候跟自己不愛的人結婚，而其餘三成的人最後只能把遺產留給自己的貓。畢竟愛情跟書寫都需要適時地留白。</p>
-        </div>
-        <div class="content">
-            <div class="option_group">
-                <h2 data-i18n="label_spacing_mode">什麼時候作用？</h2>
-                <input id="spacing_mode_btn" class="pure-button pure-button-blue big-button" type="button" data-i18n="spacing_when_load" value="網頁載入後自動幫我加上空格" />
+    <div class="options-container">
+        <!-- Main content area -->
+        <div class="options-main">
+            <!-- Header -->
+            <div class="options-header">
+                <div class="options-brand">
+                    <img src="../icons/icon_48.png" alt="pangu.js" class="options-logo">
+                    <div>
+                        <h1 class="options-title" data-i18n="extension_name">為什麼你們就是不能加個空格呢？</h1>
+                        <p class="options-description" data-i18n="subtitle">自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。</p>
+                    </div>
+                </div>
+                <blockquote class="options-quote" data-i18n="quote">
+                    漢學家稱這個空白字元為「盤古之白」，因為它劈開了全形字和半形字之間的混沌。另有研究顯示，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有七成的比例會在 34 歲的時候跟自己不愛的人結婚，而其餘三成的人最後只能把遺產留給自己的貓。畢竟愛情跟書寫都需要適時地留白。
+                </blockquote>
             </div>
-            <div class="option_group spacing_rule_group">
-                <h2 data-i18n="label_spacing_rule">然後，你是否希望：</h2>
-                <input id="spacing_rule_btn" class="pure-button pure-button-green big-button" type="button" data-i18n="blacklists" value="除了這些網址，其他網頁都自動加上空格" />
-                <div id="url-list-container">
-                    <!-- URL list will be rendered here -->
+
+            <!-- Spacing Mode Section -->
+            <div class="options-section">
+                <h2 class="options-section-title" data-i18n="label_spacing_mode">什麼時候作用？</h2>
+                <div class="card">
+                    <div class="form-group">
+                        <button id="spacing_mode_btn" class="btn btn-primary btn-lg btn-block">
+                            網頁載入後自動幫我加上空格
+                        </button>
+                        <p class="form-help-text mt-2" id="spacing_when_click_msg" style="display: none;" data-i18n="spacing_when_click_msg">
+                            你選擇了手動模式，需要點擊擴充功能圖示來添加空格。
+                        </p>
+                    </div>
                 </div>
             </div>
-            <p data-i18n="spacing_when_click_msg" style="display: none;">你選擇了手動模式，需要點擊擴充功能圖示來添加空格。</p>
-            <div class="option_group">
-                <h2>其他：</h2>
-                <label>
-                    <input id="mute-checkbox" type="checkbox" /> <span data-i18n="label_is_mute">在這個頁面靜音</span>
-                </label>
+
+            <!-- Spacing Rule Section -->
+            <div class="options-section spacing_rule_group">
+                <h2 class="options-section-title" data-i18n="label_spacing_rule">然後，你是否希望：</h2>
+                <div class="card">
+                    <div class="form-group">
+                        <button id="spacing_rule_btn" class="btn btn-secondary btn-lg btn-block">
+                            除了這些網址，其他網頁都自動加上空格
+                        </button>
+                    </div>
+                    <div class="url-list-section">
+                        <div id="url-list-container">
+                            <!-- URL list will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other Settings Section -->
+            <div class="options-section">
+                <h2 class="options-section-title">其他設定</h2>
+                <div class="card">
+                    <div class="form-group">
+                        <label class="toggle">
+                            <input type="checkbox" class="toggle-input" id="mute-checkbox">
+                            <span class="toggle-switch"></span>
+                            <span class="toggle-label" data-i18n="label_is_mute">在這個頁面靜音</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="options-footer-section">
+                <div class="options-footer-links">
+                    <a href="https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd/reviews" target="_blank" class="footer-link">
+                        Rate on Chrome Web Store
+                    </a>
+                    <span class="footer-separator">•</span>
+                    <a href="https://github.com/vinta/pangu.js" target="_blank" class="footer-link">
+                        GitHub
+                    </a>
+                    <span class="footer-separator">•</span>
+                    <a href="https://twitter.com/vinta" target="_blank" class="footer-link">
+                        Twitter
+                    </a>
+                </div>
+                <div class="options-credits">
+                    <p class="text-muted text-sm">
+                        Icons by <a href="http://thenounproject.com/term/afro/1500/" target="_blank">NounProject</a> • 
+                        Sounds by <a href="http://soundfxnow.com/" target="_blank">SoundFXNow</a>
+                    </p>
+                    <p class="copyleft text-muted text-sm">
+                        <a href="http://zh.wikipedia.org/wiki/Copyleft" target="_blank">Copyleft</a> 
+                        <span class="copyleft-symbol">©</span> 
+                        <a href="https://vinta.ws/">Vinta</a> All rights not reserved
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="options_footer">
-        <p>Rate me on <a href="https://chrome.google.com/webstore/detail/為什麼你們就是不能加個空格呢？/paphcfdffjnbcgkokihcdjliihicmbpd/reviews" target="_blank">Chrome Web Store</a></p>
-        <p>Fork me on <a href="https://github.com/vinta/pangu.js" target="_blank">GitHub</a></p>
-        <p>Follow me on <a href="https://twitter.com/vinta" target="_blank">Twitter</a></p>
-        <p>Icons: <a href="http://thenounproject.com/term/afro/1500/" target="_blank">NounProject</a></p>
-        <p>Sounds: <a href="http://soundfxnow.com/" target="_blank">SoundFXNow</a></p>
-        <p class="copyleft"><a href="http://zh.wikipedia.org/wiki/Copyleft" target="_blank">Copyleft</a> <span id="copyleft_symbol" style="-webkit-transform: rotate(180deg); -moz-transform: rotate(180deg); -o-transform: rotate(180deg); -khtml-transform: rotate(180deg); -ms-transform: rotate(180deg); transform: rotate(180deg); display: inline-block;">&copy;</span> <a href="https://vinta.ws/">Vinta</a> All rights not reserved</p>
     </div>
 </body>
 </html>
