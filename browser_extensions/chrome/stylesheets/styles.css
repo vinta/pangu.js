@@ -47,6 +47,26 @@ input[type=text] {
   input[type=text]:focus {
     outline: none; }
 
+.url-edit-input {
+  border: 1px solid #4090d0;
+  width: 60%;
+  margin-right: 10px;
+}
+
+.edit-url-btn {
+  border: 0;
+  color: #646464;
+  display: inline-block;
+  max-width: 600px;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap; }
+  .edit-url-btn:hover {
+    border-bottom: dotted 1px #646464;
+    color: #646464;
+    text-decoration: none; }
+
 .big-button {
   font-size: 180%; }
 

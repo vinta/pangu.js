@@ -16,7 +16,7 @@
     },
     "author": "Vinta",
     "background": {
-        "service_worker": "js/background.js"
+        "service_worker": "dist/background.js"
     },
     "content_scripts": [
         {
@@ -27,7 +27,7 @@
             ],
             "js": [
                 "vendors/pangu/pangu.umd.js",
-                "js/content_script.js"
+                "dist/content_script.js"
             ],
             "run_at": "document_idle"
         }

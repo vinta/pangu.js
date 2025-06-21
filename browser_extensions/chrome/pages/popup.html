@@ -1,24 +1,22 @@
 <!DOCTYPE html>
-<html ng-app="app">
+<html>
 <head>
     <meta charset="UTF-8">
     <title></title>
     <link rel="stylesheet" href="../stylesheets/pure-min.css">
     <link rel="stylesheet" href="../stylesheets/styles.css">
-    <script src="../vendors/jquery/jquery-2.1.0.min.js"></script>
-    <script src="../vendors/angular/angular-1.2.9.min.js"></script>
-    <script src="../js/utils_chrome.js"></script>
-    <script src="../js/popup.js"></script>
+    <script src="../dist/utils_chrome.js"></script>
+    <script type="module" src="../dist/popup.js"></script>
 </head>
-<body ng-controller="PopupController" class="popup_body">
+<body class="popup_body">
     <div class="popup_container">
         <h1 id="god_of_spacing">空格之神</h1>
-        <input ng-click="change_spacing_mode()" class="pure-button pure-button-primary" type="button" value="{{ spacing_mode_display }}" />
+        <input class="pure-button pure-button-primary" type="button" value="" />
         <br />
-        <input ng-click="call_god_of_spacing()" class="pure-button pure-button-purple" type="button" value="{{ call_god_of_spacing_display }}" />
+        <input class="pure-button pure-button-purple" type="button" value="" />
     </div>
     <div class="popup_footer">
-        <p class="copyleft"><span id="copyleft_symbol" style="-webkit-transform: rotate(180deg); -moz-transform: rotate(180deg); -o-transform: rotate(180deg); -khtml-transform: rotate(180deg); -ms-transform: rotate(180deg); transform: rotate(180deg); display: inline-block;">&copy;</span> Vinta - <a href="https://chrome.google.com/webstore/detail/為什麼你們就是不能加個空格呢？/paphcfdffjnbcgkokihcdjliihicmbpd/reviews" target="_blank">{{ extension_rate_display }}</a> - <a ng-click="open_options_page()" href="#">{{ extension_options_display }}</a></p>
+        <p class="copyleft"><span id="copyleft_symbol" style="-webkit-transform: rotate(180deg); -moz-transform: rotate(180deg); -o-transform: rotate(180deg); -khtml-transform: rotate(180deg); -ms-transform: rotate(180deg); transform: rotate(180deg); display: inline-block;">&copy;</span> Vinta - <a href="https://chrome.google.com/webstore/detail/為什麼你們就是不能加個空格呢？/paphcfdffjnbcgkokihcdjliihicmbpd/reviews" target="_blank"></a> - <a href="#"></a></p>
     </div>
 </body>
 </html>

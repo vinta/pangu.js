@@ -24,10 +24,10 @@
 
 - [x] Update Chrome Extension to use new TypeScript builds
   - ~~Currently using old pangu.min.js v4.0.7 instead of new dist/ builds~~ ✅ Updated to v5.0.0
-- [ ] Remove Angular.js from Chrome Extension (200KB+ savings)
-  - Still using Angular.js 1.2.9 with jQuery 2.1.0
-- [ ] Rewrite popup.js and options.js in TypeScript
-  - Both files are still plain JavaScript in browser_extensions/chrome/js/
+- [x] Remove Angular.js from Chrome Extension (200KB+ savings)
+  - ~~Still using Angular.js 1.2.9 with jQuery 2.1.0~~ ✅ Removed, saved ~194KB
+- [x] Rewrite popup.js and options.js in TypeScript
+  - ~~Both files are still plain JavaScript in browser_extensions/chrome/js/~~ ✅ Converted to TypeScript, renamed js/ to src/
 
 ### Chrome Extension Enhancement
 
