@@ -84,38 +84,65 @@ class PopupController {
   }
 
   private async callGodOfSpacing(): Promise<void> {
-    // Get all active tabs
-    const tabs = await chrome.tabs.query({ active: true });
-    
-    for (let i = 0; i < tabs.length; i++) {
-      const tab = tabs[i];
+    try {
+      // Get current active tab
+      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      
+      if (!activeTab || !activeTab.id) {
+        alert(chrome.i18n.getMessage('can_not_call_god_of_spacing'));
+        return;
+      }
       
       // Check if URL is valid for spacing
-      if (this.isValidUrlForSpacing(tab.url || '')) {
-        try {
-          // Execute spacing on the tab
-          await chrome.scripting.executeScript({
-            target: { tabId: tab.id!, allFrames: true },
-            func: () => {
-              // @ts-ignore - pangu is loaded from extension
-              if (typeof pangu !== 'undefined' && pangu.spacingPage) {
-                // @ts-ignore
-                pangu.spacingPage();
-              }
-            }
-          });
-        } catch (error) {
-          console.error('Failed to execute script:', error);
-          if (i === 0) {
-            alert(chrome.i18n.getMessage('can_not_call_god_of_spacing'));
-          }
-        }
-      } else {
-        if (i === 0) {
-          alert(chrome.i18n.getMessage('can_not_call_god_of_spacing'));
-        }
+      if (!this.isValidUrlForSpacing(activeTab.url || '')) {
+        alert(chrome.i18n.getMessage('can_not_call_god_of_spacing'));
+        return;
       }
+      
+      // Send message to content script instead of injecting code
+      try {
+        const response = await chrome.tabs.sendMessage(activeTab.id, { 
+          action: 'manual_spacing' 
+        });
+        
+        if (!response?.success) {
+          // If content script not loaded, inject it first
+          await chrome.scripting.executeScript({
+            target: { tabId: activeTab.id },
+            files: ['vendors/pangu/pangu.umd.js', 'dist/content_script.js']
+          });
+          
+          // Try again after injection
+          await chrome.tabs.sendMessage(activeTab.id, { 
+            action: 'manual_spacing' 
+          });
+        }
+        
+        // Play sound effect if enabled
+        const settings = await utils_chrome.getCachedSettings();
+        if (!settings.is_mute_sound_effects) {
+          this.playRandomSound();
+        }
+      } catch (error) {
+        console.error('Failed to apply spacing:', error);
+        alert(chrome.i18n.getMessage('can_not_call_god_of_spacing'));
+      }
+    } catch (error) {
+      console.error('Error in callGodOfSpacing:', error);
+      alert(chrome.i18n.getMessage('can_not_call_god_of_spacing'));
     }
+  }
+  
+  private playRandomSound(): void {
+    const sounds = [
+      'sounds/AustinPowers-YeahBaby.mp3',
+      'sounds/StreetFighter-Hadouken.mp3', 
+      'sounds/StreetFighter-Shouryuuken.mp3',
+      'sounds/WahWahWaaah.mp3'
+    ];
+    const randomSound = sounds[Math.floor(Math.random() * sounds.length)];
+    const audio = new Audio(chrome.runtime.getURL(randomSound));
+    audio.play().catch(e => console.log('Sound play failed:', e));
   }
 
   private isValidUrlForSpacing(url: string): boolean {

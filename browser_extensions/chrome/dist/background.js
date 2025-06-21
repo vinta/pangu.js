@@ -97,3 +97,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   })();
   return true;
 });
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === "keep-alive") {
+    console.log("Service worker keep-alive ping");
+  }
+});

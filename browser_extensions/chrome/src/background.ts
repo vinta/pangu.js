@@ -134,5 +134,19 @@ chrome.runtime.onMessage.addListener((
   return true;
 });
 
+// Keep service worker alive during critical operations
+async function keepAlive() {
+  // Use chrome.alarms API instead of setTimeout for persistence
+  chrome.alarms.create('keep-alive', { periodInMinutes: 0.25 });
+}
+
+// Clean up alarms when not needed
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === 'keep-alive') {
+    // Perform any necessary keep-alive tasks
+    console.log('Service worker keep-alive ping');
+  }
+});
+
 // Export functions for use by popup and options (via message passing)
 // Note: In service workers, we can't export directly, everything goes through messages
