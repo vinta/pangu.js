@@ -19,12 +19,6 @@ if (!/^\d+\.\d+\.\d+$/.test(newVersion)) {
   process.exit(1);
 }
 
-const gitStatus = execSync('git status --porcelain', { encoding: 'utf8' });
-if (gitStatus.trim()) {
-  console.error('Error: Uncommitted changes. Please commit or stash first.');
-  process.exit(1);
-}
-
 const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
 const currentVersion = packageJson.version;
 
@@ -61,6 +55,10 @@ const indexContent = readFileSync(sharedIndexPath, 'utf8');
 const updatedIndex = indexContent.replace(/this\.version\s*=\s*['"][^'"]+['"]/, `this.version = '${newVersion}'`);
 writeFileSync(sharedIndexPath, updatedIndex, 'utf8');
 console.log(`Updated ${sharedIndexPath}`);
+
+// Copy updated pangu.umd.js to Chrome extension
+console.log('Copying updated pangu.umd.js to Chrome extension...');
+execSync('cp -f dist/browser/pangu.umd.js browser_extensions/chrome/vendors/pangu/pangu.umd.js', { stdio: 'inherit' });
 
 execSync('git add .', { stdio: 'inherit' });
 execSync(`git commit -m "bump version to ${newVersion}"`, { stdio: 'inherit' });

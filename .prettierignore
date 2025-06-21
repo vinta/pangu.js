@@ -8,6 +8,3 @@ dist/
 coverage/
 playwright-report/
 test-results/
-
-# Browser extensions
-browser_extensions/

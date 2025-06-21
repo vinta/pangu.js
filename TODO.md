@@ -1,12 +1,26 @@
-# pangu.js TODO List
+# TODO List
 
-**Last Updated:** June 21, 2025, 7:13 PM
+**Last Updated:** December 22, 2024, 12:30 PM
 
-> Note: When completing a task, move it from "To Do" to "Completed" section to maintain history.
+## 🎯 Completed
 
-## Completed
-
+### Chrome Extension Migration (Completed December 2024)
 - [x] Chrome Extension Manifest V3 compatibility
+- [x] Remove Angular.js from Chrome Extension (saved ~194KB)
+  - Migrated popup.js and options.js to TypeScript
+  - Removed jQuery 2.1.0 and angular-xeditable dependencies
+  - Implemented native contenteditable for URL editing
+- [x] Convert all Chrome Extension JS files to TypeScript
+  - background.js → background.ts
+  - content_script.js → content-script.ts
+  - utils_chrome.js → utils-chrome.ts
+- [x] Set up Vite build configuration for Chrome Extension
+- [x] Add TypeScript types for Chrome Extension APIs (@types/chrome)
+- [x] Implement modern i18n with data-i18n attributes
+- [x] Add service worker keep-alive mechanism
+- [x] Improve error handling for invalidated contexts
+
+### Core Library Improvements
 - [x] Migrate all source code to TypeScript
 - [x] Replace Webpack/Babel with Vite
 - [x] Replace Mocha/Chai/Karma with Vitest/Playwright
@@ -15,33 +29,115 @@
 - [x] Set up ESLint and Prettier
 - [x] Create `publish-package` script for version management
 - [x] Set up GitHub Actions CI/CD workflow
-- [x] Refactor TypeScript configuration with separate tsconfig files for node/browser
-- [x] Add ES2020+ features with proper transpilation (target: ES2022)
+- [x] Refactor TypeScript configuration with separate tsconfig files
 
-## To Do
+### Chrome Extension Optimization (Completed December 2024)
+- [x] Replace `tabs` permission with `activeTab`
+  - Removes "Read browsing history" warning
+  - Already uses currentWindow: true in popup.ts
+- [x] Implement dynamic content script registration
+  - Uses chrome.scripting.registerContentScripts()
+  - Only loads scripts based on user settings
+  - Respects blacklist/whitelist rules at registration time
+- [x] Optimize pangu.js loading with on-demand injection
+  - Content scripts load dynamically based on settings
+  - Manual spacing only injects scripts when needed
+- [x] Rename files to Chrome's kebab-case convention
+  - utils_chrome.ts → utils-chrome.ts
+  - content_script.ts → content-script.ts
 
-### High Priority
+### Code Refactoring (Completed December 24, 2024)
+- [x] Refactor utils-chrome.ts to class-based ExtensionManager
+  - Converted interface to proper class structure
+  - Improved encapsulation and type safety
+- [x] Rename ExtensionManager to Utils and utils-chrome.ts to utils.ts
+  - Simplified naming convention
+  - Updated all imports and references
+- [x] Rename ExtensionSettings interface to Settings
+  - More concise naming throughout codebase
+- [x] Fix TypeScript type errors
+  - Fixed service-worker.ts type issues (Partial<Settings>, unknown types)
+  - Fixed utils.ts initialization with DEFAULT_SETTINGS
+  - Removed unused keepAlive function
+- [x] Improve code separation of concerns
+  - Moved playSound() out of toggleAutoSpacing()
+  - Better modularity in utils.ts
+- [x] UI/UX improvements
+  - Fixed footer separator margins consistency
+  - Added !important to margin utility classes
+  - Removed custom footer link styling
+- [x] Code quality improvements
+  - Added ESLint array formatting rules
+  - Fixed TypeScript strict mode compliance
+  - Renamed settingsCache to cachedSettings
 
-- [ ] Update Chrome Extension to use new TypeScript builds
-  - Currently using old pangu.min.js v4.0.7 instead of new dist/ builds
-- [ ] Remove Angular.js from Chrome Extension (200KB+ savings)
-  - Still using Angular.js 1.2.9 with jQuery 2.1.0
-- [ ] Rewrite popup.js and options.js in TypeScript
-  - Both files are still plain JavaScript in browser_extensions/chrome/js/
+### Service Worker Improvements (Completed December 21, 2024)
+- [x] Fix duplicate script ID error in Chrome extension service worker
+  - Added proper script existence checking before registration
+  - Improved error handling for expected scenarios
+  - Replaced `<all_urls>` with explicit `http://*/*, https://*/*` patterns
+- [x] Simplify content script registration
+  - Removed unnecessary SCRIPT_ID filtering
+  - Extract duplicated unregister logic into `unregisterAllContentScripts()` function
+  - Reduced bundle size from 5.22 kB to 4.97 kB
+- [x] Improve service worker initialization
+  - Simplified `initializeSettings()` with cleaner Object.entries iteration
+  - Removed nested try-catch blocks for better error flow
+  - Added proper TypeScript type assertions
 
-### Chrome Extension Enhancement
+### Match Pattern Implementation (Completed December 21, 2024)
+- [x] Implement new blacklist/whitelist settings with valid match patterns
+  - Added `blacklist` and `whitelist` settings that require valid match patterns
+  - Deprecated `blacklists` and `whitelists` (maintained for backward compatibility)
+  - Use Chrome's `excludeMatches` API for efficient blacklist handling
+- [x] Add match pattern validation in options page
+  - Created `isValidMatchPattern()` function with regex validation
+  - Added helpful error messages for invalid patterns
+  - Added documentation link to Chrome match patterns guide
+- [x] Update service worker to use excludeMatches
+  - Blacklists now use `excludeMatches` instead of content script filtering
+  - Whitelists use patterns directly as `matches`
+  - More efficient as Chrome handles filtering at API level
 
-- [ ] Use Vite to build Chrome Extension
-  - No Vite config exists for extension build
-- [ ] Modernize UI (remove jQuery/Angular dependencies)
-  - jQuery 2.1.0 and Angular.js 1.2.9 still in use
-- [ ] Add TypeScript types for Chrome Extension API
-  - No @types/chrome package installed
+### Deprecated Properties Removal (Completed December 22, 2024)
+- [x] Remove deprecated blacklists/whitelists properties completely
+  - Removed from Settings interface in types.ts
+  - Removed from DEFAULT_SETTINGS in utils.ts
+  - Removed all legacy handling logic from service-worker.ts
+  - Simplified popup.ts status checking
+  - Cleaned up options.ts to only use new properties
+  - Updated zh_TW localization messages
+  - Deleted unnecessary i18n-keys.md documentation
+- [x] Fix options page errors
+  - Fixed chrome.storage.sync access in options.ts and popup.ts
+  - Added proper fallback for undefined URL arrays
+  - Fixed forEach ESLint warnings with for...of loops
+  - Fixed TypeScript type errors in utils.ts
+- [x] Replace spacing_rule with filter_mode
+  - Created new filter_mode setting key for cleaner separation
+  - Updated all references throughout the codebase
+  - Updated HTML, CSS, and i18n messages
+  - No migration logic needed - clean break from old data
+
+## 🚧 In Progress
+
+## 📋 Next Steps
+
+### Medium Priority - Code Quality
+- [ ] Add proper Chrome API error handling
+  - Implement retry logic for script injection
+  - User-friendly error messages
+- [ ] Create optimized content script bundle
+  - Separate minimal bundle for content scripts
+  - Reduce memory footprint
+- [ ] Update declarativeContent for action button state
+
+### Low Priority - Future Enhancements
 - [ ] Update extension icons for high DPI displays
-
-### Future Enhancements
-
+- [ ] Implement performance monitoring
+- [ ] Add optional_host_permissions for user control
+- [ ] Progressive enhancement for older Chrome versions
 - [ ] Implement tree-shaking optimizations
-- [ ] Consider monorepo structure for better organization
+- [ ] Consider monorepo structure
 - [ ] Add changelog generation with standard-version
-- [ ] Publish to JSR (JavaScript Registry) in addition to npm
+- [ ] Publish to JSR (JavaScript Registry)
