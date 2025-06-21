@@ -30,7 +30,7 @@ const multiBuildPlugin = () => {
           rollupOptions: {
             output: {
               entryFileNames: '[name].cjs',
-              chunkFileNames: 'shared/[name]-[hash].cjs',
+              chunkFileNames: 'shared/[name].cjs',
               exports: 'named',
             },
             external: (id) => {

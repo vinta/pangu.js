@@ -97,4 +97,4 @@ class Pangu {
 }
 new Pangu();
 exports.Pangu = Pangu;
-//# sourceMappingURL=index-D3O23pV7.cjs.map
+//# sourceMappingURL=index.cjs.map
