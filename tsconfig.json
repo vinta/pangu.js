@@ -13,26 +13,24 @@
 
     // Module resolution
     "module": "ESNext",
-    "target": "ES2015", // Same as current Babel target
+    "target": "ES2022",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
 
-    // Emit
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "outDir": "./dist",
+    // This base tsconfig is only used for type checking, not compilation
+    "noEmit": true,
+    "declaration": false,
 
     // JavaScript support
-    "allowJs": true, // Allow gradual migration
-    "checkJs": false, // Don't type-check JS files yet
+    "allowJs": true,
+    "checkJs": false,
 
     // Other
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "test", "browser_extensions"]
+  // Exclude build output and test files from type checking
+  "exclude": ["dist", "node_modules", "tests/"]
 }

@@ -2,8 +2,8 @@
 Object.defineProperties(exports, { __esModule: { value: true }, [Symbol.toStringTag]: { value: "Module" } });
 const promises = require("node:fs/promises");
 const node_fs = require("node:fs");
-const shared_index = require("../shared/index.cjs");
-class NodePangu extends shared_index.Pangu {
+const index = require("../shared/index.cjs");
+class NodePangu extends index.Pangu {
   async spacingFile(path) {
     const data = await promises.readFile(path, "utf8");
     return this.spacingText(data);

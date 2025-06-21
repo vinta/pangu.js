@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
 import { fileURLToPath } from 'url';
+// Import the UMD types for window.pangu global
+import '../../dist/browser/pangu.umd';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -10,13 +12,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 test.describe('Browser UMD imports', () => {
   test('should expose global pangu object', async ({ page }) => {
     await page.addScriptTag({ path: path.join(__dirname, '../../dist/browser/pangu.umd.js') });
-    
+
     const result = await page.evaluate(() => {
       return {
         hasGlobalPangu: typeof window.pangu !== 'undefined',
         hasSpacing: typeof window.pangu?.spacing === 'function',
         hasBrowserPanguClass: typeof window.pangu?.BrowserPangu === 'function',
-        canCreateInstance: window.pangu?.BrowserPangu ? new window.pangu.BrowserPangu() instanceof window.pangu.BrowserPangu : false
+        canCreateInstance: window.pangu?.BrowserPangu ? new window.pangu.BrowserPangu() instanceof window.pangu.BrowserPangu : false,
       };
     });
 
@@ -28,7 +30,7 @@ test.describe('Browser UMD imports', () => {
 
   test('should have working spacing functionality', async ({ page }) => {
     await page.addScriptTag({ path: path.join(__dirname, '../../dist/browser/pangu.umd.js') });
-    
+
     const result = await page.evaluate(() => {
       const text = 'Hello世界';
       const spaced = window.pangu.spacing(text);

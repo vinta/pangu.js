@@ -1,13 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { createRequire } from 'module';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
 
 // ESM imports
 import { pangu as panguNamed, NodePangu } from '../../dist/node/index.js';
 import panguDefault from '../../dist/node/index.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 
 describe('Node.js ESM imports', () => {
