@@ -108,13 +108,6 @@ class OptionsController {
     const button = document.getElementById("spacing_rule_btn");
     if (button) {
       button.textContent = extensionManager.get_i18n(this.settings.spacing_rule);
-      if (this.settings.spacing_rule === "whitelists") {
-        button.classList.remove("btn-secondary");
-        button.classList.add("btn-primary");
-      } else {
-        button.classList.remove("btn-primary");
-        button.classList.add("btn-secondary");
-      }
     }
   }
   renderUrlList() {
@@ -172,12 +165,13 @@ class OptionsController {
     const isCurrentlyAutoMode = this.settings.spacing_mode === "spacing_when_load";
     const newIsAutoMode = !isCurrentlyAutoMode;
     await extensionManager.toggleAutoSpacing(newIsAutoMode);
+    await extensionManager.playSound(newIsAutoMode ? "Shouryuuken" : "Hadouken");
     this.settings.spacing_mode = newIsAutoMode ? "spacing_when_load" : "spacing_when_click";
     this.render();
   }
   async changeSpacingRule() {
-    await extensionManager.playSound("Shouryuuken");
     this.settings.spacing_rule = this.settings.spacing_rule === "blacklists" ? "whitelists" : "blacklists";
+    await extensionManager.playSound(this.settings.spacing_rule === "blacklists" ? "Shouryuuken" : "Hadouken");
     this.saveSettings({ spacing_rule: this.settings.spacing_rule });
     this.render();
   }

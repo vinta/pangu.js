@@ -120,8 +120,8 @@ class OptionsController {
     const button = document.getElementById('spacing_mode_btn') as HTMLButtonElement;
     if (button) {
       // Show "auto_spacing_mode" text when in auto mode, otherwise show manual mode text
-      const i18nKey = this.settings.spacing_mode === 'spacing_when_load' 
-        ? 'auto_spacing_mode' 
+      const i18nKey = this.settings.spacing_mode === 'spacing_when_load'
+        ? 'auto_spacing_mode'
         : 'manual_spacing_mode';
       button.textContent = utils_chrome.get_i18n(i18nKey);
     }
@@ -143,14 +143,6 @@ class OptionsController {
     const button = document.getElementById('spacing_rule_btn') as HTMLButtonElement;
     if (button) {
       button.textContent = utils_chrome.get_i18n(this.settings.spacing_rule);
-      // Update button style based on rule
-      if (this.settings.spacing_rule === 'whitelists') {
-        button.classList.remove('btn-secondary');
-        button.classList.add('btn-primary');
-      } else {
-        button.classList.remove('btn-primary');
-        button.classList.add('btn-secondary');
-      }
     }
   }
 
@@ -222,6 +214,7 @@ class OptionsController {
 
     // Use shared toggle function
     await utils_chrome.toggleAutoSpacing(newIsAutoMode);
+    await utils_chrome.playSound(newIsAutoMode ? 'Shouryuuken' : 'Hadouken');
 
     // Update local settings
     this.settings.spacing_mode = newIsAutoMode ? 'spacing_when_load' : 'spacing_when_click';
@@ -231,11 +224,10 @@ class OptionsController {
   }
 
   private async changeSpacingRule(): Promise<void> {
-    await utils_chrome.playSound('Shouryuuken');
-
     this.settings.spacing_rule = this.settings.spacing_rule === 'blacklists'
       ? 'whitelists'
       : 'blacklists';
+    await utils_chrome.playSound(this.settings.spacing_rule === 'blacklists' ? 'Shouryuuken' : 'Hadouken');
 
     this.saveSettings({ spacing_rule: this.settings.spacing_rule });
     this.render();
@@ -321,7 +313,7 @@ class OptionsController {
   }
 
   private isValidUrl(url: string): boolean {
-    return url && url.length > 0;
+    return Boolean(url && url.length > 0);
   }
 
   private saveSettings(update: Partial<ExtensionSettings>): void {

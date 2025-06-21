@@ -49,11 +49,10 @@ class ExtensionManager {
       console.log("SYNC_STORAGE: %O", items);
     });
   }
-  // Toggle auto spacing mode with consistent sound effects
+  // Toggle auto spacing mode
   async toggleAutoSpacing(isEnabled) {
     const spacing_mode = isEnabled ? "spacing_when_load" : "spacing_when_click";
     await this.SYNC_STORAGE.set({ spacing_mode });
-    await this.playSound(isEnabled ? "Shouryuuken" : "Hadouken");
   }
   // Play sound effects
   async playSound(name) {

@@ -125,6 +125,7 @@ class PopupController {
 
     // Use shared toggle function
     await utils_chrome.toggleAutoSpacing(this.isAutoSpacingEnabled);
+    await utils_chrome.playSound(this.isAutoSpacingEnabled ? 'Shouryuuken' : 'Hadouken');
 
     // Update status
     this.updateStatus();

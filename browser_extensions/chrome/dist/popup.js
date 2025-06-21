@@ -91,6 +91,7 @@ class PopupController {
     const toggle = document.getElementById("auto-spacing-toggle");
     this.isAutoSpacingEnabled = toggle.checked;
     await extensionManager.toggleAutoSpacing(this.isAutoSpacingEnabled);
+    await extensionManager.playSound(this.isAutoSpacingEnabled ? "Shouryuuken" : "Hadouken");
     this.updateStatus();
   }
   async handleManualSpacing() {
