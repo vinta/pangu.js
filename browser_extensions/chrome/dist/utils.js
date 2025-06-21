@@ -1,12 +1,13 @@
+import { D as DEFAULT_SETTINGS } from "./assets/types-CcJ344y1.js";
 class Utils {
-  settingsCache = {};
+  cachedSettings = { ...DEFAULT_SETTINGS };
   cacheInitialized = false;
   // Sound file mappings
   sounds = {
-    "Hadouken": "sounds/StreetFighter-Hadouken.mp3",
-    "Shouryuuken": "sounds/StreetFighter-Shouryuuken.mp3",
-    "YeahBaby": "sounds/AustinPowers-YeahBaby.mp3",
-    "WahWahWaaah": "sounds/ManciniPinkPanther-WahWahWaaah.mp3"
+    Hadouken: "sounds/StreetFighter-Hadouken.mp3",
+    Shouryuuken: "sounds/StreetFighter-Shouryuuken.mp3",
+    YeahBaby: "sounds/AustinPowers-YeahBaby.mp3",
+    WahWahWaaah: "sounds/ManciniPinkPanther-WahWahWaaah.mp3"
   };
   // Direct access to chrome.storage.sync
   SYNC_STORAGE = chrome.storage.sync;
@@ -14,7 +15,10 @@ class Utils {
     chrome.storage.onChanged.addListener((changes, areaName) => {
       if (areaName === "sync") {
         for (const key in changes) {
-          this.settingsCache[key] = changes[key].newValue;
+          if (key in this.cachedSettings) {
+            const settingsKey = key;
+            this.cachedSettings[settingsKey] = changes[key].newValue;
+          }
         }
       }
     });
@@ -24,11 +28,11 @@ class Utils {
     if (!this.cacheInitialized) {
       const response = await chrome.runtime.sendMessage({ action: "get_settings" });
       if (response && response.settings) {
-        this.settingsCache = response.settings;
+        this.cachedSettings = response.settings;
         this.cacheInitialized = true;
       }
     }
-    return this.settingsCache;
+    return this.cachedSettings;
   }
   // Get cached settings
   async getCachedSettings() {

@@ -1,9 +1,5 @@
-/*
- * Background Service Worker for Manifest V3
- * Service workers don't have persistent state, so we rely on chrome.storage
- */
-
-import { Settings, DEFAULT_SETTINGS } from './types';
+import type { Settings } from './types';
+import { DEFAULT_SETTINGS } from './types';
 
 // Initialize settings on installation
 chrome.runtime.onInstalled.addListener(async () => {
@@ -19,14 +15,14 @@ chrome.runtime.onStartup.addListener(async () => {
 // Initialize or merge settings with defaults
 async function initializeSettings(): Promise<void> {
   const items = await chrome.storage.sync.get(null);
-  const newSettings: Record<string, any> = {};
-  
-  (Object.keys(DEFAULT_SETTINGS) as Array<keyof Settings>).forEach(key => {
+  const newSettings: Partial<Settings> = {};
+
+  (Object.keys(DEFAULT_SETTINGS) as Array<keyof Settings>).forEach((key) => {
     if (items[key] === undefined) {
       newSettings[key] = DEFAULT_SETTINGS[key];
     }
   });
-  
+
   // Only set if there are new settings to add
   if (Object.keys(newSettings).length > 0) {
     await chrome.storage.sync.set(newSettings);
@@ -38,7 +34,7 @@ async function registerContentScripts(): Promise<void> {
   // First, unregister any existing scripts
   try {
     const scripts = await chrome.scripting.getRegisteredContentScripts();
-    const scriptIds = scripts.map(script => script.id);
+    const scriptIds = scripts.map((script) => script.id);
     if (scriptIds.length > 0) {
       await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
     }
@@ -47,14 +43,14 @@ async function registerContentScripts(): Promise<void> {
   }
 
   const settings = await getSettings();
-  
+
   // Only register if auto-spacing is enabled
   if (settings.spacing_mode === 'spacing_when_load') {
     const contentScript: chrome.scripting.RegisteredContentScript = {
       id: 'pangu-auto-spacing',
       js: ['vendors/pangu/pangu.umd.js', 'dist/content-script.js'],
       matches: ['<all_urls>'],
-      runAt: 'document_idle'
+      runAt: 'document_idle',
     };
 
     // Apply filtering based on rules
@@ -86,7 +82,7 @@ async function registerContentScripts(): Promise<void> {
 
 // Get settings from storage
 async function getSettings(): Promise<Settings> {
-  const items = await chrome.storage.sync.get(DEFAULT_SETTINGS) as Settings;
+  const items = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
   return items;
 }
 
@@ -94,16 +90,16 @@ async function getSettings(): Promise<Settings> {
 chrome.storage.onChanged.addListener(async (changes, areaName) => {
   if (areaName === 'sync') {
     // Sync to local storage
-    const objToSave: Record<string, any> = {};
+    const objToSave: Record<string, unknown> = {};
     for (const key in changes) {
       objToSave[key] = changes[key].newValue;
     }
     chrome.storage.local.set(objToSave);
-    
+
     // Re-register content scripts if relevant settings changed
     const relevantKeys = ['spacing_mode', 'spacing_rule', 'blacklists', 'whitelists'];
-    const hasRelevantChanges = Object.keys(changes).some(key => relevantKeys.includes(key));
-    
+    const hasRelevantChanges = Object.keys(changes).some((key) => relevantKeys.includes(key));
+
     if (hasRelevantChanges) {
       await registerContentScripts();
     }
@@ -117,10 +113,10 @@ async function canSpacing(tab: chrome.tabs.Tab | undefined): Promise<boolean> {
   }
 
   const settings = await getSettings();
-  
+
   if (settings.spacing_mode === 'spacing_when_load') {
     const currentUrl = tab.url;
-    
+
     if (settings.spacing_rule === 'blacklists') {
       for (const blacklistUrl of settings.blacklists) {
         if (currentUrl.indexOf(blacklistUrl) >= 0) {
@@ -139,7 +135,7 @@ async function canSpacing(tab: chrome.tabs.Tab | undefined): Promise<boolean> {
   } else if (settings.spacing_mode === 'spacing_when_click') {
     return false;
   }
-  
+
   return true;
 }
 
@@ -153,16 +149,12 @@ interface MessageRequest {
 interface MessageResponse {
   result?: boolean;
   settings?: Settings;
-  value?: any;
+  value?: unknown;
   error?: string;
 }
 
 // Listen for messages from content scripts and popup
-chrome.runtime.onMessage.addListener((
-  message: MessageRequest,
-  sender: chrome.runtime.MessageSender,
-  sendResponse: (response: MessageResponse) => void
-) => {
+chrome.runtime.onMessage.addListener((message: MessageRequest, sender: chrome.runtime.MessageSender, sendResponse: (response: MessageResponse) => void) => {
   // Handle async response
   (async () => {
     try {
@@ -171,12 +163,12 @@ chrome.runtime.onMessage.addListener((
           const result = await canSpacing(sender.tab);
           sendResponse({ result });
           break;
-          
+
         case 'get_settings':
           const settings = await getSettings();
           sendResponse({ settings });
           break;
-          
+
         case 'get_setting':
           if (message.key) {
             const value = await chrome.storage.sync.get(message.key);
@@ -185,7 +177,7 @@ chrome.runtime.onMessage.addListener((
             sendResponse({ error: 'No key specified' });
           }
           break;
-          
+
         default:
           sendResponse({ result: false });
       }
@@ -194,16 +186,17 @@ chrome.runtime.onMessage.addListener((
       sendResponse({ error: (error as Error).message });
     }
   })();
-  
+
   // Return true to indicate async response
   return true;
 });
 
 // Keep service worker alive during critical operations
-async function keepAlive() {
-  // Use chrome.alarms API instead of setTimeout for persistence
-  chrome.alarms.create('keep-alive', { periodInMinutes: 0.25 });
-}
+// Currently unused but kept for future implementation
+// async function keepAlive() {
+//   // Use chrome.alarms API instead of setTimeout for persistence
+//   chrome.alarms.create('keep-alive', { periodInMinutes: 0.25 });
+// }
 
 // Clean up alarms when not needed
 chrome.alarms.onAlarm.addListener((alarm) => {

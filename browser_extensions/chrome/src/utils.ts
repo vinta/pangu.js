@@ -1,9 +1,10 @@
-import { Settings } from './types';
+import type { Settings } from './types';
+import { DEFAULT_SETTINGS } from './types';
 
 type SoundName = 'Hadouken' | 'Shouryuuken' | 'YeahBaby' | 'WahWahWaaah';
 
 export class Utils {
-  private cachedSettings: Settings = {};
+  private cachedSettings: Settings = { ...DEFAULT_SETTINGS };
   private cacheInitialized: boolean = false;
 
   // Sound file mappings
@@ -22,7 +23,10 @@ export class Utils {
     chrome.storage.onChanged.addListener((changes, areaName) => {
       if (areaName === 'sync') {
         for (const key in changes) {
-          (this.cachedSettings as any)[key] = changes[key].newValue;
+          if (key in this.cachedSettings) {
+            const settingsKey = key as keyof Settings;
+            (this.cachedSettings[settingsKey] as unknown) = changes[key].newValue;
+          }
         }
       }
     });
@@ -46,7 +50,7 @@ export class Utils {
   }
 
   // Get a specific setting
-  async getSetting(key: keyof Settings): Promise<any> {
+  async getSetting<K extends keyof Settings>(key: K): Promise<Settings[K]> {
     const settings = await this.initializeCache();
     return settings[key];
   }
