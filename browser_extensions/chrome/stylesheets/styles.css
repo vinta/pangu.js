@@ -67,23 +67,152 @@ input[type=text] {
     color: #646464;
     text-decoration: none; }
 
+/* Modern button styles to replace Pure CSS */
+.btn {
+  display: inline-block;
+  line-height: normal;
+  white-space: nowrap;
+  vertical-align: baseline;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  font-size: 100%;
+  padding: 0.5em 1.5em;
+  color: #444;
+  color: rgba(0, 0, 0, 0.8);
+  border: 1px solid #999;
+  border: 0 rgba(0, 0, 0, 0);
+  background-color: #e6e6e6;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: 0.1s linear box-shadow;
+}
+
+.btn:hover,
+.btn:focus {
+  background-image: linear-gradient(transparent, rgba(0, 0, 0, 0.05) 40%, rgba(0, 0, 0, 0.1));
+}
+
+.btn:focus {
+  outline: 0;
+}
+
+.btn:active {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15) inset, 0 0 6px rgba(0, 0, 0, 0.2) inset;
+}
+
+.btn[disabled],
+.btn-disabled,
+.btn-disabled:hover,
+.btn-disabled:focus,
+.btn-disabled:active {
+  border: 0;
+  background-image: none;
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-hidden {
+  display: none;
+}
+
+/* Primary button style */
+.btn-primary {
+  background-color: #0078e7;
+  color: #fff;
+}
+
+/* Custom color variants */
+.btn-blue {
+  background: #2e7bc8;
+  color: #fff;
+}
+
+.btn-green {
+  background: #4faf4c;
+  color: #fff;
+}
+
+.btn-purple {
+  background: #6c4094;
+  color: #fff;
+}
+
+/* Size modifiers */
 .big-button {
-  font-size: 180%; }
+  font-size: 180%;
+}
 
 .small-button {
-  font-size: 70%; }
+  font-size: 70%;
+}
+
+/* Legacy Pure CSS class mappings for backward compatibility */
+.pure-button {
+  display: inline-block;
+  line-height: normal;
+  white-space: nowrap;
+  vertical-align: baseline;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  font-size: 100%;
+  padding: 0.5em 1.5em;
+  color: #444;
+  color: rgba(0, 0, 0, 0.8);
+  border: 1px solid #999;
+  border: 0 rgba(0, 0, 0, 0);
+  background-color: #e6e6e6;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: 0.1s linear box-shadow;
+}
+
+.pure-button:hover,
+.pure-button:focus {
+  background-image: linear-gradient(transparent, rgba(0, 0, 0, 0.05) 40%, rgba(0, 0, 0, 0.1));
+}
+
+.pure-button:focus {
+  outline: 0;
+}
+
+.pure-button:active {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15) inset, 0 0 6px rgba(0, 0, 0, 0.2) inset;
+}
+
+.pure-button[disabled],
+.pure-button-disabled,
+.pure-button-disabled:hover,
+.pure-button-disabled:focus,
+.pure-button-disabled:active {
+  border: 0;
+  background-image: none;
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.pure-button-primary {
+  background-color: #0078e7;
+  color: #fff;
+}
 
 .pure-button-blue {
   background: #2e7bc8;
-  color: #fff; }
+  color: #fff;
+}
 
 .pure-button-green {
   background: #4faf4c;
-  color: #fff; }
+  color: #fff;
+}
 
 .pure-button-purple {
   background: #6c4094;
-  color: #fff; }
+  color: #fff;
+}
 
 .options_container {
   font-size: 130%;
@@ -146,7 +275,8 @@ input[type=text] {
   padding: 0 20px 0 20px;
   text-align: center;
   width: 340px; }
-  .popup_container .pure-button {
+  .popup_container .pure-button,
+  .popup_container .btn {
     margin-bottom: 20px; }
 
 .popup_footer {
