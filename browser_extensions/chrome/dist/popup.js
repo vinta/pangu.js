@@ -90,15 +90,8 @@ class PopupController {
   async handleToggleChange() {
     const toggle = document.getElementById("auto-spacing-toggle");
     this.isAutoSpacingEnabled = toggle.checked;
-    const spacing_mode = this.isAutoSpacingEnabled ? "spacing_when_load" : "spacing_when_click";
-    await utils_chrome.SYNC_STORAGE.set({ spacing_mode });
+    await utils_chrome.toggleAutoSpacing(this.isAutoSpacingEnabled);
     this.updateStatus();
-    const settings = await utils_chrome.getCachedSettings();
-    if (!settings.is_mute_sound_effects) {
-      const soundFile = this.isAutoSpacingEnabled ? "sounds/StreetFighter-Shouryuuken.mp3" : "sounds/StreetFighter-Hadouken.mp3";
-      const audio = new Audio(chrome.runtime.getURL(soundFile));
-      audio.play().catch((e) => console.log("Sound play failed:", e));
-    }
   }
   async handleManualSpacing() {
     if (!this.currentTabId || !this.currentTabUrl) {

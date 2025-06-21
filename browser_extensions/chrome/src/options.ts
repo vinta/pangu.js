@@ -75,7 +75,7 @@ class OptionsController {
       const target = e.target as HTMLElement;
       
       if (target.id === 'spacing_mode_btn') {
-        this.changeSpacingMode();
+        this.changeSpacingMode().catch(console.error);
       } else if (target.id === 'spacing_rule_btn') {
         this.changeSpacingRule();
       } else if (target.classList.contains('remove-url-btn')) {
@@ -219,14 +219,18 @@ class OptionsController {
     }
   }
 
-  private changeSpacingMode(): void {
-    this.playSound('Hadouken');
+  private async changeSpacingMode(): Promise<void> {
+    // Toggle between auto and manual mode
+    const isCurrentlyAutoMode = this.settings.spacing_mode === 'spacing_when_load';
+    const newIsAutoMode = !isCurrentlyAutoMode;
     
-    this.settings.spacing_mode = this.settings.spacing_mode === 'spacing_when_load' 
-      ? 'spacing_when_click' 
-      : 'spacing_when_load';
+    // Use shared toggle function
+    await utils_chrome.toggleAutoSpacing(newIsAutoMode);
     
-    this.saveSettings({ spacing_mode: this.settings.spacing_mode });
+    // Update local settings
+    this.settings.spacing_mode = newIsAutoMode ? 'spacing_when_load' : 'spacing_when_click';
+    
+    // Re-render UI
     this.render();
   }
 

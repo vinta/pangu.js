@@ -76,7 +76,7 @@
         "description": ""
     },
     "auto_spacing_mode": {
-        "message": "網頁載入時自動召喚空格之神",
+        "message": "網頁載入後自動召喚空格之神",
         "description": ""
     },
     "auto_spacing_desc": {

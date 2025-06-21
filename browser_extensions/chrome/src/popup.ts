@@ -1,4 +1,3 @@
-import { ExtensionSettings } from './types';
 import { translatePage } from './i18n';
 import utils_chrome from './utils-chrome';
 
@@ -124,23 +123,11 @@ class PopupController {
     const toggle = document.getElementById('auto-spacing-toggle') as HTMLInputElement;
     this.isAutoSpacingEnabled = toggle.checked;
 
-    // Update spacing mode
-    const spacing_mode = this.isAutoSpacingEnabled ? 'spacing_when_load' : 'spacing_when_click';
-    await utils_chrome.SYNC_STORAGE.set({ spacing_mode });
+    // Use shared toggle function
+    await utils_chrome.toggleAutoSpacing(this.isAutoSpacingEnabled);
 
     // Update status
     this.updateStatus();
-
-    // Play sound effect
-    const settings = await utils_chrome.getCachedSettings();
-    if (!settings.is_mute_sound_effects) {
-      // Play Shouryuuken when toggling on, Hadouken when toggling off
-      const soundFile = this.isAutoSpacingEnabled
-        ? 'sounds/StreetFighter-Shouryuuken.mp3'
-        : 'sounds/StreetFighter-Hadouken.mp3';
-      const audio = new Audio(chrome.runtime.getURL(soundFile));
-      audio.play().catch(e => console.log('Sound play failed:', e));
-    }
   }
 
   private async handleManualSpacing(): Promise<void> {

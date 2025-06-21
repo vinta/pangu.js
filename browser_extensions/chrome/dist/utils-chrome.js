@@ -38,6 +38,17 @@ const utils_chrome = {
     chrome.storage.sync.get(null, function(items) {
       console.log("SYNC_STORAGE: %O", items);
     });
+  },
+  // Toggle auto spacing mode with consistent sound effects
+  toggleAutoSpacing: async function(isEnabled) {
+    const spacing_mode = isEnabled ? "spacing_when_load" : "spacing_when_click";
+    await this.SYNC_STORAGE.set({ spacing_mode });
+    const settings = await this.getCachedSettings();
+    if (!settings.is_mute_sound_effects) {
+      const soundFile = isEnabled ? "sounds/StreetFighter-Shouryuuken.mp3" : "sounds/StreetFighter-Hadouken.mp3";
+      const audio = new Audio(chrome.runtime.getURL(soundFile));
+      audio.play().catch((e) => console.log("Sound play failed:", e));
+    }
   }
 };
 window.utils_chrome = utils_chrome;
