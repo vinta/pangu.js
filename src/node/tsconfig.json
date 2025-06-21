@@ -8,7 +8,7 @@
     "rootDir": "../..",
     "noEmit": false,
     "declaration": true,
-    "declarationMap": true,
+    "declarationMap": false,
     "sourceMap": true,
     "types": ["node"]
   },

@@ -25,4 +25,3 @@ export declare class BrowserPangu extends Pangu {
 }
 export declare const pangu: BrowserPangu;
 export default pangu;
-//# sourceMappingURL=pangu.d.ts.map

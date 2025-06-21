@@ -8,6 +8,8 @@
 import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
+// Import the UMD types for window.pangu global
+import '../../dist/browser/pangu.umd';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -245,9 +247,4 @@ test.describe('BrowserPangu', () => {
   });
 });
 
-// Extend the window interface to include pangu
-declare global {
-  interface Window {
-    pangu: any;
-  }
-}
+// Type declaration is now in global.d.ts

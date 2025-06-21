@@ -18,7 +18,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
 
-    // Emit - turned off at base level
+    // This base tsconfig is only used for type checking, not compilation
     "noEmit": true,
     "declaration": false,
 
@@ -31,5 +31,6 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "exclude": ["dist", "node_modules", "**/*.test.ts", "**/*.spec.ts"]
+  // Exclude build output and test files from type checking
+  "exclude": ["dist", "node_modules", "tests/"]
 }

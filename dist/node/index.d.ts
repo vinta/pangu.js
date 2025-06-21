@@ -5,4 +5,3 @@ export declare class NodePangu extends Pangu {
 }
 export declare const pangu: NodePangu;
 export default pangu;
-//# sourceMappingURL=index.d.ts.map

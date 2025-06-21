@@ -114,7 +114,7 @@ export default defineConfig({
       insertTypesEntry: false,
       compilerOptions: {
         declaration: true,
-        declarationMap: true,
+        declarationMap: false,
       },
     }),
     multiBuildPlugin()

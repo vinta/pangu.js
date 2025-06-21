@@ -59,8 +59,7 @@
   ],
   "scripts": {
     "clean": "rm -rf dist/ playwright-report/ test-results/",
-    "build": "npm run clean && node scripts/build.js",
-    "build:vite": "vite build",
+    "build": "npm run clean && vite build",
     "test": "npm run build && vitest run && playwright test",
     "test:shared": "npm run build && vitest run tests/shared/",
     "test:node": "npm run build && vitest run tests/node/",
