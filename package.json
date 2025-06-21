@@ -58,8 +58,9 @@
     "HISTORY.md"
   ],
   "scripts": {
-    "clean": "rm -rf dist/ playwright-report/ test-results/",
-    "build": "npm run clean && vite build",
+    "clean": "rm -rf browser_extensions/chrome/dist/ dist/ playwright-report/ test-results/",
+    "build": "npm run clean && npm run build:lib && npm run build:extension",
+    "build:lib": "vite build",
     "build:extension": "vite build --config vite.config.extension.ts",
     "test": "npm run build && vitest run && playwright test",
     "test:shared": "npm run build && vitest run tests/shared/",
@@ -67,7 +68,7 @@
     "test:browser": "npm run build && playwright test",
     "lint": "eslint src/ scripts/",
     "lint:fix": "eslint src/ scripts/ --fix",
-    "publish-package": "node ./scripts/publish-package.js",
+    "publish-package": "npm run build && node ./scripts/publish-package.js",
     "pack-extension": "npm run pack:chrome && npm run pack:firefox",
     "pack-extension:chrome": "./scripts/pack-extension-chrome.sh",
     "pack-extension:firefox": "node ./browser_extensions/firefox/pack.js"
