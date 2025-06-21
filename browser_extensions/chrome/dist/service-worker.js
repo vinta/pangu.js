@@ -1,4 +1,4 @@
-import { D as DEFAULT_SETTINGS } from "./assets/types-CcJ344y1.js";
+import { D as DEFAULT_SETTINGS } from "./utils.js";
 chrome.runtime.onInstalled.addListener(async () => {
   await initializeSettings();
   await registerContentScripts();
@@ -19,19 +19,23 @@ async function initializeSettings() {
   }
 }
 async function registerContentScripts() {
+  const SCRIPT_ID = "pangu-auto-spacing";
   try {
-    const scripts = await chrome.scripting.getRegisteredContentScripts();
-    const scriptIds = scripts.map((script) => script.id);
-    if (scriptIds.length > 0) {
-      await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
+    const existingScripts = await chrome.scripting.getRegisteredContentScripts({ ids: [SCRIPT_ID] });
+    if (existingScripts.length > 0) {
+      try {
+        await chrome.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] });
+      } catch (unregisterError) {
+        console.error("Error unregistering content script:", unregisterError);
+      }
     }
   } catch (error) {
-    console.error("Error unregistering content scripts:", error);
+    console.error("Error checking existing scripts:", error);
   }
   const settings = await getSettings();
   if (settings.spacing_mode === "spacing_when_load") {
     const contentScript = {
-      id: "pangu-auto-spacing",
+      id: SCRIPT_ID,
       js: ["vendors/pangu/pangu.umd.js", "dist/content-script.js"],
       matches: ["<all_urls>"],
       runAt: "document_idle"
@@ -52,7 +56,19 @@ async function registerContentScripts() {
     try {
       await chrome.scripting.registerContentScripts([contentScript]);
     } catch (error) {
-      console.error("Error registering content scripts:", error);
+      if (error instanceof Error && error.message.includes("Duplicate script ID")) {
+        console.warn("Script already registered, skipping:", SCRIPT_ID);
+      } else {
+        console.error("Error registering content scripts:", error);
+      }
+    }
+  } else {
+    try {
+      await chrome.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] });
+    } catch (error) {
+      if (!(error instanceof Error && error.message.includes("does not exist"))) {
+        console.error("Error unregistering content script:", error);
+      }
     }
   }
 }

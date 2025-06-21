@@ -1,6 +1,5 @@
 import { t as translatePage } from "./i18n.js";
 import { u as utils } from "./utils.js";
-import "./assets/types-CcJ344y1.js";
 class PopupController {
   isAutoSpacingEnabled = true;
   currentTabId;

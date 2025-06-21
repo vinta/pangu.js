@@ -1,5 +1,5 @@
 import type { Settings } from './types';
-import { DEFAULT_SETTINGS } from './types';
+import { DEFAULT_SETTINGS } from './utils';
 
 // Initialize settings on installation
 chrome.runtime.onInstalled.addListener(async () => {
@@ -31,15 +31,23 @@ async function initializeSettings(): Promise<void> {
 
 // Register content scripts dynamically based on user settings
 async function registerContentScripts(): Promise<void> {
-  // First, unregister any existing scripts
+  const SCRIPT_ID = 'pangu-auto-spacing';
+  
+  // First, check if the script already exists
   try {
-    const scripts = await chrome.scripting.getRegisteredContentScripts();
-    const scriptIds = scripts.map((script) => script.id);
-    if (scriptIds.length > 0) {
-      await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
+    const existingScripts = await chrome.scripting.getRegisteredContentScripts({ ids: [SCRIPT_ID] });
+    
+    // If script exists, unregister it first
+    if (existingScripts.length > 0) {
+      try {
+        await chrome.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] });
+      } catch (unregisterError) {
+        console.error('Error unregistering content script:', unregisterError);
+        // Don't return here, continue to try registering
+      }
     }
   } catch (error) {
-    console.error('Error unregistering content scripts:', error);
+    console.error('Error checking existing scripts:', error);
   }
 
   const settings = await getSettings();
@@ -47,7 +55,7 @@ async function registerContentScripts(): Promise<void> {
   // Only register if auto-spacing is enabled
   if (settings.spacing_mode === 'spacing_when_load') {
     const contentScript: chrome.scripting.RegisteredContentScript = {
-      id: 'pangu-auto-spacing',
+      id: SCRIPT_ID,
       js: ['vendors/pangu/pangu.umd.js', 'dist/content-script.js'],
       matches: ['<all_urls>'],
       runAt: 'document_idle',
@@ -75,7 +83,22 @@ async function registerContentScripts(): Promise<void> {
     try {
       await chrome.scripting.registerContentScripts([contentScript]);
     } catch (error) {
-      console.error('Error registering content scripts:', error);
+      // Check if it's a duplicate ID error
+      if (error instanceof Error && error.message.includes('Duplicate script ID')) {
+        console.warn('Script already registered, skipping:', SCRIPT_ID);
+      } else {
+        console.error('Error registering content scripts:', error);
+      }
+    }
+  } else {
+    // If auto-spacing is disabled, ensure the script is unregistered
+    try {
+      await chrome.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] });
+    } catch (error) {
+      // Ignore error if script doesn't exist
+      if (!(error instanceof Error && error.message.includes('does not exist'))) {
+        console.error('Error unregistering content script:', error);
+      }
     }
   }
 }
