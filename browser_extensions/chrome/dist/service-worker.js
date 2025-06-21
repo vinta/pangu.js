@@ -9,11 +9,11 @@ chrome.runtime.onStartup.addListener(async () => {
 async function initializeSettings() {
   const items = await chrome.storage.sync.get(null);
   const newSettings = {};
-  Object.keys(DEFAULT_SETTINGS).forEach((key) => {
+  for (const key of Object.keys(DEFAULT_SETTINGS)) {
     if (items[key] === void 0) {
       newSettings[key] = DEFAULT_SETTINGS[key];
     }
-  });
+  }
   if (Object.keys(newSettings).length > 0) {
     await chrome.storage.sync.set(newSettings);
   }

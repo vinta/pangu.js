@@ -15,9 +15,6 @@ export class Utils {
     WahWahWaaah: 'sounds/ManciniPinkPanther-WahWahWaaah.mp3',
   };
 
-  // Direct access to chrome.storage.sync
-  public readonly SYNC_STORAGE = chrome.storage.sync;
-
   constructor() {
     // Listen for storage changes to update cache
     chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -71,7 +68,7 @@ export class Utils {
   async toggleAutoSpacing(isEnabled: boolean): Promise<void> {
     // Update spacing mode
     const spacing_mode = isEnabled ? 'spacing_when_load' : 'spacing_when_click';
-    await this.SYNC_STORAGE.set({ spacing_mode });
+    await chrome.storage.sync.set({ spacing_mode });
   }
 
   // Play sound effects

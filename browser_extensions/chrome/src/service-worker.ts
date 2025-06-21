@@ -15,13 +15,13 @@ chrome.runtime.onStartup.addListener(async () => {
 // Initialize or merge settings with defaults
 async function initializeSettings(): Promise<void> {
   const items = await chrome.storage.sync.get(null);
-  const newSettings: Partial<Settings> = {};
+  const newSettings: Record<string, unknown> = {};
 
-  (Object.keys(DEFAULT_SETTINGS) as Array<keyof Settings>).forEach((key) => {
+  for (const key of Object.keys(DEFAULT_SETTINGS) as Array<keyof Settings>) {
     if (items[key] === undefined) {
       newSettings[key] = DEFAULT_SETTINGS[key];
     }
-  });
+  }
 
   // Only set if there are new settings to add
   if (Object.keys(newSettings).length > 0) {

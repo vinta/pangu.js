@@ -317,7 +317,7 @@ class OptionsController {
   }
 
   private saveSettings(update: Partial<Settings>): void {
-    utils.SYNC_STORAGE.set(update);
+    chrome.storage.sync.set(update);
   }
 
 

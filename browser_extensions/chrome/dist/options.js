@@ -244,7 +244,7 @@ class OptionsController {
     return Boolean(url && url.length > 0);
   }
   saveSettings(update) {
-    utils.SYNC_STORAGE.set(update);
+    chrome.storage.sync.set(update);
   }
   escapeHtml(text) {
     const div = document.createElement("div");

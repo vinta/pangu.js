@@ -9,8 +9,6 @@ class Utils {
     YeahBaby: "sounds/AustinPowers-YeahBaby.mp3",
     WahWahWaaah: "sounds/ManciniPinkPanther-WahWahWaaah.mp3"
   };
-  // Direct access to chrome.storage.sync
-  SYNC_STORAGE = chrome.storage.sync;
   constructor() {
     chrome.storage.onChanged.addListener((changes, areaName) => {
       if (areaName === "sync") {
@@ -56,7 +54,7 @@ class Utils {
   // Toggle auto spacing mode
   async toggleAutoSpacing(isEnabled) {
     const spacing_mode = isEnabled ? "spacing_when_load" : "spacing_when_click";
-    await this.SYNC_STORAGE.set({ spacing_mode });
+    await chrome.storage.sync.set({ spacing_mode });
   }
   // Play sound effects
   async playSound(name) {
