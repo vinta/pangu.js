@@ -11,7 +11,7 @@ export default defineConfig({
         options: resolve(__dirname, 'browser_extensions/chrome/src/options.ts'),
         background: resolve(__dirname, 'browser_extensions/chrome/src/background.js'),
         content_script: resolve(__dirname, 'browser_extensions/chrome/src/content_script.js'),
-        utils_chrome: resolve(__dirname, 'browser_extensions/chrome/src/utils_chrome.js')
+        i18n: resolve(__dirname, 'browser_extensions/chrome/src/i18n.ts')
       },
       output: {
         entryFileNames: '[name].js',

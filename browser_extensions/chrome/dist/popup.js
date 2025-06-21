@@ -1,35 +1,52 @@
+import { t as translatePage } from "./i18n.js";
 class PopupController {
   spacing_mode = "spacing_when_load";
   constructor() {
     this.initialize();
   }
   async initialize() {
-    document.getElementById("god_of_spacing").textContent = window.utils_chrome.get_i18n("god_of_spacing");
-    const settings = await window.utils_chrome.getCachedSettings();
-    this.spacing_mode = settings.spacing_mode;
-    this.updateSpacingModeButton();
-    this.setupEventListeners();
-    const callButton = document.querySelector(".pure-button-purple");
-    callButton.value = window.utils_chrome.get_i18n("call_god_of_spacing");
-    const rateLink = document.querySelector('a[target="_blank"]');
-    rateLink.textContent = window.utils_chrome.get_i18n("extension_rate");
-    const optionsLink = document.querySelector('a[href="#"]');
-    optionsLink.textContent = window.utils_chrome.get_i18n("extension_options");
+    try {
+      translatePage();
+      if (!window.utils_chrome) {
+        console.error("utils_chrome not available");
+        return;
+      }
+      const settings = await window.utils_chrome.getCachedSettings();
+      this.spacing_mode = settings.spacing_mode;
+      this.updateSpacingModeButton();
+      this.setupEventListeners();
+    } catch (error) {
+      console.error("Error initializing popup:", error);
+    }
   }
   setupEventListeners() {
     const spacingModeButton = document.querySelector(".pure-button-primary");
-    spacingModeButton.addEventListener("click", () => this.changeSpacingMode());
+    if (spacingModeButton) {
+      spacingModeButton.addEventListener("click", () => this.changeSpacingMode());
+    }
     const callButton = document.querySelector(".pure-button-purple");
-    callButton.addEventListener("click", () => this.callGodOfSpacing());
+    if (callButton) {
+      callButton.addEventListener("click", () => this.callGodOfSpacing());
+    }
     const optionsLink = document.querySelector('a[href="#"]');
-    optionsLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      this.openOptionsPage();
-    });
+    if (optionsLink) {
+      optionsLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        this.openOptionsPage();
+      });
+    }
   }
   updateSpacingModeButton() {
     const button = document.querySelector(".pure-button-primary");
-    button.value = window.utils_chrome.get_i18n(this.spacing_mode);
+    if (button) {
+      button.setAttribute("data-i18n", this.spacing_mode);
+      const message = chrome.i18n.getMessage(this.spacing_mode);
+      if (message) {
+        button.value = message;
+      } else {
+        button.value = this.spacing_mode === "spacing_when_load" ? "網頁載入後自動幫我加上空格" : "我要自己決定什麼時候要加空格";
+      }
+    }
   }
   changeSpacingMode() {
     this.spacing_mode = this.spacing_mode === "spacing_when_load" ? "spacing_when_click" : "spacing_when_load";
@@ -53,12 +70,12 @@ class PopupController {
         } catch (error) {
           console.error("Failed to execute script:", error);
           if (i === 0) {
-            alert(window.utils_chrome.get_i18n("can_not_call_god_of_spacing"));
+            alert(chrome.i18n.getMessage("can_not_call_god_of_spacing"));
           }
         }
       } else {
         if (i === 0) {
-          alert(window.utils_chrome.get_i18n("can_not_call_god_of_spacing"));
+          alert(chrome.i18n.getMessage("can_not_call_god_of_spacing"));
         }
       }
     }

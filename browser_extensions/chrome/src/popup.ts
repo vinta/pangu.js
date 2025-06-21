@@ -1,11 +1,11 @@
 import { ExtensionSettings } from './types';
+import { translatePage } from './i18n';
 
 declare global {
   interface Window {
     utils_chrome: {
       getCachedSettings(): Promise<ExtensionSettings>;
       SYNC_STORAGE: chrome.storage.SyncStorageArea;
-      get_i18n(message_name: string): string;
     };
   }
 }
@@ -18,51 +18,70 @@ class PopupController {
   }
 
   private async initialize(): Promise<void> {
-    // Set initial text content
-    document.getElementById('god_of_spacing')!.textContent = window.utils_chrome.get_i18n('god_of_spacing');
-    
-    // Get cached settings
-    const settings = await window.utils_chrome.getCachedSettings();
-    this.spacing_mode = settings.spacing_mode;
-    
-    // Update UI
-    this.updateSpacingModeButton();
-    
-    // Set up event listeners
-    this.setupEventListeners();
-    
-    // Set other UI text
-    const callButton = document.querySelector('.pure-button-purple') as HTMLInputElement;
-    callButton.value = window.utils_chrome.get_i18n('call_god_of_spacing');
-    
-    // Set footer text
-    const rateLink = document.querySelector('a[target="_blank"]') as HTMLAnchorElement;
-    rateLink.textContent = window.utils_chrome.get_i18n('extension_rate');
-    
-    const optionsLink = document.querySelector('a[href="#"]') as HTMLAnchorElement;
-    optionsLink.textContent = window.utils_chrome.get_i18n('extension_options');
+    try {
+      // Translate the page
+      translatePage();
+      
+      // Wait for utils_chrome to be available
+      if (!window.utils_chrome) {
+        console.error('utils_chrome not available');
+        return;
+      }
+      
+      // Get cached settings
+      const settings = await window.utils_chrome.getCachedSettings();
+      this.spacing_mode = settings.spacing_mode;
+      
+      // Update UI
+      this.updateSpacingModeButton();
+      
+      // Set up event listeners
+      this.setupEventListeners();
+    } catch (error) {
+      console.error('Error initializing popup:', error);
+    }
   }
 
   private setupEventListeners(): void {
     // Spacing mode button
     const spacingModeButton = document.querySelector('.pure-button-primary') as HTMLInputElement;
-    spacingModeButton.addEventListener('click', () => this.changeSpacingMode());
+    if (spacingModeButton) {
+      spacingModeButton.addEventListener('click', () => this.changeSpacingMode());
+    }
     
     // Call god of spacing button
     const callButton = document.querySelector('.pure-button-purple') as HTMLInputElement;
-    callButton.addEventListener('click', () => this.callGodOfSpacing());
+    if (callButton) {
+      callButton.addEventListener('click', () => this.callGodOfSpacing());
+    }
     
     // Options link
     const optionsLink = document.querySelector('a[href="#"]') as HTMLAnchorElement;
-    optionsLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      this.openOptionsPage();
-    });
+    if (optionsLink) {
+      optionsLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.openOptionsPage();
+      });
+    }
   }
 
   private updateSpacingModeButton(): void {
     const button = document.querySelector('.pure-button-primary') as HTMLInputElement;
-    button.value = window.utils_chrome.get_i18n(this.spacing_mode);
+    if (button) {
+      // Update the data-i18n attribute to the new mode
+      button.setAttribute('data-i18n', this.spacing_mode);
+      
+      // Get the translation or use default Chinese text
+      const message = chrome.i18n.getMessage(this.spacing_mode);
+      if (message) {
+        button.value = message;
+      } else {
+        // Fallback to Chinese defaults
+        button.value = this.spacing_mode === 'spacing_when_load' 
+          ? '網頁載入後自動幫我加上空格' 
+          : '我要自己決定什麼時候要加空格';
+      }
+    }
   }
 
   private changeSpacingMode(): void {
@@ -102,12 +121,12 @@ class PopupController {
         } catch (error) {
           console.error('Failed to execute script:', error);
           if (i === 0) {
-            alert(window.utils_chrome.get_i18n('can_not_call_god_of_spacing'));
+            alert(chrome.i18n.getMessage('can_not_call_god_of_spacing'));
           }
         }
       } else {
         if (i === 0) {
-          alert(window.utils_chrome.get_i18n('can_not_call_god_of_spacing'));
+          alert(chrome.i18n.getMessage('can_not_call_god_of_spacing'));
         }
       }
     }
