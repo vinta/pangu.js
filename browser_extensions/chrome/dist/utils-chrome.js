@@ -1,66 +1,70 @@
-let settingsCache = {};
-let cacheInitialized = false;
-async function initializeCache() {
-  if (!cacheInitialized) {
-    const response = await chrome.runtime.sendMessage({ action: "get_settings" });
-    if (response && response.settings) {
-      settingsCache = response.settings;
-      cacheInitialized = true;
-    }
+class ExtensionManager {
+  settingsCache = {};
+  cacheInitialized = false;
+  // Sound file mappings
+  sounds = {
+    "Hadouken": "sounds/StreetFighter-Hadouken.mp3",
+    "Shouryuuken": "sounds/StreetFighter-Shouryuuken.mp3",
+    "YeahBaby": "sounds/AustinPowers-YeahBaby.mp3",
+    "WahWahWaaah": "sounds/ManciniPinkPanther-WahWahWaaah.mp3"
+  };
+  // Direct access to chrome.storage.sync
+  SYNC_STORAGE = chrome.storage.sync;
+  constructor() {
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName === "sync") {
+        for (const key in changes) {
+          this.settingsCache[key] = changes[key].newValue;
+        }
+      }
+    });
   }
-  return settingsCache;
-}
-chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName === "sync") {
-    for (const key in changes) {
-      settingsCache[key] = changes[key].newValue;
+  // Initialize settings cache
+  async initializeCache() {
+    if (!this.cacheInitialized) {
+      const response = await chrome.runtime.sendMessage({ action: "get_settings" });
+      if (response && response.settings) {
+        this.settingsCache = response.settings;
+        this.cacheInitialized = true;
+      }
     }
+    return this.settingsCache;
   }
-});
-const utils_chrome = {
-  // Get cached settings (async)
-  getCachedSettings: async function() {
-    return await initializeCache();
-  },
-  // Get a specific setting (async)
-  getSetting: async function(key) {
-    const settings = await initializeCache();
+  // Get cached settings
+  async getCachedSettings() {
+    return await this.initializeCache();
+  }
+  // Get a specific setting
+  async getSetting(key) {
+    const settings = await this.initializeCache();
     return settings[key];
-  },
-  // Direct access to chrome.storage.sync for setting values
-  SYNC_STORAGE: chrome.storage.sync,
+  }
   // Get i18n message
-  get_i18n: function(message_name) {
+  get_i18n(message_name) {
     return chrome.i18n.getMessage(message_name);
-  },
+  }
   // Debug helper to print sync storage
-  print_sync_storage: function() {
-    chrome.storage.sync.get(null, function(items) {
+  print_sync_storage() {
+    chrome.storage.sync.get(null, (items) => {
       console.log("SYNC_STORAGE: %O", items);
     });
-  },
+  }
   // Toggle auto spacing mode with consistent sound effects
-  toggleAutoSpacing: async function(isEnabled) {
+  async toggleAutoSpacing(isEnabled) {
     const spacing_mode = isEnabled ? "spacing_when_load" : "spacing_when_click";
     await this.SYNC_STORAGE.set({ spacing_mode });
     await this.playSound(isEnabled ? "Shouryuuken" : "Hadouken");
-  },
+  }
   // Play sound effects
-  playSound: async function(name) {
+  async playSound(name) {
     const settings = await this.getCachedSettings();
     if (!settings.is_mute_sound_effects) {
-      const sounds = {
-        "Hadouken": "sounds/StreetFighter-Hadouken.mp3",
-        "Shouryuuken": "sounds/StreetFighter-Shouryuuken.mp3",
-        "YeahBaby": "sounds/AustinPowers-YeahBaby.mp3",
-        "WahWahWaaah": "sounds/ManciniPinkPanther-WahWahWaaah.mp3"
-      };
-      const audio = new Audio(chrome.runtime.getURL(sounds[name]));
+      const audio = new Audio(chrome.runtime.getURL(this.sounds[name]));
       audio.play().catch((e) => console.log("Sound play failed:", e));
     }
   }
-};
-window.utils_chrome = utils_chrome;
+}
+const extensionManager = new ExtensionManager();
 export {
-  utils_chrome as u
+  extensionManager as e
 };

@@ -16,7 +16,7 @@
         "description": ""
     },
     "label_spacing_mode": {
-        "message": "什麼時候作用？",
+        "message": "設定",
         "description": ""
     },
     "spacing_when_load": {
@@ -32,7 +32,7 @@
         "description": ""
     },
     "label_spacing_rule": {
-        "message": "然後，你是否希望：",
+        "message": "你是否希望：",
         "description": ""
     },
     "whitelists": {

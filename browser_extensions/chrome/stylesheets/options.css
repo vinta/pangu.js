@@ -286,7 +286,7 @@
 .copyleft-symbol {
   display: inline-block;
   transform: rotate(180deg);
-  margin: 0 var(--spacing-1);
+  margin: 0;
 }
 
 /* Animation for list items */
@@ -315,13 +315,13 @@
   .options-main {
     padding: var(--spacing-4);
   }
-  
+
   .options-brand {
     flex-direction: column;
     text-align: center;
     align-items: center;
   }
-  
+
   .options-quote {
     margin-left: 0;
     padding-left: var(--spacing-3);

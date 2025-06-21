@@ -1,5 +1,5 @@
 import { t as translatePage } from "./i18n.js";
-import { u as utils_chrome } from "./utils-chrome.js";
+import { e as extensionManager } from "./utils-chrome.js";
 class PopupController {
   isAutoSpacingEnabled = true;
   currentTabId;
@@ -14,7 +14,7 @@ class PopupController {
       const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
       this.currentTabId = activeTab?.id;
       this.currentTabUrl = activeTab?.url;
-      const settings = await utils_chrome.getCachedSettings();
+      const settings = await extensionManager.getCachedSettings();
       this.isAutoSpacingEnabled = settings.spacing_mode === "spacing_when_load";
       this.updateUI();
       this.updateStatus();
@@ -61,7 +61,7 @@ class PopupController {
       return;
     }
     if (this.isAutoSpacingEnabled) {
-      const settings = await utils_chrome.getCachedSettings();
+      const settings = await extensionManager.getCachedSettings();
       let isActive = false;
       if (settings.spacing_rule === "blacklists") {
         isActive = !settings.blacklists.some((pattern) => this.currentTabUrl.includes(pattern));
@@ -90,7 +90,7 @@ class PopupController {
   async handleToggleChange() {
     const toggle = document.getElementById("auto-spacing-toggle");
     this.isAutoSpacingEnabled = toggle.checked;
-    await utils_chrome.toggleAutoSpacing(this.isAutoSpacingEnabled);
+    await extensionManager.toggleAutoSpacing(this.isAutoSpacingEnabled);
     this.updateStatus();
   }
   async handleManualSpacing() {
@@ -132,7 +132,7 @@ class PopupController {
       if (!response?.success) {
         throw new Error("Failed to apply spacing");
       }
-      await utils_chrome.playSound("YeahBaby");
+      await extensionManager.playSound("YeahBaby");
       if (btn) {
         btn.disabled = false;
         btn.textContent = chrome.i18n.getMessage("manual_spacing");
@@ -153,7 +153,7 @@ class PopupController {
   }
   async showError() {
     this.showMessage(chrome.i18n.getMessage("cannot_summon_here") || "沒辦法在這個頁面召喚空格之神", "error");
-    await utils_chrome.playSound("WahWahWaaah");
+    await extensionManager.playSound("WahWahWaaah");
   }
   showSuccess() {
     this.showMessage("空格之神降臨", "success");
