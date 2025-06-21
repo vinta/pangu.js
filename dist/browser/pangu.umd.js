@@ -5,14 +5,14 @@
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 
-  const CJK = "⺀-⻿⼀-⿟぀-ゟ゠-ヺー-ヿ㄀-ㄯ㈀-㋿㐀-䶿一-鿿豈-﫿";
+  const CJK = "\u2E80-\u2EFF\u2F00-\u2FDF\u3040-\u309F\u30A0-\u30FA\u30FC-\u30FF\u3100-\u312F\u3200-\u32FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF";
   const ANY_CJK = new RegExp(`[${CJK}]`);
   const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK = new RegExp(`([${CJK}])[ ]*([\\:]+|\\.)[ ]*([${CJK}])`, "g");
   const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS = new RegExp(`([${CJK}])[ ]*([~\\!;,\\?]+)[ ]*`, "g");
-  const DOTS_CJK = new RegExp(`([\\.]{2,}|…)([${CJK}])`, "g");
+  const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, "g");
   const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([A-Z0-9\\(\\)])`, "g");
-  const CJK_QUOTE = new RegExp(`([${CJK}])([\`"״])`, "g");
-  const QUOTE_CJK = new RegExp(`([\`"״])([${CJK}])`, "g");
+  const CJK_QUOTE = new RegExp(`([${CJK}])([\`"\u05F4])`, "g");
+  const QUOTE_CJK = new RegExp(`([\`"\u05F4])([${CJK}])`, "g");
   const FIX_QUOTE_ANY_QUOTE = /([`"\u05f4]+)[ ]*(.+?)[ ]*([`"\u05f4]+)/g;
   const QUOTE_AN = /([\u201d])([A-Za-z0-9])/g;
   const CJK_QUOTE_AN = new RegExp(`([${CJK}])(")([A-Za-z0-9])`, "g");
@@ -26,15 +26,15 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*\\/=&\\|<>])([${CJK}])`, "g");
   const FIX_SLASH_AS = /([/]) ([a-z\-_\./]+)/g;
   const FIX_SLASH_AS_SLASH = /([/\.])([A-Za-z\-_\./]+) ([/])/g;
-  const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>“])`, "g");
-  const RIGHT_BRACKET_CJK = new RegExp(`([\\)\\]\\}<>”])([${CJK}])`, "g");
+  const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>\u201C])`, "g");
+  const RIGHT_BRACKET_CJK = new RegExp(`([\\)\\]\\}<>\u201D])([${CJK}])`, "g");
   const FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET = /([\(\[\{<\u201c]+)[ ]*(.+?)[ ]*([\)\]\}>\u201d]+)/;
-  const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([A-Za-z0-9${CJK}])[ ]*([“])([A-Za-z0-9${CJK}\\-_ ]+)([”])`, "g");
-  const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([“])([A-Za-z0-9${CJK}\\-_ ]+)([”])[ ]*([A-Za-z0-9${CJK}])`, "g");
+  const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([A-Za-z0-9${CJK}])[ ]*([\u201C])([A-Za-z0-9${CJK}\\-_ ]+)([\u201D])`, "g");
+  const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([\u201C])([A-Za-z0-9${CJK}\\-_ ]+)([\u201D])[ ]*([A-Za-z0-9${CJK}])`, "g");
   const AN_LEFT_BRACKET = /([A-Za-z0-9])([\(\[\{])/g;
   const RIGHT_BRACKET_AN = /([\)\]\}])([A-Za-z0-9])/g;
-  const CJK_ANS = new RegExp(`([${CJK}])([A-Za-zͰ-Ͽ0-9@\\$%\\^&\\*\\-\\+\\\\=\\|/¡-ÿ⅐-↏✀—➿])`, "g");
-  const ANS_CJK = new RegExp(`([A-Za-zͰ-Ͽ0-9~\\$%\\^&\\*\\-\\+\\\\=\\|/!;:,\\.\\?¡-ÿ⅐-↏✀—➿])([${CJK}])`, "g");
+  const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z\u0370-\u03FF0-9@\\$%\\^&\\*\\-\\+\\\\=\\|/\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])`, "g");
+  const ANS_CJK = new RegExp(`([A-Za-z\u0370-\u03FF0-9~\\$%\\^&\\*\\-\\+\\\\=\\|/!;:,\\.\\?\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])([${CJK}])`, "g");
   const S_A = /(%)([A-Za-z])/g;
   const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
   class Pangu {
@@ -61,7 +61,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         return `${cjk}${fullwidthSymbols}`;
       });
       newText = newText.replace(DOTS_CJK, "$1 $2");
-      newText = newText.replace(FIX_CJK_COLON_ANS, "$1：$2");
+      newText = newText.replace(FIX_CJK_COLON_ANS, "$1\uFF1A$2");
       newText = newText.replace(CJK_QUOTE, "$1 $2");
       newText = newText.replace(QUOTE_CJK, "$1 $2");
       newText = newText.replace(FIX_QUOTE_ANY_QUOTE, "$1$2$3");
@@ -87,7 +87,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       newText = newText.replace(CJK_ANS, "$1 $2");
       newText = newText.replace(ANS_CJK, "$1 $2");
       newText = newText.replace(S_A, "$1 $2");
-      newText = newText.replace(MIDDLE_DOT, "・");
+      newText = newText.replace(MIDDLE_DOT, "\u30FB");
       return newText;
     }
     // alias for spacingText()
@@ -95,7 +95,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       return this.spacingText(text);
     }
     convertToFullwidth(symbols) {
-      return symbols.replace(/~/g, "～").replace(/!/g, "！").replace(/;/g, "；").replace(/:/g, "：").replace(/,/g, "，").replace(/\./g, "。").replace(/\?/g, "？");
+      return symbols.replace(/~/g, "\uFF5E").replace(/!/g, "\uFF01").replace(/;/g, "\uFF1B").replace(/:/g, "\uFF1A").replace(/,/g, "\uFF0C").replace(/\./g, "\u3002").replace(/\?/g, "\uFF1F");
     }
   }
   function once(func) {
