@@ -43,10 +43,19 @@ const utils_chrome = {
   toggleAutoSpacing: async function(isEnabled) {
     const spacing_mode = isEnabled ? "spacing_when_load" : "spacing_when_click";
     await this.SYNC_STORAGE.set({ spacing_mode });
+    await this.playSound(isEnabled ? "Shouryuuken" : "Hadouken");
+  },
+  // Play sound effects
+  playSound: async function(name) {
     const settings = await this.getCachedSettings();
     if (!settings.is_mute_sound_effects) {
-      const soundFile = isEnabled ? "sounds/StreetFighter-Shouryuuken.mp3" : "sounds/StreetFighter-Hadouken.mp3";
-      const audio = new Audio(chrome.runtime.getURL(soundFile));
+      const sounds = {
+        "Hadouken": "sounds/StreetFighter-Hadouken.mp3",
+        "Shouryuuken": "sounds/StreetFighter-Shouryuuken.mp3",
+        "YeahBaby": "sounds/AustinPowers-YeahBaby.mp3",
+        "WahWahWaaah": "sounds/ManciniPinkPanther-WahWahWaaah.mp3"
+      };
+      const audio = new Audio(chrome.runtime.getURL(sounds[name]));
       audio.play().catch((e) => console.log("Sound play failed:", e));
     }
   }

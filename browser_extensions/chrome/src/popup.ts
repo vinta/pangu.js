@@ -183,12 +183,7 @@ class PopupController {
       }
 
       // Play sound effect
-      const settings = await utils_chrome.getCachedSettings();
-      if (!settings.is_mute_sound_effects) {
-        // Play Austin Powers "Yeah Baby!" sound
-        const audio = new Audio(chrome.runtime.getURL('sounds/AustinPowers-YeahBaby.mp3'));
-        audio.play().catch(e => console.log('Sound play failed:', e));
-      }
+      await utils_chrome.playSound('YeahBaby');
 
       // Show success feedback
       if (btn) {
@@ -215,8 +210,11 @@ class PopupController {
     return /^(http(s?)|file)/i.test(url);
   }
 
-  private showError(): void {
+  private async showError(): Promise<void> {
     this.showMessage(chrome.i18n.getMessage('cannot_summon_here') || '沒辦法在這個頁面召喚空格之神', 'error');
+
+    // Play error sound effect
+    await utils_chrome.playSound('WahWahWaaah');
   }
 
   private showSuccess(): void {

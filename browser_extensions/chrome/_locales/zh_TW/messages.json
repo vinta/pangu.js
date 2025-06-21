@@ -56,7 +56,7 @@
         "description": ""
     },
     "label_is_mute": {
-        "message": "在這個頁面靜音",
+        "message": "太吵了，靜音",
         "description": ""
     },
     "label_shut_the_fuck_up": {
@@ -64,7 +64,7 @@
         "description": ""
     },
     "extension_rate": {
-        "message": "評分",
+        "message": "評價",
         "description": ""
     },
     "extension_options": {
@@ -79,8 +79,8 @@
         "message": "網頁載入後自動召喚空格之神",
         "description": ""
     },
-    "auto_spacing_desc": {
-        "message": "網頁載入時自動加入空格",
+    "manual_spacing_mode": {
+        "message": "我要自己召喚空格之神",
         "description": ""
     },
     "status_inactive": {

@@ -53,7 +53,7 @@ class OptionsController {
       if (target.id === "spacing_mode_btn") {
         this.changeSpacingMode().catch(console.error);
       } else if (target.id === "spacing_rule_btn") {
-        this.changeSpacingRule();
+        this.changeSpacingRule().catch(console.error);
       } else if (target.classList.contains("remove-url-btn")) {
         const index = parseInt(target.dataset.index || "0");
         this.removeUrl(index);
@@ -62,14 +62,14 @@ class OptionsController {
         this.startEditingUrl(index);
       } else if (target.classList.contains("save-url-btn")) {
         const index = parseInt(target.dataset.index || "0");
-        this.saveEditingUrl(index);
+        this.saveEditingUrl(index).catch(console.error);
       } else if (target.classList.contains("cancel-edit-btn")) {
         const index = parseInt(target.dataset.index || "0");
         this.cancelEditingUrl(index);
       } else if (target.id === "add-url-btn") {
         this.showAddUrlInput();
       } else if (target.id === "save-new-url-btn") {
-        this.addNewUrl();
+        this.addNewUrl().catch(console.error);
       } else if (target.id === "cancel-new-url-btn") {
         this.hideAddUrlInput();
       }
@@ -91,14 +91,8 @@ class OptionsController {
   renderSpacingMode() {
     const button = document.getElementById("spacing_mode_btn");
     if (button) {
-      button.textContent = utils_chrome.get_i18n(this.settings.spacing_mode);
-      if (this.settings.spacing_mode === "spacing_when_click") {
-        button.classList.remove("btn-primary");
-        button.classList.add("btn-secondary");
-      } else {
-        button.classList.remove("btn-secondary");
-        button.classList.add("btn-primary");
-      }
+      const i18nKey = this.settings.spacing_mode === "spacing_when_load" ? "auto_spacing_mode" : "manual_spacing_mode";
+      button.textContent = utils_chrome.get_i18n(i18nKey);
     }
     const ruleSection = document.querySelector(".spacing_rule_group");
     const clickMessage = document.getElementById("spacing_when_click_msg");
@@ -181,8 +175,8 @@ class OptionsController {
     this.settings.spacing_mode = newIsAutoMode ? "spacing_when_load" : "spacing_when_click";
     this.render();
   }
-  changeSpacingRule() {
-    this.playSound("Shouryuuken");
+  async changeSpacingRule() {
+    await utils_chrome.playSound("Shouryuuken");
     this.settings.spacing_rule = this.settings.spacing_rule === "blacklists" ? "whitelists" : "blacklists";
     this.saveSettings({ spacing_rule: this.settings.spacing_rule });
     this.render();
@@ -197,11 +191,11 @@ class OptionsController {
       input?.select();
     }, 0);
   }
-  saveEditingUrl(index) {
+  async saveEditingUrl(index) {
     const input = document.querySelector(`input[data-index="${index}"]`);
     const newUrl = input?.value.trim();
     if (this.isValidUrl(newUrl)) {
-      this.playSound("YeahBaby");
+      await utils_chrome.playSound("YeahBaby");
       const urls = this.settings[this.settings.spacing_rule];
       urls[index] = newUrl;
       this.editingUrls.delete(index);
@@ -210,7 +204,7 @@ class OptionsController {
       this.saveSettings(update);
       this.renderUrlList();
     } else {
-      this.playSound("WahWahWaaah");
+      await utils_chrome.playSound("WahWahWaaah");
       alert("Invalid URL");
     }
   }
@@ -234,11 +228,11 @@ class OptionsController {
     this.addUrlInput = null;
     this.renderUrlList();
   }
-  addNewUrl() {
+  async addNewUrl() {
     const input = document.getElementById("new-url-input");
     const newUrl = input?.value.trim();
     if (this.isValidUrl(newUrl)) {
-      this.playSound("YeahBaby");
+      await utils_chrome.playSound("YeahBaby");
       const urls = this.settings[this.settings.spacing_rule];
       urls.push(newUrl);
       const update = {};
@@ -247,7 +241,7 @@ class OptionsController {
       this.addUrlInput = null;
       this.renderUrlList();
     } else {
-      this.playSound("WahWahWaaah");
+      await utils_chrome.playSound("WahWahWaaah");
       alert("Invalid URL");
     }
   }
@@ -256,19 +250,6 @@ class OptionsController {
   }
   saveSettings(update) {
     utils_chrome.SYNC_STORAGE.set(update);
-  }
-  playSound(name) {
-    if (!this.settings.is_mute_sound_effects) {
-      const sounds = {
-        "Hadouken": "../sounds/StreetFighter-Hadouken.mp3",
-        "Shouryuuken": "../sounds/StreetFighter-Shouryuuken.mp3",
-        "YeahBaby": "../sounds/AustinPowers-YeahBaby.mp3",
-        "WahWahWaaah": "../sounds/WahWahWaaah.mp3"
-      };
-      const audio = new Audio(sounds[name]);
-      audio.play().catch(() => {
-      });
-    }
   }
   escapeHtml(text) {
     const div = document.createElement("div");

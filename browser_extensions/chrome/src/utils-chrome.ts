@@ -12,6 +12,7 @@ interface UtilsChrome {
   get_i18n(message_name: string): string;
   print_sync_storage(): void;
   toggleAutoSpacing(isEnabled: boolean): Promise<void>;
+  playSound(name: 'Hadouken' | 'Shouryuuken' | 'YeahBaby' | 'WahWahWaaah'): Promise<void>;
 }
 
 // Cache for settings to reduce message passing
@@ -72,14 +73,22 @@ const utils_chrome: UtilsChrome = {
     const spacing_mode = isEnabled ? 'spacing_when_load' : 'spacing_when_click';
     await this.SYNC_STORAGE.set({ spacing_mode });
     
-    // Play sound effect if not muted
+    // Play sound effect
+    await this.playSound(isEnabled ? 'Shouryuuken' : 'Hadouken');
+  },
+  
+  // Play sound effects
+  playSound: async function(name: 'Hadouken' | 'Shouryuuken' | 'YeahBaby' | 'WahWahWaaah'): Promise<void> {
     const settings = await this.getCachedSettings();
     if (!settings.is_mute_sound_effects) {
-      // Play Shouryuuken when enabling auto mode, Hadouken when disabling
-      const soundFile = isEnabled
-        ? 'sounds/StreetFighter-Shouryuuken.mp3'
-        : 'sounds/StreetFighter-Hadouken.mp3';
-      const audio = new Audio(chrome.runtime.getURL(soundFile));
+      const sounds: Record<string, string> = {
+        'Hadouken': 'sounds/StreetFighter-Hadouken.mp3',
+        'Shouryuuken': 'sounds/StreetFighter-Shouryuuken.mp3',
+        'YeahBaby': 'sounds/AustinPowers-YeahBaby.mp3',
+        'WahWahWaaah': 'sounds/ManciniPinkPanther-WahWahWaaah.mp3'
+      };
+      
+      const audio = new Audio(chrome.runtime.getURL(sounds[name]));
       audio.play().catch(e => console.log('Sound play failed:', e));
     }
   }

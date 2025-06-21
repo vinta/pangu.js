@@ -132,11 +132,7 @@ class PopupController {
       if (!response?.success) {
         throw new Error("Failed to apply spacing");
       }
-      const settings = await utils_chrome.getCachedSettings();
-      if (!settings.is_mute_sound_effects) {
-        const audio = new Audio(chrome.runtime.getURL("sounds/AustinPowers-YeahBaby.mp3"));
-        audio.play().catch((e) => console.log("Sound play failed:", e));
-      }
+      await utils_chrome.playSound("YeahBaby");
       if (btn) {
         btn.disabled = false;
         btn.textContent = chrome.i18n.getMessage("manual_spacing");
@@ -155,8 +151,9 @@ class PopupController {
   isValidUrlForSpacing(url) {
     return /^(http(s?)|file)/i.test(url);
   }
-  showError() {
+  async showError() {
     this.showMessage(chrome.i18n.getMessage("cannot_summon_here") || "沒辦法在這個頁面召喚空格之神", "error");
+    await utils_chrome.playSound("WahWahWaaah");
   }
   showSuccess() {
     this.showMessage("空格之神降臨", "success");

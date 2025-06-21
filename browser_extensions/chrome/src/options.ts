@@ -10,7 +10,7 @@ class OptionsController {
     whitelists: [],
     is_mute_sound_effects: false
   };
-  
+
   private editingUrls: Map<number, string> = new Map();
   private addUrlInput: HTMLInputElement | null = null;
 
@@ -21,16 +21,16 @@ class OptionsController {
   private async initialize(): Promise<void> {
     // Translate page
     translatePage();
-    
+
     // Set i18n text for dynamic elements
     this.setI18nText();
-    
+
     // Load settings
     await this.loadSettings();
-    
+
     // Set up event listeners
     this.setupEventListeners();
-    
+
     // Initial render
     this.render();
   }
@@ -56,7 +56,7 @@ class OptionsController {
 
     // Set page title
     document.title = utils_chrome.get_i18n('extension_name');
-    
+
     // Set mute label
     const muteLabel = document.getElementById('label_is_mute');
     if (muteLabel) {
@@ -73,11 +73,11 @@ class OptionsController {
     // Spacing mode button
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      
+
       if (target.id === 'spacing_mode_btn') {
         this.changeSpacingMode().catch(console.error);
       } else if (target.id === 'spacing_rule_btn') {
-        this.changeSpacingRule();
+        this.changeSpacingRule().catch(console.error);
       } else if (target.classList.contains('remove-url-btn')) {
         const index = parseInt(target.dataset.index || '0');
         this.removeUrl(index);
@@ -86,14 +86,14 @@ class OptionsController {
         this.startEditingUrl(index);
       } else if (target.classList.contains('save-url-btn')) {
         const index = parseInt(target.dataset.index || '0');
-        this.saveEditingUrl(index);
+        this.saveEditingUrl(index).catch(console.error);
       } else if (target.classList.contains('cancel-edit-btn')) {
         const index = parseInt(target.dataset.index || '0');
         this.cancelEditingUrl(index);
       } else if (target.id === 'add-url-btn') {
         this.showAddUrlInput();
       } else if (target.id === 'save-new-url-btn') {
-        this.addNewUrl();
+        this.addNewUrl().catch(console.error);
       } else if (target.id === 'cancel-new-url-btn') {
         this.hideAddUrlInput();
       }
@@ -119,21 +119,17 @@ class OptionsController {
   private renderSpacingMode(): void {
     const button = document.getElementById('spacing_mode_btn') as HTMLButtonElement;
     if (button) {
-      button.textContent = utils_chrome.get_i18n(this.settings.spacing_mode);
-      // Update button style based on mode
-      if (this.settings.spacing_mode === 'spacing_when_click') {
-        button.classList.remove('btn-primary');
-        button.classList.add('btn-secondary');
-      } else {
-        button.classList.remove('btn-secondary');
-        button.classList.add('btn-primary');
-      }
+      // Show "auto_spacing_mode" text when in auto mode, otherwise show manual mode text
+      const i18nKey = this.settings.spacing_mode === 'spacing_when_load' 
+        ? 'auto_spacing_mode' 
+        : 'manual_spacing_mode';
+      button.textContent = utils_chrome.get_i18n(i18nKey);
     }
 
     // Show/hide spacing rule section
     const ruleSection = document.querySelector('.spacing_rule_group') as HTMLElement;
     const clickMessage = document.getElementById('spacing_when_click_msg') as HTMLElement;
-    
+
     if (this.settings.spacing_mode === 'spacing_when_load') {
       ruleSection?.style.setProperty('display', 'block');
       clickMessage?.style.setProperty('display', 'none');
@@ -163,9 +159,9 @@ class OptionsController {
     if (!container) return;
 
     const urls = this.settings[this.settings.spacing_rule];
-    
+
     let html = '<ul class="spacing_rule_list">';
-    
+
     urls.forEach((url, index) => {
       if (this.editingUrls.has(index)) {
         html += `
@@ -184,7 +180,7 @@ class OptionsController {
         `;
       }
     });
-    
+
     // Add new URL input
     if (this.addUrlInput) {
       html += `
@@ -201,7 +197,7 @@ class OptionsController {
         </li>
       `;
     }
-    
+
     html += '</ul>';
     container.innerHTML = html;
 
@@ -223,24 +219,24 @@ class OptionsController {
     // Toggle between auto and manual mode
     const isCurrentlyAutoMode = this.settings.spacing_mode === 'spacing_when_load';
     const newIsAutoMode = !isCurrentlyAutoMode;
-    
+
     // Use shared toggle function
     await utils_chrome.toggleAutoSpacing(newIsAutoMode);
-    
+
     // Update local settings
     this.settings.spacing_mode = newIsAutoMode ? 'spacing_when_load' : 'spacing_when_click';
-    
+
     // Re-render UI
     this.render();
   }
 
-  private changeSpacingRule(): void {
-    this.playSound('Shouryuuken');
-    
-    this.settings.spacing_rule = this.settings.spacing_rule === 'blacklists' 
-      ? 'whitelists' 
+  private async changeSpacingRule(): Promise<void> {
+    await utils_chrome.playSound('Shouryuuken');
+
+    this.settings.spacing_rule = this.settings.spacing_rule === 'blacklists'
+      ? 'whitelists'
       : 'blacklists';
-    
+
     this.saveSettings({ spacing_rule: this.settings.spacing_rule });
     this.render();
   }
@@ -249,7 +245,7 @@ class OptionsController {
     const urls = this.settings[this.settings.spacing_rule];
     this.editingUrls.set(index, urls[index]);
     this.renderUrlList();
-    
+
     // Focus on the input
     setTimeout(() => {
       const input = document.querySelector(`input[data-index="${index}"]`) as HTMLInputElement;
@@ -258,22 +254,22 @@ class OptionsController {
     }, 0);
   }
 
-  private saveEditingUrl(index: number): void {
+  private async saveEditingUrl(index: number): Promise<void> {
     const input = document.querySelector(`input[data-index="${index}"]`) as HTMLInputElement;
     const newUrl = input?.value.trim();
-    
+
     if (this.isValidUrl(newUrl)) {
-      this.playSound('YeahBaby');
+      await utils_chrome.playSound('YeahBaby');
       const urls = this.settings[this.settings.spacing_rule];
       urls[index] = newUrl;
       this.editingUrls.delete(index);
-      
+
       const update: Partial<ExtensionSettings> = {};
       update[this.settings.spacing_rule] = urls;
       this.saveSettings(update);
       this.renderUrlList();
     } else {
-      this.playSound('WahWahWaaah');
+      await utils_chrome.playSound('WahWahWaaah');
       alert('Invalid URL');
     }
   }
@@ -286,7 +282,7 @@ class OptionsController {
   private removeUrl(index: number): void {
     const urls = this.settings[this.settings.spacing_rule];
     urls.splice(index, 1);
-    
+
     const update: Partial<ExtensionSettings> = {};
     update[this.settings.spacing_rule] = urls;
     this.saveSettings(update);
@@ -303,23 +299,23 @@ class OptionsController {
     this.renderUrlList();
   }
 
-  private addNewUrl(): void {
+  private async addNewUrl(): Promise<void> {
     const input = document.getElementById('new-url-input') as HTMLInputElement;
     const newUrl = input?.value.trim();
-    
+
     if (this.isValidUrl(newUrl)) {
-      this.playSound('YeahBaby');
+      await utils_chrome.playSound('YeahBaby');
       const urls = this.settings[this.settings.spacing_rule];
       urls.push(newUrl);
-      
+
       const update: Partial<ExtensionSettings> = {};
       update[this.settings.spacing_rule] = urls;
       this.saveSettings(update);
-      
+
       this.addUrlInput = null;
       this.renderUrlList();
     } else {
-      this.playSound('WahWahWaaah');
+      await utils_chrome.playSound('WahWahWaaah');
       alert('Invalid URL');
     }
   }
@@ -332,21 +328,6 @@ class OptionsController {
     utils_chrome.SYNC_STORAGE.set(update);
   }
 
-  private playSound(name: string): void {
-    if (!this.settings.is_mute_sound_effects) {
-      const sounds: Record<string, string> = {
-        'Hadouken': '../sounds/StreetFighter-Hadouken.mp3',
-        'Shouryuuken': '../sounds/StreetFighter-Shouryuuken.mp3',
-        'YeahBaby': '../sounds/AustinPowers-YeahBaby.mp3',
-        'WahWahWaaah': '../sounds/WahWahWaaah.mp3'
-      };
-
-      const audio = new Audio(sounds[name]);
-      audio.play().catch(() => {
-        // Ignore audio play errors
-      });
-    }
-  }
 
   private escapeHtml(text: string): string {
     const div = document.createElement('div');
