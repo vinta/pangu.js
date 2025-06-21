@@ -11,30 +11,30 @@
   --color-success: #10b981;
   --color-danger: #ef4444;
   --color-warning: #f59e0b;
-  
+
   /* Surfaces */
   --color-surface: #ffffff;
   --color-surface-secondary: #f9fafb;
   --color-surface-tertiary: #f3f4f6;
   --color-border: #e5e7eb;
   --color-border-light: #f3f4f6;
-  
+
   /* Text */
   --color-text-primary: #111827;
   --color-text-secondary: #6b7280;
   --color-text-tertiary: #9ca3af;
   --color-text-on-primary: #ffffff;
-  
+
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  
+
   /* Typography */
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
-  
+
   /* Font sizes */
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
@@ -42,7 +42,7 @@
   --text-lg: 1.125rem;
   --text-xl: 1.25rem;
   --text-2xl: 1.5rem;
-  
+
   /* Spacing */
   --spacing-1: 0.25rem;
   --spacing-2: 0.5rem;
@@ -51,13 +51,13 @@
   --spacing-5: 1.25rem;
   --spacing-6: 1.5rem;
   --spacing-8: 2rem;
-  
+
   /* Border radius */
   --radius-sm: 0.375rem;
   --radius: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-full: 9999px;
-  
+
   /* Transitions */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -357,7 +357,7 @@ a:hover {
 }
 
 .popup-footer-link {
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
 }
 
@@ -532,8 +532,10 @@ a:hover {
 .text-sm { font-size: var(--text-sm); }
 .mt-2 { margin-top: var(--spacing-2); }
 .mt-4 { margin-top: var(--spacing-4); }
+.mt-6 { margin-top: var(--spacing-6); }
 .mb-2 { margin-bottom: var(--spacing-2); }
 .mb-4 { margin-bottom: var(--spacing-4); }
+.mb-6 { margin-bottom: var(--spacing-6); }
 
 /* Legacy Pure CSS compatibility (will be removed later) */
 .pure-button {

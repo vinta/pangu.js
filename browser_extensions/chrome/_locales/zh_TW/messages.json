@@ -106,5 +106,13 @@
     "rate": {
         "message": "評分",
         "description": ""
+    },
+    "cannot_summon_here": {
+        "message": "沒辦法在這個頁面召喚空格之神",
+        "description": ""
+    },
+    "spacing_complete": {
+        "message": "空格之神降落",
+        "description": ""
     }
 }

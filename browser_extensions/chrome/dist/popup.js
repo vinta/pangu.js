@@ -144,20 +144,10 @@ class PopupController {
         audio.play().catch((e) => console.log("Sound play failed:", e));
       }
       if (btn) {
-        btn.innerHTML = `
-          <svg class="icon-sm" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill="currentColor"/>
-          </svg>
-          <span>完成！</span>
-        `;
+        btn.textContent = chrome.i18n.getMessage("spacing_complete") || "空格之神降落！";
         setTimeout(() => {
           btn.disabled = false;
-          btn.innerHTML = `
-            <svg class="icon-sm" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"/>
-            </svg>
-            <span data-i18n="manual_spacing">${chrome.i18n.getMessage("manual_spacing")}</span>
-          `;
+          btn.textContent = chrome.i18n.getMessage("manual_spacing");
         }, 1500);
       }
     } catch (error) {
@@ -166,26 +156,9 @@ class PopupController {
       const btn = document.getElementById("manual-spacing-btn");
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = `
-          <svg class="icon-sm" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M5 7C5 5.89543 5.89543 5 7 5H13C14.1046 5 15 5.89543 15 7V13C15 14.1046 14.1046 15 13 15H7C5.89543 15 5 14.1046 5 13V7Z" stroke="currentColor" stroke-width="2"/>
-            <path d="M2 10H5M15 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <span data-i18n="manual_spacing">${chrome.i18n.getMessage("manual_spacing")}</span>
-        `;
+        btn.textContent = chrome.i18n.getMessage("manual_spacing");
       }
     }
-  }
-  playRandomSound() {
-    const sounds = [
-      "sounds/AustinPowers-YeahBaby.mp3",
-      "sounds/StreetFighter-Hadouken.mp3",
-      "sounds/StreetFighter-Shouryuuken.mp3",
-      "sounds/WahWahWaaah.mp3"
-    ];
-    const randomSound = sounds[Math.floor(Math.random() * sounds.length)];
-    const audio = new Audio(chrome.runtime.getURL(randomSound));
-    audio.play().catch((e) => console.log("Sound play failed:", e));
   }
   isValidUrlForSpacing(url) {
     return /^(http(s?)|file)/i.test(url);
@@ -209,7 +182,7 @@ class PopupController {
           max-width: 280px;
           text-align: center;
         `;
-        notif.textContent = "此頁面無法使用空格功能";
+        notif.textContent = chrome.i18n.getMessage("cannot_summon_here") || "沒辦法在這個頁面召喚空格之神";
         document.body.appendChild(notif);
         setTimeout(() => {
           notif.remove();

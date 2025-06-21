@@ -6,7 +6,7 @@ class PopupController {
   private isAutoSpacingEnabled: boolean = true;
   private currentTabId: number | undefined;
   private currentTabUrl: string | undefined;
-  
+
   constructor() {
     this.initialize();
   }
@@ -15,21 +15,21 @@ class PopupController {
     try {
       // Translate the page
       translatePage();
-      
+
       // Get current tab info
       const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
       this.currentTabId = activeTab?.id;
       this.currentTabUrl = activeTab?.url;
-      
+
       // Get cached settings
       const settings = await utils_chrome.getCachedSettings();
       this.isAutoSpacingEnabled = settings.spacing_mode === 'spacing_when_load';
-      
+
       // Update UI
       this.updateUI();
       this.updateStatus();
       this.updateVersion();
-      
+
       // Set up event listeners
       this.setupEventListeners();
     } catch (error) {
@@ -43,13 +43,13 @@ class PopupController {
     if (toggle) {
       toggle.addEventListener('change', () => this.handleToggleChange());
     }
-    
+
     // Manual spacing button
     const manualBtn = document.getElementById('manual-spacing-btn');
     if (manualBtn) {
       manualBtn.addEventListener('click', () => this.handleManualSpacing());
     }
-    
+
     // Options link
     const optionsLink = document.getElementById('options-link');
     if (optionsLink) {
@@ -70,10 +70,10 @@ class PopupController {
   private async updateStatus(): Promise<void> {
     const statusEl = document.getElementById('status-indicator');
     if (!statusEl || !this.currentTabUrl) return;
-    
+
     // Check if current URL is valid for spacing
     const isValidUrl = this.isValidUrlForSpacing(this.currentTabUrl);
-    
+
     if (!isValidUrl) {
       statusEl.className = 'status';
       const textEl = statusEl.querySelector('.status-text');
@@ -83,11 +83,11 @@ class PopupController {
       }
       return;
     }
-    
+
     // Check if spacing is active on this site
     if (this.isAutoSpacingEnabled) {
       const settings = await utils_chrome.getCachedSettings();
-      
+
       let isActive = false;
       if (settings.spacing_rule === 'blacklists') {
         // For blacklist mode: active if URL doesn't match any blacklist pattern
@@ -100,7 +100,7 @@ class PopupController {
           return hostname === pattern || this.currentTabUrl.includes(pattern);
         });
       }
-      
+
       statusEl.className = isActive ? 'status status-active' : 'status';
       const textEl = statusEl.querySelector('.status-text');
       if (textEl) {
@@ -122,19 +122,19 @@ class PopupController {
   private async handleToggleChange(): Promise<void> {
     const toggle = document.getElementById('auto-spacing-toggle') as HTMLInputElement;
     this.isAutoSpacingEnabled = toggle.checked;
-    
+
     // Update spacing mode
     const spacing_mode = this.isAutoSpacingEnabled ? 'spacing_when_load' : 'spacing_when_click';
     await utils_chrome.SYNC_STORAGE.set({ spacing_mode });
-    
+
     // Update status
     this.updateStatus();
-    
+
     // Play sound effect
     const settings = await utils_chrome.getCachedSettings();
     if (!settings.is_mute_sound_effects) {
       // Play Shouryuuken when toggling on, Hadouken when toggling off
-      const soundFile = this.isAutoSpacingEnabled 
+      const soundFile = this.isAutoSpacingEnabled
         ? 'sounds/StreetFighter-Shouryuuken.mp3'
         : 'sounds/StreetFighter-Hadouken.mp3';
       const audio = new Audio(chrome.runtime.getURL(soundFile));
@@ -147,12 +147,12 @@ class PopupController {
       this.showNotification('error');
       return;
     }
-    
+
     if (!this.isValidUrlForSpacing(this.currentTabUrl)) {
       this.showNotification('error');
       return;
     }
-    
+
     try {
       // Disable button to prevent multiple clicks
       const btn = document.getElementById('manual-spacing-btn') as HTMLButtonElement;
@@ -160,40 +160,40 @@ class PopupController {
         btn.disabled = true;
         btn.textContent = '處理中...';
       }
-      
+
       // Check if content script is loaded
       let contentScriptLoaded = false;
       try {
-        const response = await chrome.tabs.sendMessage(this.currentTabId, { 
-          action: 'ping' 
+        const response = await chrome.tabs.sendMessage(this.currentTabId, {
+          action: 'ping'
         });
         contentScriptLoaded = response?.success === true;
       } catch (e) {
         // Content script not loaded
       }
-      
+
       if (!contentScriptLoaded) {
         // Inject scripts on-demand
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
           files: ['vendors/pangu/pangu.umd.js']
         });
-        
+
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
           files: ['dist/content-script.js']
         });
       }
-      
+
       // Apply spacing
-      const response = await chrome.tabs.sendMessage(this.currentTabId, { 
-        action: 'manual_spacing' 
+      const response = await chrome.tabs.sendMessage(this.currentTabId, {
+        action: 'manual_spacing'
       });
-      
+
       if (!response?.success) {
         throw new Error('Failed to apply spacing');
       }
-      
+
       // Play sound effect
       const settings = await utils_chrome.getCachedSettings();
       if (!settings.is_mute_sound_effects) {
@@ -201,54 +201,26 @@ class PopupController {
         const audio = new Audio(chrome.runtime.getURL('sounds/AustinPowers-YeahBaby.mp3'));
         audio.play().catch(e => console.log('Sound play failed:', e));
       }
-      
+
       // Show success feedback
       if (btn) {
-        btn.innerHTML = `
-          <svg class="icon-sm" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fill="currentColor"/>
-          </svg>
-          <span>完成！</span>
-        `;
+        btn.textContent = chrome.i18n.getMessage('spacing_complete');
         setTimeout(() => {
           btn.disabled = false;
-          btn.innerHTML = `
-            <svg class="icon-sm" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"/>
-            </svg>
-            <span data-i18n="manual_spacing">${chrome.i18n.getMessage('manual_spacing')}</span>
-          `;
+          btn.textContent = chrome.i18n.getMessage('manual_spacing');
         }, 1500);
       }
     } catch (error) {
       console.error('Failed to apply spacing:', error);
       this.showNotification('error');
-      
+
       // Reset button
       const btn = document.getElementById('manual-spacing-btn') as HTMLButtonElement;
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = `
-          <svg class="icon-sm" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M5 7C5 5.89543 5.89543 5 7 5H13C14.1046 5 15 5.89543 15 7V13C15 14.1046 14.1046 15 13 15H7C5.89543 15 5 14.1046 5 13V7Z" stroke="currentColor" stroke-width="2"/>
-            <path d="M2 10H5M15 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-          <span data-i18n="manual_spacing">${chrome.i18n.getMessage('manual_spacing')}</span>
-        `;
+        btn.textContent = chrome.i18n.getMessage('manual_spacing');
       }
     }
-  }
-  
-  private playRandomSound(): void {
-    const sounds = [
-      'sounds/AustinPowers-YeahBaby.mp3',
-      'sounds/StreetFighter-Hadouken.mp3', 
-      'sounds/StreetFighter-Shouryuuken.mp3',
-      'sounds/WahWahWaaah.mp3'
-    ];
-    const randomSound = sounds[Math.floor(Math.random() * sounds.length)];
-    const audio = new Audio(chrome.runtime.getURL(randomSound));
-    audio.play().catch(e => console.log('Sound play failed:', e));
   }
 
   private isValidUrlForSpacing(url: string): boolean {
@@ -276,9 +248,9 @@ class PopupController {
           max-width: 280px;
           text-align: center;
         `;
-        notif.textContent = '此頁面無法使用空格功能';
+        notif.textContent = chrome.i18n.getMessage('cannot_summon_here') || '沒辦法在這個頁面召喚空格之神';
         document.body.appendChild(notif);
-        
+
         setTimeout(() => {
           notif.remove();
         }, 3000);
