@@ -26,7 +26,7 @@
                 "file:///*/*"
             ],
             "js": [
-                "vendors/pangu/pangu.min.js",
+                "vendors/pangu/pangu.umd.js",
                 "js/content_script.js"
             ],
             "run_at": "document_idle"
