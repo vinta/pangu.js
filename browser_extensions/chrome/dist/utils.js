@@ -24,7 +24,7 @@ class Utils {
   };
   constructor() {
     chrome.storage.onChanged.addListener((changes, areaName) => {
-      if (areaName === "sync") {
+      if (areaName === "sync" && this.cacheInitialized) {
         for (const [key, change] of Object.entries(changes)) {
           if (key in this.cachedSettings) {
             this.cachedSettings = {
@@ -39,11 +39,8 @@ class Utils {
   // Get cached settings
   async getCachedSettings() {
     if (!this.cacheInitialized) {
-      const response = await chrome.runtime.sendMessage({ action: "get_settings" });
-      if (response && response.settings) {
-        this.cachedSettings = response.settings;
-        this.cacheInitialized = true;
-      }
+      this.cachedSettings = await chrome.storage.sync.get(DEFAULT_SETTINGS);
+      this.cacheInitialized = true;
     }
     return this.cachedSettings;
   }

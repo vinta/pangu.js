@@ -32,8 +32,8 @@ export class Utils {
   constructor() {
     // Listen for storage changes to update cache
     chrome.storage.onChanged.addListener((changes, areaName) => {
-      if (areaName === 'sync') {
-        // Update each changed setting
+      if (areaName === 'sync' && this.cacheInitialized) {
+        // Only update cache after it's been initialized
         for (const [key, change] of Object.entries(changes)) {
           if (key in this.cachedSettings) {
             // Create a new object to satisfy TypeScript's type checking
@@ -50,11 +50,9 @@ export class Utils {
   // Get cached settings
   async getCachedSettings(): Promise<Settings> {
     if (!this.cacheInitialized) {
-      const response = await chrome.runtime.sendMessage({ action: 'get_settings' });
-      if (response && response.settings) {
-        this.cachedSettings = response.settings;
-        this.cacheInitialized = true;
-      }
+      // Read directly from chrome.storage.sync with defaults
+      this.cachedSettings = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
+      this.cacheInitialized = true;
     }
     return this.cachedSettings;
   }
