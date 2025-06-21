@@ -4,6 +4,7 @@ class PopupController {
   isAutoSpacingEnabled = true;
   currentTabId;
   currentTabUrl;
+  hideMessageDelaySeconds = 1e3 * 10;
   constructor() {
     this.initialize();
   }
@@ -101,11 +102,11 @@ class PopupController {
   }
   async handleManualSpacing() {
     if (!this.currentTabId || !this.currentTabUrl) {
-      this.showNotification("error");
+      this.showError();
       return;
     }
     if (!this.isValidUrlForSpacing(this.currentTabUrl)) {
-      this.showNotification("error");
+      this.showError();
       return;
     }
     try {
@@ -144,15 +145,13 @@ class PopupController {
         audio.play().catch((e) => console.log("Sound play failed:", e));
       }
       if (btn) {
-        btn.textContent = chrome.i18n.getMessage("spacing_complete") || "空格之神降落！";
-        setTimeout(() => {
-          btn.disabled = false;
-          btn.textContent = chrome.i18n.getMessage("manual_spacing");
-        }, 1500);
+        btn.disabled = false;
+        btn.textContent = chrome.i18n.getMessage("manual_spacing");
       }
+      this.showSuccess();
     } catch (error) {
       console.error("Failed to apply spacing:", error);
-      this.showNotification("error");
+      this.showError();
       const btn = document.getElementById("manual-spacing-btn");
       if (btn) {
         btn.disabled = false;
@@ -163,31 +162,21 @@ class PopupController {
   isValidUrlForSpacing(url) {
     return /^(http(s?)|file)/i.test(url);
   }
-  showNotification(type) {
-    if (type === "error") {
-      const message = chrome.i18n.getMessage("can_not_call_god_of_spacing");
-      if (message) {
-        const notif = document.createElement("div");
-        notif.style.cssText = `
-          position: fixed;
-          bottom: 20px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: var(--color-danger);
-          color: white;
-          padding: 8px 16px;
-          border-radius: 4px;
-          font-size: 14px;
-          z-index: 1000;
-          max-width: 280px;
-          text-align: center;
-        `;
-        notif.textContent = chrome.i18n.getMessage("cannot_summon_here") || "沒辦法在這個頁面召喚空格之神";
-        document.body.appendChild(notif);
-        setTimeout(() => {
-          notif.remove();
-        }, 3e3);
-      }
+  showError() {
+    this.showMessage(chrome.i18n.getMessage("cannot_summon_here") || "沒辦法在這個頁面召喚空格之神", "error");
+  }
+  showSuccess() {
+    this.showMessage("空格之神降臨", "success");
+  }
+  showMessage(text, type) {
+    const messageElement = document.getElementById("message");
+    if (messageElement) {
+      messageElement.textContent = text;
+      messageElement.className = `message ${type}`;
+      messageElement.style.display = "block";
+      setTimeout(() => {
+        messageElement.style.display = "none";
+      }, this.hideMessageDelaySeconds);
     }
   }
   openOptionsPage() {

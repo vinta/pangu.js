@@ -6,6 +6,7 @@ class PopupController {
   private isAutoSpacingEnabled: boolean = true;
   private currentTabId: number | undefined;
   private currentTabUrl: string | undefined;
+  private hideMessageDelaySeconds: number = 1000 * 10;
 
   constructor() {
     this.initialize();
@@ -144,12 +145,12 @@ class PopupController {
 
   private async handleManualSpacing(): Promise<void> {
     if (!this.currentTabId || !this.currentTabUrl) {
-      this.showNotification('error');
+      this.showError();
       return;
     }
 
     if (!this.isValidUrlForSpacing(this.currentTabUrl)) {
-      this.showNotification('error');
+      this.showError();
       return;
     }
 
@@ -204,15 +205,15 @@ class PopupController {
 
       // Show success feedback
       if (btn) {
-        btn.textContent = chrome.i18n.getMessage('spacing_complete');
-        setTimeout(() => {
-          btn.disabled = false;
-          btn.textContent = chrome.i18n.getMessage('manual_spacing');
-        }, 1500);
+        btn.disabled = false;
+        btn.textContent = chrome.i18n.getMessage('manual_spacing');
       }
+
+      // Show success message
+      this.showSuccess();
     } catch (error) {
       console.error('Failed to apply spacing:', error);
-      this.showNotification('error');
+      this.showError();
 
       // Reset button
       const btn = document.getElementById('manual-spacing-btn') as HTMLButtonElement;
@@ -227,34 +228,25 @@ class PopupController {
     return /^(http(s?)|file)/i.test(url);
   }
 
-  private showNotification(type: 'error' | 'success'): void {
-    if (type === 'error') {
-      // Show error message briefly
-      const message = chrome.i18n.getMessage('can_not_call_god_of_spacing');
-      if (message) {
-        // Create a temporary notification element
-        const notif = document.createElement('div');
-        notif.style.cssText = `
-          position: fixed;
-          bottom: 20px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: var(--color-danger);
-          color: white;
-          padding: 8px 16px;
-          border-radius: 4px;
-          font-size: 14px;
-          z-index: 1000;
-          max-width: 280px;
-          text-align: center;
-        `;
-        notif.textContent = chrome.i18n.getMessage('cannot_summon_here') || '沒辦法在這個頁面召喚空格之神';
-        document.body.appendChild(notif);
+  private showError(): void {
+    this.showMessage(chrome.i18n.getMessage('cannot_summon_here') || '沒辦法在這個頁面召喚空格之神', 'error');
+  }
 
-        setTimeout(() => {
-          notif.remove();
-        }, 3000);
-      }
+  private showSuccess(): void {
+    this.showMessage('空格之神降臨', 'success');
+  }
+
+  private showMessage(text: string, type: 'error' | 'success'): void {
+    const messageElement = document.getElementById('message');
+    if (messageElement) {
+      messageElement.textContent = text;
+      messageElement.className = `message ${type}`;
+      messageElement.style.display = 'block';
+
+      // Hide message after 3 seconds
+      setTimeout(() => {
+        messageElement.style.display = 'none';
+      }, this.hideMessageDelaySeconds);
     }
   }
 

@@ -290,8 +290,11 @@ a:hover {
 /* Popup specific styles */
 .popup-container {
   width: 380px;
+  min-height: 330px;
   padding: 0;
   background-color: var(--color-surface);
+  display: flex;
+  flex-direction: column;
 }
 
 .popup-header {
@@ -326,6 +329,7 @@ a:hover {
 
 .popup-content {
   padding: var(--spacing-4);
+  flex: 1;
 }
 
 .popup-section {
@@ -364,6 +368,21 @@ a:hover {
 .popup-footer-link:hover {
   color: var(--color-primary);
   text-decoration: none;
+}
+
+/* Message under button */
+.message {
+  margin-top: var(--spacing-2);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.message.error {
+  color: var(--color-danger);
+}
+
+.message.success {
+  color: var(--color-success);
 }
 
 /* Options page specific styles */
@@ -532,10 +551,8 @@ a:hover {
 .text-sm { font-size: var(--text-sm); }
 .mt-2 { margin-top: var(--spacing-2); }
 .mt-4 { margin-top: var(--spacing-4); }
-.mt-6 { margin-top: var(--spacing-6); }
 .mb-2 { margin-bottom: var(--spacing-2); }
 .mb-4 { margin-bottom: var(--spacing-4); }
-.mb-6 { margin-bottom: var(--spacing-6); }
 
 /* Legacy Pure CSS compatibility (will be removed later) */
 .pure-button {

@@ -63,10 +63,6 @@
         "message": "不要再他媽「空格之神顯靈了」！",
         "description": ""
     },
-    "can_not_call_god_of_spacing": {
-        "message": "在這種地方是召喚不出空格之神的，除非你在七七四十九天之內都能夠不懷著淫狎之念上網。\n\n不過看你這副人五人六的樣子，想必是不可能的。",
-        "description": ""
-    },
     "extension_rate": {
         "message": "評分",
         "description": ""
@@ -108,7 +104,7 @@
         "description": ""
     },
     "cannot_summon_here": {
-        "message": "沒辦法在這個頁面召喚空格之神",
+        "message": "在這種地方是召喚不出空格之神的，除非你在七七四十九天之內都能夠不懷著淫狎之念上網",
         "description": ""
     },
     "spacing_complete": {
