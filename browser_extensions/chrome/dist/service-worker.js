@@ -23,6 +23,7 @@ async function registerContentScripts() {
   try {
     const existingScripts = await chrome.scripting.getRegisteredContentScripts({ ids: [SCRIPT_ID] });
     if (existingScripts.length > 0) {
+      console.log("Unregistering content script:", SCRIPT_ID);
       try {
         await chrome.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] });
       } catch (unregisterError) {
@@ -37,11 +38,11 @@ async function registerContentScripts() {
     const contentScript = {
       id: SCRIPT_ID,
       js: ["vendors/pangu/pangu.umd.js", "dist/content-script.js"],
-      matches: ["<all_urls>"],
+      matches: ["http://*/*", "https://*/*"],
       runAt: "document_idle"
     };
     if (settings.spacing_rule === "blacklists" && settings.blacklists.length > 0) {
-      contentScript.matches = ["<all_urls>"];
+      contentScript.matches = ["http://*/*", "https://*/*"];
     } else if (settings.spacing_rule === "whitelists" && settings.whitelists.length > 0) {
       const matchPatterns = [];
       for (const url of settings.whitelists) {
@@ -51,7 +52,7 @@ async function registerContentScripts() {
           matchPatterns.push(`*://*${url}*`);
         }
       }
-      contentScript.matches = matchPatterns.length > 0 ? matchPatterns : ["<all_urls>"];
+      contentScript.matches = matchPatterns.length > 0 ? matchPatterns : ["http://*/*", "https://*/*"];
     }
     try {
       await chrome.scripting.registerContentScripts([contentScript]);
@@ -64,17 +65,21 @@ async function registerContentScripts() {
     }
   } else {
     try {
-      await chrome.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] });
+      const existingScripts = await chrome.scripting.getRegisteredContentScripts({ ids: [SCRIPT_ID] });
+      console.log("Unregistering content script 2:", SCRIPT_ID);
+      if (existingScripts.length > 0) {
+        await chrome.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] });
+      }
     } catch (error) {
-      if (!(error instanceof Error && error.message.includes("does not exist"))) {
+      if (error instanceof Error && error.message.includes("Nonexistent script ID")) ;
+      else {
         console.error("Error unregistering content script:", error);
       }
     }
   }
 }
 async function getSettings() {
-  const items = await chrome.storage.sync.get(DEFAULT_SETTINGS);
-  return items;
+  return await chrome.storage.sync.get(DEFAULT_SETTINGS);
 }
 chrome.storage.onChanged.addListener(async (changes, areaName) => {
   if (areaName === "sync") {

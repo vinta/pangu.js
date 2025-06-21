@@ -32,13 +32,14 @@ async function initializeSettings(): Promise<void> {
 // Register content scripts dynamically based on user settings
 async function registerContentScripts(): Promise<void> {
   const SCRIPT_ID = 'pangu-auto-spacing';
-  
+
   // First, check if the script already exists
   try {
     const existingScripts = await chrome.scripting.getRegisteredContentScripts({ ids: [SCRIPT_ID] });
-    
+
     // If script exists, unregister it first
     if (existingScripts.length > 0) {
+      console.log('Unregistering content script:', SCRIPT_ID);
       try {
         await chrome.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] });
       } catch (unregisterError) {
@@ -57,15 +58,15 @@ async function registerContentScripts(): Promise<void> {
     const contentScript: chrome.scripting.RegisteredContentScript = {
       id: SCRIPT_ID,
       js: ['vendors/pangu/pangu.umd.js', 'dist/content-script.js'],
-      matches: ['<all_urls>'],
+      matches: ['http://*/*', 'https://*/*'],
       runAt: 'document_idle',
     };
 
     // Apply filtering based on rules
     if (settings.spacing_rule === 'blacklists' && settings.blacklists.length > 0) {
-      // For blacklists, we register for all URLs and filter in the content script
+      // For blacklists, we register for all HTTP/HTTPS URLs and filter in the content script
       // Chrome doesn't support negative matches directly
-      contentScript.matches = ['<all_urls>'];
+      contentScript.matches = ['http://*/*', 'https://*/*'];
     } else if (settings.spacing_rule === 'whitelists' && settings.whitelists.length > 0) {
       // For whitelists, we can use specific match patterns
       const matchPatterns: string[] = [];
@@ -77,7 +78,7 @@ async function registerContentScripts(): Promise<void> {
           matchPatterns.push(`*://*${url}*`);
         }
       }
-      contentScript.matches = matchPatterns.length > 0 ? matchPatterns : ['<all_urls>'];
+      contentScript.matches = matchPatterns.length > 0 ? matchPatterns : ['http://*/*', 'https://*/*'];
     }
 
     try {
@@ -93,10 +94,14 @@ async function registerContentScripts(): Promise<void> {
   } else {
     // If auto-spacing is disabled, ensure the script is unregistered
     try {
-      await chrome.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] });
+      const existingScripts = await chrome.scripting.getRegisteredContentScripts({ ids: [SCRIPT_ID] });
+      if (existingScripts.length > 0) {
+        await chrome.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] });
+      }
     } catch (error) {
-      // Ignore error if script doesn't exist
-      if (!(error instanceof Error && error.message.includes('does not exist'))) {
+      if (error instanceof Error && error.message.includes('Nonexistent script ID')) {
+        // expected error
+      } else {
         console.error('Error unregistering content script:', error);
       }
     }
@@ -105,8 +110,7 @@ async function registerContentScripts(): Promise<void> {
 
 // Get settings from storage
 async function getSettings(): Promise<Settings> {
-  const items = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
-  return items;
+  return (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
 }
 
 // Sync storage.sync changes to storage.local
