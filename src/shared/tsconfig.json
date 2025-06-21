@@ -1,14 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022"],
-    "outDir": "../../dist/node",
+    "outDir": "../../dist/shared",
     "composite": false,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-    "types": ["node"]
+    "sourceMap": true
   },
   "include": ["./**/*"],
   "exclude": ["**/*.test.ts", "**/*.spec.ts"]

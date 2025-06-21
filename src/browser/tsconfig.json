@@ -1,11 +1,14 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "ES2022", // Modern browsers (2022+)
+    "target": "ES2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "outDir": "../../dist/browser",
-    "rootDir": "../..",
-    "composite": true
+    "composite": false,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
   },
-  "include": ["../shared/**/*", "./**/*"]
+  "include": ["./**/*"],
+  "exclude": ["**/*.test.ts", "**/*.spec.ts"]
 }
