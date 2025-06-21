@@ -112,56 +112,7 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
   }
 });
 
-// Check if spacing should be applied to the given tab
-async function canSpacing(tab: chrome.tabs.Tab | undefined): Promise<boolean> {
-  if (!tab || !tab.url) {
-    return false;
-  }
 
-  const settings = await getSettings();
-
-  if (settings.spacing_mode === 'spacing_when_load') {
-    return true;
-  } else if (settings.spacing_mode === 'spacing_when_click') {
-    return false;
-  }
-
-  return true;
-}
-
-// Message types
-interface MessageRequest {
-  purpose?: string;
-}
-
-interface MessageResponse {
-  result?: boolean;
-  error?: string;
-}
-
-// Listen for messages from content scripts and popup
-chrome.runtime.onMessage.addListener((message: MessageRequest, sender: chrome.runtime.MessageSender, sendResponse: (response: MessageResponse) => void) => {
-  // Handle async response
-  (async () => {
-    try {
-      switch (message.purpose) {
-        case 'can_spacing':
-          const result = await canSpacing(sender.tab);
-          sendResponse({ result });
-          break;
-
-        default:
-          sendResponse({ result: false });
-      }
-    } catch (error) {
-      console.error('Error in message handler:', error);
-      sendResponse({ error: (error as Error).message });
-    }
-  })();
-
-  // Return true to indicate async response
-  return true;
-});
 
 // Keep service worker alive during critical operations
 // Currently unused but kept for future implementation

@@ -8,23 +8,14 @@ function applySpacing() {
   }
 }
 function onDocumentReady() {
-  chrome.runtime.sendMessage({ purpose: "can_spacing" }, (response) => {
-    if (chrome.runtime.lastError) {
-      console.log("Extension context invalidated");
-      return;
-    }
-    if (!response?.result) {
-      return;
-    }
-    applySpacing();
-  });
+  applySpacing();
 }
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", onDocumentReady);
 } else {
   onDocumentReady();
 }
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.action === "manual_spacing") {
     applySpacing();
     sendResponse({ success: true });

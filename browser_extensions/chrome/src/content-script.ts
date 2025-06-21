@@ -25,20 +25,9 @@ function applySpacing() {
 
 // Handle document ready state
 function onDocumentReady() {
-  chrome.runtime.sendMessage({ purpose: 'can_spacing' }, (response) => {
-    // Check if the extension context is still valid
-    if (chrome.runtime.lastError) {
-      console.log('Extension context invalidated');
-      return;
-    }
-    
-    if (!response?.result) {
-      return;
-    }
-
-    // Apply spacing
-    applySpacing();
-  });
+  // Since this content script is only injected when auto-spacing is enabled,
+  // we can apply spacing directly without checking
+  applySpacing();
 }
 
 // Check document state and apply spacing
@@ -49,7 +38,7 @@ if (document.readyState === 'loading') {
 }
 
 // Listen for manual spacing requests from popup
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.action === 'manual_spacing') {
     applySpacing();
     sendResponse({ success: true });

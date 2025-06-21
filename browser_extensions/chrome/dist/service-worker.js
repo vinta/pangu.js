@@ -75,36 +75,6 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
     }
   }
 });
-async function canSpacing(tab) {
-  if (!tab || !tab.url) {
-    return false;
-  }
-  const settings = await getSettings();
-  if (settings.spacing_mode === "spacing_when_load") {
-    return true;
-  } else if (settings.spacing_mode === "spacing_when_click") {
-    return false;
-  }
-  return true;
-}
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  (async () => {
-    try {
-      switch (message.purpose) {
-        case "can_spacing":
-          const result = await canSpacing(sender.tab);
-          sendResponse({ result });
-          break;
-        default:
-          sendResponse({ result: false });
-      }
-    } catch (error) {
-      console.error("Error in message handler:", error);
-      sendResponse({ error: error.message });
-    }
-  })();
-  return true;
-});
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "keep-alive") {
     console.log("Service worker keep-alive ping");
