@@ -9,7 +9,7 @@ export default tseslint.config(
   },
   {
     // TypeScript files
-    files: ['src/**/*.ts'],
+    files: ['src/**/*.ts', 'browser_extensions/chrome/src/**/*.ts'],
     extends: [...tseslint.configs.recommended],
     languageOptions: {
       parser: tseslint.parser,

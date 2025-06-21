@@ -1,17 +1,17 @@
-import { Settings } from "./types";
+import { Settings } from './types';
 
 type SoundName = 'Hadouken' | 'Shouryuuken' | 'YeahBaby' | 'WahWahWaaah';
 
 export class Utils {
-  private settingsCache: Settings = {} as Settings;
+  private cachedSettings: Settings = {};
   private cacheInitialized: boolean = false;
 
   // Sound file mappings
   private readonly sounds: Record<SoundName, string> = {
-    'Hadouken': 'sounds/StreetFighter-Hadouken.mp3',
-    'Shouryuuken': 'sounds/StreetFighter-Shouryuuken.mp3',
-    'YeahBaby': 'sounds/AustinPowers-YeahBaby.mp3',
-    'WahWahWaaah': 'sounds/ManciniPinkPanther-WahWahWaaah.mp3'
+    Hadouken: 'sounds/StreetFighter-Hadouken.mp3',
+    Shouryuuken: 'sounds/StreetFighter-Shouryuuken.mp3',
+    YeahBaby: 'sounds/AustinPowers-YeahBaby.mp3',
+    WahWahWaaah: 'sounds/ManciniPinkPanther-WahWahWaaah.mp3',
   };
 
   // Direct access to chrome.storage.sync
@@ -22,7 +22,7 @@ export class Utils {
     chrome.storage.onChanged.addListener((changes, areaName) => {
       if (areaName === 'sync') {
         for (const key in changes) {
-          (this.settingsCache as any)[key] = changes[key].newValue;
+          (this.cachedSettings as any)[key] = changes[key].newValue;
         }
       }
     });
@@ -33,11 +33,11 @@ export class Utils {
     if (!this.cacheInitialized) {
       const response = await chrome.runtime.sendMessage({ action: 'get_settings' });
       if (response && response.settings) {
-        this.settingsCache = response.settings;
+        this.cachedSettings = response.settings;
         this.cacheInitialized = true;
       }
     }
-    return this.settingsCache;
+    return this.cachedSettings;
   }
 
   // Get cached settings
@@ -75,7 +75,7 @@ export class Utils {
     const settings = await this.getCachedSettings();
     if (!settings.is_mute_sound_effects) {
       const audio = new Audio(chrome.runtime.getURL(this.sounds[name]));
-      audio.play().catch(e => console.log('Sound play failed:', e));
+      audio.play().catch((e) => console.log('Sound play failed:', e));
     }
   }
 }
