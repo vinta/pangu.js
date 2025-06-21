@@ -33,17 +33,17 @@ async function initializeSettings(): Promise<void> {
 async function registerContentScripts(): Promise<void> {
   const SCRIPT_ID = 'pangu-auto-spacing';
 
-  // First, check if the script already exists
+  // First, check if any scripts exist and unregister them
   try {
-    const existingScripts = await chrome.scripting.getRegisteredContentScripts({ ids: [SCRIPT_ID] });
-
-    // If script exists, unregister it first
+    const existingScripts = await chrome.scripting.getRegisteredContentScripts();
+    
+    // If scripts exist, unregister them
     if (existingScripts.length > 0) {
-      console.log('Unregistering content script:', SCRIPT_ID);
+      const scriptIds = existingScripts.map(script => script.id);
       try {
-        await chrome.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] });
+        await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
       } catch (unregisterError) {
-        console.error('Error unregistering content script:', unregisterError);
+        console.error('Error unregistering content scripts:', unregisterError);
         // Don't return here, continue to try registering
       }
     }
@@ -92,18 +92,15 @@ async function registerContentScripts(): Promise<void> {
       }
     }
   } else {
-    // If auto-spacing is disabled, ensure the script is unregistered
+    // If auto-spacing is disabled, ensure all scripts are unregistered
     try {
-      const existingScripts = await chrome.scripting.getRegisteredContentScripts({ ids: [SCRIPT_ID] });
+      const existingScripts = await chrome.scripting.getRegisteredContentScripts();
       if (existingScripts.length > 0) {
-        await chrome.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] });
+        const scriptIds = existingScripts.map(script => script.id);
+        await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
       }
     } catch (error) {
-      if (error instanceof Error && error.message.includes('Nonexistent script ID')) {
-        // expected error
-      } else {
-        console.error('Error unregistering content script:', error);
-      }
+      console.error('Error unregistering content scripts:', error);
     }
   }
 }

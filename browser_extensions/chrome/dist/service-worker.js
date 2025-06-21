@@ -21,13 +21,13 @@ async function initializeSettings() {
 async function registerContentScripts() {
   const SCRIPT_ID = "pangu-auto-spacing";
   try {
-    const existingScripts = await chrome.scripting.getRegisteredContentScripts({ ids: [SCRIPT_ID] });
+    const existingScripts = await chrome.scripting.getRegisteredContentScripts();
     if (existingScripts.length > 0) {
-      console.log("Unregistering content script:", SCRIPT_ID);
+      const scriptIds = existingScripts.map((script) => script.id);
       try {
-        await chrome.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] });
+        await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
       } catch (unregisterError) {
-        console.error("Error unregistering content script:", unregisterError);
+        console.error("Error unregistering content scripts:", unregisterError);
       }
     }
   } catch (error) {
@@ -65,16 +65,13 @@ async function registerContentScripts() {
     }
   } else {
     try {
-      const existingScripts = await chrome.scripting.getRegisteredContentScripts({ ids: [SCRIPT_ID] });
-      console.log("Unregistering content script 2:", SCRIPT_ID);
+      const existingScripts = await chrome.scripting.getRegisteredContentScripts();
       if (existingScripts.length > 0) {
-        await chrome.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] });
+        const scriptIds = existingScripts.map((script) => script.id);
+        await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
       }
     } catch (error) {
-      if (error instanceof Error && error.message.includes("Nonexistent script ID")) ;
-      else {
-        console.error("Error unregistering content script:", error);
-      }
+      console.error("Error unregistering content scripts:", error);
     }
   }
 }
