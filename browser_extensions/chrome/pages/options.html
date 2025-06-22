@@ -60,8 +60,8 @@
                 <template id="url-new-template">
                   <li>
                     <input type="text" class="url-edit-input" id="new-url-input">
-                    <button class="btn btn-sm" id="save-new-url-btn"></button>
-                    <button class="btn btn-sm" id="cancel-new-url-btn"></button>
+                    <button class="btn btn-sm save-url-btn" id="save-new-url-btn"></button>
+                    <button class="btn btn-sm cancel-edit-btn" id="cancel-new-url-btn"></button>
                   </li>
                 </template>
 
@@ -69,11 +69,14 @@
                   <ul id="url-list" class="filter_mode_list"></ul>
                   <div class="mt-4">
                     <a href="#" id="add-url-btn"></a>
+                    <br>
+                    <a href="#" id="restore-defaults-btn" class="mt-2"></a>
                   </div>
                   <div id="url-list-help" class="url-list-help">
                     <a href="https://developer.chrome.com/docs/extensions/develop/concepts/match-patterns" target="_blank"></a>
                   </div>
                 </template>
+
                 <!-- URL list will be rendered below -->
               </div>
             </div>

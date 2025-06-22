@@ -18,6 +18,11 @@ test.describe('URLPattern in Chrome', () => {
       testPattern('*://example.com/*', 'https://example.com/about', true);
       testPattern('*://example.com/*', 'http://example.com/contact', true);
       testPattern('*://example.com/*', 'https://api.example.com/v2/data', false);
+
+      // NOTE: This is a difference:
+      // In URLPattern, *:// matches everything
+      // In Chrome Extension Match Pattern, *:// matches only http or https
+      // https://developer.chrome.com/docs/extensions/develop/concepts/match-patterns
       testPattern('*://example.com/*', 'ftp://example.com/files', true);
 
       testPattern('*://*.example.com/*', 'https://example.com/', false);

@@ -109,6 +109,14 @@
     "message": "新增網址",
     "description": ""
   },
+  "button_restore_defaults": {
+    "message": "恢復成原廠設定",
+    "description": ""
+  },
+  "confirm_restore_defaults": {
+    "message": "確定要恢復成原廠設定嗎？",
+    "description": ""
+  },
   "link_learn_match_patterns": {
     "message": "你可以在網址裡用 * (wildcard)",
     "description": ""

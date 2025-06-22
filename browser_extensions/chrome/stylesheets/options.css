@@ -208,10 +208,22 @@
   text-decoration: none;
 }
 
-#add-url-btn::before {
-  content: '+ ';
-  font-weight: 600;
-  margin-right: var(--spacing-1);
+/* Restore defaults link */
+#restore-defaults-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-2) var(--spacing-3);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  border-radius: var(--radius);
+  transition: all var(--transition-fast);
+}
+
+#restore-defaults-btn:hover {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+  text-decoration: none;
 }
 
 /* Button overrides for options page */

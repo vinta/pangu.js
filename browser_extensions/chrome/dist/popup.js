@@ -70,7 +70,9 @@ class PopupController {
   }
   async handleManualSpacing() {
     const button = document.getElementById("manual-spacing-btn");
-    if (!button) return;
+    if (!button) {
+      return;
+    }
     button.disabled = true;
     if (!this.currentTabId || !this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
       await this.showErrorMessage(() => {
@@ -111,7 +113,9 @@ class PopupController {
     return /^(http(s?)|file)/i.test(url);
   }
   async isContentScriptRegistered() {
-    if (!this.currentTabId || !this.currentTabUrl) return false;
+    if (!this.currentTabId || !this.currentTabUrl) {
+      return false;
+    }
     try {
       const message = { action: "ping" };
       await chrome.tabs.sendMessage(this.currentTabId, message);

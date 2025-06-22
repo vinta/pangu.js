@@ -1,9 +1,6 @@
 import { t as translatePage } from "./i18n.js";
 import { u as utils } from "./utils.js";
 function isValidMatchPattern(pattern) {
-  if (pattern === "<all_urls>") {
-    return true;
-  }
   if (!pattern.match(/^(https?:\/\/|file:\/\/\/|\*:\/\/)/)) {
     return false;
   }
@@ -51,6 +48,8 @@ class OptionsController {
         this.cancelEditingUrl(index);
       } else if (target.id === "add-url-btn") {
         this.showAddUrlInput();
+      } else if (target.id === "restore-defaults-btn") {
+        this.restoreDefaults();
       }
     });
     document.addEventListener("change", async (e) => {
@@ -100,8 +99,10 @@ class OptionsController {
     const listFragment = listTemplate.content.cloneNode(true);
     const urlList = listFragment.querySelector("#url-list");
     const addButton = listFragment.querySelector("#add-url-btn");
+    const restoreButton = listFragment.querySelector("#restore-defaults-btn");
     const helpLink = listFragment.querySelector("#url-list-help a");
     addButton.textContent = chrome.i18n.getMessage("button_add_new_url");
+    restoreButton.textContent = chrome.i18n.getMessage("button_restore_defaults");
     helpLink.textContent = chrome.i18n.getMessage("link_learn_match_patterns");
     const urls = settings[settings.filter_mode] || [];
     for (const [index, url] of urls.entries()) {
@@ -250,6 +251,14 @@ class OptionsController {
           this.saveNewUrl();
         }
       });
+    }
+  }
+  async restoreDefaults() {
+    if (confirm(chrome.i18n.getMessage("confirm_restore_defaults") || "確定要恢復成原廠設定嗎？")) {
+      const settings = await utils.getCachedSettings();
+      const filterMode = settings.filter_mode;
+      await chrome.storage.sync.set({ [filterMode]: [] });
+      await this.renderUrlList();
     }
   }
 }

@@ -43,6 +43,8 @@ class OptionsController {
         this.cancelEditingUrl(index);
       } else if (target.id === 'add-url-btn') {
         this.showAddUrlInput();
+      } else if (target.id === 'restore-defaults-btn') {
+        this.restoreDefaults();
       }
     });
 
@@ -109,10 +111,12 @@ class OptionsController {
 
     const urlList = listFragment.querySelector('#url-list') as HTMLUListElement;
     const addButton = listFragment.querySelector('#add-url-btn') as HTMLAnchorElement;
+    const restoreButton = listFragment.querySelector('#restore-defaults-btn') as HTMLAnchorElement;
     const helpLink = listFragment.querySelector('#url-list-help a') as HTMLAnchorElement;
 
     // Set text content for localized elements
     addButton.textContent = chrome.i18n.getMessage('button_add_new_url');
+    restoreButton.textContent = chrome.i18n.getMessage('button_restore_defaults');
     helpLink.textContent = chrome.i18n.getMessage('link_learn_match_patterns');
 
     // Render URL items
@@ -308,6 +312,20 @@ class OptionsController {
           this.saveNewUrl();
         }
       });
+    }
+  }
+
+  private async restoreDefaults() {
+    if (confirm(chrome.i18n.getMessage('confirm_restore_defaults') || '確定要恢復成原廠設定嗎？')) {
+      // Clear the current filter mode list
+      const settings = await utils.getCachedSettings();
+      const filterMode = settings.filter_mode as 'blacklist' | 'whitelist';
+
+      // Set empty array for the current filter mode
+      await chrome.storage.sync.set({ [filterMode]: [] });
+
+      // Re-render the URL list
+      await this.renderUrlList();
     }
   }
 }
