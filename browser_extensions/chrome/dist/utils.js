@@ -22,6 +22,12 @@ class Utils {
     WahWahWaaah: "sounds/ManciniPinkPanther-WahWahWaaah.mp3"
   };
   constructor() {
+    this.initialize();
+  }
+  async initialize() {
+    this.setupEventListeners();
+  }
+  setupEventListeners() {
     chrome.storage.onChanged.addListener((changes, areaName) => {
       if (areaName === "sync" && this.cacheInitialized) {
         for (const [key, change] of Object.entries(changes)) {

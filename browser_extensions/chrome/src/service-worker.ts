@@ -20,7 +20,7 @@ async function initializeSettings() {
   }
 }
 
-async function unregisterAllContentScripts(): Promise<void> {
+async function unregisterAllContentScripts() {
   try {
     const existingScripts = await chrome.scripting.getRegisteredContentScripts();
     if (existingScripts.length > 0) {

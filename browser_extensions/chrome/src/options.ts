@@ -10,13 +10,19 @@ class OptionsController {
     this.initialize();
   }
 
-  private async initialize(): Promise<void> {
+  private async initialize() {
     translatePage();
     await this.render();
     this.setupEventListeners();
   }
 
   private setupEventListeners(): void {
+    chrome.storage.onChanged.addListener(async (_changes, areaName) => {
+      if (areaName === 'sync') {
+        await this.render();
+      }
+    });
+
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (target.id === 'spacing_mode_btn') {
@@ -49,14 +55,14 @@ class OptionsController {
     });
   }
 
-  private async render(): Promise<void> {
+  private async render() {
     await this.renderSpacingMode();
     await this.renderFilterMode();
     await this.renderUrlList();
     await this.renderMuteCheckbox();
   }
 
-  private async renderSpacingMode(): Promise<void> {
+  private async renderSpacingMode() {
     const settings = await utils.getCachedSettings();
     const button = document.getElementById('spacing_mode_btn') as HTMLButtonElement;
     if (button) {
@@ -80,7 +86,7 @@ class OptionsController {
     }
   }
 
-  private async renderFilterMode(): Promise<void> {
+  private async renderFilterMode() {
     const settings = await utils.getCachedSettings();
     const button = document.getElementById('filter_mode_btn') as HTMLButtonElement;
     if (button) {
@@ -88,7 +94,7 @@ class OptionsController {
     }
   }
 
-  private async renderUrlList(): Promise<void> {
+  private async renderUrlList() {
     const settings = await utils.getCachedSettings();
     const container = document.getElementById('url-list-container');
     if (!container) return;
@@ -154,7 +160,7 @@ class OptionsController {
     this.setupUrlInputListeners();
   }
 
-  private async renderMuteCheckbox(): Promise<void> {
+  private async renderMuteCheckbox() {
     const settings = await utils.getCachedSettings();
     const checkbox = document.getElementById('mute-checkbox') as HTMLInputElement;
     if (checkbox) {
@@ -162,7 +168,7 @@ class OptionsController {
     }
   }
 
-  private async toggleSpacingMode(): Promise<void> {
+  private async toggleSpacingMode() {
     const settings = await utils.getCachedSettings();
     const nextSpacingMode = settings.spacing_mode === 'spacing_when_load' ? 'spacing_when_click' : 'spacing_when_load';
     await chrome.storage.sync.set({ spacing_mode: nextSpacingMode });
@@ -172,7 +178,7 @@ class OptionsController {
     await this.renderSpacingMode();
   }
 
-  private async changeFilterMode(): Promise<void> {
+  private async changeFilterMode() {
     const settings = await utils.getCachedSettings();
     // Toggle between blacklist and whitelist
     const newFilterMode = settings.filter_mode === 'blacklist' ? 'whitelist' : 'blacklist';
@@ -198,7 +204,7 @@ class OptionsController {
     });
   }
 
-  private async saveEditingUrl(index: number): Promise<void> {
+  private async saveEditingUrl(index: number) {
     const input = document.querySelector(`input[data-index="${index}"]`) as HTMLInputElement;
     if (!input) return;
 
@@ -225,7 +231,7 @@ class OptionsController {
     this.renderUrlList();
   }
 
-  private async removeUrl(index: number): Promise<void> {
+  private async removeUrl(index: number) {
     const settings = await utils.getCachedSettings();
     const ruleKey = settings.filter_mode as 'blacklist' | 'whitelist';
     const urls = [...settings[ruleKey]];
@@ -262,7 +268,7 @@ class OptionsController {
     }
   }
 
-  private async saveNewUrl(): Promise<void> {
+  private async saveNewUrl() {
     const input = document.getElementById('new-url-input') as HTMLInputElement;
     if (!input) return;
 

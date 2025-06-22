@@ -3,7 +3,6 @@ import { u as utils } from "./utils.js";
 class PopupController {
   currentTabId;
   currentTabUrl;
-  defaultHideMessageDelayMs = 1e3 * 5;
   constructor() {
     this.initialize();
   }
@@ -74,8 +73,9 @@ class PopupController {
     if (!button) return;
     button.disabled = true;
     if (!this.currentTabId || !this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
-      await this.showErrorMessage();
-      button.disabled = false;
+      await this.showErrorMessage(() => {
+        button.disabled = false;
+      });
       return;
     }
     try {
@@ -90,15 +90,20 @@ class PopupController {
       const message = { action: "manual_spacing" };
       const response = await chrome.tabs.sendMessage(this.currentTabId, message);
       if (response && response.success) {
-        await this.showSuccessMessage();
+        await this.showSuccessMessage(() => {
+          button.disabled = false;
+        });
       } else {
-        await this.showErrorMessage();
+        await this.showErrorMessage(() => {
+          button.disabled = false;
+        });
       }
     } catch (error) {
       console.error("Manual spacing error:", error);
-      await this.showErrorMessage();
+      await this.showErrorMessage(() => {
+        button.disabled = false;
+      });
     } finally {
-      button.disabled = false;
       button.textContent = chrome.i18n.getMessage("manual_spacing");
     }
   }
@@ -115,15 +120,15 @@ class PopupController {
       return false;
     }
   }
-  async showErrorMessage() {
-    this.showMessage(chrome.i18n.getMessage("spacing_fail"), "error");
+  async showErrorMessage(callback) {
+    this.showMessage(chrome.i18n.getMessage("spacing_fail"), "error", 1e3 * 4, callback);
     await utils.playSound("WahWahWaaah");
   }
-  async showSuccessMessage() {
-    this.showMessage(chrome.i18n.getMessage("spacing_success"), "success");
+  async showSuccessMessage(callback) {
+    this.showMessage(chrome.i18n.getMessage("spacing_success"), "success", 1e3 * 3, callback);
     await utils.playSound("YeahBaby");
   }
-  showMessage(text, type = "info", hideMessageDelayMs = this.defaultHideMessageDelayMs, callback) {
+  showMessage(text, type = "info", hideMessageDelayMs, callback) {
     const messageElement = document.getElementById("message");
     if (messageElement) {
       messageElement.textContent = text;

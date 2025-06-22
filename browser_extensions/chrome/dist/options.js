@@ -42,6 +42,11 @@ class OptionsController {
     this.setupEventListeners();
   }
   setupEventListeners() {
+    chrome.storage.onChanged.addListener(async (_changes, areaName) => {
+      if (areaName === "sync") {
+        await this.render();
+      }
+    });
     document.addEventListener("click", (e) => {
       const target = e.target;
       if (target.id === "spacing_mode_btn") {

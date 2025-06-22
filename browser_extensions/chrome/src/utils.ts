@@ -29,7 +29,14 @@ export class Utils {
   };
 
   constructor() {
-    // Listen for storage changes to update cache
+    this.initialize();
+  }
+
+  private async initialize() {
+    this.setupEventListeners();
+  }
+
+  private setupEventListeners(): void {
     chrome.storage.onChanged.addListener((changes, areaName) => {
       if (areaName === 'sync' && this.cacheInitialized) {
         // Only update cache after it's been initialized
@@ -54,7 +61,7 @@ export class Utils {
     return this.cachedSettings;
   }
 
-  async playSound(name: SoundName): Promise<void> {
+  async playSound(name: SoundName) {
     const settings = await this.getCachedSettings();
     if (!settings.is_mute_sound_effects) {
       const audio = new Audio(chrome.runtime.getURL(this.sounds[name]));

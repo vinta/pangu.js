@@ -5,7 +5,6 @@ import utils from './utils';
 class PopupController {
   private currentTabId: number | undefined;
   private currentTabUrl: string | undefined;
-  private defaultHideMessageDelayMs: number = 1000 * 5;
 
   constructor() {
     this.initialize();
@@ -92,8 +91,9 @@ class PopupController {
     button.disabled = true;
 
     if (!this.currentTabId || !this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
-      await this.showErrorMessage();
-      button.disabled = false;
+      await this.showErrorMessage(() => {
+        button.disabled = false;
+      });
       return;
     }
 
@@ -113,15 +113,20 @@ class PopupController {
       const response = await chrome.tabs.sendMessage<ManualSpacingMessage, ContentScriptResponse>(this.currentTabId, message);
 
       if (response && response.success) {
-        await this.showSuccessMessage();
+        await this.showSuccessMessage(() => {
+          button.disabled = false;
+        });
       } else {
-        await this.showErrorMessage();
+        await this.showErrorMessage(() => {
+          button.disabled = false;
+        });
       }
     } catch (error) {
       console.error('Manual spacing error:', error);
-      await this.showErrorMessage();
+      await this.showErrorMessage(() => {
+        button.disabled = false;
+      });
     } finally {
-      button.disabled = false;
       button.textContent = chrome.i18n.getMessage('manual_spacing');
     }
   }
@@ -145,22 +150,17 @@ class PopupController {
     }
   }
 
-  private async showErrorMessage() {
-    this.showMessage(chrome.i18n.getMessage('spacing_fail'), 'error');
+  private async showErrorMessage(callback?: () => void) {
+    this.showMessage(chrome.i18n.getMessage('spacing_fail'), 'error', 1000 * 4, callback);
     await utils.playSound('WahWahWaaah');
   }
 
-  private async showSuccessMessage() {
-    this.showMessage(chrome.i18n.getMessage('spacing_success'), 'success');
+  private async showSuccessMessage(callback?: () => void) {
+    this.showMessage(chrome.i18n.getMessage('spacing_success'), 'success', 1000 * 3, callback);
     await utils.playSound('YeahBaby');
   }
 
-  private showMessage(
-    text: string,
-    type: 'info' | 'error' | 'success' = 'info',
-    hideMessageDelayMs: number = this.defaultHideMessageDelayMs,
-    callback?: () => void
-  ) {
+  private showMessage(text: string, type: 'info' | 'error' | 'success' = 'info', hideMessageDelayMs: number, callback?: () => void) {
     const messageElement = document.getElementById('message');
     if (messageElement) {
       messageElement.textContent = text;
