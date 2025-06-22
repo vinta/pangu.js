@@ -1,6 +1,7 @@
 import { D as DEFAULT_SETTINGS } from "./utils.js";
+const SCRIPT_ID = "pangu-auto-spacing";
 async function initializeSettings() {
-  const syncedSettings = await chrome.storage.sync.get(null);
+  const syncedSettings = await chrome.storage.sync.get();
   const missingSettings = {};
   for (const [key, defaultValue] of Object.entries(DEFAULT_SETTINGS)) {
     if (!(key in syncedSettings)) {
@@ -10,9 +11,6 @@ async function initializeSettings() {
   if (Object.keys(missingSettings).length > 0) {
     await chrome.storage.sync.set(missingSettings);
   }
-}
-async function getSettings() {
-  return await chrome.storage.sync.get(DEFAULT_SETTINGS);
 }
 async function unregisterAllContentScripts() {
   try {
@@ -26,9 +24,8 @@ async function unregisterAllContentScripts() {
   }
 }
 async function registerContentScripts() {
-  const SCRIPT_ID = "pangu-auto-spacing";
   await unregisterAllContentScripts();
-  const settings = await getSettings();
+  const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS);
   if (settings.spacing_mode === "spacing_when_load") {
     const contentScript = {
       id: SCRIPT_ID,

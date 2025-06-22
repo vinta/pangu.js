@@ -107,6 +107,10 @@
         "message": "在這種地方是召喚不出空格之神的，除非你在七七四十九天之內都能夠不懷著淫狎之念上網",
         "description": ""
     },
+    "spacing_success": {
+        "message": "空格之神降臨",
+        "description": ""
+    },
     "spacing_complete": {
         "message": "空格之神降落",
         "description": ""

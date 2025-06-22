@@ -1,10 +1,10 @@
 import { t as translatePage } from "./i18n.js";
 import { D as DEFAULT_SETTINGS, u as utils } from "./utils.js";
 class PopupController {
-  isAutoSpacingEnabled = true;
   currentTabId;
   currentTabUrl;
-  hideMessageDelaySeconds = 1e3 * 10;
+  isAutoSpacingEnabled = true;
+  hideMessageDelayMs = 1e3 * 10;
   constructor() {
     this.initialize();
   }
@@ -25,9 +25,9 @@ class PopupController {
     }
   }
   setupEventListeners() {
-    const toggle = document.getElementById("auto-spacing-toggle");
-    if (toggle) {
-      toggle.addEventListener("change", () => this.handleToggleChange());
+    const spacingModeToggle = document.getElementById("spacing-mode-toggle");
+    if (spacingModeToggle) {
+      spacingModeToggle.addEventListener("change", () => this.handleSpacingModeToggleChange());
     }
     const manualBtn = document.getElementById("manual-spacing-btn");
     if (manualBtn) {
@@ -42,9 +42,9 @@ class PopupController {
     }
   }
   updateUI() {
-    const toggle = document.getElementById("auto-spacing-toggle");
-    if (toggle) {
-      toggle.checked = this.isAutoSpacingEnabled;
+    const spacingModeToggle = document.getElementById("spacing-mode-toggle");
+    if (spacingModeToggle) {
+      spacingModeToggle.checked = this.isAutoSpacingEnabled;
     }
   }
   async updateStatus() {
@@ -61,7 +61,6 @@ class PopupController {
       return;
     }
     if (this.isAutoSpacingEnabled) {
-      await chrome.storage.sync.get(DEFAULT_SETTINGS);
       statusEl.className = "status status-active";
       const textEl = statusEl.querySelector(".status-text");
       if (textEl) {
@@ -78,9 +77,9 @@ class PopupController {
       versionEl.textContent = manifest.version;
     }
   }
-  async handleToggleChange() {
-    const toggle = document.getElementById("auto-spacing-toggle");
-    this.isAutoSpacingEnabled = toggle.checked;
+  async handleSpacingModeToggleChange() {
+    const spacingModeToggle = document.getElementById("spacing-mode-toggle");
+    this.isAutoSpacingEnabled = spacingModeToggle.checked;
     await utils.toggleAutoSpacing(this.isAutoSpacingEnabled);
     await utils.playSound(this.isAutoSpacingEnabled ? "Shouryuuken" : "Hadouken");
     this.updateStatus();
@@ -103,12 +102,9 @@ class PopupController {
       let contentScriptLoaded = false;
       try {
         const message2 = { action: "ping" };
-        const response2 = await chrome.tabs.sendMessage(
-          this.currentTabId,
-          message2
-        );
+        const response2 = await chrome.tabs.sendMessage(this.currentTabId, message2);
         contentScriptLoaded = response2?.success === true;
-      } catch (e) {
+      } catch {
       }
       if (!contentScriptLoaded) {
         await chrome.scripting.executeScript({
@@ -121,10 +117,7 @@ class PopupController {
         });
       }
       const message = { action: "manual_spacing" };
-      const response = await chrome.tabs.sendMessage(
-        this.currentTabId,
-        message
-      );
+      const response = await chrome.tabs.sendMessage(this.currentTabId, message);
       if (!response?.success) {
         throw new Error("Failed to apply spacing");
       }
@@ -152,7 +145,7 @@ class PopupController {
     await utils.playSound("WahWahWaaah");
   }
   showSuccess() {
-    this.showMessage("空格之神降臨", "success");
+    this.showMessage(chrome.i18n.getMessage("spacing_success") || "空格之神降臨", "success");
   }
   showMessage(text, type) {
     const messageElement = document.getElementById("message");
@@ -162,7 +155,7 @@ class PopupController {
       messageElement.style.display = "block";
       setTimeout(() => {
         messageElement.style.display = "none";
-      }, this.hideMessageDelaySeconds);
+      }, this.hideMessageDelayMs);
     }
   }
   openOptionsPage() {

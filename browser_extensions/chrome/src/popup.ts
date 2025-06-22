@@ -3,10 +3,10 @@ import utils, { DEFAULT_SETTINGS } from './utils';
 import type { Settings, PingMessage, ManualSpacingMessage, ContentScriptResponse } from './types';
 
 class PopupController {
-  private isAutoSpacingEnabled: boolean = true;
   private currentTabId: number | undefined;
   private currentTabUrl: string | undefined;
-  private hideMessageDelaySeconds: number = 1000 * 10;
+  private isAutoSpacingEnabled: boolean = true;
+  private hideMessageDelayMs: number = 1000 * 10;
 
   constructor() {
     this.initialize();
@@ -23,7 +23,7 @@ class PopupController {
       this.currentTabUrl = activeTab?.url;
 
       // Get settings directly from chrome.storage
-      const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS) as Settings;
+      const settings = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
       this.isAutoSpacingEnabled = settings.spacing_mode === 'spacing_when_load';
 
       // Update UI
@@ -39,10 +39,10 @@ class PopupController {
   }
 
   private setupEventListeners(): void {
-    // Auto-spacing toggle
-    const toggle = document.getElementById('auto-spacing-toggle') as HTMLInputElement;
-    if (toggle) {
-      toggle.addEventListener('change', () => this.handleToggleChange());
+    // Spacing mode toggle
+    const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
+    if (spacingModeToggle) {
+      spacingModeToggle.addEventListener('change', () => this.handleSpacingModeToggleChange());
     }
 
     // Manual spacing button
@@ -62,9 +62,9 @@ class PopupController {
   }
 
   private updateUI(): void {
-    const toggle = document.getElementById('auto-spacing-toggle') as HTMLInputElement;
-    if (toggle) {
-      toggle.checked = this.isAutoSpacingEnabled;
+    const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
+    if (spacingModeToggle) {
+      spacingModeToggle.checked = this.isAutoSpacingEnabled;
     }
   }
 
@@ -87,8 +87,6 @@ class PopupController {
 
     // Check if spacing is active on this site
     if (this.isAutoSpacingEnabled) {
-      const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS) as Settings;
-
       // For new match pattern based rules, we can't easily check if the current URL matches
       // because Chrome's match pattern system is more complex than simple string matching
       // So we'll just show as active if auto-spacing is enabled
@@ -112,9 +110,9 @@ class PopupController {
     }
   }
 
-  private async handleToggleChange(): Promise<void> {
-    const toggle = document.getElementById('auto-spacing-toggle') as HTMLInputElement;
-    this.isAutoSpacingEnabled = toggle.checked;
+  private async handleSpacingModeToggleChange(): Promise<void> {
+    const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
+    this.isAutoSpacingEnabled = spacingModeToggle.checked;
 
     // Use shared toggle function
     await utils.toggleAutoSpacing(this.isAutoSpacingEnabled);
@@ -147,12 +145,9 @@ class PopupController {
       let contentScriptLoaded = false;
       try {
         const message: PingMessage = { action: 'ping' };
-        const response = await chrome.tabs.sendMessage<PingMessage, ContentScriptResponse>(
-          this.currentTabId,
-          message
-        );
+        const response = await chrome.tabs.sendMessage<PingMessage, ContentScriptResponse>(this.currentTabId, message);
         contentScriptLoaded = response?.success === true;
-      } catch (e) {
+      } catch {
         // Content script not loaded
       }
 
@@ -160,21 +155,18 @@ class PopupController {
         // Inject scripts on-demand
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
-          files: ['vendors/pangu/pangu.umd.js']
+          files: ['vendors/pangu/pangu.umd.js'],
         });
 
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
-          files: ['dist/content-script.js']
+          files: ['dist/content-script.js'],
         });
       }
 
       // Apply spacing
       const message: ManualSpacingMessage = { action: 'manual_spacing' };
-      const response = await chrome.tabs.sendMessage<ManualSpacingMessage, ContentScriptResponse>(
-        this.currentTabId,
-        message
-      );
+      const response = await chrome.tabs.sendMessage<ManualSpacingMessage, ContentScriptResponse>(this.currentTabId, message);
 
       if (!response?.success) {
         throw new Error('Failed to apply spacing');
@@ -216,7 +208,7 @@ class PopupController {
   }
 
   private showSuccess(): void {
-    this.showMessage('空格之神降臨', 'success');
+    this.showMessage(chrome.i18n.getMessage('spacing_success') || '空格之神降臨', 'success');
   }
 
   private showMessage(text: string, type: 'error' | 'success'): void {
@@ -229,7 +221,7 @@ class PopupController {
       // Hide message after 3 seconds
       setTimeout(() => {
         messageElement.style.display = 'none';
-      }, this.hideMessageDelaySeconds);
+      }, this.hideMessageDelayMs);
     }
   }
 
