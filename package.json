@@ -81,6 +81,7 @@
     "eslint-config-prettier": "10.1.5",
     "eslint-plugin-unicorn": "59.0.1",
     "prettier": "3.5.3",
+    "@trivago/prettier-plugin-sort-imports": "5.2.2",
     "typescript": "5.8.3",
     "typescript-eslint": "8.34.1",
     "vite": "6.3.5",
