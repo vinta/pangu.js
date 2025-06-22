@@ -49,24 +49,13 @@ class PopupController {
   async renderStatus() {
     const statusEl = document.getElementById("status-indicator");
     if (!statusEl || !this.currentTabUrl) return;
-    const isValidUrl = this.isValidUrlForSpacing(this.currentTabUrl);
-    if (!isValidUrl) {
-      statusEl.className = "status";
-      const textEl = statusEl.querySelector(".status-text");
-      if (textEl) {
-        textEl.setAttribute("data-i18n", "status_inactive");
-        textEl.textContent = chrome.i18n.getMessage("status_inactive");
-      }
-      return;
-    }
-    if (this.isAutoSpacingEnabled) {
-      statusEl.className = "status status-active";
-      const textEl = statusEl.querySelector(".status-text");
-      if (textEl) {
-        const key = "status_active";
-        textEl.setAttribute("data-i18n", key);
-        textEl.textContent = chrome.i18n.getMessage(key);
-      }
+    const isActive = await this.isContentScriptRegistered();
+    statusEl.className = isActive ? "status status-active" : "status";
+    const textEl = statusEl.querySelector(".status-text");
+    if (textEl) {
+      const key = isActive ? "status_active" : "status_inactive";
+      textEl.setAttribute("data-i18n", key);
+      textEl.textContent = chrome.i18n.getMessage(key);
     }
   }
   async handleSpacingModeToggleChange() {
@@ -77,11 +66,9 @@ class PopupController {
     this.renderStatus();
   }
   async handleManualSpacing() {
-    if (!this.currentTabId || !this.currentTabUrl) {
-      await this.showErrorMessage();
-      return;
-    }
-    if (!this.isValidUrlForSpacing(this.currentTabUrl)) {
+    console.log(this.currentTabId);
+    console.log(this.currentTabUrl);
+    if (!this.currentTabId || !this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
       await this.showErrorMessage();
       return;
     }
@@ -91,10 +78,8 @@ class PopupController {
         btn.disabled = true;
         btn.textContent = chrome.i18n.getMessage("spacing_processing");
       }
-      try {
-        const message2 = { action: "ping" };
-        await chrome.tabs.sendMessage(this.currentTabId, message2);
-      } catch {
+      const isScriptLoaded = await this.isContentScriptRegistered();
+      if (!isScriptLoaded) {
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
           files: ["vendors/pangu/pangu.umd.js", "dist/content-script.js"]
@@ -110,6 +95,7 @@ class PopupController {
         btn.textContent = chrome.i18n.getMessage("manual_spacing");
       }
       await this.showSuccessMessage();
+      this.renderStatus();
     } catch (error) {
       console.error("Failed to apply spacing:", error);
       await this.showErrorMessage();
@@ -120,9 +106,18 @@ class PopupController {
       }
     }
   }
-  // TODO: use https://www.npmjs.com/package/browser-extension-url-match
-  isValidUrlForSpacing(url) {
+  isValidUrl(url) {
     return /^(http(s?)|file)/i.test(url);
+  }
+  async isContentScriptRegistered() {
+    if (!this.currentTabId || !this.currentTabUrl) return false;
+    try {
+      const message = { action: "ping" };
+      await chrome.tabs.sendMessage(this.currentTabId, message);
+      return true;
+    } catch {
+      return false;
+    }
   }
   async showErrorMessage() {
     this.showMessage(chrome.i18n.getMessage("spacing_fail"), "error");

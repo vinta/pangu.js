@@ -62,33 +62,15 @@ class PopupController {
     const statusEl = document.getElementById('status-indicator');
     if (!statusEl || !this.currentTabUrl) return;
 
-    // Check if current URL is valid for spacing
-    const isValidUrl = this.isValidUrlForSpacing(this.currentTabUrl);
+    // Check if content script is loaded in the current tab
+    const isActive = await this.isContentScriptRegistered();
 
-    if (!isValidUrl) {
-      statusEl.className = 'status';
-      const textEl = statusEl.querySelector('.status-text');
-      if (textEl) {
-        textEl.setAttribute('data-i18n', 'status_inactive');
-        textEl.textContent = chrome.i18n.getMessage('status_inactive');
-      }
-      return;
-    }
-
-    // Check if spacing is active on this site
-    if (this.isAutoSpacingEnabled) {
-      // For new match pattern based rules, we can't easily check if the current URL matches
-      // because Chrome's match pattern system is more complex than simple string matching
-      // So we'll just show as active if auto-spacing is enabled
-      const isActive = true;
-
-      statusEl.className = isActive ? 'status status-active' : 'status';
-      const textEl = statusEl.querySelector('.status-text');
-      if (textEl) {
-        const key = isActive ? 'status_active' : 'status_inactive';
-        textEl.setAttribute('data-i18n', key);
-        textEl.textContent = chrome.i18n.getMessage(key);
-      }
+    statusEl.className = isActive ? 'status status-active' : 'status';
+    const textEl = statusEl.querySelector('.status-text');
+    if (textEl) {
+      const key = isActive ? 'status_active' : 'status_inactive';
+      textEl.setAttribute('data-i18n', key);
+      textEl.textContent = chrome.i18n.getMessage(key);
     }
   }
 
@@ -103,12 +85,9 @@ class PopupController {
   }
 
   private async handleManualSpacing() {
-    if (!this.currentTabId || !this.currentTabUrl) {
-      await this.showErrorMessage();
-      return;
-    }
-
-    if (!this.isValidUrlForSpacing(this.currentTabUrl)) {
+    console.log(this.currentTabId);
+    console.log(this.currentTabUrl);
+    if (!this.currentTabId || !this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
       await this.showErrorMessage();
       return;
     }
@@ -121,11 +100,9 @@ class PopupController {
         btn.textContent = chrome.i18n.getMessage('spacing_processing');
       }
 
-      // Check if content script is loaded
-      try {
-        const message: PingMessage = { action: 'ping' };
-        await chrome.tabs.sendMessage<PingMessage, ContentScriptResponse>(this.currentTabId, message);
-      } catch {
+      // Check if content script is loaded, inject if not
+      const isScriptLoaded = await this.isContentScriptRegistered();
+      if (!isScriptLoaded) {
         // Content script not loaded - inject scripts on-demand
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
@@ -146,6 +123,7 @@ class PopupController {
       }
 
       await this.showSuccessMessage();
+      this.renderStatus();
     } catch (error) {
       console.error('Failed to apply spacing:', error);
       await this.showErrorMessage();
@@ -159,9 +137,22 @@ class PopupController {
     }
   }
 
-  // TODO: use https://www.npmjs.com/package/browser-extension-url-match
-  private isValidUrlForSpacing(url: string) {
+  private isValidUrl(url: string) {
     return /^(http(s?)|file)/i.test(url);
+  }
+
+  private async isContentScriptRegistered(): Promise<boolean> {
+    if (!this.currentTabId || !this.currentTabUrl) return false;
+
+    try {
+      // Try to ping the content script to see if it's loaded
+      const message: PingMessage = { action: 'ping' };
+      await chrome.tabs.sendMessage<PingMessage, ContentScriptResponse>(this.currentTabId, message);
+      return true;
+    } catch {
+      // Content script not loaded
+      return false;
+    }
   }
 
   private async showErrorMessage() {

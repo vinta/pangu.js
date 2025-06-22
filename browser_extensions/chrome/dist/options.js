@@ -1,5 +1,35 @@
 import { t as translatePage } from "./i18n.js";
 import { D as DEFAULT_SETTINGS, u as utils } from "./utils.js";
+function convertComplexPattern(pattern) {
+  if (pattern.includes("://*.")) {
+    const match = pattern.match(/^(\*|https?|file|ftp):\/\/\*\.([^\/]+)(\/.*)?$/);
+    if (match) {
+      const [, protocol, domain, pathname = "/*"] = match;
+      return new URLPattern({
+        protocol: protocol === "*" ? "{http,https}" : protocol,
+        hostname: `{,*.}${domain}`,
+        pathname
+      });
+    }
+  }
+  throw new Error("Unsupported pattern format");
+}
+function isValidMatchPattern(pattern) {
+  if (pattern === "<all_urls>") {
+    return true;
+  }
+  try {
+    new URLPattern(pattern);
+    return true;
+  } catch {
+    try {
+      convertComplexPattern(pattern);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+}
 class OptionsController {
   settings = { ...DEFAULT_SETTINGS };
   editingUrls = /* @__PURE__ */ new Map();
@@ -214,13 +244,8 @@ class OptionsController {
       alert(chrome.i18n.getMessage("error_invalid_match_pattern"));
     }
   }
-  // TODO: use https://www.npmjs.com/package/browser-extension-url-match
   isValidMatchPattern(pattern) {
-    const matchPatternRegex = /^(\*|https?|file|ftp):\/\/(\*|\*\.[^\/]+|[^\/]+)(\/.*)?$/;
-    if (pattern === "<all_urls>") {
-      return true;
-    }
-    return matchPatternRegex.test(pattern);
+    return isValidMatchPattern(pattern);
   }
   escapeHtml(text) {
     const div = document.createElement("div");

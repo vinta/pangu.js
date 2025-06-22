@@ -1,6 +1,7 @@
 import { translatePage } from './i18n';
 import type { Settings } from './types';
 import utils, { DEFAULT_SETTINGS } from './utils';
+import { isValidMatchPattern } from './match-pattern';
 
 class OptionsController {
   private settings: Settings = { ...DEFAULT_SETTINGS };
@@ -270,18 +271,8 @@ class OptionsController {
     }
   }
 
-  // TODO: use https://www.npmjs.com/package/browser-extension-url-match
   private isValidMatchPattern(pattern: string): boolean {
-    // Basic match pattern validation
-    // Format: <scheme>://<host><path>
-    const matchPatternRegex = /^(\*|https?|file|ftp):\/\/(\*|\*\.[^\/]+|[^\/]+)(\/.*)?$/;
-
-    // Special case for <all_urls>
-    if (pattern === '<all_urls>') {
-      return true;
-    }
-
-    return matchPatternRegex.test(pattern);
+    return isValidMatchPattern(pattern);
   }
 
   private escapeHtml(text: string): string {
