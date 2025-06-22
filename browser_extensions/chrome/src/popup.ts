@@ -105,12 +105,12 @@ class PopupController {
 
   private async handleManualSpacing() {
     if (!this.currentTabId || !this.currentTabUrl) {
-      await this.showError();
+      await this.showErrorMessage();
       return;
     }
 
     if (!this.isValidUrlForSpacing(this.currentTabUrl)) {
-      await this.showError();
+      await this.showErrorMessage();
       return;
     }
 
@@ -146,10 +146,10 @@ class PopupController {
         btn.textContent = chrome.i18n.getMessage('manual_spacing');
       }
 
-      await this.showSuccess();
+      await this.showSuccessMessage();
     } catch (error) {
       console.error('Failed to apply spacing:', error);
-      await this.showError();
+      await this.showErrorMessage();
 
       // Reset button
       const btn = document.getElementById('manual-spacing-btn') as HTMLButtonElement;
@@ -164,12 +164,12 @@ class PopupController {
     return /^(http(s?)|file)/i.test(url);
   }
 
-  private async showError() {
+  private async showErrorMessage() {
     this.showMessage(chrome.i18n.getMessage('spacing_fail'), 'error');
     await utils.playSound('WahWahWaaah');
   }
 
-  private async showSuccess() {
+  private async showSuccessMessage() {
     this.showMessage(chrome.i18n.getMessage('spacing_success'), 'success');
     await utils.playSound('YeahBaby');
   }
