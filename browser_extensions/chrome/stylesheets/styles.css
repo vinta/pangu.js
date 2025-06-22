@@ -111,8 +111,8 @@ a:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-2) var(--spacing-4);
-  font-size: var(--text-sm);
+  padding: var(--spacing-3) var(--spacing-4);
+  font-size: var(--text-base);
   font-weight: 500;
   line-height: 1.25rem;
   border-radius: var(--radius);
@@ -230,7 +230,7 @@ a:hover {
 }
 
 .toggle-label {
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   font-weight: 500;
   color: var(--color-text-primary);
 }
@@ -255,7 +255,7 @@ a:hover {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   color: var(--color-text-secondary);
 }
 
@@ -316,14 +316,14 @@ a:hover {
 }
 
 .popup-title {
-  font-size: var(--text-base);
+  font-size: var(--text-lg);
   font-weight: 600;
   color: var(--color-text-primary);
   white-space: nowrap;
 }
 
 .popup-subtitle {
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   color: var(--color-text-secondary);
 }
 
@@ -361,7 +361,7 @@ a:hover {
 }
 
 .popup-footer-link {
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   color: var(--color-text-secondary);
 }
 
@@ -373,7 +373,7 @@ a:hover {
 /* Message under button */
 .message {
   margin-top: var(--spacing-2);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   text-align: center;
 }
 
