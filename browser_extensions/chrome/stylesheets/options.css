@@ -196,7 +196,7 @@
   display: inline-flex;
   align-items: center;
   padding: var(--spacing-2) var(--spacing-3);
-  color: var(--color-primary);
+  color: var(--color-success);
   font-size: var(--text-sm);
   text-decoration: none;
   border-radius: var(--radius);
@@ -204,7 +204,7 @@
 }
 
 #add-url-btn:hover {
-  background-color: var(--color-primary-light);
+  background-color: #dcfce7;
   text-decoration: none;
 }
 
