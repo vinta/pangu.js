@@ -4,7 +4,6 @@ import utils, { DEFAULT_SETTINGS } from './utils';
 
 class OptionsController {
   private settings: Settings = { ...DEFAULT_SETTINGS };
-
   private editingUrls: Map<number, string> = new Map();
   private addUrlInput: HTMLInputElement | null = null;
 
@@ -13,54 +12,11 @@ class OptionsController {
   }
 
   private async initialize(): Promise<void> {
-    // Translate page
-    translatePage();
-
-    // Set i18n text for dynamic elements
-    this.setI18nText();
-
-    // Load settings
-    await this.loadSettings();
-
-    // Set up event listeners
-    this.setupEventListeners();
-
-    // Initial render
-    this.render();
-  }
-
-  private setI18nText(): void {
-    const elements = {
-      page_title: chrome.i18n.getMessage('extension_name'),
-      header_title: chrome.i18n.getMessage('extension_name'),
-      subtitle: chrome.i18n.getMessage('subtitle'),
-      quote: chrome.i18n.getMessage('quote'),
-      label_settings: chrome.i18n.getMessage('label_settings'),
-      label_other_options: chrome.i18n.getMessage('label_other_options'),
-      spacing_when_click_msg: chrome.i18n.getMessage('spacing_when_click_msg'),
-    };
-
-    for (const [id, text] of Object.entries(elements)) {
-      const element = document.getElementById(id);
-      if (element) {
-        element.textContent = text;
-      }
-    }
-
-    // Set page title
-    document.title = chrome.i18n.getMessage('extension_name');
-
-    // Set mute label
-    const muteLabel = document.getElementById('label_is_mute');
-    if (muteLabel) {
-      muteLabel.textContent = chrome.i18n.getMessage('label_is_mute');
-    }
-  }
-
-  private async loadSettings(): Promise<void> {
-    // Load settings directly from chrome.storage instead of messaging
-    // chrome.storage.sync.get with defaults will return merged values
     this.settings = (await chrome.storage.sync.get(this.settings)) as Settings;
+    this.setupEventListeners();
+    this.render();
+
+    translatePage();
   }
 
   private setupEventListeners(): void {
@@ -98,7 +54,7 @@ class OptionsController {
     if (muteCheckbox) {
       muteCheckbox.addEventListener('change', () => {
         this.settings.is_mute_sound_effects = muteCheckbox.checked;
-        this.saveSettings({ is_mute_sound_effects: muteCheckbox.checked });
+        chrome.storage.sync.set({ is_mute_sound_effects: muteCheckbox.checked });
       });
     }
   }
@@ -233,7 +189,7 @@ class OptionsController {
     this.settings.filter_mode = this.settings.filter_mode === 'blacklist' ? 'whitelist' : 'blacklist';
     await utils.playSound(this.settings.filter_mode === 'blacklist' ? 'Shouryuuken' : 'Hadouken');
 
-    this.saveSettings({ filter_mode: this.settings.filter_mode });
+    chrome.storage.sync.set({ filter_mode: this.settings.filter_mode });
     this.render();
   }
 
@@ -261,7 +217,7 @@ class OptionsController {
       this.settings[ruleKey][index] = newUrl;
       const update: Partial<Settings> = {};
       update[ruleKey] = [...this.settings[ruleKey]];
-      this.saveSettings(update);
+      chrome.storage.sync.set(update);
 
       this.editingUrls.delete(index);
       this.renderUrlList();
@@ -281,7 +237,7 @@ class OptionsController {
     this.settings[ruleKey].splice(index, 1);
     const update: Partial<Settings> = {};
     update[ruleKey] = [...this.settings[ruleKey]];
-    this.saveSettings(update);
+    chrome.storage.sync.set(update);
 
     this.renderUrlList();
   }
@@ -307,7 +263,7 @@ class OptionsController {
       this.settings[ruleKey].push(newUrl);
       const update: Partial<Settings> = {};
       update[ruleKey] = [...this.settings[ruleKey]];
-      this.saveSettings(update);
+      chrome.storage.sync.set(update);
 
       this.addUrlInput = null;
       this.renderUrlList();
@@ -332,10 +288,6 @@ class OptionsController {
     }
 
     return matchPatternRegex.test(pattern);
-  }
-
-  private saveSettings(update: Partial<Settings>): void {
-    chrome.storage.sync.set(update);
   }
 
   private escapeHtml(text: string): string {

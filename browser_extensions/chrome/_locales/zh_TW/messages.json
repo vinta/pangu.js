@@ -32,11 +32,11 @@
     "description": ""
   },
   "blacklist": {
-    "message": "不要在這些網站作用",
+    "message": "不要在這些網頁召喚空格之神",
     "description": ""
   },
   "whitelist": {
-    "message": "只在這些網站作用",
+    "message": "只在這些網頁召喚空格之神",
     "description": ""
   },
   "god_of_spacing": {
@@ -141,10 +141,6 @@
   },
   "section_other": {
     "message": "其他",
-    "description": ""
-  },
-  "filter_mode_blacklist_desc": {
-    "message": "除了這些網址，其他網頁都自動加上空格",
     "description": ""
   }
 }

@@ -8,36 +8,10 @@ class OptionsController {
     this.initialize();
   }
   async initialize() {
-    translatePage();
-    this.setI18nText();
-    await this.loadSettings();
+    this.settings = await chrome.storage.sync.get(this.settings);
     this.setupEventListeners();
     this.render();
-  }
-  setI18nText() {
-    const elements = {
-      page_title: chrome.i18n.getMessage("extension_name"),
-      header_title: chrome.i18n.getMessage("extension_name"),
-      subtitle: chrome.i18n.getMessage("subtitle"),
-      quote: chrome.i18n.getMessage("quote"),
-      label_settings: chrome.i18n.getMessage("label_settings"),
-      label_other_options: chrome.i18n.getMessage("label_other_options"),
-      spacing_when_click_msg: chrome.i18n.getMessage("spacing_when_click_msg")
-    };
-    for (const [id, text] of Object.entries(elements)) {
-      const element = document.getElementById(id);
-      if (element) {
-        element.textContent = text;
-      }
-    }
-    document.title = chrome.i18n.getMessage("extension_name");
-    const muteLabel = document.getElementById("label_is_mute");
-    if (muteLabel) {
-      muteLabel.textContent = chrome.i18n.getMessage("label_is_mute");
-    }
-  }
-  async loadSettings() {
-    this.settings = await chrome.storage.sync.get(this.settings);
+    translatePage();
   }
   setupEventListeners() {
     document.addEventListener("click", (e) => {
@@ -70,7 +44,7 @@ class OptionsController {
     if (muteCheckbox) {
       muteCheckbox.addEventListener("change", () => {
         this.settings.is_mute_sound_effects = muteCheckbox.checked;
-        this.saveSettings({ is_mute_sound_effects: muteCheckbox.checked });
+        chrome.storage.sync.set({ is_mute_sound_effects: muteCheckbox.checked });
       });
     }
   }
@@ -173,7 +147,7 @@ class OptionsController {
   async changeFilterMode() {
     this.settings.filter_mode = this.settings.filter_mode === "blacklist" ? "whitelist" : "blacklist";
     await utils.playSound(this.settings.filter_mode === "blacklist" ? "Shouryuuken" : "Hadouken");
-    this.saveSettings({ filter_mode: this.settings.filter_mode });
+    chrome.storage.sync.set({ filter_mode: this.settings.filter_mode });
     this.render();
   }
   startEditingUrl(index) {
@@ -195,7 +169,7 @@ class OptionsController {
       this.settings[ruleKey][index] = newUrl;
       const update = {};
       update[ruleKey] = [...this.settings[ruleKey]];
-      this.saveSettings(update);
+      chrome.storage.sync.set(update);
       this.editingUrls.delete(index);
       this.renderUrlList();
     } else {
@@ -212,7 +186,7 @@ class OptionsController {
     this.settings[ruleKey].splice(index, 1);
     const update = {};
     update[ruleKey] = [...this.settings[ruleKey]];
-    this.saveSettings(update);
+    chrome.storage.sync.set(update);
     this.renderUrlList();
   }
   showAddUrlInput() {
@@ -232,7 +206,7 @@ class OptionsController {
       this.settings[ruleKey].push(newUrl);
       const update = {};
       update[ruleKey] = [...this.settings[ruleKey]];
-      this.saveSettings(update);
+      chrome.storage.sync.set(update);
       this.addUrlInput = null;
       this.renderUrlList();
     } else {
@@ -249,9 +223,6 @@ class OptionsController {
       return true;
     }
     return matchPatternRegex.test(pattern);
-  }
-  saveSettings(update) {
-    chrome.storage.sync.set(update);
   }
   escapeHtml(text) {
     const div = document.createElement("div");
