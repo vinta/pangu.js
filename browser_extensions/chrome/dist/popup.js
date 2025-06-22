@@ -60,13 +60,12 @@ class PopupController {
     }
   }
   async handleSpacingModeToggleChange() {
-    const spacingModeToggle = document.getElementById("spacing-mode-toggle");
-    const isAutoSpacingEnabled = spacingModeToggle.checked;
-    const spacing_mode = isAutoSpacingEnabled ? "spacing_when_load" : "spacing_when_click";
-    await chrome.storage.sync.set({ spacing_mode });
-    await utils.playSound(isAutoSpacingEnabled ? "Shouryuuken" : "Hadouken");
+    const toggle = document.getElementById("spacing-mode-toggle");
+    const spacingMode = toggle.checked ? "spacing_when_load" : "spacing_when_click";
+    await chrome.storage.sync.set({ spacing_mode: spacingMode });
     await this.renderStatus();
     this.showMessage(chrome.i18n.getMessage("refresh_required"), "info", 1e3 * 3);
+    await utils.playSound(spacingMode === "spacing_when_load" ? "Shouryuuken" : "Hadouken");
   }
   async handleManualSpacing() {
     const button = document.getElementById("manual-spacing-btn");
