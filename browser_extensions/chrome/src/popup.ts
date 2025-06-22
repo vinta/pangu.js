@@ -119,7 +119,7 @@ class PopupController {
       const btn = document.getElementById('manual-spacing-btn') as HTMLButtonElement;
       if (btn) {
         btn.disabled = true;
-        btn.textContent = chrome.i18n.getMessage('processing');
+        btn.textContent = chrome.i18n.getMessage('spacing_processing');
       }
 
       // Check if content script is loaded
@@ -165,7 +165,7 @@ class PopupController {
   }
 
   private async showError() {
-    this.showMessage(chrome.i18n.getMessage('cannot_summon_here'), 'error');
+    this.showMessage(chrome.i18n.getMessage('spacing_fail'), 'error');
     await utils.playSound('WahWahWaaah');
   }
 

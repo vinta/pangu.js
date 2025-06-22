@@ -87,7 +87,7 @@ class PopupController {
       const btn = document.getElementById("manual-spacing-btn");
       if (btn) {
         btn.disabled = true;
-        btn.textContent = chrome.i18n.getMessage("processing");
+        btn.textContent = chrome.i18n.getMessage("spacing_processing");
       }
       try {
         const message2 = { action: "ping" };
@@ -122,7 +122,7 @@ class PopupController {
     return /^(http(s?)|file)/i.test(url);
   }
   async showError() {
-    this.showMessage(chrome.i18n.getMessage("cannot_summon_here"), "error");
+    this.showMessage(chrome.i18n.getMessage("spacing_fail"), "error");
     await utils.playSound("WahWahWaaah");
   }
   async showSuccess() {
