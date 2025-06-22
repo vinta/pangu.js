@@ -2,8 +2,10 @@
 import type { Settings } from './types';
 import { DEFAULT_SETTINGS } from './utils';
 
+const SCRIPT_ID = 'pangu-auto-spacing';
+
 async function initializeSettings() {
-  const syncedSettings = await chrome.storage.sync.get(null);
+  const syncedSettings = await chrome.storage.sync.get();
 
   const missingSettings: Partial<Settings> = {};
   for (const [key, defaultValue] of Object.entries(DEFAULT_SETTINGS)) {
@@ -31,13 +33,9 @@ async function unregisterAllContentScripts(): Promise<void> {
 }
 
 async function registerContentScripts() {
-  const SCRIPT_ID = 'pangu-auto-spacing';
-
   await unregisterAllContentScripts();
 
   const settings = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
-
-  // Only register if auto-spacing is enabled
   if (settings.spacing_mode === 'spacing_when_load') {
     const contentScript: chrome.scripting.RegisteredContentScript = {
       id: SCRIPT_ID,
@@ -62,24 +60,23 @@ async function registerContentScripts() {
       }
     }
   } else {
-    // If auto-spacing is disabled, ensure all scripts are unregistered
     await unregisterAllContentScripts();
   }
 }
 
-// Initialize settings when extension is installed or updated to a new version
 chrome.runtime.onInstalled.addListener(async () => {
+  // Initialize settings when extension is installed or updated to a new version
   await initializeSettings();
   await registerContentScripts();
 });
 
-// Also register content scripts when extension starts
 chrome.runtime.onStartup.addListener(async () => {
+  // Also register content scripts when extension starts
   await registerContentScripts();
 });
 
-// Re-register content scripts when relevant settings change
 chrome.storage.onChanged.addListener(async (changes, areaName) => {
+  // Re-register content scripts when relevant settings change
   if (areaName === 'sync') {
     const relevantKeys: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist'];
     const hasRelevantChanges = Object.keys(changes).some((key) => relevantKeys.includes(key as keyof Settings));
