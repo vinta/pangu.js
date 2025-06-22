@@ -1,5 +1,5 @@
 import { t as translatePage } from "./i18n.js";
-import { u as utils } from "./utils.js";
+import { u as utils, D as DEFAULT_SETTINGS } from "./utils.js";
 function isValidMatchPattern(pattern) {
   if (!pattern.match(/^(https?:\/\/|file:\/\/\/|\*:\/\/)/)) {
     return false;
@@ -254,10 +254,13 @@ class OptionsController {
     }
   }
   async restoreDefaults() {
-    if (confirm(chrome.i18n.getMessage("confirm_restore_defaults") || "確定要恢復成原廠設定嗎？")) {
+    if (confirm(chrome.i18n.getMessage("confirm_restore_defaults"))) {
       const settings = await utils.getCachedSettings();
       const filterMode = settings.filter_mode;
-      await chrome.storage.sync.set({ [filterMode]: [] });
+      const defaultValue = DEFAULT_SETTINGS[filterMode];
+      await chrome.storage.sync.set({
+        [filterMode]: defaultValue
+      });
       await this.renderUrlList();
     }
   }

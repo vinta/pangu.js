@@ -193,7 +193,7 @@ a:hover {
 /* Button sizes */
 .btn-sm {
   padding: var(--spacing-1) var(--spacing-3);
-  font-size: var(--text-xs);
+  font-size: var(--text-ms);
 }
 
 .btn-lg {

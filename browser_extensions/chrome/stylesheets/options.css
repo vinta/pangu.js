@@ -226,16 +226,6 @@
   text-decoration: none;
 }
 
-/* Button overrides for options page */
-.options-section .btn {
-  font-size: var(--text-base);
-  box-shadow: var(--shadow);
-}
-
-.options-section .btn:hover {
-  box-shadow: var(--shadow-md);
-}
-
 /* Small buttons for URL actions */
 .small-button {
   padding: var(--spacing-1) var(--spacing-2);

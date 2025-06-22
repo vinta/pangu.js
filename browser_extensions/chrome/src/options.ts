@@ -1,6 +1,6 @@
 import { translatePage } from './i18n';
 import { isValidMatchPattern } from './match-pattern';
-import utils from './utils';
+import utils, { DEFAULT_SETTINGS } from './utils';
 
 class OptionsController {
   private editingUrls: Map<number, string> = new Map();
@@ -316,13 +316,16 @@ class OptionsController {
   }
 
   private async restoreDefaults() {
-    if (confirm(chrome.i18n.getMessage('confirm_restore_defaults') || '確定要恢復成原廠設定嗎？')) {
-      // Clear the current filter mode list
+    if (confirm(chrome.i18n.getMessage('confirm_restore_defaults'))) {
+      // Get current filter mode
       const settings = await utils.getCachedSettings();
-      const filterMode = settings.filter_mode as 'blacklist' | 'whitelist';
+      const filterMode = settings.filter_mode;
 
-      // Set empty array for the current filter mode
-      await chrome.storage.sync.set({ [filterMode]: [] });
+      // Restore only the current filter mode list to its default value
+      const defaultValue = DEFAULT_SETTINGS[filterMode];
+      await chrome.storage.sync.set({
+        [filterMode]: defaultValue,
+      });
 
       // Re-render the URL list
       await this.renderUrlList();
