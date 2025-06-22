@@ -1,6 +1,7 @@
 import { translatePage } from './utils/i18n';
 import type { PingMessage, ManualSpacingMessage, ContentScriptResponse, MessageFromContentScript } from './utils/types';
-import utils from './utils/settings';
+import { getCachedSettings } from './utils/settings';
+import { playSound } from './utils/sounds';
 
 class PopupController {
   private currentTabId: number | undefined;
@@ -50,7 +51,7 @@ class PopupController {
   }
 
   private async renderToggle() {
-    const settings = await utils.getCachedSettings();
+    const settings = await getCachedSettings();
     const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
     if (spacingModeToggle) {
       spacingModeToggle.checked = settings.spacing_mode === 'spacing_when_load';
@@ -87,7 +88,7 @@ class PopupController {
     await chrome.storage.sync.set({ spacing_mode: spacingMode });
 
     this.showMessage(chrome.i18n.getMessage('refresh_required'), 'info', 1000 * 3);
-    await utils.playSound(spacingMode === 'spacing_when_load' ? 'Shouryuuken' : 'Hadouken');
+    await playSound(spacingMode === 'spacing_when_load' ? 'Shouryuuken' : 'Hadouken');
   }
 
   private async handleManualSpacing() {
@@ -166,7 +167,7 @@ class PopupController {
       return false;
     }
 
-    const settings = await utils.getCachedSettings();
+    const settings = await getCachedSettings();
 
     // If in manual mode, content script shouldn't be active
     if (settings.spacing_mode === 'spacing_when_click') {
@@ -196,12 +197,12 @@ class PopupController {
 
   private async showErrorMessage(callback?: () => void) {
     this.showMessage(chrome.i18n.getMessage('spacing_fail'), 'error', 1000 * 4, callback);
-    await utils.playSound('WahWahWaaah');
+    await playSound('WahWahWaaah');
   }
 
   private async showSuccessMessage(callback?: () => void) {
     this.showMessage(chrome.i18n.getMessage('spacing_success'), 'success', 1000 * 3, callback);
-    await utils.playSound('YeahBaby');
+    await playSound('YeahBaby');
   }
 
   private showMessage(text: string, type: 'info' | 'error' | 'success' = 'info', hideMessageDelayMs: number, callback?: () => void) {

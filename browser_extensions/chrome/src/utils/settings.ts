@@ -1,7 +1,5 @@
 import type { Settings } from './types';
 
-type SoundName = 'Hadouken' | 'Shouryuuken' | 'YeahBaby' | 'WahWahWaaah';
-
 export const DEFAULT_SETTINGS: Settings = {
   spacing_mode: 'spacing_when_load',
   filter_mode: 'blacklist',
@@ -17,60 +15,29 @@ export const DEFAULT_SETTINGS: Settings = {
   is_mute_sound_effects: false,
 };
 
-export class Utils {
-  private cachedSettings: Settings = { ...DEFAULT_SETTINGS };
-  private cacheInitialized: boolean = false;
+// Module-level state for settings cache
+let cachedSettings: Settings = { ...DEFAULT_SETTINGS };
+let cacheInitialized = false;
 
-  private readonly sounds: Record<SoundName, string> = {
-    Hadouken: 'sounds/StreetFighter-Hadouken.mp3',
-    Shouryuuken: 'sounds/StreetFighter-Shouryuuken.mp3',
-    YeahBaby: 'sounds/AustinPowers-YeahBaby.mp3',
-    WahWahWaaah: 'sounds/ManciniPinkPanther-WahWahWaaah.mp3',
-  };
-
-  constructor() {
-    this.initialize();
-  }
-
-  private async initialize() {
-    this.setupEventListeners();
-  }
-
-  private setupEventListeners(): void {
-    chrome.storage.onChanged.addListener((changes, areaName) => {
-      if (areaName === 'sync' && this.cacheInitialized) {
-        // Only update cache after it's been initialized
-        for (const [key, change] of Object.entries(changes)) {
-          if (key in this.cachedSettings) {
-            // Create a new object to satisfy TypeScript's type checking
-            this.cachedSettings = {
-              ...this.cachedSettings,
-              [key]: change.newValue,
-            };
-          }
-        }
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === 'sync' && cacheInitialized) {
+    // Only update cache after it's been initialized
+    for (const [key, change] of Object.entries(changes)) {
+      if (key in cachedSettings) {
+        // Create a new object to satisfy TypeScript's type checking
+        cachedSettings = {
+          ...cachedSettings,
+          [key]: change.newValue,
+        };
       }
-    });
-  }
-
-  async getCachedSettings(): Promise<Settings> {
-    if (!this.cacheInitialized) {
-      this.cachedSettings = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
-      this.cacheInitialized = true;
-    }
-    return this.cachedSettings;
-  }
-
-  async playSound(name: SoundName) {
-    const settings = await this.getCachedSettings();
-    if (!settings.is_mute_sound_effects) {
-      const audio = new Audio(chrome.runtime.getURL(this.sounds[name]));
-      audio.play().catch((e) => console.log('Sound play failed:', e));
     }
   }
+});
+
+export async function getCachedSettings(): Promise<Settings> {
+  if (!cacheInitialized) {
+    cachedSettings = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
+    cacheInitialized = true;
+  }
+  return cachedSettings;
 }
-
-// NOTE: Each script (popup, options, content scripts, service workers) creates its own Utils instance
-const utils = new Utils();
-
-export default utils;

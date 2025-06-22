@@ -1,6 +1,7 @@
 import { translatePage } from './utils/i18n';
-import { isValidMatchPattern } from './utils/match-pattern';
-import utils, { DEFAULT_SETTINGS } from './utils/settings';
+import { isValidMatchPattern } from './utils/urls';
+import { getCachedSettings, DEFAULT_SETTINGS } from './utils/settings';
+import { playSound } from './utils/sounds';
 
 class OptionsController {
   private editingUrls: Map<number, string> = new Map();
@@ -64,7 +65,7 @@ class OptionsController {
   }
 
   private async renderSpacingMode() {
-    const settings = await utils.getCachedSettings();
+    const settings = await getCachedSettings();
     const button = document.getElementById('spacing_mode_btn') as HTMLButtonElement;
     button.textContent = chrome.i18n.getMessage(settings.spacing_mode);
 
@@ -81,7 +82,7 @@ class OptionsController {
   }
 
   private async renderFilterMode() {
-    const settings = await utils.getCachedSettings();
+    const settings = await getCachedSettings();
     const button = document.getElementById('filter_mode_btn') as HTMLButtonElement;
     button.textContent = chrome.i18n.getMessage(settings.filter_mode);
 
@@ -89,7 +90,7 @@ class OptionsController {
   }
 
   private async renderUrlList() {
-    const settings = await utils.getCachedSettings();
+    const settings = await getCachedSettings();
     const container = document.getElementById('url-list-container') as HTMLDivElement;
 
     // Save templates before clearing
@@ -185,7 +186,7 @@ class OptionsController {
   }
 
   private async renderMuteCheckbox() {
-    const settings = await utils.getCachedSettings();
+    const settings = await getCachedSettings();
     const checkbox = document.getElementById('mute-checkbox') as HTMLInputElement;
     if (checkbox) {
       checkbox.checked = settings.is_mute_sound_effects;
@@ -193,21 +194,21 @@ class OptionsController {
   }
 
   private async toggleSpacingMode() {
-    const settings = await utils.getCachedSettings();
+    const settings = await getCachedSettings();
     const newSpacingMode = settings.spacing_mode === 'spacing_when_load' ? 'spacing_when_click' : 'spacing_when_load';
     await chrome.storage.sync.set({ spacing_mode: newSpacingMode });
     await this.renderSpacingMode();
 
-    await utils.playSound(newSpacingMode === 'spacing_when_load' ? 'Shouryuuken' : 'Hadouken');
+    await playSound(newSpacingMode === 'spacing_when_load' ? 'Shouryuuken' : 'Hadouken');
   }
 
   private async toggleFilterMode() {
-    const settings = await utils.getCachedSettings();
+    const settings = await getCachedSettings();
     const newFilterMode = settings.filter_mode === 'blacklist' ? 'whitelist' : 'blacklist';
     await chrome.storage.sync.set({ filter_mode: newFilterMode });
     await this.renderFilterMode();
 
-    await utils.playSound(newFilterMode === 'blacklist' ? 'Shouryuuken' : 'Hadouken');
+    await playSound(newFilterMode === 'blacklist' ? 'Shouryuuken' : 'Hadouken');
   }
 
   private showAddUrlInput() {
@@ -224,7 +225,7 @@ class OptionsController {
       return;
     }
 
-    const settings = await utils.getCachedSettings();
+    const settings = await getCachedSettings();
     const ruleKey = settings.filter_mode as 'blacklist' | 'whitelist';
     const urls = [...settings[ruleKey], newUrl];
 
@@ -241,7 +242,7 @@ class OptionsController {
   }
 
   private async startEditingUrl(index: number) {
-    const settings = await utils.getCachedSettings();
+    const settings = await getCachedSettings();
     const urls = settings[settings.filter_mode as 'blacklist' | 'whitelist'];
     this.editingUrls.set(index, urls[index]);
     await this.renderUrlList();
@@ -266,7 +267,7 @@ class OptionsController {
       return;
     }
 
-    const settings = await utils.getCachedSettings();
+    const settings = await getCachedSettings();
     const ruleKey = settings.filter_mode as 'blacklist' | 'whitelist';
     const urls = [...settings[ruleKey]];
     urls[index] = newUrl;
@@ -284,7 +285,7 @@ class OptionsController {
   }
 
   private async removeUrl(index: number) {
-    const settings = await utils.getCachedSettings();
+    const settings = await getCachedSettings();
     const ruleKey = settings.filter_mode as 'blacklist' | 'whitelist';
     const urls = [...settings[ruleKey]];
     urls.splice(index, 1);
@@ -318,7 +319,7 @@ class OptionsController {
   private async restoreDefaults() {
     if (confirm(chrome.i18n.getMessage('confirm_restore_defaults'))) {
       // Get current filter mode
-      const settings = await utils.getCachedSettings();
+      const settings = await getCachedSettings();
       const filterMode = settings.filter_mode;
 
       // Restore only the current filter mode list to its default value
