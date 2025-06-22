@@ -1,6 +1,6 @@
 import { translatePage } from './i18n';
 import utils, { DEFAULT_SETTINGS } from './utils';
-import type { Settings } from './types';
+import type { Settings, PingMessage, ManualSpacingMessage, ContentScriptResponse } from './types';
 
 class PopupController {
   private isAutoSpacingEnabled: boolean = true;
@@ -146,9 +146,11 @@ class PopupController {
       // Check if content script is loaded
       let contentScriptLoaded = false;
       try {
-        const response = await chrome.tabs.sendMessage(this.currentTabId, {
-          action: 'ping'
-        });
+        const message: PingMessage = { action: 'ping' };
+        const response = await chrome.tabs.sendMessage<PingMessage, ContentScriptResponse>(
+          this.currentTabId,
+          message
+        );
         contentScriptLoaded = response?.success === true;
       } catch (e) {
         // Content script not loaded
@@ -168,9 +170,11 @@ class PopupController {
       }
 
       // Apply spacing
-      const response = await chrome.tabs.sendMessage(this.currentTabId, {
-        action: 'manual_spacing'
-      });
+      const message: ManualSpacingMessage = { action: 'manual_spacing' };
+      const response = await chrome.tabs.sendMessage<ManualSpacingMessage, ContentScriptResponse>(
+        this.currentTabId,
+        message
+      );
 
       if (!response?.success) {
         throw new Error('Failed to apply spacing');

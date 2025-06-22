@@ -1,23 +1,24 @@
-// Content script that runs on web pages to apply spacing
+import type { BrowserPangu } from '../../../src/browser/pangu';
+import type { ContentScriptMessage, ContentScriptResponse } from './types';
 
-// Type definition for the pangu global object
-interface PanguGlobal {
-  autoSpacingPage(): void;
-  spacingPage(): void;
+declare global {
+  interface Window {
+    pangu: BrowserPangu;
+  }
 }
 
-// Apply auto-spacing with continuous monitoring
-function applyAutoSpacing() {
-  const pangu = (window as { pangu?: PanguGlobal }).pangu;
-  if (typeof pangu !== 'undefined') {
+// Apply auto-spacing with continuous DOM monitoring
+function autoSpacingPage() {
+  const pangu = window.pangu;
+  if (pangu) {
     pangu.autoSpacingPage();
   }
 }
 
 // Apply manual spacing (runs once)
-function applyManualSpacing() {
-  const pangu = (window as { pangu?: PanguGlobal }).pangu;
-  if (typeof pangu !== 'undefined') {
+function spacingPage() {
+  const pangu = window.pangu;
+  if (pangu) {
     pangu.spacingPage();
   }
 }
@@ -25,15 +26,15 @@ function applyManualSpacing() {
 // Apply auto-spacing when the content script loads
 // This only happens when auto-spacing is enabled and the page matches the filter rules
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', applyAutoSpacing);
+  document.addEventListener('DOMContentLoaded', autoSpacingPage);
 } else {
-  applyAutoSpacing();
+  autoSpacingPage();
 }
 
 // Listen for manual spacing requests from popup
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message: ContentScriptMessage, _sender: chrome.runtime.MessageSender, sendResponse: (response: ContentScriptResponse) => void) => {
   if (message.action === 'manual_spacing') {
-    applyManualSpacing();
+    spacingPage();
     sendResponse({ success: true });
   } else if (message.action === 'ping') {
     // Respond to ping to indicate content script is loaded
@@ -41,3 +42,5 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
   return true;
 });
+
+export {};

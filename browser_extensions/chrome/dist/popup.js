@@ -102,9 +102,11 @@ class PopupController {
       }
       let contentScriptLoaded = false;
       try {
-        const response2 = await chrome.tabs.sendMessage(this.currentTabId, {
-          action: "ping"
-        });
+        const message2 = { action: "ping" };
+        const response2 = await chrome.tabs.sendMessage(
+          this.currentTabId,
+          message2
+        );
         contentScriptLoaded = response2?.success === true;
       } catch (e) {
       }
@@ -118,9 +120,11 @@ class PopupController {
           files: ["dist/content-script.js"]
         });
       }
-      const response = await chrome.tabs.sendMessage(this.currentTabId, {
-        action: "manual_spacing"
-      });
+      const message = { action: "manual_spacing" };
+      const response = await chrome.tabs.sendMessage(
+        this.currentTabId,
+        message
+      );
       if (!response?.success) {
         throw new Error("Failed to apply spacing");
       }

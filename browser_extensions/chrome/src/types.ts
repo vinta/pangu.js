@@ -6,14 +6,18 @@ export interface Settings {
   is_mute_sound_effects: boolean;
 }
 
-export interface MessageRequest {
-  purpose?: string;
-  text?: string;
-  [key: string]: any;
+// Messages sent to content script
+export interface PingMessage {
+  action: 'ping';
 }
 
-export interface MessageResponse {
-  isAllowed?: boolean;
-  settings?: Settings;
-  [key: string]: any;
+export interface ManualSpacingMessage {
+  action: 'manual_spacing';
+}
+
+export type ContentScriptMessage = PingMessage | ManualSpacingMessage;
+
+// Response from content script
+export interface ContentScriptResponse {
+  success: boolean;
 }

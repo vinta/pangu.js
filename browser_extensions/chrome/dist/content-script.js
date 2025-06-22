@@ -1,23 +1,23 @@
-function applyAutoSpacing() {
+function autoSpacingPage() {
   const pangu = window.pangu;
-  if (typeof pangu !== "undefined") {
+  if (pangu) {
     pangu.autoSpacingPage();
   }
 }
-function applyManualSpacing() {
+function spacingPage() {
   const pangu = window.pangu;
-  if (typeof pangu !== "undefined") {
+  if (pangu) {
     pangu.spacingPage();
   }
 }
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", applyAutoSpacing);
+  document.addEventListener("DOMContentLoaded", autoSpacingPage);
 } else {
-  applyAutoSpacing();
+  autoSpacingPage();
 }
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.action === "manual_spacing") {
-    applyManualSpacing();
+    spacingPage();
     sendResponse({ success: true });
   } else if (message.action === "ping") {
     sendResponse({ success: true });

@@ -22,10 +22,6 @@
     "noEmit": true,
     "declaration": false,
 
-    // JavaScript support
-    "allowJs": true,
-    "checkJs": false,
-
     // Other
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
