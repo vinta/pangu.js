@@ -154,7 +154,9 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       let nextTextNode = null;
       for (let i = textNodes.snapshotLength - 1; i > -1; --i) {
         currentTextNode = textNodes.snapshotItem(i);
-        if (!currentTextNode) continue;
+        if (!currentTextNode) {
+          continue;
+        }
         if (currentTextNode.parentNode && this.isSpecificTag(currentTextNode.parentNode, this.presentationalTags) && !this.isInsideSpecificTag(currentTextNode.parentNode, this.ignoredTags)) {
           const elementNode = currentTextNode.parentNode;
           if (elementNode.previousSibling) {
@@ -283,9 +285,9 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
     spacingPageBody() {
       let xPathQuery = "/html/body//*/text()[normalize-space(.)]";
-      ["script", "style", "textarea"].forEach((tag) => {
+      for (const tag of ["script", "style", "textarea"]) {
         xPathQuery = `${xPathQuery}[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
-      });
+      }
       this.spacingNodeByXPath(xPathQuery, document);
     }
     spacingPage() {
@@ -339,16 +341,16 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         nodeMaxWait
       );
       const mutationObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
+        for (const mutation of mutations) {
           switch (mutation.type) {
             case "childList":
-              mutation.addedNodes.forEach((node2) => {
+              for (const node2 of mutation.addedNodes) {
                 if (node2.nodeType === Node.ELEMENT_NODE) {
                   queue.push(node2);
                 } else if (node2.nodeType === Node.TEXT_NODE && node2.parentNode) {
                   queue.push(node2.parentNode);
                 }
-              });
+              }
               break;
             case "characterData":
               const { target: node } = mutation;
@@ -357,7 +359,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
               }
               break;
           }
-        });
+        }
         debouncedSpacingNodes();
       });
       mutationObserver.observe(document.body, {

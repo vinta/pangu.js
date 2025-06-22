@@ -75,6 +75,16 @@ class PopupController {
   }
 
   private async handleSpacingModeToggleChange() {
+    const url1 = new URLPattern('*://*.example.com/*');
+    console.log(url1.test('https://example.com/')); // false
+    console.log(url1.test('https://ddd.example.com/safdadsf')); // true
+    console.log(url1.test('http://ddd.example.com/safdadsf')); // true
+    const url2 = new URLPattern('https://*.google.com/foo*bar');
+    console.log(url2.test('https://example.com/')); // false
+    console.log(url2.test('https://api.google.com/foo/sadfasdfdf/bar'));
+    console.log(url2.test('https://api.google.com/foobar'));
+    return;
+
     const toggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
 
     const spacingMode = toggle.checked ? 'spacing_when_load' : 'spacing_when_click';

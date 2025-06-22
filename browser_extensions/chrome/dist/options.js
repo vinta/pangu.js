@@ -1,33 +1,17 @@
 import { t as translatePage } from "./i18n.js";
 import { u as utils } from "./utils.js";
-function convertComplexPattern(pattern) {
-  if (pattern.includes("://*.")) {
-    const match = pattern.match(/^(\*|https?|file|ftp):\/\/\*\.([^\/]+)(\/.*)?$/);
-    if (match) {
-      const [, protocol, domain, pathname = "/*"] = match;
-      return new URLPattern({
-        protocol: protocol === "*" ? "{http,https}" : protocol,
-        hostname: `{,*.}${domain}`,
-        pathname
-      });
-    }
-  }
-  throw new Error("Unsupported pattern format");
-}
 function isValidMatchPattern(pattern) {
   if (pattern === "<all_urls>") {
     return true;
+  }
+  if (!pattern.match(/^(https?:\/\/|file:\/\/\/|\*:\/\/)/)) {
+    return false;
   }
   try {
     new URLPattern(pattern);
     return true;
   } catch {
-    try {
-      convertComplexPattern(pattern);
-      return true;
-    } catch {
-      return false;
-    }
+    return false;
   }
 }
 class OptionsController {
@@ -52,7 +36,7 @@ class OptionsController {
       if (target.id === "spacing_mode_btn") {
         this.toggleSpacingMode().catch(console.error);
       } else if (target.id === "filter_mode_btn") {
-        this.changeFilterMode().catch(console.error);
+        this.toggleFilterMode().catch(console.error);
       } else if (target.classList.contains("remove-url-btn")) {
         const index = parseInt(target.dataset.index || "0");
         this.removeUrl(index);
@@ -173,17 +157,40 @@ class OptionsController {
   }
   async toggleSpacingMode() {
     const settings = await utils.getCachedSettings();
-    const nextSpacingMode = settings.spacing_mode === "spacing_when_load" ? "spacing_when_click" : "spacing_when_load";
-    await chrome.storage.sync.set({ spacing_mode: nextSpacingMode });
-    await utils.playSound(nextSpacingMode === "spacing_when_load" ? "Shouryuuken" : "Hadouken");
+    const newSpacingMode = settings.spacing_mode === "spacing_when_load" ? "spacing_when_click" : "spacing_when_load";
+    await chrome.storage.sync.set({ spacing_mode: newSpacingMode });
     await this.renderSpacingMode();
+    await utils.playSound(newSpacingMode === "spacing_when_load" ? "Shouryuuken" : "Hadouken");
   }
-  async changeFilterMode() {
+  async toggleFilterMode() {
     const settings = await utils.getCachedSettings();
     const newFilterMode = settings.filter_mode === "blacklist" ? "whitelist" : "blacklist";
+    await chrome.storage.sync.set({ filter_mode: newFilterMode });
+    await this.renderFilterMode();
     await utils.playSound(newFilterMode === "blacklist" ? "Shouryuuken" : "Hadouken");
-    chrome.storage.sync.set({ filter_mode: newFilterMode });
-    await this.render();
+  }
+  showAddUrlInput() {
+    this.addUrlInput = document.createElement("input");
+    this.renderUrlList();
+  }
+  async saveNewUrl() {
+    const input = document.getElementById("new-url-input");
+    const newUrl = input.value.trim();
+    if (!newUrl || !isValidMatchPattern(newUrl)) {
+      alert(chrome.i18n.getMessage("error_invalid_match_pattern"));
+      return;
+    }
+    const settings = await utils.getCachedSettings();
+    const ruleKey = settings.filter_mode;
+    const urls = [...settings[ruleKey], newUrl];
+    const update = { [ruleKey]: urls };
+    chrome.storage.sync.set(update);
+    this.addUrlInput = null;
+    await this.renderUrlList();
+  }
+  cancelNewUrl() {
+    this.addUrlInput = null;
+    this.renderUrlList();
   }
   async startEditingUrl(index) {
     const settings = await utils.getCachedSettings();
@@ -228,10 +235,6 @@ class OptionsController {
     chrome.storage.sync.set(update);
     await this.renderUrlList();
   }
-  showAddUrlInput() {
-    this.addUrlInput = document.createElement("input");
-    this.renderUrlList();
-  }
   setupUrlInputListeners() {
     const newUrlInput = document.getElementById("new-url-input");
     if (newUrlInput) {
@@ -248,28 +251,6 @@ class OptionsController {
         }
       });
     }
-  }
-  async saveNewUrl() {
-    const input = document.getElementById("new-url-input");
-    if (!input) {
-      return;
-    }
-    const newUrl = input.value.trim();
-    if (!newUrl || !isValidMatchPattern(newUrl)) {
-      alert(chrome.i18n.getMessage("error_invalid_match_pattern"));
-      return;
-    }
-    const settings = await utils.getCachedSettings();
-    const ruleKey = settings.filter_mode;
-    const urls = [...settings[ruleKey], newUrl];
-    const update = { [ruleKey]: urls };
-    chrome.storage.sync.set(update);
-    this.addUrlInput = null;
-    await this.renderUrlList();
-  }
-  cancelNewUrl() {
-    this.addUrlInput = null;
-    this.renderUrlList();
   }
 }
 document.addEventListener("DOMContentLoaded", () => {

@@ -16,7 +16,7 @@ class OptionsController {
     this.setupEventListeners();
   }
 
-  private setupEventListeners(): void {
+  private setupEventListeners() {
     chrome.storage.onChanged.addListener(async (_changes, areaName) => {
       if (areaName === 'sync') {
         await this.render();
@@ -28,7 +28,7 @@ class OptionsController {
       if (target.id === 'spacing_mode_btn') {
         this.toggleSpacingMode().catch(console.error);
       } else if (target.id === 'filter_mode_btn') {
-        this.changeFilterMode().catch(console.error);
+        this.toggleFilterMode().catch(console.error);
       } else if (target.classList.contains('remove-url-btn')) {
         const index = parseInt(target.dataset.index || '0');
         this.removeUrl(index);
@@ -190,25 +190,53 @@ class OptionsController {
 
   private async toggleSpacingMode() {
     const settings = await utils.getCachedSettings();
-    const nextSpacingMode = settings.spacing_mode === 'spacing_when_load' ? 'spacing_when_click' : 'spacing_when_load';
-    await chrome.storage.sync.set({ spacing_mode: nextSpacingMode });
-
-    await utils.playSound(nextSpacingMode === 'spacing_when_load' ? 'Shouryuuken' : 'Hadouken');
-
+    const newSpacingMode = settings.spacing_mode === 'spacing_when_load' ? 'spacing_when_click' : 'spacing_when_load';
+    await chrome.storage.sync.set({ spacing_mode: newSpacingMode });
     await this.renderSpacingMode();
+
+    await utils.playSound(newSpacingMode === 'spacing_when_load' ? 'Shouryuuken' : 'Hadouken');
   }
 
-  private async changeFilterMode() {
+  private async toggleFilterMode() {
     const settings = await utils.getCachedSettings();
-    // Toggle between blacklist and whitelist
     const newFilterMode = settings.filter_mode === 'blacklist' ? 'whitelist' : 'blacklist';
-    await utils.playSound(newFilterMode === 'blacklist' ? 'Shouryuuken' : 'Hadouken');
+    await chrome.storage.sync.set({ filter_mode: newFilterMode });
+    await this.renderFilterMode();
 
-    chrome.storage.sync.set({ filter_mode: newFilterMode });
-    await this.render();
+    await utils.playSound(newFilterMode === 'blacklist' ? 'Shouryuuken' : 'Hadouken');
   }
 
-  private async startEditingUrl(index: number): Promise<void> {
+  private showAddUrlInput() {
+    this.addUrlInput = document.createElement('input');
+    this.renderUrlList();
+  }
+
+  private async saveNewUrl() {
+    const input = document.getElementById('new-url-input') as HTMLInputElement;
+
+    const newUrl = input.value.trim();
+    if (!newUrl || !isValidMatchPattern(newUrl)) {
+      alert(chrome.i18n.getMessage('error_invalid_match_pattern'));
+      return;
+    }
+
+    const settings = await utils.getCachedSettings();
+    const ruleKey = settings.filter_mode as 'blacklist' | 'whitelist';
+    const urls = [...settings[ruleKey], newUrl];
+
+    const update = { [ruleKey]: urls };
+    chrome.storage.sync.set(update);
+
+    this.addUrlInput = null;
+    await this.renderUrlList();
+  }
+
+  private cancelNewUrl() {
+    this.addUrlInput = null;
+    this.renderUrlList();
+  }
+
+  private async startEditingUrl(index: number) {
     const settings = await utils.getCachedSettings();
     const urls = settings[settings.filter_mode as 'blacklist' | 'whitelist'];
     this.editingUrls.set(index, urls[index]);
@@ -246,7 +274,7 @@ class OptionsController {
     await this.renderUrlList();
   }
 
-  private cancelEditingUrl(index: number): void {
+  private cancelEditingUrl(index: number) {
     this.editingUrls.delete(index);
     this.renderUrlList();
   }
@@ -262,12 +290,7 @@ class OptionsController {
     await this.renderUrlList();
   }
 
-  private showAddUrlInput(): void {
-    this.addUrlInput = document.createElement('input');
-    this.renderUrlList();
-  }
-
-  private setupUrlInputListeners(): void {
+  private setupUrlInputListeners() {
     const newUrlInput = document.getElementById('new-url-input') as HTMLInputElement;
     if (newUrlInput) {
       newUrlInput.focus();
@@ -286,34 +309,6 @@ class OptionsController {
         }
       });
     }
-  }
-
-  private async saveNewUrl() {
-    const input = document.getElementById('new-url-input') as HTMLInputElement;
-    if (!input) {
-      return;
-    }
-
-    const newUrl = input.value.trim();
-    if (!newUrl || !isValidMatchPattern(newUrl)) {
-      alert(chrome.i18n.getMessage('error_invalid_match_pattern'));
-      return;
-    }
-
-    const settings = await utils.getCachedSettings();
-    const ruleKey = settings.filter_mode as 'blacklist' | 'whitelist';
-    const urls = [...settings[ruleKey], newUrl];
-
-    const update = { [ruleKey]: urls };
-    chrome.storage.sync.set(update);
-
-    this.addUrlInput = null;
-    await this.renderUrlList();
-  }
-
-  private cancelNewUrl(): void {
-    this.addUrlInput = null;
-    this.renderUrlList();
   }
 }
 

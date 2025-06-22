@@ -86,11 +86,11 @@
     "description": ""
   },
   "placeholder_enter_url": {
-    "message": "輸入網址，你可以使用 *",
+    "message": "輸入網址，你可以使用 * (wildcard)",
     "description": ""
   },
   "error_invalid_match_pattern": {
-    "message": "無效的匹配模式。格式：<scheme>://<host><path>\n範例：*://example.com/*",
+    "message": "網址的格式不對啦！",
     "description": ""
   },
   "button_save": {
