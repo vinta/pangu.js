@@ -18,7 +18,6 @@ class PopupController {
       this.isAutoSpacingEnabled = settings.spacing_mode === "spacing_when_load";
       this.updateUI();
       this.updateStatus();
-      this.updateVersion();
       this.setupEventListeners();
     } catch (error) {
       console.error("Error initializing popup:", error);
@@ -38,6 +37,11 @@ class PopupController {
     const spacingModeToggle = document.getElementById("spacing-mode-toggle");
     if (spacingModeToggle) {
       spacingModeToggle.checked = this.isAutoSpacingEnabled;
+    }
+    const versionEl = document.getElementById("version");
+    if (versionEl) {
+      const manifest = chrome.runtime.getManifest();
+      versionEl.textContent = manifest.version;
     }
   }
   async updateStatus() {
@@ -63,13 +67,6 @@ class PopupController {
       }
     }
   }
-  updateVersion() {
-    const versionEl = document.getElementById("version");
-    if (versionEl) {
-      const manifest = chrome.runtime.getManifest();
-      versionEl.textContent = manifest.version;
-    }
-  }
   async handleSpacingModeToggleChange() {
     const spacingModeToggle = document.getElementById("spacing-mode-toggle");
     this.isAutoSpacingEnabled = spacingModeToggle.checked;
@@ -79,11 +76,11 @@ class PopupController {
   }
   async handleManualSpacing() {
     if (!this.currentTabId || !this.currentTabUrl) {
-      this.showError();
+      await this.showError();
       return;
     }
     if (!this.isValidUrlForSpacing(this.currentTabUrl)) {
-      this.showError();
+      await this.showError();
       return;
     }
     try {
@@ -92,37 +89,28 @@ class PopupController {
         btn.disabled = true;
         btn.textContent = chrome.i18n.getMessage("processing");
       }
-      let contentScriptLoaded = false;
       try {
         const message2 = { action: "ping" };
-        const response2 = await chrome.tabs.sendMessage(this.currentTabId, message2);
-        contentScriptLoaded = response2?.success === true;
+        await chrome.tabs.sendMessage(this.currentTabId, message2);
       } catch {
-      }
-      if (!contentScriptLoaded) {
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
-          files: ["vendors/pangu/pangu.umd.js"]
-        });
-        await chrome.scripting.executeScript({
-          target: { tabId: this.currentTabId },
-          files: ["dist/content-script.js"]
+          files: ["vendors/pangu/pangu.umd.js", "dist/content-script.js"]
         });
       }
       const message = { action: "manual_spacing" };
       const response = await chrome.tabs.sendMessage(this.currentTabId, message);
       if (!response?.success) {
-        throw new Error("Failed to apply spacing");
+        throw new Error("Failed to apply manual spacing");
       }
-      await utils.playSound("YeahBaby");
       if (btn) {
         btn.disabled = false;
         btn.textContent = chrome.i18n.getMessage("manual_spacing");
       }
-      this.showSuccess();
+      await this.showSuccess();
     } catch (error) {
       console.error("Failed to apply spacing:", error);
-      this.showError();
+      await this.showError();
       const btn = document.getElementById("manual-spacing-btn");
       if (btn) {
         btn.disabled = false;
@@ -134,11 +122,12 @@ class PopupController {
     return /^(http(s?)|file)/i.test(url);
   }
   async showError() {
-    this.showMessage(chrome.i18n.getMessage("cannot_summon_here") || "沒辦法在這個頁面召喚空格之神", "error");
+    this.showMessage(chrome.i18n.getMessage("cannot_summon_here"), "error");
     await utils.playSound("WahWahWaaah");
   }
-  showSuccess() {
-    this.showMessage(chrome.i18n.getMessage("spacing_success") || "空格之神降臨", "success");
+  async showSuccess() {
+    this.showMessage(chrome.i18n.getMessage("spacing_success"), "success");
+    await utils.playSound("YeahBaby");
   }
   showMessage(text, type) {
     const messageElement = document.getElementById("message");

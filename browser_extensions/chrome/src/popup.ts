@@ -12,33 +12,27 @@ class PopupController {
     this.initialize();
   }
 
-  private async initialize(): Promise<void> {
+  private async initialize() {
     try {
-      // Translate the page
       translatePage();
 
-      // Get current tab info
       const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
       this.currentTabId = activeTab?.id;
       this.currentTabUrl = activeTab?.url;
 
-      // Get settings directly from chrome.storage
       const settings = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
       this.isAutoSpacingEnabled = settings.spacing_mode === 'spacing_when_load';
 
-      // Update UI
       this.updateUI();
       this.updateStatus();
-      this.updateVersion();
 
-      // Set up event listeners
       this.setupEventListeners();
     } catch (error) {
       console.error('Error initializing popup:', error);
     }
   }
 
-  private setupEventListeners(): void {
+  private setupEventListeners() {
     // Spacing mode toggle
     const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
     if (spacingModeToggle) {
@@ -52,14 +46,20 @@ class PopupController {
     }
   }
 
-  private updateUI(): void {
+  private updateUI() {
     const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
     if (spacingModeToggle) {
       spacingModeToggle.checked = this.isAutoSpacingEnabled;
     }
+
+    const versionEl = document.getElementById('version');
+    if (versionEl) {
+      const manifest = chrome.runtime.getManifest();
+      versionEl.textContent = manifest.version;
+    }
   }
 
-  private async updateStatus(): Promise<void> {
+  private async updateStatus() {
     const statusEl = document.getElementById('status-indicator');
     if (!statusEl || !this.currentTabUrl) return;
 
@@ -93,34 +93,24 @@ class PopupController {
     }
   }
 
-  private updateVersion(): void {
-    const versionEl = document.getElementById('version');
-    if (versionEl) {
-      const manifest = chrome.runtime.getManifest();
-      versionEl.textContent = manifest.version;
-    }
-  }
-
-  private async handleSpacingModeToggleChange(): Promise<void> {
+  private async handleSpacingModeToggleChange() {
     const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
     this.isAutoSpacingEnabled = spacingModeToggle.checked;
 
-    // Use shared toggle function
     await utils.toggleAutoSpacing(this.isAutoSpacingEnabled);
     await utils.playSound(this.isAutoSpacingEnabled ? 'Shouryuuken' : 'Hadouken');
 
-    // Update status
     this.updateStatus();
   }
 
-  private async handleManualSpacing(): Promise<void> {
+  private async handleManualSpacing() {
     if (!this.currentTabId || !this.currentTabUrl) {
-      this.showError();
+      await this.showError();
       return;
     }
 
     if (!this.isValidUrlForSpacing(this.currentTabUrl)) {
-      this.showError();
+      await this.showError();
       return;
     }
 
@@ -133,25 +123,14 @@ class PopupController {
       }
 
       // Check if content script is loaded
-      let contentScriptLoaded = false;
       try {
         const message: PingMessage = { action: 'ping' };
-        const response = await chrome.tabs.sendMessage<PingMessage, ContentScriptResponse>(this.currentTabId, message);
-        contentScriptLoaded = response?.success === true;
+        await chrome.tabs.sendMessage<PingMessage, ContentScriptResponse>(this.currentTabId, message);
       } catch {
-        // Content script not loaded
-      }
-
-      if (!contentScriptLoaded) {
-        // Inject scripts on-demand
+        // Content script not loaded - inject scripts on-demand
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
-          files: ['vendors/pangu/pangu.umd.js'],
-        });
-
-        await chrome.scripting.executeScript({
-          target: { tabId: this.currentTabId },
-          files: ['dist/content-script.js'],
+          files: ['vendors/pangu/pangu.umd.js', 'dist/content-script.js'],
         });
       }
 
@@ -162,20 +141,15 @@ class PopupController {
         throw new Error('Failed to apply manual spacing');
       }
 
-      // Play sound effect
-      await utils.playSound('YeahBaby');
-
-      // Show success feedback
       if (btn) {
         btn.disabled = false;
         btn.textContent = chrome.i18n.getMessage('manual_spacing');
       }
 
-      // Show success message
-      this.showSuccess();
+      await this.showSuccess();
     } catch (error) {
       console.error('Failed to apply spacing:', error);
-      this.showError();
+      await this.showError();
 
       // Reset button
       const btn = document.getElementById('manual-spacing-btn') as HTMLButtonElement;
@@ -186,29 +160,27 @@ class PopupController {
     }
   }
 
-  private isValidUrlForSpacing(url: string): boolean {
+  private isValidUrlForSpacing(url: string) {
     return /^(http(s?)|file)/i.test(url);
   }
 
-  private async showError(): Promise<void> {
-    this.showMessage(chrome.i18n.getMessage('cannot_summon_here') || '沒辦法在這個頁面召喚空格之神', 'error');
-
-    // Play error sound effect
+  private async showError() {
+    this.showMessage(chrome.i18n.getMessage('cannot_summon_here'), 'error');
     await utils.playSound('WahWahWaaah');
   }
 
-  private showSuccess(): void {
-    this.showMessage(chrome.i18n.getMessage('spacing_success') || '空格之神降臨', 'success');
+  private async showSuccess() {
+    this.showMessage(chrome.i18n.getMessage('spacing_success'), 'success');
+    await utils.playSound('YeahBaby');
   }
 
-  private showMessage(text: string, type: 'error' | 'success'): void {
+  private showMessage(text: string, type: 'error' | 'success') {
     const messageElement = document.getElementById('message');
     if (messageElement) {
       messageElement.textContent = text;
       messageElement.className = `message ${type}`;
       messageElement.style.display = 'block';
 
-      // Hide message after 3 seconds
       setTimeout(() => {
         messageElement.style.display = 'none';
       }, this.hideMessageDelayMs);
@@ -216,7 +188,6 @@ class PopupController {
   }
 }
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   new PopupController();
 });
