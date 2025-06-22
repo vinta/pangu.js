@@ -110,11 +110,11 @@
     "description": ""
   },
   "button_restore_defaults": {
-    "message": "恢復成原廠設定",
+    "message": "恢復原廠設定",
     "description": ""
   },
   "confirm_restore_defaults": {
-    "message": "確定要恢復成原廠設定嗎？",
+    "message": "確定要恢復原廠設定嗎？",
     "description": ""
   },
   "link_learn_match_patterns": {
