@@ -20,9 +20,8 @@ class OptionsController {
       header_title: chrome.i18n.getMessage("extension_name"),
       subtitle: chrome.i18n.getMessage("subtitle"),
       quote: chrome.i18n.getMessage("quote"),
-      label_spacing_mode: chrome.i18n.getMessage("label_spacing_mode"),
-      label_filter_mode: chrome.i18n.getMessage("label_filter_mode"),
-      label_other_options: "其他：",
+      label_settings: chrome.i18n.getMessage("label_settings"),
+      label_other_options: chrome.i18n.getMessage("label_other_options"),
       spacing_when_click_msg: chrome.i18n.getMessage("spacing_when_click_msg")
     };
     for (const [id, text] of Object.entries(elements)) {
@@ -113,15 +112,15 @@ class OptionsController {
         html += `
           <li class="animate-repeat">
             <input type="text" class="url-edit-input" value="${this.escapeHtml(this.editingUrls.get(index) || url)}" data-index="${index}" />
-            <button class="btn btn-sm save-url-btn" data-index="${index}">Save</button>
-            <button class="btn btn-sm btn-ghost cancel-edit-btn" data-index="${index}">Cancel</button>
+            <button class="btn btn-sm save-url-btn" data-index="${index}">${chrome.i18n.getMessage("button_save")}</button>
+            <button class="btn btn-sm btn-ghost cancel-edit-btn" data-index="${index}">${chrome.i18n.getMessage("button_cancel")}</button>
           </li>
         `;
       } else {
         html += `
           <li class="animate-repeat">
             <a href="#" class="gradientEllipsis edit-url-btn" data-index="${index}" title="${this.escapeHtml(url)}">${this.escapeHtml(url)}</a>
-            <button class="btn btn-sm btn-ghost remove-url-btn" data-index="${index}">Remove</button>
+            <button class="btn btn-sm btn-ghost remove-url-btn" data-index="${index}">${chrome.i18n.getMessage("button_remove")}</button>
           </li>
         `;
       }
@@ -129,15 +128,15 @@ class OptionsController {
     if (this.addUrlInput) {
       html += `
         <li>
-          <input type="text" class="url-edit-input" id="new-url-input" placeholder="Enter URL or match pattern" />
-          <button class="btn btn-sm save-url-btn" id="save-new-url-btn">Save</button>
-          <button class="btn btn-sm btn-ghost cancel-edit-btn" id="cancel-new-url-btn">Cancel</button>
+          <input type="text" class="url-edit-input" id="new-url-input" placeholder="${chrome.i18n.getMessage("placeholder_enter_url")}" />
+          <button class="btn btn-sm save-url-btn" id="save-new-url-btn">${chrome.i18n.getMessage("button_save")}</button>
+          <button class="btn btn-sm btn-ghost cancel-edit-btn" id="cancel-new-url-btn">${chrome.i18n.getMessage("button_cancel")}</button>
         </li>
       `;
     } else {
       html += `
         <li>
-          <a href="#" id="add-url-btn">Add new URL</a>
+          <a href="#" id="add-url-btn">${chrome.i18n.getMessage("button_add_new_url")}</a>
         </li>
       `;
     }
@@ -146,7 +145,7 @@ class OptionsController {
       <div class="url-list-help">
         <small class="text-muted">
           <a href="https://developer.chrome.com/docs/extensions/develop/concepts/match-patterns" target="_blank" rel="noopener">
-            Learn about match patterns ↗
+            ${chrome.i18n.getMessage("link_learn_match_patterns")}
           </a>
         </small>
       </div>
@@ -201,7 +200,7 @@ class OptionsController {
       this.renderUrlList();
     } else {
       await utils.playSound("WahWahWaaah");
-      alert("Invalid match pattern. Format: <scheme>://<host><path>\nExample: *://example.com/*");
+      alert(chrome.i18n.getMessage("error_invalid_match_pattern"));
     }
   }
   cancelEditingUrl(index) {
@@ -238,7 +237,7 @@ class OptionsController {
       this.renderUrlList();
     } else {
       await utils.playSound("WahWahWaaah");
-      alert("Invalid match pattern. Format: <scheme>://<host><path>\nExample: *://example.com/*");
+      alert(chrome.i18n.getMessage("error_invalid_match_pattern"));
     }
   }
   isValidUrl(url) {

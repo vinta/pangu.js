@@ -15,7 +15,7 @@
     "message": "漢學家稱這個空白字元為「盤古之白」，因為它劈開了全形字和半形字之間的混沌。另有研究顯示，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有七成的比例會在 34 歲的時候跟自己不愛的人結婚，而其餘三成的人最後只能把遺產留給自己的貓。畢竟愛情跟書寫都需要適時地留白。",
     "description": ""
   },
-  "label_spacing_mode": {
+  "label_settings": {
     "message": "設定",
     "description": ""
   },
@@ -29,10 +29,6 @@
   },
   "spacing_when_click_msg": {
     "message": "你可以按右上角那個黑人頭來召喚空格之神！",
-    "description": ""
-  },
-  "label_filter_mode": {
-    "message": "你是否希望：",
     "description": ""
   },
   "blacklist": {
@@ -51,16 +47,8 @@
     "message": "召喚空格之神",
     "description": ""
   },
-  "hello_god_of_spacing": {
-    "message": "空格之神顯靈了",
-    "description": ""
-  },
   "label_is_mute": {
     "message": "太吵了，靜音",
-    "description": ""
-  },
-  "label_shut_the_fuck_up": {
-    "message": "不要再他媽「空格之神顯靈了」！",
     "description": ""
   },
   "extension_rate": {
@@ -113,6 +101,50 @@
   },
   "spacing_complete": {
     "message": "空格之神降落",
+    "description": ""
+  },
+  "label_other_options": {
+    "message": "其他設定",
+    "description": ""
+  },
+  "placeholder_enter_url": {
+    "message": "輸入網址或匹配模式",
+    "description": ""
+  },
+  "error_invalid_match_pattern": {
+    "message": "無效的匹配模式。格式：<scheme>://<host><path>\n範例：*://example.com/*",
+    "description": ""
+  },
+  "button_save": {
+    "message": "好了",
+    "description": ""
+  },
+  "button_cancel": {
+    "message": "算了",
+    "description": ""
+  },
+  "button_remove": {
+    "message": "刪掉",
+    "description": ""
+  },
+  "button_add_new_url": {
+    "message": "新增",
+    "description": ""
+  },
+  "link_learn_match_patterns": {
+    "message": "了解匹配模式 ↗",
+    "description": ""
+  },
+  "label_magic_button": {
+    "message": "神奇按鈕",
+    "description": ""
+  },
+  "section_other": {
+    "message": "其他",
+    "description": ""
+  },
+  "filter_mode_blacklist_desc": {
+    "message": "除了這些網址，其他網頁都自動加上空格",
     "description": ""
   }
 }
