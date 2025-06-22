@@ -1,10 +1,9 @@
 # TODO List
 
-**Last Updated:** December 22, 2024, 12:30 PM
-
 ## 🎯 Completed
 
 ### Chrome Extension Migration (Completed December 2024)
+
 - [x] Chrome Extension Manifest V3 compatibility
 - [x] Remove Angular.js from Chrome Extension (saved ~194KB)
   - Migrated popup.js and options.js to TypeScript
@@ -21,6 +20,7 @@
 - [x] Improve error handling for invalidated contexts
 
 ### Core Library Improvements
+
 - [x] Migrate all source code to TypeScript
 - [x] Replace Webpack/Babel with Vite
 - [x] Replace Mocha/Chai/Karma with Vitest/Playwright
@@ -32,6 +32,7 @@
 - [x] Refactor TypeScript configuration with separate tsconfig files
 
 ### Chrome Extension Optimization (Completed December 2024)
+
 - [x] Replace `tabs` permission with `activeTab`
   - Removes "Read browsing history" warning
   - Already uses currentWindow: true in popup.ts
@@ -47,6 +48,7 @@
   - content_script.ts → content-script.ts
 
 ### Code Refactoring (Completed December 24, 2024)
+
 - [x] Refactor utils-chrome.ts to class-based ExtensionManager
   - Converted interface to proper class structure
   - Improved encapsulation and type safety
@@ -72,6 +74,7 @@
   - Renamed settingsCache to cachedSettings
 
 ### Service Worker Improvements (Completed December 21, 2024)
+
 - [x] Fix duplicate script ID error in Chrome extension service worker
   - Added proper script existence checking before registration
   - Improved error handling for expected scenarios
@@ -86,6 +89,7 @@
   - Added proper TypeScript type assertions
 
 ### Match Pattern Implementation (Completed December 21, 2024)
+
 - [x] Implement new blacklist/whitelist settings with valid match patterns
   - Added `blacklist` and `whitelist` settings that require valid match patterns
   - Deprecated `blacklists` and `whitelists` (maintained for backward compatibility)
@@ -100,6 +104,7 @@
   - More efficient as Chrome handles filtering at API level
 
 ### Deprecated Properties Removal (Completed December 22, 2024)
+
 - [x] Remove deprecated blacklists/whitelists properties completely
   - Removed from Settings interface in types.ts
   - Removed from DEFAULT_SETTINGS in utils.ts
@@ -119,11 +124,48 @@
   - Updated HTML, CSS, and i18n messages
   - No migration logic needed - clean break from old data
 
+### Chrome Extension UI/UX Improvements (Completed December 22, 2024)
+
+- [x] Clean up popup.ts code
+  - Removed unused settings variable in updateStatus()
+  - Renamed hideMessageDelaySeconds to hideMessageDelayMs
+  - Added i18n support for success message "空格之神降臨"
+  - Fixed ESLint errors
+- [x] Rename auto-spacing toggle to spacing mode toggle
+  - Updated variable names, element IDs, and function names
+  - Improved code clarity and consistency
+- [x] Simplify popup.ts structure
+  - Replaced options link event listener with direct href
+  - Merged multiple executeScript calls into single call
+  - Moved script injection to catch block for cleaner flow
+  - Removed explicit return type annotations
+- [x] Improve error handling and user feedback
+  - Consolidated sound effects into showError() and showSuccess()
+  - Made error/success methods async for proper sound playback
+  - Renamed i18n keys for consistency
+- [x] Increase font sizes in popup for better readability
+  - Title: base → lg (16px → 18px)
+  - All other text: sm → base (14px → 16px)
+  - Improved button padding
+
+### i18n Completeness (Completed December 22, 2024)
+
+- [x] Add i18n support for all missing UI strings
+  - Added 12 new translation keys for buttons, placeholders, errors
+  - Updated options.ts to use chrome.i18n.getMessage()
+  - Added data-i18n attributes to HTML elements
+  - Skipped i18n for universal terms (GitHub, Copyleft, version prefix)
+- [x] Simplify options.ts code structure
+  - Removed redundant setI18nText() method
+  - Replaced saveSettings() wrapper with direct chrome.storage.sync.set()
+  - Improved code organization
+
 ## 🚧 In Progress
 
 ## 📋 Next Steps
 
 ### Medium Priority - Code Quality
+
 - [ ] Add proper Chrome API error handling
   - Implement retry logic for script injection
   - User-friendly error messages
@@ -133,6 +175,7 @@
 - [ ] Update declarativeContent for action button state
 
 ### Low Priority - Future Enhancements
+
 - [ ] Update extension icons for high DPI displays
 - [ ] Implement performance monitoring
 - [ ] Add optional_host_permissions for user control
