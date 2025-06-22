@@ -29,16 +29,9 @@ class PopupController {
     if (spacingModeToggle) {
       spacingModeToggle.addEventListener("change", () => this.handleSpacingModeToggleChange());
     }
-    const manualBtn = document.getElementById("manual-spacing-btn");
-    if (manualBtn) {
-      manualBtn.addEventListener("click", () => this.handleManualSpacing());
-    }
-    const optionsLink = document.getElementById("options-link");
-    if (optionsLink) {
-      optionsLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        this.openOptionsPage();
-      });
+    const manualSpacingBtn = document.getElementById("manual-spacing-btn");
+    if (manualSpacingBtn) {
+      manualSpacingBtn.addEventListener("click", () => this.handleManualSpacing());
     }
   }
   updateUI() {
@@ -97,7 +90,7 @@ class PopupController {
       const btn = document.getElementById("manual-spacing-btn");
       if (btn) {
         btn.disabled = true;
-        btn.textContent = "處理中...";
+        btn.textContent = chrome.i18n.getMessage("processing");
       }
       let contentScriptLoaded = false;
       try {
@@ -157,9 +150,6 @@ class PopupController {
         messageElement.style.display = "none";
       }, this.hideMessageDelayMs);
     }
-  }
-  openOptionsPage() {
-    chrome.tabs.create({ url: "pages/options.html" });
   }
 }
 document.addEventListener("DOMContentLoaded", () => {

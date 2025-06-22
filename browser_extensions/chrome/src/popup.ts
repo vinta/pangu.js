@@ -46,18 +46,9 @@ class PopupController {
     }
 
     // Manual spacing button
-    const manualBtn = document.getElementById('manual-spacing-btn');
-    if (manualBtn) {
-      manualBtn.addEventListener('click', () => this.handleManualSpacing());
-    }
-
-    // Options link
-    const optionsLink = document.getElementById('options-link');
-    if (optionsLink) {
-      optionsLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.openOptionsPage();
-      });
+    const manualSpacingBtn = document.getElementById('manual-spacing-btn');
+    if (manualSpacingBtn) {
+      manualSpacingBtn.addEventListener('click', () => this.handleManualSpacing());
     }
   }
 
@@ -138,7 +129,7 @@ class PopupController {
       const btn = document.getElementById('manual-spacing-btn') as HTMLButtonElement;
       if (btn) {
         btn.disabled = true;
-        btn.textContent = '處理中...';
+        btn.textContent = chrome.i18n.getMessage('processing');
       }
 
       // Check if content script is loaded
@@ -167,9 +158,8 @@ class PopupController {
       // Apply spacing
       const message: ManualSpacingMessage = { action: 'manual_spacing' };
       const response = await chrome.tabs.sendMessage<ManualSpacingMessage, ContentScriptResponse>(this.currentTabId, message);
-
       if (!response?.success) {
-        throw new Error('Failed to apply spacing');
+        throw new Error('Failed to apply manual spacing');
       }
 
       // Play sound effect
@@ -223,10 +213,6 @@ class PopupController {
         messageElement.style.display = 'none';
       }, this.hideMessageDelayMs);
     }
-  }
-
-  private openOptionsPage(): void {
-    chrome.tabs.create({ url: 'pages/options.html' });
   }
 }
 
