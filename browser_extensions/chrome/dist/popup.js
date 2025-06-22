@@ -62,15 +62,11 @@ class PopupController {
     }
   }
   async handleSpacingModeToggleChange() {
-    const url1 = new URLPattern("*://*.example.com/*");
-    console.log(url1.test("https://example.com/"));
-    console.log(url1.test("https://ddd.example.com/safdadsf"));
-    console.log(url1.test("http://ddd.example.com/safdadsf"));
-    const url2 = new URLPattern("https://*.google.com/foo*bar");
-    console.log(url2.test("https://example.com/"));
-    console.log(url2.test("https://api.google.com/foo/sadfasdfdf/bar"));
-    console.log(url2.test("https://api.google.com/foobar"));
-    return;
+    const toggle = document.getElementById("spacing-mode-toggle");
+    const spacingMode = toggle.checked ? "spacing_when_load" : "spacing_when_click";
+    await chrome.storage.sync.set({ spacing_mode: spacingMode });
+    this.showMessage(chrome.i18n.getMessage("refresh_required"), "info", 1e3 * 3);
+    await utils.playSound(spacingMode === "spacing_when_load" ? "Shouryuuken" : "Hadouken");
   }
   async handleManualSpacing() {
     const button = document.getElementById("manual-spacing-btn");

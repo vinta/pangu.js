@@ -1,15 +1,14 @@
+// Import the UMD types for window.pangu global
+import '../../dist/browser/pangu.umd';
 import { test, expect } from '@playwright/test';
 import path from 'path';
 import { fileURLToPath } from 'url';
-// Import the UMD types for window.pangu global
-import '../../dist/browser/pangu.umd';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Note: Browser ESM imports are tested in the Node.js environment
+// Browser ESM imports are tested in the Node.js environment
 // since they use the same ES modules. UMD is the primary browser target.
-
-test.describe('Browser UMD imports', () => {
+test.describe('imports', () => {
   test('should expose global pangu object', async ({ page }) => {
     await page.addScriptTag({ path: path.join(__dirname, '../../dist/browser/pangu.umd.js') });
 
