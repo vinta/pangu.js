@@ -1,24 +1,60 @@
 <!DOCTYPE html>
-<html ng-app="app">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title></title>
-    <link rel="stylesheet" href="../stylesheets/pure-min.css">
+    <title data-i18n="extension_name">為什麼你們就是不能加個空格呢？</title>
     <link rel="stylesheet" href="../stylesheets/styles.css">
-    <script src="../vendors/jquery/jquery-2.1.0.min.js"></script>
-    <script src="../vendors/angular/angular-1.2.9.min.js"></script>
-    <script src="../js/utils_chrome.js"></script>
-    <script src="../js/popup.js"></script>
+    <script type="module" src="../dist/popup.js"></script>
 </head>
-<body ng-controller="PopupController" class="popup_body">
-    <div class="popup_container">
-        <h1 id="god_of_spacing">空格之神</h1>
-        <input ng-click="change_spacing_mode()" class="pure-button pure-button-primary" type="button" value="{{ spacing_mode_display }}" />
-        <br />
-        <input ng-click="call_god_of_spacing()" class="pure-button pure-button-purple" type="button" value="{{ call_god_of_spacing_display }}" />
-    </div>
-    <div class="popup_footer">
-        <p class="copyleft"><span id="copyleft_symbol" style="-webkit-transform: rotate(180deg); -moz-transform: rotate(180deg); -o-transform: rotate(180deg); -khtml-transform: rotate(180deg); -ms-transform: rotate(180deg); transform: rotate(180deg); display: inline-block;">&copy;</span> Vinta - <a href="https://chrome.google.com/webstore/detail/為什麼你們就是不能加個空格呢？/paphcfdffjnbcgkokihcdjliihicmbpd/reviews" target="_blank">{{ extension_rate_display }}</a> - <a ng-click="open_options_page()" href="#">{{ extension_options_display }}</a></p>
+<body>
+    <div class="popup-container">
+        <!-- Header -->
+        <div class="popup-header">
+            <div class="popup-brand">
+                <img src="../icons/icon_48.png" alt="pangu.js" class="popup-logo">
+                <h1 class="popup-title" data-i18n="extension_name">為什麼你們就是不能加個空格呢？</h1>
+            </div>
+            <p class="popup-subtitle" data-i18n="smart_spacing_desc">空格之神赦免他們不加空格的罪</p>
+        </div>
+
+        <!-- Content -->
+        <div class="popup-content">
+            <!-- Spacing mode toggle -->
+            <div class="popup-section">
+                <label class="toggle">
+                    <input type="checkbox" class="toggle-input" id="spacing-mode-toggle">
+                    <span class="toggle-switch"></span>
+                    <span class="toggle-label" data-i18n="auto_spacing_mode">網頁載入時自動召喚空格之神</span>
+                </label>
+            </div>
+
+            <!-- Status indicator -->
+            <div class="popup-section">
+                <div class="status" id="status-indicator">
+                    <span class="status-text" data-i18n="status_inactive">空格之神神隱中</span>
+                    <!-- <span class="status-text" data-i18n="status_active">空格之神顯靈中</span> -->
+                    <span class="status-dot"></span>
+                </div>
+            </div>
+
+            <!-- Manual spacing button -->
+            <div class="popup-section mt-4">
+                <button class="btn btn-primary btn-block" id="manual-spacing-btn" data-i18n="manual_spacing">
+                    召喚空格之神
+                </button>
+                <div id="message" class="message" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="popup-footer">
+            <div class="popup-footer-links">
+                <a href="options.html" target="_blank" class="popup-footer-link" data-i18n="settings">設定</a>
+                <a href="https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd/reviews" target="_blank" class="popup-footer-link" data-i18n="extension_rate">評分</a>
+                <a href="https://github.com/vinta/pangu.js" target="_blank" class="popup-footer-link">GitHub</a>
+            </div>
+            <span class="text-muted text-sm">v<span id="version">x.y.z</span></span>
+        </div>
     </div>
 </body>
 </html>

@@ -20,10 +20,9 @@ pangu.js is a text spacing library that automatically inserts whitespace between
 ### Building
 
 ```bash
-npm run build              # Build all targets (shared, browser, node)
-npm run build:shared       # Build shared/core module
-npm run build:node         # Build Node.js modules (ESM + CommonJS)
-npm run build:browser      # Build browser bundles (ESM + UMD)
+npm run build              # Build all targets (library + extension)
+npm run build:lib          # Build library (shared, browser, node)
+npm run build:extension    # Build Chrome extension TypeScript files
 npm run clean              # Clean all build artifacts
 ```
 
@@ -36,6 +35,13 @@ npm run test:node          # Test Node.js-specific code
 npm run test:browser       # Test browser code (uses Playwright)
 ```
 
+### Linting
+
+```bash
+npm run lint               # Run ESLint on src/ and scripts/
+npm run lint:fix           # Run ESLint with auto-fix
+```
+
 ### Publishing & Packaging
 
 ```bash
@@ -43,9 +49,9 @@ npm run test:browser       # Test browser code (uses Playwright)
 npm run publish-package 5.0.2   # Bump version, commit, and tag
 
 # Extension packaging
-npm run pack-extension          # Build both Chrome and Firefox
-npm run pack-extension:chrome   # Chrome extension only
-npm run pack-extension:firefox  # Firefox extension only
+npm run pack-extension          # Package both Chrome and Firefox extensions
+npm run pack-extension:chrome   # Package Chrome extension only (.zip)
+npm run pack-extension:firefox  # Package Firefox extension only (.xpi)
 ```
 
 ## Code Architecture
@@ -67,15 +73,18 @@ src/
 ### Build Output Structure
 
 ```
-dist/
-├── shared/           # Core module (ESM)
-├── browser/          # Browser builds
-│   ├── pangu.js      # ESM bundle
-│   └── pangu.umd.js  # UMD bundle (window.pangu)
-└── node/             # Node.js builds
-    ├── index.js      # ESM module
-    ├── index.cjs     # CommonJS module
-    └── cli.js        # CLI executable
+dist/                           # Library builds
+├── shared/                     # Core module
+│   ├── index.js                # ESM module
+│   └── index.cjs               # CommonJS module
+├── browser/                    # Browser builds
+│   ├── pangu.js                # ESM bundle
+│   └── pangu.umd.js            # UMD bundle (window.pangu)
+└── node/                       # Node.js builds
+    ├── index.js                # ESM module
+    ├── index.cjs               # CommonJS module
+    ├── cli.js                  # CLI executable (ESM)
+    └── cli.cjs                 # CLI executable (CommonJS)
 ```
 
 ### Core API
@@ -140,8 +149,42 @@ pangu.spacingFileSync('input.txt');
 
 - **Manifest Version**: V3 (modern Chrome extension format)
 - **Location**: `browser_extensions/chrome/`
-- **Built File**: Gets copied to `browser_extensions/chrome/vendors/pangu/pangu.min.js`
-- **UI Framework**: Angular.js 1.2.9 (legacy, planned for removal)
+- **Source**: TypeScript files in `browser_extensions/chrome/src/`
+- **Build Output**: `browser_extensions/chrome/dist/`
+- **Build Command**: `npm run build:extension`
+- **Permissions**: Uses `activeTab` instead of broad `tabs` permission
+- **Content Scripts**: Dynamically registered based on user settings
+- **Match Patterns**: Uses Chrome's match pattern format for blacklist/whitelist
+- **UI Framework**: Pure TypeScript (Angular.js removed December 2024)
+
+### Chrome Extension Architecture
+
+- **Service Worker**: `service-worker.ts` - Handles background tasks and content script registration
+- **Content Script**: `content-script.ts` - Injected into web pages for auto-spacing
+- **Popup**: `popup.ts` - Extension popup UI
+- **Options**: `options.ts` - Settings page
+- **Utils**: `utils.ts` - Shared utilities and settings management
+- **Types**: `types.ts` - TypeScript interfaces
+
+#### Settings Structure
+
+```typescript
+interface Settings {
+  spacing_mode: 'spacing_when_load' | 'spacing_when_click';
+  spacing_rule: 'blacklist' | 'whitelist';
+  blacklist: string[]; // Valid match patterns only
+  whitelist: string[]; // Valid match patterns only
+  is_mute_sound_effects: boolean;
+}
+```
+
+#### Match Patterns
+
+The extension uses Chrome's match pattern format for URL filtering:
+
+- Format: `<scheme>://<host><path>`
+- Example: `*://example.com/*`
+- [Chrome Match Pattern Documentation](https://developer.chrome.com/docs/extensions/develop/concepts/match-patterns)
 
 ## Development Guidelines
 

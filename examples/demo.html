@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pangu.js Browser Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        
+        h1, h2 {
+            color: #333;
+        }
+        
+        .demo-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        
+        .demo-content {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e7f3ff;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: Consolas, Monaco, monospace;
+        }
+        
+        .auto-spacing-demo {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>pangu.js Browser Demo</h1>
+    <p>This demo shows how to use pangu.js in browsers using the UMD build.</p>
+
+    <div class="demo-section">
+        <h2>1. Basic Text Spacing</h2>
+        <div class="demo-content">
+            <p>Original text: <span id="text1">你好world！這是pangu.js的demo。</span></p>
+            <button onclick="demoTextSpacing()">Apply Spacing</button>
+            <div id="result1" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>2. Spacing Specific Elements</h2>
+        <div class="demo-content">
+            <div id="targetElement">
+                <p>這是一個包含English和中文的paragraph。</p>
+                <p>pangu.js會自動在CJK字符和half-width字符之間添加空格。</p>
+            </div>
+            <button onclick="demoElementSpacing()">Space Element by ID</button>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>3. Spacing by Class Name</h2>
+        <div class="demo-content">
+            <div class="spaceable">第1個需要spacing的element</div>
+            <div class="spaceable">第2個需要spacing的element</div>
+            <div class="spaceable">JavaScript是一門programming language</div>
+            <button onclick="demoClassSpacing()">Space Elements by Class</button>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>4. Auto Spacing (with MutationObserver)</h2>
+        <div class="demo-content">
+            <div class="auto-spacing-demo" id="autoSpacingDemo">
+                <p>這個區域已啟用auto spacing。</p>
+                <button onclick="addDynamicContent()">Add Dynamic Content</button>
+                <div id="dynamicContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>5. Custom Text Input</h2>
+        <div class="demo-content">
+            <textarea id="customInput" rows="4" style="width: 100%; font-size: 16px;">
+輸入你的text，例如：Hello世界！pangu.js是一個很useful的library。</textarea>
+            <br><br>
+            <button onclick="demoCustomText()">Apply Spacing to Custom Text</button>
+            <div id="customResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- For local file access, use UMD build instead of ES modules -->
+    <script src="../dist/browser/pangu.umd.js"></script>
+    
+    <script>
+        // pangu is now available as window.pangu
+        
+        function demoTextSpacing() {
+            const originalText = document.getElementById('text1').textContent;
+            const spacedText = pangu.spacingText(originalText);
+            
+            document.getElementById('text1').textContent = spacedText;
+            document.getElementById('result1').style.display = 'block';
+            document.getElementById('result1').innerHTML = `
+                <strong>Original:</strong> ${originalText}<br>
+                <strong>Spaced:</strong> ${spacedText}
+            `;
+        }
+        
+        function demoElementSpacing() {
+            pangu.spacingElementById('targetElement');
+            alert('Spacing applied to element with ID "targetElement"');
+        }
+        
+        function demoClassSpacing() {
+            pangu.spacingElementByClassName('spaceable');
+            alert('Spacing applied to all elements with class "spaceable"');
+        }
+        
+        function addDynamicContent() {
+            const container = document.getElementById('dynamicContent');
+            const newContent = document.createElement('p');
+            newContent.textContent = `動態新增的content ${Date.now()}：這是一段包含English和中文的text。`;
+            container.appendChild(newContent);
+        }
+        
+        function demoCustomText() {
+            const input = document.getElementById('customInput').value;
+            const output = pangu.spacingText(input);
+            
+            document.getElementById('customResult').style.display = 'block';
+            document.getElementById('customResult').innerHTML = `
+                <strong>Original:</strong><br>${input}<br><br>
+                <strong>Spaced:</strong><br>${output}
+            `;
+        }
+        
+        // Initialize auto spacing for the demo area
+        document.addEventListener('DOMContentLoaded', () => {
+            // Create a new instance for auto-spacing demo
+            const autoPangu = new pangu.BrowserPangu();
+            
+            // Only auto-space the specific demo area, not the entire page
+            const autoSpacingArea = document.getElementById('autoSpacingDemo');
+            autoPangu.spacingNode(autoSpacingArea);
+            
+            // Set up mutation observer for the auto-spacing demo area
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach((node) => {
+                            if (node.nodeType === Node.ELEMENT_NODE) {
+                                autoPangu.spacingNode(node);
+                            }
+                        });
+                    }
+                });
+            });
+            
+            observer.observe(autoSpacingArea, {
+                childList: true,
+                subtree: true
+            });
+            
+            console.log('pangu.js loaded successfully!');
+            console.log('Available methods:', Object.getOwnPropertyNames(pangu));
+        });
+    </script>
+</body>
+</html>

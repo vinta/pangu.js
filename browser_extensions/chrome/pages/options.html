@@ -1,79 +1,102 @@
 <!DOCTYPE html>
-<html ng-app="app">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title id="page_title">為什麼你們就是不能加個空格呢？</title>
-    <link rel="stylesheet" href="../vendors/angular-xeditable/css/xeditable.css">
-    <link rel="stylesheet" href="../stylesheets/pure-min.css">
+    <title data-i18n="extension_name">為什麼你們就是不能加個空格呢？</title>
     <link rel="stylesheet" href="../stylesheets/styles.css">
-    <script src="../vendors/jquery/jquery-2.1.0.min.js"></script>
-    <script src="../vendors/angular/angular-1.2.9.min.js"></script>
-    <script src="../vendors/angular-xeditable/js/xeditable.min.js"></script>
-    <script src="../js/utils_chrome.js"></script>
-    <script src="../js/options.js"></script>
+    <link rel="stylesheet" href="../stylesheets/options.css">
+    <script type="module" src="../dist/options.js"></script>
 </head>
-<body ng-controller="OptionsController">
-    <div class="options_container">
-        <div class="header">
-            <h1 id="header_title">為什麼你們就是不能加個空格呢？</h1>
-            <p id="subtitle">自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。</p>
-            <p id="quote">漢學家稱這個空白字元為「盤古之白」，因為它劈開了全形字和半形字之間的混沌。另有研究顯示，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有七成的比例會在 34 歲的時候跟自己不愛的人結婚，而其餘三成的人最後只能把遺產留給自己的貓。畢竟愛情跟書寫都需要適時地留白。</p>
-        </div>
-        <div class="content">
-            <div class="option_group">
-                <h2 id="label_spacing_mode">什麼時候作用？</h2>
-                <input ng-click="change_spacing_mode()" id="spacing_mode_btn" class="pure-button pure-button-blue big-button" type="button" value="{{ spacing_mode_display }}" />
+<body>
+    <div class="options-container">
+        <!-- Main content area -->
+        <div class="options-main">
+            <!-- Header -->
+            <div class="options-header">
+                <div class="options-brand">
+                    <img src="../icons/icon_48.png" alt="pangu.js" class="options-logo">
+                    <div>
+                        <h1 class="options-title" data-i18n="extension_name">為什麼你們就是不能加個空格呢？</h1>
+                        <p class="options-description" data-i18n="subtitle">自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。</p>
+                    </div>
+                </div>
+                <blockquote class="options-quote" data-i18n="quote">
+                    漢學家稱這個空白字元為「盤古之白」，因為它劈開了全形字和半形字之間的混沌。另有研究顯示，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有七成的比例會在 34 歲的時候跟自己不愛的人結婚，而其餘三成的人最後只能把遺產留給自己的貓。畢竟愛情跟書寫都需要適時地留白。
+                </blockquote>
             </div>
-            <div ng-switch on="spacing_mode">
-                <div ng-switch-when="spacing_when_load">
-                    <div class="option_group spacing_rule_group">
-                        <h2 id="label_spacing_rule">然後，你是否希望：</h2>
-                        <input ng-click="change_spacing_rule()" id="spacing_rule_btn" class="pure-button pure-button-green big-button" type="button" value="{{ spacing_rule_display }}" />
-                        <div ng-switch on="spacing_rule">
-                            <div ng-switch-when="blacklists">
-                                <ul class="spacing_rule_list">
-                                    <li class="animate-repeat" ng-repeat="url in blacklists track by $index">
-                                        <a href="#" class="gradientEllipsis" editable-text="blacklists[$index]" onbeforesave="update_urls($data)">{{ blacklists[$index] }}</a>
-                                        <button ng-click="remove_url($index)" class="pure-button small-button">remove</button>
-                                    </li>
-                                    <li>
-                                        <a href="#" editable-text="url_to_add.for_blacklist" onbeforesave="add_url($data)" onaftersave="reset_click_to_add()">{{ 'click to add' }}</a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div ng-switch-when="whitelists">
-                                <ul class="spacing_rule_list">
-                                    <li class="animate-repeat" ng-repeat="url in whitelists track by $index">
-                                        <a href="#" editable-text="whitelists[$index]" onaftersave="update_urls($data)">{{ whitelists[$index] }}</a>
-                                        <button ng-click="remove_url($index)" class="pure-button small-button">remove</button>
-                                    </li>
-                                    <li>
-                                        <a href="#" editable-text="url_to_add.for_whitelist" onbeforesave="add_url($data)" onaftersave="reset_click_to_add()">{{ 'click to add' }}</a>
-                                    </li>
-                                </ul>
-                            </div>
+
+            <!-- Spacing Mode Section -->
+            <div class="options-section">
+                <h2 class="options-section-title" data-i18n="label_settings">設定</h2>
+                <div class="card">
+                    <div class="form-group">
+                        <button id="spacing_mode_btn" class="btn btn-primary btn-lg btn-block" data-i18n="auto_spacing_mode">
+                            網頁載入後自動幫我加上空格
+                        </button>
+                        <p class="form-help-text mt-4" id="spacing_when_click_msg" style="display: none;" data-i18n="spacing_when_click_msg">
+                            你可以按右上角那個黑人頭來召喚空格之神！
+                        </p>
+                    </div>
+                </div>
+                <div class="card mt-4">
+                    <div class="form-group">
+                        <button id="filter_mode_btn" class="btn btn-secondary btn-lg btn-block" data-i18n="blacklist">
+                            不要在這些網頁召喚空格之神
+                        </button>
+                    </div>
+                    <div class="url-list-section">
+                        <div id="url-list-container">
+                            <!-- URL list will be rendered here -->
                         </div>
                     </div>
                 </div>
-                <div ng-switch-when="spacing_when_click">
-                    <p id="spacing_when_click_msg">{{ spacing_when_click_msg }}</p>
+            </div>
+
+            <!-- Other Settings Section -->
+            <div class="options-section">
+                <h2 class="options-section-title" data-i18n="section_other">其他</h2>
+                <div class="card">
+                    <div class="form-group">
+                        <label class="toggle">
+                            <input type="checkbox" class="toggle-input" id="mute-checkbox">
+                            <span class="toggle-switch"></span>
+                            <span class="toggle-label" data-i18n="label_is_mute">在這個頁面靜音</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="toggle">
+                            <input type="checkbox" class="toggle-input" id="mute-checkbox">
+                            <span class="toggle-switch"></span>
+                            <span class="toggle-label" data-i18n="label_magic_button">神奇按鈕</span>
+                        </label>
+                    </div>
                 </div>
             </div>
-            <div class="option_group">
-                <h2 id="label_other_options">其他：</h2>
-                <label>
-                    <input ng-model="is_mute" type="checkbox" /> {{ label_is_mute }}
-                </label>
+
+            <!-- Footer -->
+            <div class="options-footer-section">
+                <div class="options-footer-links">
+                    <a href="https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd/reviews" target="_blank">
+                        Rate on Chrome Web Store
+                    </a>
+                    <span class="footer-separator">•</span>
+                    <a href="https://github.com/vinta/pangu.js" target="_blank">
+                        Star on GitHub
+                    </a>
+                    <span class="footer-separator">•</span>
+                    <a href="https://twitter.com/vinta" target="_blank">
+                        Follow on Twitter (X)
+                    </a>
+                </div>
+                <div class="options-credits text-muted">
+                    <p class="copyleft">
+                        <a href="http://zh.wikipedia.org/wiki/Copyleft" target="_blank">Copyleft</a>
+                        <span class="copyleft-symbol">©</span>
+                        <a href="https://vinta.ws/">Vinta</a> All rights NOT reserved
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="options_footer">
-        <p>Rate me on <a href="https://chrome.google.com/webstore/detail/為什麼你們就是不能加個空格呢？/paphcfdffjnbcgkokihcdjliihicmbpd/reviews" target="_blank">Chrome Web Store</a></p>
-        <p>Fork me on <a href="https://github.com/vinta/pangu.js" target="_blank">GitHub</a></p>
-        <p>Follow me on <a href="https://twitter.com/vinta" target="_blank">Twitter</a></p>
-        <p>Icons: <a href="http://thenounproject.com/term/afro/1500/" target="_blank">NounProject</a></p>
-        <p>Sounds: <a href="http://soundfxnow.com/" target="_blank">SoundFXNow</a></p>
-        <p class="copyleft"><a href="http://zh.wikipedia.org/wiki/Copyleft" target="_blank">Copyleft</a> <span id="copyleft_symbol" style="-webkit-transform: rotate(180deg); -moz-transform: rotate(180deg); -o-transform: rotate(180deg); -khtml-transform: rotate(180deg); -ms-transform: rotate(180deg); transform: rotate(180deg); display: inline-block;">&copy;</span> <a href="https://vinta.ws/">Vinta</a> All rights not reserved</p>
     </div>
 </body>
 </html>

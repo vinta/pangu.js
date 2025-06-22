@@ -41,6 +41,7 @@ const multiBuildPlugin = () => {
         esbuild: {
           target: 'es2022',
           format: 'cjs',
+          charset: 'ascii',
         },
       });
       console.log('✓ CommonJS modules built');
@@ -71,6 +72,7 @@ const multiBuildPlugin = () => {
         },
         esbuild: {
           target: 'es2022',
+          charset: 'ascii',
         },
       });
       console.log('✓ Browser UMD bundle built');
@@ -105,6 +107,7 @@ export default defineConfig({
   },
   esbuild: {
     target: 'es2022',
+    charset: 'ascii',
   },
   plugins: [
     dts({

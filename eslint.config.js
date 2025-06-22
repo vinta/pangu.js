@@ -5,11 +5,11 @@ import unicorn from 'eslint-plugin-unicorn';
 export default tseslint.config(
   {
     // Global ignores
-    ignores: ['node_modules/', 'browser_extensions/', 'dist/'],
+    ignores: ['node_modules/', 'dist/'],
   },
   {
     // TypeScript files
-    files: ['src/**/*.ts'],
+    files: ['src/**/*.ts', 'browser_extensions/chrome/src/**/*.ts'],
     extends: [...tseslint.configs.recommended],
     languageOptions: {
       parser: tseslint.parser,
@@ -22,6 +22,7 @@ export default tseslint.config(
     },
     rules: {
       'unicorn/prefer-node-protocol': 'error',
+      'unicorn/no-array-for-each': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-non-null-assertion': 'warn',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -49,6 +50,7 @@ export default tseslint.config(
     },
     rules: {
       'unicorn/prefer-node-protocol': 'error',
+      'unicorn/no-array-for-each': 'error',
     },
   },
   // Apply prettier config last to disable formatting rules
