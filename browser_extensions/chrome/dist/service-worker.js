@@ -1,11 +1,4 @@
 import { D as DEFAULT_SETTINGS } from "./utils.js";
-chrome.runtime.onInstalled.addListener(async () => {
-  await initializeSettings();
-  await registerContentScripts();
-});
-chrome.runtime.onStartup.addListener(async () => {
-  await registerContentScripts();
-});
 async function initializeSettings() {
   const syncedSettings = await chrome.storage.sync.get(null);
   const missingSettings = {};
@@ -61,6 +54,13 @@ async function registerContentScripts() {
     await unregisterAllContentScripts();
   }
 }
+chrome.runtime.onInstalled.addListener(async () => {
+  await initializeSettings();
+  await registerContentScripts();
+});
+chrome.runtime.onStartup.addListener(async () => {
+  await registerContentScripts();
+});
 chrome.storage.onChanged.addListener(async (changes, areaName) => {
   if (areaName === "sync") {
     const relevantKeys = ["spacing_mode", "filter_mode", "blacklist", "whitelist"];
@@ -68,10 +68,5 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
     if (hasRelevantChanges) {
       await registerContentScripts();
     }
-  }
-});
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === "keep-alive") {
-    console.log("Service worker keep-alive ping");
   }
 });
