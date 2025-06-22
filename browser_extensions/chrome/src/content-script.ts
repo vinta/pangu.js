@@ -1,46 +1,39 @@
 // Content script that runs on web pages to apply spacing
-declare global {
-  interface Window {
-    pangu: {
-      autoSpacingPage(): void;
-      spacingPage(): void;
-    };
+
+// Type definition for the pangu global object
+interface PanguGlobal {
+  autoSpacingPage(): void;
+  spacingPage(): void;
+}
+
+// Apply auto-spacing with continuous monitoring
+function applyAutoSpacing() {
+  const pangu = (window as { pangu?: PanguGlobal }).pangu;
+  if (typeof pangu !== 'undefined') {
+    pangu.autoSpacingPage();
   }
 }
 
-// Track if spacing has been initialized
-let spacingInitialized = false;
-
-// Function to apply spacing
-function applySpacing() {
-  if (typeof window.pangu !== 'undefined') {
-    if (window.pangu.autoSpacingPage) {
-      window.pangu.autoSpacingPage();
-      spacingInitialized = true;
-    } else if (window.pangu.spacingPage) {
-      window.pangu.spacingPage();
-    }
+// Apply manual spacing (runs once)
+function applyManualSpacing() {
+  const pangu = (window as { pangu?: PanguGlobal }).pangu;
+  if (typeof pangu !== 'undefined') {
+    pangu.spacingPage();
   }
 }
 
-// Handle document ready state
-function onDocumentReady() {
-  // Since this content script is only injected when auto-spacing is enabled,
-  // we can apply spacing directly without checking
-  applySpacing();
-}
-
-// Check document state and apply spacing
+// Apply auto-spacing when the content script loads
+// This only happens when auto-spacing is enabled and the page matches the filter rules
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', onDocumentReady);
+  document.addEventListener('DOMContentLoaded', applyAutoSpacing);
 } else {
-  onDocumentReady();
+  applyAutoSpacing();
 }
 
 // Listen for manual spacing requests from popup
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.action === 'manual_spacing') {
-    applySpacing();
+    applyManualSpacing();
     sendResponse({ success: true });
   } else if (message.action === 'ping') {
     // Respond to ping to indicate content script is loaded

@@ -1,23 +1,23 @@
-function applySpacing() {
-  if (typeof window.pangu !== "undefined") {
-    if (window.pangu.autoSpacingPage) {
-      window.pangu.autoSpacingPage();
-    } else if (window.pangu.spacingPage) {
-      window.pangu.spacingPage();
-    }
+function applyAutoSpacing() {
+  const pangu = window.pangu;
+  if (typeof pangu !== "undefined") {
+    pangu.autoSpacingPage();
   }
 }
-function onDocumentReady() {
-  applySpacing();
+function applyManualSpacing() {
+  const pangu = window.pangu;
+  if (typeof pangu !== "undefined") {
+    pangu.spacingPage();
+  }
 }
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", onDocumentReady);
+  document.addEventListener("DOMContentLoaded", applyAutoSpacing);
 } else {
-  onDocumentReady();
+  applyAutoSpacing();
 }
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.action === "manual_spacing") {
-    applySpacing();
+    applyManualSpacing();
     sendResponse({ success: true });
   } else if (message.action === "ping") {
     sendResponse({ success: true });
