@@ -33,14 +33,13 @@ if (document.readyState === 'loading') {
 
 // Listen for manual spacing requests from popup
 chrome.runtime.onMessage.addListener((message: ContentScriptMessage, _sender: chrome.runtime.MessageSender, sendResponse: (response: ContentScriptResponse) => void) => {
-  if (message.action === 'manual_spacing') {
-    spacingPage();
-    sendResponse({ success: true });
-  } else if (message.action === 'ping') {
+  if (message.action === 'ping') {
     // Respond to ping to indicate content script is loaded
     sendResponse({ success: true });
+  } else if (message.action === 'manual_spacing') {
+    spacingPage();
+    sendResponse({ success: true });
   }
-  return true;
 });
 
 export {};

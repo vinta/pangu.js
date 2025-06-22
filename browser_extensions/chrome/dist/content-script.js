@@ -16,11 +16,10 @@ if (document.readyState === "loading") {
   autoSpacingPage();
 }
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.action === "manual_spacing") {
+  if (message.action === "ping") {
+    sendResponse({ success: true });
+  } else if (message.action === "manual_spacing") {
     spacingPage();
     sendResponse({ success: true });
-  } else if (message.action === "ping") {
-    sendResponse({ success: true });
   }
-  return true;
 });
