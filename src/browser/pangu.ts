@@ -285,7 +285,7 @@ export class BrowserPangu extends Pangu {
     ['script', 'style', 'textarea'].forEach((tag) => {
       // 理論上這幾個 tag 裡面不會包含其他 tag
       // 所以可以直接用 .. 取父節點
-      // ex: [translate(name(..), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") != "script"]
+      // 例如 [translate(name(..), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") != "script"]
       xPathQuery = `${xPathQuery}[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
     });
     this.spacingNodeByXPath(xPathQuery, document);

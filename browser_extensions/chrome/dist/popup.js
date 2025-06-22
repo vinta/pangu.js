@@ -4,7 +4,7 @@ class PopupController {
   currentTabId;
   currentTabUrl;
   isAutoSpacingEnabled = true;
-  hideMessageDelayMs = 1e3 * 10;
+  defaultHideMessageDelayMs = 1e3 * 5;
   constructor() {
     this.initialize();
   }
@@ -64,6 +64,7 @@ class PopupController {
     await utils.toggleAutoSpacing(this.isAutoSpacingEnabled);
     await utils.playSound(this.isAutoSpacingEnabled ? "Shouryuuken" : "Hadouken");
     this.renderStatus();
+    this.showMessage(chrome.i18n.getMessage("refresh_required"), "info", 1e3 * 3);
   }
   async handleManualSpacing() {
     console.log(this.currentTabId);
@@ -78,8 +79,8 @@ class PopupController {
         btn.disabled = true;
         btn.textContent = chrome.i18n.getMessage("spacing_processing");
       }
-      const isScriptLoaded = await this.isContentScriptRegistered();
-      if (!isScriptLoaded) {
+      const isContentScriptRegistered = await this.isContentScriptRegistered();
+      if (!isContentScriptRegistered) {
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
           files: ["vendors/pangu/pangu.umd.js", "dist/content-script.js"]
@@ -127,7 +128,7 @@ class PopupController {
     this.showMessage(chrome.i18n.getMessage("spacing_success"), "success");
     await utils.playSound("YeahBaby");
   }
-  showMessage(text, type) {
+  showMessage(text, type = "info", hideMessageDelayMs = this.defaultHideMessageDelayMs) {
     const messageElement = document.getElementById("message");
     if (messageElement) {
       messageElement.textContent = text;
@@ -135,7 +136,7 @@ class PopupController {
       messageElement.style.display = "block";
       setTimeout(() => {
         messageElement.style.display = "none";
-      }, this.hideMessageDelayMs);
+      }, hideMessageDelayMs);
     }
   }
 }

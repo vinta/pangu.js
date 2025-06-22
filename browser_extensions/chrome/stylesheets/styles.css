@@ -377,6 +377,10 @@ a:hover {
   text-align: center;
 }
 
+.message.info {
+  color: var(--color-text-secondary);
+}
+
 .message.error {
   color: var(--color-danger);
 }

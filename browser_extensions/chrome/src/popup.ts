@@ -6,7 +6,7 @@ class PopupController {
   private currentTabId: number | undefined;
   private currentTabUrl: string | undefined;
   private isAutoSpacingEnabled: boolean = true;
-  private hideMessageDelayMs: number = 1000 * 10;
+  private defaultHideMessageDelayMs: number = 1000 * 5;
 
   constructor() {
     this.initialize();
@@ -82,6 +82,7 @@ class PopupController {
     await utils.playSound(this.isAutoSpacingEnabled ? 'Shouryuuken' : 'Hadouken');
 
     this.renderStatus();
+    this.showMessage(chrome.i18n.getMessage('refresh_required'), 'info', 1000 * 3);
   }
 
   private async handleManualSpacing() {
@@ -100,10 +101,8 @@ class PopupController {
         btn.textContent = chrome.i18n.getMessage('spacing_processing');
       }
 
-      // Check if content script is loaded, inject if not
-      const isScriptLoaded = await this.isContentScriptRegistered();
-      if (!isScriptLoaded) {
-        // Content script not loaded - inject scripts on-demand
+      const isContentScriptRegistered = await this.isContentScriptRegistered();
+      if (!isContentScriptRegistered) {
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
           files: ['vendors/pangu/pangu.umd.js', 'dist/content-script.js'],
@@ -138,6 +137,8 @@ class PopupController {
   }
 
   private isValidUrl(url: string) {
+    // valid urls, e.g., http://, https://, file://
+    // invalid urls, e.g., chrome://extensions/, chrome://flags/, ftp://
     return /^(http(s?)|file)/i.test(url);
   }
 
@@ -165,7 +166,7 @@ class PopupController {
     await utils.playSound('YeahBaby');
   }
 
-  private showMessage(text: string, type: 'error' | 'success') {
+  private showMessage(text: string, type: 'info' | 'error' | 'success' = 'info', hideMessageDelayMs: number = this.defaultHideMessageDelayMs) {
     const messageElement = document.getElementById('message');
     if (messageElement) {
       messageElement.textContent = text;
@@ -174,7 +175,7 @@ class PopupController {
 
       setTimeout(() => {
         messageElement.style.display = 'none';
-      }, this.hideMessageDelayMs);
+      }, hideMessageDelayMs);
     }
   }
 }

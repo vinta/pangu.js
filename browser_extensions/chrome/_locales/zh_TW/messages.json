@@ -142,5 +142,9 @@
   "section_other": {
     "message": "其他",
     "description": ""
+  },
+  "refresh_required": {
+    "message": "重新整理網頁之後才會生效",
+    "description": ""
   }
 }
