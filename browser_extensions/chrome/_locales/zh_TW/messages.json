@@ -19,14 +19,6 @@
     "message": "設定",
     "description": ""
   },
-  "spacing_when_load": {
-    "message": "網頁載入後自動幫我加上空格",
-    "description": ""
-  },
-  "spacing_when_click": {
-    "message": "我要自己決定什麼時候要加空格",
-    "description": ""
-  },
   "spacing_when_click_msg": {
     "message": "你可以按右上角那個黑人頭來召喚空格之神！",
     "description": ""
@@ -43,20 +35,12 @@
     "message": "空格之神",
     "description": ""
   },
-  "call_god_of_spacing": {
-    "message": "召喚空格之神",
-    "description": ""
-  },
   "label_is_mute": {
     "message": "太吵了，靜音",
     "description": ""
   },
   "extension_rate": {
     "message": "評價",
-    "description": ""
-  },
-  "extension_options": {
-    "message": "選項",
     "description": ""
   },
   "smart_spacing_desc": {
@@ -99,14 +83,6 @@
     "message": "降落中...",
     "description": ""
   },
-  "spacing_complete": {
-    "message": "空格之神降落",
-    "description": ""
-  },
-  "label_other_options": {
-    "message": "其他設定",
-    "description": ""
-  },
   "placeholder_enter_url": {
     "message": "輸入網址或匹配模式",
     "description": ""
@@ -139,7 +115,7 @@
     "message": "神奇按鈕",
     "description": ""
   },
-  "section_other": {
+  "label_other_settings": {
     "message": "其他",
     "description": ""
   },
