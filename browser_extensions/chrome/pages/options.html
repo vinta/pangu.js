@@ -1,102 +1,91 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title data-i18n="extension_name">為什麼你們就是不能加個空格呢？</title>
-    <link rel="stylesheet" href="../stylesheets/styles.css">
-    <link rel="stylesheet" href="../stylesheets/options.css">
+    <link rel="stylesheet" href="../stylesheets/styles.css" />
+    <link rel="stylesheet" href="../stylesheets/options.css" />
     <script type="module" src="../dist/options.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <div class="options-container">
-        <!-- Main content area -->
-        <div class="options-main">
-            <!-- Header -->
-            <div class="options-header">
-                <div class="options-brand">
-                    <img src="../icons/icon_48.png" alt="pangu.js" class="options-logo">
-                    <div>
-                        <h1 class="options-title" data-i18n="extension_name">為什麼你們就是不能加個空格呢？</h1>
-                        <p class="options-description" data-i18n="options_subtitle">自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。</p>
-                    </div>
-                </div>
-                <blockquote class="options-quote" data-i18n="quote">
-                    漢學家稱這個空白字元為「盤古之白」，因為它劈開了全形字和半形字之間的混沌。另有研究顯示，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有七成的比例會在 34 歲的時候跟自己不愛的人結婚，而其餘三成的人最後只能把遺產留給自己的貓。畢竟愛情跟書寫都需要適時地留白。
-                </blockquote>
+      <!-- Main content area -->
+      <div class="options-main">
+        <!-- Header -->
+        <div class="options-header">
+          <div class="options-brand">
+            <img src="../icons/icon_48.png" alt="pangu.js" class="options-logo" />
+            <div>
+              <h1 class="options-title" data-i18n="extension_name">為什麼你們就是不能加個空格呢？</h1>
+              <p class="options-description" data-i18n="options_subtitle">自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。</p>
             </div>
-
-            <!-- Spacing Mode Section -->
-            <div class="options-section">
-                <h2 class="options-section-title" data-i18n="label_settings">設定</h2>
-                <div id="spacing_mode_section" class="card">
-                    <div class="form-group">
-                        <button id="spacing_mode_btn" class="btn btn-primary btn-lg btn-block" data-i18n="auto_spacing_mode">
-                            網頁載入後自動幫我加上空格
-                        </button>
-                        <p class="form-help-text mt-4" id="spacing_when_click_msg" style="display: none;" data-i18n="spacing_when_click_msg">
-                            你可以按右上角那個黑人頭來召喚空格之神！
-                        </p>
-                    </div>
-                </div>
-                <div id="filter_mode_section" class="card mt-4">
-                    <div class="form-group">
-                        <button id="filter_mode_btn" class="btn btn-secondary btn-lg btn-block" data-i18n="blacklist">
-                            不要在這些網頁召喚空格之神
-                        </button>
-                    </div>
-                    <div class="url-list-section">
-                        <div id="url-list-container">
-                            <!-- URL list will be rendered here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Other Settings Section -->
-            <div class="options-section">
-                <h2 class="options-section-title" data-i18n="label_other_settings">其他</h2>
-                <div class="card">
-                    <div class="form-group">
-                        <label class="toggle">
-                            <input type="checkbox" class="toggle-input" id="mute-checkbox">
-                            <span class="toggle-switch"></span>
-                            <span class="toggle-label" data-i18n="label_is_mute">在這個頁面靜音</span>
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label class="toggle">
-                            <input type="checkbox" class="toggle-input" id="mute-checkbox">
-                            <span class="toggle-switch"></span>
-                            <span class="toggle-label" data-i18n="label_magic_button">神奇按鈕</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div class="options-footer-section">
-                <div class="options-footer-links">
-                    <a href="https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd/reviews" target="_blank">
-                        Rate on Chrome Web Store
-                    </a>
-                    <span class="footer-separator">•</span>
-                    <a href="https://github.com/vinta/pangu.js" target="_blank">
-                        Star on GitHub
-                    </a>
-                    <span class="footer-separator">•</span>
-                    <a href="https://twitter.com/vinta" target="_blank">
-                        Follow on Twitter (X)
-                    </a>
-                </div>
-                <div class="options-credits text-muted">
-                    <p class="copyleft">
-                        <a href="http://zh.wikipedia.org/wiki/Copyleft" target="_blank">Copyleft</a>
-                        <span class="copyleft-symbol">©</span>
-                        <a href="https://vinta.ws/">Vinta</a> All rights NOT reserved
-                    </p>
-                </div>
-            </div>
+          </div>
+          <blockquote class="options-quote" data-i18n="quote">
+            漢學家稱這個空白字元為「盤古之白」，因為它劈開了全形字和半形字之間的混沌。另有研究顯示，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有七成的比例會在 34
+            歲的時候跟自己不愛的人結婚，而其餘三成的人最後只能把遺產留給自己的貓。畢竟愛情跟書寫都需要適時地留白。
+          </blockquote>
         </div>
+
+        <!-- Spacing Mode Section -->
+        <div class="options-section">
+          <h2 class="options-section-title" data-i18n="label_settings">設定</h2>
+          <div id="spacing_mode_section" class="card">
+            <div class="form-group">
+              <button id="spacing_mode_btn" class="btn btn-primary btn-lg btn-block" data-i18n="spacing_when_load">網頁載入後自動幫我加上空格</button>
+              <p class="form-help-text mt-4" id="spacing_when_click_msg" style="display: none" data-i18n="spacing_when_click_msg">你可以按右上角那個黑人頭來召喚空格之神！</p>
+            </div>
+          </div>
+          <div id="filter_mode_section" class="card mt-4">
+            <div class="form-group">
+              <button id="filter_mode_btn" class="btn btn-secondary btn-lg btn-block" data-i18n="blacklist">不要在這些網頁召喚空格之神</button>
+            </div>
+            <div class="url-list-section">
+              <div id="url-list-container">
+                <!-- URL list will be rendered here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Other Settings Section -->
+        <div class="options-section">
+          <h2 class="options-section-title" data-i18n="label_other_settings">其他</h2>
+          <div class="card">
+            <div class="form-group">
+              <label class="toggle">
+                <input type="checkbox" class="toggle-input" id="mute-checkbox" />
+                <span class="toggle-switch"></span>
+                <span class="toggle-label" data-i18n="label_is_mute">在這個頁面靜音</span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label class="toggle">
+                <input type="checkbox" class="toggle-input" id="mute-checkbox" />
+                <span class="toggle-switch"></span>
+                <span class="toggle-label" data-i18n="label_magic_button">神奇按鈕</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="options-footer-section">
+          <div class="options-footer-links">
+            <a href="https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd/reviews" target="_blank"> Rate on Chrome Web Store </a>
+            <span class="footer-separator">•</span>
+            <a href="https://github.com/vinta/pangu.js" target="_blank"> Star on GitHub </a>
+            <span class="footer-separator">•</span>
+            <a href="https://twitter.com/vinta" target="_blank"> Follow on Twitter (X) </a>
+          </div>
+          <div class="options-credits text-muted">
+            <p class="copyleft">
+              <a href="http://zh.wikipedia.org/wiki/Copyleft" target="_blank">Copyleft</a>
+              <span class="copyleft-symbol">©</span>
+              <a href="https://vinta.ws/">Vinta</a> All rights NOT reserved
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
-</body>
+  </body>
 </html>

@@ -86,17 +86,16 @@ class OptionsController {
     const settings = await utils.getCachedSettings();
     const button = document.getElementById("spacing_mode_btn");
     if (button) {
-      const i18nKey = settings.spacing_mode === "spacing_when_load" ? "auto_spacing_mode" : "manual_spacing_mode";
-      button.textContent = chrome.i18n.getMessage(i18nKey);
+      button.textContent = chrome.i18n.getMessage(settings.spacing_mode);
     }
     const ruleSection = document.getElementById("filter_mode_section");
     const clickMessage = document.getElementById("spacing_when_click_msg");
     if (settings.spacing_mode === "spacing_when_load") {
-      if (ruleSection) ruleSection.style.display = "block";
-      if (clickMessage) clickMessage.style.display = "none";
+      ruleSection.style.display = "block";
+      clickMessage.style.display = "none";
     } else {
-      if (ruleSection) ruleSection.style.display = "none";
-      if (clickMessage) clickMessage.style.display = "block";
+      ruleSection.style.display = "none";
+      clickMessage.style.display = "block";
     }
   }
   async renderFilterMode() {
@@ -110,7 +109,9 @@ class OptionsController {
   async renderUrlList() {
     const settings = await utils.getCachedSettings();
     const container = document.getElementById("url-list-container");
-    if (!container) return;
+    if (!container) {
+      return;
+    }
     const urls = settings[settings.filter_mode] || [];
     let html = '<ul class="filter_mode_list">';
     for (const [index, url] of urls.entries()) {
@@ -194,7 +195,9 @@ class OptionsController {
   }
   async saveEditingUrl(index) {
     const input = document.querySelector(`input[data-index="${index}"]`);
-    if (!input) return;
+    if (!input) {
+      return;
+    }
     const newUrl = input.value.trim();
     if (!newUrl || !isValidMatchPattern(newUrl)) {
       alert(chrome.i18n.getMessage("error_invalid_match_pattern"));
@@ -245,7 +248,9 @@ class OptionsController {
   }
   async saveNewUrl() {
     const input = document.getElementById("new-url-input");
-    if (!input) return;
+    if (!input) {
+      return;
+    }
     const newUrl = input.value.trim();
     if (!newUrl || !isValidMatchPattern(newUrl)) {
       alert(chrome.i18n.getMessage("error_invalid_match_pattern"));

@@ -65,23 +65,18 @@ class OptionsController {
     const settings = await utils.getCachedSettings();
     const button = document.getElementById('spacing_mode_btn') as HTMLButtonElement;
     if (button) {
-      // Show "auto_spacing_mode" text when in auto mode, otherwise show manual mode text
-      const i18nKey = settings.spacing_mode === 'spacing_when_load' ? 'auto_spacing_mode' : 'manual_spacing_mode';
-      button.textContent = chrome.i18n.getMessage(i18nKey);
+      button.textContent = chrome.i18n.getMessage(settings.spacing_mode);
     }
 
     // Show/hide filter mode section
     const ruleSection = document.getElementById('filter_mode_section') as HTMLElement;
     const clickMessage = document.getElementById('spacing_when_click_msg') as HTMLElement;
-
     if (settings.spacing_mode === 'spacing_when_load') {
-      // Auto spacing mode - show filter mode section
-      if (ruleSection) ruleSection.style.display = 'block';
-      if (clickMessage) clickMessage.style.display = 'none';
+      ruleSection.style.display = 'block';
+      clickMessage.style.display = 'none';
     } else {
-      // Manual spacing mode - hide filter mode section
-      if (ruleSection) ruleSection.style.display = 'none';
-      if (clickMessage) clickMessage.style.display = 'block';
+      ruleSection.style.display = 'none';
+      clickMessage.style.display = 'block';
     }
   }
 
@@ -98,7 +93,9 @@ class OptionsController {
   private async renderUrlList() {
     const settings = await utils.getCachedSettings();
     const container = document.getElementById('url-list-container');
-    if (!container) return;
+    if (!container) {
+      return;
+    }
 
     const urls = settings[settings.filter_mode as 'blacklist' | 'whitelist'] || [];
     let html = '<ul class="filter_mode_list">';
@@ -207,7 +204,9 @@ class OptionsController {
 
   private async saveEditingUrl(index: number) {
     const input = document.querySelector(`input[data-index="${index}"]`) as HTMLInputElement;
-    if (!input) return;
+    if (!input) {
+      return;
+    }
 
     const newUrl = input.value.trim();
     if (!newUrl || !isValidMatchPattern(newUrl)) {
@@ -271,7 +270,9 @@ class OptionsController {
 
   private async saveNewUrl() {
     const input = document.getElementById('new-url-input') as HTMLInputElement;
-    if (!input) return;
+    if (!input) {
+      return;
+    }
 
     const newUrl = input.value.trim();
     if (!newUrl || !isValidMatchPattern(newUrl)) {

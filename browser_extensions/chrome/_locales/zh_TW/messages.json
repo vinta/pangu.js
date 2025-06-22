@@ -16,11 +16,11 @@
     "message": "讓空格之神赦免他們不加空格的罪",
     "description": ""
   },
-  "auto_spacing_mode": {
+  "spacing_when_load": {
     "message": "網頁載入後自動召喚空格之神",
     "description": ""
   },
-  "manual_spacing_mode": {
+  "spacing_when_click": {
     "message": "我要自己召喚空格之神",
     "description": ""
   },
