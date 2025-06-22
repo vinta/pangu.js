@@ -19,7 +19,7 @@
     "service_worker": "dist/service-worker.js",
     "type": "module"
   },
-  "minimum_chrome_version": "91",
+  "minimum_chrome_version": "95",
   "offline_enabled": true,
   "options_page": "pages/options.html",
   "permissions": ["activeTab", "scripting", "alarms", "storage"],

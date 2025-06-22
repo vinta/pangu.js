@@ -21,7 +21,7 @@ export default defineConfig({
         assetFileNames: '[name].[ext]',
       },
     },
-    target: 'chrome91',
+    target: 'chrome95',
     minify: false,
     sourcemap: false,
   },
