@@ -55,13 +55,13 @@ class PopupController {
     if (!statusText) {
       return;
     }
-    const isContentScriptRegistered = await this.isContentScriptRegistered();
+    const isContentScriptActive = await this.isContentScriptActive();
     console.log("currentTabId", this.currentTabId);
     console.log("currentTabUrl", this.currentTabUrl);
-    console.log("isContentScriptRegistered", isContentScriptRegistered);
-    statusText.setAttribute("data-i18n", isContentScriptRegistered ? "status_active" : "status_inactive");
-    statusText.textContent = chrome.i18n.getMessage(isContentScriptRegistered ? "status_active" : "status_inactive");
-    statusIndicator.className = isContentScriptRegistered ? "status status-active" : "status";
+    console.log("isContentScriptActive", isContentScriptActive);
+    statusText.setAttribute("data-i18n", isContentScriptActive ? "status_active" : "status_inactive");
+    statusText.textContent = chrome.i18n.getMessage(isContentScriptActive ? "status_active" : "status_inactive");
+    statusIndicator.className = isContentScriptActive ? "status status-active" : "status";
   }
   renderVersion() {
     const versionElement = document.getElementById("version");
@@ -90,8 +90,8 @@ class PopupController {
     }
     try {
       button.textContent = chrome.i18n.getMessage("spacing_processing");
-      const isContentScriptRegistered = await this.isContentScriptRegistered();
-      if (!isContentScriptRegistered) {
+      const isContentScriptActive = await this.isContentScriptActive();
+      if (!isContentScriptActive) {
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
           files: ["vendors/pangu/pangu.umd.js", "dist/content-script.js"]
@@ -120,7 +120,7 @@ class PopupController {
   isValidUrl(url) {
     return /^(http(s?)|file)/i.test(url);
   }
-  async isContentScriptRegistered() {
+  async isContentScriptActive() {
     if (!this.currentTabId || !this.currentTabUrl) {
       return false;
     }
