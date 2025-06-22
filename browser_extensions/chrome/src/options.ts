@@ -58,7 +58,6 @@ class OptionsController {
   private async render() {
     await this.renderSpacingMode();
     await this.renderFilterMode();
-    await this.renderUrlList();
     await this.renderMuteCheckbox();
   }
 
@@ -72,7 +71,7 @@ class OptionsController {
     }
 
     // Show/hide filter mode section
-    const ruleSection = document.querySelector('.filter_mode_group') as HTMLElement;
+    const ruleSection = document.getElementById('filter_mode_section') as HTMLElement;
     const clickMessage = document.getElementById('spacing_when_click_msg') as HTMLElement;
 
     if (settings.spacing_mode === 'spacing_when_load') {
@@ -92,6 +91,8 @@ class OptionsController {
     if (button) {
       button.textContent = chrome.i18n.getMessage(settings.filter_mode);
     }
+
+    await this.renderUrlList();
   }
 
   private async renderUrlList() {

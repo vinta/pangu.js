@@ -86,7 +86,7 @@
     "description": ""
   },
   "placeholder_enter_url": {
-    "message": "輸入網址或匹配模式",
+    "message": "輸入網址，你可以使用 *",
     "description": ""
   },
   "error_invalid_match_pattern": {
@@ -106,7 +106,7 @@
     "description": ""
   },
   "button_add_new_url": {
-    "message": "新增",
+    "message": "新增網址",
     "description": ""
   },
   "link_learn_match_patterns": {
