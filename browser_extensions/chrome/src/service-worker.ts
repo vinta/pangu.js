@@ -45,8 +45,10 @@ async function registerContentScripts() {
     };
 
     if (settings.filter_mode === 'blacklist' && settings.blacklist.length > 0) {
+      // TODO: check whether url is valid match pattern before assign
       contentScript.excludeMatches = settings.blacklist;
     } else if (settings.filter_mode === 'whitelist' && settings.whitelist.length > 0) {
+      // TODO: check whether url is valid match pattern before assign
       contentScript.matches = settings.whitelist;
     }
 

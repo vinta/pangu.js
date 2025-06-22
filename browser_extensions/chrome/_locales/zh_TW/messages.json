@@ -110,7 +110,7 @@
     "description": ""
   },
   "link_learn_match_patterns": {
-    "message": "了解匹配模式 ↗",
+    "message": "你可以在網址裡用 * (wildcard)",
     "description": ""
   },
   "label_other_settings": {

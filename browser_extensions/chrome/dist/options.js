@@ -105,51 +105,63 @@ class OptionsController {
   async renderUrlList() {
     const settings = await utils.getCachedSettings();
     const container = document.getElementById("url-list-container");
-    if (!container) {
-      return;
+    const templates = container.querySelectorAll("template");
+    const templateFragment = document.createDocumentFragment();
+    for (const template of templates) {
+      templateFragment.appendChild(template);
     }
+    container.innerHTML = "";
+    container.appendChild(templateFragment);
+    const listTemplate = document.getElementById("url-list-template");
+    const listFragment = listTemplate.content.cloneNode(true);
+    const urlList = listFragment.querySelector("#url-list");
+    const addButton = listFragment.querySelector("#add-url-btn");
+    const helpLink = listFragment.querySelector("#url-list-help a");
+    addButton.textContent = chrome.i18n.getMessage("button_add_new_url");
+    helpLink.textContent = chrome.i18n.getMessage("link_learn_match_patterns");
     const urls = settings[settings.filter_mode] || [];
-    let html = '<ul class="filter_mode_list">';
     for (const [index, url] of urls.entries()) {
       const editingUrl = this.editingUrls.get(index);
       if (editingUrl !== void 0) {
-        html += `
-          <li>
-            <input type="text" class="url-edit-input" value="${this.escapeHtml(editingUrl)}" data-index="${index}">
-            <button class="btn btn-sm save-url-btn" data-index="${index}">${chrome.i18n.getMessage("button_save")}</button>
-            <button class="btn btn-sm cancel-edit-btn" data-index="${index}">${chrome.i18n.getMessage("button_cancel")}</button>
-          </li>
-        `;
+        const editTemplate = document.getElementById("url-edit-template");
+        const editItem = editTemplate.content.cloneNode(true);
+        const input = editItem.querySelector(".url-edit-input");
+        const saveBtn = editItem.querySelector(".save-url-btn");
+        const cancelBtn = editItem.querySelector(".cancel-edit-btn");
+        input.value = editingUrl;
+        input.setAttribute("data-index", index.toString());
+        saveBtn.setAttribute("data-index", index.toString());
+        saveBtn.textContent = chrome.i18n.getMessage("button_save");
+        cancelBtn.setAttribute("data-index", index.toString());
+        cancelBtn.textContent = chrome.i18n.getMessage("button_cancel");
+        urlList.appendChild(editItem);
       } else {
-        html += `
-          <li class="animate-repeat">
-            <input type="text" class="url-display-input" value="${this.escapeHtml(url)}" data-index="${index}" readonly>
-            <button class="btn btn-sm remove-url-btn" data-index="${index}">${chrome.i18n.getMessage("button_remove")}</button>
-          </li>
-        `;
+        const displayTemplate = document.getElementById("url-display-template");
+        const displayItem = displayTemplate.content.cloneNode(true);
+        const input = displayItem.querySelector(".url-display-input");
+        const removeBtn = displayItem.querySelector(".remove-url-btn");
+        input.value = url;
+        input.setAttribute("data-index", index.toString());
+        removeBtn.setAttribute("data-index", index.toString());
+        removeBtn.textContent = chrome.i18n.getMessage("button_remove");
+        urlList.appendChild(displayItem);
       }
     }
     if (this.addUrlInput) {
-      html += `
-        <li>
-          <input type="text" class="url-edit-input" id="new-url-input" placeholder="${chrome.i18n.getMessage("placeholder_enter_url")}">
-          <button class="btn btn-sm" id="save-new-url-btn">${chrome.i18n.getMessage("button_save")}</button>
-          <button class="btn btn-sm" id="cancel-new-url-btn">${chrome.i18n.getMessage("button_cancel")}</button>
-        </li>
-      `;
+      const newTemplate = document.getElementById("url-new-template");
+      const newItem = newTemplate.content.cloneNode(true);
+      const input = newItem.querySelector("#new-url-input");
+      const saveBtn = newItem.querySelector("#save-new-url-btn");
+      const cancelBtn = newItem.querySelector("#cancel-new-url-btn");
+      input.placeholder = chrome.i18n.getMessage("placeholder_enter_url");
+      saveBtn.textContent = chrome.i18n.getMessage("button_save");
+      cancelBtn.textContent = chrome.i18n.getMessage("button_cancel");
+      urlList.appendChild(newItem);
     }
-    html += "</ul>";
-    if (!this.addUrlInput) {
-      html += `<div class="mt-4">
-        <a href="#" id="add-url-btn">${chrome.i18n.getMessage("button_add_new_url")}</a>
-      </div>`;
+    if (this.addUrlInput && addButton.parentElement) {
+      addButton.parentElement.style.display = "none";
     }
-    html += `<div class="url-list-help">
-      <a href="https://developer.chrome.com/docs/extensions/develop/concepts/match-patterns" target="_blank">
-        ${chrome.i18n.getMessage("link_learn_match_patterns")}
-      </a>
-    </div>`;
-    container.innerHTML = html;
+    container.appendChild(listFragment);
     this.setupUrlInputListeners();
   }
   async renderMuteCheckbox() {
@@ -258,11 +270,6 @@ class OptionsController {
   cancelNewUrl() {
     this.addUrlInput = null;
     this.renderUrlList();
-  }
-  escapeHtml(str) {
-    const div = document.createElement("div");
-    div.textContent = str;
-    return div.innerHTML;
   }
 }
 document.addEventListener("DOMContentLoaded", () => {

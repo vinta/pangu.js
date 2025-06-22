@@ -167,6 +167,7 @@
 ### Medium Priority - Code Quality
 
 - [ ] Add proper Chrome API error handling
+  - Check whether url is valid match pattern before register content script
   - Implement retry logic for script injection
   - User-friendly error messages
 - [ ] Create optimized content script bundle

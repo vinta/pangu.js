@@ -41,7 +41,40 @@
             </div>
             <div class="url-list-section">
               <div id="url-list-container">
-                <!-- URL list will be rendered here -->
+                <!-- Template elements (hidden by default) -->
+                <template id="url-display-template">
+                  <li class="animate-repeat">
+                    <input type="text" class="url-display-input" readonly>
+                    <button class="btn btn-sm remove-url-btn"></button>
+                  </li>
+                </template>
+
+                <template id="url-edit-template">
+                  <li>
+                    <input type="text" class="url-edit-input">
+                    <button class="btn btn-sm save-url-btn"></button>
+                    <button class="btn btn-sm cancel-edit-btn"></button>
+                  </li>
+                </template>
+
+                <template id="url-new-template">
+                  <li>
+                    <input type="text" class="url-edit-input" id="new-url-input">
+                    <button class="btn btn-sm" id="save-new-url-btn"></button>
+                    <button class="btn btn-sm" id="cancel-new-url-btn"></button>
+                  </li>
+                </template>
+
+                <template id="url-list-template">
+                  <ul id="url-list" class="filter_mode_list"></ul>
+                  <div class="mt-4">
+                    <a href="#" id="add-url-btn"></a>
+                  </div>
+                  <div id="url-list-help" class="url-list-help">
+                    <a href="https://developer.chrome.com/docs/extensions/develop/concepts/match-patterns" target="_blank"></a>
+                  </div>
+                </template>
+                <!-- URL list will be rendered below -->
               </div>
             </div>
           </div>
