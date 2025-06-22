@@ -7,44 +7,13 @@
     "message": "自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。（攤手）沒辦法，處女座都有強迫症。",
     "description": ""
   },
-  "subtitle": {
-    "message": "自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。",
-    "description": ""
-  },
-  "quote": {
-    "message": "漢學家稱這個空白字元為「盤古之白」，因為它劈開了全形字和半形字之間的混沌。另有研究顯示，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有七成的比例會在 34 歲的時候跟自己不愛的人結婚，而其餘三成的人最後只能把遺產留給自己的貓。畢竟愛情跟書寫都需要適時地留白。",
-    "description": ""
-  },
-  "label_settings": {
-    "message": "設定",
-    "description": ""
-  },
-  "spacing_when_click_msg": {
-    "message": "你可以按右上角那個黑人頭來召喚空格之神！",
-    "description": ""
-  },
-  "blacklist": {
-    "message": "不要在這些網頁召喚空格之神",
-    "description": ""
-  },
-  "whitelist": {
-    "message": "只在這些網頁召喚空格之神",
-    "description": ""
-  },
   "god_of_spacing": {
     "message": "空格之神",
     "description": ""
   },
-  "label_is_mute": {
-    "message": "太吵了，靜音",
-    "description": ""
-  },
-  "extension_rate": {
-    "message": "評價",
-    "description": ""
-  },
-  "smart_spacing_desc": {
-    "message": "空格之神赦免他們不加空格的罪",
+
+  "popup_subtitle": {
+    "message": "讓空格之神赦免他們不加空格的罪",
     "description": ""
   },
   "auto_spacing_mode": {
@@ -71,6 +40,10 @@
     "message": "設定",
     "description": ""
   },
+  "extension_rate": {
+    "message": "評價",
+    "description": ""
+  },
   "spacing_fail": {
     "message": "在這種地方是召喚不出空格之神的，除非你在七七四十九天之內都能夠不懷著淫狎之念上網",
     "description": ""
@@ -81,6 +54,35 @@
   },
   "spacing_processing": {
     "message": "降落中...",
+    "description": ""
+  },
+  "refresh_required": {
+    "message": "重新整理網頁之後才會生效",
+    "description": ""
+  },
+
+  "options_subtitle": {
+    "message": "自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白",
+    "description": ""
+  },
+  "quote": {
+    "message": "漢學家稱這個空白字元為「盤古之白」，因為它劈開了全形字和半形字之間的混沌。另有研究顯示，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有七成的比例會在 34 歲的時候跟自己不愛的人結婚，而其餘三成的人最後只能把遺產留給自己的貓。畢竟愛情跟書寫都需要適時地留白。",
+    "description": ""
+  },
+  "label_settings": {
+    "message": "設定",
+    "description": ""
+  },
+  "spacing_when_click_msg": {
+    "message": "你可以按右上角那個黑人頭來召喚空格之神！",
+    "description": ""
+  },
+  "blacklist": {
+    "message": "不要在這些網頁召喚空格之神",
+    "description": ""
+  },
+  "whitelist": {
+    "message": "只在這些網頁召喚空格之神",
     "description": ""
   },
   "placeholder_enter_url": {
@@ -111,16 +113,16 @@
     "message": "了解匹配模式 ↗",
     "description": ""
   },
-  "label_magic_button": {
-    "message": "神奇按鈕",
-    "description": ""
-  },
   "label_other_settings": {
     "message": "其他",
     "description": ""
   },
-  "refresh_required": {
-    "message": "重新整理網頁之後才會生效",
+  "label_is_mute": {
+    "message": "太吵了，靜音",
+    "description": ""
+  },
+  "label_magic_button": {
+    "message": "神奇按鈕",
     "description": ""
   }
 }
