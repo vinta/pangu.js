@@ -1,5 +1,5 @@
 import type { BrowserPangu } from '../../../src/browser/pangu';
-import type { MessageToContentScript, ContentScriptResponse, ContentScriptLoadedMessage } from './types';
+import type { MessageToContentScript, ContentScriptResponse, ContentScriptLoadedMessage } from './utils/types';
 
 // Extend the global Window interface to include the pangu object
 // The pangu object is injected by pangu.umd.js which loads before this script

@@ -1,6 +1,6 @@
-import { translatePage } from './i18n';
-import { isValidMatchPattern } from './match-pattern';
-import utils, { DEFAULT_SETTINGS } from './utils';
+import { translatePage } from './utils/i18n';
+import { isValidMatchPattern } from './utils/match-pattern';
+import utils, { DEFAULT_SETTINGS } from './utils/settings';
 
 class OptionsController {
   private editingUrls: Map<number, string> = new Map();

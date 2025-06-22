@@ -1,6 +1,6 @@
 // NOTE: In service workers, we can't export directly, everything goes through messages
-import type { Settings } from './types';
-import { DEFAULT_SETTINGS } from './utils';
+import type { Settings } from './utils/types';
+import { DEFAULT_SETTINGS } from './utils/settings';
 
 const SCRIPT_ID = 'pangu-auto-spacing';
 

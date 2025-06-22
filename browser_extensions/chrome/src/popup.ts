@@ -1,6 +1,6 @@
-import { translatePage } from './i18n';
-import type { PingMessage, ManualSpacingMessage, ContentScriptResponse, MessageFromContentScript } from './types';
-import utils from './utils';
+import { translatePage } from './utils/i18n';
+import type { PingMessage, ManualSpacingMessage, ContentScriptResponse, MessageFromContentScript } from './utils/types';
+import utils from './utils/settings';
 
 class PopupController {
   private currentTabId: number | undefined;
