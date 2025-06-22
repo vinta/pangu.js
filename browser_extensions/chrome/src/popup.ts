@@ -51,17 +51,19 @@ class PopupController {
   }
 
   private async renderStatus() {
-    const settings = await utils.getCachedSettings();
     const statusIndicator = document.getElementById('status-indicator');
-    if (statusIndicator) {
-      const isAutoMode = settings.spacing_mode === 'spacing_when_load';
-      const statusText = statusIndicator.querySelector('.status-text');
-      if (statusText) {
-        statusText.setAttribute('data-i18n', isAutoMode ? 'status_active' : 'status_inactive');
-        statusText.textContent = chrome.i18n.getMessage(isAutoMode ? 'status_active' : 'status_inactive');
-      }
-      statusIndicator.className = isAutoMode ? 'status status-active' : 'status';
+    if (!statusIndicator) {
+      return;
     }
+    const statusText = statusIndicator.querySelector('.status-text');
+    if (!statusText) {
+      return;
+    }
+
+    const isContentScriptRegistered = await this.isContentScriptRegistered();
+    statusText.setAttribute('data-i18n', isContentScriptRegistered ? 'status_active' : 'status_inactive');
+    statusText.textContent = chrome.i18n.getMessage(isContentScriptRegistered ? 'status_active' : 'status_inactive');
+    statusIndicator.className = isContentScriptRegistered ? 'status status-active' : 'status';
   }
 
   private renderVersion() {
@@ -76,8 +78,6 @@ class PopupController {
 
     const spacingMode = toggle.checked ? 'spacing_when_load' : 'spacing_when_click';
     await chrome.storage.sync.set({ spacing_mode: spacingMode });
-
-    await this.renderStatus();
 
     this.showMessage(chrome.i18n.getMessage('refresh_required'), 'info', 1000 * 3);
     await utils.playSound(spacingMode === 'spacing_when_load' ? 'Shouryuuken' : 'Hadouken');
