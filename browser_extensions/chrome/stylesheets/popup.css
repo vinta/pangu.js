@@ -1,0 +1,100 @@
+.popup-container {
+  width: 380px;
+  min-height: 330px;
+  padding: 0;
+  background-color: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+}
+
+.popup-header {
+  padding: var(--spacing-4);
+  background-color: var(--color-surface-secondary);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.popup-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-1);
+}
+
+.popup-logo {
+  width: 24px;
+  height: 24px;
+}
+
+.popup-title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.popup-subtitle {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+}
+
+.popup-content {
+  padding: var(--spacing-4);
+  flex: 1;
+}
+
+.popup-section {
+  margin-bottom: var(--spacing-3);
+}
+
+.popup-section:last-child {
+  margin-bottom: 0;
+}
+
+.popup-actions {
+  display: flex;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-4);
+}
+
+.popup-footer {
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-surface-secondary);
+  border-top: 1px solid var(--color-border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.popup-footer-links {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.popup-footer-link {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+}
+
+.popup-footer-link:hover {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+/* Message under button */
+.message {
+  margin-top: var(--spacing-2);
+  font-size: var(--text-base);
+  text-align: center;
+}
+
+.message.info {
+  color: var(--color-text-secondary);
+}
+
+.message.error {
+  color: var(--color-danger);
+}
+
+.message.success {
+  color: var(--color-success);
+}

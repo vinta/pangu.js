@@ -145,13 +145,12 @@ class PopupController {
   private async isContentScriptRegistered(): Promise<boolean> {
     if (!this.currentTabId || !this.currentTabUrl) return false;
 
+    // Try to ping the content script to see if it's loaded
     try {
-      // Try to ping the content script to see if it's loaded
       const message: PingMessage = { action: 'ping' };
       await chrome.tabs.sendMessage<PingMessage, ContentScriptResponse>(this.currentTabId, message);
       return true;
     } catch {
-      // Content script not loaded
       return false;
     }
   }
