@@ -55,13 +55,10 @@ class PopupController {
     if (!statusText) {
       return;
     }
-    const isContentScriptActive = await this.isContentScriptActive();
-    console.log("currentTabId", this.currentTabId);
-    console.log("currentTabUrl", this.currentTabUrl);
-    console.log("isContentScriptActive", isContentScriptActive);
-    statusText.setAttribute("data-i18n", isContentScriptActive ? "status_active" : "status_inactive");
-    statusText.textContent = chrome.i18n.getMessage(isContentScriptActive ? "status_active" : "status_inactive");
-    statusIndicator.className = isContentScriptActive ? "status status-active" : "status";
+    const shouldBeActive = await this.shouldContentScriptBeActive();
+    statusText.setAttribute("data-i18n", shouldBeActive ? "status_active" : "status_inactive");
+    statusText.textContent = chrome.i18n.getMessage(shouldBeActive ? "status_active" : "status_inactive");
+    statusIndicator.className = shouldBeActive ? "status status-active" : "status";
   }
   renderVersion() {
     const versionElement = document.getElementById("version");
@@ -90,8 +87,8 @@ class PopupController {
     }
     try {
       button.textContent = chrome.i18n.getMessage("spacing_processing");
-      const isContentScriptActive = await this.isContentScriptActive();
-      if (!isContentScriptActive) {
+      const isContentScriptLoaded = await this.isContentScriptLoaded();
+      if (!isContentScriptLoaded) {
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
           files: ["vendors/pangu/pangu.umd.js", "dist/content-script.js"]
@@ -120,7 +117,7 @@ class PopupController {
   isValidUrl(url) {
     return /^(http(s?)|file)/i.test(url);
   }
-  async isContentScriptActive() {
+  async isContentScriptLoaded() {
     if (!this.currentTabId || !this.currentTabUrl) {
       return false;
     }
@@ -131,6 +128,26 @@ class PopupController {
     } catch {
       return false;
     }
+  }
+  async shouldContentScriptBeActive() {
+    if (!this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
+      return false;
+    }
+    const settings = await utils.getCachedSettings();
+    if (settings.spacing_mode === "spacing_when_click") {
+      return false;
+    }
+    const urlPatterns = settings[settings.filter_mode];
+    for (const pattern of urlPatterns) {
+      try {
+        const urlPattern = new URLPattern(pattern);
+        if (urlPattern.test(this.currentTabUrl)) {
+          return settings.filter_mode === "whitelist";
+        }
+      } catch {
+      }
+    }
+    return settings.filter_mode === "blacklist";
   }
   async showErrorMessage(callback) {
     this.showMessage(chrome.i18n.getMessage("spacing_fail"), "error", 1e3 * 4, callback);

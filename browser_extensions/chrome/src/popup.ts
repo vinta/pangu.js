@@ -36,7 +36,6 @@ class PopupController {
       });
     }
 
-    // Listen for content script load notifications
     chrome.runtime.onMessage.addListener((message: MessageFromContentScript, sender) => {
       if (message.type === 'CONTENT_SCRIPT_LOADED' && sender.tab?.id === this.currentTabId) {
         this.renderStatus();
@@ -68,13 +67,10 @@ class PopupController {
       return;
     }
 
-    const isContentScriptActive = await this.isContentScriptActive();
-    console.log('currentTabId', this.currentTabId);
-    console.log('currentTabUrl', this.currentTabUrl);
-    console.log('isContentScriptActive', isContentScriptActive);
-    statusText.setAttribute('data-i18n', isContentScriptActive ? 'status_active' : 'status_inactive');
-    statusText.textContent = chrome.i18n.getMessage(isContentScriptActive ? 'status_active' : 'status_inactive');
-    statusIndicator.className = isContentScriptActive ? 'status status-active' : 'status';
+    const shouldBeActive = await this.shouldContentScriptBeActive();
+    statusText.setAttribute('data-i18n', shouldBeActive ? 'status_active' : 'status_inactive');
+    statusText.textContent = chrome.i18n.getMessage(shouldBeActive ? 'status_active' : 'status_inactive');
+    statusIndicator.className = shouldBeActive ? 'status status-active' : 'status';
   }
 
   private renderVersion() {
@@ -113,8 +109,8 @@ class PopupController {
     try {
       button.textContent = chrome.i18n.getMessage('spacing_processing');
 
-      const isContentScriptActive = await this.isContentScriptActive();
-      if (!isContentScriptActive) {
+      const isContentScriptLoaded = await this.isContentScriptLoaded();
+      if (!isContentScriptLoaded) {
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
           files: ['vendors/pangu/pangu.umd.js', 'dist/content-script.js'],
@@ -150,7 +146,7 @@ class PopupController {
     return /^(http(s?)|file)/i.test(url);
   }
 
-  private async isContentScriptActive(): Promise<boolean> {
+  private async isContentScriptLoaded(): Promise<boolean> {
     if (!this.currentTabId || !this.currentTabUrl) {
       return false;
     }
@@ -163,6 +159,39 @@ class PopupController {
     } catch {
       return false;
     }
+  }
+
+  private async shouldContentScriptBeActive(): Promise<boolean> {
+    if (!this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
+      return false;
+    }
+
+    const settings = await utils.getCachedSettings();
+
+    // If in manual mode, content script shouldn't be active
+    if (settings.spacing_mode === 'spacing_when_click') {
+      return false;
+    }
+
+    // Check blacklist/whitelist
+    const urlPatterns = settings[settings.filter_mode];
+    for (const pattern of urlPatterns) {
+      try {
+        const urlPattern = new URLPattern(pattern);
+        if (urlPattern.test(this.currentTabUrl)) {
+          // If URL matches blacklist, should NOT be active
+          // If URL matches whitelist, SHOULD be active
+          return settings.filter_mode === 'whitelist';
+        }
+      } catch {
+        // Invalid pattern, skip
+      }
+    }
+
+    // If no patterns matched:
+    // - For blacklist mode: should be active (not blacklisted)
+    // - For whitelist mode: should NOT be active (not whitelisted)
+    return settings.filter_mode === 'blacklist';
   }
 
   private async showErrorMessage(callback?: () => void) {
