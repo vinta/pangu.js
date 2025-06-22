@@ -56,7 +56,7 @@ class OptionsController {
       } else if (target.classList.contains("remove-url-btn")) {
         const index = parseInt(target.dataset.index || "0");
         this.removeUrl(index);
-      } else if (target.classList.contains("edit-url-btn")) {
+      } else if (target.classList.contains("url-display-input")) {
         const index = parseInt(target.dataset.index || "0");
         this.startEditingUrl(index);
       } else if (target.classList.contains("save-url-btn")) {
@@ -85,9 +85,7 @@ class OptionsController {
   async renderSpacingMode() {
     const settings = await utils.getCachedSettings();
     const button = document.getElementById("spacing_mode_btn");
-    if (button) {
-      button.textContent = chrome.i18n.getMessage(settings.spacing_mode);
-    }
+    button.textContent = chrome.i18n.getMessage(settings.spacing_mode);
     const ruleSection = document.getElementById("filter_mode_section");
     const clickMessage = document.getElementById("spacing_when_click_msg");
     if (settings.spacing_mode === "spacing_when_load") {
@@ -101,9 +99,7 @@ class OptionsController {
   async renderFilterMode() {
     const settings = await utils.getCachedSettings();
     const button = document.getElementById("filter_mode_btn");
-    if (button) {
-      button.textContent = chrome.i18n.getMessage(settings.filter_mode);
-    }
+    button.textContent = chrome.i18n.getMessage(settings.filter_mode);
     await this.renderUrlList();
   }
   async renderUrlList() {
@@ -127,10 +123,7 @@ class OptionsController {
       } else {
         html += `
           <li class="animate-repeat">
-            <a href="${url}" target="_blank" class="gradientEllipsis">${url}</a>
-            <button class="btn btn-sm edit-url-btn" data-index="${index}">
-              <svg class="icon icon-sm"><use xlink:href="#icon-edit"></use></svg>
-            </button>
+            <input type="text" class="url-display-input" value="${this.escapeHtml(url)}" data-index="${index}" readonly>
             <button class="btn btn-sm remove-url-btn" data-index="${index}">${chrome.i18n.getMessage("button_remove")}</button>
           </li>
         `;
@@ -180,18 +173,16 @@ class OptionsController {
     chrome.storage.sync.set({ filter_mode: newFilterMode });
     await this.render();
   }
-  startEditingUrl(index) {
-    const settings = utils.getCachedSettings();
-    settings.then(async (s) => {
-      const urls = s[s.filter_mode];
-      this.editingUrls.set(index, urls[index]);
-      await this.renderUrlList();
-      const input = document.querySelector(`input[data-index="${index}"]`);
-      if (input) {
-        input.focus();
-        input.select();
-      }
-    });
+  async startEditingUrl(index) {
+    const settings = await utils.getCachedSettings();
+    const urls = settings[settings.filter_mode];
+    this.editingUrls.set(index, urls[index]);
+    await this.renderUrlList();
+    const input = document.querySelector(`input[data-index="${index}"]`);
+    if (input) {
+      input.focus();
+      input.select();
+    }
   }
   async saveEditingUrl(index) {
     const input = document.querySelector(`input[data-index="${index}"]`);

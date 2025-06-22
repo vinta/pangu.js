@@ -142,6 +142,34 @@
   box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
 }
 
+/* URL display input (clickable) */
+.url-display-input {
+  flex: 1;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.url-display-input:hover {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  border-color: var(--color-primary-light);
+}
+
+.url-display-input:focus {
+  outline: none;
+  cursor: text;
+}
+
 /* URL item link */
 .gradientEllipsis {
   flex: 1;
@@ -220,6 +248,7 @@
   font-size: var(--text-xs);
   font-weight: 500;
 }
+
 
 .remove-url-btn {
   color: var(--color-danger);
