@@ -6,18 +6,27 @@ export interface Settings {
   is_mute_sound_effects: boolean;
 }
 
-// Messages sent to content script
 export interface PingMessage {
-  action: 'ping';
+  action: 'PING';
 }
 
 export interface ManualSpacingMessage {
-  action: 'manual_spacing';
+  action: 'MANUAL_SPACING';
 }
 
-export type ContentScriptMessage = PingMessage | ManualSpacingMessage;
+// Messages sent TO content script (via chrome.tabs.sendMessage)
+export type MessageToContentScript = PingMessage | ManualSpacingMessage;
 
-// Response from content script
+// We only need a response when sender actually needs it, e.g.,
+// popup needs to know if content script is loaded or not,
+// or if manual spacing is successful or not
 export interface ContentScriptResponse {
   success: boolean;
 }
+
+export interface ContentScriptLoadedMessage {
+  type: 'CONTENT_SCRIPT_LOADED';
+}
+
+// Messages sent FROM content script to extension (via chrome.runtime.sendMessage)
+export type MessageFromContentScript = ContentScriptLoadedMessage;

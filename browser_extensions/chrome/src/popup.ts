@@ -1,5 +1,5 @@
 import { translatePage } from './i18n';
-import type { PingMessage, ManualSpacingMessage, ContentScriptResponse } from './types';
+import type { PingMessage, ManualSpacingMessage, ContentScriptResponse, MessageFromContentScript } from './types';
 import utils from './utils';
 
 class PopupController {
@@ -35,6 +35,13 @@ class PopupController {
         this.handleManualSpacing();
       });
     }
+
+    // Listen for content script load notifications
+    chrome.runtime.onMessage.addListener((message: MessageFromContentScript, sender) => {
+      if (message.type === 'CONTENT_SCRIPT_LOADED' && sender.tab?.id === this.currentTabId) {
+        this.renderStatus();
+      }
+    });
   }
 
   private async render() {
@@ -62,6 +69,9 @@ class PopupController {
     }
 
     const isContentScriptRegistered = await this.isContentScriptRegistered();
+    console.log('currentTabId', this.currentTabId);
+    console.log('currentTabUrl', this.currentTabUrl);
+    console.log('isContentScriptRegistered', isContentScriptRegistered);
     statusText.setAttribute('data-i18n', isContentScriptRegistered ? 'status_active' : 'status_inactive');
     statusText.textContent = chrome.i18n.getMessage(isContentScriptRegistered ? 'status_active' : 'status_inactive');
     statusIndicator.className = isContentScriptRegistered ? 'status status-active' : 'status';
@@ -112,7 +122,7 @@ class PopupController {
       }
 
       // Apply spacing
-      const message: ManualSpacingMessage = { action: 'manual_spacing' };
+      const message: ManualSpacingMessage = { action: 'MANUAL_SPACING' };
       const response = await chrome.tabs.sendMessage<ManualSpacingMessage, ContentScriptResponse>(this.currentTabId, message);
 
       if (response && response.success) {
@@ -147,7 +157,7 @@ class PopupController {
 
     // Try to ping the content script to see if it's loaded
     try {
-      const message: PingMessage = { action: 'ping' };
+      const message: PingMessage = { action: 'PING' };
       await chrome.tabs.sendMessage<PingMessage, ContentScriptResponse>(this.currentTabId, message);
       return true;
     } catch {

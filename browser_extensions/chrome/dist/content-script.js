@@ -10,15 +10,17 @@ function spacingPage() {
     pangu.spacingPage();
   }
 }
+const loadedMessage = { type: "CONTENT_SCRIPT_LOADED" };
+chrome.runtime.sendMessage(loadedMessage);
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", autoSpacingPage);
 } else {
   autoSpacingPage();
 }
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.action === "ping") {
+  if (message.action === "PING") {
     sendResponse({ success: true });
-  } else if (message.action === "manual_spacing") {
+  } else if (message.action === "MANUAL_SPACING") {
     spacingPage();
     sendResponse({ success: true });
   }

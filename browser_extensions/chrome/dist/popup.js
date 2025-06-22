@@ -28,6 +28,11 @@ class PopupController {
         this.handleManualSpacing();
       });
     }
+    chrome.runtime.onMessage.addListener((message, sender) => {
+      if (message.type === "CONTENT_SCRIPT_LOADED" && sender.tab?.id === this.currentTabId) {
+        this.renderStatus();
+      }
+    });
   }
   async render() {
     await this.renderToggle();
@@ -51,6 +56,9 @@ class PopupController {
       return;
     }
     const isContentScriptRegistered = await this.isContentScriptRegistered();
+    console.log("currentTabId", this.currentTabId);
+    console.log("currentTabUrl", this.currentTabUrl);
+    console.log("isContentScriptRegistered", isContentScriptRegistered);
     statusText.setAttribute("data-i18n", isContentScriptRegistered ? "status_active" : "status_inactive");
     statusText.textContent = chrome.i18n.getMessage(isContentScriptRegistered ? "status_active" : "status_inactive");
     statusIndicator.className = isContentScriptRegistered ? "status status-active" : "status";
@@ -89,7 +97,7 @@ class PopupController {
           files: ["vendors/pangu/pangu.umd.js", "dist/content-script.js"]
         });
       }
-      const message = { action: "manual_spacing" };
+      const message = { action: "MANUAL_SPACING" };
       const response = await chrome.tabs.sendMessage(this.currentTabId, message);
       if (response && response.success) {
         await this.showSuccessMessage(() => {
@@ -117,7 +125,7 @@ class PopupController {
       return false;
     }
     try {
-      const message = { action: "ping" };
+      const message = { action: "PING" };
       await chrome.tabs.sendMessage(this.currentTabId, message);
       return true;
     } catch {
