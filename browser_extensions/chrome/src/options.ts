@@ -1,7 +1,7 @@
 import { translatePage } from './i18n';
+import { isValidMatchPattern } from './match-pattern';
 import type { Settings } from './types';
 import utils, { DEFAULT_SETTINGS } from './utils';
-import { isValidMatchPattern } from './match-pattern';
 
 class OptionsController {
   private settings: Settings = { ...DEFAULT_SETTINGS };
@@ -24,7 +24,7 @@ class OptionsController {
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (target.id === 'spacing_mode_btn') {
-        this.changeSpacingMode().catch(console.error);
+        this.toggleSpacingMode().catch(console.error);
       } else if (target.id === 'filter_mode_btn') {
         this.changeFilterMode().catch(console.error);
       } else if (target.classList.contains('remove-url-btn')) {
@@ -166,13 +166,13 @@ class OptionsController {
     }
   }
 
-  private async changeSpacingMode(): Promise<void> {
+  private async toggleSpacingMode(): Promise<void> {
     // Toggle between auto and manual mode
-    const isCurrentlyAutoMode = this.settings.spacing_mode === 'spacing_when_load';
-    const newIsAutoMode = !isCurrentlyAutoMode;
+    const newIsAutoMode = !(this.settings.spacing_mode === 'spacing_when_load');
 
-    // Use shared toggle function
-    await utils.toggleAutoSpacing(newIsAutoMode);
+    // Update spacing mode in storage
+    const spacing_mode = newIsAutoMode ? 'spacing_when_load' : 'spacing_when_click';
+    await chrome.storage.sync.set({ spacing_mode });
     await utils.playSound(newIsAutoMode ? 'Shouryuuken' : 'Hadouken');
 
     // Update local settings

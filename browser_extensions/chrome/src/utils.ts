@@ -17,12 +17,10 @@ export const DEFAULT_SETTINGS: Settings = {
   is_mute_sound_effects: false,
 };
 
-// NOTE: Each script (popup, options, content scripts, service workers) creates its own Utils instance
 export class Utils {
   private cachedSettings: Settings = { ...DEFAULT_SETTINGS };
   private cacheInitialized: boolean = false;
 
-  // Sound file mappings
   private readonly sounds: Record<SoundName, string> = {
     Hadouken: 'sounds/StreetFighter-Hadouken.mp3',
     Shouryuuken: 'sounds/StreetFighter-Shouryuuken.mp3',
@@ -48,24 +46,14 @@ export class Utils {
     });
   }
 
-  // Get cached settings
   async getCachedSettings(): Promise<Settings> {
     if (!this.cacheInitialized) {
-      // Read directly from chrome.storage.sync with defaults
       this.cachedSettings = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
       this.cacheInitialized = true;
     }
     return this.cachedSettings;
   }
 
-  // Toggle auto spacing mode
-  async toggleAutoSpacing(isEnabled: boolean): Promise<void> {
-    // Update spacing mode
-    const spacing_mode = isEnabled ? 'spacing_when_load' : 'spacing_when_click';
-    await chrome.storage.sync.set({ spacing_mode });
-  }
-
-  // Play sound effects
   async playSound(name: SoundName): Promise<void> {
     const settings = await this.getCachedSettings();
     if (!settings.is_mute_sound_effects) {
@@ -75,7 +63,7 @@ export class Utils {
   }
 }
 
-// Create singleton instance
+// NOTE: Each script (popup, options, content scripts, service workers) creates its own Utils instance
 const utils = new Utils();
 
 export default utils;

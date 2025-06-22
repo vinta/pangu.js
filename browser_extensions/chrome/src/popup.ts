@@ -78,7 +78,8 @@ class PopupController {
     const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
     this.isAutoSpacingEnabled = spacingModeToggle.checked;
 
-    await utils.toggleAutoSpacing(this.isAutoSpacingEnabled);
+    const spacing_mode = this.isAutoSpacingEnabled ? 'spacing_when_load' : 'spacing_when_click';
+    await chrome.storage.sync.set({ spacing_mode });
     await utils.playSound(this.isAutoSpacingEnabled ? 'Shouryuuken' : 'Hadouken');
 
     this.renderStatus();

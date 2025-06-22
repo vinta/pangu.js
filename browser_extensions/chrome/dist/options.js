@@ -47,7 +47,7 @@ class OptionsController {
     document.addEventListener("click", (e) => {
       const target = e.target;
       if (target.id === "spacing_mode_btn") {
-        this.changeSpacingMode().catch(console.error);
+        this.toggleSpacingMode().catch(console.error);
       } else if (target.id === "filter_mode_btn") {
         this.changeFilterMode().catch(console.error);
       } else if (target.classList.contains("remove-url-btn")) {
@@ -166,10 +166,10 @@ class OptionsController {
       checkbox.checked = this.settings.is_mute_sound_effects;
     }
   }
-  async changeSpacingMode() {
-    const isCurrentlyAutoMode = this.settings.spacing_mode === "spacing_when_load";
-    const newIsAutoMode = !isCurrentlyAutoMode;
-    await utils.toggleAutoSpacing(newIsAutoMode);
+  async toggleSpacingMode() {
+    const newIsAutoMode = !(this.settings.spacing_mode === "spacing_when_load");
+    const spacing_mode = newIsAutoMode ? "spacing_when_load" : "spacing_when_click";
+    await chrome.storage.sync.set({ spacing_mode });
     await utils.playSound(newIsAutoMode ? "Shouryuuken" : "Hadouken");
     this.settings.spacing_mode = newIsAutoMode ? "spacing_when_load" : "spacing_when_click";
     this.render();

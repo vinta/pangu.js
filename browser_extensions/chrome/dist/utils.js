@@ -15,7 +15,6 @@ const DEFAULT_SETTINGS = {
 class Utils {
   cachedSettings = { ...DEFAULT_SETTINGS };
   cacheInitialized = false;
-  // Sound file mappings
   sounds = {
     Hadouken: "sounds/StreetFighter-Hadouken.mp3",
     Shouryuuken: "sounds/StreetFighter-Shouryuuken.mp3",
@@ -36,7 +35,6 @@ class Utils {
       }
     });
   }
-  // Get cached settings
   async getCachedSettings() {
     if (!this.cacheInitialized) {
       this.cachedSettings = await chrome.storage.sync.get(DEFAULT_SETTINGS);
@@ -44,12 +42,6 @@ class Utils {
     }
     return this.cachedSettings;
   }
-  // Toggle auto spacing mode
-  async toggleAutoSpacing(isEnabled) {
-    const spacing_mode = isEnabled ? "spacing_when_load" : "spacing_when_click";
-    await chrome.storage.sync.set({ spacing_mode });
-  }
-  // Play sound effects
   async playSound(name) {
     const settings = await this.getCachedSettings();
     if (!settings.is_mute_sound_effects) {

@@ -61,7 +61,8 @@ class PopupController {
   async handleSpacingModeToggleChange() {
     const spacingModeToggle = document.getElementById("spacing-mode-toggle");
     this.isAutoSpacingEnabled = spacingModeToggle.checked;
-    await utils.toggleAutoSpacing(this.isAutoSpacingEnabled);
+    const spacing_mode = this.isAutoSpacingEnabled ? "spacing_when_load" : "spacing_when_click";
+    await chrome.storage.sync.set({ spacing_mode });
     await utils.playSound(this.isAutoSpacingEnabled ? "Shouryuuken" : "Hadouken");
     this.renderStatus();
     this.showMessage(chrome.i18n.getMessage("refresh_required"), "info", 1e3 * 3);
