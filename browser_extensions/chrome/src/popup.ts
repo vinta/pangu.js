@@ -147,7 +147,7 @@ class PopupController {
     return /^(http(s?)|file)/i.test(url);
   }
 
-  private async isContentScriptLoaded(): Promise<boolean> {
+  private async isContentScriptLoaded() {
     if (!this.currentTabId || !this.currentTabUrl) {
       return false;
     }
@@ -162,7 +162,7 @@ class PopupController {
     }
   }
 
-  private async shouldContentScriptBeActive(): Promise<boolean> {
+  private async shouldContentScriptBeActive() {
     if (!this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
       return false;
     }

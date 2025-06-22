@@ -1,4 +1,4 @@
-import { D as DEFAULT_SETTINGS } from "./utils.js";
+import { D as DEFAULT_SETTINGS } from "./assets/settings-Db_f-qL2.js";
 const SCRIPT_ID = "pangu-auto-spacing";
 async function initializeSettings() {
   const syncedSettings = await chrome.storage.sync.get();

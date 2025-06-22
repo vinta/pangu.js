@@ -1,0 +1,39 @@
+const DEFAULT_SETTINGS = {
+  spacing_mode: "spacing_when_load",
+  filter_mode: "blacklist",
+  blacklist: [
+    // Default blacklist with valid match patterns
+    "*://docs.google.com/*",
+    "*://gist.github.com/*",
+    "*://github.com/*/blob/*",
+    "*://github.com/*/commit/*",
+    "*://github.com/*/pull/*"
+  ],
+  whitelist: [],
+  is_mute_sound_effects: false
+};
+let cachedSettings = { ...DEFAULT_SETTINGS };
+let cacheInitialized = false;
+async function getCachedSettings() {
+  if (!cacheInitialized) {
+    cachedSettings = await chrome.storage.sync.get(DEFAULT_SETTINGS);
+    cacheInitialized = true;
+  }
+  return cachedSettings;
+}
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === "sync" && cacheInitialized) {
+    for (const [key, change] of Object.entries(changes)) {
+      if (key in cachedSettings) {
+        cachedSettings = {
+          ...cachedSettings,
+          [key]: change.newValue
+        };
+      }
+    }
+  }
+});
+export {
+  DEFAULT_SETTINGS as D,
+  getCachedSettings as g
+};

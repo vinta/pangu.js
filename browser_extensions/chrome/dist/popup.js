@@ -1,5 +1,5 @@
-import { t as translatePage } from "./i18n.js";
-import { u as utils } from "./utils.js";
+import { t as translatePage, p as playSound } from "./assets/sounds-CFP6Stg4.js";
+import { g as getCachedSettings } from "./assets/settings-Db_f-qL2.js";
 class PopupController {
   currentTabId;
   currentTabUrl;
@@ -40,7 +40,7 @@ class PopupController {
     this.renderVersion();
   }
   async renderToggle() {
-    const settings = await utils.getCachedSettings();
+    const settings = await getCachedSettings();
     const spacingModeToggle = document.getElementById("spacing-mode-toggle");
     if (spacingModeToggle) {
       spacingModeToggle.checked = settings.spacing_mode === "spacing_when_load";
@@ -71,7 +71,7 @@ class PopupController {
     const spacingMode = toggle.checked ? "spacing_when_load" : "spacing_when_click";
     await chrome.storage.sync.set({ spacing_mode: spacingMode });
     this.showMessage(chrome.i18n.getMessage("refresh_required"), "info", 1e3 * 3);
-    await utils.playSound(spacingMode === "spacing_when_load" ? "Shouryuuken" : "Hadouken");
+    await playSound(spacingMode === "spacing_when_load" ? "Shouryuuken" : "Hadouken");
   }
   async handleManualSpacing() {
     const button = document.getElementById("manual-spacing-btn");
@@ -133,7 +133,7 @@ class PopupController {
     if (!this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
       return false;
     }
-    const settings = await utils.getCachedSettings();
+    const settings = await getCachedSettings();
     if (settings.spacing_mode === "spacing_when_click") {
       return false;
     }
@@ -151,11 +151,11 @@ class PopupController {
   }
   async showErrorMessage(callback) {
     this.showMessage(chrome.i18n.getMessage("spacing_fail"), "error", 1e3 * 4, callback);
-    await utils.playSound("WahWahWaaah");
+    await playSound("WahWahWaaah");
   }
   async showSuccessMessage(callback) {
     this.showMessage(chrome.i18n.getMessage("spacing_success"), "success", 1e3 * 3, callback);
-    await utils.playSound("YeahBaby");
+    await playSound("YeahBaby");
   }
   showMessage(text, type = "info", hideMessageDelayMs, callback) {
     const messageElement = document.getElementById("message");
