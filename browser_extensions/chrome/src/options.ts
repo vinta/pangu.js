@@ -1,5 +1,5 @@
-import type { Settings } from './types';
 import { translatePage } from './i18n';
+import type { Settings } from './types';
 import utils, { DEFAULT_SETTINGS } from './utils';
 
 class OptionsController {
@@ -13,17 +13,15 @@ class OptionsController {
 
   private async initialize(): Promise<void> {
     this.settings = (await chrome.storage.sync.get(this.settings)) as Settings;
-    this.setupEventListeners();
-    this.render();
 
     translatePage();
+    this.render();
+    this.setupEventListeners();
   }
 
   private setupEventListeners(): void {
-    // Spacing mode button
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-
       if (target.id === 'spacing_mode_btn') {
         this.changeSpacingMode().catch(console.error);
       } else if (target.id === 'filter_mode_btn') {
@@ -49,7 +47,6 @@ class OptionsController {
       }
     });
 
-    // Mute checkbox
     const muteCheckbox = document.getElementById('mute-checkbox') as HTMLInputElement;
     if (muteCheckbox) {
       muteCheckbox.addEventListener('change', () => {
@@ -210,7 +207,7 @@ class OptionsController {
     const input = document.querySelector(`input[data-index="${index}"]`) as HTMLInputElement;
     const newUrl = input?.value.trim();
 
-    if (this.isValidUrl(newUrl)) {
+    if (this.isValidMatchPattern(newUrl)) {
       await utils.playSound('YeahBaby');
 
       const ruleKey = this.settings.filter_mode as 'blacklist' | 'whitelist';
@@ -256,7 +253,7 @@ class OptionsController {
     const input = document.getElementById('new-url-input') as HTMLInputElement;
     const newUrl = input?.value.trim();
 
-    if (this.isValidUrl(newUrl)) {
+    if (this.isValidMatchPattern(newUrl)) {
       await utils.playSound('YeahBaby');
 
       const ruleKey = this.settings.filter_mode as 'blacklist' | 'whitelist';
@@ -273,10 +270,7 @@ class OptionsController {
     }
   }
 
-  private isValidUrl(url: string): boolean {
-    return this.isValidMatchPattern(url);
-  }
-
+  // TODO: use https://www.npmjs.com/package/browser-extension-url-match
   private isValidMatchPattern(pattern: string): boolean {
     // Basic match pattern validation
     // Format: <scheme>://<host><path>
@@ -297,7 +291,6 @@ class OptionsController {
   }
 }
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   new OptionsController();
 });

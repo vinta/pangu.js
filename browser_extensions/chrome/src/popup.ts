@@ -1,6 +1,6 @@
 import { translatePage } from './i18n';
-import utils, { DEFAULT_SETTINGS } from './utils';
 import type { Settings, PingMessage, ManualSpacingMessage, ContentScriptResponse } from './types';
+import utils, { DEFAULT_SETTINGS } from './utils';
 
 class PopupController {
   private currentTabId: number | undefined;
@@ -13,45 +13,44 @@ class PopupController {
   }
 
   private async initialize() {
-    try {
-      translatePage();
+    const settings = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
+    this.isAutoSpacingEnabled = settings.spacing_mode === 'spacing_when_load';
 
-      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      this.currentTabId = activeTab?.id;
-      this.currentTabUrl = activeTab?.url;
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    this.currentTabId = activeTab?.id;
+    this.currentTabUrl = activeTab?.url;
 
-      const settings = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
-      this.isAutoSpacingEnabled = settings.spacing_mode === 'spacing_when_load';
-
-      this.updateUI();
-      this.updateStatus();
-
-      this.setupEventListeners();
-    } catch (error) {
-      console.error('Error initializing popup:', error);
-    }
+    translatePage();
+    this.render();
+    this.setupEventListeners();
   }
 
   private setupEventListeners() {
-    // Spacing mode toggle
     const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
     if (spacingModeToggle) {
       spacingModeToggle.addEventListener('change', () => this.handleSpacingModeToggleChange());
     }
 
-    // Manual spacing button
     const manualSpacingBtn = document.getElementById('manual-spacing-btn');
     if (manualSpacingBtn) {
       manualSpacingBtn.addEventListener('click', () => this.handleManualSpacing());
     }
   }
 
-  private updateUI() {
+  private render() {
+    this.renderSpacingModeToggle();
+    this.renderVersion();
+    this.renderStatus();
+  }
+
+  private renderSpacingModeToggle() {
     const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
     if (spacingModeToggle) {
       spacingModeToggle.checked = this.isAutoSpacingEnabled;
     }
+  }
 
+  private renderVersion() {
     const versionEl = document.getElementById('version');
     if (versionEl) {
       const manifest = chrome.runtime.getManifest();
@@ -59,7 +58,7 @@ class PopupController {
     }
   }
 
-  private async updateStatus() {
+  private async renderStatus() {
     const statusEl = document.getElementById('status-indicator');
     if (!statusEl || !this.currentTabUrl) return;
 
@@ -100,7 +99,7 @@ class PopupController {
     await utils.toggleAutoSpacing(this.isAutoSpacingEnabled);
     await utils.playSound(this.isAutoSpacingEnabled ? 'Shouryuuken' : 'Hadouken');
 
-    this.updateStatus();
+    this.renderStatus();
   }
 
   private async handleManualSpacing() {
@@ -160,6 +159,7 @@ class PopupController {
     }
   }
 
+  // TODO: use https://www.npmjs.com/package/browser-extension-url-match
   private isValidUrlForSpacing(url: string) {
     return /^(http(s?)|file)/i.test(url);
   }

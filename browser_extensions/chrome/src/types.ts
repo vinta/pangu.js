@@ -1,8 +1,8 @@
 export interface Settings {
   spacing_mode: 'spacing_when_load' | 'spacing_when_click';
   filter_mode: 'blacklist' | 'whitelist';
-  blacklist: string[];   // Valid match patterns only
-  whitelist: string[];   // Valid match patterns only
+  blacklist: string[];
+  whitelist: string[];
   is_mute_sound_effects: boolean;
 }
 

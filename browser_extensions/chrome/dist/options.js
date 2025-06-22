@@ -9,9 +9,9 @@ class OptionsController {
   }
   async initialize() {
     this.settings = await chrome.storage.sync.get(this.settings);
-    this.setupEventListeners();
-    this.render();
     translatePage();
+    this.render();
+    this.setupEventListeners();
   }
   setupEventListeners() {
     document.addEventListener("click", (e) => {
@@ -163,7 +163,7 @@ class OptionsController {
   async saveEditingUrl(index) {
     const input = document.querySelector(`input[data-index="${index}"]`);
     const newUrl = input?.value.trim();
-    if (this.isValidUrl(newUrl)) {
+    if (this.isValidMatchPattern(newUrl)) {
       await utils.playSound("YeahBaby");
       const ruleKey = this.settings.filter_mode;
       this.settings[ruleKey][index] = newUrl;
@@ -200,7 +200,7 @@ class OptionsController {
   async addNewUrl() {
     const input = document.getElementById("new-url-input");
     const newUrl = input?.value.trim();
-    if (this.isValidUrl(newUrl)) {
+    if (this.isValidMatchPattern(newUrl)) {
       await utils.playSound("YeahBaby");
       const ruleKey = this.settings.filter_mode;
       this.settings[ruleKey].push(newUrl);
@@ -214,9 +214,7 @@ class OptionsController {
       alert(chrome.i18n.getMessage("error_invalid_match_pattern"));
     }
   }
-  isValidUrl(url) {
-    return this.isValidMatchPattern(url);
-  }
+  // TODO: use https://www.npmjs.com/package/browser-extension-url-match
   isValidMatchPattern(pattern) {
     const matchPatternRegex = /^(\*|https?|file|ftp):\/\/(\*|\*\.[^\/]+|[^\/]+)(\/.*)?$/;
     if (pattern === "<all_urls>") {
