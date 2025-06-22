@@ -3,6 +3,7 @@ import { u as utils } from "./utils.js";
 class PopupController {
   currentTabId;
   currentTabUrl;
+  messageTimeoutId;
   constructor() {
     this.initialize();
   }
@@ -130,11 +131,15 @@ class PopupController {
   showMessage(text, type = "info", hideMessageDelayMs, callback) {
     const messageElement = document.getElementById("message");
     if (messageElement) {
+      if (this.messageTimeoutId) {
+        clearTimeout(this.messageTimeoutId);
+      }
       messageElement.textContent = text;
       messageElement.className = `message ${type}`;
       messageElement.style.display = "block";
-      setTimeout(() => {
+      this.messageTimeoutId = window.setTimeout(() => {
         messageElement.style.display = "none";
+        this.messageTimeoutId = void 0;
         if (callback) {
           callback();
         }

@@ -5,6 +5,7 @@ import utils from './utils';
 class PopupController {
   private currentTabId: number | undefined;
   private currentTabUrl: string | undefined;
+  private messageTimeoutId: number | undefined;
 
   constructor() {
     this.initialize();
@@ -163,12 +164,18 @@ class PopupController {
   private showMessage(text: string, type: 'info' | 'error' | 'success' = 'info', hideMessageDelayMs: number, callback?: () => void) {
     const messageElement = document.getElementById('message');
     if (messageElement) {
+      // Clear any existing timeout to prevent premature hiding
+      if (this.messageTimeoutId) {
+        clearTimeout(this.messageTimeoutId);
+      }
+
       messageElement.textContent = text;
       messageElement.className = `message ${type}`;
       messageElement.style.display = 'block';
 
-      setTimeout(() => {
+      this.messageTimeoutId = window.setTimeout(() => {
         messageElement.style.display = 'none';
+        this.messageTimeoutId = undefined;
         if (callback) {
           callback();
         }
