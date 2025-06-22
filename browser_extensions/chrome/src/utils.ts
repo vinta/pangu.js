@@ -17,6 +17,7 @@ export const DEFAULT_SETTINGS: Settings = {
   is_mute_sound_effects: false,
 };
 
+// NOTE: Each script (popup, options, content scripts, service workers) creates its own Utils instance
 export class Utils {
   private cachedSettings: Settings = { ...DEFAULT_SETTINGS };
   private cacheInitialized: boolean = false;

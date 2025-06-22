@@ -92,27 +92,17 @@ async function registerContentScripts() {
   }
 }
 
-// Sync storage.sync changes to storage.local
+// Re-register content scripts when relevant settings change
 chrome.storage.onChanged.addListener(async (changes, areaName) => {
   if (areaName === 'sync') {
-    // Sync to local storage
-    const objToSave: Record<string, unknown> = {};
-    for (const key in changes) {
-      objToSave[key] = changes[key].newValue;
-    }
-    chrome.storage.local.set(objToSave);
-
-    // Re-register content scripts if relevant settings changed
-    const relevantKeys = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist'];
-    const hasRelevantChanges = Object.keys(changes).some((key) => relevantKeys.includes(key));
+    const relevantKeys: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist'];
+    const hasRelevantChanges = Object.keys(changes).some((key) => relevantKeys.includes(key as keyof Settings));
 
     if (hasRelevantChanges) {
       await registerContentScripts();
     }
   }
 });
-
-
 
 // Keep service worker alive during critical operations
 // Currently unused but kept for future implementation

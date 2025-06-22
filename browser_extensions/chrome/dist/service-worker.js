@@ -63,11 +63,6 @@ async function registerContentScripts() {
 }
 chrome.storage.onChanged.addListener(async (changes, areaName) => {
   if (areaName === "sync") {
-    const objToSave = {};
-    for (const key in changes) {
-      objToSave[key] = changes[key].newValue;
-    }
-    chrome.storage.local.set(objToSave);
     const relevantKeys = ["spacing_mode", "filter_mode", "blacklist", "whitelist"];
     const hasRelevantChanges = Object.keys(changes).some((key) => relevantKeys.includes(key));
     if (hasRelevantChanges) {
