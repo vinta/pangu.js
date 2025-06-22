@@ -1,5 +1,5 @@
 import { t as translatePage } from "./i18n.js";
-import { D as DEFAULT_SETTINGS, u as utils } from "./utils.js";
+import { u as utils } from "./utils.js";
 function convertComplexPattern(pattern) {
   if (pattern.includes("://*.")) {
     const match = pattern.match(/^(\*|https?|file|ftp):\/\/\*\.([^\/]+)(\/.*)?$/);
@@ -31,16 +31,14 @@ function isValidMatchPattern(pattern) {
   }
 }
 class OptionsController {
-  settings = { ...DEFAULT_SETTINGS };
   editingUrls = /* @__PURE__ */ new Map();
   addUrlInput = null;
   constructor() {
     this.initialize();
   }
   async initialize() {
-    this.settings = await chrome.storage.sync.get(this.settings);
     translatePage();
-    this.render();
+    await this.render();
     this.setupEventListeners();
   }
   setupEventListeners() {
@@ -58,73 +56,76 @@ class OptionsController {
         this.startEditingUrl(index);
       } else if (target.classList.contains("save-url-btn")) {
         const index = parseInt(target.dataset.index || "0");
-        this.saveEditingUrl(index).catch(console.error);
+        this.saveEditingUrl(index);
       } else if (target.classList.contains("cancel-edit-btn")) {
         const index = parseInt(target.dataset.index || "0");
         this.cancelEditingUrl(index);
       } else if (target.id === "add-url-btn") {
         this.showAddUrlInput();
-      } else if (target.id === "save-new-url-btn") {
-        this.addNewUrl().catch(console.error);
-      } else if (target.id === "cancel-new-url-btn") {
-        this.hideAddUrlInput();
       }
     });
-    const muteCheckbox = document.getElementById("mute-checkbox");
-    if (muteCheckbox) {
-      muteCheckbox.addEventListener("change", () => {
-        this.settings.is_mute_sound_effects = muteCheckbox.checked;
+    document.addEventListener("change", async (e) => {
+      const target = e.target;
+      if (target.id === "mute-checkbox") {
+        const muteCheckbox = target;
         chrome.storage.sync.set({ is_mute_sound_effects: muteCheckbox.checked });
-      });
-    }
+      }
+    });
   }
-  render() {
-    this.renderSpacingMode();
-    this.renderFilterMode();
-    this.renderUrlList();
-    this.renderMuteCheckbox();
+  async render() {
+    await this.renderSpacingMode();
+    await this.renderFilterMode();
+    await this.renderUrlList();
+    await this.renderMuteCheckbox();
   }
-  renderSpacingMode() {
+  async renderSpacingMode() {
+    const settings = await utils.getCachedSettings();
     const button = document.getElementById("spacing_mode_btn");
     if (button) {
-      const i18nKey = this.settings.spacing_mode === "spacing_when_load" ? "auto_spacing_mode" : "manual_spacing_mode";
+      const i18nKey = settings.spacing_mode === "spacing_when_load" ? "auto_spacing_mode" : "manual_spacing_mode";
       button.textContent = chrome.i18n.getMessage(i18nKey);
     }
     const ruleSection = document.querySelector(".filter_mode_group");
     const clickMessage = document.getElementById("spacing_when_click_msg");
-    if (this.settings.spacing_mode === "spacing_when_load") {
-      ruleSection?.style.setProperty("display", "block");
-      clickMessage?.style.setProperty("display", "none");
+    if (settings.spacing_mode === "spacing_when_load") {
+      if (ruleSection) ruleSection.style.display = "block";
+      if (clickMessage) clickMessage.style.display = "none";
     } else {
-      ruleSection?.style.setProperty("display", "none");
-      clickMessage?.style.setProperty("display", "block");
+      if (ruleSection) ruleSection.style.display = "none";
+      if (clickMessage) clickMessage.style.display = "block";
     }
   }
-  renderFilterMode() {
+  async renderFilterMode() {
+    const settings = await utils.getCachedSettings();
     const button = document.getElementById("filter_mode_btn");
     if (button) {
-      button.textContent = chrome.i18n.getMessage(this.settings.filter_mode);
+      button.textContent = chrome.i18n.getMessage(settings.filter_mode);
     }
   }
-  renderUrlList() {
+  async renderUrlList() {
+    const settings = await utils.getCachedSettings();
     const container = document.getElementById("url-list-container");
     if (!container) return;
-    const urls = this.settings[this.settings.filter_mode] || [];
+    const urls = settings[settings.filter_mode] || [];
     let html = '<ul class="filter_mode_list">';
     for (const [index, url] of urls.entries()) {
-      if (this.editingUrls.has(index)) {
+      const editingUrl = this.editingUrls.get(index);
+      if (editingUrl !== void 0) {
         html += `
-          <li class="animate-repeat">
-            <input type="text" class="url-edit-input" value="${this.escapeHtml(this.editingUrls.get(index) || url)}" data-index="${index}" />
+          <li>
+            <input type="text" class="url-edit-input" value="${this.escapeHtml(editingUrl)}" data-index="${index}">
             <button class="btn btn-sm save-url-btn" data-index="${index}">${chrome.i18n.getMessage("button_save")}</button>
-            <button class="btn btn-sm btn-ghost cancel-edit-btn" data-index="${index}">${chrome.i18n.getMessage("button_cancel")}</button>
+            <button class="btn btn-sm cancel-edit-btn" data-index="${index}">${chrome.i18n.getMessage("button_cancel")}</button>
           </li>
         `;
       } else {
         html += `
           <li class="animate-repeat">
-            <a href="#" class="gradientEllipsis edit-url-btn" data-index="${index}" title="${this.escapeHtml(url)}">${this.escapeHtml(url)}</a>
-            <button class="btn btn-sm btn-ghost remove-url-btn" data-index="${index}">${chrome.i18n.getMessage("button_remove")}</button>
+            <a href="${url}" target="_blank" class="gradientEllipsis">${url}</a>
+            <button class="btn btn-sm edit-url-btn" data-index="${index}">
+              <svg class="icon icon-sm"><use xlink:href="#icon-edit"></use></svg>
+            </button>
+            <button class="btn btn-sm remove-url-btn" data-index="${index}">${chrome.i18n.getMessage("button_remove")}</button>
           </li>
         `;
       }
@@ -132,124 +133,134 @@ class OptionsController {
     if (this.addUrlInput) {
       html += `
         <li>
-          <input type="text" class="url-edit-input" id="new-url-input" placeholder="${chrome.i18n.getMessage("placeholder_enter_url")}" />
-          <button class="btn btn-sm save-url-btn" id="save-new-url-btn">${chrome.i18n.getMessage("button_save")}</button>
-          <button class="btn btn-sm btn-ghost cancel-edit-btn" id="cancel-new-url-btn">${chrome.i18n.getMessage("button_cancel")}</button>
-        </li>
-      `;
-    } else {
-      html += `
-        <li>
-          <a href="#" id="add-url-btn">${chrome.i18n.getMessage("button_add_new_url")}</a>
+          <input type="text" class="url-edit-input" id="new-url-input" placeholder="${chrome.i18n.getMessage("placeholder_enter_url")}">
+          <button class="btn btn-sm" id="save-new-url-btn">${chrome.i18n.getMessage("button_save")}</button>
+          <button class="btn btn-sm" id="cancel-new-url-btn">${chrome.i18n.getMessage("button_cancel")}</button>
         </li>
       `;
     }
     html += "</ul>";
-    html += `
-      <div class="url-list-help">
-        <small class="text-muted">
-          <a href="https://developer.chrome.com/docs/extensions/develop/concepts/match-patterns" target="_blank" rel="noopener">
-            ${chrome.i18n.getMessage("link_learn_match_patterns")}
-          </a>
-        </small>
-      </div>
-    `;
-    container.innerHTML = html;
-    if (this.addUrlInput) {
-      const input = document.getElementById("new-url-input");
-      input?.focus();
+    if (!this.addUrlInput) {
+      html += `<div class="mt-4">
+        <a href="#" id="add-url-btn">${chrome.i18n.getMessage("button_add_new_url")}</a>
+      </div>`;
     }
+    html += `<div class="url-list-help">
+      <a href="https://developer.chrome.com/docs/extensions/develop/concepts/match-patterns" target="_blank">
+        ${chrome.i18n.getMessage("link_learn_match_patterns")}
+      </a>
+    </div>`;
+    container.innerHTML = html;
+    this.setupUrlInputListeners();
   }
-  renderMuteCheckbox() {
+  async renderMuteCheckbox() {
+    const settings = await utils.getCachedSettings();
     const checkbox = document.getElementById("mute-checkbox");
     if (checkbox) {
-      checkbox.checked = this.settings.is_mute_sound_effects;
+      checkbox.checked = settings.is_mute_sound_effects;
     }
   }
   async toggleSpacingMode() {
-    const newIsAutoMode = !(this.settings.spacing_mode === "spacing_when_load");
-    const spacing_mode = newIsAutoMode ? "spacing_when_load" : "spacing_when_click";
-    await chrome.storage.sync.set({ spacing_mode });
-    await utils.playSound(newIsAutoMode ? "Shouryuuken" : "Hadouken");
-    this.settings.spacing_mode = newIsAutoMode ? "spacing_when_load" : "spacing_when_click";
-    this.render();
+    const settings = await utils.getCachedSettings();
+    const nextSpacingMode = settings.spacing_mode === "spacing_when_load" ? "spacing_when_click" : "spacing_when_load";
+    await chrome.storage.sync.set({ spacing_mode: nextSpacingMode });
+    await utils.playSound(nextSpacingMode === "spacing_when_load" ? "Shouryuuken" : "Hadouken");
+    await this.renderSpacingMode();
   }
   async changeFilterMode() {
-    this.settings.filter_mode = this.settings.filter_mode === "blacklist" ? "whitelist" : "blacklist";
-    await utils.playSound(this.settings.filter_mode === "blacklist" ? "Shouryuuken" : "Hadouken");
-    chrome.storage.sync.set({ filter_mode: this.settings.filter_mode });
-    this.render();
+    const settings = await utils.getCachedSettings();
+    const newFilterMode = settings.filter_mode === "blacklist" ? "whitelist" : "blacklist";
+    await utils.playSound(newFilterMode === "blacklist" ? "Shouryuuken" : "Hadouken");
+    chrome.storage.sync.set({ filter_mode: newFilterMode });
+    await this.render();
   }
   startEditingUrl(index) {
-    const urls = this.settings[this.settings.filter_mode];
-    this.editingUrls.set(index, urls[index]);
-    this.renderUrlList();
-    setTimeout(() => {
+    const settings = utils.getCachedSettings();
+    settings.then(async (s) => {
+      const urls = s[s.filter_mode];
+      this.editingUrls.set(index, urls[index]);
+      await this.renderUrlList();
       const input = document.querySelector(`input[data-index="${index}"]`);
-      input?.focus();
-      input?.select();
-    }, 0);
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    });
   }
   async saveEditingUrl(index) {
     const input = document.querySelector(`input[data-index="${index}"]`);
-    const newUrl = input?.value.trim();
-    if (this.isValidMatchPattern(newUrl)) {
-      await utils.playSound("YeahBaby");
-      const ruleKey = this.settings.filter_mode;
-      this.settings[ruleKey][index] = newUrl;
-      const update = {};
-      update[ruleKey] = [...this.settings[ruleKey]];
-      chrome.storage.sync.set(update);
-      this.editingUrls.delete(index);
-      this.renderUrlList();
-    } else {
-      await utils.playSound("WahWahWaaah");
+    if (!input) return;
+    const newUrl = input.value.trim();
+    if (!newUrl || !isValidMatchPattern(newUrl)) {
       alert(chrome.i18n.getMessage("error_invalid_match_pattern"));
+      return;
     }
+    const settings = await utils.getCachedSettings();
+    const ruleKey = settings.filter_mode;
+    const urls = [...settings[ruleKey]];
+    urls[index] = newUrl;
+    const update = { [ruleKey]: urls };
+    chrome.storage.sync.set(update);
+    this.editingUrls.delete(index);
+    await this.renderUrlList();
   }
   cancelEditingUrl(index) {
     this.editingUrls.delete(index);
     this.renderUrlList();
   }
-  removeUrl(index) {
-    const ruleKey = this.settings.filter_mode;
-    this.settings[ruleKey].splice(index, 1);
-    const update = {};
-    update[ruleKey] = [...this.settings[ruleKey]];
+  async removeUrl(index) {
+    const settings = await utils.getCachedSettings();
+    const ruleKey = settings.filter_mode;
+    const urls = [...settings[ruleKey]];
+    urls.splice(index, 1);
+    const update = { [ruleKey]: urls };
     chrome.storage.sync.set(update);
-    this.renderUrlList();
+    await this.renderUrlList();
   }
   showAddUrlInput() {
     this.addUrlInput = document.createElement("input");
     this.renderUrlList();
   }
-  hideAddUrlInput() {
+  setupUrlInputListeners() {
+    const newUrlInput = document.getElementById("new-url-input");
+    if (newUrlInput) {
+      newUrlInput.focus();
+      document.getElementById("save-new-url-btn")?.addEventListener("click", () => {
+        this.saveNewUrl();
+      });
+      document.getElementById("cancel-new-url-btn")?.addEventListener("click", () => {
+        this.cancelNewUrl();
+      });
+      newUrlInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          this.saveNewUrl();
+        }
+      });
+    }
+  }
+  async saveNewUrl() {
+    const input = document.getElementById("new-url-input");
+    if (!input) return;
+    const newUrl = input.value.trim();
+    if (!newUrl || !isValidMatchPattern(newUrl)) {
+      alert(chrome.i18n.getMessage("error_invalid_match_pattern"));
+      return;
+    }
+    const settings = await utils.getCachedSettings();
+    const ruleKey = settings.filter_mode;
+    const urls = [...settings[ruleKey], newUrl];
+    const update = { [ruleKey]: urls };
+    chrome.storage.sync.set(update);
+    this.addUrlInput = null;
+    await this.renderUrlList();
+  }
+  cancelNewUrl() {
     this.addUrlInput = null;
     this.renderUrlList();
   }
-  async addNewUrl() {
-    const input = document.getElementById("new-url-input");
-    const newUrl = input?.value.trim();
-    if (this.isValidMatchPattern(newUrl)) {
-      await utils.playSound("YeahBaby");
-      const ruleKey = this.settings.filter_mode;
-      this.settings[ruleKey].push(newUrl);
-      const update = {};
-      update[ruleKey] = [...this.settings[ruleKey]];
-      chrome.storage.sync.set(update);
-      this.addUrlInput = null;
-      this.renderUrlList();
-    } else {
-      await utils.playSound("WahWahWaaah");
-      alert(chrome.i18n.getMessage("error_invalid_match_pattern"));
-    }
-  }
-  isValidMatchPattern(pattern) {
-    return isValidMatchPattern(pattern);
-  }
-  escapeHtml(text) {
+  escapeHtml(str) {
     const div = document.createElement("div");
-    div.textContent = text;
+    div.textContent = str;
     return div.innerHTML;
   }
 }
