@@ -41,7 +41,7 @@
 
 .options-quote {
   font-size: var(--text-base);
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
   font-style: italic;
   border-left: 3px solid var(--color-border);
   padding-left: var(--spacing-4);
