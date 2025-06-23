@@ -40,6 +40,7 @@
 
 - [ ] Add "之後不要在這個網頁召喚空格之神了" to popup actions or context menu
 - [ ] Add `optional_host_permissions` for user control
+- [ ] Use Verified CRX uploads
 - [ ] Implement tree-shaking optimizations
 - [ ] Publish to JSR (JavaScript Registry)
 - [ ] Consider monorepo structure
