@@ -11,11 +11,11 @@ echo "3. Creating extension package..."
 cd browser_extensions/chrome/
 rm -f ../paranoid-auto-spacing.zip
 zip -r ../paranoid-auto-spacing.zip . \
+  -x "icons/*.svg" \
   -x "images/*" \
   -x "src/*" \
-  -x "*.md" \
-  -x "*.ts" \
-  -x ".DS_Store"
+  -x ".DS_Store" \
+  -x "*/.DS_Store"
 cd ../..
 
 echo "Ready to upload to Chrome Web Store!"
