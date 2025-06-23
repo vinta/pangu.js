@@ -59,19 +59,27 @@ class PopupController {
   }
 
   private async renderStatus() {
-    const statusIndicator = document.getElementById('status-indicator');
-    if (!statusIndicator) {
+    const statusToggle = document.getElementById('status-indicator') as HTMLLabelElement;
+    if (!statusToggle) {
       return;
     }
-    const statusText = statusIndicator.querySelector('.status-text');
-    if (!statusText) {
+    
+    const statusInput = statusToggle.querySelector('.toggle-input') as HTMLInputElement;
+    const statusLabel = statusToggle.querySelector('.toggle-label');
+    
+    if (!statusInput || !statusLabel) {
       return;
     }
 
     const shouldBeActive = await this.shouldContentScriptBeActive();
-    statusText.setAttribute('data-i18n', shouldBeActive ? 'status_active' : 'status_inactive');
-    statusText.textContent = chrome.i18n.getMessage(shouldBeActive ? 'status_active' : 'status_inactive');
-    statusIndicator.className = shouldBeActive ? 'status status-active' : 'status';
+    
+    // Update the toggle state
+    statusInput.checked = shouldBeActive;
+    
+    // Update the label text
+    const messageKey = shouldBeActive ? 'status_active' : 'status_inactive';
+    statusLabel.setAttribute('data-i18n', messageKey);
+    statusLabel.textContent = chrome.i18n.getMessage(messageKey);
   }
 
   private renderVersion() {
