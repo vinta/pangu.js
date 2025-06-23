@@ -6,11 +6,18 @@
   "description": "__MSG_extension_description__",
   "icons": {
     "16": "icons/icon_16.png",
+    "32": "icons/icon_32.png",
     "48": "icons/icon_48.png",
+    "64": "icons/icon_64.png",
     "128": "icons/icon_128.png"
   },
   "action": {
-    "default_icon": "icons/icon_19.png",
+    "default_icon": {
+      "16": "icons/icon_16.png",
+      "19": "icons/icon_19.png",
+      "32": "icons/icon_32.png",
+      "38": "icons/icon_48.png"
+    },
     "default_title": "__MSG_god_of_spacing__",
     "default_popup": "pages/popup.html"
   },
