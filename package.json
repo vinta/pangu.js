@@ -75,6 +75,7 @@
     "pack-extension:chrome": "./scripts/pack-extension-chrome.sh",
     "pack-extension:firefox": "node ./browser_extensions/firefox/pack.js"
   },
+  "dependencies": {},
   "devDependencies": {
     "@playwright/test": "1.53.0",
     "@trivago/prettier-plugin-sort-imports": "5.2.2",
