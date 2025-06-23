@@ -200,4 +200,4 @@ The extension uses Chrome's match pattern format for URL filtering:
 
 ## Future Improvements
 
-See @TODO.md for planned improvements and technical debt.
+See @.claude/TODO.md for planned improvements and technical debt.
