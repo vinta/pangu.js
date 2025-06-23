@@ -17,7 +17,7 @@
 ## v4.0.6 / 2019-02-04
 
 - 修正 `,` 的問題
-- 新增 `pangu` 指令，詳見 [cli.js](https://github.com/vinta/pangu.js/blob/master/src/node/cli.js)
+- 新增 `pangu` 指令
 
 ## v4.0.5 / 2019-01-30
 

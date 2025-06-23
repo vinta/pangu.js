@@ -48,7 +48,7 @@ npm run lint:fix           # Run ESLint with auto-fix
 
 ```bash
 # Version management
-npm run publish-package 5.0.2   # Bump version, commit, and tag
+npm run publish-package 1.2.3   # Bump version, update docs, build, commit, and tag
 
 # Extension packaging
 npm run pack-extension          # Package both Chrome and Firefox extensions
@@ -165,8 +165,7 @@ pangu.spacingFileSync('input.txt');
 - **Content Script**: `content-script.ts` - Injected into web pages for auto-spacing
 - **Popup**: `popup.ts` - Extension popup UI
 - **Options**: `options.ts` - Settings page
-- **Utils**: `utils/` - Shared utilities and settings management
-- **Types**: `types.ts` - TypeScript interfaces
+- **Utils**: `utils/` - Shared utilities
 
 #### Settings Structure
 
