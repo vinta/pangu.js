@@ -16,8 +16,8 @@
 
 ### For Users
 
-- [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (**2025-06-16 UPDATED**)
-- [Mozilla Firefox](https://github.com/vinta/pangu.js/blob/master/browser_extensions/firefox/paranoid-auto-spacing.user.js) (**2019-02-09 UPDATED**)
+- [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (**2025-06-24 UPDATED**)
+- [Mozilla Firefox](https://github.com/vinta/pangu.js/blob/master/browser_extensions/firefox/paranoid-auto-spacing.user.js)
 
 ### For Developers
 
@@ -43,17 +43,15 @@
 ## Usage
 
 ```bash
-$ npm install pangu --save
-# or
-$ yarn add pangu
+npm install pangu --save-exact
 ```
+
+Learn more on [npm](https://www.npmjs.com/package/pangu).
 
 ### Browser
 
-Files are located in `./node_modules/pangu/dist/`.
-
 ```html
-<script src="dist/browser/pangu.umd.js"></script>
+<script src="pangu/dist/browser/pangu.umd.js"></script>
 <script>
   const text = pangu.spacing('當你凝視著bug，bug也凝視著你');
   // text = '當你凝視著 bug，bug 也凝視著你'
@@ -69,19 +67,14 @@ Files are located in `./node_modules/pangu/dist/`.
 </script>
 ```
 
-`pangu.js` is also available on [jsDelivr](https://www.jsdelivr.com/package/npm/pangu) and [cdnjs](https://cdnjs.com/libraries/pangu):
+`pangu.js` is also available on some popular npm CDNs:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/pangu@4.0.7/dist/browser/pangu.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pangu@4.0.7/dist/browser/pangu.min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pangu@5.1.1/dist/browser/pangu.umd.js"></script>
+<script src="https://unpkg.com/pangu@5.1.1/dist/browser/pangu.umd.js"></script>
 ```
 
 ### Node.js
-
-Learn more on [npm](https://www.npmjs.com/package/pangu).
 
 ```js
 import pangu from 'pangu';
