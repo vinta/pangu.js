@@ -1,6 +1,6 @@
 .popup-container {
   width: 380px;
-  min-height: 330px;
+  min-height: 380px;
   padding: 0;
   background-color: var(--color-surface);
   display: flex;

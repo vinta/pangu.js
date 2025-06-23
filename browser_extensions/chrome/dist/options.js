@@ -1,16 +1,6 @@
-import { t as translatePage, p as playSound } from "./assets/sounds-CFP6Stg4.js";
-import { g as getCachedSettings, D as DEFAULT_SETTINGS } from "./assets/settings-Db_f-qL2.js";
-function isValidMatchPattern(pattern) {
-  if (!pattern.match(/^(https?:\/\/|file:\/\/\/|\*:\/\/)/)) {
-    return false;
-  }
-  try {
-    new URLPattern(pattern);
-    return true;
-  } catch {
-    return false;
-  }
-}
+import { t as translatePage, p as playSound } from "./utils/sounds.js";
+import { g as getCachedSettings, D as DEFAULT_SETTINGS } from "./utils/settings.js";
+import { i as isValidMatchPattern } from "./utils/urls.js";
 class OptionsController {
   editingUrls = /* @__PURE__ */ new Map();
   addUrlInput = null;

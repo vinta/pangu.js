@@ -1,4 +1,4 @@
-import { g as getCachedSettings } from "./settings-Db_f-qL2.js";
+import { g as getCachedSettings } from "./settings.js";
 function translatePage() {
   for (const element of document.querySelectorAll("[data-i18n]")) {
     const messageKey = element.getAttribute("data-i18n");

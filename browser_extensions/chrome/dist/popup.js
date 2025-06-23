@@ -1,5 +1,5 @@
-import { t as translatePage, p as playSound } from "./assets/sounds-CFP6Stg4.js";
-import { g as getCachedSettings } from "./assets/settings-Db_f-qL2.js";
+import { t as translatePage, p as playSound } from "./utils/sounds.js";
+import { g as getCachedSettings } from "./utils/settings.js";
 class PopupController {
   currentTabId;
   currentTabUrl;
