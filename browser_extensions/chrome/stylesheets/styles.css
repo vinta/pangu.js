@@ -402,6 +402,10 @@ a:hover {
 .text-sm { font-size: var(--text-sm); }
 .mt-2 { margin-top: var(--spacing-2) !important; }
 .mt-4 { margin-top: var(--spacing-4) !important; }
+.mt-6 { margin-top: var(--spacing-6) !important; }
+.mt-8 { margin-top: var(--spacing-8) !important; }
 .mb-2 { margin-bottom: var(--spacing-2) !important; }
 .mb-4 { margin-bottom: var(--spacing-4) !important; }
+.mb-6 { margin-bottom: var(--spacing-6) !important; }
+.mb-8 { margin-bottom: var(--spacing-8) !important; }
 
