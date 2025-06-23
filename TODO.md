@@ -23,23 +23,6 @@
 - [x] Use Chrome's `excludeMatches` API for efficient blacklist handling
 - [x] Add match pattern validation with helpful error messages
 
-### Settings Cleanup
-
-- [x] Remove deprecated blacklists/whitelists properties
-- [x] Replace spacing_rule with filter_mode for cleaner separation
-
-### UI/UX Improvements
-
-- [x] Increase font sizes in popup for better readability
-- [x] Improve error handling with consolidated showError() and showSuccess() methods
-- [x] Add "沒有東西" empty state message for blacklist/whitelist
-- [x] Fix whitelist validation bug in service worker
-
-### i18n Improvements
-
-- [x] Add i18n support for all UI strings (12 new translation keys)
-- [x] Implement data-i18n attributes for automatic translation
-
 ## In Progress
 
 - [ ] None currently
@@ -48,16 +31,14 @@
 
 ### Medium Priority - Code Quality
 
+- [ ] Generate different size icons from `icon_1500.svg`
 - [ ] Improve Chrome API error handling with retry logic
 - [ ] Create optimized content script bundle to reduce memory footprint
 - [ ] Update declarativeContent for action button state
 
 ### Low Priority - Future Enhancements
 
-- [ ] Update extension icons for high DPI displays
 - [ ] Add `optional_host_permissions` for user control
-- [ ] Progressive enhancement for older Chrome versions
 - [ ] Implement tree-shaking optimizations
-- [ ] Consider monorepo structure
-- [ ] Add changelog generation with standard-version
 - [ ] Publish to JSR (JavaScript Registry)
+- [ ] Consider monorepo structure
