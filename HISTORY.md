@@ -1,13 +1,14 @@
 # History
 
-## v5.1.0 / 2025-06-22
+## v5.1.0 / 2025-06-24
 
-- 偉哉 Claude Code，Chrome extension 有了新 UI 啦
+- 偉哉 Claude Code，精雕細琢的 v5.1.0 終於推出啦！
+- 雖然其實只是換了一個新 UI，但爽啦！
 
 ## v5.0.0 / 2025-06-17
 
 - 請 Claude Code 把 Chrome extension 升級成 Manifest v3 了
-- 請 Claude Code 幫我把 codebase 改寫成 TypeScript
+- 請 Claude Code 幫我把 codebase 改寫成 TypeScript 了
 
 ## v4.0.7 / 2019-02-15
 
