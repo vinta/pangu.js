@@ -29,6 +29,12 @@
 
 ## Next Steps
 
+### High Priority - Features
+
+- [ ] Provide a less aggressive approach: `text-autospace` in CSS
+  - https://developer.chrome.com/blog/css-i18n-features
+  - https://github.com/sparanoid/chinese-copywriting-guidelines/issues/211
+
 ### Medium Priority - Code Quality
 
 - [ ] Generate different size icons from `icon_1500.svg`
@@ -43,4 +49,3 @@
 - [ ] Use Verified CRX uploads
 - [ ] Implement tree-shaking optimizations
 - [ ] Publish to JSR (JavaScript Registry)
-- [ ] Consider monorepo structure
