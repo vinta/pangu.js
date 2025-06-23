@@ -132,9 +132,5 @@
   "label_is_mute": {
     "message": "太吵了，靜音",
     "description": ""
-  },
-  "label_magic_button": {
-    "message": "神奇按鈕",
-    "description": ""
   }
 }
