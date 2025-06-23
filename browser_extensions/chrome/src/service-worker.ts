@@ -8,16 +8,30 @@ const SCRIPT_ID = 'pangu-auto-spacing';
 async function initializeSettings() {
   const syncedSettings = await chrome.storage.sync.get();
 
-  const missingSettings: Partial<Settings> = {};
+  const settingsToAdd: Partial<Settings> = {};
+  const settingsToRemove: string[] = [];
+
   for (const [key, defaultValue] of Object.entries(DEFAULT_SETTINGS)) {
     if (!(key in syncedSettings)) {
-      missingSettings[key as keyof Settings] = defaultValue;
+      settingsToAdd[key as keyof Settings] = defaultValue;
     }
   }
 
-  // Only write if there are missing settings
-  if (Object.keys(missingSettings).length > 0) {
-    await chrome.storage.sync.set(missingSettings);
+  const validKeys = Object.keys(DEFAULT_SETTINGS);
+  for (const key of Object.keys(syncedSettings)) {
+    if (!validKeys.includes(key)) {
+      settingsToRemove.push(key);
+    }
+  }
+
+  if (Object.keys(settingsToAdd).length > 0) {
+    await chrome.storage.sync.set(settingsToAdd);
+  }
+
+  console.log(settingsToAdd);
+  console.log(settingsToRemove);
+  if (settingsToRemove.length > 0) {
+    await chrome.storage.sync.remove(settingsToRemove);
   }
 }
 

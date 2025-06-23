@@ -3,14 +3,26 @@ import { i as isValidMatchPattern } from "./utils/urls.js";
 const SCRIPT_ID = "pangu-auto-spacing";
 async function initializeSettings() {
   const syncedSettings = await chrome.storage.sync.get();
-  const missingSettings = {};
+  const settingsToAdd = {};
+  const settingsToRemove = [];
   for (const [key, defaultValue] of Object.entries(DEFAULT_SETTINGS)) {
     if (!(key in syncedSettings)) {
-      missingSettings[key] = defaultValue;
+      settingsToAdd[key] = defaultValue;
     }
   }
-  if (Object.keys(missingSettings).length > 0) {
-    await chrome.storage.sync.set(missingSettings);
+  const validKeys = Object.keys(DEFAULT_SETTINGS);
+  for (const key of Object.keys(syncedSettings)) {
+    if (!validKeys.includes(key)) {
+      settingsToRemove.push(key);
+    }
+  }
+  if (Object.keys(settingsToAdd).length > 0) {
+    await chrome.storage.sync.set(settingsToAdd);
+  }
+  console.log(settingsToAdd);
+  console.log(settingsToRemove);
+  if (settingsToRemove.length > 0) {
+    await chrome.storage.sync.remove(settingsToRemove);
   }
 }
 async function unregisterAllContentScripts() {

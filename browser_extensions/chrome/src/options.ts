@@ -218,9 +218,7 @@ class OptionsController {
   private async renderMuteCheckbox() {
     const settings = await getCachedSettings();
     const checkbox = document.getElementById('mute-checkbox') as HTMLInputElement;
-    if (checkbox) {
-      checkbox.checked = settings.is_mute_sound_effects;
-    }
+    checkbox.checked = settings.is_mute_sound_effects;
   }
 
   private async toggleSpacingMode() {
