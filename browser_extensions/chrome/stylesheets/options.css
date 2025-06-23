@@ -196,15 +196,18 @@
   display: inline-flex;
   align-items: center;
   padding: var(--spacing-2) var(--spacing-3);
+  background-color: #dcfce7;
   color: var(--color-success);
   font-size: var(--text-sm);
   text-decoration: none;
+  border: 1px solid #86efac;
   border-radius: var(--radius);
   transition: all var(--transition-fast);
 }
 
 #add-url-btn:hover {
-  background-color: #dcfce7;
+  background-color: #bbf7d0;
+  border-color: #4ade80;
   text-decoration: none;
 }
 
@@ -213,16 +216,18 @@
   display: inline-flex;
   align-items: center;
   padding: var(--spacing-2) var(--spacing-3);
+  background-color: #fef2f2;
   color: var(--color-danger);
   font-size: var(--text-sm);
   text-decoration: none;
+  border: 1px solid #fecaca;
   border-radius: var(--radius);
   transition: all var(--transition-fast);
 }
 
 #restore-defaults-btn:hover {
-  background-color: #fef2f2;
-  border-color: #fecaca;
+  background-color: #fee2e2;
+  border-color: #f87171;
   text-decoration: none;
 }
 
@@ -234,14 +239,14 @@
 }
 
 .remove-url-btn {
+  background-color: #fef2f2;
   color: var(--color-danger);
-  background-color: transparent;
-  border: 1px solid transparent;
+  border: 1px solid #fecaca;
 }
 
 .remove-url-btn:hover {
-  background-color: #fef2f2;
-  border-color: #fecaca;
+  background-color: #fee2e2;
+  border-color: #f87171;
 }
 
 .save-new-url-btn,
