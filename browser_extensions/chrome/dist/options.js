@@ -122,6 +122,12 @@ class OptionsController {
     restoreButton.textContent = chrome.i18n.getMessage("button_restore_defaults");
     helpLink.textContent = chrome.i18n.getMessage("link_learn_match_patterns");
     const urls = settings[settings.filter_mode] || [];
+    if (urls.length === 0) {
+      const emptyItem = document.createElement("li");
+      emptyItem.className = "empty-list-message";
+      emptyItem.textContent = chrome.i18n.getMessage("empty_list");
+      urlList.appendChild(emptyItem);
+    }
     for (const [index, url] of urls.entries()) {
       const editingUrl = this.editingUrls.get(index);
       if (editingUrl !== void 0) {

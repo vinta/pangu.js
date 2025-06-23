@@ -143,6 +143,15 @@ class OptionsController {
 
     // Render URL items
     const urls = settings[settings.filter_mode as 'blacklist' | 'whitelist'] || [];
+
+    // Show "沒有東西" if the list is empty
+    if (urls.length === 0) {
+      const emptyItem = document.createElement('li');
+      emptyItem.className = 'empty-list-message';
+      emptyItem.textContent = chrome.i18n.getMessage('empty_list');
+      urlList.appendChild(emptyItem);
+    }
+
     for (const [index, url] of urls.entries()) {
       const editingUrl = this.editingUrls.get(index);
 

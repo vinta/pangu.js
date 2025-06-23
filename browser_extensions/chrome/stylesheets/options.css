@@ -109,6 +109,20 @@
   gap: var(--spacing-2);
 }
 
+/* Empty list message */
+.empty-list-message {
+  color: var(--color-text-tertiary);
+  font-style: italic;
+  text-align: center;
+  padding: var(--spacing-4) !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.empty-list-message:hover {
+  background-color: transparent !important;
+}
+
 .filter_mode_list li {
   display: flex;
   align-items: center;

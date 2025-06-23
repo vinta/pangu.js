@@ -121,6 +121,10 @@
     "message": "你可以在網址裡用 * (wildcard)",
     "description": ""
   },
+  "empty_list": {
+    "message": "沒有東西",
+    "description": ""
+  },
   "label_other_settings": {
     "message": "其他設定",
     "description": ""
