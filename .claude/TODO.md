@@ -38,6 +38,7 @@
 
 ### Low Priority - Future Enhancements
 
+- [ ] Add "之後不要在這個網頁召喚空格之神了" to popup actions or context menu
 - [ ] Add `optional_host_permissions` for user control
 - [ ] Implement tree-shaking optimizations
 - [ ] Publish to JSR (JavaScript Registry)

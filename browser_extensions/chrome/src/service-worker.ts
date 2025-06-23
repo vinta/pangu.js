@@ -3,7 +3,7 @@ import { DEFAULT_SETTINGS } from './utils/settings';
 import type { Settings } from './utils/types';
 import { isValidMatchPattern } from './utils/urls';
 
-const SCRIPT_ID = 'pangu-auto-spacing';
+const SCRIPT_ID = 'paranoid-auto-spacing';
 
 async function initializeSettings() {
   const syncedSettings = await chrome.storage.sync.get();
@@ -28,8 +28,6 @@ async function initializeSettings() {
     await chrome.storage.sync.set(settingsToAdd);
   }
 
-  console.log(settingsToAdd);
-  console.log(settingsToRemove);
   if (settingsToRemove.length > 0) {
     await chrome.storage.sync.remove(settingsToRemove);
   }
