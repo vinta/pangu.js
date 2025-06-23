@@ -13,19 +13,19 @@ Write the progress report using the following template:
 ```markdown
 # TODO List
 
-## 🎯 Completed
+## Completed
 
 - [List completed features/tasks with checkmarks]
 - [x] [Specific completed item]
 - [x] [Another completed item]
 
-## 🚧 In Progress
+## In Progress
 
 - [Current task being worked on]
 - [Percentage complete if applicable]
 - [Any blockers or challenges]
 
-## 📋 Next Steps
+## Next Steps
 
 - [ ] [Upcoming task 1]
 - [ ] [Upcoming task 2]
