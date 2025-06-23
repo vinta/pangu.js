@@ -86,11 +86,11 @@
     "description": ""
   },
   "placeholder_enter_url": {
-    "message": "輸入網址，你可以使用 * (wildcard)",
+    "message": "輸入網址，例如 https://vinta.ws/*",
     "description": ""
   },
   "error_invalid_match_pattern": {
-    "message": "網址的格式不對啦！",
+    "message": "網址的格式不對啦！用心一點好不好？算了，你這輩子大概就這樣了",
     "description": ""
   },
   "button_save": {
