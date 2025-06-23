@@ -28,7 +28,7 @@
 }
 
 .options-title {
-  font-size: 2rem;
+  font-size: var(--text-3xl);
   font-weight: 700;
   color: var(--color-text-primary);
   margin-bottom: var(--spacing-1);

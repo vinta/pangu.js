@@ -64,8 +64,8 @@ class PopupController {
       return;
     }
     
-    const statusInput = statusToggle.querySelector('.toggle-input') as HTMLInputElement;
-    const statusLabel = statusToggle.querySelector('.toggle-label');
+    const statusInput = document.getElementById('status-toggle-input') as HTMLInputElement;
+    const statusLabel = document.getElementById('status-toggle-label');
     
     if (!statusInput || !statusLabel) {
       return;
