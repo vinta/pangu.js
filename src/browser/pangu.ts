@@ -77,7 +77,7 @@ export class BrowserPangu extends Pangu {
     // 從最下面、最裡面的節點開始，所以是倒序的
     for (let i = textNodes.snapshotLength - 1; i > -1; --i) {
       currentTextNode = textNodes.snapshotItem(i);
-      if (!currentTextNode) continue;
+      if (!currentTextNode) {continue;}
 
       if (
         currentTextNode.parentNode &&
@@ -282,12 +282,12 @@ export class BrowserPangu extends Pangu {
     //
     // 注意，以下的 query 只會取出各節點的 text 內容！
     let xPathQuery = '/html/body//*/text()[normalize-space(.)]';
-    ['script', 'style', 'textarea'].forEach((tag) => {
+    for (const tag of ['script', 'style', 'textarea']) {
       // 理論上這幾個 tag 裡面不會包含其他 tag
       // 所以可以直接用 .. 取父節點
-      // ex: [translate(name(..), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") != "script"]
+      // 例如 [translate(name(..), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") != "script"]
       xPathQuery = `${xPathQuery}[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
-    });
+    }
     this.spacingNodeByXPath(xPathQuery, document);
   }
 
@@ -357,16 +357,16 @@ export class BrowserPangu extends Pangu {
     const mutationObserver = new MutationObserver((mutations) => {
       // Element: https://developer.mozilla.org/en-US/docs/Web/API/Element
       // Text: https://developer.mozilla.org/en-US/docs/Web/API/Text
-      mutations.forEach((mutation) => {
+      for (const mutation of mutations) {
         switch (mutation.type) {
           case 'childList':
-            mutation.addedNodes.forEach((node) => {
+            for (const node of mutation.addedNodes) {
               if (node.nodeType === Node.ELEMENT_NODE) {
                 queue.push(node);
               } else if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
                 queue.push(node.parentNode);
               }
-            });
+            }
             break;
           case 'characterData':
             const { target: node } = mutation;
@@ -377,7 +377,7 @@ export class BrowserPangu extends Pangu {
           default:
             break;
         }
-      });
+      }
 
       debouncedSpacingNodes();
     });

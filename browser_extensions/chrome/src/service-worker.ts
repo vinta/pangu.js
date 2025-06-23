@@ -1,6 +1,7 @@
 // NOTE: In service workers, we can't export directly, everything goes through messages
-import type { Settings } from './types';
-import { DEFAULT_SETTINGS } from './utils';
+import { DEFAULT_SETTINGS } from './utils/settings';
+import type { Settings } from './utils/types';
+import { isValidMatchPattern } from './utils/urls';
 
 const SCRIPT_ID = 'pangu-auto-spacing';
 
@@ -20,7 +21,7 @@ async function initializeSettings() {
   }
 }
 
-async function unregisterAllContentScripts(): Promise<void> {
+async function unregisterAllContentScripts() {
   try {
     const existingScripts = await chrome.scripting.getRegisteredContentScripts();
     if (existingScripts.length > 0) {
@@ -44,10 +45,13 @@ async function registerContentScripts() {
       runAt: 'document_idle',
     };
 
-    if (settings.filter_mode === 'blacklist' && settings.blacklist.length > 0) {
-      contentScript.excludeMatches = settings.blacklist;
-    } else if (settings.filter_mode === 'whitelist' && settings.whitelist.length > 0) {
-      contentScript.matches = settings.whitelist;
+    // Just in case there are invalid match patterns from old settings
+    const validBlacklist = settings.blacklist.filter((pattern) => isValidMatchPattern(pattern));
+    const validWhitelist = settings.whitelist.filter((pattern) => isValidMatchPattern(pattern));
+    if (settings.filter_mode === 'blacklist' && validBlacklist.length > 0) {
+      contentScript.excludeMatches = validBlacklist;
+    } else if (settings.filter_mode === 'whitelist' && validWhitelist.length > 0) {
+      contentScript.matches = validWhitelist;
     }
 
     try {

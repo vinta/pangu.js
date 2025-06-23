@@ -4,7 +4,7 @@ Follow the instructions precisely. If it wasn't specified, don't do it.
 
 ## Write Current Progress
 
-CREATE or UPDATE a file named `TODO.md` in the project root with the current development progress. Keep each item as concise as possible.
+CREATE or UPDATE a file named @.claude/TODO.md in the project root with the current development progress. Keep each item as concise as possible.
 
 ### File Structure:
 

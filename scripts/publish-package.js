@@ -26,11 +26,7 @@ const parseVersion = (v) => v.split('.').map(Number);
 const [currMajor, currMinor, currPatch] = parseVersion(currentVersion);
 const [newMajor, newMinor, newPatch] = parseVersion(newVersion);
 
-if (
-  newMajor < currMajor ||
-  (newMajor === currMajor && newMinor < currMinor) ||
-  (newMajor === currMajor && newMinor === currMinor && newPatch <= currPatch)
-) {
+if (newMajor < currMajor || (newMajor === currMajor && newMinor < currMinor) || (newMajor === currMajor && newMinor === currMinor && newPatch <= currPatch)) {
   console.error(`Error: Version ${newVersion} must be greater than ${currentVersion}`);
   process.exit(1);
 }
@@ -56,12 +52,10 @@ const updatedIndex = indexContent.replace(/this\.version\s*=\s*['"][^'"]+['"]/, 
 writeFileSync(sharedIndexPath, updatedIndex, 'utf8');
 console.log(`Updated ${sharedIndexPath}`);
 
+execSync('npm run build', { stdio: 'inherit' });
+
 // Copy updated pangu.umd.js to Chrome extension
 console.log('Copying updated pangu.umd.js to Chrome extension...');
 execSync('cp -f dist/browser/pangu.umd.js browser_extensions/chrome/vendors/pangu/pangu.umd.js', { stdio: 'inherit' });
-
-execSync('git add .', { stdio: 'inherit' });
-execSync(`git commit -m "bump version to ${newVersion}"`, { stdio: 'inherit' });
-execSync(`git tag v${newVersion}`, { stdio: 'inherit' });
 
 console.log(`\nVersion bumped to ${newVersion}`);

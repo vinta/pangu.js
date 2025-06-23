@@ -1,4 +1,5 @@
-import { D as DEFAULT_SETTINGS } from "./utils.js";
+import { D as DEFAULT_SETTINGS } from "./utils/settings.js";
+import { i as isValidMatchPattern } from "./utils/urls.js";
 const SCRIPT_ID = "pangu-auto-spacing";
 async function initializeSettings() {
   const syncedSettings = await chrome.storage.sync.get();
@@ -33,10 +34,12 @@ async function registerContentScripts() {
       matches: ["http://*/*", "https://*/*"],
       runAt: "document_idle"
     };
-    if (settings.filter_mode === "blacklist" && settings.blacklist.length > 0) {
-      contentScript.excludeMatches = settings.blacklist;
-    } else if (settings.filter_mode === "whitelist" && settings.whitelist.length > 0) {
-      contentScript.matches = settings.whitelist;
+    const validBlacklist = settings.blacklist.filter((pattern) => isValidMatchPattern(pattern));
+    const validWhitelist = settings.whitelist.filter((pattern) => isValidMatchPattern(pattern));
+    if (settings.filter_mode === "blacklist" && validBlacklist.length > 0) {
+      contentScript.excludeMatches = validBlacklist;
+    } else if (settings.filter_mode === "whitelist" && validWhitelist.length > 0) {
+      contentScript.matches = validWhitelist;
     }
     try {
       await chrome.scripting.registerContentScripts([contentScript]);

@@ -1,5 +1,5 @@
 import type { BrowserPangu } from '../../../src/browser/pangu';
-import type { ContentScriptMessage, ContentScriptResponse } from './types';
+import type { MessageToContentScript, ContentScriptResponse, ContentScriptLoadedMessage } from './utils/types';
 
 // Extend the global Window interface to include the pangu object
 // The pangu object is injected by pangu.umd.js which loads before this script
@@ -23,6 +23,10 @@ function spacingPage() {
   }
 }
 
+// Notify that content script has loaded
+const loadedMessage: ContentScriptLoadedMessage = { type: 'CONTENT_SCRIPT_LOADED' };
+chrome.runtime.sendMessage(loadedMessage);
+
 // Document Loading Lifecycle:
 // loading → (DOM parsing completes) → DOMContentLoaded event fires →
 // interactive → (resources load) → load event fires → complete
@@ -36,12 +40,12 @@ if (document.readyState === 'loading') {
 
 // Listen for messages from the popup
 // This allows manual spacing even when auto-spacing is disabled
-chrome.runtime.onMessage.addListener((message: ContentScriptMessage, _sender: chrome.runtime.MessageSender, sendResponse: (response: ContentScriptResponse) => void) => {
-  if (message.action === 'ping') {
-    // ping is used by popup to check if content script is already loaded
+chrome.runtime.onMessage.addListener((message: MessageToContentScript, _sender: chrome.runtime.MessageSender, sendResponse: (response: ContentScriptResponse) => void) => {
+  if (message.action === 'PING') {
+    // PING is used by popup to check if content script is already loaded
     sendResponse({ success: true });
-  } else if (message.action === 'manual_spacing') {
-    // manual_spacing is requested by user clicking button in popup
+  } else if (message.action === 'MANUAL_SPACING') {
+    // MANUAL_SPACING is requested by user clicking button in popup
     spacingPage();
     sendResponse({ success: true });
   }

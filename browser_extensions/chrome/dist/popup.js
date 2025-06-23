@@ -1,143 +1,180 @@
-import { t as translatePage } from "./i18n.js";
-import { D as DEFAULT_SETTINGS, u as utils } from "./utils.js";
+import { t as translatePage, p as playSound } from "./utils/sounds.js";
+import { g as getCachedSettings } from "./utils/settings.js";
 class PopupController {
   currentTabId;
   currentTabUrl;
-  isAutoSpacingEnabled = true;
-  hideMessageDelayMs = 1e3 * 10;
+  messageTimeoutId;
   constructor() {
     this.initialize();
   }
   async initialize() {
-    try {
-      translatePage();
-      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      this.currentTabId = activeTab?.id;
-      this.currentTabUrl = activeTab?.url;
-      const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS);
-      this.isAutoSpacingEnabled = settings.spacing_mode === "spacing_when_load";
-      this.updateUI();
-      this.updateStatus();
-      this.setupEventListeners();
-    } catch (error) {
-      console.error("Error initializing popup:", error);
-    }
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    this.currentTabId = activeTab?.id;
+    this.currentTabUrl = activeTab?.url;
+    translatePage();
+    await this.render();
+    this.setupEventListeners();
   }
   setupEventListeners() {
     const spacingModeToggle = document.getElementById("spacing-mode-toggle");
     if (spacingModeToggle) {
-      spacingModeToggle.addEventListener("change", () => this.handleSpacingModeToggleChange());
+      spacingModeToggle.addEventListener("change", () => {
+        this.handleSpacingModeToggleChange();
+      });
     }
     const manualSpacingBtn = document.getElementById("manual-spacing-btn");
     if (manualSpacingBtn) {
-      manualSpacingBtn.addEventListener("click", () => this.handleManualSpacing());
+      manualSpacingBtn.addEventListener("click", () => {
+        this.handleManualSpacing();
+      });
     }
+    chrome.runtime.onMessage.addListener((message, sender) => {
+      if (message.type === "CONTENT_SCRIPT_LOADED" && sender.tab?.id === this.currentTabId) {
+        this.renderStatus();
+      }
+    });
   }
-  updateUI() {
+  async render() {
+    await this.renderToggle();
+    await this.renderStatus();
+    this.renderVersion();
+  }
+  async renderToggle() {
+    const settings = await getCachedSettings();
     const spacingModeToggle = document.getElementById("spacing-mode-toggle");
     if (spacingModeToggle) {
-      spacingModeToggle.checked = this.isAutoSpacingEnabled;
-    }
-    const versionEl = document.getElementById("version");
-    if (versionEl) {
-      const manifest = chrome.runtime.getManifest();
-      versionEl.textContent = manifest.version;
+      spacingModeToggle.checked = settings.spacing_mode === "spacing_when_load";
     }
   }
-  async updateStatus() {
-    const statusEl = document.getElementById("status-indicator");
-    if (!statusEl || !this.currentTabUrl) return;
-    const isValidUrl = this.isValidUrlForSpacing(this.currentTabUrl);
-    if (!isValidUrl) {
-      statusEl.className = "status";
-      const textEl = statusEl.querySelector(".status-text");
-      if (textEl) {
-        textEl.setAttribute("data-i18n", "status_inactive");
-        textEl.textContent = chrome.i18n.getMessage("status_inactive");
-      }
+  async renderStatus() {
+    const statusToggle = document.getElementById("status-indicator");
+    if (!statusToggle) {
       return;
     }
-    if (this.isAutoSpacingEnabled) {
-      statusEl.className = "status status-active";
-      const textEl = statusEl.querySelector(".status-text");
-      if (textEl) {
-        const key = "status_active";
-        textEl.setAttribute("data-i18n", key);
-        textEl.textContent = chrome.i18n.getMessage(key);
-      }
+    const statusInput = statusToggle.querySelector(".toggle-input");
+    const statusLabel = statusToggle.querySelector(".toggle-label");
+    if (!statusInput || !statusLabel) {
+      return;
+    }
+    const shouldBeActive = await this.shouldContentScriptBeActive();
+    statusInput.checked = shouldBeActive;
+    const messageKey = shouldBeActive ? "status_active" : "status_inactive";
+    statusLabel.setAttribute("data-i18n", messageKey);
+    statusLabel.textContent = chrome.i18n.getMessage(messageKey);
+  }
+  renderVersion() {
+    const versionElement = document.getElementById("version");
+    if (versionElement) {
+      versionElement.textContent = chrome.runtime.getManifest().version;
     }
   }
   async handleSpacingModeToggleChange() {
-    const spacingModeToggle = document.getElementById("spacing-mode-toggle");
-    this.isAutoSpacingEnabled = spacingModeToggle.checked;
-    await utils.toggleAutoSpacing(this.isAutoSpacingEnabled);
-    await utils.playSound(this.isAutoSpacingEnabled ? "Shouryuuken" : "Hadouken");
-    this.updateStatus();
+    const toggle = document.getElementById("spacing-mode-toggle");
+    const spacingMode = toggle.checked ? "spacing_when_load" : "spacing_when_click";
+    await chrome.storage.sync.set({ spacing_mode: spacingMode });
+    this.showMessage(chrome.i18n.getMessage("refresh_required"), "info", 1e3 * 3);
+    await playSound(spacingMode === "spacing_when_load" ? "Shouryuuken" : "Hadouken");
   }
   async handleManualSpacing() {
-    if (!this.currentTabId || !this.currentTabUrl) {
-      await this.showError();
+    const button = document.getElementById("manual-spacing-btn");
+    if (!button) {
       return;
     }
-    if (!this.isValidUrlForSpacing(this.currentTabUrl)) {
-      await this.showError();
+    button.disabled = true;
+    if (!this.currentTabId || !this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
+      await this.showErrorMessage(() => {
+        button.disabled = false;
+      });
       return;
     }
     try {
-      const btn = document.getElementById("manual-spacing-btn");
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = chrome.i18n.getMessage("spacing_processing");
-      }
-      try {
-        const message2 = { action: "ping" };
-        await chrome.tabs.sendMessage(this.currentTabId, message2);
-      } catch {
+      button.textContent = chrome.i18n.getMessage("spacing_processing");
+      const isContentScriptLoaded = await this.isContentScriptLoaded();
+      if (!isContentScriptLoaded) {
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
           files: ["vendors/pangu/pangu.umd.js", "dist/content-script.js"]
         });
       }
-      const message = { action: "manual_spacing" };
+      const message = { action: "MANUAL_SPACING" };
       const response = await chrome.tabs.sendMessage(this.currentTabId, message);
-      if (!response?.success) {
-        throw new Error("Failed to apply manual spacing");
+      if (response && response.success) {
+        await this.showSuccessMessage(() => {
+          button.disabled = false;
+        });
+      } else {
+        await this.showErrorMessage(() => {
+          button.disabled = false;
+        });
       }
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = chrome.i18n.getMessage("manual_spacing");
-      }
-      await this.showSuccess();
     } catch (error) {
-      console.error("Failed to apply spacing:", error);
-      await this.showError();
-      const btn = document.getElementById("manual-spacing-btn");
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = chrome.i18n.getMessage("manual_spacing");
-      }
+      console.error("Manual spacing error:", error);
+      await this.showErrorMessage(() => {
+        button.disabled = false;
+      });
+    } finally {
+      button.textContent = chrome.i18n.getMessage("manual_spacing");
     }
   }
-  isValidUrlForSpacing(url) {
+  isValidUrl(url) {
     return /^(http(s?)|file)/i.test(url);
   }
-  async showError() {
-    this.showMessage(chrome.i18n.getMessage("spacing_fail"), "error");
-    await utils.playSound("WahWahWaaah");
+  async isContentScriptLoaded() {
+    if (!this.currentTabId || !this.currentTabUrl) {
+      return false;
+    }
+    try {
+      const message = { action: "PING" };
+      await chrome.tabs.sendMessage(this.currentTabId, message);
+      return true;
+    } catch {
+      return false;
+    }
   }
-  async showSuccess() {
-    this.showMessage(chrome.i18n.getMessage("spacing_success"), "success");
-    await utils.playSound("YeahBaby");
+  async shouldContentScriptBeActive() {
+    if (!this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
+      return false;
+    }
+    const settings = await getCachedSettings();
+    if (settings.spacing_mode === "spacing_when_click") {
+      return false;
+    }
+    const urlPatterns = settings[settings.filter_mode];
+    for (const pattern of urlPatterns) {
+      try {
+        const urlPattern = new URLPattern(pattern);
+        if (urlPattern.test(this.currentTabUrl)) {
+          return settings.filter_mode === "whitelist";
+        }
+      } catch {
+      }
+    }
+    return settings.filter_mode === "blacklist";
   }
-  showMessage(text, type) {
+  async showErrorMessage(callback) {
+    this.showMessage(chrome.i18n.getMessage("spacing_fail"), "error", 1e3 * 4, callback);
+    await playSound("WahWahWaaah");
+  }
+  async showSuccessMessage(callback) {
+    this.showMessage(chrome.i18n.getMessage("spacing_success"), "success", 1e3 * 3, callback);
+    await playSound("YeahBaby");
+  }
+  showMessage(text, type = "info", hideMessageDelayMs, callback) {
     const messageElement = document.getElementById("message");
     if (messageElement) {
+      if (this.messageTimeoutId) {
+        clearTimeout(this.messageTimeoutId);
+      }
       messageElement.textContent = text;
       messageElement.className = `message ${type}`;
       messageElement.style.display = "block";
-      setTimeout(() => {
+      this.messageTimeoutId = window.setTimeout(() => {
         messageElement.style.display = "none";
-      }, this.hideMessageDelayMs);
+        this.messageTimeoutId = void 0;
+        if (callback) {
+          callback();
+        }
+      }, hideMessageDelayMs);
     }
   }
 }

@@ -1,6 +1,8 @@
 # CLAUDE.md
 
-Project-specific instructions for pangu.js. See @.claude/instructions.md for general preferences.
+Extends: `@~/.claude/CLAUDE.md` (mandatory base instructions)
+
+Everything in the base instructions MUST be followed strictly.
 
 ## Project Overview
 
@@ -155,7 +157,7 @@ pangu.spacingFileSync('input.txt');
 - **Permissions**: Uses `activeTab` instead of broad `tabs` permission
 - **Content Scripts**: Dynamically registered based on user settings
 - **Match Patterns**: Uses Chrome's match pattern format for blacklist/whitelist
-- **UI Framework**: Pure TypeScript (Angular.js removed December 2024)
+- **UI Framework**: Pure TypeScript
 
 ### Chrome Extension Architecture
 
@@ -163,7 +165,7 @@ pangu.spacingFileSync('input.txt');
 - **Content Script**: `content-script.ts` - Injected into web pages for auto-spacing
 - **Popup**: `popup.ts` - Extension popup UI
 - **Options**: `options.ts` - Settings page
-- **Utils**: `utils.ts` - Shared utilities and settings management
+- **Utils**: `utils/` - Shared utilities and settings management
 - **Types**: `types.ts` - TypeScript interfaces
 
 #### Settings Structure
@@ -188,22 +190,6 @@ The extension uses Chrome's match pattern format for URL filtering:
 
 ## Development Guidelines
 
-### TypeScript Migration
-
-- Currently using moderate strictness (`noImplicitAny: false`)
-- Gradually migrating to full strict mode
-- Use type annotations for new code
-- Preserve existing JavaScript patterns during migration
-
-### Unicode Support
-
-The library supports comprehensive CJK character ranges:
-
-- CJK Radicals and Kangxi Radicals
-- Hiragana, Katakana, Bopomofo
-- CJK Unified Ideographs (all extensions)
-- Half-width and full-width forms
-
 ### Code Style
 
 - Follow existing patterns in the codebase
@@ -212,14 +198,6 @@ The library supports comprehensive CJK character ranges:
 - Keep regex patterns readable with comments
 - Always use `node:` prefix for Node.js built-in modules
 
-## Project-Specific Requirements
-
-### Version Bumping
-
-- Use `npm run publish-package <x.y.z>` for version updates
-- This updates: package.json, Chrome manifest, and src/shared/index.ts
-- Creates git commit and tag automatically
-
 ## Future Improvements
 
-See @TODO.md for planned improvements and technical debt.
+See @.claude/TODO.md for planned improvements and technical debt.

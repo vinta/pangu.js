@@ -1,6 +1,6 @@
-import tseslint from 'typescript-eslint';
 import prettierConfig from 'eslint-config-prettier';
 import unicorn from 'eslint-plugin-unicorn';
+import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
@@ -55,4 +55,10 @@ export default tseslint.config(
   },
   // Apply prettier config last to disable formatting rules
   prettierConfig,
+  // Override the above configs
+  {
+    rules: {
+      curly: ['error', 'all'],
+    },
+  },
 );
