@@ -1,7 +1,7 @@
 import { translatePage } from './utils/i18n';
-import { isValidMatchPattern } from './utils/urls';
 import { getCachedSettings, DEFAULT_SETTINGS } from './utils/settings';
 import { playSound } from './utils/sounds';
+import { isValidMatchPattern } from './utils/urls';
 
 class OptionsController {
   private editingUrls: Map<number, string> = new Map();
@@ -30,13 +30,13 @@ class OptionsController {
         this.toggleSpacingMode().catch(console.error);
       } else if (target.id === 'filter_mode_btn') {
         this.toggleFilterMode().catch(console.error);
-      } else if (target.classList.contains('remove-url-btn')) {
-        const index = parseInt(target.dataset.index || '0');
-        this.removeUrl(index);
       } else if (target.classList.contains('url-display-input')) {
         const index = parseInt(target.dataset.index || '0');
         this.startEditingUrl(index);
-      } else if (target.classList.contains('save-url-btn')) {
+      } else if (target.classList.contains('remove-url-btn')) {
+        const index = parseInt(target.dataset.index || '0');
+        this.removeUrl(index);
+      } else if (target.classList.contains('save-edit-url-btn')) {
         const index = parseInt(target.dataset.index || '0');
         this.saveEditingUrl(index);
       } else if (target.classList.contains('cancel-edit-btn')) {
@@ -56,6 +56,27 @@ class OptionsController {
         chrome.storage.sync.set({ is_mute_sound_effects: muteCheckbox.checked });
       }
     });
+  }
+
+  private setupNewUrlInputListeners() {
+    const newUrlInput = document.getElementById('new-url-input') as HTMLInputElement;
+    if (newUrlInput) {
+      newUrlInput.focus();
+
+      document.getElementById('save-new-url-btn')?.addEventListener('click', () => {
+        this.saveNewUrl();
+      });
+
+      document.getElementById('cancel-new-url-btn')?.addEventListener('click', () => {
+        this.cancelNewUrl();
+      });
+
+      newUrlInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          this.saveNewUrl();
+        }
+      });
+    }
   }
 
   private async render() {
@@ -131,7 +152,7 @@ class OptionsController {
         const editItem = editTemplate.content.cloneNode(true) as DocumentFragment;
 
         const input = editItem.querySelector('.url-edit-input') as HTMLInputElement;
-        const saveBtn = editItem.querySelector('.save-url-btn') as HTMLButtonElement;
+        const saveBtn = editItem.querySelector('.save-edit-url-btn') as HTMLButtonElement;
         const cancelBtn = editItem.querySelector('.cancel-edit-btn') as HTMLButtonElement;
 
         input.value = editingUrl;
@@ -182,7 +203,7 @@ class OptionsController {
 
     container.appendChild(listFragment);
 
-    this.setupUrlInputListeners();
+    this.setupNewUrlInputListeners();
   }
 
   private async renderMuteCheckbox() {
@@ -293,27 +314,6 @@ class OptionsController {
     const update = { [ruleKey]: urls };
     chrome.storage.sync.set(update);
     await this.renderUrlList();
-  }
-
-  private setupUrlInputListeners() {
-    const newUrlInput = document.getElementById('new-url-input') as HTMLInputElement;
-    if (newUrlInput) {
-      newUrlInput.focus();
-
-      document.getElementById('save-new-url-btn')?.addEventListener('click', () => {
-        this.saveNewUrl();
-      });
-
-      document.getElementById('cancel-new-url-btn')?.addEventListener('click', () => {
-        this.cancelNewUrl();
-      });
-
-      newUrlInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          this.saveNewUrl();
-        }
-      });
-    }
   }
 
   private async restoreDefaults() {

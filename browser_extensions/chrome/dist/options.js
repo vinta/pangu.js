@@ -34,13 +34,13 @@ class OptionsController {
         this.toggleSpacingMode().catch(console.error);
       } else if (target.id === "filter_mode_btn") {
         this.toggleFilterMode().catch(console.error);
-      } else if (target.classList.contains("remove-url-btn")) {
-        const index = parseInt(target.dataset.index || "0");
-        this.removeUrl(index);
       } else if (target.classList.contains("url-display-input")) {
         const index = parseInt(target.dataset.index || "0");
         this.startEditingUrl(index);
-      } else if (target.classList.contains("save-url-btn")) {
+      } else if (target.classList.contains("remove-url-btn")) {
+        const index = parseInt(target.dataset.index || "0");
+        this.removeUrl(index);
+      } else if (target.classList.contains("save-edit-url-btn")) {
         const index = parseInt(target.dataset.index || "0");
         this.saveEditingUrl(index);
       } else if (target.classList.contains("cancel-edit-btn")) {
@@ -59,6 +59,23 @@ class OptionsController {
         chrome.storage.sync.set({ is_mute_sound_effects: muteCheckbox.checked });
       }
     });
+  }
+  setupNewUrlInputListeners() {
+    const newUrlInput = document.getElementById("new-url-input");
+    if (newUrlInput) {
+      newUrlInput.focus();
+      document.getElementById("save-new-url-btn")?.addEventListener("click", () => {
+        this.saveNewUrl();
+      });
+      document.getElementById("cancel-new-url-btn")?.addEventListener("click", () => {
+        this.cancelNewUrl();
+      });
+      newUrlInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          this.saveNewUrl();
+        }
+      });
+    }
   }
   async render() {
     await this.renderSpacingMode();
@@ -111,7 +128,7 @@ class OptionsController {
         const editTemplate = document.getElementById("url-edit-template");
         const editItem = editTemplate.content.cloneNode(true);
         const input = editItem.querySelector(".url-edit-input");
-        const saveBtn = editItem.querySelector(".save-url-btn");
+        const saveBtn = editItem.querySelector(".save-edit-url-btn");
         const cancelBtn = editItem.querySelector(".cancel-edit-btn");
         input.value = editingUrl;
         input.setAttribute("data-index", index.toString());
@@ -147,7 +164,7 @@ class OptionsController {
       addButton.parentElement.style.display = "none";
     }
     container.appendChild(listFragment);
-    this.setupUrlInputListeners();
+    this.setupNewUrlInputListeners();
   }
   async renderMuteCheckbox() {
     const settings = await getCachedSettings();
@@ -235,23 +252,6 @@ class OptionsController {
     const update = { [ruleKey]: urls };
     chrome.storage.sync.set(update);
     await this.renderUrlList();
-  }
-  setupUrlInputListeners() {
-    const newUrlInput = document.getElementById("new-url-input");
-    if (newUrlInput) {
-      newUrlInput.focus();
-      document.getElementById("save-new-url-btn")?.addEventListener("click", () => {
-        this.saveNewUrl();
-      });
-      document.getElementById("cancel-new-url-btn")?.addEventListener("click", () => {
-        this.cancelNewUrl();
-      });
-      newUrlInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-          this.saveNewUrl();
-        }
-      });
-    }
   }
   async restoreDefaults() {
     if (confirm(chrome.i18n.getMessage("confirm_restore_defaults"))) {

@@ -244,13 +244,15 @@
   border-color: #fecaca;
 }
 
-.save-url-btn {
+.save-new-url-btn,
+.save-edit-url-btn {
   background-color: var(--color-success);
   color: white;
   border-color: var(--color-success);
 }
 
-.save-url-btn:hover {
+.save-new-url-btn:hover,
+.save-edit-url-btn:hover {
   background-color: #059669;
 }
 
@@ -331,7 +333,7 @@
 }
 
 /* Hide filter mode section when in manual mode */
-.filter_mode_group[style*="display: none"] {
+.filter_mode_group[style*='display: none'] {
   display: none !important;
 }
 
