@@ -70,7 +70,7 @@
     "test:browser": "npm run build && playwright test",
     "lint": "eslint src/ scripts/",
     "lint:fix": "eslint src/ scripts/ --fix",
-    "publish-package": "npm run build && node ./scripts/publish-package.js",
+    "publish-package": "node ./scripts/publish-package.js",
     "pack-extension": "npm run pack:chrome && npm run pack:firefox",
     "pack-extension:chrome": "./scripts/pack-extension-chrome.sh",
     "pack-extension:firefox": "node ./browser_extensions/firefox/pack.js"
