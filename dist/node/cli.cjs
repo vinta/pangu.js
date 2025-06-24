@@ -38,18 +38,20 @@ function debounce(func, delay, mustRunDelay = Infinity) {
 class BrowserPangu extends index.Pangu {
   constructor() {
     super();
+    __publicField(this, "isAutoSpacingPageExecuted");
     __publicField(this, "blockTags");
     __publicField(this, "ignoredTags");
     __publicField(this, "presentationalTags");
     __publicField(this, "spaceLikeTags");
     __publicField(this, "spaceSensitiveTags");
-    __publicField(this, "isAutoSpacingPageExecuted");
+    __publicField(this, "ignoredClass");
+    this.isAutoSpacingPageExecuted = false;
     this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
     this.ignoredTags = /^(code|pre|script|style|textarea|iframe)$/i;
     this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
     this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
     this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-    this.isAutoSpacingPageExecuted = false;
+    this.ignoredClass = "no-pangu-spacing";
   }
   spacingNodeByXPath(xPathQuery, contextNode) {
     if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
@@ -97,7 +99,7 @@ class BrowserPangu extends index.Pangu {
         }
       }
       if (nextTextNode) {
-        if (currentTextNode.nextSibling && currentTextNode.nextSibling.nodeName.search(this.spaceLikeTags) >= 0) {
+        if (currentTextNode.nextSibling && this.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
           nextTextNode = currentTextNode;
           continue;
         }
@@ -108,24 +110,24 @@ class BrowserPangu extends index.Pangu {
         const testNewText = this.spacingText(testText);
         if (testNewText !== testText) {
           let nextNode = nextTextNode;
-          while (nextNode.parentNode && nextNode.nodeName.search(this.spaceSensitiveTags) === -1 && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
+          while (nextNode.parentNode && !this.spaceSensitiveTags.test(nextNode.nodeName) && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
             nextNode = nextNode.parentNode;
           }
           let currentNode = currentTextNode;
-          while (currentNode.parentNode && currentNode.nodeName.search(this.spaceSensitiveTags) === -1 && this.isLastTextChild(currentNode.parentNode, currentNode)) {
+          while (currentNode.parentNode && !this.spaceSensitiveTags.test(currentNode.nodeName) && this.isLastTextChild(currentNode.parentNode, currentNode)) {
             currentNode = currentNode.parentNode;
           }
           if (currentNode.nextSibling) {
-            if (currentNode.nextSibling.nodeName.search(this.spaceLikeTags) >= 0) {
+            if (this.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
               nextTextNode = currentTextNode;
               continue;
             }
           }
-          if (currentNode.nodeName.search(this.blockTags) === -1) {
-            if (nextNode.nodeName.search(this.spaceSensitiveTags) === -1) {
-              if (nextNode.nodeName.search(this.ignoredTags) === -1 && nextNode.nodeName.search(this.blockTags) === -1) {
+          if (!this.blockTags.test(currentNode.nodeName)) {
+            if (!this.spaceSensitiveTags.test(nextNode.nodeName)) {
+              if (!this.ignoredTags.test(nextNode.nodeName) && !this.blockTags.test(nextNode.nodeName)) {
                 if (nextTextNode.previousSibling) {
-                  if (nextTextNode.previousSibling.nodeName.search(this.spaceLikeTags) === -1) {
+                  if (!this.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
                     if (nextTextNode instanceof Text) {
                       nextTextNode.data = ` ${nextTextNode.data}`;
                     }
@@ -138,7 +140,7 @@ class BrowserPangu extends index.Pangu {
                   }
                 }
               }
-            } else if (currentNode.nodeName.search(this.spaceSensitiveTags) === -1) {
+            } else if (!this.spaceSensitiveTags.test(currentNode.nodeName)) {
               if (currentTextNode instanceof Text) {
                 currentTextNode.data = `${currentTextNode.data} `;
               }
@@ -147,7 +149,7 @@ class BrowserPangu extends index.Pangu {
               panguSpace.innerHTML = " ";
               if (nextNode.parentNode) {
                 if (nextNode.previousSibling) {
-                  if (nextNode.previousSibling.nodeName.search(this.spaceLikeTags) === -1) {
+                  if (!this.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
                     nextNode.parentNode.insertBefore(panguSpace, nextNode);
                   }
                 } else {
@@ -279,7 +281,7 @@ class BrowserPangu extends index.Pangu {
     return node.isContentEditable || node.getAttribute && node.getAttribute("g_editable") === "true";
   }
   isSpecificTag(node, tagRegex) {
-    return node && node.nodeName && node.nodeName.search(tagRegex) >= 0;
+    return node && node.nodeName && tagRegex.test(node.nodeName);
   }
   isInsideSpecificTag(node, tagRegex, checkCurrent = false) {
     let currentNode = node;
@@ -296,9 +298,18 @@ class BrowserPangu extends index.Pangu {
     }
     return false;
   }
+  hasIgnoredClass(node) {
+    if (node instanceof Element && node.classList.contains(this.ignoredClass)) {
+      return true;
+    }
+    if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(this.ignoredClass)) {
+      return true;
+    }
+    return false;
+  }
   canIgnoreNode(node) {
     let currentNode = node;
-    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClass(currentNode))) {
       return true;
     }
     while (currentNode.parentNode) {
