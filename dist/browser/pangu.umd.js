@@ -141,14 +141,14 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       __publicField(this, "presentationalTags");
       __publicField(this, "spaceLikeTags");
       __publicField(this, "spaceSensitiveTags");
-      __publicField(this, "ignoreClasses");
+      __publicField(this, "ignoredClasses");
       this.isAutoSpacingPageExecuted = false;
       this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
       this.ignoredTags = /^(code|pre|script|style|textarea|iframe)$/i;
       this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
       this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
       this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-      this.ignoreClasses = /\bno-pangu-spacing\b/;
+      this.ignoredClasses = /\bno-pangu-spacing\b/;
     }
     spacingNodeByXPath(xPathQuery, contextNode) {
       if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
@@ -395,18 +395,18 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
       return false;
     }
-    hasIgnoreClasses(node) {
-      if (node instanceof Element && this.ignoreClasses.test(node.className)) {
+    hasIgnoredClasses(node) {
+      if (node instanceof Element && this.ignoredClasses.test(node.className)) {
         return true;
       }
-      if (node.parentNode && node.parentNode instanceof Element && this.ignoreClasses.test(node.parentNode.className)) {
+      if (node.parentNode && node.parentNode instanceof Element && this.ignoredClasses.test(node.parentNode.className)) {
         return true;
       }
       return false;
     }
     canIgnoreNode(node) {
       let currentNode = node;
-      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoreClasses(currentNode))) {
+      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClasses(currentNode))) {
         return true;
       }
       while (currentNode.parentNode) {

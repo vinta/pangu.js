@@ -48,7 +48,7 @@ export class BrowserPangu extends Pangu {
   public presentationalTags: RegExp;
   public spaceLikeTags: RegExp;
   public spaceSensitiveTags: RegExp;
-  public ignoreClasses: RegExp;
+  public ignoredClasses: RegExp;
 
   constructor() {
     super();
@@ -59,7 +59,7 @@ export class BrowserPangu extends Pangu {
     this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
     this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
     this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-    this.ignoreClasses = /\bno-pangu-spacing\b/;
+    this.ignoredClasses = /\bno-pangu-spacing\b/;
   }
 
   public spacingNodeByXPath(xPathQuery: string, contextNode: Node) {
@@ -402,14 +402,14 @@ export class BrowserPangu extends Pangu {
     return false;
   }
 
-  protected hasIgnoreClasses(node: Node) {
+  protected hasIgnoredClasses(node: Node) {
     // Check the node itself if it's an element
-    if (node instanceof Element && this.ignoreClasses.test(node.className)) {
+    if (node instanceof Element && this.ignoredClasses.test(node.className)) {
       return true;
     }
 
     // Check the parent node (for text nodes)
-    if (node.parentNode && node.parentNode instanceof Element && this.ignoreClasses.test(node.parentNode.className)) {
+    if (node.parentNode && node.parentNode instanceof Element && this.ignoredClasses.test(node.parentNode.className)) {
       return true;
     }
 
@@ -418,7 +418,7 @@ export class BrowserPangu extends Pangu {
 
   protected canIgnoreNode(node: Node) {
     let currentNode = node;
-    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoreClasses(currentNode))) {
+    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClasses(currentNode))) {
       return true;
     }
     while (currentNode.parentNode) {
