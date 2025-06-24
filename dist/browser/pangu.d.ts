@@ -6,7 +6,7 @@ export declare class BrowserPangu extends Pangu {
     presentationalTags: RegExp;
     spaceLikeTags: RegExp;
     spaceSensitiveTags: RegExp;
-    ignoreClasses: RegExp | null;
+    ignoreClasses: RegExp;
     constructor();
     spacingNodeByXPath(xPathQuery: string, contextNode: Node): void;
     spacingNode(contextNode: Node): void;
@@ -16,7 +16,6 @@ export declare class BrowserPangu extends Pangu {
     spacingPageTitle(): void;
     spacingPageBody(): void;
     spacingPage(): void;
-    setIgnoreClasses(cls: string[]): void;
     autoSpacingPage(pageDelay?: number, nodeDelay?: number, nodeMaxWait?: number): void;
     protected isContentEditable(node: any): any;
     protected isSpecificTag(node: Node, tagRegex: RegExp): boolean | "";

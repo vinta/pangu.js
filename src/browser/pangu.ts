@@ -42,13 +42,13 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
 
 export class BrowserPangu extends Pangu {
-  isAutoSpacingPageExecuted: boolean;
-  blockTags: RegExp;
-  ignoredTags: RegExp;
-  presentationalTags: RegExp;
-  spaceLikeTags: RegExp;
-  spaceSensitiveTags: RegExp;
-  ignoreClasses: RegExp | null;
+  public isAutoSpacingPageExecuted: boolean;
+  public blockTags: RegExp;
+  public ignoredTags: RegExp;
+  public presentationalTags: RegExp;
+  public spaceLikeTags: RegExp;
+  public spaceSensitiveTags: RegExp;
+  public ignoreClasses: RegExp;
 
   constructor() {
     super();
@@ -59,7 +59,7 @@ export class BrowserPangu extends Pangu {
     this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
     this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
     this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-    this.ignoreClasses = /(skip-pangu-spacing)/;
+    this.ignoreClasses = /\bno-pangu-spacing\b/;
   }
 
   public spacingNodeByXPath(xPathQuery: string, contextNode: Node) {
@@ -285,17 +285,6 @@ export class BrowserPangu extends Pangu {
     this.spacingPageBody();
   }
 
-  public setIgnoreClasses(cls: string[]) {
-    if (!Array.isArray(cls)) {
-      throw new Error('invalid ignoreClasses');
-    }
-    if (cls.length === 0) {
-      this.ignoreClasses = null;
-    } else {
-      this.ignoreClasses = new RegExp(`(${cls.join('|')})`);
-    }
-  }
-
   public autoSpacingPage(pageDelay = 1000, nodeDelay = 500, nodeMaxWait = 2000) {
     if (!(document.body instanceof Node)) {
       return;
@@ -414,10 +403,6 @@ export class BrowserPangu extends Pangu {
   }
 
   protected hasIgnoreClasses(node: Node) {
-    if (!this.ignoreClasses) {
-      return false;
-    }
-
     // Check the node itself if it's an element
     if (node instanceof Element && this.ignoreClasses.test(node.className)) {
       return true;

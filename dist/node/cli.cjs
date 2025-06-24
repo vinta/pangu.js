@@ -51,7 +51,7 @@ class BrowserPangu extends index.Pangu {
     this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
     this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
     this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-    this.ignoreClasses = /(skip-pangu-spacing)/;
+    this.ignoreClasses = /\bno-pangu-spacing\b/;
   }
   spacingNodeByXPath(xPathQuery, contextNode) {
     if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
@@ -202,16 +202,6 @@ class BrowserPangu extends index.Pangu {
     this.spacingPageTitle();
     this.spacingPageBody();
   }
-  setIgnoreClasses(cls) {
-    if (!Array.isArray(cls)) {
-      throw new Error("invalid ignoreClasses");
-    }
-    if (cls.length === 0) {
-      this.ignoreClasses = null;
-    } else {
-      this.ignoreClasses = new RegExp(`(${cls.join("|")})`);
-    }
-  }
   autoSpacingPage(pageDelay = 1e3, nodeDelay = 500, nodeMaxWait = 2e3) {
     if (!(document.body instanceof Node)) {
       return;
@@ -309,9 +299,6 @@ class BrowserPangu extends index.Pangu {
     return false;
   }
   hasIgnoreClasses(node) {
-    if (!this.ignoreClasses) {
-      return false;
-    }
     if (node instanceof Element && this.ignoreClasses.test(node.className)) {
       return true;
     }
