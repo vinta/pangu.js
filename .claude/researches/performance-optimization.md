@@ -14,11 +14,11 @@ The core performance issue in pangu.js is that `spacingPage()` blocks the UI thr
 
 ## Analyzed Solutions
 
-### 1. CSS text-autospace (Recommended Primary Solution)
+### 1. CSS text-autospace (Limited Viability)
 
 **Simplicity**: ⭐⭐⭐⭐⭐
 **Performance**: ⭐⭐⭐⭐⭐
-**Browser Support**: Chrome 120+, Safari 18.4+
+**Browser Support**: Safari 18.4+ only (~9.75% global usage)
 
 ```css
 body {
@@ -29,9 +29,9 @@ body {
 - Zero JavaScript processing - browser handles spacing natively
 - Eliminates performance problem entirely
 - Only ~15 lines of code needed for implementation
-- Covers ~80% of users (Chrome + Safari)
+- **Major limitation**: Only Safari supports it (Chrome requires experimental flag, not production-ready)
 
-### 2. Batch Processing with Microtasks (Recommended Fallback)
+### 2. Batch Processing with Microtasks (Recommended Primary Solution)
 
 **Simplicity**: ⭐⭐⭐⭐
 **Performance**: ⭐⭐⭐⭐
@@ -139,4 +139,11 @@ The fundamental realization is that **we don't need complex architectures**. The
 
 ## Conclusion
 
-The simplest solution (CSS `text-autospace`) is also the best. It requires minimal code changes, provides perfect performance, and lets the browser handle spacing natively. The batch processing fallback ensures all users get a responsive experience. This approach follows the principle of "do less, achieve more."
+While CSS `text-autospace` would be the ideal solution, its extremely limited browser support (Safari only, ~9.75% global usage) makes it impractical as a primary approach. Instead, **batch processing with microtasks** is the recommended solution - it's simple to implement, works in all browsers, and effectively prevents UI blocking. 
+
+For maximum compatibility:
+1. Use batch processing as the primary solution
+2. Optionally detect and use `text-autospace` for Safari users
+3. Consider `requestIdleCallback` with fallback for additional optimization
+
+This pragmatic approach balances performance, simplicity, and browser compatibility.

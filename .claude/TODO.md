@@ -32,11 +32,11 @@
 ### High Priority - Features
 
 - [ ] Generate different size icons from `icon_1500.svg`
-- [x] Provide a less aggressive approach: `text-autospace` in CSS
-  - https://developer.chrome.com/blog/css-i18n-features
-  - https://github.com/sparanoid/chinese-copywriting-guidelines/issues/211
-  - Implemented in css-autospace.ts - Chrome (v120+) and Safari (v18.4+) support it
-  - Falls back to JavaScript processing for Firefox
+- [ ] Add instructions in options page for enabling experimental CSS text-autospace
+  - Guide users to `chrome://flags/#enable-experimental-web-platform-features`
+  - Auto-detect and use CSS text-autospace when available
+  - Provide clear benefits explanation (better performance, native spacing)
+  - Show only to Chrome users (not relevant for Safari/Firefox)
 - [ ] Add "之後不要在這個網頁召喚空格之神了" to popup actions or context menu
 - [ ] Add `optional_host_permissions` for user control
 
@@ -69,27 +69,32 @@
 ### Proposed Solutions
 
 #### 1. Text Processing in Service Worker
+
 - Extract text from DOM in content script
 - Send to service worker for regex processing (off main thread)
 - Return processed text to content script for DOM updates
 - **Benefit**: Heavy regex operations don't block UI
 
 #### 2. Chunked Processing with requestIdleCallback
+
 - Process DOM nodes in small batches during browser idle time
 - Yield control back to browser between chunks
 - **Benefit**: Maintains responsive UI during processing
 
 #### 3. Web Workers for Text Processing
+
 - Inject dedicated Web Worker from content script
 - Pass text batches to worker for parallel processing
 - **Benefit**: True parallel processing of text
 
 #### 4. Intersection Observer for Viewport Processing
+
 - Only process visible text initially
 - Defer off-screen content until scrolled into view
 - **Benefit**: Faster initial page load
 
 #### 5. Offscreen Document API
+
 - Use Chrome's Offscreen API for heavy DOM processing
 - Process large batches without blocking visible tab
 - **Benefit**: Complete isolation from user's browsing experience
@@ -97,6 +102,7 @@
 ### Recommended Architecture
 
 Combine multiple approaches:
+
 1. **Initial scan**: Use Intersection Observer for visible content only
 2. **Background processing**: Send non-visible text to service worker in batches
 3. **Incremental updates**: Use requestIdleCallback for processing queue
