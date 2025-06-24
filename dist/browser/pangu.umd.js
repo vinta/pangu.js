@@ -141,14 +141,14 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       __publicField(this, "presentationalTags");
       __publicField(this, "spaceLikeTags");
       __publicField(this, "spaceSensitiveTags");
-      __publicField(this, "ignoredClasses");
+      __publicField(this, "ignoreClass");
       this.isAutoSpacingPageExecuted = false;
       this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
       this.ignoredTags = /^(code|pre|script|style|textarea|iframe)$/i;
       this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
       this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
       this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-      this.ignoredClasses = /\bno-pangu-spacing\b/;
+      this.ignoreClass = "no-pangu-spacing";
     }
     spacingNodeByXPath(xPathQuery, contextNode) {
       if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
@@ -396,10 +396,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       return false;
     }
     hasIgnoredClasses(node) {
-      if (node instanceof Element && this.ignoredClasses.test(node.className)) {
+      if (node instanceof Element && node.classList.contains(this.ignoreClass)) {
         return true;
       }
-      if (node.parentNode && node.parentNode instanceof Element && this.ignoredClasses.test(node.parentNode.className)) {
+      if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(this.ignoreClass)) {
         return true;
       }
       return false;

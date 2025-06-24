@@ -6,7 +6,7 @@ export declare class BrowserPangu extends Pangu {
     presentationalTags: RegExp;
     spaceLikeTags: RegExp;
     spaceSensitiveTags: RegExp;
-    ignoredClasses: RegExp;
+    ignoreClass: string;
     constructor();
     spacingNodeByXPath(xPathQuery: string, contextNode: Node): void;
     spacingNode(contextNode: Node): void;

@@ -48,7 +48,7 @@ export class BrowserPangu extends Pangu {
   public presentationalTags: RegExp;
   public spaceLikeTags: RegExp;
   public spaceSensitiveTags: RegExp;
-  public ignoredClasses: RegExp;
+  public ignoreClass: string;
 
   constructor() {
     super();
@@ -59,7 +59,7 @@ export class BrowserPangu extends Pangu {
     this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
     this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
     this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-    this.ignoredClasses = /\bno-pangu-spacing\b/;
+    this.ignoreClass = 'no-pangu-spacing';
   }
 
   public spacingNodeByXPath(xPathQuery: string, contextNode: Node) {
@@ -404,12 +404,12 @@ export class BrowserPangu extends Pangu {
 
   protected hasIgnoredClasses(node: Node) {
     // Check the node itself if it's an element
-    if (node instanceof Element && node.classList.contains('no-pangu-spacing')) {
+    if (node instanceof Element && node.classList.contains(this.ignoreClass)) {
       return true;
     }
 
     // Check the parent node (for text nodes)
-    if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains('no-pangu-spacing')) {
+    if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(this.ignoreClass)) {
       return true;
     }
 
