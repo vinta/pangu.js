@@ -1,11 +1,12 @@
 import { Pangu } from '../shared';
 export declare class BrowserPangu extends Pangu {
+    isAutoSpacingPageExecuted: boolean;
     blockTags: RegExp;
     ignoredTags: RegExp;
     presentationalTags: RegExp;
     spaceLikeTags: RegExp;
     spaceSensitiveTags: RegExp;
-    isAutoSpacingPageExecuted: boolean;
+    ignoreClasses: RegExp | null;
     constructor();
     spacingNodeByXPath(xPathQuery: string, contextNode: Node): void;
     spacingNode(contextNode: Node): void;
@@ -15,10 +16,12 @@ export declare class BrowserPangu extends Pangu {
     spacingPageTitle(): void;
     spacingPageBody(): void;
     spacingPage(): void;
+    setIgnoreClasses(cls: string[]): void;
     autoSpacingPage(pageDelay?: number, nodeDelay?: number, nodeMaxWait?: number): void;
     protected isContentEditable(node: any): any;
     protected isSpecificTag(node: Node, tagRegex: RegExp): boolean | "";
     protected isInsideSpecificTag(node: Node, tagRegex: RegExp, checkCurrent?: boolean): boolean;
+    protected hasIgnoreClasses(node: Node): boolean;
     protected canIgnoreNode(node: Node): boolean;
     protected isFirstTextChild(parentNode: Node, targetNode: Node): boolean;
     protected isLastTextChild(parentNode: Node, targetNode: Node): boolean;

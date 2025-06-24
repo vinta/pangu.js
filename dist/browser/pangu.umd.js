@@ -135,18 +135,20 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   class BrowserPangu extends Pangu {
     constructor() {
       super();
+      __publicField(this, "isAutoSpacingPageExecuted");
       __publicField(this, "blockTags");
       __publicField(this, "ignoredTags");
       __publicField(this, "presentationalTags");
       __publicField(this, "spaceLikeTags");
       __publicField(this, "spaceSensitiveTags");
-      __publicField(this, "isAutoSpacingPageExecuted");
+      __publicField(this, "ignoreClasses");
+      this.isAutoSpacingPageExecuted = false;
       this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
       this.ignoredTags = /^(code|pre|script|style|textarea|iframe)$/i;
       this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
       this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
       this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-      this.isAutoSpacingPageExecuted = false;
+      this.ignoreClasses = /(skip-pangu-spacing)/;
     }
     spacingNodeByXPath(xPathQuery, contextNode) {
       if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
@@ -297,6 +299,16 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.spacingPageTitle();
       this.spacingPageBody();
     }
+    setIgnoreClasses(cls) {
+      if (!Array.isArray(cls)) {
+        throw new Error("invalid ignoreClasses");
+      }
+      if (cls.length === 0) {
+        this.ignoreClasses = null;
+      } else {
+        this.ignoreClasses = new RegExp(`(${cls.join("|")})`);
+      }
+    }
     autoSpacingPage(pageDelay = 1e3, nodeDelay = 500, nodeMaxWait = 2e3) {
       if (!(document.body instanceof Node)) {
         return;
@@ -393,9 +405,21 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
       return false;
     }
+    hasIgnoreClasses(node) {
+      if (!this.ignoreClasses) {
+        return false;
+      }
+      if (node instanceof Element && this.ignoreClasses.test(node.className)) {
+        return true;
+      }
+      if (node.parentNode && node.parentNode instanceof Element && this.ignoreClasses.test(node.parentNode.className)) {
+        return true;
+      }
+      return false;
+    }
     canIgnoreNode(node) {
       let currentNode = node;
-      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoreClasses(currentNode))) {
         return true;
       }
       while (currentNode.parentNode) {

@@ -42,22 +42,24 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
 
 export class BrowserPangu extends Pangu {
+  isAutoSpacingPageExecuted: boolean;
   blockTags: RegExp;
   ignoredTags: RegExp;
   presentationalTags: RegExp;
   spaceLikeTags: RegExp;
   spaceSensitiveTags: RegExp;
-  isAutoSpacingPageExecuted: boolean;
+  ignoreClasses: RegExp | null;
 
   constructor() {
     super();
 
+    this.isAutoSpacingPageExecuted = false;
     this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
     this.ignoredTags = /^(code|pre|script|style|textarea|iframe)$/i;
     this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
     this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
     this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-    this.isAutoSpacingPageExecuted = false;
+    this.ignoreClasses = /(skip-pangu-spacing)/;
   }
 
   public spacingNodeByXPath(xPathQuery: string, contextNode: Node) {
@@ -77,13 +79,11 @@ export class BrowserPangu extends Pangu {
     // 從最下面、最裡面的節點開始，所以是倒序的
     for (let i = textNodes.snapshotLength - 1; i > -1; --i) {
       currentTextNode = textNodes.snapshotItem(i);
-      if (!currentTextNode) {continue;}
+      if (!currentTextNode) {
+        continue;
+      }
 
-      if (
-        currentTextNode.parentNode &&
-        this.isSpecificTag(currentTextNode.parentNode, this.presentationalTags) &&
-        !this.isInsideSpecificTag(currentTextNode.parentNode, this.ignoredTags)
-      ) {
+      if (currentTextNode.parentNode && this.isSpecificTag(currentTextNode.parentNode, this.presentationalTags) && !this.isInsideSpecificTag(currentTextNode.parentNode, this.ignoredTags)) {
         const elementNode = currentTextNode.parentNode;
 
         if (elementNode.previousSibling) {
@@ -143,20 +143,12 @@ export class BrowserPangu extends Pangu {
           // 而且 nextTextNode 必須是第一個 text child
           // 才能把空格加在 nextTextNode 的前面
           let nextNode: Node = nextTextNode;
-          while (
-            nextNode.parentNode &&
-            nextNode.nodeName.search(this.spaceSensitiveTags) === -1 &&
-            this.isFirstTextChild(nextNode.parentNode, nextNode)
-          ) {
+          while (nextNode.parentNode && nextNode.nodeName.search(this.spaceSensitiveTags) === -1 && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
             nextNode = nextNode.parentNode;
           }
 
           let currentNode: Node = currentTextNode;
-          while (
-            currentNode.parentNode &&
-            currentNode.nodeName.search(this.spaceSensitiveTags) === -1 &&
-            this.isLastTextChild(currentNode.parentNode, currentNode)
-          ) {
+          while (currentNode.parentNode && currentNode.nodeName.search(this.spaceSensitiveTags) === -1 && this.isLastTextChild(currentNode.parentNode, currentNode)) {
             currentNode = currentNode.parentNode;
           }
 
@@ -169,10 +161,7 @@ export class BrowserPangu extends Pangu {
 
           if (currentNode.nodeName.search(this.blockTags) === -1) {
             if (nextNode.nodeName.search(this.spaceSensitiveTags) === -1) {
-              if (
-                nextNode.nodeName.search(this.ignoredTags) === -1 &&
-                nextNode.nodeName.search(this.blockTags) === -1
-              ) {
+              if (nextNode.nodeName.search(this.ignoredTags) === -1 && nextNode.nodeName.search(this.blockTags) === -1) {
                 if (nextTextNode.previousSibling) {
                   if (nextTextNode.previousSibling.nodeName.search(this.spaceLikeTags) === -1) {
                     if (nextTextNode instanceof Text) {
@@ -296,6 +285,17 @@ export class BrowserPangu extends Pangu {
     this.spacingPageBody();
   }
 
+  public setIgnoreClasses(cls: string[]) {
+    if (!Array.isArray(cls)) {
+      throw new Error('invalid ignoreClasses');
+    }
+    if (cls.length === 0) {
+      this.ignoreClasses = null;
+    } else {
+      this.ignoreClasses = new RegExp(`(${cls.join('|')})`);
+    }
+  }
+
   public autoSpacingPage(pageDelay = 1000, nodeDelay = 500, nodeMaxWait = 2000) {
     if (!(document.body instanceof Node)) {
       return;
@@ -413,9 +413,27 @@ export class BrowserPangu extends Pangu {
     return false;
   }
 
+  protected hasIgnoreClasses(node: Node) {
+    if (!this.ignoreClasses) {
+      return false;
+    }
+
+    // Check the node itself if it's an element
+    if (node instanceof Element && this.ignoreClasses.test(node.className)) {
+      return true;
+    }
+
+    // Check the parent node (for text nodes)
+    if (node.parentNode && node.parentNode instanceof Element && this.ignoreClasses.test(node.parentNode.className)) {
+      return true;
+    }
+
+    return false;
+  }
+
   protected canIgnoreNode(node: Node) {
     let currentNode = node;
-    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoreClasses(currentNode))) {
       return true;
     }
     while (currentNode.parentNode) {
