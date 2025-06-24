@@ -94,6 +94,9 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     spacing(text) {
       return this.spacingText(text);
     }
+    hasPerfectSpacing(text) {
+      return this.spacingText(text) === text;
+    }
     convertToFullwidth(symbols) {
       return symbols.replace(/~/g, "\uFF5E").replace(/!/g, "\uFF01").replace(/;/g, "\uFF1B").replace(/:/g, "\uFF1A").replace(/,/g, "\uFF0C").replace(/\./g, "\u3002").replace(/\?/g, "\uFF1F");
     }

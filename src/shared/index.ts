@@ -181,6 +181,10 @@ export class Pangu {
     return this.spacingText(text);
   }
 
+  public hasPerfectSpacing(text: string) {
+    return this.spacingText(text) === text;
+  }
+
   protected convertToFullwidth(symbols: string): string {
     // prettier-ignore
     return symbols

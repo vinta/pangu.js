@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import { Pangu } from '../../dist/shared/index.js';
+import { describe, it, expect } from 'vitest';
 
 const pangu = new Pangu();
 
@@ -421,17 +421,16 @@ describe('Pangu', () => {
 
   describe('spacing()', () => {
     it('should work with multiple texts sequentially', () => {
-      const results = [
-        pangu.spacing('Xcode 7.1配備了全新的AppleTV開發工具'),
-        pangu.spacing('新MacBook Pro有15寸和13寸兩個版本'),
-        pangu.spacing('ChromeDriver 2.20支援Chrome v43-48')
-      ];
+      const results = [pangu.spacing('Xcode 7.1配備了全新的AppleTV開發工具'), pangu.spacing('新MacBook Pro有15寸和13寸兩個版本'), pangu.spacing('ChromeDriver 2.20支援Chrome v43-48')];
 
-      expect(results).toEqual([
-        'Xcode 7.1 配備了全新的 AppleTV 開發工具',
-        '新 MacBook Pro 有 15 寸和 13 寸兩個版本',
-        'ChromeDriver 2.20 支援 Chrome v43-48'
-      ]);
+      expect(results).toEqual(['Xcode 7.1 配備了全新的 AppleTV 開發工具', '新 MacBook Pro 有 15 寸和 13 寸兩個版本', 'ChromeDriver 2.20 支援 Chrome v43-48']);
+    });
+  });
+
+  describe('hasPerfectSpacing()', () => {
+    it('should return true if the text has perfect spacing', () => {
+      expect(pangu.hasPerfectSpacing('Claude Code 用起來真的他媽爽')).toBe(true);
+      expect(pangu.hasPerfectSpacing('Claude Code用起來真的他媽爽')).toBe(false);
     });
   });
 });
