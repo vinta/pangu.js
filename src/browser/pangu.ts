@@ -404,12 +404,12 @@ export class BrowserPangu extends Pangu {
 
   protected hasIgnoredClasses(node: Node) {
     // Check the node itself if it's an element
-    if (node instanceof Element && this.ignoredClasses.test(node.className)) {
+    if (node instanceof Element && node.classList.contains('no-pangu-spacing')) {
       return true;
     }
 
     // Check the parent node (for text nodes)
-    if (node.parentNode && node.parentNode instanceof Element && this.ignoredClasses.test(node.parentNode.className)) {
+    if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains('no-pangu-spacing')) {
       return true;
     }
 
