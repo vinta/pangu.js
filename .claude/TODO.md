@@ -25,27 +25,28 @@
 
 ## In Progress
 
-- [ ] None currently
+- [ ] None
 
 ## Next Steps
 
-### High Priority - Features
-
-- [ ] Provide a less aggressive approach: `text-autospace` in CSS
-  - https://developer.chrome.com/blog/css-i18n-features
-  - https://github.com/sparanoid/chinese-copywriting-guidelines/issues/211
-
-### Medium Priority - Code Quality
+### High Priority
 
 - [ ] Generate different size icons from `icon_1500.svg`
-- [ ] Improve Chrome API error handling with retry logic
-- [ ] Create optimized content script bundle to reduce memory footprint
-- [ ] Update declarativeContent for action button state
+- [ ] Add a button for "Add this url to blacklist" in popup page or context menu
+
+### Medium Priority
+
+- [ ] No need to perform spacing if there is no CJK in webpages
+  - See @.claude/researches/detect-cjk-content.md
+- [ ] Improve `autoSpacingPage()` performance, especially with a large DOM tree
+  - See @.claude/researches/performance-optimization.md
+- [ ] Add instructions in options page for enabling experimental CSS `text-autospace`
+  - Guide users to `chrome://flags/#enable-experimental-web-platform-features`
+  - Auto-detect and use CSS text-autospace when available
+  - Provide clear benefits explanation (better performance, native spacing)
 
 ### Low Priority - Future Enhancements
 
-- [ ] Add "之後不要在這個網頁召喚空格之神了" to popup actions or context menu
-- [ ] Add `optional_host_permissions` for user control
 - [ ] Use Verified CRX uploads
 - [ ] Implement tree-shaking optimizations
 - [ ] Publish to JSR (JavaScript Registry)

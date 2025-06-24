@@ -16,8 +16,7 @@
 
 ### For Users
 
-- [Google Chrome](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (**2025-06-24 UPDATED**)
-- [Mozilla Firefox](https://github.com/vinta/pangu.js/blob/master/browser_extensions/firefox/paranoid-auto-spacing.user.js)
+- [Google Chrome Extension](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (**2025-06-25 UPDATED**)
 
 ### For Developers
 
@@ -25,9 +24,8 @@
 
   - [pangu.go](https://github.com/vinta/pangu) (Go)
   - [pangu.java](https://github.com/vinta/pangu.java) (Java)
-  - [pangu.js](https://github.com/vinta/pangu.js) (JavaScript)
+  - [pangu.js](https://github.com/vinta/pangu.js) (TypeScript/JavaScript)
   - [pangu.py](https://github.com/vinta/pangu.py) (Python)
-  - [pangu.dart](https://github.com/SemonCat/pangu.dart) (Dart)
   - [pangu.space](https://github.com/vinta/pangu.space) (Web API)
 
 - Community supports:
