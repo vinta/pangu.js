@@ -31,21 +31,24 @@
 
 ### High Priority - Features
 
+- [ ] Generate different size icons from `icon_1500.svg`
 - [ ] Provide a less aggressive approach: `text-autospace` in CSS
   - https://developer.chrome.com/blog/css-i18n-features
   - https://github.com/sparanoid/chinese-copywriting-guidelines/issues/211
+- [ ] Add "之後不要在這個網頁召喚空格之神了" to popup actions or context menu
+- [ ] Add `optional_host_permissions` for user control
 
 ### Medium Priority - Code Quality
 
-- [ ] Generate different size icons from `icon_1500.svg`
+- [ ] No need to perform spacing if there is no CJK in webpages
+  - Though I'm not sure "detecting whether there is CJK" is quick enough as an earlier return
+- [ ] Improve `autoSpacingPage()` performance, especially with a large DOM tree
 - [ ] Improve Chrome API error handling with retry logic
 - [ ] Create optimized content script bundle to reduce memory footprint
 - [ ] Update declarativeContent for action button state
 
 ### Low Priority - Future Enhancements
 
-- [ ] Add "之後不要在這個網頁召喚空格之神了" to popup actions or context menu
-- [ ] Add `optional_host_permissions` for user control
 - [ ] Use Verified CRX uploads
 - [ ] Implement tree-shaking optimizations
 - [ ] Publish to JSR (JavaScript Registry)
