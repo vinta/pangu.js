@@ -217,7 +217,7 @@ test.describe('BrowserPangu', () => {
     test('handles dynamic content with MutationObserver', async ({ page }) => {
       // Start auto spacing
       await page.evaluate(() => {
-        window.pangu.autoSpacingPage();
+        window.pangu.autoSpacingPage({});
       });
 
       // Wait a bit for MutationObserver to be set up

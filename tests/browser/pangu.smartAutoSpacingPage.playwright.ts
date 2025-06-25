@@ -27,16 +27,16 @@ test.describe('CJK Detection', () => {
       }
     });
 
-    // Run autoSpacingPage
+    // Run smartAutoSpacingPage
     await page.evaluate(() => {
-      window.pangu.autoSpacingPage();
+      window.pangu.smartAutoSpacingPage();
     });
 
     // Wait a bit for any console messages
     await page.waitForTimeout(100);
 
     // Check that the appropriate message was logged
-    expect(consoleMessages).toContain('pangu.js: No CJK content detected, skipping auto spacing');
+    expect(consoleMessages).toContain('pangu.js: No CJK content detected, setting up observer');
   });
 
   test('should process pages with CJK content', async ({ page }) => {
@@ -64,16 +64,16 @@ test.describe('CJK Detection', () => {
       }
     });
 
-    // Run autoSpacingPage
+    // Run smartAutoSpacingPage
     await page.evaluate(() => {
-      window.pangu.autoSpacingPage();
+      window.pangu.smartAutoSpacingPage();
     });
 
     // Wait for spacing to complete
     await page.waitForTimeout(1500);
 
     // Check that no "skipping" message was logged
-    expect(consoleMessages).not.toContain('pangu.js: No CJK content detected, skipping auto spacing');
+    expect(consoleMessages).not.toContain('pangu.js: No CJK content detected, setting up observer');
 
     // Verify spacing was applied
     const text = await page.textContent('#test');
@@ -130,16 +130,16 @@ test.describe('CJK Detection', () => {
       }
     });
 
-    // Run autoSpacingPage
+    // Run smartAutoSpacingPage
     await page.evaluate(() => {
-      window.pangu.autoSpacingPage();
+      window.pangu.smartAutoSpacingPage();
     });
 
     // Wait a bit
     await page.waitForTimeout(100);
 
     // Should skip initially
-    expect(consoleMessages).toContain('pangu.js: No CJK content detected, skipping auto spacing');
+    expect(consoleMessages).toContain('pangu.js: No CJK content detected, setting up observer');
 
     // Now add CJK content dynamically
     await page.evaluate(() => {

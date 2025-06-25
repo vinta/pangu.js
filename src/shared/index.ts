@@ -200,7 +200,6 @@ export class Pangu {
 
 export const pangu = new Pangu();
 
-// Export CJK detection utilities
 export { ANY_CJK };
 
 export default pangu;

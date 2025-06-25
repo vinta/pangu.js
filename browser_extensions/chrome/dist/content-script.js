@@ -1,7 +1,7 @@
 function autoSpacingPage() {
   const pangu = window.pangu;
   if (pangu) {
-    pangu.autoSpacingPage();
+    pangu.smartAutoSpacingPage({});
   }
 }
 function spacingPage() {

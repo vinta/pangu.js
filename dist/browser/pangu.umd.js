@@ -310,10 +310,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
     smartAutoSpacingPage(config = {}) {
       const fullConfig = {
-        sampleSize: 1e3,
         pageDelayMs: 1e3,
         nodeDelayMs: 500,
         nodeMaxWaitMs: 2e3,
+        sampleSize: 1e3,
         ...config
       };
       if (!this.hasCJK(fullConfig.sampleSize)) {
