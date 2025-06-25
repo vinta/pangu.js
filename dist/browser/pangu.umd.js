@@ -150,6 +150,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
       this.ignoredClass = "no-pangu-spacing";
     }
+    // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
     spacingNodeByXPath(xPathQuery, contextNode) {
       if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
         return;
@@ -299,6 +300,14 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.spacingPageTitle();
       this.spacingPageBody();
     }
+    hasCJK() {
+      if (ANY_CJK.test(document.title)) {
+        return true;
+      }
+      const bodyText = document.body.textContent || "";
+      const sample = bodyText.substring(0, 1e3);
+      return ANY_CJK.test(sample);
+    }
     autoSpacingPage(pageDelay = 1e3, nodeDelay = 500, nodeMaxWait = 2e3) {
       if (!(document.body instanceof Node)) {
         return;
@@ -307,6 +316,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         return;
       }
       this.isAutoSpacingPageExecuted = true;
+      if (!this.hasCJK()) {
+        console.log("pangu.js: No CJK content detected, skipping auto spacing");
+        this.watchForCJKContent(nodeDelay, nodeMaxWait);
+        return;
+      }
       const onceSpacingPage = once(() => {
         this.spacingPage();
       });
@@ -436,6 +450,27 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         }
       }
       return false;
+    }
+    watchForCJKContent(nodeDelay = 500, nodeMaxWait = 2e3) {
+      let checkCount = 0;
+      const observer = new MutationObserver(() => {
+        checkCount++;
+        if (checkCount > 10) {
+          observer.disconnect();
+          return;
+        }
+        if (this.hasCJK()) {
+          observer.disconnect();
+          console.log("pangu.js: CJK content detected, starting auto spacing");
+          this.isAutoSpacingPageExecuted = false;
+          this.autoSpacingPage(0, nodeDelay, nodeMaxWait);
+        }
+      });
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true
+      });
     }
   }
   const pangu = new BrowserPangu();

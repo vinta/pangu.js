@@ -16,6 +16,7 @@ export declare class BrowserPangu extends Pangu {
     spacingPageTitle(): void;
     spacingPageBody(): void;
     spacingPage(): void;
+    hasCJK(): boolean;
     autoSpacingPage(pageDelay?: number, nodeDelay?: number, nodeMaxWait?: number): void;
     protected isContentEditable(node: any): any;
     protected isSpecificTag(node: Node, tagRegex: RegExp): boolean | "";
@@ -24,6 +25,7 @@ export declare class BrowserPangu extends Pangu {
     protected canIgnoreNode(node: Node): boolean;
     protected isFirstTextChild(parentNode: Node, targetNode: Node): boolean;
     protected isLastTextChild(parentNode: Node, targetNode: Node): boolean;
+    protected watchForCJKContent(nodeDelay?: number, nodeMaxWait?: number): void;
 }
 export declare const pangu: BrowserPangu;
 export default pangu;
