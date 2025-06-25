@@ -26,7 +26,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('spacing()', () => {
-    test('處理 text', async ({ page }) => {
+    test('should process text strings', async ({ page }) => {
       const result = await page.evaluate(() => {
         return pangu.spacing('新八的構造成分有95%是眼鏡、3%是水、2%是垃圾');
       });
@@ -36,7 +36,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('spacingNode()', () => {
-    test('處理 text node', async ({ page }) => {
+    test('should process text nodes', async ({ page }) => {
       const result = await page.evaluate(() => {
         const textNode = document.createTextNode('早安！こんにちは！안녕하세요!');
         document.body.appendChild(textNode);
@@ -49,7 +49,7 @@ test.describe('BrowserPangu', () => {
       expect(result).toBe('早安！こんにちは！안녕하세요!');
     });
 
-    test('處理 element node', async ({ page }) => {
+    test('should process element nodes', async ({ page }) => {
       const result = await page.evaluate(() => {
         const div = document.createElement('div');
         div.textContent = '新八的構造成分有95%是眼鏡、3%是水、2%是垃圾';
@@ -65,7 +65,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('spacingElementById()', () => {
-    test('處理 #idName', async ({ page }) => {
+    test('should process elements by ID', async ({ page }) => {
       const htmlContent = loadFixture('id_name.html');
       const expected = loadFixture('id_name_expected.html').trim();
 
@@ -82,7 +82,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('spacingElementByClassName()', () => {
-    test('處理 #className 之一', async ({ page }) => {
+    test('should process elements by class name (single element)', async ({ page }) => {
       const htmlContent = loadFixture('class_name_1.html');
       const expected = loadFixture('class_name_1_expected.html').trim();
 
@@ -97,7 +97,7 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
-    test('處理 #className 之二', async ({ page }) => {
+    test('should process elements by class name (multiple elements)', async ({ page }) => {
       const htmlContent = loadFixture('class_name_2.html');
       const expected = loadFixture('class_name_2_expected.html').trim();
 
@@ -112,7 +112,7 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
-    test('處理 #className 之三', async ({ page }) => {
+    test('should process elements by class name (nested elements)', async ({ page }) => {
       const htmlContent = loadFixture('class_name_3.html');
       const expected = loadFixture('class_name_3_expected.html').trim();
 
@@ -129,7 +129,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('spacingElementByTagName()', () => {
-    test('處理 <tag>', async ({ page }) => {
+    test('should process elements by tag name', async ({ page }) => {
       const htmlContent = loadFixture('tag_name.html');
       const expected = loadFixture('tag_name_expected.html').trim();
 
@@ -146,7 +146,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('spacingPageTitle()', () => {
-    test('處理 <title>', async ({ page }) => {
+    test('should process page title', async ({ page }) => {
       await page.evaluate(() => {
         document.title = "Mr.龍島主道：「Let's Party!各位高明博雅君子！」";
         pangu.spacingPageTitle();
@@ -158,7 +158,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('spacingPageBody()', () => {
-    test('處理 <body>', async ({ page }) => {
+    test('should process page body', async ({ page }) => {
       const htmlContent = loadFixture('body.html');
       const expected = loadFixture('body_expected.html').trim();
 
@@ -175,7 +175,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('spacingPage()', () => {
-    test('處理 <body>', async ({ page }) => {
+    test('should process entire page (title and body)', async ({ page }) => {
       const htmlContent = loadFixture('body.html');
       const expected = loadFixture('body_expected.html').trim();
 
@@ -206,7 +206,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('autoSpacingPage()', () => {
-    test('handles dynamic content with MutationObserver', async ({ page }) => {
+    test('should handle dynamic content with MutationObserver', async ({ page }) => {
       await page.evaluate(() => {
         pangu.autoSpacingPage({});
       });
@@ -231,7 +231,7 @@ test.describe('BrowserPangu', () => {
   test.describe('CJK Detection', () => {
     // Note: These tests use page.setContent() which replaces the entire page,
     // removing the pangu.js loaded in beforeEach, so we need to reload it
-    
+
     test('should skip pages without CJK content', async ({ page }) => {
       const htmlContent = loadFixture('cjk_detection_english_only.html');
       await page.setContent(htmlContent);
