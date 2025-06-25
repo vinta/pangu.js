@@ -1,13 +1,14 @@
 import { Pangu, ANY_CJK } from '../shared';
 
 export interface AutoSpacingPageConfig {
-  pageDelayMs: number;
-  nodeDelayMs: number;
-  nodeMaxWaitMs: number;
+  pageDelayMs?: number;
+  nodeDelayMs?: number;
+  nodeMaxWaitMs?: number;
 }
 
 export interface SmartAutoSpacingPageConfig extends AutoSpacingPageConfig {
-  sampleSize: number;
+  sampleSize?: number;
+  cjkObserverMaxWaitMs?: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -301,13 +302,11 @@ export class BrowserPangu extends Pangu {
     this.spacingPageBody();
   }
 
-  public autoSpacingPage(config: Partial<AutoSpacingPageConfig> = {}) {
-    const fullConfig: AutoSpacingPageConfig = {
-      pageDelayMs: 1000,
-      nodeDelayMs: 500,
-      nodeMaxWaitMs: 2000,
-      ...config,
-    };
+  public autoSpacingPage({
+    pageDelayMs = 1000,
+    nodeDelayMs = 500,
+    nodeMaxWaitMs = 2000,
+  }: AutoSpacingPageConfig = {}) {
 
     if (!(document.body instanceof Node)) {
       return;
@@ -328,7 +327,7 @@ export class BrowserPangu extends Pangu {
     if (videos.length === 0) {
       setTimeout(() => {
         onceSpacingPage();
-      }, fullConfig.pageDelayMs);
+      }, pageDelayMs);
     } else {
       for (let i = 0; i < videos.length; i++) {
         const video = videos[i];
@@ -361,8 +360,8 @@ export class BrowserPangu extends Pangu {
           }
         }
       },
-      fullConfig.nodeDelayMs,
-      fullConfig.nodeMaxWaitMs,
+      nodeDelayMs,
+      nodeMaxWaitMs,
     );
 
     // Disconnect any existing auto-spacing observer
@@ -416,22 +415,20 @@ export class BrowserPangu extends Pangu {
     return ANY_CJK.test(sample);
   }
 
-  public smartAutoSpacingPage(config: Partial<SmartAutoSpacingPageConfig> = {}) {
-    const fullConfig: SmartAutoSpacingPageConfig = {
-      pageDelayMs: 1000,
-      nodeDelayMs: 500,
-      nodeMaxWaitMs: 2000,
-      sampleSize: 1000,
-      ...config,
-    };
-
-    if (!this.hasCjk(fullConfig.sampleSize)) {
+  public smartAutoSpacingPage({
+    pageDelayMs = 1000,
+    nodeDelayMs = 500,
+    nodeMaxWaitMs = 2000,
+    sampleSize = 1000,
+    cjkObserverMaxWaitMs = 30000,
+  }: SmartAutoSpacingPageConfig = {}) {
+    if (!this.hasCjk(sampleSize)) {
       console.log('pangu.js: No CJK content detected, setting up observer');
-      this.setupCjkObserver(fullConfig);
+      this.setupCjkObserver({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs, sampleSize, cjkObserverMaxWaitMs });
       return;
     }
 
-    this.autoSpacingPage(fullConfig);
+    this.autoSpacingPage({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -526,21 +523,26 @@ export class BrowserPangu extends Pangu {
     this.isAutoSpacingPageExecuted = false;
   }
 
-  protected setupCjkObserver(config: AutoSpacingPageConfig) {
+  protected setupCjkObserver({
+    nodeDelayMs = 500,
+    nodeMaxWaitMs = 2000,
+    cjkObserverMaxWaitMs = 30000,
+  }: SmartAutoSpacingPageConfig) {
     if (this.cjkObserver) {
       this.cjkObserver.disconnect();
       this.cjkObserver = null;
     }
 
-    let checkCount = 0;
+    const startTime = Date.now();
+
     this.cjkObserver = new MutationObserver(() => {
-      checkCount++;
-      // Limit checks to prevent performance issues
-      if (checkCount > 10) {
+      // Check if we've exceeded the maximum wait time
+      if (Date.now() - startTime > cjkObserverMaxWaitMs) {
         if (this.cjkObserver) {
           this.cjkObserver.disconnect();
           this.cjkObserver = null;
         }
+        console.log('pangu.js: CJK observer timeout reached, stopping observer');
         return;
       }
 
@@ -552,7 +554,7 @@ export class BrowserPangu extends Pangu {
 
         console.log('pangu.js: CJK content detected, starting auto spacing');
         this.isAutoSpacingPageExecuted = false;
-        this.autoSpacingPage({ ...config, pageDelayMs: 0 }); // No delay since we already waited
+        this.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs, nodeMaxWaitMs }); // No delay since we already waited
       }
     });
 

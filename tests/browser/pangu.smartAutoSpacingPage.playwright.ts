@@ -21,7 +21,7 @@ test.describe('CJK Detection', () => {
 
     // Listen for console messages
     const consoleMessages: string[] = [];
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       if (msg.text().includes('pangu.js:')) {
         consoleMessages.push(msg.text());
       }
@@ -58,7 +58,7 @@ test.describe('CJK Detection', () => {
 
     // Listen for console messages
     const consoleMessages: string[] = [];
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       if (msg.text().includes('pangu.js:')) {
         consoleMessages.push(msg.text());
       }
@@ -97,12 +97,12 @@ test.describe('CJK Detection', () => {
     // Add pangu.js
     await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
 
-    // Check hasCJK returns true
-    const hasCJK = await page.evaluate(() => {
-      return window.pangu.hasCJK();
+    // Check hasCjk returns true
+    const hasCjk = await page.evaluate(() => {
+      return window.pangu.hasCjk();
     });
 
-    expect(hasCJK).toBe(true);
+    expect(hasCjk).toBe(true);
   });
 
   test('should detect dynamically added CJK content', async ({ page }) => {
@@ -124,7 +124,7 @@ test.describe('CJK Detection', () => {
 
     // Listen for console messages
     const consoleMessages: string[] = [];
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       if (msg.text().includes('pangu.js:')) {
         consoleMessages.push(msg.text());
       }

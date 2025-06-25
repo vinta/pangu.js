@@ -136,23 +136,23 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     constructor() {
       super();
       __publicField(this, "isAutoSpacingPageExecuted");
+      __publicField(this, "autoSpacingPageObserver");
+      __publicField(this, "cjkObserver");
       __publicField(this, "blockTags");
       __publicField(this, "ignoredTags");
       __publicField(this, "presentationalTags");
       __publicField(this, "spaceLikeTags");
       __publicField(this, "spaceSensitiveTags");
       __publicField(this, "ignoredClass");
-      __publicField(this, "autoSpacingObserver");
-      __publicField(this, "cjkObserver");
       this.isAutoSpacingPageExecuted = false;
+      this.autoSpacingPageObserver = null;
+      this.cjkObserver = null;
       this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
       this.ignoredTags = /^(code|pre|script|style|textarea|iframe)$/i;
       this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
       this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
       this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
       this.ignoredClass = "no-pangu-spacing";
-      this.autoSpacingObserver = null;
-      this.cjkObserver = null;
     }
     // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
     spacingNodeByXPath(xPathQuery, contextNode) {
@@ -304,13 +304,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.spacingPageTitle();
       this.spacingPageBody();
     }
-    autoSpacingPage(config = {}) {
-      const fullConfig = {
-        pageDelayMs: 1e3,
-        nodeDelayMs: 500,
-        nodeMaxWaitMs: 2e3,
-        ...config
-      };
+    autoSpacingPage({
+      pageDelayMs = 1e3,
+      nodeDelayMs = 500,
+      nodeMaxWaitMs = 2e3
+    } = {}) {
       if (!(document.body instanceof Node)) {
         return;
       }
@@ -325,7 +323,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       if (videos.length === 0) {
         setTimeout(() => {
           onceSpacingPage();
-        }, fullConfig.pageDelayMs);
+        }, pageDelayMs);
       } else {
         for (let i = 0; i < videos.length; i++) {
           const video = videos[i];
@@ -353,14 +351,14 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
             }
           }
         },
-        fullConfig.nodeDelayMs,
-        fullConfig.nodeMaxWaitMs
+        nodeDelayMs,
+        nodeMaxWaitMs
       );
-      if (this.autoSpacingObserver) {
-        this.autoSpacingObserver.disconnect();
-        this.autoSpacingObserver = null;
+      if (this.autoSpacingPageObserver) {
+        this.autoSpacingPageObserver.disconnect();
+        this.autoSpacingPageObserver = null;
       }
-      this.autoSpacingObserver = new MutationObserver((mutations) => {
+      this.autoSpacingPageObserver = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           switch (mutation.type) {
             case "childList":
@@ -382,13 +380,13 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         }
         debouncedSpacingNodes();
       });
-      this.autoSpacingObserver.observe(document.body, {
+      this.autoSpacingPageObserver.observe(document.body, {
         characterData: true,
         childList: true,
         subtree: true
       });
     }
-    hasCJK(sampleSize = 1e3) {
+    hasCjk(sampleSize = 1e3) {
       if (ANY_CJK.test(document.title)) {
         return true;
       }
@@ -396,20 +394,19 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       const sample = bodyText.substring(0, sampleSize);
       return ANY_CJK.test(sample);
     }
-    smartAutoSpacingPage(config = {}) {
-      const fullConfig = {
-        pageDelayMs: 1e3,
-        nodeDelayMs: 500,
-        nodeMaxWaitMs: 2e3,
-        sampleSize: 1e3,
-        ...config
-      };
-      if (!this.hasCJK(fullConfig.sampleSize)) {
+    smartAutoSpacingPage({
+      pageDelayMs = 1e3,
+      nodeDelayMs = 500,
+      nodeMaxWaitMs = 2e3,
+      sampleSize = 1e3,
+      cjkObserverMaxWaitMs = 3e4
+    } = {}) {
+      if (!this.hasCjk(sampleSize)) {
         console.log("pangu.js: No CJK content detected, setting up observer");
-        this.watchForCJKContent(fullConfig);
+        this.setupCjkObserver({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs, sampleSize, cjkObserverMaxWaitMs });
         return;
       }
-      this.autoSpacingPage(fullConfig);
+      this.autoSpacingPage({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs });
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     isContentEditable(node) {
@@ -475,10 +472,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
       return false;
     }
-    stopAutoSpacing() {
-      if (this.autoSpacingObserver) {
-        this.autoSpacingObserver.disconnect();
-        this.autoSpacingObserver = null;
+    stopAutoSpacingPage() {
+      if (this.autoSpacingPageObserver) {
+        this.autoSpacingPageObserver.disconnect();
+        this.autoSpacingPageObserver = null;
       }
       if (this.cjkObserver) {
         this.cjkObserver.disconnect();
@@ -486,29 +483,35 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
       this.isAutoSpacingPageExecuted = false;
     }
-    watchForCJKContent(config) {
+    setupCjkObserver({
+      pageDelayMs = 1e3,
+      nodeDelayMs = 500,
+      nodeMaxWaitMs = 2e3,
+      sampleSize = 1e3,
+      cjkObserverMaxWaitMs = 3e4
+    }) {
       if (this.cjkObserver) {
         this.cjkObserver.disconnect();
         this.cjkObserver = null;
       }
-      let checkCount = 0;
+      const startTime = Date.now();
       this.cjkObserver = new MutationObserver(() => {
-        checkCount++;
-        if (checkCount > 10) {
+        if (Date.now() - startTime > cjkObserverMaxWaitMs) {
           if (this.cjkObserver) {
             this.cjkObserver.disconnect();
             this.cjkObserver = null;
           }
+          console.log("pangu.js: CJK observer timeout reached, stopping observer");
           return;
         }
-        if (this.hasCJK()) {
+        if (this.hasCjk()) {
           if (this.cjkObserver) {
             this.cjkObserver.disconnect();
             this.cjkObserver = null;
           }
           console.log("pangu.js: CJK content detected, starting auto spacing");
           this.isAutoSpacingPageExecuted = false;
-          this.autoSpacingPage({ ...config, pageDelayMs: 0 });
+          this.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs, nodeMaxWaitMs });
         }
       });
       this.cjkObserver.observe(document.body, {
