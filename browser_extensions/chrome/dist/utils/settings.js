@@ -10,7 +10,8 @@ const DEFAULT_SETTINGS = {
     "*://github.com/*/pull/*"
   ],
   whitelist: [],
-  is_mute_sound_effects: false
+  is_mute_sound_effects: false,
+  is_enable_detect_cjk: false
 };
 let cachedSettings = { ...DEFAULT_SETTINGS };
 let cacheInitialized = false;

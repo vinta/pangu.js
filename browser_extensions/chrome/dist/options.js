@@ -47,6 +47,9 @@ class OptionsController {
       if (target.id === "mute-checkbox") {
         const muteCheckbox = target;
         chrome.storage.sync.set({ is_mute_sound_effects: muteCheckbox.checked });
+      } else if (target.id === "detect-cjk-checkbox") {
+        const detectCjkCheckbox = target;
+        chrome.storage.sync.set({ is_enable_detect_cjk: detectCjkCheckbox.checked });
       }
     });
   }
@@ -71,6 +74,7 @@ class OptionsController {
     await this.renderSpacingMode();
     await this.renderFilterMode();
     await this.renderMuteCheckbox();
+    await this.renderDetectCjkCheckbox();
   }
   async renderSpacingMode() {
     const settings = await getCachedSettings();
@@ -166,6 +170,11 @@ class OptionsController {
     const settings = await getCachedSettings();
     const checkbox = document.getElementById("mute-checkbox");
     checkbox.checked = settings.is_mute_sound_effects;
+  }
+  async renderDetectCjkCheckbox() {
+    const settings = await getCachedSettings();
+    const checkbox = document.getElementById("detect-cjk-checkbox");
+    checkbox.checked = settings.is_enable_detect_cjk;
   }
   async toggleSpacingMode() {
     const settings = await getCachedSettings();
