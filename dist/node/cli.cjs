@@ -45,6 +45,8 @@ class BrowserPangu extends index.Pangu {
     __publicField(this, "spaceLikeTags");
     __publicField(this, "spaceSensitiveTags");
     __publicField(this, "ignoredClass");
+    __publicField(this, "autoSpacingObserver");
+    __publicField(this, "cjkObserver");
     this.isAutoSpacingPageExecuted = false;
     this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
     this.ignoredTags = /^(code|pre|script|style|textarea|iframe)$/i;
@@ -52,6 +54,8 @@ class BrowserPangu extends index.Pangu {
     this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
     this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
     this.ignoredClass = "no-pangu-spacing";
+    this.autoSpacingObserver = null;
+    this.cjkObserver = null;
   }
   // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
   spacingNodeByXPath(xPathQuery, contextNode) {
@@ -255,7 +259,11 @@ class BrowserPangu extends index.Pangu {
       fullConfig.nodeDelayMs,
       fullConfig.nodeMaxWaitMs
     );
-    const mutationObserver = new MutationObserver((mutations) => {
+    if (this.autoSpacingObserver) {
+      this.autoSpacingObserver.disconnect();
+      this.autoSpacingObserver = null;
+    }
+    this.autoSpacingObserver = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         switch (mutation.type) {
           case "childList":
@@ -277,7 +285,7 @@ class BrowserPangu extends index.Pangu {
       }
       debouncedSpacingNodes();
     });
-    mutationObserver.observe(document.body, {
+    this.autoSpacingObserver.observe(document.body, {
       characterData: true,
       childList: true,
       subtree: true
@@ -370,22 +378,43 @@ class BrowserPangu extends index.Pangu {
     }
     return false;
   }
+  stopAutoSpacing() {
+    if (this.autoSpacingObserver) {
+      this.autoSpacingObserver.disconnect();
+      this.autoSpacingObserver = null;
+    }
+    if (this.cjkObserver) {
+      this.cjkObserver.disconnect();
+      this.cjkObserver = null;
+    }
+    this.isAutoSpacingPageExecuted = false;
+  }
   watchForCJKContent(config) {
+    if (this.cjkObserver) {
+      this.cjkObserver.disconnect();
+      this.cjkObserver = null;
+    }
     let checkCount = 0;
-    const observer = new MutationObserver(() => {
+    this.cjkObserver = new MutationObserver(() => {
       checkCount++;
       if (checkCount > 10) {
-        observer.disconnect();
+        if (this.cjkObserver) {
+          this.cjkObserver.disconnect();
+          this.cjkObserver = null;
+        }
         return;
       }
       if (this.hasCJK()) {
-        observer.disconnect();
+        if (this.cjkObserver) {
+          this.cjkObserver.disconnect();
+          this.cjkObserver = null;
+        }
         console.log("pangu.js: CJK content detected, starting auto spacing");
         this.isAutoSpacingPageExecuted = false;
         this.autoSpacingPage({ ...config, pageDelayMs: 0 });
       }
     });
-    observer.observe(document.body, {
+    this.cjkObserver.observe(document.body, {
       childList: true,
       subtree: true,
       characterData: true

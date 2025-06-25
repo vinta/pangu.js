@@ -50,7 +50,10 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 }
 
 export class BrowserPangu extends Pangu {
-  public isAutoSpacingPageExecuted;
+  public isAutoSpacingPageExecuted: boolean;
+  protected autoSpacingPageObserver: MutationObserver | null;
+  protected cjkObserver: MutationObserver | null;
+
   public blockTags: RegExp;
   public ignoredTags: RegExp;
   public presentationalTags: RegExp;
@@ -62,6 +65,9 @@ export class BrowserPangu extends Pangu {
     super();
 
     this.isAutoSpacingPageExecuted = false;
+    this.autoSpacingPageObserver = null;
+    this.cjkObserver = null;
+
     this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
     this.ignoredTags = /^(code|pre|script|style|textarea|iframe)$/i;
     this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
@@ -342,7 +348,7 @@ export class BrowserPangu extends Pangu {
 
     const queue: Node[] = [];
 
-    // it's possible that multiple workers process the queue at the same time
+    // It's possible that multiple workers process the queue at the same time
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     const debouncedSpacingNodes = debounce(
@@ -359,8 +365,14 @@ export class BrowserPangu extends Pangu {
       fullConfig.nodeMaxWaitMs,
     );
 
+    // Disconnect any existing auto-spacing observer
+    if (this.autoSpacingPageObserver) {
+      this.autoSpacingPageObserver.disconnect();
+      this.autoSpacingPageObserver = null;
+    }
+
     // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-    const mutationObserver = new MutationObserver((mutations) => {
+    this.autoSpacingPageObserver = new MutationObserver((mutations) => {
       // Element: https://developer.mozilla.org/en-US/docs/Web/API/Element
       // Text: https://developer.mozilla.org/en-US/docs/Web/API/Text
       for (const mutation of mutations) {
@@ -387,14 +399,14 @@ export class BrowserPangu extends Pangu {
 
       debouncedSpacingNodes();
     });
-    mutationObserver.observe(document.body, {
+    this.autoSpacingPageObserver.observe(document.body, {
       characterData: true,
       childList: true,
       subtree: true,
     });
   }
 
-  public hasCJK(sampleSize = 1000) {
+  public hasCjk(sampleSize = 1000) {
     if (ANY_CJK.test(document.title)) {
       return true;
     }
@@ -413,9 +425,9 @@ export class BrowserPangu extends Pangu {
       ...config,
     };
 
-    if (!this.hasCJK(fullConfig.sampleSize)) {
+    if (!this.hasCjk(fullConfig.sampleSize)) {
       console.log('pangu.js: No CJK content detected, setting up observer');
-      this.watchForCJKContent(fullConfig);
+      this.setupCjkObserver(fullConfig);
       return;
     }
 
@@ -500,27 +512,51 @@ export class BrowserPangu extends Pangu {
     return false;
   }
 
-  protected watchForCJKContent(config: AutoSpacingPageConfig) {
+  public stopAutoSpacingPage() {
+    if (this.autoSpacingPageObserver) {
+      this.autoSpacingPageObserver.disconnect();
+      this.autoSpacingPageObserver = null;
+    }
+
+    if (this.cjkObserver) {
+      this.cjkObserver.disconnect();
+      this.cjkObserver = null;
+    }
+
+    this.isAutoSpacingPageExecuted = false;
+  }
+
+  protected setupCjkObserver(config: AutoSpacingPageConfig) {
+    if (this.cjkObserver) {
+      this.cjkObserver.disconnect();
+      this.cjkObserver = null;
+    }
+
     let checkCount = 0;
-    const observer = new MutationObserver(() => {
+    this.cjkObserver = new MutationObserver(() => {
       checkCount++;
       // Limit checks to prevent performance issues
       if (checkCount > 10) {
-        observer.disconnect();
+        if (this.cjkObserver) {
+          this.cjkObserver.disconnect();
+          this.cjkObserver = null;
+        }
         return;
       }
 
-      if (this.hasCJK()) {
-        observer.disconnect();
-        console.log('pangu.js: CJK content detected, starting auto spacing');
+      if (this.hasCjk()) {
+        if (this.cjkObserver) {
+          this.cjkObserver.disconnect();
+          this.cjkObserver = null;
+        }
 
-        // Reset the flag so autoSpacingPage can run
+        console.log('pangu.js: CJK content detected, starting auto spacing');
         this.isAutoSpacingPageExecuted = false;
         this.autoSpacingPage({ ...config, pageDelayMs: 0 }); // No delay since we already waited
       }
     });
 
-    observer.observe(document.body, {
+    this.cjkObserver.observe(document.body, {
       childList: true,
       subtree: true,
       characterData: true,

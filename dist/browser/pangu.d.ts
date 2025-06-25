@@ -15,6 +15,8 @@ export declare class BrowserPangu extends Pangu {
     spaceLikeTags: RegExp;
     spaceSensitiveTags: RegExp;
     ignoredClass: string;
+    protected autoSpacingObserver: MutationObserver | null;
+    protected cjkObserver: MutationObserver | null;
     constructor();
     spacingNodeByXPath(xPathQuery: string, contextNode: Node): void;
     spacingNode(contextNode: Node): void;
@@ -34,6 +36,7 @@ export declare class BrowserPangu extends Pangu {
     protected canIgnoreNode(node: Node): boolean;
     protected isFirstTextChild(parentNode: Node, targetNode: Node): boolean;
     protected isLastTextChild(parentNode: Node, targetNode: Node): boolean;
+    stopAutoSpacing(): void;
     protected watchForCJKContent(config: AutoSpacingPageConfig): void;
 }
 export declare const pangu: BrowserPangu;
