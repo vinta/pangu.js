@@ -415,7 +415,7 @@ export class BrowserPangu extends Pangu {
 
     if (!this.hasCJK(fullConfig.sampleSize)) {
       console.log('pangu.js: No CJK content detected, setting up observer');
-      this.watchForCJKContent(fullConfig.nodeDelayMs, fullConfig.nodeMaxWaitMs);
+      this.watchForCJKContent(fullConfig);
       return;
     }
 
@@ -500,7 +500,7 @@ export class BrowserPangu extends Pangu {
     return false;
   }
 
-  protected watchForCJKContent(nodeDelay = 500, nodeMaxWait = 2000) {
+  protected watchForCJKContent(config: AutoSpacingPageConfig) {
     let checkCount = 0;
     const observer = new MutationObserver(() => {
       checkCount++;
@@ -513,9 +513,10 @@ export class BrowserPangu extends Pangu {
       if (this.hasCJK()) {
         observer.disconnect();
         console.log('pangu.js: CJK content detected, starting auto spacing');
+
         // Reset the flag so autoSpacingPage can run
         this.isAutoSpacingPageExecuted = false;
-        this.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: nodeDelay, nodeMaxWaitMs: nodeMaxWait }); // No delay since we already waited
+        this.autoSpacingPage({ ...config, pageDelayMs: 0 }); // No delay since we already waited
       }
     });
 

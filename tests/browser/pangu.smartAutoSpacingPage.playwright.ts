@@ -149,8 +149,8 @@ test.describe('CJK Detection', () => {
       }
     });
 
-    // Wait for observer to detect the change
-    await page.waitForTimeout(600);
+    // Wait for observer to detect the change and spacing to complete
+    await page.waitForTimeout(800);
 
     // Check that CJK was detected and spacing started
     expect(consoleMessages).toContain('pangu.js: CJK content detected, starting auto spacing');

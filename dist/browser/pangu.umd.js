@@ -300,29 +300,6 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.spacingPageTitle();
       this.spacingPageBody();
     }
-    hasCJK(sampleSize = 1e3) {
-      if (ANY_CJK.test(document.title)) {
-        return true;
-      }
-      const bodyText = document.body.textContent || "";
-      const sample = bodyText.substring(0, sampleSize);
-      return ANY_CJK.test(sample);
-    }
-    smartAutoSpacingPage(config = {}) {
-      const fullConfig = {
-        pageDelayMs: 1e3,
-        nodeDelayMs: 500,
-        nodeMaxWaitMs: 2e3,
-        sampleSize: 1e3,
-        ...config
-      };
-      if (!this.hasCJK(fullConfig.sampleSize)) {
-        console.log("pangu.js: No CJK content detected, setting up observer");
-        this.watchForCJKContent(fullConfig.nodeDelayMs, fullConfig.nodeMaxWaitMs);
-        return;
-      }
-      this.autoSpacingPage(fullConfig);
-    }
     autoSpacingPage(config = {}) {
       const fullConfig = {
         pageDelayMs: 1e3,
@@ -403,6 +380,29 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         subtree: true
       });
     }
+    hasCJK(sampleSize = 1e3) {
+      if (ANY_CJK.test(document.title)) {
+        return true;
+      }
+      const bodyText = document.body.textContent || "";
+      const sample = bodyText.substring(0, sampleSize);
+      return ANY_CJK.test(sample);
+    }
+    smartAutoSpacingPage(config = {}) {
+      const fullConfig = {
+        pageDelayMs: 1e3,
+        nodeDelayMs: 500,
+        nodeMaxWaitMs: 2e3,
+        sampleSize: 1e3,
+        ...config
+      };
+      if (!this.hasCJK(fullConfig.sampleSize)) {
+        console.log("pangu.js: No CJK content detected, setting up observer");
+        this.watchForCJKContent(fullConfig);
+        return;
+      }
+      this.autoSpacingPage(fullConfig);
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     isContentEditable(node) {
       return node.isContentEditable || node.getAttribute && node.getAttribute("g_editable") === "true";
@@ -467,7 +467,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
       return false;
     }
-    watchForCJKContent(nodeDelay = 500, nodeMaxWait = 2e3) {
+    watchForCJKContent(config) {
       let checkCount = 0;
       const observer = new MutationObserver(() => {
         checkCount++;
@@ -479,7 +479,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           observer.disconnect();
           console.log("pangu.js: CJK content detected, starting auto spacing");
           this.isAutoSpacingPageExecuted = false;
-          this.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: nodeDelay, nodeMaxWaitMs: nodeMaxWait });
+          this.autoSpacingPage({ ...config, pageDelayMs: 0 });
         }
       });
       observer.observe(document.body, {
