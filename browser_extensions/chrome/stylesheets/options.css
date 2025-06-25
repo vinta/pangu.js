@@ -22,9 +22,10 @@
 }
 
 .options-logo {
-  width: 48px;
-  height: 48px;
+  width: 4.5rem;
+  height: 4.3rem;
   flex-shrink: 0;
+  fill: var(--color-text-primary);
 }
 
 .options-title {
