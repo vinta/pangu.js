@@ -154,6 +154,104 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
       this.ignoredClass = "no-pangu-spacing";
     }
+    hasCjk(sampleSize = 1e3) {
+      if (ANY_CJK.test(document.title)) {
+        return true;
+      }
+      const bodyText = document.body.textContent || "";
+      const sample = bodyText.substring(0, sampleSize);
+      return ANY_CJK.test(sample);
+    }
+    autoSpacingPage({ pageDelayMs = 1e3, nodeDelayMs = 500, nodeMaxWaitMs = 2e3 } = {}) {
+      if (!(document.body instanceof Node)) {
+        return;
+      }
+      if (this.isAutoSpacingPageExecuted) {
+        return;
+      }
+      this.isAutoSpacingPageExecuted = true;
+      const onceSpacingPage = once(() => {
+        this.spacingPage();
+      });
+      const videos = document.getElementsByTagName("video");
+      if (videos.length === 0) {
+        setTimeout(() => {
+          onceSpacingPage();
+        }, pageDelayMs);
+      } else {
+        for (let i = 0; i < videos.length; i++) {
+          const video = videos[i];
+          if (video.readyState === 4) {
+            setTimeout(() => {
+              onceSpacingPage();
+            }, 3e3);
+            break;
+          }
+          video.addEventListener("loadeddata", () => {
+            setTimeout(() => {
+              onceSpacingPage();
+            }, 4e3);
+          });
+        }
+      }
+      const queue = [];
+      const self2 = this;
+      const debouncedSpacingNodes = debounce(
+        () => {
+          while (queue.length) {
+            const node = queue.shift();
+            if (node) {
+              self2.spacingNode(node);
+            }
+          }
+        },
+        nodeDelayMs,
+        nodeMaxWaitMs
+      );
+      this.setupAutoSpacingPageObserver(queue, debouncedSpacingNodes);
+    }
+    smartAutoSpacingPage({ pageDelayMs = 1e3, nodeDelayMs = 500, nodeMaxWaitMs = 2e3, sampleSize = 1e3, cjkObserverMaxWaitMs = 3e4 } = {}) {
+      if (!this.hasCjk(sampleSize)) {
+        console.log("pangu.js: No CJK content detected, setting up observer");
+        this.setupCjkObserver({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs, sampleSize, cjkObserverMaxWaitMs });
+        return;
+      }
+      this.autoSpacingPage({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs });
+    }
+    spacingPage() {
+      this.spacingPageTitle();
+      this.spacingPageBody();
+    }
+    spacingPageTitle() {
+      const xPathQuery = "/html/head/title/text()";
+      this.spacingNodeByXPath(xPathQuery, document);
+    }
+    spacingPageBody() {
+      let xPathQuery = "/html/body//*/text()[normalize-space(.)]";
+      for (const tag of ["script", "style", "textarea"]) {
+        xPathQuery = `${xPathQuery}[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
+      }
+      this.spacingNodeByXPath(xPathQuery, document);
+    }
+    spacingNode(contextNode) {
+      let xPathQuery = ".//*/text()[normalize-space(.)]";
+      if (contextNode instanceof Element && contextNode.children && contextNode.children.length === 0) {
+        xPathQuery = ".//text()[normalize-space(.)]";
+      }
+      this.spacingNodeByXPath(xPathQuery, contextNode);
+    }
+    spacingElementById(idName) {
+      const xPathQuery = `id("${idName}")//text()`;
+      this.spacingNodeByXPath(xPathQuery, document);
+    }
+    spacingElementByClassName(className) {
+      const xPathQuery = `//*[contains(concat(" ", normalize-space(@class), " "), "${className}")]//text()`;
+      this.spacingNodeByXPath(xPathQuery, document);
+    }
+    spacingElementByTagName(tagName) {
+      const xPathQuery = `//${tagName}//text()`;
+      this.spacingNodeByXPath(xPathQuery, document);
+    }
     // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
     spacingNodeByXPath(xPathQuery, contextNode) {
       if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
@@ -270,113 +368,16 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         nextTextNode = currentTextNode;
       }
     }
-    spacingNode(contextNode) {
-      let xPathQuery = ".//*/text()[normalize-space(.)]";
-      if (contextNode instanceof Element && contextNode.children && contextNode.children.length === 0) {
-        xPathQuery = ".//text()[normalize-space(.)]";
+    stopAutoSpacingPage() {
+      if (this.autoSpacingPageObserver) {
+        this.autoSpacingPageObserver.disconnect();
+        this.autoSpacingPageObserver = null;
       }
-      this.spacingNodeByXPath(xPathQuery, contextNode);
-    }
-    spacingElementById(idName) {
-      const xPathQuery = `id("${idName}")//text()`;
-      this.spacingNodeByXPath(xPathQuery, document);
-    }
-    spacingElementByClassName(className) {
-      const xPathQuery = `//*[contains(concat(" ", normalize-space(@class), " "), "${className}")]//text()`;
-      this.spacingNodeByXPath(xPathQuery, document);
-    }
-    spacingElementByTagName(tagName) {
-      const xPathQuery = `//${tagName}//text()`;
-      this.spacingNodeByXPath(xPathQuery, document);
-    }
-    spacingPageTitle() {
-      const xPathQuery = "/html/head/title/text()";
-      this.spacingNodeByXPath(xPathQuery, document);
-    }
-    spacingPageBody() {
-      let xPathQuery = "/html/body//*/text()[normalize-space(.)]";
-      for (const tag of ["script", "style", "textarea"]) {
-        xPathQuery = `${xPathQuery}[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
+      if (this.cjkObserver) {
+        this.cjkObserver.disconnect();
+        this.cjkObserver = null;
       }
-      this.spacingNodeByXPath(xPathQuery, document);
-    }
-    spacingPage() {
-      this.spacingPageTitle();
-      this.spacingPageBody();
-    }
-    autoSpacingPage({
-      pageDelayMs = 1e3,
-      nodeDelayMs = 500,
-      nodeMaxWaitMs = 2e3
-    } = {}) {
-      if (!(document.body instanceof Node)) {
-        return;
-      }
-      if (this.isAutoSpacingPageExecuted) {
-        return;
-      }
-      this.isAutoSpacingPageExecuted = true;
-      const onceSpacingPage = once(() => {
-        this.spacingPage();
-      });
-      const videos = document.getElementsByTagName("video");
-      if (videos.length === 0) {
-        setTimeout(() => {
-          onceSpacingPage();
-        }, pageDelayMs);
-      } else {
-        for (let i = 0; i < videos.length; i++) {
-          const video = videos[i];
-          if (video.readyState === 4) {
-            setTimeout(() => {
-              onceSpacingPage();
-            }, 3e3);
-            break;
-          }
-          video.addEventListener("loadeddata", () => {
-            setTimeout(() => {
-              onceSpacingPage();
-            }, 4e3);
-          });
-        }
-      }
-      const queue = [];
-      const self2 = this;
-      const debouncedSpacingNodes = debounce(
-        () => {
-          while (queue.length) {
-            const node = queue.shift();
-            if (node) {
-              self2.spacingNode(node);
-            }
-          }
-        },
-        nodeDelayMs,
-        nodeMaxWaitMs
-      );
-      this.setupAutoSpacingPageObserver(queue, debouncedSpacingNodes);
-    }
-    hasCjk(sampleSize = 1e3) {
-      if (ANY_CJK.test(document.title)) {
-        return true;
-      }
-      const bodyText = document.body.textContent || "";
-      const sample = bodyText.substring(0, sampleSize);
-      return ANY_CJK.test(sample);
-    }
-    smartAutoSpacingPage({
-      pageDelayMs = 1e3,
-      nodeDelayMs = 500,
-      nodeMaxWaitMs = 2e3,
-      sampleSize = 1e3,
-      cjkObserverMaxWaitMs = 3e4
-    } = {}) {
-      if (!this.hasCjk(sampleSize)) {
-        console.log("pangu.js: No CJK content detected, setting up observer");
-        this.setupCjkObserver({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs, sampleSize, cjkObserverMaxWaitMs });
-        return;
-      }
-      this.autoSpacingPage({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs });
+      this.isAutoSpacingPageExecuted = false;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     isContentEditable(node) {
@@ -442,17 +443,6 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
       return false;
     }
-    stopAutoSpacingPage() {
-      if (this.autoSpacingPageObserver) {
-        this.autoSpacingPageObserver.disconnect();
-        this.autoSpacingPageObserver = null;
-      }
-      if (this.cjkObserver) {
-        this.cjkObserver.disconnect();
-        this.cjkObserver = null;
-      }
-      this.isAutoSpacingPageExecuted = false;
-    }
     setupAutoSpacingPageObserver(queue, debouncedSpacingNodes) {
       if (this.autoSpacingPageObserver) {
         this.autoSpacingPageObserver.disconnect();
@@ -486,11 +476,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         subtree: true
       });
     }
-    setupCjkObserver({
-      nodeDelayMs = 500,
-      nodeMaxWaitMs = 2e3,
-      cjkObserverMaxWaitMs = 3e4
-    }) {
+    setupCjkObserver({ nodeDelayMs = 500, nodeMaxWaitMs = 2e3, cjkObserverMaxWaitMs = 3e4 }) {
       if (this.cjkObserver) {
         this.cjkObserver.disconnect();
         this.cjkObserver = null;

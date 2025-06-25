@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "src/**/*",
+    "browser_extensions/chrome/src/**/*",
+    "tests/**/*",
+    "scripts/**/*"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
+}

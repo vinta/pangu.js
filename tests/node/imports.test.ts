@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createRequire } from 'module';
+import { createRequire } from 'node:module';
 
 // ESM imports
 import { pangu as panguNamed, NodePangu } from '../../dist/node/index.js';
