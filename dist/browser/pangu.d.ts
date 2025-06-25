@@ -1,4 +1,12 @@
 import { Pangu } from '../shared';
+export interface AutoSpacingPageConfig {
+    pageDelayMs: number;
+    nodeDelayMs: number;
+    nodeMaxWaitMs: number;
+}
+export interface SmartAutoSpacingPageConfig extends AutoSpacingPageConfig {
+    sampleSize: number;
+}
 export declare class BrowserPangu extends Pangu {
     isAutoSpacingPageExecuted: boolean;
     blockTags: RegExp;
@@ -16,8 +24,9 @@ export declare class BrowserPangu extends Pangu {
     spacingPageTitle(): void;
     spacingPageBody(): void;
     spacingPage(): void;
-    hasCJK(): boolean;
-    autoSpacingPage(pageDelay?: number, nodeDelay?: number, nodeMaxWait?: number): void;
+    hasCJK(sampleSize?: number): boolean;
+    smartAutoSpacingPage(config?: Partial<SmartAutoSpacingPageConfig>): void;
+    autoSpacingPage(config?: Partial<AutoSpacingPageConfig>): void;
     protected isContentEditable(node: any): any;
     protected isSpecificTag(node: Node, tagRegex: RegExp): boolean | "";
     protected isInsideSpecificTag(node: Node, tagRegex: RegExp, checkCurrent?: boolean): boolean;

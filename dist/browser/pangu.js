@@ -201,15 +201,36 @@ class BrowserPangu extends Pangu {
     this.spacingPageTitle();
     this.spacingPageBody();
   }
-  hasCJK() {
+  hasCJK(sampleSize = 1e3) {
     if (ANY_CJK.test(document.title)) {
       return true;
     }
     const bodyText = document.body.textContent || "";
-    const sample = bodyText.substring(0, 1e3);
+    const sample = bodyText.substring(0, sampleSize);
     return ANY_CJK.test(sample);
   }
-  autoSpacingPage(pageDelay = 1e3, nodeDelay = 500, nodeMaxWait = 2e3) {
+  smartAutoSpacingPage(config = {}) {
+    const fullConfig = {
+      sampleSize: 1e3,
+      pageDelayMs: 1e3,
+      nodeDelayMs: 500,
+      nodeMaxWaitMs: 2e3,
+      ...config
+    };
+    if (!this.hasCJK(fullConfig.sampleSize)) {
+      console.log("pangu.js: No CJK content detected, setting up observer");
+      this.watchForCJKContent(fullConfig.nodeDelayMs, fullConfig.nodeMaxWaitMs);
+      return;
+    }
+    this.autoSpacingPage(fullConfig);
+  }
+  autoSpacingPage(config = {}) {
+    const fullConfig = {
+      pageDelayMs: 1e3,
+      nodeDelayMs: 500,
+      nodeMaxWaitMs: 2e3,
+      ...config
+    };
     if (!(document.body instanceof Node)) {
       return;
     }
@@ -217,11 +238,6 @@ class BrowserPangu extends Pangu {
       return;
     }
     this.isAutoSpacingPageExecuted = true;
-    if (!this.hasCJK()) {
-      console.log("pangu.js: No CJK content detected, skipping auto spacing");
-      this.watchForCJKContent(nodeDelay, nodeMaxWait);
-      return;
-    }
     const onceSpacingPage = once(() => {
       this.spacingPage();
     });
@@ -229,7 +245,7 @@ class BrowserPangu extends Pangu {
     if (videos.length === 0) {
       setTimeout(() => {
         onceSpacingPage();
-      }, pageDelay);
+      }, fullConfig.pageDelayMs);
     } else {
       for (let i = 0; i < videos.length; i++) {
         const video = videos[i];
@@ -257,8 +273,8 @@ class BrowserPangu extends Pangu {
           }
         }
       },
-      nodeDelay,
-      nodeMaxWait
+      fullConfig.nodeDelayMs,
+      fullConfig.nodeMaxWaitMs
     );
     const mutationObserver = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
@@ -364,7 +380,7 @@ class BrowserPangu extends Pangu {
         observer.disconnect();
         console.log("pangu.js: CJK content detected, starting auto spacing");
         this.isAutoSpacingPageExecuted = false;
-        this.autoSpacingPage(0, nodeDelay, nodeMaxWait);
+        this.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: nodeDelay, nodeMaxWaitMs: nodeMaxWait });
       }
     });
     observer.observe(document.body, {

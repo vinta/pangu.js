@@ -1,5 +1,15 @@
 import { Pangu, ANY_CJK } from '../shared';
 
+export interface AutoSpacingPageConfig {
+  pageDelayMs: number;
+  nodeDelayMs: number;
+  nodeMaxWaitMs: number;
+}
+
+export interface SmartAutoSpacingPageConfig extends AutoSpacingPageConfig {
+  sampleSize: number;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function once<T extends (...args: any[]) => any>(func: T) {
   let executed = false;
@@ -285,20 +295,42 @@ export class BrowserPangu extends Pangu {
     this.spacingPageBody();
   }
 
-  public hasCJK(): boolean {
-    // Check document title first (very fast)
+  public hasCJK(sampleSize = 1000): boolean {
     if (ANY_CJK.test(document.title)) {
       return true;
     }
 
-    // Sample first ~1000 characters of body text
     const bodyText = document.body.textContent || '';
-    const sample = bodyText.substring(0, 1000);
-
+    const sample = bodyText.substring(0, sampleSize);
     return ANY_CJK.test(sample);
   }
 
-  public autoSpacingPage(pageDelay = 1000, nodeDelay = 500, nodeMaxWait = 2000) {
+  public smartAutoSpacingPage(config: Partial<SmartAutoSpacingPageConfig> = {}) {
+    const fullConfig: SmartAutoSpacingPageConfig = {
+      pageDelayMs: 1000,
+      nodeDelayMs: 500,
+      nodeMaxWaitMs: 2000,
+      sampleSize: 1000,
+      ...config,
+    };
+
+    if (!this.hasCJK(fullConfig.sampleSize)) {
+      console.log('pangu.js: No CJK content detected, setting up observer');
+      this.watchForCJKContent(fullConfig.nodeDelayMs, fullConfig.nodeMaxWaitMs);
+      return;
+    }
+
+    this.autoSpacingPage(fullConfig);
+  }
+
+  public autoSpacingPage(config: Partial<AutoSpacingPageConfig> = {}) {
+    const fullConfig: AutoSpacingPageConfig = {
+      pageDelayMs: 1000,
+      nodeDelayMs: 500,
+      nodeMaxWaitMs: 2000,
+      ...config,
+    };
+
     if (!(document.body instanceof Node)) {
       return;
     }
@@ -307,15 +339,6 @@ export class BrowserPangu extends Pangu {
       return;
     }
     this.isAutoSpacingPageExecuted = true;
-
-    // Skip if no CJK content detected
-    if (!this.hasCJK()) {
-      console.log('pangu.js: No CJK content detected, skipping auto spacing');
-
-      // Set up observer for dynamic content
-      this.watchForCJKContent(nodeDelay, nodeMaxWait);
-      return;
-    }
 
     const onceSpacingPage = once(() => {
       this.spacingPage();
@@ -327,7 +350,7 @@ export class BrowserPangu extends Pangu {
     if (videos.length === 0) {
       setTimeout(() => {
         onceSpacingPage();
-      }, pageDelay);
+      }, fullConfig.pageDelayMs);
     } else {
       for (let i = 0; i < videos.length; i++) {
         const video = videos[i];
@@ -360,8 +383,8 @@ export class BrowserPangu extends Pangu {
           }
         }
       },
-      nodeDelay,
-      nodeMaxWait,
+      fullConfig.nodeDelayMs,
+      fullConfig.nodeMaxWaitMs,
     );
 
     // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
@@ -492,7 +515,7 @@ export class BrowserPangu extends Pangu {
         console.log('pangu.js: CJK content detected, starting auto spacing');
         // Reset the flag so autoSpacingPage can run
         this.isAutoSpacingPageExecuted = false;
-        this.autoSpacingPage(0, nodeDelay, nodeMaxWait); // No delay since we already waited
+        this.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: nodeDelay, nodeMaxWaitMs: nodeMaxWait }); // No delay since we already waited
       }
     });
 
