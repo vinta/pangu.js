@@ -77,6 +77,158 @@ export class BrowserPangu extends Pangu {
     this.ignoredClass = 'no-pangu-spacing';
   }
 
+  public hasCjk(sampleSize = 1000) {
+    if (ANY_CJK.test(document.title)) {
+      return true;
+    }
+
+    const bodyText = document.body.textContent || '';
+    const sample = bodyText.substring(0, sampleSize);
+    return ANY_CJK.test(sample);
+  }
+
+  public autoSpacingPage({ pageDelayMs = 1000, nodeDelayMs = 500, nodeMaxWaitMs = 2000 }: AutoSpacingPageConfig = {}) {
+    if (!(document.body instanceof Node)) {
+      return;
+    }
+
+    if (this.isAutoSpacingPageExecuted) {
+      return;
+    }
+    this.isAutoSpacingPageExecuted = true;
+
+    const onceSpacingPage = once(() => {
+      this.spacingPage();
+    });
+
+    // TODO
+    // this is a dirty hack for https://github.com/vinta/pangu.js/issues/117
+    const videos = document.getElementsByTagName('video');
+    if (videos.length === 0) {
+      setTimeout(() => {
+        onceSpacingPage();
+      }, pageDelayMs);
+    } else {
+      for (let i = 0; i < videos.length; i++) {
+        const video = videos[i];
+        if (video.readyState === 4) {
+          setTimeout(() => {
+            onceSpacingPage();
+          }, 3000);
+          break;
+        }
+        video.addEventListener('loadeddata', () => {
+          setTimeout(() => {
+            onceSpacingPage();
+          }, 4000);
+        });
+      }
+    }
+
+    const queue: Node[] = [];
+
+    // It's possible that multiple workers process the queue at the same time
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+    const debouncedSpacingNodes = debounce(
+      () => {
+        // a single node could be very big which contains a lot of child nodes
+        while (queue.length) {
+          const node = queue.shift();
+          if (node) {
+            self.spacingNode(node);
+          }
+        }
+      },
+      nodeDelayMs,
+      nodeMaxWaitMs,
+    );
+
+    this.setupAutoSpacingPageObserver(queue, debouncedSpacingNodes);
+  }
+
+  public smartAutoSpacingPage({ pageDelayMs = 1000, nodeDelayMs = 500, nodeMaxWaitMs = 2000, sampleSize = 1000, cjkObserverMaxWaitMs = 30000 }: SmartAutoSpacingPageConfig = {}) {
+    if (!this.hasCjk(sampleSize)) {
+      console.log('pangu.js: No CJK content detected, setting up observer');
+      this.setupCjkObserver({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs, sampleSize, cjkObserverMaxWaitMs });
+      return;
+    }
+
+    this.autoSpacingPage({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs });
+  }
+
+  public spacingPage() {
+    this.spacingPageTitle();
+    this.spacingPageBody();
+  }
+
+  public spacingPageTitle() {
+    const xPathQuery = '/html/head/title/text()';
+    this.spacingNodeByXPath(xPathQuery, document);
+  }
+
+  public spacingPageBody() {
+    // // >> 任意位置的節點
+    // . >> 當前節點
+    // .. >> 父節點
+    // [] >> 條件
+    // text() >> 節點的文字內容，例如 hello 之於 <tag>hello</tag>
+    // https://www.w3schools.com/xml/xpath_syntax.asp
+    //
+    // [@contenteditable]
+    // 帶有 contenteditable 屬性的節點
+    //
+    // normalize-space(.)
+    // 當前節點的頭尾的空白字元都會被移除，大於兩個以上的空白字元會被置換成單一空白
+    // https://developer.mozilla.org/en-US/docs/Web/XPath/Functions/normalize-space
+    //
+    // name(..)
+    // 父節點的名稱
+    // https://developer.mozilla.org/en-US/docs/Web/XPath/Functions/name
+    //
+    // translate(string, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")
+    // 將 string 轉換成小寫，因為 XML 是 case-sensitive 的
+    // https://developer.mozilla.org/en-US/docs/Web/XPath/Functions/translate
+    //
+    // 1. 處理 <title>
+    // 2. 處理 <body> 底下的節點
+    // 3. 略過 contentEditable 的節點
+    // 4. 略過特定節點，例如 <script> 和 <style>
+    //
+    // 注意，以下的 query 只會取出各節點的 text 內容！
+    let xPathQuery = '/html/body//*/text()[normalize-space(.)]';
+    for (const tag of ['script', 'style', 'textarea']) {
+      // 理論上這幾個 tag 裡面不會包含其他 tag
+      // 所以可以直接用 .. 取父節點
+      // 例如 [translate(name(..), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") != "script"]
+      xPathQuery = `${xPathQuery}[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
+    }
+    this.spacingNodeByXPath(xPathQuery, document);
+  }
+
+  public spacingNode(contextNode: Node) {
+    let xPathQuery = './/*/text()[normalize-space(.)]';
+    if (contextNode instanceof Element && contextNode.children && contextNode.children.length === 0) {
+      xPathQuery = './/text()[normalize-space(.)]';
+    }
+    this.spacingNodeByXPath(xPathQuery, contextNode);
+  }
+
+  public spacingElementById(idName: string) {
+    const xPathQuery = `id("${idName}")//text()`;
+    this.spacingNodeByXPath(xPathQuery, document);
+  }
+
+  public spacingElementByClassName(className: string) {
+    const xPathQuery = `//*[contains(concat(" ", normalize-space(@class), " "), "${className}")]//text()`;
+    this.spacingNodeByXPath(xPathQuery, document);
+  }
+
+  public spacingElementByTagName(tagName: string) {
+    const xPathQuery = `//${tagName}//text()`;
+    this.spacingNodeByXPath(xPathQuery, document);
+  }
+
   // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
   public spacingNodeByXPath(xPathQuery: string, contextNode: Node) {
     // DocumentFragments don't support XPath queries
@@ -230,205 +382,18 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  public spacingNode(contextNode: Node) {
-    let xPathQuery = './/*/text()[normalize-space(.)]';
-    if (contextNode instanceof Element && contextNode.children && contextNode.children.length === 0) {
-      xPathQuery = './/text()[normalize-space(.)]';
-    }
-    this.spacingNodeByXPath(xPathQuery, contextNode);
-  }
-
-  public spacingElementById(idName: string) {
-    const xPathQuery = `id("${idName}")//text()`;
-    this.spacingNodeByXPath(xPathQuery, document);
-  }
-
-  public spacingElementByClassName(className: string) {
-    const xPathQuery = `//*[contains(concat(" ", normalize-space(@class), " "), "${className}")]//text()`;
-    this.spacingNodeByXPath(xPathQuery, document);
-  }
-
-  public spacingElementByTagName(tagName: string) {
-    const xPathQuery = `//${tagName}//text()`;
-    this.spacingNodeByXPath(xPathQuery, document);
-  }
-
-  public spacingPageTitle() {
-    const xPathQuery = '/html/head/title/text()';
-    this.spacingNodeByXPath(xPathQuery, document);
-  }
-
-  public spacingPageBody() {
-    // // >> 任意位置的節點
-    // . >> 當前節點
-    // .. >> 父節點
-    // [] >> 條件
-    // text() >> 節點的文字內容，例如 hello 之於 <tag>hello</tag>
-    // https://www.w3schools.com/xml/xpath_syntax.asp
-    //
-    // [@contenteditable]
-    // 帶有 contenteditable 屬性的節點
-    //
-    // normalize-space(.)
-    // 當前節點的頭尾的空白字元都會被移除，大於兩個以上的空白字元會被置換成單一空白
-    // https://developer.mozilla.org/en-US/docs/Web/XPath/Functions/normalize-space
-    //
-    // name(..)
-    // 父節點的名稱
-    // https://developer.mozilla.org/en-US/docs/Web/XPath/Functions/name
-    //
-    // translate(string, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")
-    // 將 string 轉換成小寫，因為 XML 是 case-sensitive 的
-    // https://developer.mozilla.org/en-US/docs/Web/XPath/Functions/translate
-    //
-    // 1. 處理 <title>
-    // 2. 處理 <body> 底下的節點
-    // 3. 略過 contentEditable 的節點
-    // 4. 略過特定節點，例如 <script> 和 <style>
-    //
-    // 注意，以下的 query 只會取出各節點的 text 內容！
-    let xPathQuery = '/html/body//*/text()[normalize-space(.)]';
-    for (const tag of ['script', 'style', 'textarea']) {
-      // 理論上這幾個 tag 裡面不會包含其他 tag
-      // 所以可以直接用 .. 取父節點
-      // 例如 [translate(name(..), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") != "script"]
-      xPathQuery = `${xPathQuery}[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
-    }
-    this.spacingNodeByXPath(xPathQuery, document);
-  }
-
-  public spacingPage() {
-    this.spacingPageTitle();
-    this.spacingPageBody();
-  }
-
-  public autoSpacingPage({
-    pageDelayMs = 1000,
-    nodeDelayMs = 500,
-    nodeMaxWaitMs = 2000,
-  }: AutoSpacingPageConfig = {}) {
-
-    if (!(document.body instanceof Node)) {
-      return;
-    }
-
-    if (this.isAutoSpacingPageExecuted) {
-      return;
-    }
-    this.isAutoSpacingPageExecuted = true;
-
-    const onceSpacingPage = once(() => {
-      this.spacingPage();
-    });
-
-    // TODO
-    // this is a dirty hack for https://github.com/vinta/pangu.js/issues/117
-    const videos = document.getElementsByTagName('video');
-    if (videos.length === 0) {
-      setTimeout(() => {
-        onceSpacingPage();
-      }, pageDelayMs);
-    } else {
-      for (let i = 0; i < videos.length; i++) {
-        const video = videos[i];
-        if (video.readyState === 4) {
-          setTimeout(() => {
-            onceSpacingPage();
-          }, 3000);
-          break;
-        }
-        video.addEventListener('loadeddata', () => {
-          setTimeout(() => {
-            onceSpacingPage();
-          }, 4000);
-        });
-      }
-    }
-
-    const queue: Node[] = [];
-
-    // It's possible that multiple workers process the queue at the same time
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-    const debouncedSpacingNodes = debounce(
-      () => {
-        // a single node could be very big which contains a lot of child nodes
-        while (queue.length) {
-          const node = queue.shift();
-          if (node) {
-            self.spacingNode(node);
-          }
-        }
-      },
-      nodeDelayMs,
-      nodeMaxWaitMs,
-    );
-
-    // Disconnect any existing auto-spacing observer
+  public stopAutoSpacingPage() {
     if (this.autoSpacingPageObserver) {
       this.autoSpacingPageObserver.disconnect();
       this.autoSpacingPageObserver = null;
     }
 
-    // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-    this.autoSpacingPageObserver = new MutationObserver((mutations) => {
-      // Element: https://developer.mozilla.org/en-US/docs/Web/API/Element
-      // Text: https://developer.mozilla.org/en-US/docs/Web/API/Text
-      for (const mutation of mutations) {
-        switch (mutation.type) {
-          case 'childList':
-            for (const node of mutation.addedNodes) {
-              if (node.nodeType === Node.ELEMENT_NODE) {
-                queue.push(node);
-              } else if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
-                queue.push(node.parentNode);
-              }
-            }
-            break;
-          case 'characterData':
-            const { target: node } = mutation;
-            if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
-              queue.push(node.parentNode);
-            }
-            break;
-          default:
-            break;
-        }
-      }
-
-      debouncedSpacingNodes();
-    });
-    this.autoSpacingPageObserver.observe(document.body, {
-      characterData: true,
-      childList: true,
-      subtree: true,
-    });
-  }
-
-  public hasCjk(sampleSize = 1000) {
-    if (ANY_CJK.test(document.title)) {
-      return true;
+    if (this.cjkObserver) {
+      this.cjkObserver.disconnect();
+      this.cjkObserver = null;
     }
 
-    const bodyText = document.body.textContent || '';
-    const sample = bodyText.substring(0, sampleSize);
-    return ANY_CJK.test(sample);
-  }
-
-  public smartAutoSpacingPage({
-    pageDelayMs = 1000,
-    nodeDelayMs = 500,
-    nodeMaxWaitMs = 2000,
-    sampleSize = 1000,
-    cjkObserverMaxWaitMs = 30000,
-  }: SmartAutoSpacingPageConfig = {}) {
-    if (!this.hasCjk(sampleSize)) {
-      console.log('pangu.js: No CJK content detected, setting up observer');
-      this.setupCjkObserver({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs, sampleSize, cjkObserverMaxWaitMs });
-      return;
-    }
-
-    this.autoSpacingPage({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs });
+    this.isAutoSpacingPageExecuted = false;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -509,25 +474,49 @@ export class BrowserPangu extends Pangu {
     return false;
   }
 
-  public stopAutoSpacingPage() {
+  protected setupAutoSpacingPageObserver(queue: Node[], debouncedSpacingNodes: () => void) {
+    // Disconnect any existing auto-spacing observer
     if (this.autoSpacingPageObserver) {
       this.autoSpacingPageObserver.disconnect();
       this.autoSpacingPageObserver = null;
     }
 
-    if (this.cjkObserver) {
-      this.cjkObserver.disconnect();
-      this.cjkObserver = null;
-    }
+    // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+    this.autoSpacingPageObserver = new MutationObserver((mutations) => {
+      // Element: https://developer.mozilla.org/en-US/docs/Web/API/Element
+      // Text: https://developer.mozilla.org/en-US/docs/Web/API/Text
+      for (const mutation of mutations) {
+        switch (mutation.type) {
+          case 'childList':
+            for (const node of mutation.addedNodes) {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                queue.push(node);
+              } else if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
+                queue.push(node.parentNode);
+              }
+            }
+            break;
+          case 'characterData':
+            const { target: node } = mutation;
+            if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
+              queue.push(node.parentNode);
+            }
+            break;
+          default:
+            break;
+        }
+      }
 
-    this.isAutoSpacingPageExecuted = false;
+      debouncedSpacingNodes();
+    });
+    this.autoSpacingPageObserver.observe(document.body, {
+      characterData: true,
+      childList: true,
+      subtree: true,
+    });
   }
 
-  protected setupCjkObserver({
-    nodeDelayMs = 500,
-    nodeMaxWaitMs = 2000,
-    cjkObserverMaxWaitMs = 30000,
-  }: SmartAutoSpacingPageConfig) {
+  protected setupCjkObserver({ nodeDelayMs = 500, nodeMaxWaitMs = 2000, cjkObserverMaxWaitMs = 30000 }: SmartAutoSpacingPageConfig) {
     if (this.cjkObserver) {
       this.cjkObserver.disconnect();
       this.cjkObserver = null;

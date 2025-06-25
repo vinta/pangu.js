@@ -354,37 +354,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         nodeDelayMs,
         nodeMaxWaitMs
       );
-      if (this.autoSpacingPageObserver) {
-        this.autoSpacingPageObserver.disconnect();
-        this.autoSpacingPageObserver = null;
-      }
-      this.autoSpacingPageObserver = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-          switch (mutation.type) {
-            case "childList":
-              for (const node2 of mutation.addedNodes) {
-                if (node2.nodeType === Node.ELEMENT_NODE) {
-                  queue.push(node2);
-                } else if (node2.nodeType === Node.TEXT_NODE && node2.parentNode) {
-                  queue.push(node2.parentNode);
-                }
-              }
-              break;
-            case "characterData":
-              const { target: node } = mutation;
-              if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
-                queue.push(node.parentNode);
-              }
-              break;
-          }
-        }
-        debouncedSpacingNodes();
-      });
-      this.autoSpacingPageObserver.observe(document.body, {
-        characterData: true,
-        childList: true,
-        subtree: true
-      });
+      this.setupAutoSpacingPageObserver(queue, debouncedSpacingNodes);
     }
     hasCjk(sampleSize = 1e3) {
       if (ANY_CJK.test(document.title)) {
@@ -483,11 +453,42 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
       this.isAutoSpacingPageExecuted = false;
     }
+    setupAutoSpacingPageObserver(queue, debouncedSpacingNodes) {
+      if (this.autoSpacingPageObserver) {
+        this.autoSpacingPageObserver.disconnect();
+        this.autoSpacingPageObserver = null;
+      }
+      this.autoSpacingPageObserver = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          switch (mutation.type) {
+            case "childList":
+              for (const node2 of mutation.addedNodes) {
+                if (node2.nodeType === Node.ELEMENT_NODE) {
+                  queue.push(node2);
+                } else if (node2.nodeType === Node.TEXT_NODE && node2.parentNode) {
+                  queue.push(node2.parentNode);
+                }
+              }
+              break;
+            case "characterData":
+              const { target: node } = mutation;
+              if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
+                queue.push(node.parentNode);
+              }
+              break;
+          }
+        }
+        debouncedSpacingNodes();
+      });
+      this.autoSpacingPageObserver.observe(document.body, {
+        characterData: true,
+        childList: true,
+        subtree: true
+      });
+    }
     setupCjkObserver({
-      pageDelayMs = 1e3,
       nodeDelayMs = 500,
       nodeMaxWaitMs = 2e3,
-      sampleSize = 1e3,
       cjkObserverMaxWaitMs = 3e4
     }) {
       if (this.cjkObserver) {
