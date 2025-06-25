@@ -16,27 +16,33 @@
 
 ### For Users
 
-- [Google Chrome Extension](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (**2025-06-25 UPDATED**)
+- Official support:
+
+  - [Google Chrome Extension](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (**2025-06-25 UPDATED**)
+
+- Community support:
+
+  - [盤古之白 - 文案排版轉換](https://pangu.serko.dev/)
 
 ### For Developers
 
-- Official supports:
+- Official support:
 
-  - [pangu.go](https://github.com/vinta/pangu) (Go)
-  - [pangu.java](https://github.com/vinta/pangu.java) (Java)
-  - [pangu.js](https://github.com/vinta/pangu.js) (TypeScript/JavaScript)
-  - [pangu.py](https://github.com/vinta/pangu.py) (Python)
-  - [pangu.space](https://github.com/vinta/pangu.space) (Web API)
+  - [pangu.go](https://github.com/vinta/pangu)
+  - [pangu.java](https://github.com/vinta/pangu.java)
+  - [pangu.js](https://github.com/vinta/pangu.js)
+  - [pangu.py](https://github.com/vinta/pangu.py)
+  - [pangu.space](https://github.com/vinta/pangu.space)
 
-- Community supports:
-  - [pangu.clj](https://github.com/coldnew/pangu.clj) (Clojure)
-  - [pangu.dart](https://github.com/SemonCat/pangu.dart) (Dart)
-  - [pangu.ex](https://github.com/cataska/pangu.ex) (Elixir)
-  - [pangu.objective-c](https://github.com/Cee/pangu.objective-c) (Objective-C)
-  - [pangu.php](https://github.com/Kunr/pangu.php) (PHP)
-  - [pangu.rb](https://github.com/dlackty/pangu.rb) (Ruby)
-  - [pangu.rs](https://github.com/airt/pangu.rs) (Rust)
-  - [pangu.swift](https://github.com/X140Yu/pangu.Swift) (Swift)
+- Community support:
+  - [pangu.clj](https://github.com/coldnew/pangu.clj)
+  - [pangu.dart](https://github.com/SemonCat/pangu.dart)
+  - [pangu.ex](https://github.com/cataska/pangu.ex)
+  - [pangu.objective-c](https://github.com/Cee/pangu.objective-c)
+  - [pangu.php](https://github.com/Kunr/pangu.php)
+  - [pangu.rb](https://github.com/dlackty/pangu.rb)
+  - [pangu.rs](https://github.com/airt/pangu.rs)
+  - [pangu.swift](https://github.com/X140Yu/pangu.Swift)
 
 ## Usage
 
