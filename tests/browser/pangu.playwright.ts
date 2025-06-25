@@ -1,15 +1,15 @@
-/**
- * Browser API Tests using Playwright
- *
- * These tests run in real browsers (Chromium, Firefox, WebKit) for accurate browser testing.
- * They replace the jsdom-based tests which had limitations with browser-specific features.
- */
-// Import the UMD types for window.pangu global
-import '../../dist/browser/pangu.umd';
+import { BrowserPangu } from '../../dist/browser/pangu';
 import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+
+declare global {
+  const pangu: BrowserPangu;
+  interface Window {
+    pangu: BrowserPangu;
+  }
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,7 +36,7 @@ test.describe('BrowserPangu', () => {
   test.describe('spacing()', () => {
     test('處理 text', async ({ page }) => {
       const result = await page.evaluate(() => {
-        return window.pangu.spacing('新八的構造成分有95%是眼鏡、3%是水、2%是垃圾');
+        return pangu.spacing('新八的構造成分有95%是眼鏡、3%是水、2%是垃圾');
       });
 
       expect(result).toBe('新八的構造成分有 95% 是眼鏡、3% 是水、2% 是垃圾');
@@ -49,7 +49,7 @@ test.describe('BrowserPangu', () => {
         const textNode = document.createTextNode('早安！こんにちは！안녕하세요!');
         document.body.appendChild(textNode);
 
-        window.pangu.spacingNode(textNode);
+        pangu.spacingNode(textNode);
 
         return textNode.textContent;
       });
@@ -63,7 +63,7 @@ test.describe('BrowserPangu', () => {
         div.textContent = '新八的構造成分有95%是眼鏡、3%是水、2%是垃圾';
         document.body.appendChild(div);
 
-        window.pangu.spacingNode(div);
+        pangu.spacingNode(div);
 
         return div.textContent;
       });
@@ -80,7 +80,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent(htmlContent);
 
       await page.evaluate(() => {
-        window.pangu.spacingElementById('e1');
+        pangu.spacingElementById('e1');
       });
 
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
@@ -97,7 +97,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent(htmlContent);
 
       await page.evaluate(() => {
-        window.pangu.spacingElementByClassName('e2');
+        pangu.spacingElementByClassName('e2');
       });
 
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
@@ -112,7 +112,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent(htmlContent);
 
       await page.evaluate(() => {
-        window.pangu.spacingElementByClassName('e4');
+        pangu.spacingElementByClassName('e4');
       });
 
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
@@ -127,7 +127,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent(htmlContent);
 
       await page.evaluate(() => {
-        window.pangu.spacingElementByClassName('e5');
+        pangu.spacingElementByClassName('e5');
       });
 
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
@@ -144,7 +144,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent(htmlContent);
 
       await page.evaluate(() => {
-        window.pangu.spacingElementByTagName('article');
+        pangu.spacingElementByTagName('article');
       });
 
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
@@ -157,7 +157,7 @@ test.describe('BrowserPangu', () => {
     test('處理 <title>', async ({ page }) => {
       await page.evaluate(() => {
         document.title = "Mr.龍島主道：「Let's Party!各位高明博雅君子！」";
-        window.pangu.spacingPageTitle();
+        pangu.spacingPageTitle();
       });
 
       const title = await page.title();
@@ -173,7 +173,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent(htmlContent);
 
       await page.evaluate(() => {
-        window.pangu.spacingPageBody();
+        pangu.spacingPageBody();
       });
 
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
@@ -190,7 +190,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent(htmlContent);
       await page.evaluate(() => {
         document.title = '花學姊的梅杜莎';
-        window.pangu.spacingPage();
+        pangu.spacingPage();
       });
 
       const title = await page.title();
@@ -205,7 +205,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<div contenteditable="true">abc漢字1</div>');
 
       await page.evaluate(() => {
-        window.pangu.spacingPageBody();
+        pangu.spacingPageBody();
       });
 
       const content = await page.content();
@@ -217,7 +217,7 @@ test.describe('BrowserPangu', () => {
     test('handles dynamic content with MutationObserver', async ({ page }) => {
       // Start auto spacing
       await page.evaluate(() => {
-        window.pangu.autoSpacingPage({});
+        pangu.autoSpacingPage({});
       });
 
       // Wait a bit for MutationObserver to be set up
