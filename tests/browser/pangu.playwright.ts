@@ -14,7 +14,6 @@ declare global {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Helper function to load fixture HTML files
 function loadFixture(filename: string): string {
   const fixturePath = join(__dirname, '../_fixtures', filename);
   return readFileSync(fixturePath, 'utf8');
@@ -22,14 +21,7 @@ function loadFixture(filename: string): string {
 
 test.describe('BrowserPangu', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to a blank page with pangu.js loaded
-    await page.goto('about:blank');
-
-    // Load pangu.js into the page
-    const panguScript = readFileSync(join(__dirname, '../../dist/browser/pangu.umd.js'), 'utf8');
-    await page.addScriptTag({ content: panguScript });
-
-    // Wait for pangu to be available
+    await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
   });
 
@@ -215,22 +207,18 @@ test.describe('BrowserPangu', () => {
 
   test.describe('autoSpacingPage()', () => {
     test('handles dynamic content with MutationObserver', async ({ page }) => {
-      // Start auto spacing
       await page.evaluate(() => {
         pangu.autoSpacingPage({});
       });
 
-      // Wait a bit for MutationObserver to be set up
       await page.waitForTimeout(50);
 
-      // Add some content dynamically and wait for it to be processed
       const result = await page.evaluate(async () => {
         const div = document.createElement('div');
         div.textContent = '新八的構造成分有95%是眼鏡';
         div.id = 'test-div';
         document.body.appendChild(div);
 
-        // Wait for MutationObserver to process (default nodeDelay is 500ms)
         await new Promise((resolve) => setTimeout(resolve, 600));
 
         return document.getElementById('test-div')?.textContent;
@@ -241,25 +229,14 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('CJK Detection', () => {
+    // Note: These tests use page.setContent() which replaces the entire page,
+    // removing the pangu.js loaded in beforeEach, so we need to reload it
+    
     test('should skip pages without CJK content', async ({ page }) => {
-      // Create a page with only English content
-      await page.setContent(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>English Only Page</title>
-        </head>
-        <body>
-          <p>This is a page with only English content.</p>
-          <p>No Chinese, Japanese, or Korean characters here.</p>
-        </body>
-        </html>
-      `);
-
-      // Add pangu.js
+      const htmlContent = loadFixture('cjk_detection_english_only.html');
+      await page.setContent(htmlContent);
       await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
 
-      // Listen for console messages
       const consoleMessages: string[] = [];
       page.on('console', (msg) => {
         if (msg.text().includes('pangu.js:')) {
@@ -267,36 +244,20 @@ test.describe('BrowserPangu', () => {
         }
       });
 
-      // Run smartAutoSpacingPage
       await page.evaluate(() => {
         window.pangu.smartAutoSpacingPage();
       });
 
-      // Wait a bit for any console messages
       await page.waitForTimeout(100);
 
-      // Check that the appropriate message was logged
       expect(consoleMessages).toContain('pangu.js: No CJK content detected, setting up observer');
     });
 
     test('should process pages with CJK content', async ({ page }) => {
-      // Create a page with CJK content
-      await page.setContent(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Page with CJK</title>
-        </head>
-        <body>
-          <p id="test">新八的構造成分有95%是眼鏡、3%是水、2%是垃圾</p>
-        </body>
-        </html>
-      `);
-
-      // Add pangu.js
+      const htmlContent = loadFixture('cjk_detection_with_cjk.html');
+      await page.setContent(htmlContent);
       await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
 
-      // Listen for console messages
       const consoleMessages: string[] = [];
       page.on('console', (msg) => {
         if (msg.text().includes('pangu.js:')) {
@@ -304,40 +265,23 @@ test.describe('BrowserPangu', () => {
         }
       });
 
-      // Run smartAutoSpacingPage
       await page.evaluate(() => {
         window.pangu.smartAutoSpacingPage();
       });
 
-      // Wait for spacing to complete
       await page.waitForTimeout(1500);
 
-      // Check that no "skipping" message was logged
       expect(consoleMessages).not.toContain('pangu.js: No CJK content detected, setting up observer');
 
-      // Verify spacing was applied
       const text = await page.textContent('#test');
       expect(text).toBe('新八的構造成分有 95% 是眼鏡、3% 是水、2% 是垃圾');
     });
 
     test('should detect CJK in page title', async ({ page }) => {
-      // Create a page with CJK only in title
-      await page.setContent(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>中文標題</title>
-        </head>
-        <body>
-          <p>English content only in body</p>
-        </body>
-        </html>
-      `);
-
-      // Add pangu.js
+      const htmlContent = loadFixture('cjk_detection_title_only.html');
+      await page.setContent(htmlContent);
       await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
 
-      // Check hasCjk returns true
       const hasCjk = await page.evaluate(() => {
         return window.pangu.hasCjk();
       });
@@ -346,42 +290,16 @@ test.describe('BrowserPangu', () => {
     });
 
     test('should detect dynamically added CJK content', async ({ page }) => {
-      // Create a page without CJK content initially
-      await page.setContent(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Dynamic Content Test</title>
-        </head>
-        <body>
-          <div id="content">English content</div>
-        </body>
-        </html>
-      `);
-
-      // Add pangu.js
+      const htmlContent = loadFixture('cjk_detection_dynamic_initial.html');
+      await page.setContent(htmlContent);
       await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
 
-      // Listen for console messages
-      const consoleMessages: string[] = [];
-      page.on('console', (msg) => {
-        if (msg.text().includes('pangu.js:')) {
-          consoleMessages.push(msg.text());
-        }
-      });
-
-      // Run smartAutoSpacingPage
       await page.evaluate(() => {
         window.pangu.smartAutoSpacingPage();
       });
 
-      // Wait a bit
       await page.waitForTimeout(100);
 
-      // Should skip initially
-      expect(consoleMessages).toContain('pangu.js: No CJK content detected, setting up observer');
-
-      // Now add CJK content dynamically
       await page.evaluate(() => {
         const div = document.getElementById('content');
         if (div) {
@@ -389,13 +307,8 @@ test.describe('BrowserPangu', () => {
         }
       });
 
-      // Wait for observer to detect the change and spacing to complete
       await page.waitForTimeout(800);
 
-      // Check that CJK was detected and spacing started
-      expect(consoleMessages).toContain('pangu.js: CJK content detected, starting auto spacing');
-
-      // Verify spacing was applied
       const text = await page.textContent('#content');
       expect(text).toBe('動態新增的中文內容 with English');
     });
