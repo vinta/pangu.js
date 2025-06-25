@@ -10,7 +10,7 @@
 
 與大家共勉之。
 
-[![](https://developer.chrome.com/webstore/images/ChromeWebStore_BadgeWBorder_v2_340x96.png)](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+[![](browser_extensions/chrome/images/chrome_web_store_badge.png)](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 
 ## Installation
 
