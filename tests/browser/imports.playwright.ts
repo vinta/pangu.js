@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 // Browser ESM imports are tested in the Node.js environment
 // since they use the same ES modules. UMD is the primary browser target.
-test.describe('import UMD', () => {
+test.describe('Browser UMD imports', () => {
   test.beforeEach(async ({ page }) => {
     await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');

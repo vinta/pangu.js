@@ -95,6 +95,7 @@ export class BrowserPangu extends Pangu {
     if (this.isAutoSpacingPageExecuted) {
       return;
     }
+
     this.isAutoSpacingPageExecuted = true;
 
     const onceSpacingPage = once(() => {

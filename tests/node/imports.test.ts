@@ -1,9 +1,8 @@
-import { describe, it, expect } from 'vitest';
-import { createRequire } from 'node:module';
-
 // ESM imports
 import { pangu as panguNamed, NodePangu } from '../../dist/node/index.js';
 import panguDefault from '../../dist/node/index.js';
+import { createRequire } from 'node:module';
+import { describe, it, expect } from 'vitest';
 
 const require = createRequire(import.meta.url);
 
