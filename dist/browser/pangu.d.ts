@@ -1,6 +1,17 @@
 import { Pangu } from '../shared';
+export interface AutoSpacingPageConfig {
+    pageDelayMs?: number;
+    nodeDelayMs?: number;
+    nodeMaxWaitMs?: number;
+}
+export interface SmartAutoSpacingPageConfig extends AutoSpacingPageConfig {
+    sampleSize?: number;
+    cjkObserverMaxWaitMs?: number;
+}
 export declare class BrowserPangu extends Pangu {
     isAutoSpacingPageExecuted: boolean;
+    protected autoSpacingPageObserver: MutationObserver | null;
+    protected cjkObserver: MutationObserver | null;
     blockTags: RegExp;
     ignoredTags: RegExp;
     presentationalTags: RegExp;
@@ -8,15 +19,18 @@ export declare class BrowserPangu extends Pangu {
     spaceSensitiveTags: RegExp;
     ignoredClass: string;
     constructor();
-    spacingNodeByXPath(xPathQuery: string, contextNode: Node): void;
+    hasCjk(sampleSize?: number): boolean;
+    autoSpacingPage({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs }?: AutoSpacingPageConfig): void;
+    smartAutoSpacingPage({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs, sampleSize, cjkObserverMaxWaitMs }?: SmartAutoSpacingPageConfig): void;
+    spacingPage(): void;
+    spacingPageTitle(): void;
+    spacingPageBody(): void;
     spacingNode(contextNode: Node): void;
     spacingElementById(idName: string): void;
     spacingElementByClassName(className: string): void;
     spacingElementByTagName(tagName: string): void;
-    spacingPageTitle(): void;
-    spacingPageBody(): void;
-    spacingPage(): void;
-    autoSpacingPage(pageDelay?: number, nodeDelay?: number, nodeMaxWait?: number): void;
+    spacingNodeByXPath(xPathQuery: string, contextNode: Node): void;
+    stopAutoSpacingPage(): void;
     protected isContentEditable(node: any): any;
     protected isSpecificTag(node: Node, tagRegex: RegExp): boolean | "";
     protected isInsideSpecificTag(node: Node, tagRegex: RegExp, checkCurrent?: boolean): boolean;
@@ -24,6 +38,8 @@ export declare class BrowserPangu extends Pangu {
     protected canIgnoreNode(node: Node): boolean;
     protected isFirstTextChild(parentNode: Node, targetNode: Node): boolean;
     protected isLastTextChild(parentNode: Node, targetNode: Node): boolean;
+    protected setupAutoSpacingPageObserver(queue: Node[], debouncedSpacingNodes: () => void): void;
+    protected setupCjkObserver({ nodeDelayMs, nodeMaxWaitMs, cjkObserverMaxWaitMs }: SmartAutoSpacingPageConfig): void;
 }
 export declare const pangu: BrowserPangu;
 export default pangu;

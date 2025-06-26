@@ -1,16 +1,10 @@
 const DEFAULT_SETTINGS = {
   spacing_mode: "spacing_when_load",
   filter_mode: "blacklist",
-  blacklist: [
-    // Default blacklist with valid match patterns
-    "*://docs.google.com/*",
-    "*://gist.github.com/*",
-    "*://github.com/*/blob/*",
-    "*://github.com/*/commit/*",
-    "*://github.com/*/pull/*"
-  ],
+  blacklist: ["*://docs.google.com/*", "*://gist.github.com/*", "*://github.com/*/blob/*", "*://github.com/*/commit/*", "*://github.com/*/pull/*"],
   whitelist: [],
-  is_mute_sound_effects: false
+  is_mute_sound_effects: false,
+  is_enable_detect_cjk: false
 };
 let cachedSettings = { ...DEFAULT_SETTINGS };
 let cacheInitialized = false;

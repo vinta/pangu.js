@@ -36,8 +36,10 @@
 
 ### Medium Priority
 
-- [ ] No need to perform spacing if there is no CJK in webpages
-  - See @.claude/researches/detect-cjk-content.md
+- [x] No need to perform spacing if there is no CJK in webpages
+  - Implemented pageHasCJK() detection in BrowserPangu class
+  - Added watchForCJKContent() for dynamic content monitoring
+  - Saves processing time on pages without CJK content
 - [ ] Improve `autoSpacingPage()` performance, especially with a large DOM tree
   - See @.claude/researches/performance-optimization.md
 - [ ] Add instructions in options page for enabling experimental CSS `text-autospace`

@@ -99,5 +99,6 @@ class Pangu {
   }
 }
 new Pangu();
+exports.ANY_CJK = ANY_CJK;
 exports.Pangu = Pangu;
 //# sourceMappingURL=index.cjs.map

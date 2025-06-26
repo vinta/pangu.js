@@ -129,8 +129,12 @@
     "message": "其他設定",
     "description": ""
   },
-  "label_is_mute": {
+  "label_is_mute_sound_effects": {
     "message": "太吵了，靜音",
+    "description": ""
+  },
+  "label_is_enable_detect_cjk": {
+    "message": "只在有中文的頁面才招喚空格之神",
     "description": ""
   }
 }

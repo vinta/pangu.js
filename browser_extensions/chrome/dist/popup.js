@@ -1,9 +1,10 @@
-import { t as translatePage, p as playSound } from "./utils/sounds.js";
+import { t as translatePage, p as playSound, s as stopSound } from "./utils/sounds.js";
 import { g as getCachedSettings } from "./utils/settings.js";
 class PopupController {
   currentTabId;
   currentTabUrl;
   messageTimeoutId;
+  notificationCallback;
   constructor() {
     this.initialize();
   }
@@ -22,10 +23,22 @@ class PopupController {
         this.handleSpacingModeToggleChange();
       });
     }
+    const muteToggle = document.getElementById("mute-toggle");
+    if (muteToggle) {
+      muteToggle.addEventListener("change", () => {
+        this.handleMuteToggleChange();
+      });
+    }
     const manualSpacingBtn = document.getElementById("manual-spacing-btn");
     if (manualSpacingBtn) {
       manualSpacingBtn.addEventListener("click", () => {
         this.handleManualSpacing();
+      });
+    }
+    const notification = document.getElementById("notification");
+    if (notification) {
+      notification.addEventListener("click", () => {
+        this.hideNotification();
       });
     }
     chrome.runtime.onMessage.addListener((message, sender) => {
@@ -35,15 +48,23 @@ class PopupController {
     });
   }
   async render() {
-    await this.renderToggle();
+    await this.renderSpacingModeToggle();
+    await this.renderMuteToggle();
     await this.renderStatus();
     this.renderVersion();
   }
-  async renderToggle() {
+  async renderSpacingModeToggle() {
     const settings = await getCachedSettings();
     const spacingModeToggle = document.getElementById("spacing-mode-toggle");
     if (spacingModeToggle) {
       spacingModeToggle.checked = settings.spacing_mode === "spacing_when_load";
+    }
+  }
+  async renderMuteToggle() {
+    const settings = await getCachedSettings();
+    const muteToggle = document.getElementById("mute-toggle");
+    if (muteToggle) {
+      muteToggle.checked = settings.is_mute_sound_effects;
     }
   }
   async renderStatus() {
@@ -74,6 +95,13 @@ class PopupController {
     await chrome.storage.sync.set({ spacing_mode: spacingMode });
     this.showMessage(chrome.i18n.getMessage("refresh_required"), "info", 1e3 * 3);
     await playSound(spacingMode === "spacing_when_load" ? "Shouryuuken" : "Hadouken");
+  }
+  async handleMuteToggleChange() {
+    const toggle = document.getElementById("mute-toggle");
+    await chrome.storage.sync.set({ is_mute_sound_effects: toggle.checked });
+    if (!toggle.checked) {
+      await playSound("Hadouken");
+    }
   }
   async handleManualSpacing() {
     const button = document.getElementById("manual-spacing-btn");
@@ -160,21 +188,34 @@ class PopupController {
     await playSound("YeahBaby");
   }
   showMessage(text, type = "info", hideMessageDelayMs, callback) {
-    const messageElement = document.getElementById("message");
-    if (messageElement) {
+    const notificationElement = document.getElementById("notification");
+    const notificationMessage = document.getElementById("notification-message");
+    if (notificationElement && notificationMessage) {
       if (this.messageTimeoutId) {
         clearTimeout(this.messageTimeoutId);
       }
-      messageElement.textContent = text;
-      messageElement.className = `message ${type}`;
-      messageElement.style.display = "block";
+      this.notificationCallback = callback;
+      notificationMessage.textContent = text;
+      notificationElement.className = `notification ${type}`;
+      notificationElement.style.display = "block";
       this.messageTimeoutId = window.setTimeout(() => {
-        messageElement.style.display = "none";
-        this.messageTimeoutId = void 0;
-        if (callback) {
-          callback();
-        }
+        this.hideNotification();
       }, hideMessageDelayMs);
+    }
+  }
+  hideNotification() {
+    const notificationElement = document.getElementById("notification");
+    if (notificationElement) {
+      notificationElement.style.display = "none";
+    }
+    stopSound();
+    if (this.messageTimeoutId) {
+      clearTimeout(this.messageTimeoutId);
+      this.messageTimeoutId = void 0;
+    }
+    if (this.notificationCallback) {
+      this.notificationCallback();
+      this.notificationCallback = void 0;
     }
   }
 }

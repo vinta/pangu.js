@@ -13,9 +13,21 @@ class OptionsController {
     this.setupEventListeners();
   }
   setupEventListeners() {
-    chrome.storage.onChanged.addListener(async (_changes, areaName) => {
+    chrome.storage.onChanged.addListener(async (changes, areaName) => {
       if (areaName === "sync") {
-        await this.render();
+        const changedKeys = Object.keys(changes);
+        if (changedKeys.includes("spacing_mode")) {
+          await this.renderSpacingMode();
+        }
+        if (changedKeys.includes("filter_mode") || changedKeys.includes("blacklist") || changedKeys.includes("whitelist")) {
+          await this.renderFilterMode();
+        }
+        if (changedKeys.includes("is_mute_sound_effects")) {
+          await this.renderMuteCheckbox();
+        }
+        if (changedKeys.includes("is_enable_detect_cjk")) {
+          await this.renderDetectCjkCheckbox();
+        }
       }
     });
     document.addEventListener("click", (e) => {
@@ -47,6 +59,9 @@ class OptionsController {
       if (target.id === "mute-checkbox") {
         const muteCheckbox = target;
         chrome.storage.sync.set({ is_mute_sound_effects: muteCheckbox.checked });
+      } else if (target.id === "detect-cjk-checkbox") {
+        const detectCjkCheckbox = target;
+        chrome.storage.sync.set({ is_enable_detect_cjk: detectCjkCheckbox.checked });
       }
     });
   }
@@ -71,6 +86,7 @@ class OptionsController {
     await this.renderSpacingMode();
     await this.renderFilterMode();
     await this.renderMuteCheckbox();
+    await this.renderDetectCjkCheckbox();
   }
   async renderSpacingMode() {
     const settings = await getCachedSettings();
@@ -166,6 +182,11 @@ class OptionsController {
     const settings = await getCachedSettings();
     const checkbox = document.getElementById("mute-checkbox");
     checkbox.checked = settings.is_mute_sound_effects;
+  }
+  async renderDetectCjkCheckbox() {
+    const settings = await getCachedSettings();
+    const checkbox = document.getElementById("detect-cjk-checkbox");
+    checkbox.checked = settings.is_enable_detect_cjk;
   }
   async toggleSpacingMode() {
     const settings = await getCachedSettings();

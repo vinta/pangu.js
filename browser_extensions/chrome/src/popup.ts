@@ -1,12 +1,13 @@
 import { translatePage } from './utils/i18n';
 import type { PingMessage, ManualSpacingMessage, ContentScriptResponse, MessageFromContentScript } from './utils/types';
 import { getCachedSettings } from './utils/settings';
-import { playSound } from './utils/sounds';
+import { playSound, stopSound } from './utils/sounds';
 
 class PopupController {
   private currentTabId: number | undefined;
   private currentTabUrl: string | undefined;
   private messageTimeoutId: number | undefined;
+  private notificationCallback: (() => void) | undefined;
 
   constructor() {
     this.initialize();
@@ -30,10 +31,24 @@ class PopupController {
       });
     }
 
+    const muteToggle = document.getElementById('mute-toggle') as HTMLInputElement;
+    if (muteToggle) {
+      muteToggle.addEventListener('change', () => {
+        this.handleMuteToggleChange();
+      });
+    }
+
     const manualSpacingBtn = document.getElementById('manual-spacing-btn');
     if (manualSpacingBtn) {
       manualSpacingBtn.addEventListener('click', () => {
         this.handleManualSpacing();
+      });
+    }
+
+    const notification = document.getElementById('notification');
+    if (notification) {
+      notification.addEventListener('click', () => {
+        this.hideNotification();
       });
     }
 
@@ -45,16 +60,25 @@ class PopupController {
   }
 
   private async render() {
-    await this.renderToggle();
+    await this.renderSpacingModeToggle();
+    await this.renderMuteToggle();
     await this.renderStatus();
     this.renderVersion();
   }
 
-  private async renderToggle() {
+  private async renderSpacingModeToggle() {
     const settings = await getCachedSettings();
     const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
     if (spacingModeToggle) {
       spacingModeToggle.checked = settings.spacing_mode === 'spacing_when_load';
+    }
+  }
+
+  private async renderMuteToggle() {
+    const settings = await getCachedSettings();
+    const muteToggle = document.getElementById('mute-toggle') as HTMLInputElement;
+    if (muteToggle) {
+      muteToggle.checked = settings.is_mute_sound_effects;
     }
   }
 
@@ -97,6 +121,16 @@ class PopupController {
 
     this.showMessage(chrome.i18n.getMessage('refresh_required'), 'info', 1000 * 3);
     await playSound(spacingMode === 'spacing_when_load' ? 'Shouryuuken' : 'Hadouken');
+  }
+
+  private async handleMuteToggleChange() {
+    const toggle = document.getElementById('mute-toggle') as HTMLInputElement;
+    await chrome.storage.sync.set({ is_mute_sound_effects: toggle.checked });
+    
+    // Play a sound when turning off mute to confirm it works
+    if (!toggle.checked) {
+      await playSound('Hadouken');
+    }
   }
 
   private async handleManualSpacing() {
@@ -214,24 +248,46 @@ class PopupController {
   }
 
   private showMessage(text: string, type: 'info' | 'error' | 'success' = 'info', hideMessageDelayMs: number, callback?: () => void) {
-    const messageElement = document.getElementById('message');
-    if (messageElement) {
+    const notificationElement = document.getElementById('notification');
+    const notificationMessage = document.getElementById('notification-message');
+    
+    if (notificationElement && notificationMessage) {
       // Clear any existing timeout to prevent premature hiding
       if (this.messageTimeoutId) {
         clearTimeout(this.messageTimeoutId);
       }
 
-      messageElement.textContent = text;
-      messageElement.className = `message ${type}`;
-      messageElement.style.display = 'block';
+      // Store the callback so it can be called when manually dismissing
+      this.notificationCallback = callback;
+
+      notificationMessage.textContent = text;
+      notificationElement.className = `notification ${type}`;
+      notificationElement.style.display = 'block';
 
       this.messageTimeoutId = window.setTimeout(() => {
-        messageElement.style.display = 'none';
-        this.messageTimeoutId = undefined;
-        if (callback) {
-          callback();
-        }
+        this.hideNotification();
       }, hideMessageDelayMs);
+    }
+  }
+
+  private hideNotification() {
+    const notificationElement = document.getElementById('notification');
+    if (notificationElement) {
+      notificationElement.style.display = 'none';
+    }
+    
+    // Stop any playing sound when notification is dismissed
+    stopSound();
+    
+    if (this.messageTimeoutId) {
+      clearTimeout(this.messageTimeoutId);
+      this.messageTimeoutId = undefined;
+    }
+    
+    // Execute the stored callback if it exists
+    if (this.notificationCallback) {
+      this.notificationCallback();
+      this.notificationCallback = undefined;
     }
   }
 }

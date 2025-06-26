@@ -1,3 +1,4 @@
+declare const ANY_CJK: RegExp;
 export declare class Pangu {
     version: string;
     constructor();
@@ -7,4 +8,5 @@ export declare class Pangu {
     protected convertToFullwidth(symbols: string): string;
 }
 export declare const pangu: Pangu;
+export { ANY_CJK };
 export default pangu;

@@ -1,26 +1,26 @@
+import { execSync } from 'node:child_process';
+import { writeFileSync, existsSync, unlinkSync } from 'node:fs';
+import { dirname, resolve, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { execSync } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
 describe('CLI', () => {
-  const cliPath = path.resolve(__dirname, '../../dist/node/cli.js');
-  const fixtureDir = path.resolve(__dirname, '../_fixtures');
-  const tempFile = path.join(fixtureDir, 'temp_test.txt');
+  const cliPath = resolve(__dirname, '../../dist/node/cli.js');
+  const fixtureDir = resolve(__dirname, '../_fixtures');
+  const tempFile = join(fixtureDir, 'temp_test.txt');
 
   beforeEach(() => {
     // Create a temporary test file
-    fs.writeFileSync(tempFile, '新八的構造成分有95%是眼鏡、3%是水、2%是垃圾');
+    writeFileSync(tempFile, '新八的構造成分有95%是眼鏡、3%是水、2%是垃圾');
   });
 
   afterEach(() => {
     // Clean up
-    if (fs.existsSync(tempFile)) {
-      fs.unlinkSync(tempFile);
+    if (existsSync(tempFile)) {
+      unlinkSync(tempFile);
     }
   });
 

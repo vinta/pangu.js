@@ -99,6 +99,7 @@ class Pangu {
 }
 const pangu = new Pangu();
 export {
+  ANY_CJK,
   Pangu,
   pangu as default,
   pangu

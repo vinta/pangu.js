@@ -9,10 +9,28 @@ const SOUND_FILES: Record<SoundName, string> = {
   WahWahWaaah: 'sounds/ManciniPinkPanther-WahWahWaaah.mp3',
 };
 
+let currentAudio: HTMLAudioElement | null = null;
+
 export async function playSound(name: SoundName) {
   const settings = await getCachedSettings();
   if (!settings.is_mute_sound_effects) {
+    stopSound();
+
     const audio = new Audio(chrome.runtime.getURL(SOUND_FILES[name]));
+    currentAudio = audio;
+
+    audio.addEventListener('ended', () => {
+      currentAudio = null;
+    });
+
     audio.play().catch((e) => console.log('Sound play failed:', e));
+  }
+}
+
+export function stopSound() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
   }
 }
