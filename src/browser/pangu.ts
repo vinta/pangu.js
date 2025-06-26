@@ -150,7 +150,7 @@ export class BrowserPangu extends Pangu {
 
   public smartAutoSpacingPage({ pageDelayMs = 1000, nodeDelayMs = 500, nodeMaxWaitMs = 2000, sampleSize = 1000, cjkObserverMaxWaitMs = 30000 }: SmartAutoSpacingPageConfig = {}) {
     if (!this.hasCjk(sampleSize)) {
-      console.log('pangu.js: No CJK content detected, setting up observer');
+      console.log('No CJK content detected, setting up observer');
       this.setupCjkObserver({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs, sampleSize, cjkObserverMaxWaitMs });
       return;
     }
@@ -517,7 +517,7 @@ export class BrowserPangu extends Pangu {
     });
   }
 
-  protected setupCjkObserver({ nodeDelayMs = 500, nodeMaxWaitMs = 2000, cjkObserverMaxWaitMs = 30000 }: SmartAutoSpacingPageConfig) {
+  protected setupCjkObserver({ nodeDelayMs = 500, nodeMaxWaitMs = 2000, cjkObserverMaxWaitMs = 1000 * 30 }: SmartAutoSpacingPageConfig) {
     if (this.cjkObserver) {
       this.cjkObserver.disconnect();
       this.cjkObserver = null;
@@ -532,7 +532,7 @@ export class BrowserPangu extends Pangu {
           this.cjkObserver.disconnect();
           this.cjkObserver = null;
         }
-        console.log('pangu.js: CJK observer timeout reached, stopping observer');
+        console.log('CJK observer timeout reached, stopping observer');
         return;
       }
 
@@ -542,7 +542,7 @@ export class BrowserPangu extends Pangu {
           this.cjkObserver = null;
         }
 
-        console.log('pangu.js: CJK content detected, starting auto spacing');
+        console.log('CJK content detected, starting auto spacing');
         this.isAutoSpacingPageExecuted = false;
         this.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs, nodeMaxWaitMs }); // No delay since we already waited
       }

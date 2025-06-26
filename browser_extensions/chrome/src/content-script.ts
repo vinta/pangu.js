@@ -14,7 +14,6 @@ async function autoSpacingPage() {
   const pangu = window.pangu;
   if (pangu) {
     const settings = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
-    console.log(`pangu.js settings:`, settings);
     if (settings.is_enable_detect_cjk) {
       pangu.smartAutoSpacingPage();
     } else {
