@@ -1,7 +1,6 @@
 .popup-container {
   position: relative;
   width: 380px;
-  min-height: 380px;
   padding: 0;
   background-color: var(--color-surface);
   display: flex;
@@ -40,7 +39,6 @@
 
 .popup-content {
   padding: var(--spacing-4);
-  flex: 1;
 }
 
 .popup-section {
