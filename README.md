@@ -18,7 +18,7 @@
 
 - Official support:
 
-  - [Google Chrome Extension](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd) (**2025-06-25 UPDATED**)
+  - [Google Chrome Extension](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 
 - Community support:
 
