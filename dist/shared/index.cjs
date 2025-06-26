@@ -55,7 +55,7 @@ class Pangu {
     const HTML_TAG_PLACEHOLDER = "\0HTML_TAG_PLACEHOLDER_";
     const HTML_TAG_PATTERN = /<\/?[a-zA-Z][a-zA-Z0-9]*(?:\s+[^>]*)?>/g;
     newText = newText.replace(HTML_TAG_PATTERN, (match) => {
-      let processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName, attrValue) => {
+      const processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName, attrValue) => {
         const processedValue = self.spacingText(attrValue);
         return `${attrName}="${processedValue}"`;
       });

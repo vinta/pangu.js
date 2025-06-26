@@ -58,7 +58,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       const HTML_TAG_PLACEHOLDER = "\0HTML_TAG_PLACEHOLDER_";
       const HTML_TAG_PATTERN = /<\/?[a-zA-Z][a-zA-Z0-9]*(?:\s+[^>]*)?>/g;
       newText = newText.replace(HTML_TAG_PATTERN, (match) => {
-        let processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName, attrValue) => {
+        const processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName, attrValue) => {
           const processedValue = self2.spacingText(attrValue);
           return `${attrName}="${processedValue}"`;
         });
@@ -169,7 +169,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.autoSpacingPageObserver = null;
       this.cjkObserver = null;
       this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
-      this.ignoredTags = /^(code|pre|script|style|textarea|iframe)$/i;
+      this.ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
       this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
       this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
       this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
