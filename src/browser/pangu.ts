@@ -493,26 +493,31 @@ export class BrowserPangu extends Pangu {
       // Element: https://developer.mozilla.org/en-US/docs/Web/API/Element
       // Text: https://developer.mozilla.org/en-US/docs/Web/API/Text
       for (const mutation of mutations) {
-        // Check if mutation is in title element
+        // Skip to avoid double processing - title handled separately by debouncedSpacingTitle()
         if (mutation.target.parentNode?.nodeName === 'TITLE' || mutation.target.nodeName === 'TITLE') {
           titleChanged = true;
           continue;
         }
 
+        // Queue parent elements for spacing processing
         switch (mutation.type) {
-          case 'childList':
-            for (const node of mutation.addedNodes) {
-              if (node.nodeType === Node.ELEMENT_NODE) {
-                queue.push(node);
-              } else if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
-                queue.push(node.parentNode);
-              }
-            }
-            break;
           case 'characterData':
+            // Text content changed (e.g., textContent = '新文字new text')
             const { target: node } = mutation;
             if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
-              queue.push(node.parentNode);
+              // <p>Hello 世界</p>
+              // "Hello 世界" is the text node, <p> is the parent element
+              queue.push(node.parentNode); // Queue parent element, not text node
+            }
+            break;
+          case 'childList':
+            // New nodes added to DOM (e.g., innerHTML change, appendChild)
+            for (const node of mutation.addedNodes) {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                queue.push(node); // Element added, process its text content
+              } else if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
+                queue.push(node.parentNode); // Text node added, process its parent
+              }
             }
             break;
           default:

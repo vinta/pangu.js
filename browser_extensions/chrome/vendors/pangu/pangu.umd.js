@@ -482,6 +482,12 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
             continue;
           }
           switch (mutation.type) {
+            case "characterData":
+              const { target: node } = mutation;
+              if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
+                queue.push(node.parentNode);
+              }
+              break;
             case "childList":
               for (const node2 of mutation.addedNodes) {
                 if (node2.nodeType === Node.ELEMENT_NODE) {
@@ -489,12 +495,6 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                 } else if (node2.nodeType === Node.TEXT_NODE && node2.parentNode) {
                   queue.push(node2.parentNode);
                 }
-              }
-              break;
-            case "characterData":
-              const { target: node } = mutation;
-              if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
-                queue.push(node.parentNode);
               }
               break;
           }
