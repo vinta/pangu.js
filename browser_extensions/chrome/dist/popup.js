@@ -4,6 +4,7 @@ class PopupController {
   currentTabId;
   currentTabUrl;
   messageTimeoutId;
+  notificationCallback;
   constructor() {
     this.initialize();
   }
@@ -28,9 +29,9 @@ class PopupController {
         this.handleManualSpacing();
       });
     }
-    const notificationClose = document.getElementById("notification-close");
-    if (notificationClose) {
-      notificationClose.addEventListener("click", () => {
+    const notification = document.getElementById("notification");
+    if (notification) {
+      notification.addEventListener("click", () => {
         this.hideNotification();
       });
     }
@@ -172,15 +173,16 @@ class PopupController {
       if (this.messageTimeoutId) {
         clearTimeout(this.messageTimeoutId);
       }
+      this.notificationCallback = callback;
       notificationMessage.textContent = text;
       notificationElement.className = `notification ${type}`;
       notificationElement.style.display = "block";
       this.messageTimeoutId = window.setTimeout(() => {
-        this.hideNotification(callback);
+        this.hideNotification();
       }, hideMessageDelayMs);
     }
   }
-  hideNotification(callback) {
+  hideNotification() {
     const notificationElement = document.getElementById("notification");
     if (notificationElement) {
       notificationElement.style.display = "none";
@@ -189,8 +191,9 @@ class PopupController {
       clearTimeout(this.messageTimeoutId);
       this.messageTimeoutId = void 0;
     }
-    if (callback) {
-      callback();
+    if (this.notificationCallback) {
+      this.notificationCallback();
+      this.notificationCallback = void 0;
     }
   }
 }

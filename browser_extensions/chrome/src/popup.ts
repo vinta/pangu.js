@@ -7,6 +7,7 @@ class PopupController {
   private currentTabId: number | undefined;
   private currentTabUrl: string | undefined;
   private messageTimeoutId: number | undefined;
+  private notificationCallback: (() => void) | undefined;
 
   constructor() {
     this.initialize();
@@ -37,9 +38,9 @@ class PopupController {
       });
     }
 
-    const notificationClose = document.getElementById('notification-close');
-    if (notificationClose) {
-      notificationClose.addEventListener('click', () => {
+    const notification = document.getElementById('notification');
+    if (notification) {
+      notification.addEventListener('click', () => {
         this.hideNotification();
       });
     }
@@ -230,17 +231,20 @@ class PopupController {
         clearTimeout(this.messageTimeoutId);
       }
 
+      // Store the callback so it can be called when manually dismissing
+      this.notificationCallback = callback;
+
       notificationMessage.textContent = text;
       notificationElement.className = `notification ${type}`;
       notificationElement.style.display = 'block';
 
       this.messageTimeoutId = window.setTimeout(() => {
-        this.hideNotification(callback);
+        this.hideNotification();
       }, hideMessageDelayMs);
     }
   }
 
-  private hideNotification(callback?: () => void) {
+  private hideNotification() {
     const notificationElement = document.getElementById('notification');
     if (notificationElement) {
       notificationElement.style.display = 'none';
@@ -251,8 +255,10 @@ class PopupController {
       this.messageTimeoutId = undefined;
     }
     
-    if (callback) {
-      callback();
+    // Execute the stored callback if it exists
+    if (this.notificationCallback) {
+      this.notificationCallback();
+      this.notificationCallback = undefined;
     }
   }
 }
