@@ -1,20 +1,20 @@
 (function() {
   "use strict";
-  const spacing_mode = "spacing_when_load";
-  const filter_mode = "blacklist";
-  const blacklist = ["*://docs.google.com/*", "*://gist.github.com/*", "*://github.com/*/blob/*", "*://github.com/*/commit/*", "*://github.com/*/pull/*"];
-  const whitelist = [];
-  const is_mute_sound_effects = false;
-  const is_enable_detect_cjk = false;
-  const DEFAULT_SETTINGS_JSON = {
-    spacing_mode,
-    filter_mode,
-    blacklist,
-    whitelist,
-    is_mute_sound_effects,
-    is_enable_detect_cjk
+  const DEFAULT_SETTINGS = {
+    spacing_mode: "spacing_when_load",
+    filter_mode: "blacklist",
+    blacklist: [
+      // Default blacklist with valid match patterns
+      "*://docs.google.com/*",
+      "*://gist.github.com/*",
+      "*://github.com/*/blob/*",
+      "*://github.com/*/commit/*",
+      "*://github.com/*/pull/*"
+    ],
+    whitelist: [],
+    is_mute_sound_effects: false,
+    is_enable_detect_cjk: false
   };
-  const DEFAULT_SETTINGS = DEFAULT_SETTINGS_JSON;
   ({ ...DEFAULT_SETTINGS });
   chrome.storage.onChanged.addListener((changes, areaName) => {
   });

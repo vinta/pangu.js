@@ -1,7 +1,20 @@
 import type { Settings } from './types';
-import DEFAULT_SETTINGS_JSON from '../default-settings.json';
 
-export const DEFAULT_SETTINGS: Settings = DEFAULT_SETTINGS_JSON as Settings;
+export const DEFAULT_SETTINGS: Settings = {
+  spacing_mode: 'spacing_when_load',
+  filter_mode: 'blacklist',
+  blacklist: [
+    // Default blacklist with valid match patterns
+    '*://docs.google.com/*',
+    '*://gist.github.com/*',
+    '*://github.com/*/blob/*',
+    '*://github.com/*/commit/*',
+    '*://github.com/*/pull/*',
+  ],
+  whitelist: [],
+  is_mute_sound_effects: false,
+  is_enable_detect_cjk: false,
+};
 
 // Module-level state for settings cache
 let cachedSettings: Settings = { ...DEFAULT_SETTINGS };

@@ -136,9 +136,5 @@
   "label_is_enable_detect_cjk": {
     "message": "只在有中文的頁面才招喚空格之神",
     "description": ""
-  },
-  "detect_cjk_help": {
-    "message": "開啟後，只有在偵測到中文內容時才會執行空格處理，可提升效能。",
-    "description": ""
   }
 }
