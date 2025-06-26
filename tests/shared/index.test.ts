@@ -192,7 +192,9 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面 / 後面')).toBe('前面 / 後面');
       expect(pangu.spacingText('Vinta/Mollie')).toBe('Vinta/Mollie');
       expect(pangu.spacingText('Vinta/陳上進')).toBe('Vinta/陳上進');
+      expect(pangu.spacingText('vinta/陳上進')).toBe('vinta/陳上進');
       expect(pangu.spacingText('陳上進/Vinta')).toBe('陳上進/Vinta');
+      expect(pangu.spacingText('陳上進/vinta')).toBe('陳上進/vinta');
       expect(pangu.spacingText('Mollie/陳上進/Vinta')).toBe('Mollie/陳上進/Vinta');
       expect(pangu.spacingText('得到一個A/B的結果')).toBe('得到一個 A/B 的結果');
       expect(pangu.spacingText('2016-12-26(奇幻电影节) / 2017-01-20(美国) / 詹姆斯麦卡沃伊')).toBe('2016-12-26 (奇幻电影节) / 2017-01-20 (美国) / 詹姆斯麦卡沃伊');
@@ -472,14 +474,14 @@ describe('Pangu', () => {
       expect(pangu.spacingText('<a href="#">連結</a>')).toBe('<a href="#">連結</a>');
       expect(pangu.spacingText('<input value="測試123">')).toBe('<input value="測試 123">');
       expect(pangu.spacingText('<img src="test.jpg" alt="測試圖片">')).toBe('<img src="test.jpg" alt="測試圖片">');
-      
+
       // Multiple tags
       expect(pangu.spacingText('<p>第一段</p><p>第二段</p>')).toBe('<p>第一段</p><p>第二段</p>');
       expect(pangu.spacingText('<h1>標題</h1><p>內容</p>')).toBe('<h1>標題</h1><p>內容</p>');
-      
+
       // Nested tags
       expect(pangu.spacingText('<div><p>嵌套<strong>測試</strong></p></div>')).toBe('<div><p>嵌套<strong>測試</strong></p></div>');
-      
+
       // Self-closing tags
       expect(pangu.spacingText('文字<br>換行')).toBe('文字<br>換行');
       expect(pangu.spacingText('水平線<hr>分隔')).toBe('水平線<hr>分隔');

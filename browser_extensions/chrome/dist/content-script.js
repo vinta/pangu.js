@@ -3,7 +3,15 @@
   const DEFAULT_SETTINGS = {
     spacing_mode: "spacing_when_load",
     filter_mode: "blacklist",
-    blacklist: ["*://docs.google.com/*", "*://gist.github.com/*", "*://github.com/*/blob/*", "*://github.com/*/commit/*", "*://github.com/*/pull/*"],
+    blacklist: [
+      "https://docs.google.com/*",
+      "https://gist.github.com/*",
+      "https://github.com/*/blob/*",
+      "https://github.com/*/commit/*",
+      "https://github.com/*/pull/*",
+      "https://github.com/vinta/pangu.js/issues*",
+      "https://www.netflix.com/*"
+    ],
     whitelist: [],
     is_mute_sound_effects: false,
     is_enable_detect_cjk: false

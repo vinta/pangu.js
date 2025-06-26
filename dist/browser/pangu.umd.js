@@ -6,7 +6,7 @@ var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { en
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 
   const CJK = "\u2E80-\u2EFF\u2F00-\u2FDF\u3040-\u309F\u30A0-\u30FA\u30FC-\u30FF\u3100-\u312F\u3200-\u32FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF";
-  const FILESYSTEM_PATH = /(?:[A-Z]:)?\/[A-Za-z0-9_\-\.@\+]+(?:\/[A-Za-z0-9_\-\.@\+]+)*/;
+  const FILESYSTEM_PATH = /(?:[A-Z]:)?\/(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|\.[A-Za-z0-9_\-\.@\+]+|[A-Za-z0-9_\-\.@\+]+\/[A-Za-z0-9_\-\.@\+]+(?:\/[A-Za-z0-9_\-\.@\+]+)*)/;
   const ANY_CJK = new RegExp(`[${CJK}]`);
   const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK = new RegExp(`([${CJK}])[ ]*([\\:]+|\\.)[ ]*([${CJK}])`, "g");
   const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS = new RegExp(`([${CJK}])[ ]*([~\\!;,\\?]+)[ ]*`, "g");
@@ -35,7 +35,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   const RIGHT_BRACKET_AN = /([\)\]\}])([A-Za-z0-9])/g;
   const CJK_FILESYSTEM_PATH = new RegExp(`([${CJK}])(${FILESYSTEM_PATH.source})`, "g");
   const FILESYSTEM_PATH_SLASH_CJK = new RegExp(`(${FILESYSTEM_PATH.source}/)([${CJK}])`, "g");
-  const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z\u0370-\u03FF0-9@\\$%\\^&\\*\\-\\+\\\\=/\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])`, "g");
+  const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z\u0370-\u03FF0-9@\\$%\\^&\\*\\-\\+\\\\=\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])`, "g");
   const ANS_CJK = new RegExp(`([A-Za-z\u0370-\u03FF0-9~\\$%\\^&\\*\\-\\+\\\\=!;:,\\.\\?\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])([${CJK}])`, "g");
   const S_A = /(%)([A-Za-z])/g;
   const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;

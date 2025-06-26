@@ -21,7 +21,8 @@ const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u
 // Define filesystem path pattern that can be reused
 // Matches Unix paths like /home, /usr/bin, /etc/nginx.conf, /node_modules/@babel/core
 // Also matches Windows paths like C:/ D:/
-const FILESYSTEM_PATH = /(?:[A-Z]:)?\/[A-Za-z0-9_\-\.@\+]+(?:\/[A-Za-z0-9_\-\.@\+]+)*/;
+// Requires at least 2 segments OR common system paths OR hidden files starting with dot
+const FILESYSTEM_PATH = /(?:[A-Z]:)?\/(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|\.[A-Za-z0-9_\-\.@\+]+|[A-Za-z0-9_\-\.@\+]+\/[A-Za-z0-9_\-\.@\+]+(?:\/[A-Za-z0-9_\-\.@\+]+)*)/;
 
 // ANS is short for Alphabets, Numbers, and Symbols.
 //
@@ -84,7 +85,7 @@ const CJK_FILESYSTEM_PATH = new RegExp(`([${CJK}])(${FILESYSTEM_PATH.source})`, 
 // Pattern for filesystem path ending with / followed by CJK
 const FILESYSTEM_PATH_SLASH_CJK = new RegExp(`(${FILESYSTEM_PATH.source}/)([${CJK}])`, 'g');
 
-const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=/\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])`, 'g');
+const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])`, 'g');
 const ANS_CJK = new RegExp(`([A-Za-z\u0370-\u03ff0-9~\\$%\\^&\\*\\-\\+\\\\=!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])([${CJK}])`, 'g');
 
 const S_A = /(%)([A-Za-z])/g;

@@ -43,20 +43,15 @@
 
 ### High Priority - Unfixed Issues
 
-- [ ] Fix issue #158 - Input fields getting auto-spaced
+- [x] Fix issue #158 - Input fields getting auto-spaced
   - Text in input fields should not be automatically spaced
   - Need to exclude input/textarea elements from auto-spacing
 - [ ] Fix issue #173 - Full-width curved quotes shouldn't have spaces
   - Full-width quotation marks (「」『』) are being incorrectly spaced
   - These are punctuation marks in CJK languages and shouldn't be separated
-- [ ] Fix issue #216 - Add support for skipping Markdown syntax
-  - Markdown formatting (like `**bold**`, `_italic_`) gets broken by spacing
-  - Need to protect Markdown syntax during processing
 
 ### Medium Priority - Unfixed Issues
 
-- [ ] Fix issue #161 - Markdown syntax support
-  - Similar to #216, need comprehensive Markdown protection
 - [ ] Fix issue #201 - Spaces inserted between image-separated text
   - When images are used as separators, unwanted spaces are added
 - [ ] Fix issue #207 - Breaking Bilibili upload page layout
@@ -68,6 +63,11 @@
 - [ ] Fix issue #169 - YouTube title persistence bug
   - Changes to YouTube titles don't persist
   - May be related to YouTube's dynamic content updates
+- [ ] Fix issue #216 - Add support for skipping Markdown syntax
+  - Markdown formatting (like `**bold**`, `_italic_`) gets broken by spacing
+  - Need to protect Markdown syntax during processing
+- [ ] Fix issue #161 - Markdown syntax support
+  - Similar to #216, need comprehensive Markdown protection
 
 ### Feature Enhancements
 
