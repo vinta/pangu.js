@@ -64,8 +64,8 @@
     "message": "把這個網址加到黑名單",
     "description": ""
   },
-  "added_to_blacklist": {
-    "message": "已將此網站加入黑名單",
+  "already_in_blacklist": {
+    "message": "加過了啦",
     "description": ""
   },
 

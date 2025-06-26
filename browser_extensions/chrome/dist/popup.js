@@ -35,16 +35,16 @@ class PopupController {
         this.handleManualSpacing();
       });
     }
-    const notification = document.getElementById("notification");
-    if (notification) {
-      notification.addEventListener("click", () => {
-        this.hideNotification();
-      });
-    }
     const addToBlacklistBtn = document.getElementById("add-to-blacklist-btn");
     if (addToBlacklistBtn) {
       addToBlacklistBtn.addEventListener("click", () => {
         this.handleAddToBlacklist();
+      });
+    }
+    const notification = document.getElementById("notification");
+    if (notification) {
+      notification.addEventListener("click", () => {
+        this.hideNotification();
       });
     }
     chrome.runtime.onMessage.addListener((message, sender) => {
@@ -246,14 +246,12 @@ class PopupController {
       const domainPattern = `${url.protocol}//${url.hostname}/*`;
       const settings = await getCachedSettings();
       if (settings.blacklist.includes(domainPattern)) {
-        this.showMessage(chrome.i18n.getMessage("added_to_blacklist"), "info", 1e3 * 3);
+        this.showMessage(chrome.i18n.getMessage("already_in_blacklist"), "info", 1e3 * 3);
         return;
       }
       settings.blacklist.push(domainPattern);
       await chrome.storage.sync.set({ blacklist: settings.blacklist });
-      this.showMessage(chrome.i18n.getMessage("added_to_blacklist"), "success", 1e3 * 3);
-      await playSound("Hadouken");
-      await this.renderStatus();
+      this.showMessage(chrome.i18n.getMessage("refresh_required"), "info", 1e3 * 3);
     } catch (error) {
       console.error("Failed to add to blacklist:", error);
       await this.showErrorMessage();
