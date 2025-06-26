@@ -8,6 +8,10 @@
 - [x] Use Chrome's `excludeMatches` API for efficient blacklist handling
 - [x] Add a button for "把這個網址加到黑名單" in popup page
   - Which only add `https://example.com/*` instead of the entire url
+- [x] Add dynamic title spacing support for SPAs like YouTube (#169)
+  - Observe both document.body and document.head for mutations
+  - Handle title changes with debounced re-spacing
+  - Fixed title observer setup in `setupAutoSpacingPageObserver()`
 
 ### Optimization
 
@@ -15,6 +19,14 @@
 - [x] Implement dynamic content script registration with chrome.scripting API
 - [x] Optimize `pangu.js` loading with on-demand injection
 - [x] Skip auto spacing if there is no CJK content in webpages
+
+### Code Quality Improvements
+
+- [x] Refactor mutation observer setup to be self-contained
+- [x] Remove unnecessary `self = this` pattern in favor of arrow functions
+- [x] Clean up misleading comments about concurrent workers
+- [x] Add detailed documentation for mutation handling logic
+- [x] Improve test structure for YouTube formatted strings
 
 ### Regex Pattern Fixes
 
@@ -37,9 +49,22 @@
   - Removed the `FIX_NAME_SLASH` workaround as it's no longer needed
   - Pattern now only matches paths starting with system dirs like `/home`, `/usr`, `/etc`, or `/node_modules`
 
+### Testing & Investigation (2025-01-26)
+
+- [x] Investigated spacing between adjacent sibling elements (YouTube hashtag test case)
+  - Attempted multiple approaches: sibling checking, post-processing, XPath modifications
+  - Confirmed this is a fundamental limitation of the current XPath-based algorithm
+  - Test marked as skipped in `tests/browser/pangu.playwright.ts:195`
+  - Documented limitation and workaround in TODO
+
 ## In Progress
 
-- [ ] None currently active
+- [ ] Fix spacing between span and link elements (YouTube hashtag case)
+  - Current: `<span>text</span><a>#hashtag</a>`
+  - Expected: `<span>text </span><a>#hashtag</a>` OR `<span>text</span><a> #hashtag</a>`
+  - Note: Current XPath-based approach has limitations with adjacent sibling elements
+  - Workaround: Use CSS margins or padding for visual spacing
+  - **Status**: Investigated, requires architectural changes to fix properly
 
 ## Next Steps
 
