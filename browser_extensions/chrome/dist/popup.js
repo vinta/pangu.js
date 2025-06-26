@@ -48,12 +48,12 @@ class PopupController {
     });
   }
   async render() {
-    await this.renderToggle();
+    await this.renderSpacingModeToggle();
     await this.renderMuteToggle();
     await this.renderStatus();
     this.renderVersion();
   }
-  async renderToggle() {
+  async renderSpacingModeToggle() {
     const settings = await getCachedSettings();
     const spacingModeToggle = document.getElementById("spacing-mode-toggle");
     if (spacingModeToggle) {

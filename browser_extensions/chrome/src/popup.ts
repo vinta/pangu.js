@@ -60,13 +60,13 @@ class PopupController {
   }
 
   private async render() {
-    await this.renderToggle();
+    await this.renderSpacingModeToggle();
     await this.renderMuteToggle();
     await this.renderStatus();
     this.renderVersion();
   }
 
-  private async renderToggle() {
+  private async renderSpacingModeToggle() {
     const settings = await getCachedSettings();
     const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
     if (spacingModeToggle) {
