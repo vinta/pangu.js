@@ -17,6 +17,8 @@
 - [x] Implement dynamic content script registration with chrome.scripting API
 - [x] Optimize `pangu.js` loading with on-demand injection
 - [x] Skip auto spacing if there is no CJK content in webpages
+- [x] Add a button for "把這個網址加到黑名單" in popup page
+  - Which only add `https://example.com/*` instead of the entire url
 
 ### Match Pattern Implementation
 
@@ -51,36 +53,9 @@
 
 ## Next Steps
 
-### High Priority - Unfixed Issues
-
-- [ ] Fix issue #173 - Full-width curved quotes shouldn't have spaces
-  - Full-width quotation marks (「」『』) are being incorrectly spaced
-  - These are punctuation marks in CJK languages and shouldn't be separated
-
-### Medium Priority - Unfixed Issues
-
-- [ ] Fix issue #201 - Spaces inserted between image-separated text
-  - When images are used as separators, unwanted spaces are added
-- [ ] Fix issue #207 - Breaking Bilibili upload page layout
-  - Auto-spacing interferes with specific website functionality
-  - May need site-specific rules or better element detection
-
-### Low Priority - Unfixed Issues
-
-- [ ] Fix issue #169 - YouTube title persistence bug
-  - Changes to YouTube titles don't persist
-  - May be related to YouTube's dynamic content updates
-- [ ] Fix issue #216 - Add support for skipping Markdown syntax
-  - Markdown formatting (like `**bold**`, `_italic_`) gets broken by spacing
-  - Need to protect Markdown syntax during processing
-- [ ] Fix issue #161 - Markdown syntax support
-  - Similar to #216, need comprehensive Markdown protection
-
-### Feature Enhancements
+### High Priority
 
 - [ ] Generate different size icons from `icon_1500.svg`
-- [ ] Add a button for "把這個網址加到黑名單" in popup page
-  - Which only add `https://example.com/*` instead of the entire url
 - [ ] Improve `autoSpacingPage()` performance, especially with a large DOM tree
   - See @.claude/researches/performance-optimization.md
 - [ ] Add instructions in options page for enabling experimental CSS `text-autospace`
@@ -88,8 +63,27 @@
   - Auto-detect and use CSS text-autospace when available
   - Provide clear benefits explanation (better performance, native spacing)
 
-### Low Priority - Future Enhancements
+### Medium Priority
+
+- [ ] Fix issue #201 - Spaces inserted between image-separated text
+  - When images are used as separators, unwanted spaces are added
+- [ ] Fix issue #173 - Full-width curved quotes shouldn't have spaces
+  - Full-width quotation marks (「」『』) are being incorrectly spaced
+  - These are punctuation marks in CJK languages and shouldn't be separated
+- [ ] Fix issue #169 - YouTube title persistence bug
+  - Changes to YouTube titles don't persist
+  - May be related to YouTube's dynamic content updates
+- [ ] Fix issue #207 - Breaking Bilibili upload page layout
+  - Auto-spacing interferes with specific website functionality
+  - May need site-specific rules or better element detection
+
+### Low Priority
 
 - [ ] Use Verified CRX uploads
 - [ ] Implement tree-shaking optimizations
 - [ ] Publish to JSR (JavaScript Registry)
+- [ ] Fix issue #216 - Add support for skipping Markdown syntax
+  - Markdown formatting (like `**bold**`, `_italic_`) gets broken by spacing
+  - Need to protect Markdown syntax during processing
+- [ ] Fix issue #161 - Markdown syntax support
+  - Similar to #216, need comprehensive Markdown protection
