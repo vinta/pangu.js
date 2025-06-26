@@ -22,6 +22,7 @@
 
 - Community support:
 
+  - [Paranoid Text Spacing](https://tools.1chooo.com/paranoid-text-spacing)
   - [盤古之白 - 文案排版轉換](https://pangu.serko.dev/)
 
 ### For Developers
