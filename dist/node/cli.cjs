@@ -73,26 +73,26 @@ class BrowserPangu extends index.Pangu {
       return;
     }
     this.isAutoSpacingPageExecuted = true;
-    const spacingPageOnceOnly = once(() => {
+    const spacingPageOnce = once(() => {
       this.spacingPage();
     });
     const videos = document.getElementsByTagName("video");
     if (videos.length === 0) {
       setTimeout(() => {
-        spacingPageOnceOnly();
+        spacingPageOnce();
       }, pageDelayMs);
     } else {
       for (let i = 0; i < videos.length; i++) {
         const video = videos[i];
         if (video.readyState === 4) {
           setTimeout(() => {
-            spacingPageOnceOnly();
+            spacingPageOnce();
           }, 3e3);
           break;
         }
         video.addEventListener("loadeddata", () => {
           setTimeout(() => {
-            spacingPageOnceOnly();
+            spacingPageOnce();
           }, 4e3);
         });
       }

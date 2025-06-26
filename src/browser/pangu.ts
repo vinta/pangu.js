@@ -100,26 +100,26 @@ export class BrowserPangu extends Pangu {
 
     // FIXME
     // Dirty hack for https://github.com/vinta/pangu.js/issues/117
-    const spacingPageOnceOnly = once(() => {
+    const spacingPageOnce = once(() => {
       this.spacingPage();
     });
     const videos = document.getElementsByTagName('video');
     if (videos.length === 0) {
       setTimeout(() => {
-        spacingPageOnceOnly();
+        spacingPageOnce();
       }, pageDelayMs);
     } else {
       for (let i = 0; i < videos.length; i++) {
         const video = videos[i];
         if (video.readyState === 4) {
           setTimeout(() => {
-            spacingPageOnceOnly();
+            spacingPageOnce();
           }, 3000);
           break;
         }
         video.addEventListener('loadeddata', () => {
           setTimeout(() => {
-            spacingPageOnceOnly();
+            spacingPageOnce();
           }, 4000);
         });
       }
