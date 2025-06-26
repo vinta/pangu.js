@@ -464,29 +464,26 @@ export class BrowserPangu extends Pangu {
 
     const queue: Node[] = [];
 
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-    const debouncedSpacingNode = debounce(
+    const debouncedSpacingTitle = debounce(
       () => {
-        // a single node could be very big which contains a lot of child nodes
-        while (queue.length) {
-          const node = queue.shift();
-          if (node) {
-            self.spacingNode(node);
-          }
-        }
+        this.spacingPageTitle();
       },
       nodeDelayMs,
       nodeMaxWaitMs,
     );
 
-    // Create a debounced function for spacing title
-    const debouncedSpacingTitle = debounce(
+    const debouncedSpacingNode = debounce(
       () => {
-        this.spacingPageTitle();
+        // NOTE: a single node could be very big which contains a lot of child nodes
+        while (queue.length) {
+          const node = queue.shift();
+          if (node) {
+            this.spacingNode(node);
+          }
+        }
       },
-      100,
-      500,
+      nodeDelayMs,
+      nodeMaxWaitMs,
     );
 
     // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
@@ -530,20 +527,23 @@ export class BrowserPangu extends Pangu {
       debouncedSpacingNode();
     });
 
-    // Observe body for content changes
+    // NOTE: A single MutationObserver can observe multiple targets simultaneously
+    // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver/observe:
+
+    // Observe page content changes
     this.autoSpacingPageObserver.observe(document.body, {
       characterData: true,
       childList: true,
       subtree: true,
     });
 
-    // Also observe title element for changes
+    // Observe page title changes
     const titleElement = document.querySelector('title');
     if (titleElement) {
       this.autoSpacingPageObserver.observe(titleElement, {
-        childList: true,
         characterData: true,
-        subtree: true,
+        childList: false,
+        subtree: true, // Need subtree to observe text node changes inside title
       });
     }
   }

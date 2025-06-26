@@ -38,7 +38,7 @@ export declare class BrowserPangu extends Pangu {
     protected canIgnoreNode(node: Node): boolean;
     protected isFirstTextChild(parentNode: Node, targetNode: Node): boolean;
     protected isLastTextChild(parentNode: Node, targetNode: Node): boolean;
-    protected setupAutoSpacingPageObserver(queue: Node[], debouncedSpacingNodes: () => void): void;
+    protected setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number): void;
     protected setupCjkObserver({ nodeDelayMs, nodeMaxWaitMs, cjkObserverMaxWaitMs }: SmartAutoSpacingPageConfig): void;
 }
 export declare const pangu: BrowserPangu;

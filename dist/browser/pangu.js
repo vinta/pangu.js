@@ -71,45 +71,31 @@ class BrowserPangu extends Pangu {
       return;
     }
     this.isAutoSpacingPageExecuted = true;
-    const onceSpacingPage = once(() => {
+    const spacingPageOnceOnly = once(() => {
       this.spacingPage();
     });
     const videos = document.getElementsByTagName("video");
     if (videos.length === 0) {
       setTimeout(() => {
-        onceSpacingPage();
+        spacingPageOnceOnly();
       }, pageDelayMs);
     } else {
       for (let i = 0; i < videos.length; i++) {
         const video = videos[i];
         if (video.readyState === 4) {
           setTimeout(() => {
-            onceSpacingPage();
+            spacingPageOnceOnly();
           }, 3e3);
           break;
         }
         video.addEventListener("loadeddata", () => {
           setTimeout(() => {
-            onceSpacingPage();
+            spacingPageOnceOnly();
           }, 4e3);
         });
       }
     }
-    const queue = [];
-    const self = this;
-    const debouncedSpacingNodes = debounce(
-      () => {
-        while (queue.length) {
-          const node = queue.shift();
-          if (node) {
-            self.spacingNode(node);
-          }
-        }
-      },
-      nodeDelayMs,
-      nodeMaxWaitMs
-    );
-    this.setupAutoSpacingPageObserver(queue, debouncedSpacingNodes);
+    this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
   }
   smartAutoSpacingPage({ pageDelayMs = 1e3, nodeDelayMs = 500, nodeMaxWaitMs = 2e3, sampleSize = 1e3, cjkObserverMaxWaitMs = 3e4 } = {}) {
     if (!this.hasCjk(sampleSize)) {
@@ -344,13 +330,39 @@ class BrowserPangu extends Pangu {
     }
     return false;
   }
-  setupAutoSpacingPageObserver(queue, debouncedSpacingNodes) {
+  setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs) {
     if (this.autoSpacingPageObserver) {
       this.autoSpacingPageObserver.disconnect();
       this.autoSpacingPageObserver = null;
     }
+    const queue = [];
+    const debouncedSpacingTitle = debounce(
+      () => {
+        this.spacingPageTitle();
+      },
+      nodeDelayMs,
+      nodeMaxWaitMs
+    );
+    const debouncedSpacingNode = debounce(
+      () => {
+        while (queue.length) {
+          const node = queue.shift();
+          if (node) {
+            this.spacingNode(node);
+          }
+        }
+      },
+      nodeDelayMs,
+      nodeMaxWaitMs
+    );
     this.autoSpacingPageObserver = new MutationObserver((mutations) => {
+      var _a;
+      let titleChanged = false;
       for (const mutation of mutations) {
+        if (((_a = mutation.target.parentNode) == null ? void 0 : _a.nodeName) === "TITLE" || mutation.target.nodeName === "TITLE") {
+          titleChanged = true;
+          continue;
+        }
         switch (mutation.type) {
           case "childList":
             for (const node2 of mutation.addedNodes) {
@@ -369,13 +381,25 @@ class BrowserPangu extends Pangu {
             break;
         }
       }
-      debouncedSpacingNodes();
+      if (titleChanged) {
+        debouncedSpacingTitle();
+      }
+      debouncedSpacingNode();
     });
     this.autoSpacingPageObserver.observe(document.body, {
       characterData: true,
       childList: true,
       subtree: true
     });
+    const titleElement = document.querySelector("title");
+    if (titleElement) {
+      this.autoSpacingPageObserver.observe(titleElement, {
+        characterData: true,
+        childList: false,
+        subtree: true
+        // Need subtree to observe text node changes inside title
+      });
+    }
   }
   setupCjkObserver({ nodeDelayMs = 500, nodeMaxWaitMs = 2e3, cjkObserverMaxWaitMs = 1e3 * 30 }) {
     if (this.cjkObserver) {
