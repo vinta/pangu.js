@@ -131,7 +131,7 @@ export class BrowserPangu extends Pangu {
     // It's possible that multiple workers process the queue at the same time
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
-    const debouncedSpacingNodes = debounce(
+    const debouncedSpacingNode = debounce(
       () => {
         // a single node could be very big which contains a lot of child nodes
         while (queue.length) {
@@ -145,7 +145,7 @@ export class BrowserPangu extends Pangu {
       nodeMaxWaitMs,
     );
 
-    this.setupAutoSpacingPageObserver(queue, debouncedSpacingNodes);
+    this.setupAutoSpacingPageObserver(queue, debouncedSpacingNode);
   }
 
   public smartAutoSpacingPage({ pageDelayMs = 1000, nodeDelayMs = 500, nodeMaxWaitMs = 2000, sampleSize = 1000, cjkObserverMaxWaitMs = 30000 }: SmartAutoSpacingPageConfig = {}) {
@@ -475,7 +475,7 @@ export class BrowserPangu extends Pangu {
     return false;
   }
 
-  protected setupAutoSpacingPageObserver(queue: Node[], debouncedSpacingNodes: () => void) {
+  protected setupAutoSpacingPageObserver(queue: Node[], processQueueFunc: () => void) {
     // Disconnect any existing auto-spacing observer
     if (this.autoSpacingPageObserver) {
       this.autoSpacingPageObserver.disconnect();
@@ -508,7 +508,7 @@ export class BrowserPangu extends Pangu {
         }
       }
 
-      debouncedSpacingNodes();
+      processQueueFunc();
     });
     this.autoSpacingPageObserver.observe(document.body, {
       characterData: true,
