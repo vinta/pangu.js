@@ -1,15 +1,6 @@
 import type { BrowserPangu } from '../../../src/browser/pangu';
+import { DEFAULT_SETTINGS } from './utils/settings';
 import type { MessageToContentScript, ContentScriptResponse, ContentScriptLoadedMessage, Settings } from './utils/types';
-
-// Inline DEFAULT_SETTINGS to avoid ES module issues in content scripts
-const DEFAULT_SETTINGS: Settings = {
-  spacing_mode: 'spacing_when_load',
-  filter_mode: 'blacklist',
-  blacklist: ['*://docs.google.com/*', '*://gist.github.com/*', '*://github.com/*/blob/*', '*://github.com/*/commit/*', '*://github.com/*/pull/*'],
-  whitelist: [],
-  is_mute_sound_effects: false,
-  is_enable_detect_cjk: false,
-};
 
 // Extend the global Window interface to include the pangu object
 // The pangu object is injected by pangu.umd.js which loads before this script

@@ -1,6 +1,6 @@
-import { defineConfig, build } from 'vite';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { defineConfig, build } from 'vite';
 import dts from 'vite-plugin-dts';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
@@ -44,7 +44,6 @@ const multiBuildPlugin = () => {
           charset: 'ascii',
         },
       });
-      console.log('✓ CommonJS modules built');
 
       // Build UMD for browser
       console.log('\nBuilding browser UMD bundle...');
@@ -66,7 +65,7 @@ const multiBuildPlugin = () => {
               name: 'pangu',
             },
             external: (id) => {
-              return id.startsWith('node:') || ['fs', 'path', 'process'].includes(id);
+              return id.startsWith('node:');
             },
           },
         },
@@ -75,8 +74,7 @@ const multiBuildPlugin = () => {
           charset: 'ascii',
         },
       });
-      console.log('✓ Browser UMD bundle built');
-    }
+    },
   };
 };
 
@@ -120,6 +118,6 @@ export default defineConfig({
         declarationMap: false,
       },
     }),
-    multiBuildPlugin()
+    multiBuildPlugin(),
   ],
 });

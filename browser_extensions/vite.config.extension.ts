@@ -1,5 +1,43 @@
 import { resolve } from 'node:path';
-import { defineConfig } from 'vite';
+import { defineConfig, build } from 'vite';
+
+// Custom plugin to handle multiple builds
+const multiBuildPlugin = () => {
+  return {
+    name: 'multi-build',
+    closeBundle: async () => {
+      // Build content script as IIFE
+      console.log('\nBuilding content script as IIFE...');
+      await build({
+        configFile: false,
+        build: {
+          outDir: resolve(__dirname, 'chrome/dist'),
+          emptyOutDir: false,
+          sourcemap: false,
+          minify: false,
+          lib: {
+            entry: resolve(__dirname, 'chrome/src/content-script.ts'),
+            formats: ['iife'],
+            name: 'PanguContentScript',
+            fileName: () => 'content-script.js',
+          },
+          rollupOptions: {
+            output: {
+              inlineDynamicImports: true,
+            },
+          },
+        },
+        resolve: {
+          extensions: ['.ts', '.json'],
+        },
+        esbuild: {
+          target: 'chrome95',
+          charset: 'ascii',
+        },
+      });
+    },
+  };
+};
 
 export default defineConfig({
   build: {
@@ -14,7 +52,6 @@ export default defineConfig({
         popup: resolve(__dirname, 'chrome/src/popup.ts'),
         options: resolve(__dirname, 'chrome/src/options.ts'),
         'service-worker': resolve(__dirname, 'chrome/src/service-worker.ts'),
-        'content-script': resolve(__dirname, 'chrome/src/content-script.ts'),
       },
       output: {
         entryFileNames: '[name].js',
@@ -31,4 +68,5 @@ export default defineConfig({
   resolve: {
     extensions: ['.ts'],
   },
+  plugins: [multiBuildPlugin()],
 });
