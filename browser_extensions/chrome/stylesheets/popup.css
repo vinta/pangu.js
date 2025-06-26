@@ -1,6 +1,6 @@
 .popup-container {
   position: relative;
-  width: 420px;
+  width: 400px;
   padding: 0;
   background-color: var(--color-surface);
   display: flex;
@@ -17,7 +17,6 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-3);
-  margin-bottom: var(--spacing-2);
 }
 
 .popup-logo {
@@ -35,7 +34,7 @@
 }
 
 .popup-subtitle {
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   color: var(--color-text-secondary);
   margin: 0;
   margin-top: var(--spacing-1);
@@ -67,6 +66,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
 }
 
 .popup-footer-links {
@@ -75,7 +76,6 @@
 }
 
 .popup-footer-link {
-  font-size: var(--text-base);
   color: var(--color-text-secondary);
 }
 

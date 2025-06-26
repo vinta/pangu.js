@@ -353,6 +353,7 @@
 
 .options-credits {
   margin-top: var(--spacing-2);
+  color: var(--color-text-secondary);
 }
 
 .copyleft {

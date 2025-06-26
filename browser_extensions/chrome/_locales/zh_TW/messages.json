@@ -4,7 +4,7 @@
     "description": ""
   },
   "extension_description": {
-    "message": "自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。（攤手）沒辦法，處女座都有強迫症。",
+    "message": "自動在網頁的中文和英文、數字、符號之間插入空白。（攤手）沒辦法，處女座都有強迫症。",
     "description": ""
   },
   "god_of_spacing": {
@@ -70,7 +70,7 @@
   },
 
   "options_subtitle": {
-    "message": "自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白",
+    "message": "自動在網頁的中文和英文、數字、符號之間插入空白",
     "description": ""
   },
   "quote": {
@@ -142,7 +142,7 @@
     "description": ""
   },
   "label_is_enable_detect_cjk": {
-    "message": "只在有中文的頁面才招喚空格之神（測試中的功能）",
+    "message": "只在有中文的頁面才招喚空格之神（測試中，不要用）",
     "description": ""
   }
 }
