@@ -1,6 +1,6 @@
 .popup-container {
   position: relative;
-  width: 380px;
+  width: 420px;
   padding: 0;
   background-color: var(--color-surface);
   display: flex;
@@ -16,25 +16,30 @@
 .popup-brand {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
-  margin-bottom: var(--spacing-1);
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-2);
 }
 
 .popup-logo {
-  width: 24px;
-  height: 24px;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
 }
 
 .popup-title {
-  font-size: var(--text-xl);
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
   color: var(--color-text-primary);
-  white-space: nowrap;
+  margin: 0;
+  line-height: 1.2;
 }
 
 .popup-subtitle {
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
+  margin: 0;
+  margin-top: var(--spacing-1);
+  line-height: 1.4;
 }
 
 .popup-content {
