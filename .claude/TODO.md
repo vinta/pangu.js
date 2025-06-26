@@ -24,14 +24,6 @@ pangu.js is a mature text spacing library that automatically inserts whitespace 
 - [x] On-demand pangu.js injection (files: service-worker.ts, content-script.ts)
 - [x] Skip auto-spacing for non-CJK pages (files: content-script.ts)
 
-### Code Quality Improvements
-
-- [x] Refactor mutation observer to be self-contained (files: browser/pangu.ts)
-- [x] Replace `self = this` with arrow functions (files: browser/pangu.ts)
-- [x] Clean up concurrent worker comments (files: shared/index.ts)
-- [x] Add mutation handling documentation (files: browser/pangu.ts)
-- [x] Improve YouTube test structure (files: tests/browser/pangu.playwright.ts)
-
 ### Regex Pattern Fixes
 
 - [x] Fixed `AN_LEFT_BRACKET` for function calls like `a.getB()` (files: shared/index.ts)
@@ -70,7 +62,6 @@ pangu.js is a mature text spacing library that automatically inserts whitespace 
 
 ### High Priority
 
-- [ ] Generate different size icons from `icon_1500.svg` (Reason: Missing required extension icons)
 - [ ] Improve `autoSpacingPage()` performance for large DOM trees (Reason: User experience on heavy pages)
   - Reference: @.claude/researches/performance-optimization.md
 
