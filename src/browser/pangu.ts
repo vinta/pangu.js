@@ -98,54 +98,34 @@ export class BrowserPangu extends Pangu {
 
     this.isAutoSpacingPageExecuted = true;
 
-    const onceSpacingPage = once(() => {
+    // FIXME
+    // Dirty hack for https://github.com/vinta/pangu.js/issues/117
+    const spacingPageOnceOnly = once(() => {
       this.spacingPage();
     });
-
-    // TODO
-    // this is a dirty hack for https://github.com/vinta/pangu.js/issues/117
     const videos = document.getElementsByTagName('video');
     if (videos.length === 0) {
       setTimeout(() => {
-        onceSpacingPage();
+        spacingPageOnceOnly();
       }, pageDelayMs);
     } else {
       for (let i = 0; i < videos.length; i++) {
         const video = videos[i];
         if (video.readyState === 4) {
           setTimeout(() => {
-            onceSpacingPage();
+            spacingPageOnceOnly();
           }, 3000);
           break;
         }
         video.addEventListener('loadeddata', () => {
           setTimeout(() => {
-            onceSpacingPage();
+            spacingPageOnceOnly();
           }, 4000);
         });
       }
     }
 
-    const queue: Node[] = [];
-
-    // It's possible that multiple workers process the queue at the same time
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-    const debouncedSpacingNode = debounce(
-      () => {
-        // a single node could be very big which contains a lot of child nodes
-        while (queue.length) {
-          const node = queue.shift();
-          if (node) {
-            self.spacingNode(node);
-          }
-        }
-      },
-      nodeDelayMs,
-      nodeMaxWaitMs,
-    );
-
-    this.setupAutoSpacingPageObserver(queue, debouncedSpacingNode);
+    this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
   }
 
   public smartAutoSpacingPage({ pageDelayMs = 1000, nodeDelayMs = 500, nodeMaxWaitMs = 2000, sampleSize = 1000, cjkObserverMaxWaitMs = 30000 }: SmartAutoSpacingPageConfig = {}) {
@@ -475,18 +455,53 @@ export class BrowserPangu extends Pangu {
     return false;
   }
 
-  protected setupAutoSpacingPageObserver(queue: Node[], processQueueFunc: () => void) {
+  protected setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number) {
     // Disconnect any existing auto-spacing observer
     if (this.autoSpacingPageObserver) {
       this.autoSpacingPageObserver.disconnect();
       this.autoSpacingPageObserver = null;
     }
 
+    const queue: Node[] = [];
+
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+    const debouncedSpacingNode = debounce(
+      () => {
+        // a single node could be very big which contains a lot of child nodes
+        while (queue.length) {
+          const node = queue.shift();
+          if (node) {
+            self.spacingNode(node);
+          }
+        }
+      },
+      nodeDelayMs,
+      nodeMaxWaitMs,
+    );
+
+    // Create a debounced function for spacing title
+    const debouncedSpacingTitle = debounce(
+      () => {
+        this.spacingPageTitle();
+      },
+      100,
+      500,
+    );
+
     // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
     this.autoSpacingPageObserver = new MutationObserver((mutations) => {
+      let titleChanged = false;
+
       // Element: https://developer.mozilla.org/en-US/docs/Web/API/Element
       // Text: https://developer.mozilla.org/en-US/docs/Web/API/Text
       for (const mutation of mutations) {
+        // Check if mutation is in title element
+        if (mutation.target.parentNode?.nodeName === 'TITLE' || mutation.target.nodeName === 'TITLE') {
+          titleChanged = true;
+          continue;
+        }
+
         switch (mutation.type) {
           case 'childList':
             for (const node of mutation.addedNodes) {
@@ -508,13 +523,29 @@ export class BrowserPangu extends Pangu {
         }
       }
 
-      processQueueFunc();
+      if (titleChanged) {
+        debouncedSpacingTitle();
+      }
+
+      debouncedSpacingNode();
     });
+
+    // Observe body for content changes
     this.autoSpacingPageObserver.observe(document.body, {
       characterData: true,
       childList: true,
       subtree: true,
     });
+
+    // Also observe title element for changes
+    const titleElement = document.querySelector('title');
+    if (titleElement) {
+      this.autoSpacingPageObserver.observe(titleElement, {
+        childList: true,
+        characterData: true,
+        subtree: true,
+      });
+    }
   }
 
   protected setupCjkObserver({ nodeDelayMs = 500, nodeMaxWaitMs = 2000, cjkObserverMaxWaitMs = 1000 * 30 }: SmartAutoSpacingPageConfig) {
