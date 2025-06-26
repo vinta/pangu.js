@@ -69,8 +69,8 @@
     "test:shared": "npm run build && vitest run tests/shared/",
     "test:node": "npm run build && vitest run tests/node/",
     "test:browser": "npm run build && playwright test",
-    "lint": "eslint src/ scripts/ tests/",
-    "lint:fix": "eslint src/ scripts/ tests/ --fix",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "publish-package": "node ./scripts/publish-package.js",
     "pack-extension": "npm run pack-extension:chrome",
     "pack-extension:chrome": "./scripts/pack-extension-chrome.sh"

@@ -5,7 +5,7 @@ import tseslint from 'typescript-eslint';
 export default tseslint.config(
   {
     // Global ignores
-    ignores: ['node_modules/', 'dist/'],
+    ignores: ['node_modules/', 'dist/', 'browser_extensions/chrome/dist/', 'browser_extensions/chrome/vendors/'],
   },
   {
     // TypeScript files
