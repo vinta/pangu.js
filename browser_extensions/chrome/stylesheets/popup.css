@@ -75,15 +75,6 @@
   gap: var(--spacing-3);
 }
 
-.popup-footer-link {
-  color: var(--color-text-secondary);
-}
-
-.popup-footer-link:hover {
-  color: var(--color-primary);
-  text-decoration: none;
-}
-
 /* Notification styles */
 .notification {
   position: absolute;

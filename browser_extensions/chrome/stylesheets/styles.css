@@ -101,7 +101,6 @@ a {
 }
 
 a:hover {
-  color: var(--color-primary-hover);
   text-decoration: underline;
 }
 
@@ -399,7 +398,6 @@ a:hover {
 
 /* Utility classes */
 .text-center { text-align: center; }
-.text-muted { color: var(--color-text-secondary); }
 .mt-2 { margin-top: var(--spacing-2) !important; }
 .mt-4 { margin-top: var(--spacing-4) !important; }
 .mt-6 { margin-top: var(--spacing-6) !important; }
@@ -408,4 +406,3 @@ a:hover {
 .mb-4 { margin-bottom: var(--spacing-4) !important; }
 .mb-6 { margin-bottom: var(--spacing-6) !important; }
 .mb-8 { margin-bottom: var(--spacing-8) !important; }
-

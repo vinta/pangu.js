@@ -90,16 +90,6 @@
   text-align: right;
 }
 
-.url-list-help a {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-size: var(--text-base);
-}
-
-.url-list-help a:hover {
-  text-decoration: underline;
-}
-
 /* URL list styles */
 .filter_mode_list {
   list-style: none;
@@ -329,21 +319,6 @@
   align-items: center;
   gap: var(--spacing-2);
   margin-bottom: var(--spacing-4);
-}
-
-.footer-link {
-  font-size: var(--text-base);
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  padding: var(--spacing-1) var(--spacing-2);
-  border-radius: var(--radius);
-  transition: all var(--transition-fast);
-}
-
-.footer-link:hover {
-  color: var(--color-primary);
-  background-color: var(--color-primary-light);
-  text-decoration: none;
 }
 
 .footer-separator {
