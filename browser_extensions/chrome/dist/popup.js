@@ -23,6 +23,12 @@ class PopupController {
         this.handleSpacingModeToggleChange();
       });
     }
+    const muteToggle = document.getElementById("mute-toggle");
+    if (muteToggle) {
+      muteToggle.addEventListener("change", () => {
+        this.handleMuteToggleChange();
+      });
+    }
     const manualSpacingBtn = document.getElementById("manual-spacing-btn");
     if (manualSpacingBtn) {
       manualSpacingBtn.addEventListener("click", () => {
@@ -43,6 +49,7 @@ class PopupController {
   }
   async render() {
     await this.renderToggle();
+    await this.renderMuteToggle();
     await this.renderStatus();
     this.renderVersion();
   }
@@ -51,6 +58,13 @@ class PopupController {
     const spacingModeToggle = document.getElementById("spacing-mode-toggle");
     if (spacingModeToggle) {
       spacingModeToggle.checked = settings.spacing_mode === "spacing_when_load";
+    }
+  }
+  async renderMuteToggle() {
+    const settings = await getCachedSettings();
+    const muteToggle = document.getElementById("mute-toggle");
+    if (muteToggle) {
+      muteToggle.checked = settings.is_mute_sound_effects;
     }
   }
   async renderStatus() {
@@ -81,6 +95,13 @@ class PopupController {
     await chrome.storage.sync.set({ spacing_mode: spacingMode });
     this.showMessage(chrome.i18n.getMessage("refresh_required"), "info", 1e3 * 3);
     await playSound(spacingMode === "spacing_when_load" ? "Shouryuuken" : "Hadouken");
+  }
+  async handleMuteToggleChange() {
+    const toggle = document.getElementById("mute-toggle");
+    await chrome.storage.sync.set({ is_mute_sound_effects: toggle.checked });
+    if (!toggle.checked) {
+      await playSound("Hadouken");
+    }
   }
   async handleManualSpacing() {
     const button = document.getElementById("manual-spacing-btn");

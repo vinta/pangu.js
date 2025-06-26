@@ -31,6 +31,13 @@ class PopupController {
       });
     }
 
+    const muteToggle = document.getElementById('mute-toggle') as HTMLInputElement;
+    if (muteToggle) {
+      muteToggle.addEventListener('change', () => {
+        this.handleMuteToggleChange();
+      });
+    }
+
     const manualSpacingBtn = document.getElementById('manual-spacing-btn');
     if (manualSpacingBtn) {
       manualSpacingBtn.addEventListener('click', () => {
@@ -54,6 +61,7 @@ class PopupController {
 
   private async render() {
     await this.renderToggle();
+    await this.renderMuteToggle();
     await this.renderStatus();
     this.renderVersion();
   }
@@ -63,6 +71,14 @@ class PopupController {
     const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
     if (spacingModeToggle) {
       spacingModeToggle.checked = settings.spacing_mode === 'spacing_when_load';
+    }
+  }
+
+  private async renderMuteToggle() {
+    const settings = await getCachedSettings();
+    const muteToggle = document.getElementById('mute-toggle') as HTMLInputElement;
+    if (muteToggle) {
+      muteToggle.checked = settings.is_mute_sound_effects;
     }
   }
 
@@ -105,6 +121,16 @@ class PopupController {
 
     this.showMessage(chrome.i18n.getMessage('refresh_required'), 'info', 1000 * 3);
     await playSound(spacingMode === 'spacing_when_load' ? 'Shouryuuken' : 'Hadouken');
+  }
+
+  private async handleMuteToggleChange() {
+    const toggle = document.getElementById('mute-toggle') as HTMLInputElement;
+    await chrome.storage.sync.set({ is_mute_sound_effects: toggle.checked });
+    
+    // Play a sound when turning off mute to confirm it works
+    if (!toggle.checked) {
+      await playSound('Hadouken');
+    }
   }
 
   private async handleManualSpacing() {
