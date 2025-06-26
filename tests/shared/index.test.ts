@@ -7,7 +7,7 @@ describe('Pangu', () => {
   describe('spacingText()', () => {
     // 略過
 
-    it('略過 _ 符號', () => {
+    it('should skip underscore', () => {
       expect(pangu.spacingText('前面_後面')).toBe('前面_後面');
       expect(pangu.spacingText('前面 _ 後面')).toBe('前面 _ 後面');
       expect(pangu.spacingText('Vinta_Mollie')).toBe('Vinta_Mollie');
@@ -16,108 +16,108 @@ describe('Pangu', () => {
 
     // 兩邊都加空格
 
-    it('處理 Alphabets', () => {
+    it('should handle alphabets', () => {
       expect(pangu.spacingText('中文abc')).toBe('中文 abc');
       expect(pangu.spacingText('abc中文')).toBe('abc 中文');
     });
 
-    it('處理 Numbers', () => {
+    it('should handle numbers', () => {
       expect(pangu.spacingText('中文123')).toBe('中文 123');
       expect(pangu.spacingText('123中文')).toBe('123 中文');
     });
 
     // https://unicode-table.com/en/blocks/latin-1-supplement/
-    it('處理 Latin-1 Supplement', () => {
+    it('should handle Latin-1 Supplement', () => {
       expect(pangu.spacingText('中文Ø漢字')).toBe('中文 Ø 漢字');
       expect(pangu.spacingText('中文 Ø 漢字')).toBe('中文 Ø 漢字');
     });
 
     // https://unicode-table.com/en/blocks/greek-coptic/
-    it('處理 Greek and Coptic', () => {
+    it('should handle Greek and Coptic', () => {
       expect(pangu.spacingText('中文β漢字')).toBe('中文 β 漢字');
       expect(pangu.spacingText('中文 β 漢字')).toBe('中文 β 漢字');
       expect(pangu.spacingText('我是α，我是Ω')).toBe('我是 α，我是 Ω');
     });
 
     // https://unicode-table.com/en/blocks/number-forms/
-    it('處理 Number Forms', () => {
+    it('should handle Number Forms', () => {
       expect(pangu.spacingText('中文Ⅶ漢字')).toBe('中文 Ⅶ 漢字');
       expect(pangu.spacingText('中文 Ⅶ 漢字')).toBe('中文 Ⅶ 漢字');
     });
 
     // https://unicode-table.com/en/blocks/cjk-radicals-supplement/
-    it('處理 CJK Radicals Supplement', () => {
+    it('should handle CJK Radicals Supplement', () => {
       expect(pangu.spacingText('abc⻤123')).toBe('abc ⻤ 123');
       expect(pangu.spacingText('abc ⻤ 123')).toBe('abc ⻤ 123');
     });
 
     // https://unicode-table.com/en/blocks/kangxi-radicals/
-    it('處理 Kangxi Radicals', () => {
+    it('should handle Kangxi Radicals', () => {
       expect(pangu.spacingText('abc⾗123')).toBe('abc ⾗ 123');
       expect(pangu.spacingText('abc ⾗ 123')).toBe('abc ⾗ 123');
     });
 
     // https://unicode-table.com/en/blocks/hiragana/
-    it('處理 Hiragana', () => {
+    it('should handle Hiragana', () => {
       expect(pangu.spacingText('abcあ123')).toBe('abc あ 123');
       expect(pangu.spacingText('abc あ 123')).toBe('abc あ 123');
     });
 
     // https://unicode-table.com/en/blocks/katakana/
-    it('處理 Katakana', () => {
+    it('should handle Katakana', () => {
       expect(pangu.spacingText('abcア123')).toBe('abc ア 123');
       expect(pangu.spacingText('abc ア 123')).toBe('abc ア 123');
     });
 
     // https://unicode-table.com/en/blocks/bopomofo/
-    it('處理 Bopomofo', () => {
+    it('should handle Bopomofo', () => {
       expect(pangu.spacingText('abcㄅ123')).toBe('abc ㄅ 123');
       expect(pangu.spacingText('abc ㄅ 123')).toBe('abc ㄅ 123');
     });
 
     // https://unicode-table.com/en/blocks/enclosed-cjk-letters-and-months/
-    it('處理 Enclosed CJK Letters And Months', () => {
+    it('should handle Enclosed CJK Letters And Months', () => {
       expect(pangu.spacingText('abc㈱123')).toBe('abc ㈱ 123');
       expect(pangu.spacingText('abc ㈱ 123')).toBe('abc ㈱ 123');
     });
 
     // https://unicode-table.com/en/blocks/cjk-unified-ideographs-extension-a/
-    it('處理 CJK Unified Ideographs Extension-A', () => {
+    it('should handle CJK Unified Ideographs Extension-A', () => {
       expect(pangu.spacingText('abc㐂123')).toBe('abc 㐂 123');
       expect(pangu.spacingText('abc 㐂 123')).toBe('abc 㐂 123');
     });
 
     // https://unicode-table.com/en/blocks/cjk-unified-ideographs/
-    it('處理 CJK Unified Ideographs', () => {
+    it('should handle CJK Unified Ideographs', () => {
       expect(pangu.spacingText('abc丁123')).toBe('abc 丁 123');
       expect(pangu.spacingText('abc 丁 123')).toBe('abc 丁 123');
     });
 
     // https://unicode-table.com/en/blocks/cjk-compatibility-ideographs/
-    it('處理 CJK Compatibility Ideographs', () => {
+    it('should handle CJK Compatibility Ideographs', () => {
       expect(pangu.spacingText('abc車123')).toBe('abc 車 123');
       expect(pangu.spacingText('abc 車 123')).toBe('abc 車 123');
     });
 
-    it('處理 $ 符號', () => {
+    it('should handle $ symbol', () => {
       expect(pangu.spacingText('前面$後面')).toBe('前面 $ 後面');
       expect(pangu.spacingText('前面 $ 後面')).toBe('前面 $ 後面');
       expect(pangu.spacingText('前面$100後面')).toBe('前面 $100 後面');
     });
 
-    it('處理 % 符號', () => {
+    it('should handle % symbol', () => {
       expect(pangu.spacingText('前面%後面')).toBe('前面 % 後面');
       expect(pangu.spacingText('前面 % 後面')).toBe('前面 % 後面');
       expect(pangu.spacingText('前面100%後面')).toBe('前面 100% 後面');
       expect(pangu.spacingText('新八的構造成分有95%是眼鏡、3%是水、2%是垃圾')).toBe('新八的構造成分有 95% 是眼鏡、3% 是水、2% 是垃圾');
     });
 
-    it('處理 ^ 符號', () => {
+    it('should handle ^ symbol', () => {
       expect(pangu.spacingText('前面^後面')).toBe('前面 ^ 後面');
       expect(pangu.spacingText('前面 ^ 後面')).toBe('前面 ^ 後面');
     });
 
-    it('處理 & 符號', () => {
+    it('should handle & symbol', () => {
       expect(pangu.spacingText('前面&後面')).toBe('前面 & 後面');
       expect(pangu.spacingText('前面 & 後面')).toBe('前面 & 後面');
       expect(pangu.spacingText('Vinta&Mollie')).toBe('Vinta&Mollie');
@@ -126,7 +126,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('得到一個A&B的結果')).toBe('得到一個 A&B 的結果');
     });
 
-    it('處理 * 符號', () => {
+    it('should handle * symbol', () => {
       expect(pangu.spacingText('前面*後面')).toBe('前面 * 後面');
       expect(pangu.spacingText('前面 * 後面')).toBe('前面 * 後面');
       expect(pangu.spacingText('前面* 後面')).toBe('前面 * 後面');
@@ -137,7 +137,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('得到一個A*B的結果')).toBe('得到一個 A*B 的結果');
     });
 
-    it('處理 - 符號', () => {
+    it('should handle - symbol', () => {
       expect(pangu.spacingText('前面-後面')).toBe('前面 - 後面');
       expect(pangu.spacingText('前面 - 後面')).toBe('前面 - 後面');
       expect(pangu.spacingText('Vinta-Mollie')).toBe('Vinta-Mollie');
@@ -150,7 +150,7 @@ describe('Pangu', () => {
       // expect(pangu.spacing('陳上進--Vinta')).toBe('陳上進 -- Vinta');
     });
 
-    it('處理 = 符號', () => {
+    it('should handle = symbol', () => {
       expect(pangu.spacingText('前面=後面')).toBe('前面 = 後面');
       expect(pangu.spacingText('前面 = 後面')).toBe('前面 = 後面');
       expect(pangu.spacingText('Vinta=Mollie')).toBe('Vinta=Mollie');
@@ -159,7 +159,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('得到一個A=B的結果')).toBe('得到一個 A=B 的結果');
     });
 
-    it('處理 + 符號', () => {
+    it('should handle + symbol', () => {
       expect(pangu.spacingText('前面+後面')).toBe('前面 + 後面');
       expect(pangu.spacingText('前面 + 後面')).toBe('前面 + 後面');
       expect(pangu.spacingText('Vinta+Mollie')).toBe('Vinta+Mollie');
@@ -172,7 +172,7 @@ describe('Pangu', () => {
       // expect(pangu.spacing('得到一個A+的結果')).toBe('得到一個 A+ 的結果');
     });
 
-    it('處理 | 符號', () => {
+    it('should handle | symbol', () => {
       expect(pangu.spacingText('前面|後面')).toBe('前面 | 後面');
       expect(pangu.spacingText('前面 | 後面')).toBe('前面 | 後面');
       expect(pangu.spacingText('Vinta|Mollie')).toBe('Vinta|Mollie');
@@ -181,12 +181,12 @@ describe('Pangu', () => {
       expect(pangu.spacingText('得到一個A|B的結果')).toBe('得到一個 A|B 的結果');
     });
 
-    it('處理 \\ 符號', () => {
+    it('should handle \\ symbol', () => {
       expect(pangu.spacingText('前面\\後面')).toBe('前面 \\ 後面');
       expect(pangu.spacingText('前面 \\ 後面')).toBe('前面 \\ 後面');
     });
 
-    it('處理 / 符號', () => {
+    it('should handle / symbol', () => {
       expect(pangu.spacingText('前面/後面')).toBe('前面 / 後面');
       expect(pangu.spacingText('前面 / 後面')).toBe('前面 / 後面');
       expect(pangu.spacingText('Vinta/Mollie')).toBe('Vinta/Mollie');
@@ -199,7 +199,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('當你用cat和od指令查看/dev/random和/dev/urandom的內容時')).toBe('當你用 cat 和 od 指令查看 /dev/random 和 /dev/urandom 的內容時');
     });
 
-    it('處理 < 符號', () => {
+    it('should handle < symbol', () => {
       expect(pangu.spacingText('前面<後面')).toBe('前面 < 後面');
       expect(pangu.spacingText('前面 < 後面')).toBe('前面 < 後面');
       expect(pangu.spacingText('Vinta<Mollie')).toBe('Vinta<Mollie');
@@ -208,7 +208,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('得到一個A<B的結果')).toBe('得到一個 A<B 的結果');
     });
 
-    it('處理 > 符號', () => {
+    it('should handle > symbol', () => {
       expect(pangu.spacingText('前面>後面')).toBe('前面 > 後面');
       expect(pangu.spacingText('前面 > 後面')).toBe('前面 > 後面');
       expect(pangu.spacingText('Vinta>Mollie')).toBe('Vinta>Mollie');
@@ -219,14 +219,14 @@ describe('Pangu', () => {
 
     // 只加左空格
 
-    it('處理 @ 符號', () => {
+    it('should handle @ symbol', () => {
       // https://twitter.com/vinta
       // https://www.weibo.com/vintalines
       expect(pangu.spacingText('請@vinta吃大便')).toBe('請 @vinta 吃大便');
       expect(pangu.spacingText('請@陳上進 吃大便')).toBe('請 @陳上進 吃大便');
     });
 
-    it('處理 # 符號', () => {
+    it('should handle # symbol', () => {
       expect(pangu.spacingText('前面#後面')).toBe('前面 #後面');
       expect(pangu.spacingText('前面C#後面')).toBe('前面 C# 後面');
       expect(pangu.spacingText('前面#H2G2後面')).toBe('前面 #H2G2 後面');
@@ -237,41 +237,41 @@ describe('Pangu', () => {
 
     // 只加右空格
 
-    it('處理 ... 符號', () => {
+    it('should handle ... symbol', () => {
       expect(pangu.spacingText('前面...後面')).toBe('前面... 後面');
       expect(pangu.spacingText('前面..後面')).toBe('前面.. 後面');
     });
 
     // \u2026
-    it('處理 … 符號', () => {
+    it('should handle … symbol', () => {
       expect(pangu.spacingText('前面…後面')).toBe('前面… 後面');
       expect(pangu.spacingText('前面……後面')).toBe('前面…… 後面');
     });
 
     // 換成全形符號
 
-    it('處理 ~ 符號', () => {
+    it('should handle ~ symbol', () => {
       expect(pangu.spacingText('前面~後面')).toBe('前面～後面');
       expect(pangu.spacingText('前面 ~ 後面')).toBe('前面～後面');
       expect(pangu.spacingText('前面~ 後面')).toBe('前面～後面');
       expect(pangu.spacingText('前面 ~後面')).toBe('前面～後面');
     });
 
-    it('處理 ! 符號', () => {
+    it('should handle ! symbol', () => {
       expect(pangu.spacingText('前面!後面')).toBe('前面！後面');
       expect(pangu.spacingText('前面 ! 後面')).toBe('前面！後面');
       expect(pangu.spacingText('前面! 後面')).toBe('前面！後面');
       expect(pangu.spacingText('前面 !後面')).toBe('前面！後面');
     });
 
-    it('處理 ; 符號', () => {
+    it('should handle ; symbol', () => {
       expect(pangu.spacingText('前面;後面')).toBe('前面；後面');
       expect(pangu.spacingText('前面 ; 後面')).toBe('前面；後面');
       expect(pangu.spacingText('前面; 後面')).toBe('前面；後面');
       expect(pangu.spacingText('前面 ;後面')).toBe('前面；後面');
     });
 
-    it('處理 : 符號', () => {
+    it('should handle : symbol', () => {
       expect(pangu.spacingText('前面:後面')).toBe('前面：後面');
       expect(pangu.spacingText('前面 : 後面')).toBe('前面：後面');
       expect(pangu.spacingText('前面: 後面')).toBe('前面：後面');
@@ -282,7 +282,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面: I have no idea後面')).toBe('前面: I have no idea 後面');
     });
 
-    it('處理 , 符號', () => {
+    it('should handle , symbol', () => {
       expect(pangu.spacingText('前面,後面')).toBe('前面，後面');
       expect(pangu.spacingText('前面 , 後面')).toBe('前面，後面');
       expect(pangu.spacingText('前面, 後面')).toBe('前面，後面');
@@ -291,7 +291,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面, ')).toBe('前面，');
     });
 
-    it('處理 . 符號', () => {
+    it('should handle . symbol', () => {
       expect(pangu.spacingText('前面.後面')).toBe('前面。後面');
       expect(pangu.spacingText('前面 . 後面')).toBe('前面。後面');
       expect(pangu.spacingText('前面. 後面')).toBe('前面。後面');
@@ -299,7 +299,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('黑人問號.jpg 後面')).toBe('黑人問號.jpg 後面');
     });
 
-    it('處理 ? 符號', () => {
+    it('should handle ? symbol', () => {
       expect(pangu.spacingText('前面?後面')).toBe('前面？後面');
       expect(pangu.spacingText('前面 ? 後面')).toBe('前面？後面');
       expect(pangu.spacingText('前面? 後面')).toBe('前面？後面');
@@ -308,21 +308,21 @@ describe('Pangu', () => {
     });
 
     // \u00b7
-    it('處理 · 符號', () => {
+    it('should handle · symbol', () => {
       expect(pangu.spacingText('前面·後面')).toBe('前面・後面');
       expect(pangu.spacingText('喬治·R·R·馬丁')).toBe('喬治・R・R・馬丁');
       expect(pangu.spacingText('M·奈特·沙马兰')).toBe('M・奈特・沙马兰');
     });
 
     // \u2022
-    it('處理 • 符號', () => {
+    it('should handle • symbol', () => {
       expect(pangu.spacingText('前面•後面')).toBe('前面・後面');
       expect(pangu.spacingText('喬治•R•R•馬丁')).toBe('喬治・R・R・馬丁');
       expect(pangu.spacingText('M•奈特•沙马兰')).toBe('M・奈特・沙马兰');
     });
 
     // \u2027
-    it('處理 ‧ 符號', () => {
+    it('should handle ‧ symbol', () => {
       expect(pangu.spacingText('前面‧後面')).toBe('前面・後面');
       expect(pangu.spacingText('喬治‧R‧R‧馬丁')).toBe('喬治・R・R・馬丁');
       expect(pangu.spacingText('M‧奈特‧沙马兰')).toBe('M・奈特・沙马兰');
@@ -330,7 +330,7 @@ describe('Pangu', () => {
 
     // 成對符號：相異
 
-    it('處理 < > 符號', () => {
+    it('should handle < > symbols', () => {
       expect(pangu.spacingText('前面<中文123漢字>後面')).toBe('前面 <中文 123 漢字> 後面');
       expect(pangu.spacingText('前面<中文123>後面')).toBe('前面 <中文 123> 後面');
       expect(pangu.spacingText('前面<123漢字>後面')).toBe('前面 <123 漢字> 後面');
@@ -339,7 +339,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('head <中文123漢字> tail')).toBe('head <中文 123 漢字> tail');
     });
 
-    it('處理 ( ) 符號', () => {
+    it('should handle ( ) symbols', () => {
       expect(pangu.spacingText('前面(中文123漢字)後面')).toBe('前面 (中文 123 漢字) 後面');
       expect(pangu.spacingText('前面(中文123)後面')).toBe('前面 (中文 123) 後面');
       expect(pangu.spacingText('前面(123漢字)後面')).toBe('前面 (123 漢字) 後面');
@@ -352,7 +352,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('Chang Stream(变更记录流)是指collection(数据库集合)的变更事件流')).toBe('Chang Stream (变更记录流) 是指 collection (数据库集合) 的变更事件流');
     });
 
-    it('處理 { } 符號', () => {
+    it('should handle { } symbols', () => {
       expect(pangu.spacingText('前面{中文123漢字}後面')).toBe('前面 {中文 123 漢字} 後面');
       expect(pangu.spacingText('前面{中文123}後面')).toBe('前面 {中文 123} 後面');
       expect(pangu.spacingText('前面{123漢字}後面')).toBe('前面 {123 漢字} 後面');
@@ -361,7 +361,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('head {中文123漢字} tail')).toBe('head {中文 123 漢字} tail');
     });
 
-    it('處理 [ ] 符號', () => {
+    it('should handle [ ] symbols', () => {
       expect(pangu.spacingText('前面[中文123漢字]後面')).toBe('前面 [中文 123 漢字] 後面');
       expect(pangu.spacingText('前面[中文123]後面')).toBe('前面 [中文 123] 後面');
       expect(pangu.spacingText('前面[123漢字]後面')).toBe('前面 [123 漢字] 後面');
@@ -370,22 +370,22 @@ describe('Pangu', () => {
       expect(pangu.spacingText('head [中文123漢字] tail')).toBe('head [中文 123 漢字] tail');
     });
 
-    it('處理 " " \\u201c \\u201d 符號', () => {
+    it('should handle " " \\u201c \\u201d symbols', () => {
       expect(pangu.spacingText('前面"中文123漢字"後面')).toBe('前面 "中文 123 漢字" 後面');
     });
 
     // 成對符號：相同
 
-    it('處理 ` ` 符號', () => {
+    it('should handle ` ` symbols', () => {
       expect(pangu.spacingText('前面`中間`後面')).toBe('前面 `中間` 後面');
     });
 
-    it('處理 # # 符號', () => {
+    it('should handle # # symbols', () => {
       expect(pangu.spacingText('前面#H2G2#後面')).toBe('前面 #H2G2# 後面');
       expect(pangu.spacingText('前面#銀河閃電霹靂車指南#後面')).toBe('前面 #銀河閃電霹靂車指南# 後面');
     });
 
-    it('處理 " " 符號', () => {
+    it('should handle " " symbols', () => {
       expect(pangu.spacingText('前面"中文123漢字"後面')).toBe('前面 "中文 123 漢字" 後面');
       expect(pangu.spacingText('前面"中文123"後面')).toBe('前面 "中文 123" 後面');
       expect(pangu.spacingText('前面"123漢字"後面')).toBe('前面 "123 漢字" 後面');
@@ -394,19 +394,19 @@ describe('Pangu', () => {
       expect(pangu.spacingText('head "中文123漢字" tail')).toBe('head "中文 123 漢字" tail');
     });
 
-    it("處理 ' ' 符號", () => {
+    it("should handle ' ' symbols", () => {
       expect(pangu.spacingText("Why are Python's 'private' methods not actually private?")).toBe("Why are Python's 'private' methods not actually private?");
       expect(pangu.spacingText("陳上進 likes 林依諾's status.")).toBe("陳上進 likes 林依諾's status.");
       expect(pangu.spacingText("举个栗子，如果一道题只包含'A' ~ 'Z'意味着字符集大小是")).toBe("举个栗子，如果一道题只包含 'A' ~ 'Z' 意味着字符集大小是");
     });
 
-    it('處理 ״ ״ \\u05f4 \\u05f4 符號', () => {
+    it('should handle ״ ״ \\u05f4 \\u05f4 symbols', () => {
       expect(pangu.spacingText('前面״中間״後面')).toBe('前面 ״中間״ 後面');
     });
 
     // 英文與符號
 
-    it('處理英文與 " " \\u201c \\u201d 符號', () => {
+    it('should handle English with " " \\u201c \\u201d symbols', () => {
       // TODO: Fix spacing after curly quotes followed by English letters
       // This is a known bug in the original pangu.js that needs the QUOTE_AN and AN_QUOTE patterns
       // expect(pangu.spacing('阿里云开源"计算王牌"Blink，实时计算时代已来')).toBe('阿里云开源 "计算王牌" Blink，实时计算时代已来');
@@ -414,7 +414,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('【UCG中字】"數毛社"DF的《戰神4》全新演示解析')).toBe('【UCG 中字】"數毛社" DF 的《戰神 4》全新演示解析');
     });
 
-    it('處理英文與 % 符號', () => {
+    it('should handle English with % symbol', () => {
       expect(pangu.spacingText("丹寧控注意Levi's全館任2件25%OFF滿額再享85折！")).toBe("丹寧控注意 Levi's 全館任 2 件 25% OFF 滿額再享 85 折！");
     });
   });
