@@ -60,6 +60,14 @@
     "message": "重新整理網頁之後才會生效",
     "description": ""
   },
+  "add_to_blacklist": {
+    "message": "把這個網址加到黑名單",
+    "description": ""
+  },
+  "added_to_blacklist": {
+    "message": "已將此網站加入黑名單",
+    "description": ""
+  },
 
   "options_subtitle": {
     "message": "自動在網頁中所有的中文字和半形的英文、數字、符號之間插入空白",

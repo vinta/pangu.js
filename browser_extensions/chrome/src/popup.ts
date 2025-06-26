@@ -52,6 +52,13 @@ class PopupController {
       });
     }
 
+    const addToBlacklistBtn = document.getElementById('add-to-blacklist-btn');
+    if (addToBlacklistBtn) {
+      addToBlacklistBtn.addEventListener('click', () => {
+        this.handleAddToBlacklist();
+      });
+    }
+
     chrome.runtime.onMessage.addListener((message: MessageFromContentScript, sender) => {
       if (message.type === 'CONTENT_SCRIPT_LOADED' && sender.tab?.id === this.currentTabId) {
         this.renderStatus();
@@ -63,6 +70,7 @@ class PopupController {
     await this.renderSpacingModeToggle();
     await this.renderMuteToggle();
     await this.renderStatus();
+    await this.renderAddToBlacklistButton();
     this.renderVersion();
   }
 
@@ -111,6 +119,24 @@ class PopupController {
     if (versionElement) {
       versionElement.textContent = chrome.runtime.getManifest().version;
     }
+  }
+
+  private async renderAddToBlacklistButton() {
+    const button = document.getElementById('add-to-blacklist-btn');
+    if (!button) {
+      return;
+    }
+
+    const settings = await getCachedSettings();
+    
+    // Hide button if not in blacklist mode or if URL is invalid
+    if (settings.filter_mode !== 'blacklist' || !this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
+      button.style.display = 'none';
+      return;
+    }
+
+    // Show button
+    button.style.display = 'block';
   }
 
   private async handleSpacingModeToggleChange() {
@@ -288,6 +314,41 @@ class PopupController {
     if (this.notificationCallback) {
       this.notificationCallback();
       this.notificationCallback = undefined;
+    }
+  }
+
+  private async handleAddToBlacklist() {
+    if (!this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
+      return;
+    }
+
+    try {
+      // Extract domain pattern from current URL
+      const url = new URL(this.currentTabUrl);
+      const domainPattern = `${url.protocol}//${url.hostname}/*`;
+
+      // Get current settings
+      const settings = await getCachedSettings();
+      
+      // Check if already in blacklist
+      if (settings.blacklist.includes(domainPattern)) {
+        this.showMessage(chrome.i18n.getMessage('added_to_blacklist'), 'info', 1000 * 3);
+        return;
+      }
+
+      // Add to blacklist
+      settings.blacklist.push(domainPattern);
+      await chrome.storage.sync.set({ blacklist: settings.blacklist });
+
+      // Show success message
+      this.showMessage(chrome.i18n.getMessage('added_to_blacklist'), 'success', 1000 * 3);
+      await playSound('Hadouken');
+
+      // Re-render status after blacklist update
+      await this.renderStatus();
+    } catch (error) {
+      console.error('Failed to add to blacklist:', error);
+      await this.showErrorMessage();
     }
   }
 }

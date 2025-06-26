@@ -79,7 +79,8 @@
 ### Feature Enhancements
 
 - [ ] Generate different size icons from `icon_1500.svg`
-- [ ] Add a button for "Add this url to blacklist" in popup page or context menu
+- [ ] Add a button for "把這個網址加到黑名單" in popup page
+  - Which only add `https://example.com/*` instead of the entire url
 - [ ] Improve `autoSpacingPage()` performance, especially with a large DOM tree
   - See @.claude/researches/performance-optimization.md
 - [ ] Add instructions in options page for enabling experimental CSS `text-autospace`
