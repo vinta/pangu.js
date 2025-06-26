@@ -463,6 +463,27 @@ describe('Pangu', () => {
     it('should handle English with % symbol', () => {
       expect(pangu.spacingText("丹寧控注意Levi's全館任2件25%OFF滿額再享85折！")).toBe("丹寧控注意 Levi's 全館任 2 件 25% OFF 滿額再享 85 折！");
     });
+
+    it('should NOT add spaces inside HTML tags', () => {
+      // Issue #164: HTML tags should not have spaces added inside them
+      expect(pangu.spacingText('<p>一行文本</p>')).toBe('<p>一行文本</p>');
+      expect(pangu.spacingText('<p>文字<strong>加粗</strong></p>')).toBe('<p>文字<strong>加粗</strong></p>');
+      expect(pangu.spacingText('<div>測試<span>內容</span>結束</div>')).toBe('<div>測試<span>內容</span>結束</div>');
+      expect(pangu.spacingText('<a href="#">連結</a>')).toBe('<a href="#">連結</a>');
+      expect(pangu.spacingText('<input value="測試123">')).toBe('<input value="測試 123">');
+      expect(pangu.spacingText('<img src="test.jpg" alt="測試圖片">')).toBe('<img src="test.jpg" alt="測試圖片">');
+      
+      // Multiple tags
+      expect(pangu.spacingText('<p>第一段</p><p>第二段</p>')).toBe('<p>第一段</p><p>第二段</p>');
+      expect(pangu.spacingText('<h1>標題</h1><p>內容</p>')).toBe('<h1>標題</h1><p>內容</p>');
+      
+      // Nested tags
+      expect(pangu.spacingText('<div><p>嵌套<strong>測試</strong></p></div>')).toBe('<div><p>嵌套<strong>測試</strong></p></div>');
+      
+      // Self-closing tags
+      expect(pangu.spacingText('文字<br>換行')).toBe('文字<br>換行');
+      expect(pangu.spacingText('水平線<hr>分隔')).toBe('水平線<hr>分隔');
+    });
   });
 
   describe('spacing()', () => {

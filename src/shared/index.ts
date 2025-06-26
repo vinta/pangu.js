@@ -126,6 +126,31 @@ export class Pangu {
 
     let newText = text;
 
+    // Protect HTML tags from being processed
+    const htmlTags: string[] = [];
+    const HTML_TAG_PLACEHOLDER = '\u0000HTML_TAG_PLACEHOLDER_';
+    
+    // More specific HTML tag pattern:
+    // - Opening tags: <tagname ...> or <tagname>
+    // - Closing tags: </tagname>
+    // - Self-closing tags: <tagname ... />
+    // This pattern ensures we only match actual HTML tags, not just any < > content
+    const HTML_TAG_PATTERN = /<\/?[a-zA-Z][a-zA-Z0-9]*(?:\s+[^>]*)?>/g;
+    
+    // Replace all HTML tags with placeholders, but process attribute values
+    newText = newText.replace(HTML_TAG_PATTERN, (match) => {
+      // Process attribute values inside the tag
+      const processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName, attrValue) => {
+        // Process the attribute value with spacing
+        const processedValue = self.spacingText(attrValue);
+        return `${attrName}="${processedValue}"`;
+      });
+      
+      const index = htmlTags.length;
+      htmlTags.push(processedTag);
+      return `${HTML_TAG_PLACEHOLDER}${index}\u0000`;
+    });
+
     // https://stackoverflow.com/questions/4285472/multiple-regex-replace
     newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK, (_match, leftCjk, symbols, rightCjk) => {
       const fullwidthSymbols = self.convertToFullwidth(symbols);
@@ -191,6 +216,12 @@ export class Pangu {
     // But keep spaces for filesystem paths like "和 /root"
     const FIX_NAME_SLASH = new RegExp(`([${CJK}]) (/[A-Z][A-Za-z]*)`, 'g');
     newText = newText.replace(FIX_NAME_SLASH, '$1$2');
+
+    // Restore HTML tags from placeholders
+    const HTML_TAG_RESTORE = new RegExp(`${HTML_TAG_PLACEHOLDER}(\\d+)\u0000`, 'g');
+    newText = newText.replace(HTML_TAG_RESTORE, (_match, index) => {
+      return htmlTags[parseInt(index, 10)] || '';
+    });
 
     // DEBUG
     // String.prototype.replace = String.prototype.rawReplace;
