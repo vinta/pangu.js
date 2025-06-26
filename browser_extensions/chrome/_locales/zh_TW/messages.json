@@ -142,7 +142,7 @@
     "description": ""
   },
   "label_is_enable_detect_cjk": {
-    "message": "只在有中文的頁面才招喚空格之神",
+    "message": "只在有中文的頁面才招喚空格之神（測試中的功能）",
     "description": ""
   }
 }
