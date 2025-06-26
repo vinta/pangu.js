@@ -1,105 +1,110 @@
-# TODO List
+# Development Progress
+
+## Project Overview
+
+pangu.js is a mature text spacing library that automatically inserts whitespace between CJK and half-width characters, with zero runtime dependencies. The project includes both a JavaScript library (npm package) and a Chrome extension (Manifest V3).
 
 ## Completed
 
 ### New Features
 
-- [x] Implement blacklist/whitelist with Chrome match pattern validation
-- [x] Use Chrome's `excludeMatches` API for efficient blacklist handling
-- [x] Add a button for "把這個網址加到黑名單" in popup page
-  - Which only add `https://example.com/*` instead of the entire url
-- [x] Add dynamic title spacing support for SPAs like YouTube (#169)
-  - Observe both document.body and document.head for mutations
-  - Handle title changes with debounced re-spacing
-  - Fixed title observer setup in `setupAutoSpacingPageObserver()`
+- [x] Blacklist/whitelist with Chrome match pattern validation (files: service-worker.ts, options.ts, popup.ts)
+- [x] Chrome's `excludeMatches` API for efficient blacklist handling (files: service-worker.ts)
+- [x] "把這個網址加到黑名單" button in popup (files: popup.ts, popup.html)
+  - Only adds domain pattern `https://example.com/*` instead of full URL
+- [x] Dynamic title spacing for SPAs like YouTube (files: content-script.ts, browser/pangu.ts)
+  - Observes both document.body and document.head mutations
+  - Debounced re-spacing for title changes
+  - Fixed title observer in `setupAutoSpacingPageObserver()`
 
 ### Optimization
 
-- [x] Replace `tabs` permission with `activeTab` (removes "Read browsing history" warning)
-- [x] Implement dynamic content script registration with chrome.scripting API
-- [x] Optimize `pangu.js` loading with on-demand injection
-- [x] Skip auto spacing if there is no CJK content in webpages
+- [x] Replace `tabs` with `activeTab` permission (files: manifest.json)
+- [x] Dynamic content script registration (files: service-worker.ts)
+- [x] On-demand pangu.js injection (files: service-worker.ts, content-script.ts)
+- [x] Skip auto-spacing for non-CJK pages (files: content-script.ts)
 
 ### Code Quality Improvements
 
-- [x] Refactor mutation observer setup to be self-contained
-- [x] Remove unnecessary `self = this` pattern in favor of arrow functions
-- [x] Clean up misleading comments about concurrent workers
-- [x] Add detailed documentation for mutation handling logic
-- [x] Improve test structure for YouTube formatted strings
+- [x] Refactor mutation observer to be self-contained (files: browser/pangu.ts)
+- [x] Replace `self = this` with arrow functions (files: browser/pangu.ts)
+- [x] Clean up concurrent worker comments (files: shared/index.ts)
+- [x] Add mutation handling documentation (files: browser/pangu.ts)
+- [x] Improve YouTube test structure (files: tests/browser/pangu.playwright.ts)
 
 ### Regex Pattern Fixes
 
-- [x] Fixed `AN_LEFT_BRACKET` pattern to prevent adding spaces in function calls like `a.getB()`
-  - Added negative lookbehind `(?<!\\.[A-Za-z0-9]*)` to exclude patterns after dots
-- [x] Fixed pipe character `|` handling - removed from operator patterns (#194)
-- [x] Fixed filesystem path patterns to support special characters like `@`, `+`, dots (#209, #218, #219)
-  - Enhanced pattern to match paths like `/node_modules/@babel/core`
-- [x] Fixed HTML tag spacing - tags no longer get spaces inside them (#164)
-  - Implemented placeholder system to protect HTML tags during processing
-  - Attribute values still get processed for spacing
-- [x] Fixed input field auto-spacing (#158)
-  - Added `input` to `ignoredTags` regex in browser implementation
-  - Prevents spacing in form fields, login/registration forms
-- [x] Fixed slash pattern conflict with filesystem paths
-  - Removed `/` from `CJK_ANS` pattern to prevent spacing in patterns like `陳上進/vinta`
-  - Made filesystem path pattern more specific to avoid false matches
-- [x] Improved filesystem path pattern to be less aggressive
-  - Changed from matching any `/something` to only known system directories
-  - Removed the `FIX_NAME_SLASH` workaround as it's no longer needed
-  - Pattern now only matches paths starting with system dirs like `/home`, `/usr`, `/etc`, or `/node_modules`
+- [x] Fixed `AN_LEFT_BRACKET` for function calls like `a.getB()` (files: shared/index.ts)
+  - Added negative lookbehind `(?<!\\.[A-Za-z0-9]*)`
+- [x] Fixed pipe character `|` handling (#194) (files: shared/index.ts)
+- [x] Fixed filesystem paths with special chars (#209, #218, #219) (files: shared/index.ts)
+  - Supports paths like `/node_modules/@babel/core`
+- [x] Fixed HTML tag spacing (#164) (files: shared/index.ts)
+  - Placeholder system protects tags during processing
+- [x] Fixed input field auto-spacing (#158) (files: browser/pangu.ts)
+  - Added `input` to `ignoredTags` regex
+- [x] Fixed slash pattern conflicts (files: shared/index.ts)
+  - Removed `/` from `CJK_ANS` pattern
+  - Made filesystem path pattern more specific
+- [x] Improved filesystem path pattern (files: shared/index.ts)
+  - Only matches system directories like `/home`, `/usr`, `/etc`, `/node_modules`
 
-### Testing & Investigation (2025-01-26)
+### Testing & Investigation
 
-- [x] Investigated spacing between adjacent sibling elements (YouTube hashtag test case)
-  - Attempted multiple approaches: sibling checking, post-processing, XPath modifications
-  - Confirmed this is a fundamental limitation of the current XPath-based algorithm
-  - Test marked as skipped in `tests/browser/pangu.playwright.ts:195`
-  - Documented limitation and workaround in TODO
+- [x] Investigated adjacent sibling spacing (YouTube hashtags) (files: tests/browser/pangu.playwright.ts)
+  - What's done: Multiple approach attempts (sibling checking, post-processing, XPath mods)
+  - Result: Fundamental XPath algorithm limitation
+  - Test skipped at line 195 with documentation
 
 ## In Progress
 
-- [ ] Fix spacing between span and link elements (YouTube hashtag case)
-  - Current: `<span>text</span><a>#hashtag</a>`
-  - Expected: `<span>text </span><a>#hashtag</a>` OR `<span>text</span><a> #hashtag</a>`
-  - Note: Current XPath-based approach has limitations with adjacent sibling elements
-  - Workaround: Use CSS margins or padding for visual spacing
-  - **Status**: Investigated, requires architectural changes to fix properly
+### Current Focus
 
-## Next Steps
+- [ ] Fix spacing between span and link elements (YouTube hashtag case)
+  - What's done: Investigation complete, limitation documented
+  - What's left: Architectural changes needed for proper fix
+  - Blockers: Current XPath-based approach can't handle adjacent siblings
+  - Workaround: Use CSS margins/padding for visual spacing
+
+## Upcoming Tasks
 
 ### High Priority
 
-- [ ] Generate different size icons from `icon_1500.svg`
-- [ ] Improve `autoSpacingPage()` performance, especially with a large DOM tree
-  - See @.claude/researches/performance-optimization.md
-- [ ] Add instructions in options page for enabling experimental CSS `text-autospace`
-  - Guide users to `chrome://flags/#enable-experimental-web-platform-features`
-  - Auto-detect and use CSS text-autospace when available
-  - Provide clear benefits explanation (better performance, native spacing)
+- [ ] Generate different size icons from `icon_1500.svg` (Reason: Missing required extension icons)
+- [ ] Improve `autoSpacingPage()` performance for large DOM trees (Reason: User experience on heavy pages)
+  - Reference: @.claude/researches/performance-optimization.md
 
 ### Medium Priority
 
-- [ ] Fix extra space ` 3` in `<span> 3</span>` in Gmail table row
-- [ ] Fix issue #201 - Spaces inserted between image-separated text
-  - When images are used as separators, unwanted spaces are added
-- [ ] Fix issue #173 - Full-width curved quotes shouldn't have spaces
-  - Full-width quotation marks (「」『』) are being incorrectly spaced
-  - These are punctuation marks in CJK languages and shouldn't be separated
-- [ ] Fix issue #169 - YouTube title persistence bug
-  - Changes to YouTube titles don't persist
-  - May be related to YouTube's dynamic content updates
-- [ ] Fix issue #207 - Breaking Bilibili upload page layout
-  - Auto-spacing interferes with specific website functionality
-  - May need site-specific rules or better element detection
+- [ ] Fix extra space in Gmail table `<span> 3</span>`
+- [ ] Fix issue #201 - Spaces between image-separated text
+- [ ] Fix issue #173 - Full-width quotes spacing (「」『』)
+- [ ] Fix issue #169 - YouTube title persistence
+- [ ] Fix issue #207 - Bilibili upload page layout breaking
+- [ ] Add CSS `text-autospace` instructions in options page (Reason: Native browser feature is faster)
+  - Guide to `chrome://flags/#enable-experimental-web-platform-features`
+  - Auto-detect and use when available
+  - Explain performance benefits
 
 ### Low Priority
 
 - [ ] Use Verified CRX uploads
 - [ ] Implement tree-shaking optimizations
 - [ ] Publish to JSR (JavaScript Registry)
-- [ ] Fix issue #216 - Add support for skipping Markdown syntax
-  - Markdown formatting (like `**bold**`, `_italic_`) gets broken by spacing
-  - Need to protect Markdown syntax during processing
-- [ ] Fix issue #161 - Markdown syntax support
-  - Similar to #216, need comprehensive Markdown protection
+- [ ] Fix issue #216 - Markdown syntax protection
+- [ ] Fix issue #161 - Comprehensive Markdown support
+
+## Technical Decisions & Notes
+
+- **Decision**: Use placeholder system for HTML tags | **Rationale**: Prevents breaking tag structure while allowing attribute processing
+- **Decision**: Dynamic content script injection | **Rationale**: Better performance, only loads when needed
+- **Decision**: `activeTab` over `tabs` permission | **Rationale**: Reduces permission warnings, better privacy
+- **Important**: XPath text node selection has fundamental limitations with adjacent siblings
+- **Dependencies**: Zero runtime dependencies (design goal)
+
+## Known Issues & Limitations
+
+- Issue: Adjacent sibling elements don't get spaced | Impact: YouTube hashtags, inline elements
+- Workaround: Use CSS margins or require architectural rewrite for proper fix
+- Issue: Performance on very large DOM trees | Impact: Slow initial load on heavy pages
+- Workaround: Skip auto-spacing option, manual trigger

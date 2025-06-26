@@ -1,50 +1,61 @@
-# Progress Report
+# Development Progress Tracking
 
-Follow the instructions precisely. If it wasn't specified, don't do it.
+Create or update a file named @.claude/TODO.md in the project root to track development progress.
 
-## Write Current Progress
+## Instructions
 
-CREATE or UPDATE a file named @.claude/TODO.md in the project root with the current development progress. Keep each item as concise as possible.
+1. **Update Frequency**: Update this file after completing significant work or before switching contexts
+2. **Format**: Use the exact markdown structure provided below
 
-### File Structure:
-
-Write the progress report using the following template:
+## Required Structure
 
 ```markdown
-# TODO List
+# Development Progress
+
+## Project Overview
+
+[1-2 sentence description of the project's current state]
 
 ## Completed
 
-- [List completed features/tasks with checkmarks]
-- [x] [Specific completed item]
-- [x] [Another completed item]
+- [x] Feature/task description (files affected: filename.ext, filename2.ext)
+- [x] Specific implementation detail
+  - Sub-task or clarification if needed
 
 ## In Progress
 
-- [Current task being worked on]
-- [Percentage complete if applicable]
-- [Any blockers or challenges]
+### Current Focus
 
-## Next Steps
+- [ ] Task description
+  - What's done: [specific progress]
+  - What's left: [remaining work]
+  - Blockers: [any issues] (if applicable)
 
-- [ ] [Upcoming task 1]
-- [ ] [Upcoming task 2]
-- [ ] [Priority items]
+## Upcoming Tasks
 
-### Update Frequency:
+### High Priority
 
-Execute this command:
+- [ ] Critical task (Reason: why it's critical)
+- [ ] Time-sensitive item (Deadline: if applicable)
 
-- After completing a major feature or milestone
-- Before ending a coding session
-- When switching between different parts of the project
-- After encountering and resolving significant challenges
+### Medium Priority
 
-### Important Guidelines:
+- [ ] Important but not urgent task
+- [ ] Feature that enhances functionality
 
-- Be concise but informative
-- Include specific file names and function names when relevant
-- Note any decisions that might affect future development
-- Keep previous entries if appending (consider using date headers)
-- Use clear, actionable language for TODO items
+### Low Priority
+
+- [ ] Nice-to-have improvements
+- [ ] Future optimizations
+
+## Technical Decisions & Notes
+
+- **Decision**: [What was decided] | **Rationale**: [Why]
+- **Important**: [Critical information for future development]
+- **Dependencies**: [External libraries, APIs, or services used]
+
+## Known Issues & Limitations
+
+- Issue: [Description] | Impact: [How it affects the project]
+- Workaround: [Temporary solution if any]
 ```
