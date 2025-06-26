@@ -42,7 +42,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   class Pangu {
     constructor() {
       __publicField(this, "version");
-      this.version = "5.3.1";
+      this.version = "5.3.2";
     }
     spacingText(text) {
       if (typeof text !== "string") {
