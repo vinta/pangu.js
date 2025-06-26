@@ -13,9 +13,21 @@ class OptionsController {
     this.setupEventListeners();
   }
   setupEventListeners() {
-    chrome.storage.onChanged.addListener(async (_changes, areaName) => {
+    chrome.storage.onChanged.addListener(async (changes, areaName) => {
       if (areaName === "sync") {
-        await this.render();
+        const changedKeys = Object.keys(changes);
+        if (changedKeys.includes("spacing_mode")) {
+          await this.renderSpacingMode();
+        }
+        if (changedKeys.includes("filter_mode") || changedKeys.includes("blacklist") || changedKeys.includes("whitelist")) {
+          await this.renderFilterMode();
+        }
+        if (changedKeys.includes("is_mute_sound_effects")) {
+          await this.renderMuteCheckbox();
+        }
+        if (changedKeys.includes("is_enable_detect_cjk")) {
+          await this.renderDetectCjkCheckbox();
+        }
       }
     });
     document.addEventListener("click", (e) => {

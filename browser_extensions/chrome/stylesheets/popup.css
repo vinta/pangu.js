@@ -100,32 +100,32 @@
 }
 
 /* Style for main toggle */
-.popup-section .toggle:not(.toggle-status) .toggle-switch {
+.popup-section .toggle:not(.toggle-secondary) .toggle-switch {
   background-color: var(--color-surface-tertiary);
   border-color: var(--color-border);
 }
 
-.popup-section .toggle:not(.toggle-status) .toggle-input:checked + .toggle-switch {
+.popup-section .toggle:not(.toggle-secondary) .toggle-input:checked + .toggle-switch {
   background-color: #dbeafe; /* Light blue for active state */
   border-color: #93c5fd;
 }
 
-.popup-section .toggle:not(.toggle-status) .toggle-input:checked + .toggle-switch::after {
+.popup-section .toggle:not(.toggle-secondary) .toggle-input:checked + .toggle-switch::after {
   background-color: #3b82f6; /* Blue circle for active state */
 }
 
 /* Style for status toggle */
-.toggle-status .toggle-switch {
+.toggle-secondary .toggle-switch {
   background-color: var(--color-surface-tertiary);
   border-color: var(--color-border);
 }
 
-.toggle-status .toggle-input:checked + .toggle-switch {
+.toggle-secondary .toggle-input:checked + .toggle-switch {
   background-color: #dcfce7; /* Light green for active state */
   border-color: #86efac;
 }
 
-.toggle-status .toggle-input:checked + .toggle-switch::after {
+.toggle-secondary .toggle-input:checked + .toggle-switch::after {
   background-color: #22c55e; /* Green circle for active state */
 }
 
@@ -135,11 +135,11 @@
 }
 
 /* Disabled toggle for status display */
-.toggle-status {
+.toggle-secondary {
   cursor: not-allowed !important;
   opacity: 1 !important; /* Override default disabled opacity */
 }
 
-.toggle-status .toggle-switch {
+.toggle-secondary .toggle-switch {
   cursor: not-allowed !important;
 }
