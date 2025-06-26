@@ -18,6 +18,11 @@
 // all J below does not include \u30fb
 const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
 
+// Define filesystem path pattern that can be reused
+// Matches Unix paths like /home, /usr/bin, /etc/nginx.conf, /node_modules/@babel/core
+// Also matches Windows paths like C:/ D:/
+const FILESYSTEM_PATH = /(?:[A-Z]:)?\/[A-Za-z0-9_\-\.@\+]+(?:\/[A-Za-z0-9_\-\.@\+]+)*/;
+
 // ANS is short for Alphabets, Numbers, and Symbols.
 //
 // A includes A-Za-z\u0370-\u03ff
@@ -72,9 +77,6 @@ const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([\u201c])([A-Za-z0-9
 
 const AN_LEFT_BRACKET = /([A-Za-z0-9])(?<!\.[A-Za-z0-9]*)([\(\[\{])/g;
 const RIGHT_BRACKET_AN = /([\)\]\}])([A-Za-z0-9])/g;
-
-// Define filesystem path pattern that can be reused
-const FILESYSTEM_PATH = /\/[A-Za-z0-9_\-]+(?:\/[A-Za-z0-9_\-]+)*/;
 
 // Special pattern for filesystem paths like /home, /root, /dev/random after CJK
 const CJK_FILESYSTEM_PATH = new RegExp(`([${CJK}])(${FILESYSTEM_PATH.source})`, 'g');
@@ -162,7 +164,7 @@ export class Pangu {
 
     // Add space before filesystem paths after CJK (e.g., "和/root" -> "和 /root")
     newText = newText.replace(CJK_FILESYSTEM_PATH, '$1 $2');
-    
+
     // Add space after filesystem paths ending with / before CJK (e.g., "/home/與" -> "/home/ 與")
     newText = newText.replace(FILESYSTEM_PATH_SLASH_CJK, '$1 $2');
 
@@ -184,7 +186,7 @@ export class Pangu {
     newText = newText.replace(S_A, '$1 $2');
 
     newText = newText.replace(MIDDLE_DOT, '・');
-    
+
     // Post-processing: fix unwanted spaces in name patterns like "陳上進 /Vinta"
     // But keep spaces for filesystem paths like "和 /root"
     const FIX_NAME_SLASH = new RegExp(`([${CJK}]) (/[A-Z][A-Za-z]*)`, 'g');
