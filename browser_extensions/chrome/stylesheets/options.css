@@ -302,6 +302,7 @@
 
 .options-credits {
   margin-top: var(--spacing-2);
+  margin-bottom: var(--spacing-8);
   color: var(--color-text-secondary);
 }
 
