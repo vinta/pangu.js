@@ -28,6 +28,12 @@ class PopupController {
         this.handleManualSpacing();
       });
     }
+    const notificationClose = document.getElementById("notification-close");
+    if (notificationClose) {
+      notificationClose.addEventListener("click", () => {
+        this.hideNotification();
+      });
+    }
     chrome.runtime.onMessage.addListener((message, sender) => {
       if (message.type === "CONTENT_SCRIPT_LOADED" && sender.tab?.id === this.currentTabId) {
         this.renderStatus();
@@ -160,21 +166,31 @@ class PopupController {
     await playSound("YeahBaby");
   }
   showMessage(text, type = "info", hideMessageDelayMs, callback) {
-    const messageElement = document.getElementById("message");
-    if (messageElement) {
+    const notificationElement = document.getElementById("notification");
+    const notificationMessage = document.getElementById("notification-message");
+    if (notificationElement && notificationMessage) {
       if (this.messageTimeoutId) {
         clearTimeout(this.messageTimeoutId);
       }
-      messageElement.textContent = text;
-      messageElement.className = `message ${type}`;
-      messageElement.style.display = "block";
+      notificationMessage.textContent = text;
+      notificationElement.className = `notification ${type}`;
+      notificationElement.style.display = "block";
       this.messageTimeoutId = window.setTimeout(() => {
-        messageElement.style.display = "none";
-        this.messageTimeoutId = void 0;
-        if (callback) {
-          callback();
-        }
+        this.hideNotification(callback);
       }, hideMessageDelayMs);
+    }
+  }
+  hideNotification(callback) {
+    const notificationElement = document.getElementById("notification");
+    if (notificationElement) {
+      notificationElement.style.display = "none";
+    }
+    if (this.messageTimeoutId) {
+      clearTimeout(this.messageTimeoutId);
+      this.messageTimeoutId = void 0;
+    }
+    if (callback) {
+      callback();
     }
   }
 }

@@ -1,4 +1,5 @@
 .popup-container {
+  position: relative;
   width: 380px;
   min-height: 380px;
   padding: 0;
@@ -80,23 +81,73 @@
   text-decoration: none;
 }
 
-/* Message under button */
-.message {
-  margin-top: var(--spacing-2);
+/* Notification styles */
+.notification {
+  position: absolute;
+  top: var(--spacing-4);
+  left: var(--spacing-4);
+  right: var(--spacing-4);
+  z-index: 1000;
+  padding: var(--spacing-3) var(--spacing-4);
+  padding-right: var(--spacing-10);
   font-size: var(--text-base);
   text-align: center;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideDown 0.3s ease-out;
 }
 
-.message.info {
-  color: var(--color-text-secondary);
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
-.message.error {
-  color: var(--color-danger);
+.notification.info {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #7dd3fc;
 }
 
-.message.success {
-  color: var(--color-success);
+.notification.error {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+
+.notification.success {
+  background-color: #dcfce7;
+  color: #16a34a;
+  border: 1px solid #86efac;
+}
+
+.notification-close {
+  position: absolute;
+  top: 50%;
+  right: var(--spacing-3);
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: inherit;
+  opacity: 0.6;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-close:hover {
+  opacity: 1;
 }
 
 /* Style for main toggle */
