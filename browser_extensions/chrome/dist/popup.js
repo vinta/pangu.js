@@ -35,6 +35,12 @@ class PopupController {
         this.handleManualSpacing();
       });
     }
+    const addToBlacklistBtn = document.getElementById("add-to-blacklist-btn");
+    if (addToBlacklistBtn) {
+      addToBlacklistBtn.addEventListener("click", () => {
+        this.handleAddToBlacklist();
+      });
+    }
     const notification = document.getElementById("notification");
     if (notification) {
       notification.addEventListener("click", () => {
@@ -51,6 +57,7 @@ class PopupController {
     await this.renderSpacingModeToggle();
     await this.renderMuteToggle();
     await this.renderStatus();
+    await this.renderAddToBlacklistButton();
     this.renderVersion();
   }
   async renderSpacingModeToggle() {
@@ -68,10 +75,6 @@ class PopupController {
     }
   }
   async renderStatus() {
-    const statusToggle = document.getElementById("status-indicator");
-    if (!statusToggle) {
-      return;
-    }
     const statusInput = document.getElementById("status-toggle-input");
     const statusLabel = document.getElementById("status-toggle-label");
     if (!statusInput || !statusLabel) {
@@ -88,6 +91,18 @@ class PopupController {
     if (versionElement) {
       versionElement.textContent = chrome.runtime.getManifest().version;
     }
+  }
+  async renderAddToBlacklistButton() {
+    const button = document.getElementById("add-to-blacklist-btn");
+    if (!button) {
+      return;
+    }
+    const settings = await getCachedSettings();
+    if (settings.filter_mode !== "blacklist" || !this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
+      button.style.display = "none";
+      return;
+    }
+    button.style.display = "block";
   }
   async handleSpacingModeToggleChange() {
     const toggle = document.getElementById("spacing-mode-toggle");
@@ -216,6 +231,25 @@ class PopupController {
     if (this.notificationCallback) {
       this.notificationCallback();
       this.notificationCallback = void 0;
+    }
+  }
+  async handleAddToBlacklist() {
+    if (!this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
+      return;
+    }
+    try {
+      const url = new URL(this.currentTabUrl);
+      const domainPattern = `${url.protocol}//${url.hostname}/*`;
+      const settings = await getCachedSettings();
+      if (settings.blacklist.includes(domainPattern)) {
+        this.showMessage(chrome.i18n.getMessage("already_in_blacklist"), "info", 1e3 * 3);
+        return;
+      }
+      settings.blacklist.push(domainPattern);
+      await chrome.storage.sync.set({ blacklist: settings.blacklist });
+      this.showMessage(chrome.i18n.getMessage("refresh_required"), "info", 1e3 * 3);
+    } catch (error) {
+      console.error("Failed to add to blacklist:", error);
     }
   }
 }

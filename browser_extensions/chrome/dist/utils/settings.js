@@ -3,6 +3,7 @@ const DEFAULT_SETTINGS = {
   filter_mode: "blacklist",
   blacklist: [
     "https://docs.google.com/*",
+    "https://calendar.google.com/*",
     "https://gist.github.com/*",
     "https://github.com/*/blob/*",
     "https://github.com/*/commit/*",

@@ -1,7 +1,7 @@
 import { translatePage } from './utils/i18n';
-import type { PingMessage, ManualSpacingMessage, ContentScriptResponse, MessageFromContentScript } from './utils/types';
 import { getCachedSettings } from './utils/settings';
 import { playSound, stopSound } from './utils/sounds';
+import type { PingMessage, ManualSpacingMessage, ContentScriptResponse, MessageFromContentScript } from './utils/types';
 
 class PopupController {
   private currentTabId: number | undefined;
@@ -45,6 +45,13 @@ class PopupController {
       });
     }
 
+    const addToBlacklistBtn = document.getElementById('add-to-blacklist-btn');
+    if (addToBlacklistBtn) {
+      addToBlacklistBtn.addEventListener('click', () => {
+        this.handleAddToBlacklist();
+      });
+    }
+
     const notification = document.getElementById('notification');
     if (notification) {
       notification.addEventListener('click', () => {
@@ -63,6 +70,7 @@ class PopupController {
     await this.renderSpacingModeToggle();
     await this.renderMuteToggle();
     await this.renderStatus();
+    await this.renderAddToBlacklistButton();
     this.renderVersion();
   }
 
@@ -83,24 +91,15 @@ class PopupController {
   }
 
   private async renderStatus() {
-    const statusToggle = document.getElementById('status-indicator') as HTMLLabelElement;
-    if (!statusToggle) {
-      return;
-    }
-    
     const statusInput = document.getElementById('status-toggle-input') as HTMLInputElement;
     const statusLabel = document.getElementById('status-toggle-label');
-    
+
     if (!statusInput || !statusLabel) {
       return;
     }
 
     const shouldBeActive = await this.shouldContentScriptBeActive();
-    
-    // Update the toggle state
     statusInput.checked = shouldBeActive;
-    
-    // Update the label text
     const messageKey = shouldBeActive ? 'status_active' : 'status_inactive';
     statusLabel.setAttribute('data-i18n', messageKey);
     statusLabel.textContent = chrome.i18n.getMessage(messageKey);
@@ -111,6 +110,23 @@ class PopupController {
     if (versionElement) {
       versionElement.textContent = chrome.runtime.getManifest().version;
     }
+  }
+
+  private async renderAddToBlacklistButton() {
+    const button = document.getElementById('add-to-blacklist-btn');
+    if (!button) {
+      return;
+    }
+
+    const settings = await getCachedSettings();
+
+    // Hide button if not in blacklist mode or if URL is invalid
+    if (settings.filter_mode !== 'blacklist' || !this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
+      button.style.display = 'none';
+      return;
+    }
+
+    button.style.display = 'block';
   }
 
   private async handleSpacingModeToggleChange() {
@@ -126,7 +142,7 @@ class PopupController {
   private async handleMuteToggleChange() {
     const toggle = document.getElementById('mute-toggle') as HTMLInputElement;
     await chrome.storage.sync.set({ is_mute_sound_effects: toggle.checked });
-    
+
     // Play a sound when turning off mute to confirm it works
     if (!toggle.checked) {
       await playSound('Hadouken');
@@ -250,7 +266,7 @@ class PopupController {
   private showMessage(text: string, type: 'info' | 'error' | 'success' = 'info', hideMessageDelayMs: number, callback?: () => void) {
     const notificationElement = document.getElementById('notification');
     const notificationMessage = document.getElementById('notification-message');
-    
+
     if (notificationElement && notificationMessage) {
       // Clear any existing timeout to prevent premature hiding
       if (this.messageTimeoutId) {
@@ -275,19 +291,42 @@ class PopupController {
     if (notificationElement) {
       notificationElement.style.display = 'none';
     }
-    
-    // Stop any playing sound when notification is dismissed
+
     stopSound();
-    
+
     if (this.messageTimeoutId) {
       clearTimeout(this.messageTimeoutId);
       this.messageTimeoutId = undefined;
     }
-    
-    // Execute the stored callback if it exists
+
     if (this.notificationCallback) {
       this.notificationCallback();
       this.notificationCallback = undefined;
+    }
+  }
+
+  private async handleAddToBlacklist() {
+    if (!this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
+      return;
+    }
+
+    try {
+      const url = new URL(this.currentTabUrl);
+      const domainPattern = `${url.protocol}//${url.hostname}/*`;
+
+      const settings = await getCachedSettings();
+
+      if (settings.blacklist.includes(domainPattern)) {
+        this.showMessage(chrome.i18n.getMessage('already_in_blacklist'), 'info', 1000 * 3);
+        return;
+      }
+
+      settings.blacklist.push(domainPattern);
+      await chrome.storage.sync.set({ blacklist: settings.blacklist });
+
+      this.showMessage(chrome.i18n.getMessage('refresh_required'), 'info', 1000 * 3);
+    } catch (error) {
+      console.error('Failed to add to blacklist:', error);
     }
   }
 }

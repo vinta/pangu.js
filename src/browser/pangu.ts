@@ -98,59 +98,39 @@ export class BrowserPangu extends Pangu {
 
     this.isAutoSpacingPageExecuted = true;
 
-    const onceSpacingPage = once(() => {
+    // FIXME
+    // Dirty hack for https://github.com/vinta/pangu.js/issues/117
+    const spacingPageOnce = once(() => {
       this.spacingPage();
     });
-
-    // TODO
-    // this is a dirty hack for https://github.com/vinta/pangu.js/issues/117
     const videos = document.getElementsByTagName('video');
     if (videos.length === 0) {
       setTimeout(() => {
-        onceSpacingPage();
+        spacingPageOnce();
       }, pageDelayMs);
     } else {
       for (let i = 0; i < videos.length; i++) {
         const video = videos[i];
         if (video.readyState === 4) {
           setTimeout(() => {
-            onceSpacingPage();
+            spacingPageOnce();
           }, 3000);
           break;
         }
         video.addEventListener('loadeddata', () => {
           setTimeout(() => {
-            onceSpacingPage();
+            spacingPageOnce();
           }, 4000);
         });
       }
     }
 
-    const queue: Node[] = [];
-
-    // It's possible that multiple workers process the queue at the same time
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-    const debouncedSpacingNodes = debounce(
-      () => {
-        // a single node could be very big which contains a lot of child nodes
-        while (queue.length) {
-          const node = queue.shift();
-          if (node) {
-            self.spacingNode(node);
-          }
-        }
-      },
-      nodeDelayMs,
-      nodeMaxWaitMs,
-    );
-
-    this.setupAutoSpacingPageObserver(queue, debouncedSpacingNodes);
+    this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
   }
 
   public smartAutoSpacingPage({ pageDelayMs = 1000, nodeDelayMs = 500, nodeMaxWaitMs = 2000, sampleSize = 1000, cjkObserverMaxWaitMs = 30000 }: SmartAutoSpacingPageConfig = {}) {
     if (!this.hasCjk(sampleSize)) {
-      console.log('No CJK content detected, setting up observer');
+      console.log('[pangu.js] No CJK content detected, setting up observer');
       this.setupCjkObserver({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs, sampleSize, cjkObserverMaxWaitMs });
       return;
     }
@@ -475,32 +455,69 @@ export class BrowserPangu extends Pangu {
     return false;
   }
 
-  protected setupAutoSpacingPageObserver(queue: Node[], debouncedSpacingNodes: () => void) {
+  protected setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number) {
     // Disconnect any existing auto-spacing observer
     if (this.autoSpacingPageObserver) {
       this.autoSpacingPageObserver.disconnect();
       this.autoSpacingPageObserver = null;
     }
 
+    const queue: Node[] = [];
+
+    const debouncedSpacingTitle = debounce(
+      () => {
+        this.spacingPageTitle();
+      },
+      nodeDelayMs,
+      nodeMaxWaitMs,
+    );
+
+    const debouncedSpacingNode = debounce(
+      () => {
+        // NOTE: a single node could be very big which contains a lot of child nodes
+        while (queue.length) {
+          const node = queue.shift();
+          if (node) {
+            this.spacingNode(node);
+          }
+        }
+      },
+      nodeDelayMs,
+      nodeMaxWaitMs,
+    );
+
     // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
     this.autoSpacingPageObserver = new MutationObserver((mutations) => {
+      let titleChanged = false;
+
       // Element: https://developer.mozilla.org/en-US/docs/Web/API/Element
       // Text: https://developer.mozilla.org/en-US/docs/Web/API/Text
       for (const mutation of mutations) {
+        // Skip to avoid double processing - title handled separately by debouncedSpacingTitle()
+        if (mutation.target.parentNode?.nodeName === 'TITLE' || mutation.target.nodeName === 'TITLE') {
+          titleChanged = true;
+          continue;
+        }
+
+        // Queue parent elements for spacing processing
         switch (mutation.type) {
-          case 'childList':
-            for (const node of mutation.addedNodes) {
-              if (node.nodeType === Node.ELEMENT_NODE) {
-                queue.push(node);
-              } else if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
-                queue.push(node.parentNode);
-              }
-            }
-            break;
           case 'characterData':
+            // Text content changed (e.g., textContent = '新文字new text')
             const { target: node } = mutation;
             if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
-              queue.push(node.parentNode);
+              // <p>Hello 世界</p>
+              // "Hello 世界" is the text node, <p> is the parent element
+              queue.push(node.parentNode); // Queue parent element, not text node
+            }
+            break;
+          case 'childList':
+            // New nodes added to DOM (e.g., innerHTML change, appendChild)
+            for (const node of mutation.addedNodes) {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                queue.push(node); // Element added, process its text content
+              } else if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
+                queue.push(node.parentNode); // Text node added, process its parent
+              }
             }
             break;
           default:
@@ -508,12 +525,28 @@ export class BrowserPangu extends Pangu {
         }
       }
 
-      debouncedSpacingNodes();
+      if (titleChanged) {
+        debouncedSpacingTitle();
+      }
+
+      debouncedSpacingNode();
     });
+
+    // NOTE: A single MutationObserver can observe multiple targets simultaneously
+    // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver/observe:
+
+    // Observe page content changes
     this.autoSpacingPageObserver.observe(document.body, {
       characterData: true,
       childList: true,
       subtree: true,
+    });
+
+    // Observe page title changes
+    this.autoSpacingPageObserver.observe(document.head, {
+      characterData: true,
+      childList: true,
+      subtree: true, // Need subtree to observe text node changes inside title
     });
   }
 
@@ -532,7 +565,7 @@ export class BrowserPangu extends Pangu {
           this.cjkObserver.disconnect();
           this.cjkObserver = null;
         }
-        console.log('CJK observer timeout reached, stopping observer');
+        console.log('[pangu.js] CJK observer timeout reached, stopping observer');
         return;
       }
 
@@ -542,7 +575,7 @@ export class BrowserPangu extends Pangu {
           this.cjkObserver = null;
         }
 
-        console.log('CJK content detected, starting auto spacing');
+        console.log('[pangu.js] CJK content detected, starting auto spacing');
         this.isAutoSpacingPageExecuted = false;
         this.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs, nodeMaxWaitMs }); // No delay since we already waited
       }

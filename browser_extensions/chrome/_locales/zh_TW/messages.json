@@ -49,7 +49,7 @@
     "description": ""
   },
   "spacing_success": {
-    "message": "空格之神降臨",
+    "message": "空格之神赦免他們的罪",
     "description": ""
   },
   "spacing_processing": {
@@ -58,6 +58,14 @@
   },
   "refresh_required": {
     "message": "重新整理網頁之後才會生效",
+    "description": ""
+  },
+  "add_to_blacklist": {
+    "message": "把這個網址加到黑名單",
+    "description": ""
+  },
+  "already_in_blacklist": {
+    "message": "加過了啦",
     "description": ""
   },
 
@@ -134,7 +142,7 @@
     "description": ""
   },
   "label_is_enable_detect_cjk": {
-    "message": "只在有中文的頁面才招喚空格之神",
+    "message": "只在有中文的頁面才招喚空格之神（測試中的功能）",
     "description": ""
   }
 }
