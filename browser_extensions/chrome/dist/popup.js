@@ -1,4 +1,4 @@
-import { t as translatePage, p as playSound } from "./utils/sounds.js";
+import { t as translatePage, p as playSound, s as stopSound } from "./utils/sounds.js";
 import { g as getCachedSettings } from "./utils/settings.js";
 class PopupController {
   currentTabId;
@@ -187,6 +187,7 @@ class PopupController {
     if (notificationElement) {
       notificationElement.style.display = "none";
     }
+    stopSound();
     if (this.messageTimeoutId) {
       clearTimeout(this.messageTimeoutId);
       this.messageTimeoutId = void 0;

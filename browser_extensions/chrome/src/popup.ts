@@ -1,7 +1,7 @@
 import { translatePage } from './utils/i18n';
 import type { PingMessage, ManualSpacingMessage, ContentScriptResponse, MessageFromContentScript } from './utils/types';
 import { getCachedSettings } from './utils/settings';
-import { playSound } from './utils/sounds';
+import { playSound, stopSound } from './utils/sounds';
 
 class PopupController {
   private currentTabId: number | undefined;
@@ -249,6 +249,9 @@ class PopupController {
     if (notificationElement) {
       notificationElement.style.display = 'none';
     }
+    
+    // Stop any playing sound when notification is dismissed
+    stopSound();
     
     if (this.messageTimeoutId) {
       clearTimeout(this.messageTimeoutId);
