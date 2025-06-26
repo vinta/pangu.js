@@ -27,9 +27,9 @@ The extension only:
 
 The extension requires the following permissions:
 
-- **storage**: To save your preferences and settings locally
-- **tabs**: To detect which tab is active for applying spacing rules
+- **activeTab**: To apply spacing rules only to the currently active tab when you interact with the extension
 - **scripting**: To inject the spacing functionality into web pages
+- **storage**: To save your preferences and settings locally
 - **host_permissions**: To run on web pages you visit
 
 ## Third-Party Services
