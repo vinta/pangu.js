@@ -1,9 +1,11 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extension_name__",
-  "version": "5.3.0",
-  "default_locale": "zh_TW",
   "description": "__MSG_extension_description__",
+  "short_name": "__MSG_god_of_spacing__",
+  "version": "5.3.0",
+  "author": "Vinta",
+  "default_locale": "zh_TW",
   "icons": {
     "16": "icons/icon_16.png",
     "32": "icons/icon_32.png",
@@ -19,15 +21,13 @@
     "default_title": "__MSG_extension_name__",
     "default_popup": "pages/popup.html"
   },
-  "author": "Vinta",
+  "options_page": "pages/options.html",
   "background": {
     "service_worker": "dist/service-worker.js",
     "type": "module"
   },
-  "minimum_chrome_version": "95",
-  "offline_enabled": true,
-  "options_page": "pages/options.html",
   "permissions": ["activeTab", "scripting", "storage"],
   "host_permissions": ["http://*/*", "https://*/*", "file:///*/*"],
-  "short_name": "__MSG_god_of_spacing__"
+  "minimum_chrome_version": "95",
+  "offline_enabled": true
 }
