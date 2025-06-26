@@ -53,11 +53,6 @@
   margin-bottom: 0;
 }
 
-.popup-actions {
-  display: flex;
-  gap: var(--spacing-2);
-  margin-top: var(--spacing-4);
-}
 
 .popup-footer {
   padding: var(--spacing-3) var(--spacing-4);
