@@ -75,8 +75,8 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 `pangu.js` is also available on some popular npm CDNs:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/pangu@5.2.0/dist/browser/pangu.umd.js"></script>
-<script src="https://unpkg.com/pangu@5.2.0/dist/browser/pangu.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pangu@5.3.0/dist/browser/pangu.umd.js"></script>
+<script src="https://unpkg.com/pangu@5.3.0/dist/browser/pangu.umd.js"></script>
 ```
 
 ### Node.js
