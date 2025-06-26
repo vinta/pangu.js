@@ -55,6 +55,7 @@
 
 ### Medium Priority
 
+- [ ] Fix extra space ` 3` in `<span> 3</span>` in Gmail table row
 - [ ] Fix issue #201 - Spaces inserted between image-separated text
   - When images are used as separators, unwanted spaces are added
 - [ ] Fix issue #173 - Full-width curved quotes shouldn't have spaces
