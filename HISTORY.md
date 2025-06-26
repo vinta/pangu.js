@@ -1,5 +1,9 @@
 # History
 
+## v5.2.0 / 2025-06-26
+
+- 各位觀眾，Paranoid Text Spacing 演算法 v5！
+
 ## v5.1.1 / 2025-06-24
 
 - 偉哉 Claude Code，精雕細琢的 v5.1.0 終於推出啦！
