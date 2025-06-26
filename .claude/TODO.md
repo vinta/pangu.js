@@ -34,6 +34,12 @@
 - [x] Fixed HTML tag spacing - tags no longer get spaces inside them (#164)
   - Implemented placeholder system to protect HTML tags during processing
   - Attribute values still get processed for spacing
+- [x] Fixed input field auto-spacing (#158)
+  - Added `input` to `ignoredTags` regex in browser implementation
+  - Prevents spacing in form fields, login/registration forms
+- [x] Fixed slash pattern conflict with filesystem paths
+  - Removed `/` from `CJK_ANS` pattern to prevent spacing in patterns like `陳上進/vinta`
+  - Made filesystem path pattern more specific to avoid false matches
 
 ## In Progress
 
@@ -43,9 +49,6 @@
 
 ### High Priority - Unfixed Issues
 
-- [x] Fix issue #158 - Input fields getting auto-spaced
-  - Text in input fields should not be automatically spaced
-  - Need to exclude input/textarea elements from auto-spacing
 - [ ] Fix issue #173 - Full-width curved quotes shouldn't have spaces
   - Full-width quotation marks (「」『』) are being incorrectly spaced
   - These are punctuation marks in CJK languages and shouldn't be separated
