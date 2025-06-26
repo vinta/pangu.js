@@ -1,8 +1,16 @@
-import { D as DEFAULT_SETTINGS } from "./utils/settings.js";
+const DEFAULT_SETTINGS = {
+  spacing_mode: "spacing_when_load",
+  filter_mode: "blacklist",
+  blacklist: ["*://docs.google.com/*", "*://gist.github.com/*", "*://github.com/*/blob/*", "*://github.com/*/commit/*", "*://github.com/*/pull/*"],
+  whitelist: [],
+  is_mute_sound_effects: false,
+  is_enable_detect_cjk: false
+};
 async function autoSpacingPage() {
   const pangu = window.pangu;
   if (pangu) {
     const settings = await chrome.storage.sync.get(DEFAULT_SETTINGS);
+    console.log(`pangu.js settings:`, settings);
     if (settings.is_enable_detect_cjk) {
       pangu.smartAutoSpacingPage();
     } else {
