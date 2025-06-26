@@ -179,7 +179,6 @@ a:hover {
   opacity: 0.9;
 }
 
-
 /* Button sizes */
 
 .btn-lg {
@@ -252,14 +251,10 @@ a:hover {
   box-shadow: var(--shadow-sm);
 }
 
-
-
-
 /* Form elements */
 .form-group {
   margin-bottom: var(--spacing-4);
 }
-
 
 /* Utility classes */
 .mt-2 { margin-top: var(--spacing-2) !important; }

@@ -175,7 +175,6 @@
   cursor: text;
 }
 
-
 /* Add URL link */
 #add-url-btn {
   display: inline-flex;
@@ -331,7 +330,6 @@
     transform: translateY(0);
   }
 }
-
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
