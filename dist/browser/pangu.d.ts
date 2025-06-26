@@ -4,14 +4,9 @@ export interface AutoSpacingPageConfig {
     nodeDelayMs?: number;
     nodeMaxWaitMs?: number;
 }
-export interface SmartAutoSpacingPageConfig extends AutoSpacingPageConfig {
-    sampleSize?: number;
-    cjkObserverMaxWaitMs?: number;
-}
 export declare class BrowserPangu extends Pangu {
     isAutoSpacingPageExecuted: boolean;
     protected autoSpacingPageObserver: MutationObserver | null;
-    protected cjkObserver: MutationObserver | null;
     blockTags: RegExp;
     ignoredTags: RegExp;
     presentationalTags: RegExp;
@@ -19,9 +14,7 @@ export declare class BrowserPangu extends Pangu {
     spaceSensitiveTags: RegExp;
     ignoredClass: string;
     constructor();
-    hasCjk(sampleSize?: number): boolean;
     autoSpacingPage({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs }?: AutoSpacingPageConfig): void;
-    smartAutoSpacingPage({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs, sampleSize, cjkObserverMaxWaitMs }?: SmartAutoSpacingPageConfig): void;
     spacingPage(): void;
     spacingPageTitle(): void;
     spacingPageBody(): void;
@@ -39,7 +32,6 @@ export declare class BrowserPangu extends Pangu {
     protected isFirstTextChild(parentNode: Node, targetNode: Node): boolean;
     protected isLastTextChild(parentNode: Node, targetNode: Node): boolean;
     protected setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number): void;
-    protected setupCjkObserver({ nodeDelayMs, nodeMaxWaitMs, cjkObserverMaxWaitMs }: SmartAutoSpacingPageConfig): void;
 }
 export declare const pangu: BrowserPangu;
 export default pangu;

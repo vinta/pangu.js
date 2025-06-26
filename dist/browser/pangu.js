@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { Pangu, ANY_CJK } from "../shared/index.js";
+import { Pangu } from "../shared/index.js";
 function once(func) {
   let executed = false;
   return function(...args) {
@@ -38,7 +38,6 @@ class BrowserPangu extends Pangu {
     super();
     __publicField(this, "isAutoSpacingPageExecuted");
     __publicField(this, "autoSpacingPageObserver");
-    __publicField(this, "cjkObserver");
     __publicField(this, "blockTags");
     __publicField(this, "ignoredTags");
     __publicField(this, "presentationalTags");
@@ -47,21 +46,12 @@ class BrowserPangu extends Pangu {
     __publicField(this, "ignoredClass");
     this.isAutoSpacingPageExecuted = false;
     this.autoSpacingPageObserver = null;
-    this.cjkObserver = null;
     this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
     this.ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
     this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
     this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
     this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
     this.ignoredClass = "no-pangu-spacing";
-  }
-  hasCjk(sampleSize = 1e3) {
-    if (ANY_CJK.test(document.title)) {
-      return true;
-    }
-    const bodyText = document.body.textContent || "";
-    const sample = bodyText.substring(0, sampleSize);
-    return ANY_CJK.test(sample);
   }
   autoSpacingPage({ pageDelayMs = 1e3, nodeDelayMs = 500, nodeMaxWaitMs = 2e3 } = {}) {
     if (!(document.body instanceof Node)) {
@@ -96,14 +86,6 @@ class BrowserPangu extends Pangu {
       }
     }
     this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
-  }
-  smartAutoSpacingPage({ pageDelayMs = 1e3, nodeDelayMs = 500, nodeMaxWaitMs = 2e3, sampleSize = 1e3, cjkObserverMaxWaitMs = 3e4 } = {}) {
-    if (!this.hasCjk(sampleSize)) {
-      console.log("[pangu.js] No CJK content detected, setting up observer");
-      this.setupCjkObserver({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs, sampleSize, cjkObserverMaxWaitMs });
-      return;
-    }
-    this.autoSpacingPage({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs });
   }
   spacingPage() {
     this.spacingPageTitle();
@@ -260,10 +242,6 @@ class BrowserPangu extends Pangu {
       this.autoSpacingPageObserver.disconnect();
       this.autoSpacingPageObserver = null;
     }
-    if (this.cjkObserver) {
-      this.cjkObserver.disconnect();
-      this.cjkObserver = null;
-    }
     this.isAutoSpacingPageExecuted = false;
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -396,37 +374,6 @@ class BrowserPangu extends Pangu {
       childList: true,
       subtree: true
       // Need subtree to observe text node changes inside title
-    });
-  }
-  setupCjkObserver({ nodeDelayMs = 500, nodeMaxWaitMs = 2e3, cjkObserverMaxWaitMs = 1e3 * 30 }) {
-    if (this.cjkObserver) {
-      this.cjkObserver.disconnect();
-      this.cjkObserver = null;
-    }
-    const startTime = Date.now();
-    this.cjkObserver = new MutationObserver(() => {
-      if (Date.now() - startTime > cjkObserverMaxWaitMs) {
-        if (this.cjkObserver) {
-          this.cjkObserver.disconnect();
-          this.cjkObserver = null;
-        }
-        console.log("[pangu.js] CJK observer timeout reached, stopping observer");
-        return;
-      }
-      if (this.hasCjk()) {
-        if (this.cjkObserver) {
-          this.cjkObserver.disconnect();
-          this.cjkObserver = null;
-        }
-        console.log("[pangu.js] CJK content detected, starting auto spacing");
-        this.isAutoSpacingPageExecuted = false;
-        this.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs, nodeMaxWaitMs });
-      }
-    });
-    this.cjkObserver.observe(document.body, {
-      childList: true,
-      subtree: true,
-      characterData: true
     });
   }
 }

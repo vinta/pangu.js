@@ -1,6 +1,5 @@
 import type { BrowserPangu } from '../../../src/browser/pangu';
-import { DEFAULT_SETTINGS } from './utils/settings';
-import type { MessageToContentScript, ContentScriptResponse, ContentScriptLoadedMessage, Settings } from './utils/types';
+import type { MessageToContentScript, ContentScriptResponse, ContentScriptLoadedMessage } from './utils/types';
 
 // Extend the global Window interface to include the pangu object
 // The pangu object is injected by pangu.umd.js which loads before this script
@@ -13,12 +12,7 @@ declare global {
 async function autoSpacingPage() {
   const pangu = window.pangu;
   if (pangu) {
-    const settings = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
-    if (settings.is_enable_detect_cjk) {
-      pangu.smartAutoSpacingPage();
-    } else {
-      pangu.autoSpacingPage();
-    }
+    pangu.autoSpacingPage();
   }
 }
 

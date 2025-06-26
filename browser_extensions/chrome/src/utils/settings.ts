@@ -15,7 +15,6 @@ export const DEFAULT_SETTINGS: Settings = {
   ],
   whitelist: [],
   is_mute_sound_effects: false,
-  is_enable_detect_cjk: false,
 };
 
 let cachedSettings: Settings = { ...DEFAULT_SETTINGS };

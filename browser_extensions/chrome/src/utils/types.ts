@@ -4,7 +4,6 @@ export interface Settings {
   blacklist: string[];
   whitelist: string[];
   is_mute_sound_effects: boolean;
-  is_enable_detect_cjk: boolean;
 }
 
 export interface PingMessage {

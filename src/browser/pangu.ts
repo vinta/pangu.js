@@ -1,14 +1,9 @@
-import { Pangu, ANY_CJK } from '../shared';
+import { Pangu } from '../shared';
 
 export interface AutoSpacingPageConfig {
   pageDelayMs?: number;
   nodeDelayMs?: number;
   nodeMaxWaitMs?: number;
-}
-
-export interface SmartAutoSpacingPageConfig extends AutoSpacingPageConfig {
-  sampleSize?: number;
-  cjkObserverMaxWaitMs?: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -53,7 +48,6 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 export class BrowserPangu extends Pangu {
   public isAutoSpacingPageExecuted: boolean;
   protected autoSpacingPageObserver: MutationObserver | null;
-  protected cjkObserver: MutationObserver | null;
 
   public blockTags: RegExp;
   public ignoredTags: RegExp;
@@ -67,7 +61,6 @@ export class BrowserPangu extends Pangu {
 
     this.isAutoSpacingPageExecuted = false;
     this.autoSpacingPageObserver = null;
-    this.cjkObserver = null;
 
     this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
     this.ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
@@ -75,16 +68,6 @@ export class BrowserPangu extends Pangu {
     this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
     this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
     this.ignoredClass = 'no-pangu-spacing';
-  }
-
-  public hasCjk(sampleSize = 1000) {
-    if (ANY_CJK.test(document.title)) {
-      return true;
-    }
-
-    const bodyText = document.body.textContent || '';
-    const sample = bodyText.substring(0, sampleSize);
-    return ANY_CJK.test(sample);
   }
 
   public autoSpacingPage({ pageDelayMs = 1000, nodeDelayMs = 500, nodeMaxWaitMs = 2000 }: AutoSpacingPageConfig = {}) {
@@ -126,16 +109,6 @@ export class BrowserPangu extends Pangu {
     }
 
     this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
-  }
-
-  public smartAutoSpacingPage({ pageDelayMs = 1000, nodeDelayMs = 500, nodeMaxWaitMs = 2000, sampleSize = 1000, cjkObserverMaxWaitMs = 30000 }: SmartAutoSpacingPageConfig = {}) {
-    if (!this.hasCjk(sampleSize)) {
-      console.log('[pangu.js] No CJK content detected, setting up observer');
-      this.setupCjkObserver({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs, sampleSize, cjkObserverMaxWaitMs });
-      return;
-    }
-
-    this.autoSpacingPage({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs });
   }
 
   public spacingPage() {
@@ -369,11 +342,6 @@ export class BrowserPangu extends Pangu {
       this.autoSpacingPageObserver = null;
     }
 
-    if (this.cjkObserver) {
-      this.cjkObserver.disconnect();
-      this.cjkObserver = null;
-    }
-
     this.isAutoSpacingPageExecuted = false;
   }
 
@@ -547,44 +515,6 @@ export class BrowserPangu extends Pangu {
       characterData: true,
       childList: true,
       subtree: true, // Need subtree to observe text node changes inside title
-    });
-  }
-
-  protected setupCjkObserver({ nodeDelayMs = 500, nodeMaxWaitMs = 2000, cjkObserverMaxWaitMs = 1000 * 30 }: SmartAutoSpacingPageConfig) {
-    if (this.cjkObserver) {
-      this.cjkObserver.disconnect();
-      this.cjkObserver = null;
-    }
-
-    const startTime = Date.now();
-
-    this.cjkObserver = new MutationObserver(() => {
-      // Check if we've exceeded the maximum wait time
-      if (Date.now() - startTime > cjkObserverMaxWaitMs) {
-        if (this.cjkObserver) {
-          this.cjkObserver.disconnect();
-          this.cjkObserver = null;
-        }
-        console.log('[pangu.js] CJK observer timeout reached, stopping observer');
-        return;
-      }
-
-      if (this.hasCjk()) {
-        if (this.cjkObserver) {
-          this.cjkObserver.disconnect();
-          this.cjkObserver = null;
-        }
-
-        console.log('[pangu.js] CJK content detected, starting auto spacing');
-        this.isAutoSpacingPageExecuted = false;
-        this.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs, nodeMaxWaitMs }); // No delay since we already waited
-      }
-    });
-
-    this.cjkObserver.observe(document.body, {
-      childList: true,
-      subtree: true,
-      characterData: true,
     });
   }
 }

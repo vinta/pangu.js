@@ -140,9 +140,5 @@
   "label_is_mute_sound_effects": {
     "message": "太吵了，靜音",
     "description": ""
-  },
-  "label_is_enable_detect_cjk": {
-    "message": "只在有中文的頁面才招喚空格之神（測試中，不要用）",
-    "description": ""
   }
 }
