@@ -239,9 +239,7 @@ test.describe('BrowserPangu', () => {
 
       const consoleMessages: string[] = [];
       page.on('console', (msg) => {
-        if (msg.text().includes('pangu.js:')) {
-          consoleMessages.push(msg.text());
-        }
+        consoleMessages.push(msg.text());
       });
 
       await page.evaluate(() => {
@@ -250,7 +248,7 @@ test.describe('BrowserPangu', () => {
 
       await page.waitForTimeout(100);
 
-      expect(consoleMessages).toContain('pangu.js: No CJK content detected, setting up observer');
+      expect(consoleMessages).toContain('No CJK content detected, setting up observer');
     });
 
     test('should process pages with CJK content', async ({ page }) => {
@@ -260,9 +258,7 @@ test.describe('BrowserPangu', () => {
 
       const consoleMessages: string[] = [];
       page.on('console', (msg) => {
-        if (msg.text().includes('pangu.js:')) {
-          consoleMessages.push(msg.text());
-        }
+        consoleMessages.push(msg.text());
       });
 
       await page.evaluate(() => {
@@ -271,7 +267,7 @@ test.describe('BrowserPangu', () => {
 
       await page.waitForTimeout(1500);
 
-      expect(consoleMessages).not.toContain('pangu.js: No CJK content detected, setting up observer');
+      expect(consoleMessages).not.toContain('No CJK content detected, setting up observer');
 
       const text = await page.textContent('#test');
       expect(text).toBe('新八的構造成分有 95% 是眼鏡、3% 是水、2% 是垃圾');
