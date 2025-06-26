@@ -8,17 +8,15 @@
     "16": "icons/icon_16.png",
     "32": "icons/icon_32.png",
     "48": "icons/icon_48.png",
-    "64": "icons/icon_64.png",
     "128": "icons/icon_128.png"
   },
   "action": {
     "default_icon": {
       "16": "icons/icon_16.png",
-      "19": "icons/icon_19.png",
-      "32": "icons/icon_32.png",
-      "38": "icons/icon_48.png"
+      "24": "icons/icon_24.png",
+      "32": "icons/icon_32.png"
     },
-    "default_title": "__MSG_god_of_spacing__",
+    "default_title": "__MSG_extension_name__",
     "default_popup": "pages/popup.html"
   },
   "author": "Vinta",
