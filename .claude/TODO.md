@@ -2,29 +2,19 @@
 
 ## Completed
 
-### Major Migrations
+### New Features
 
-- [x] Chrome Extension Manifest V3 compatibility
-- [x] Remove Angular.js from Chrome Extension (saved ~194KB)
-- [x] Convert all Chrome Extension JS files to TypeScript
-- [x] Migrate all source code to TypeScript with strict mode
-- [x] Replace Webpack/Babel with Vite
-- [x] Replace Mocha/Chai/Karma with Vitest/Playwright
+- [x] Implement blacklist/whitelist with Chrome match pattern validation
+- [x] Use Chrome's `excludeMatches` API for efficient blacklist handling
+- [x] Add a button for "把這個網址加到黑名單" in popup page
+  - Which only add `https://example.com/*` instead of the entire url
 
-### Chrome Extension Optimization
+### Optimization
 
 - [x] Replace `tabs` permission with `activeTab` (removes "Read browsing history" warning)
 - [x] Implement dynamic content script registration with chrome.scripting API
 - [x] Optimize `pangu.js` loading with on-demand injection
 - [x] Skip auto spacing if there is no CJK content in webpages
-- [x] Add a button for "把這個網址加到黑名單" in popup page
-  - Which only add `https://example.com/*` instead of the entire url
-
-### Match Pattern Implementation
-
-- [x] Implement blacklist/whitelist with Chrome match pattern validation
-- [x] Use Chrome's `excludeMatches` API for efficient blacklist handling
-- [x] Add match pattern validation with helpful error messages
 
 ### Regex Pattern Fixes
 
