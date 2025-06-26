@@ -15,7 +15,8 @@
 
 - [x] Replace `tabs` permission with `activeTab` (removes "Read browsing history" warning)
 - [x] Implement dynamic content script registration with chrome.scripting API
-- [x] Optimize pangu.js loading with on-demand injection
+- [x] Optimize `pangu.js` loading with on-demand injection
+- [x] Skip auto spacing if there is no CJK content in webpages
 
 ### Match Pattern Implementation
 
@@ -36,10 +37,6 @@
 
 ### Medium Priority
 
-- [x] No need to perform spacing if there is no CJK in webpages
-  - Implemented pageHasCJK() detection in BrowserPangu class
-  - Added watchForCJKContent() for dynamic content monitoring
-  - Saves processing time on pages without CJK content
 - [ ] Improve `autoSpacingPage()` performance, especially with a large DOM tree
   - See @.claude/researches/performance-optimization.md
 - [ ] Add instructions in options page for enabling experimental CSS `text-autospace`
