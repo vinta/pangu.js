@@ -29,7 +29,6 @@ function spacingPage() {
   }
 }
 
-// Notify that content script has loaded
 const loadedMessage: ContentScriptLoadedMessage = { type: 'CONTENT_SCRIPT_LOADED' };
 chrome.runtime.sendMessage(loadedMessage);
 

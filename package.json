@@ -61,7 +61,7 @@
     "clean": "rm -rf browser_extensions/chrome/dist/ dist/ playwright-report/ test-results/",
     "build": "npm run clean && npm run build:lib && npm run build:extension",
     "build:lib": "vite build",
-    "build:extension": "vite build --config browser_extensions/vite.config.extension.ts && cp -f dist/browser/pangu.umd.js browser_extensions/chrome/vendors/pangu/pangu.umd.js",
+    "build:extension": "cp -f dist/browser/pangu.umd.js browser_extensions/chrome/vendors/pangu/ && vite build --config browser_extensions/vite.config.extension.ts",
     "watch": "npm run watch:lib & npm run watch:extension",
     "watch:lib": "vite build --watch",
     "watch:extension": "nodemon --watch browser_extensions/chrome/ --watch dist/browser/ --ext ts,json,html,css --exec 'npm run build:extension'",
