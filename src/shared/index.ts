@@ -56,12 +56,12 @@ const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, 'g
 const CJK_HASH = new RegExp(`([${CJK}])(#([^ ]))`, 'g');
 const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, 'g');
 
-// the symbol part only includes + - * / = & < > (excluding |)
-const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*\\/=&<>])([A-Za-z0-9])`, 'g');
-const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*\\/=&<>])([${CJK}])`, 'g');
+// the symbol part only includes + - * = & < > (excluding | and /)
+const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*=&<>])([A-Za-z0-9])`, 'g');
+const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*=&<>])([${CJK}])`, 'g');
 
-const FIX_SLASH_AS = /([/]) ([a-z\-_\./]+)/g;
-const FIX_SLASH_AS_SLASH = /([/\.])([A-Za-z\-_\./]+) ([/])/g;
+// Only add spaces around / when both sides are CJK
+const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
 
 // the bracket part only includes ( ) [ ] { } < > “ ”
 const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>\u201c])`, 'g');
@@ -73,8 +73,17 @@ const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([\u201c])([A-Za-z0-9
 const AN_LEFT_BRACKET = /([A-Za-z0-9])(?<!\.[A-Za-z0-9]*)([\(\[\{])/g;
 const RIGHT_BRACKET_AN = /([\)\]\}])([A-Za-z0-9])/g;
 
+// Define filesystem path pattern that can be reused
+const FILESYSTEM_PATH = /\/[A-Za-z0-9_\-]+(?:\/[A-Za-z0-9_\-]+)*/;
+
+// Special pattern for filesystem paths like /home, /root, /dev/random after CJK
+const CJK_FILESYSTEM_PATH = new RegExp(`([${CJK}])(${FILESYSTEM_PATH.source})`, 'g');
+
+// Pattern for filesystem path ending with / followed by CJK
+const FILESYSTEM_PATH_SLASH_CJK = new RegExp(`(${FILESYSTEM_PATH.source}/)([${CJK}])`, 'g');
+
 const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=/\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])`, 'g');
-const ANS_CJK = new RegExp(`([A-Za-z\u0370-\u03ff0-9~\\$%\\^&\\*\\-\\+\\\\=/!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])([${CJK}])`, 'g');
+const ANS_CJK = new RegExp(`([A-Za-z\u0370-\u03ff0-9~\\$%\\^&\\*\\-\\+\\\\=!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])([${CJK}])`, 'g');
 
 const S_A = /(%)([A-Za-z])/g;
 
@@ -151,8 +160,14 @@ export class Pangu {
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
 
-    newText = newText.replace(FIX_SLASH_AS, '$1$2');
-    newText = newText.replace(FIX_SLASH_AS_SLASH, '$1$2$3');
+    // Add space before filesystem paths after CJK (e.g., "和/root" -> "和 /root")
+    newText = newText.replace(CJK_FILESYSTEM_PATH, '$1 $2');
+    
+    // Add space after filesystem paths ending with / before CJK (e.g., "/home/與" -> "/home/ 與")
+    newText = newText.replace(FILESYSTEM_PATH_SLASH_CJK, '$1 $2');
+
+    // Only add spaces around / when both sides are CJK
+    newText = newText.replace(CJK_SLASH_CJK, '$1 $2 $3');
 
     newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
     newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
@@ -169,6 +184,11 @@ export class Pangu {
     newText = newText.replace(S_A, '$1 $2');
 
     newText = newText.replace(MIDDLE_DOT, '・');
+    
+    // Post-processing: fix unwanted spaces in name patterns like "陳上進 /Vinta"
+    // But keep spaces for filesystem paths like "和 /root"
+    const FIX_NAME_SLASH = new RegExp(`([${CJK}]) (/[A-Z][A-Za-z]*)`, 'g');
+    newText = newText.replace(FIX_NAME_SLASH, '$1$2');
 
     // DEBUG
     // String.prototype.replace = String.prototype.rawReplace;

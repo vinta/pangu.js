@@ -19,10 +19,9 @@ const FIX_POSSESSIVE_SINGLE_QUOTE = new RegExp(`([A-Za-z0-9${CJK}])( )('s)`, "g"
 const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, "g");
 const CJK_HASH = new RegExp(`([${CJK}])(#([^ ]))`, "g");
 const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, "g");
-const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*\\/=&<>])([A-Za-z0-9])`, "g");
-const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*\\/=&<>])([${CJK}])`, "g");
-const FIX_SLASH_AS = /([/]) ([a-z\-_\./]+)/g;
-const FIX_SLASH_AS_SLASH = /([/\.])([A-Za-z\-_\./]+) ([/])/g;
+const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*=&<>])([A-Za-z0-9])`, "g");
+const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*=&<>])([${CJK}])`, "g");
+const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, "g");
 const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>\u201C])`, "g");
 const RIGHT_BRACKET_CJK = new RegExp(`([\\)\\]\\}<>\u201D])([${CJK}])`, "g");
 const FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET = /([\(\[\{<\u201c]+)[ ]*(.+?)[ ]*([\)\]\}>\u201d]+)/;
@@ -30,8 +29,11 @@ const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([A-Za-z0-9${CJK}])[ 
 const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([\u201C])([A-Za-z0-9${CJK}\\-_ ]+)([\u201D])[ ]*([A-Za-z0-9${CJK}])`, "g");
 const AN_LEFT_BRACKET = new RegExp("([A-Za-z0-9])(?<!\\.[A-Za-z0-9]*)([\\(\\[\\{])", "g");
 const RIGHT_BRACKET_AN = /([\)\]\}])([A-Za-z0-9])/g;
+const FILESYSTEM_PATH = /\/[A-Za-z0-9_\-]+(?:\/[A-Za-z0-9_\-]+)*/;
+const CJK_FILESYSTEM_PATH = new RegExp(`([${CJK}])(${FILESYSTEM_PATH.source})`, "g");
+const FILESYSTEM_PATH_SLASH_CJK = new RegExp(`(${FILESYSTEM_PATH.source}/)([${CJK}])`, "g");
 const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z\u0370-\u03FF0-9@\\$%\\^&\\*\\-\\+\\\\=/\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])`, "g");
-const ANS_CJK = new RegExp(`([A-Za-z\u0370-\u03FF0-9~\\$%\\^&\\*\\-\\+\\\\=/!;:,\\.\\?\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])([${CJK}])`, "g");
+const ANS_CJK = new RegExp(`([A-Za-z\u0370-\u03FF0-9~\\$%\\^&\\*\\-\\+\\\\=!;:,\\.\\?\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])([${CJK}])`, "g");
 const S_A = /(%)([A-Za-z])/g;
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 class Pangu {
@@ -72,8 +74,9 @@ class Pangu {
     newText = newText.replace(HASH_CJK, "$1 $3");
     newText = newText.replace(CJK_OPERATOR_ANS, "$1 $2 $3");
     newText = newText.replace(ANS_OPERATOR_CJK, "$1 $2 $3");
-    newText = newText.replace(FIX_SLASH_AS, "$1$2");
-    newText = newText.replace(FIX_SLASH_AS_SLASH, "$1$2$3");
+    newText = newText.replace(CJK_FILESYSTEM_PATH, "$1 $2");
+    newText = newText.replace(FILESYSTEM_PATH_SLASH_CJK, "$1 $2");
+    newText = newText.replace(CJK_SLASH_CJK, "$1 $2 $3");
     newText = newText.replace(CJK_LEFT_BRACKET, "$1 $2");
     newText = newText.replace(RIGHT_BRACKET_CJK, "$1 $2");
     newText = newText.replace(FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET, "$1$2$3");
@@ -85,6 +88,8 @@ class Pangu {
     newText = newText.replace(ANS_CJK, "$1 $2");
     newText = newText.replace(S_A, "$1 $2");
     newText = newText.replace(MIDDLE_DOT, "\u30FB");
+    const FIX_NAME_SLASH = new RegExp(`([${CJK}]) (/[A-Z][A-Za-z]*)`, "g");
+    newText = newText.replace(FIX_NAME_SLASH, "$1$2");
     return newText;
   }
   // alias for spacingText()

@@ -191,13 +191,17 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面/後面')).toBe('前面 / 後面');
       expect(pangu.spacingText('前面 / 後面')).toBe('前面 / 後面');
       expect(pangu.spacingText('Vinta/Mollie')).toBe('Vinta/Mollie');
-      expect(pangu.spacingText('Vinta/陳上進')).toBe('Vinta / 陳上進');
-      expect(pangu.spacingText('陳上進/Vinta')).toBe('陳上進 / Vinta');
-      expect(pangu.spacingText('Mollie/陳上進/Vinta')).toBe('Mollie / 陳上進 / Vinta');
+      expect(pangu.spacingText('Vinta/陳上進')).toBe('Vinta/陳上進');
+      expect(pangu.spacingText('陳上進/Vinta')).toBe('陳上進/Vinta');
+      expect(pangu.spacingText('Mollie/陳上進/Vinta')).toBe('Mollie/陳上進/Vinta');
       expect(pangu.spacingText('得到一個A/B的結果')).toBe('得到一個 A/B 的結果');
       expect(pangu.spacingText('2016-12-26(奇幻电影节) / 2017-01-20(美国) / 詹姆斯麦卡沃伊')).toBe('2016-12-26 (奇幻电影节) / 2017-01-20 (美国) / 詹姆斯麦卡沃伊');
-      expect(pangu.spacingText('/home/和/root是Linux中的頂級目錄')).toBe('/home/ 和 /root 是 Linux 中的頂級目錄');
+      expect(pangu.spacingText('/home和/root是Linux中的頂級目錄')).toBe('/home 和 /root 是 Linux 中的頂級目錄');
+      expect(pangu.spacingText('/home/與/root是Linux中的頂級目錄')).toBe('/home/ 與 /root 是 Linux 中的頂級目錄');
       expect(pangu.spacingText('當你用cat和od指令查看/dev/random和/dev/urandom的內容時')).toBe('當你用 cat 和 od 指令查看 /dev/random 和 /dev/urandom 的內容時');
+      expect(pangu.spacingText('當你用cat和od指令查看"/dev/random"和"/dev/urandom"的內容時')).toBe('當你用 cat 和 od 指令查看 "/dev/random" 和 "/dev/urandom" 的內容時');
+      expect(pangu.spacingText('吃apple / banana')).toBe('吃 apple / banana');
+      expect(pangu.spacingText('好人 / bad guy')).toBe('好人 / bad guy');
     });
 
     it('should handle < symbol', () => {

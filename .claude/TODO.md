@@ -24,9 +24,17 @@
 - [x] Use Chrome's `excludeMatches` API for efficient blacklist handling
 - [x] Add match pattern validation with helpful error messages
 
+### Regex Pattern Fixes
+
+- [x] Fixed `AN_LEFT_BRACKET` pattern to prevent adding spaces in function calls like `a.getB()`
+  - Added negative lookbehind `(?<!\\.[A-Za-z0-9]*)` to exclude patterns after dots
+
 ## In Progress
 
-- [ ] None
+- [ ] Fix `FIX_SLASH_AS` pattern (src/shared/index.ts:63)
+  - Currently failing test: `/home和/root是Linux中的頂級目錄` produces `/home 和 / root` instead of `/home 和 /root`
+  - Need to distinguish between filesystem paths and text separators
+  - Multiple attempts made with lookahead/lookbehind patterns
 
 ## Next Steps
 
