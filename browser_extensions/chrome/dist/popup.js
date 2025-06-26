@@ -254,7 +254,6 @@ class PopupController {
       this.showMessage(chrome.i18n.getMessage("refresh_required"), "info", 1e3 * 3);
     } catch (error) {
       console.error("Failed to add to blacklist:", error);
-      await this.showErrorMessage();
     }
   }
 }
