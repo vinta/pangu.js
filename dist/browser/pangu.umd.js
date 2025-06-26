@@ -217,7 +217,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
     smartAutoSpacingPage({ pageDelayMs = 1e3, nodeDelayMs = 500, nodeMaxWaitMs = 2e3, sampleSize = 1e3, cjkObserverMaxWaitMs = 3e4 } = {}) {
       if (!this.hasCjk(sampleSize)) {
-        console.log("No CJK content detected, setting up observer");
+        console.log("[pangu.js] No CJK content detected, setting up observer");
         this.setupCjkObserver({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs, sampleSize, cjkObserverMaxWaitMs });
         return;
       }
@@ -509,15 +509,12 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         childList: true,
         subtree: true
       });
-      const titleElement = document.querySelector("title");
-      if (titleElement) {
-        this.autoSpacingPageObserver.observe(titleElement, {
-          characterData: true,
-          childList: false,
-          subtree: true
-          // Need subtree to observe text node changes inside title
-        });
-      }
+      this.autoSpacingPageObserver.observe(document.head, {
+        characterData: true,
+        childList: true,
+        subtree: true
+        // Need subtree to observe text node changes inside title
+      });
     }
     setupCjkObserver({ nodeDelayMs = 500, nodeMaxWaitMs = 2e3, cjkObserverMaxWaitMs = 1e3 * 30 }) {
       if (this.cjkObserver) {
@@ -531,7 +528,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
             this.cjkObserver.disconnect();
             this.cjkObserver = null;
           }
-          console.log("CJK observer timeout reached, stopping observer");
+          console.log("[pangu.js] CJK observer timeout reached, stopping observer");
           return;
         }
         if (this.hasCjk()) {
@@ -539,7 +536,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
             this.cjkObserver.disconnect();
             this.cjkObserver = null;
           }
-          console.log("CJK content detected, starting auto spacing");
+          console.log("[pangu.js] CJK content detected, starting auto spacing");
           this.isAutoSpacingPageExecuted = false;
           this.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs, nodeMaxWaitMs });
         }

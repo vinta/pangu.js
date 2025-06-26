@@ -130,7 +130,7 @@ export class BrowserPangu extends Pangu {
 
   public smartAutoSpacingPage({ pageDelayMs = 1000, nodeDelayMs = 500, nodeMaxWaitMs = 2000, sampleSize = 1000, cjkObserverMaxWaitMs = 30000 }: SmartAutoSpacingPageConfig = {}) {
     if (!this.hasCjk(sampleSize)) {
-      console.log('No CJK content detected, setting up observer');
+      console.log('[pangu.js] No CJK content detected, setting up observer');
       this.setupCjkObserver({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs, sampleSize, cjkObserverMaxWaitMs });
       return;
     }
@@ -543,14 +543,11 @@ export class BrowserPangu extends Pangu {
     });
 
     // Observe page title changes
-    const titleElement = document.querySelector('title');
-    if (titleElement) {
-      this.autoSpacingPageObserver.observe(titleElement, {
-        characterData: true,
-        childList: false,
-        subtree: true, // Need subtree to observe text node changes inside title
-      });
-    }
+    this.autoSpacingPageObserver.observe(document.head, {
+      characterData: true,
+      childList: true,
+      subtree: true, // Need subtree to observe text node changes inside title
+    });
   }
 
   protected setupCjkObserver({ nodeDelayMs = 500, nodeMaxWaitMs = 2000, cjkObserverMaxWaitMs = 1000 * 30 }: SmartAutoSpacingPageConfig) {
@@ -568,7 +565,7 @@ export class BrowserPangu extends Pangu {
           this.cjkObserver.disconnect();
           this.cjkObserver = null;
         }
-        console.log('CJK observer timeout reached, stopping observer');
+        console.log('[pangu.js] CJK observer timeout reached, stopping observer');
         return;
       }
 
@@ -578,7 +575,7 @@ export class BrowserPangu extends Pangu {
           this.cjkObserver = null;
         }
 
-        console.log('CJK content detected, starting auto spacing');
+        console.log('[pangu.js] CJK content detected, starting auto spacing');
         this.isAutoSpacingPageExecuted = false;
         this.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs, nodeMaxWaitMs }); // No delay since we already waited
       }
