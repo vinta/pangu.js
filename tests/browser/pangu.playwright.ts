@@ -203,6 +203,49 @@ test.describe('BrowserPangu', () => {
       const content = await page.content();
       expect(content).toContain('<div contenteditable="true">abc漢字1</div>');
     });
+
+    test('should not add spaces to input field values', async ({ page }) => {
+      const htmlContent = loadFixture('input_fields.html');
+      
+      await page.setContent(htmlContent);
+      
+      await page.evaluate(() => {
+        pangu.spacingPage();
+      });
+      
+      // Check that input values are unchanged
+      const textInput = await page.inputValue('#text-input');
+      const emailInput = await page.inputValue('#email-input');
+      const passwordInput = await page.inputValue('#password-input');
+      const textarea = await page.inputValue('#textarea');
+      
+      // Input fields should not be modified
+      expect(textInput).toBe('測試test123');
+      expect(emailInput).toBe('user@example中文.com');
+      expect(passwordInput).toBe('密碼password123');
+      
+      // Textarea was already in ignoredTags, so it should also not be modified
+      expect(textarea).toBe('測試test123');
+    });
+    
+    test('should still add spaces to text outside input fields', async ({ page }) => {
+      const htmlContent = loadFixture('input_fields_mixed.html');
+      const expected = loadFixture('input_fields_mixed_expected.html').trim();
+      
+      await page.setContent(htmlContent);
+      
+      await page.evaluate(() => {
+        pangu.spacingPage();
+      });
+      
+      const actual = await page.evaluate(() => document.body.innerHTML.trim());
+      
+      expect(actual).toBe(expected);
+      
+      // Also verify input value remains unchanged
+      const inputValue = await page.inputValue('#input');
+      expect(inputValue).toBe('測試text123');
+    });
   });
 
   test.describe('autoSpacingPage()', () => {
@@ -239,9 +282,7 @@ test.describe('BrowserPangu', () => {
 
       const consoleMessages: string[] = [];
       page.on('console', (msg) => {
-        if (msg.text().includes('pangu.js:')) {
-          consoleMessages.push(msg.text());
-        }
+        consoleMessages.push(msg.text());
       });
 
       await page.evaluate(() => {
@@ -250,7 +291,7 @@ test.describe('BrowserPangu', () => {
 
       await page.waitForTimeout(100);
 
-      expect(consoleMessages).toContain('pangu.js: No CJK content detected, setting up observer');
+      expect(consoleMessages).toContain('No CJK content detected, setting up observer');
     });
 
     test('should process pages with CJK content', async ({ page }) => {
@@ -260,9 +301,7 @@ test.describe('BrowserPangu', () => {
 
       const consoleMessages: string[] = [];
       page.on('console', (msg) => {
-        if (msg.text().includes('pangu.js:')) {
-          consoleMessages.push(msg.text());
-        }
+        consoleMessages.push(msg.text());
       });
 
       await page.evaluate(() => {
@@ -271,7 +310,7 @@ test.describe('BrowserPangu', () => {
 
       await page.waitForTimeout(1500);
 
-      expect(consoleMessages).not.toContain('pangu.js: No CJK content detected, setting up observer');
+      expect(consoleMessages).not.toContain('No CJK content detected, setting up observer');
 
       const text = await page.textContent('#test');
       expect(text).toBe('新八的構造成分有 95% 是眼鏡、3% 是水、2% 是垃圾');

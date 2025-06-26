@@ -22,6 +22,7 @@
 
 - Community support:
 
+  - [Paranoid Text Spacing](https://tools.1chooo.com/paranoid-text-spacing)
   - [盤古之白 - 文案排版轉換](https://pangu.serko.dev/)
 
 ### For Developers
@@ -57,7 +58,7 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 ```html
 <script src="pangu/dist/browser/pangu.umd.js"></script>
 <script>
-  const text = pangu.spacing('當你凝視著bug，bug也凝視著你');
+  const text = pangu.spacingText('當你凝視著bug，bug也凝視著你');
   // text = '當你凝視著 bug，bug 也凝視著你'
 
   pangu.spacingElementById('main');
@@ -85,7 +86,7 @@ import pangu from 'pangu';
 // or
 const pangu = require('pangu');
 
-const text = pangu.spacing('與PM戰鬥的人，應當小心自己不要成為PM');
+const text = pangu.spacingText('與PM戰鬥的人，應當小心自己不要成為PM');
 // text = '與 PM 戰鬥的人，應當小心自己不要成為 PM'
 
 const content = await pangu.spacingFile('/path/to/text.txt');

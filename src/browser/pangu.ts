@@ -70,7 +70,7 @@ export class BrowserPangu extends Pangu {
     this.cjkObserver = null;
 
     this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
-    this.ignoredTags = /^(code|pre|script|style|textarea|iframe)$/i;
+    this.ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
     this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
     this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
     this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;

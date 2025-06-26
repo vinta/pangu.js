@@ -173,11 +173,12 @@ describe('Pangu', () => {
     });
 
     it('should handle | symbol', () => {
-      expect(pangu.spacingText('前面|後面')).toBe('前面 | 後面');
+      expect(pangu.spacingText('前面|後面')).toBe('前面|後面');
+      expect(pangu.spacingText('编曲|摄影')).toBe('编曲|摄影');
       expect(pangu.spacingText('前面 | 後面')).toBe('前面 | 後面');
       expect(pangu.spacingText('Vinta|Mollie')).toBe('Vinta|Mollie');
-      expect(pangu.spacingText('Vinta|陳上進')).toBe('Vinta | 陳上進');
-      expect(pangu.spacingText('陳上進|Vinta')).toBe('陳上進 | Vinta');
+      expect(pangu.spacingText('Vinta|陳上進')).toBe('Vinta|陳上進');
+      expect(pangu.spacingText('陳上進|Vinta')).toBe('陳上進|Vinta');
       expect(pangu.spacingText('得到一個A|B的結果')).toBe('得到一個 A|B 的結果');
     });
 
@@ -190,13 +191,78 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面/後面')).toBe('前面 / 後面');
       expect(pangu.spacingText('前面 / 後面')).toBe('前面 / 後面');
       expect(pangu.spacingText('Vinta/Mollie')).toBe('Vinta/Mollie');
-      expect(pangu.spacingText('Vinta/陳上進')).toBe('Vinta / 陳上進');
-      expect(pangu.spacingText('陳上進/Vinta')).toBe('陳上進 / Vinta');
-      expect(pangu.spacingText('Mollie/陳上進/Vinta')).toBe('Mollie / 陳上進 / Vinta');
+      expect(pangu.spacingText('Vinta/陳上進')).toBe('Vinta/陳上進');
+      expect(pangu.spacingText('vinta/陳上進')).toBe('vinta/陳上進');
+      expect(pangu.spacingText('陳上進/Vinta')).toBe('陳上進/Vinta');
+      expect(pangu.spacingText('陳上進/vinta')).toBe('陳上進/vinta');
+      expect(pangu.spacingText('Mollie/陳上進/Vinta')).toBe('Mollie/陳上進/Vinta');
       expect(pangu.spacingText('得到一個A/B的結果')).toBe('得到一個 A/B 的結果');
       expect(pangu.spacingText('2016-12-26(奇幻电影节) / 2017-01-20(美国) / 詹姆斯麦卡沃伊')).toBe('2016-12-26 (奇幻电影节) / 2017-01-20 (美国) / 詹姆斯麦卡沃伊');
-      expect(pangu.spacingText('/home/和/root是Linux中的頂級目錄')).toBe('/home/ 和 /root 是 Linux 中的頂級目錄');
+      expect(pangu.spacingText('吃apple / banana')).toBe('吃 apple / banana');
+      expect(pangu.spacingText('好人 / bad guy')).toBe('好人 / bad guy');
+    });
+
+    it('should handle filesystem paths', () => {
+      expect(pangu.spacingText('/home和/root是Linux中的頂級目錄')).toBe('/home 和 /root 是 Linux 中的頂級目錄');
+      expect(pangu.spacingText('/home/與/root是Linux中的頂級目錄')).toBe('/home/ 與 /root 是 Linux 中的頂級目錄');
+      expect(pangu.spacingText('"/home/"和"/root"是Linux中的頂級目錄')).toBe('"/home/" 和 "/root" 是 Linux 中的頂級目錄');
       expect(pangu.spacingText('當你用cat和od指令查看/dev/random和/dev/urandom的內容時')).toBe('當你用 cat 和 od 指令查看 /dev/random 和 /dev/urandom 的內容時');
+      expect(pangu.spacingText('當你用cat和od指令查看"/dev/random"和"/dev/urandom"的內容時')).toBe('當你用 cat 和 od 指令查看 "/dev/random" 和 "/dev/urandom" 的內容時');
+
+      // Basic Unix paths
+      expect(pangu.spacingText('在/home目錄')).toBe('在 /home 目錄');
+      expect(pangu.spacingText('查看/etc/passwd文件')).toBe('查看 /etc/passwd 文件');
+      expect(pangu.spacingText('進入/usr/local/bin目錄')).toBe('進入 /usr/local/bin 目錄');
+
+      // Paths with dots
+      expect(pangu.spacingText('配置檔在/etc/nginx/nginx.conf')).toBe('配置檔在 /etc/nginx/nginx.conf');
+      expect(pangu.spacingText('隱藏檔案/.bashrc很重要')).toBe('隱藏檔案 /.bashrc 很重要');
+      expect(pangu.spacingText('查看/home/.config/settings')).toBe('查看 /home/.config/settings');
+
+      // Paths with version numbers
+      expect(pangu.spacingText('安裝到/usr/lib/python3.9/')).toBe('安裝到 /usr/lib/python3.9/');
+      expect(pangu.spacingText('位於/opt/node-v16.14.0/bin')).toBe('位於 /opt/node-v16.14.0/bin');
+
+      // Paths with special characters
+      expect(pangu.spacingText('備份到/mnt/backup.2024-01-01/')).toBe('備份到 /mnt/backup.2024-01-01/');
+      expect(pangu.spacingText('日誌在/var/log/app-name.log')).toBe('日誌在 /var/log/app-name.log');
+
+      // Paths with @ symbols (npm packages)
+      expect(pangu.spacingText('模組在/node_modules/@babel/core')).toBe('模組在 /node_modules/@babel/core');
+      expect(pangu.spacingText('套件在/node_modules/@types/node')).toBe('套件在 /node_modules/@types/node');
+
+      // Paths with + symbols
+      expect(pangu.spacingText('編譯器在/usr/bin/g++')).toBe('編譯器在 /usr/bin/g++');
+      expect(pangu.spacingText('套件在/usr/lib/gcc/x86_64-linux-gnu/11++')).toBe('套件在 /usr/lib/gcc/x86_64-linux-gnu/11++');
+
+      // Windows paths
+      expect(pangu.spacingText('檔案在C:/Users/name/')).toBe('檔案在 C:/Users/name/');
+      expect(pangu.spacingText('程式在D:/Program Files/')).toBe('程式在 D:/Program Files/');
+      expect(pangu.spacingText('在C:/Windows/System32')).toBe('在 C:/Windows/System32');
+
+      // Paths ending with slash before CJK
+      expect(pangu.spacingText('目錄/usr/bin/包含執行檔')).toBe('目錄 /usr/bin/ 包含執行檔');
+      expect(pangu.spacingText('資料夾/etc/nginx/存放設定')).toBe('資料夾 /etc/nginx/ 存放設定');
+    });
+
+    it('should handle dot patterns in filenames', () => {
+      // File extensions should keep spacing
+      expect(pangu.spacingText('使用Python.py檔案')).toBe('使用 Python.py 檔案');
+      expect(pangu.spacingText('設定檔.env很重要')).toBe('設定檔.env 很重要');
+      expect(pangu.spacingText('編輯器.vscode目錄')).toBe('編輯器.vscode 目錄');
+
+      // Multiple dots
+      expect(pangu.spacingText('版本v1.2.3發布了')).toBe('版本 v1.2.3 發布了');
+      expect(pangu.spacingText('檔案package.lock.json存在')).toBe('檔案 package.lock.json 存在');
+
+      // CJK before dot patterns
+      expect(pangu.spacingText('環境.env')).toBe('環境.env');
+      expect(pangu.spacingText('測試.test.js')).toBe('測試.test.js');
+      expect(pangu.spacingText('專案.gitignore')).toBe('專案.gitignore');
+
+      // Mixed patterns
+      expect(pangu.spacingText('使用環境.env配置')).toBe('使用環境.env 配置');
+      expect(pangu.spacingText('專案.prettierrc和.eslintrc')).toBe('專案.prettierrc 和.eslintrc');
     });
 
     it('should handle < symbol', () => {
@@ -347,9 +413,12 @@ describe('Pangu', () => {
       expect(pangu.spacingText('head (中文123漢字)後面')).toBe('head (中文 123 漢字) 後面');
       expect(pangu.spacingText('head (中文123漢字) tail')).toBe('head (中文 123 漢字) tail');
       expect(pangu.spacingText('(or simply "React")')).toBe('(or simply "React")');
+      expect(pangu.spacingText('function(123)')).toBe('function(123)');
       expect(pangu.spacingText("OperationalError: (2006, 'MySQL server has gone away')")).toBe("OperationalError: (2006, 'MySQL server has gone away')");
       expect(pangu.spacingText('我看过的电影(1404)')).toBe('我看过的电影 (1404)');
       expect(pangu.spacingText('Chang Stream(变更记录流)是指collection(数据库集合)的变更事件流')).toBe('Chang Stream (变更记录流) 是指 collection (数据库集合) 的变更事件流');
+      expect(pangu.spacingText('从结果来看，当a.b销毁后，`a.getB()`返回值为null')).toBe('从结果来看，当 a.b 销毁后，`a.getB()` 返回值为 null');
+      expect(pangu.spacingText("后续会直接用iframe window.addEventListener('message')")).toBe("后续会直接用 iframe window.addEventListener('message')");
     });
 
     it('should handle { } symbols', () => {
@@ -416,6 +485,27 @@ describe('Pangu', () => {
 
     it('should handle English with % symbol', () => {
       expect(pangu.spacingText("丹寧控注意Levi's全館任2件25%OFF滿額再享85折！")).toBe("丹寧控注意 Levi's 全館任 2 件 25% OFF 滿額再享 85 折！");
+    });
+
+    it('should NOT add spaces inside HTML tags', () => {
+      // Issue #164: HTML tags should not have spaces added inside them
+      expect(pangu.spacingText('<p>一行文本</p>')).toBe('<p>一行文本</p>');
+      expect(pangu.spacingText('<p>文字<strong>加粗</strong></p>')).toBe('<p>文字<strong>加粗</strong></p>');
+      expect(pangu.spacingText('<div>測試<span>內容</span>結束</div>')).toBe('<div>測試<span>內容</span>結束</div>');
+      expect(pangu.spacingText('<a href="#">連結</a>')).toBe('<a href="#">連結</a>');
+      expect(pangu.spacingText('<input value="測試123">')).toBe('<input value="測試 123">');
+      expect(pangu.spacingText('<img src="test.jpg" alt="測試圖片">')).toBe('<img src="test.jpg" alt="測試圖片">');
+
+      // Multiple tags
+      expect(pangu.spacingText('<p>第一段</p><p>第二段</p>')).toBe('<p>第一段</p><p>第二段</p>');
+      expect(pangu.spacingText('<h1>標題</h1><p>內容</p>')).toBe('<h1>標題</h1><p>內容</p>');
+
+      // Nested tags
+      expect(pangu.spacingText('<div><p>嵌套<strong>測試</strong></p></div>')).toBe('<div><p>嵌套<strong>測試</strong></p></div>');
+
+      // Self-closing tags
+      expect(pangu.spacingText('文字<br>換行')).toBe('文字<br>換行');
+      expect(pangu.spacingText('水平線<hr>分隔')).toBe('水平線<hr>分隔');
     });
   });
 
