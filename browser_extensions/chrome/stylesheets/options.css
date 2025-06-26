@@ -293,6 +293,35 @@
   text-align: center;
 }
 
+/* Toggle sections in options page */
+.options-toggle-section {
+  margin-bottom: var(--spacing-3);
+}
+
+.options-toggle-section:last-child {
+  margin-bottom: 0;
+}
+
+/* Style for options toggles */
+.options-toggle-section .toggle .toggle-switch {
+  background-color: var(--color-surface-tertiary);
+  border-color: var(--color-border);
+}
+
+.options-toggle-section .toggle .toggle-input:checked + .toggle-switch {
+  background-color: #dbeafe; /* Light blue for active state */
+  border-color: #93c5fd;
+}
+
+.options-toggle-section .toggle .toggle-input:checked + .toggle-switch::after {
+  background-color: #3b82f6; /* Blue circle for active state */
+}
+
+.options-toggle-section .toggle .toggle-label {
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+}
+
 .options-footer-links {
   display: flex;
   justify-content: center;
