@@ -91,11 +91,6 @@ class PopupController {
   }
 
   private async renderStatus() {
-    const statusToggle = document.getElementById('status-indicator') as HTMLLabelElement;
-    if (!statusToggle) {
-      return;
-    }
-
     const statusInput = document.getElementById('status-toggle-input') as HTMLInputElement;
     const statusLabel = document.getElementById('status-toggle-label');
 
@@ -104,11 +99,7 @@ class PopupController {
     }
 
     const shouldBeActive = await this.shouldContentScriptBeActive();
-
-    // Update the toggle state
     statusInput.checked = shouldBeActive;
-
-    // Update the label text
     const messageKey = shouldBeActive ? 'status_active' : 'status_inactive';
     statusLabel.setAttribute('data-i18n', messageKey);
     statusLabel.textContent = chrome.i18n.getMessage(messageKey);
@@ -301,7 +292,6 @@ class PopupController {
       notificationElement.style.display = 'none';
     }
 
-    // Stop any playing sound when notification is dismissed
     stopSound();
 
     if (this.messageTimeoutId) {
@@ -309,7 +299,6 @@ class PopupController {
       this.messageTimeoutId = undefined;
     }
 
-    // Execute the stored callback if it exists
     if (this.notificationCallback) {
       this.notificationCallback();
       this.notificationCallback = undefined;

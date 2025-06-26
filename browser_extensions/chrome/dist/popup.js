@@ -75,10 +75,6 @@ class PopupController {
     }
   }
   async renderStatus() {
-    const statusToggle = document.getElementById("status-indicator");
-    if (!statusToggle) {
-      return;
-    }
     const statusInput = document.getElementById("status-toggle-input");
     const statusLabel = document.getElementById("status-toggle-label");
     if (!statusInput || !statusLabel) {
