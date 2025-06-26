@@ -40,6 +40,10 @@
 - [x] Fixed slash pattern conflict with filesystem paths
   - Removed `/` from `CJK_ANS` pattern to prevent spacing in patterns like `陳上進/vinta`
   - Made filesystem path pattern more specific to avoid false matches
+- [x] Improved filesystem path pattern to be less aggressive
+  - Changed from matching any `/something` to only known system directories
+  - Removed the `FIX_NAME_SLASH` workaround as it's no longer needed
+  - Pattern now only matches paths starting with system dirs like `/home`, `/usr`, `/etc`, or `/node_modules`
 
 ## In Progress
 

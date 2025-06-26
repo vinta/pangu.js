@@ -3,7 +3,7 @@ var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, key + "", value);
 const CJK = "\u2E80-\u2EFF\u2F00-\u2FDF\u3040-\u309F\u30A0-\u30FA\u30FC-\u30FF\u3100-\u312F\u3200-\u32FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF";
-const FILESYSTEM_PATH = /(?:[A-Z]:)?\/(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|\.[A-Za-z0-9_\-\.@\+]+|[A-Za-z0-9_\-\.@\+]+\/[A-Za-z0-9_\-\.@\+]+(?:\/[A-Za-z0-9_\-\.@\+]+)*)/;
+const FILESYSTEM_PATH = /(?:[A-Z]:)?\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+]+)*/;
 const ANY_CJK = new RegExp(`[${CJK}]`);
 const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK = new RegExp(`([${CJK}])[ ]*([\\:]+|\\.)[ ]*([${CJK}])`, "g");
 const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS = new RegExp(`([${CJK}])[ ]*([~\\!;,\\?]+)[ ]*`, "g");
@@ -100,8 +100,6 @@ class Pangu {
     newText = newText.replace(ANS_CJK, "$1 $2");
     newText = newText.replace(S_A, "$1 $2");
     newText = newText.replace(MIDDLE_DOT, "\u30FB");
-    const FIX_NAME_SLASH = new RegExp(`([${CJK}]) (/[A-Z][A-Za-z]*)`, "g");
-    newText = newText.replace(FIX_NAME_SLASH, "$1$2");
     const HTML_TAG_RESTORE = new RegExp(`${HTML_TAG_PLACEHOLDER}(\\d+)\0`, "g");
     newText = newText.replace(HTML_TAG_RESTORE, (_match, index) => {
       return htmlTags[parseInt(index, 10)] || "";

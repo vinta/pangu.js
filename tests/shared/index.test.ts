@@ -205,6 +205,7 @@ describe('Pangu', () => {
     it('should handle filesystem paths', () => {
       expect(pangu.spacingText('/home和/root是Linux中的頂級目錄')).toBe('/home 和 /root 是 Linux 中的頂級目錄');
       expect(pangu.spacingText('/home/與/root是Linux中的頂級目錄')).toBe('/home/ 與 /root 是 Linux 中的頂級目錄');
+      expect(pangu.spacingText('"/home/"和"/root"是Linux中的頂級目錄')).toBe('"/home/" 和 "/root" 是 Linux 中的頂級目錄');
       expect(pangu.spacingText('當你用cat和od指令查看/dev/random和/dev/urandom的內容時')).toBe('當你用 cat 和 od 指令查看 /dev/random 和 /dev/urandom 的內容時');
       expect(pangu.spacingText('當你用cat和od指令查看"/dev/random"和"/dev/urandom"的內容時')).toBe('當你用 cat 和 od 指令查看 "/dev/random" 和 "/dev/urandom" 的內容時');
 
@@ -242,6 +243,26 @@ describe('Pangu', () => {
       // Paths ending with slash before CJK
       expect(pangu.spacingText('目錄/usr/bin/包含執行檔')).toBe('目錄 /usr/bin/ 包含執行檔');
       expect(pangu.spacingText('資料夾/etc/nginx/存放設定')).toBe('資料夾 /etc/nginx/ 存放設定');
+    });
+
+    it('should handle dot patterns in filenames', () => {
+      // File extensions should keep spacing
+      expect(pangu.spacingText('使用Python.py檔案')).toBe('使用 Python.py 檔案');
+      expect(pangu.spacingText('設定檔.env很重要')).toBe('設定檔.env 很重要');
+      expect(pangu.spacingText('編輯器.vscode目錄')).toBe('編輯器.vscode 目錄');
+
+      // Multiple dots
+      expect(pangu.spacingText('版本v1.2.3發布了')).toBe('版本 v1.2.3 發布了');
+      expect(pangu.spacingText('檔案package.lock.json存在')).toBe('檔案 package.lock.json 存在');
+
+      // CJK before dot patterns
+      expect(pangu.spacingText('環境.env')).toBe('環境.env');
+      expect(pangu.spacingText('測試.test.js')).toBe('測試.test.js');
+      expect(pangu.spacingText('專案.gitignore')).toBe('專案.gitignore');
+
+      // Mixed patterns
+      expect(pangu.spacingText('使用環境.env配置')).toBe('使用環境.env 配置');
+      expect(pangu.spacingText('專案.prettierrc和.eslintrc')).toBe('專案.prettierrc 和.eslintrc');
     });
 
     it('should handle < symbol', () => {
