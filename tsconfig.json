@@ -27,6 +27,5 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  // Exclude build output from type checking
   "exclude": ["dist", "node_modules"]
 }

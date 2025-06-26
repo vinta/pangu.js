@@ -1,5 +1,4 @@
-// ESM imports
-import { pangu as panguNamed, NodePangu } from '../../dist/node/index.js';
+import { pangu as aliasPangu, NodePangu } from '../../dist/node/index.js';
 import panguDefault from '../../dist/node/index.js';
 import { createRequire } from 'node:module';
 import { describe, it, expect } from 'vitest';
@@ -8,9 +7,9 @@ const require = createRequire(import.meta.url);
 
 describe('Node.js ESM imports', () => {
   it('should support named import of pangu', () => {
-    expect(panguNamed).toBeDefined();
-    expect(typeof panguNamed.spacing).toBe('function');
-    expect(typeof panguNamed.spacingText).toBe('function');
+    expect(aliasPangu).toBeDefined();
+    expect(typeof aliasPangu.spacing).toBe('function');
+    expect(typeof aliasPangu.spacingText).toBe('function');
   });
 
   it('should support named import of NodePangu', () => {
@@ -21,7 +20,7 @@ describe('Node.js ESM imports', () => {
   it('should support default import', () => {
     expect(panguDefault).toBeDefined();
     expect(typeof panguDefault.spacing).toBe('function');
-    expect(panguDefault).toBe(panguNamed);
+    expect(panguDefault).toBe(aliasPangu);
   });
 
   it('should create new instances', () => {
@@ -62,7 +61,7 @@ describe('Node.js CommonJS imports', () => {
 
   it('should have consistent behavior between default and named exports', () => {
     const module = require('../../dist/node/index.cjs');
-    const { pangu: panguNamed } = module;
-    expect(module.default).toBe(panguNamed);
+    const { pangu: aliasPangu } = module;
+    expect(module.default).toBe(aliasPangu);
   });
 });
