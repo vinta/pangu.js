@@ -67,3 +67,7 @@ writeFileSync(readmePath, updatedReadme, 'utf8');
 console.log(`Updated ${readmePath}`);
 
 console.log(`\nVersion bumped to ${newVersion}`);
+
+// Pack extensions
+console.log('Packing extensions...');
+execSync('npm run pack-extension', { stdio: 'inherit' });
