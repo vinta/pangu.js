@@ -112,19 +112,6 @@ export class Pangu {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
 
-    // DEBUG
-    // String.prototype.rawReplace = String.prototype.replace;
-    // String.prototype.replace = function(regexp, newSubstr) {
-    //   const oldText = this;
-    //   const newText = this.rawReplace(regexp, newSubstr);
-    //   if (oldText !== newText) {
-    //     console.log(`regexp: ${regexp}`);
-    //     console.log(`oldText: ${oldText}`);
-    //     console.log(`newText: ${newText}`);
-    //   }
-    //   return newText;
-    // };
-
     let newText = text;
 
     // Protect HTML tags from being processed
@@ -218,9 +205,6 @@ export class Pangu {
     newText = newText.replace(HTML_TAG_RESTORE, (_match, index) => {
       return htmlTags[parseInt(index, 10)] || '';
     });
-
-    // DEBUG
-    // String.prototype.replace = String.prototype.rawReplace;
 
     return newText;
   }

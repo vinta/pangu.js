@@ -15,14 +15,3 @@ export function isValidMatchPattern(pattern: string) {
     return false;
   }
 }
-
-export function isUrlMatchPatterns(url: string, matchPatterns: string[]) {
-  return matchPatterns.some((pattern) => {
-    try {
-      const urlPattern = new URLPattern(pattern);
-      return urlPattern.test(url);
-    } catch {
-      return false;
-    }
-  });
-}

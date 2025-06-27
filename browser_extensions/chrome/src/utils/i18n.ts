@@ -1,6 +1,6 @@
 /**
  * Modern i18n helper for Chrome Extensions
- * Automatically translates elements with data-i18n attributes
+ * Translates elements with data-i18n attributes
  */
 
 export function translatePage() {
@@ -21,11 +21,4 @@ export function translatePage() {
       }
     }
   }
-}
-
-// Auto-translate when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', translatePage);
-} else {
-  translatePage();
 }

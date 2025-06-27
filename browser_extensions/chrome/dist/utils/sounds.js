@@ -16,11 +16,6 @@ function translatePage() {
     }
   }
 }
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", translatePage);
-} else {
-  translatePage();
-}
 const SOUND_FILES = {
   Hadouken: "sounds/StreetFighter-Hadouken.mp3",
   Shouryuuken: "sounds/StreetFighter-Shouryuuken.mp3",
