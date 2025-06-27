@@ -118,7 +118,7 @@ optional arguments:
   -v, --version  show program's version number and exit
   -t, --text     specify the input value is a text
   -f, --file     specify the input value is a file path
-  -c, --check    check if text has perfect spacing (exit 0 if yes, 1 if no)
+  -c, --check    check if text has proper spacing (exit 0 if yes, 1 if no)
 ```
 
 ## Testing
