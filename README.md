@@ -86,8 +86,8 @@ import pangu from 'pangu';
 // or
 const pangu = require('pangu');
 
-const text = pangu.spacingText('與PM戰鬥的人，應當小心自己不要成為PM');
-// text = '與 PM 戰鬥的人，應當小心自己不要成為 PM'
+const text = pangu.spacingText('不能信任那些Terminal或Editor用白底的人');
+// text = '不能信任那些 Terminal 或 Editor 用白底的人'
 
 const content = await pangu.spacingFile('/path/to/text.txt');
 ```
@@ -97,26 +97,28 @@ You **SHOULD NOT** use `pangu.js` directly to spacing Markdown documents, this l
 ### CLI
 
 ```console
-$ pangu "不能信任那些Terminal或Editor用白底的人"
-不能信任那些 Terminal 或 Editor 用白底的人
+$ pangu "與PM戰鬥的人，應當小心自己不要成為PM"
+與 PM 戰鬥的人，應當小心自己不要成為 PM
 
-$ pangu "為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip"
-為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip
+$ pangu "盤古新聞網：工程師會議中默不作聲，PM恐成最大贏家"
+盤古新聞網：工程師會議中默不作聲，PM 恐成最大贏家
 
 $ pangu --help
-usage: pangu [-h] [-v] [-t] [-f] text_or_path
+usage: pangu [-h] [-v] [-t] [-f] [-c] text_or_path
 
-pangu.js -- Paranoid text spacing for good readability, to automatically insert whitespace
-between CJK and half-width characters (alphabetical letters, numerical digits and symbols).
+pangu.js -- Paranoid text spacing for good readability, to automatically
+insert whitespace between CJK and half-width characters (alphabetical letters,
+numerical digits and symbols).
 
 positional arguments:
-  text_or_path   the text or file path to perform spacing
+  text_or_path   the text or file path to apply spacing
 
 optional arguments:
   -h, --help     show this help message and exit
   -v, --version  show program's version number and exit
   -t, --text     specify the input value is a text
   -f, --file     specify the input value is a file path
+  -c, --check    check if text has perfect spacing (exit 0 if yes, 1 if no)
 ```
 
 ## Testing

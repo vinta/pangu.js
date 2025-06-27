@@ -28,10 +28,10 @@ test.describe('BrowserPangu', () => {
   test.describe('spacing()', () => {
     test('should process text strings', async ({ page }) => {
       const result = await page.evaluate(() => {
-        return pangu.spacing('盤古新聞網：工程師會議中默不作聲，PM恐成最大贏家');
+        return pangu.spacing('小明在開發軟體時總是嚴格地遵循各項協定與標準，直到他看了ISO 3166-1');
       });
 
-      expect(result).toBe('盤古新聞網：工程師會議中默不作聲，PM 恐成最大贏家');
+      expect(result).toBe('小明在開發軟體時總是嚴格地遵循各項協定與標準，直到他看了 ISO 3166-1');
     });
   });
 
