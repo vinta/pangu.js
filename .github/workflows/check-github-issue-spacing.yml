@@ -1,26 +1,30 @@
-name: Check Issue Title Spacing
+name: Check GitHub Issue Spacing
 
 on:
   issues:
     types: [opened, edited]
 
+permissions:
+  contents: read
+
 jobs:
-  check-spacing:
+  check-title:
     runs-on: ubuntu-latest
+
     permissions:
-      contents: read
       issues: write
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build pangu
+      - name: Run build
         run: npm run build:lib
 
       - name: Check issue title
@@ -35,34 +39,29 @@ jobs:
             echo "has_proper_spacing=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Comment and close if spacing is incorrect
+      - name: Comment and close if not proper spacing
         if: steps.check.outputs.has_proper_spacing == 'false'
         uses: actions/github-script@v7
         with:
           script: |
-            const issueNumber = context.issue.number;
-
-            // Add comment explaining the issue
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: issueNumber,
+              issue_number: context.issue.number,
               body: `Hi @${context.payload.issue.user.login},\n\nIf you're here to report spacing issues, but your issue title doesn't even have proper spacing, how do you expect anyone to take you seriously?`
             });
 
-            // Add label for improper spacing
             await github.rest.issues.addLabels({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: issueNumber,
+              issue_number: context.issue.number,
               labels: ['not-proper-spacing']
             });
 
-            // Close the issue
             await github.rest.issues.update({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: issueNumber,
+              issue_number: context.issue.number,
               state: 'closed',
               state_reason: 'not_planned'
             });
