@@ -62,19 +62,22 @@ const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, 'g
 const CJK_HASH = new RegExp(`([${CJK}])(#([^ ]))`, 'g');
 const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, 'g');
 
-// the symbol part only includes + - * = & < > (excluding | and /)
-const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*=&<>])([A-Za-z0-9])`, 'g');
-const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*=&<>])([${CJK}])`, 'g');
+// the symbol part only includes + - * = & (excluding | / < >)
+const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*=&])([A-Za-z0-9])`, 'g');
+const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*=&])([${CJK}])`, 'g');
 
 // Only add spaces around / when both sides are CJK
 const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
 
+// Special handling for < and > as comparison operators (not brackets)
+const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([A-Za-z0-9])`, 'g');
+const LESS_THAN_CJK = new RegExp(`([A-Za-z0-9])(<)([${CJK}])`, 'g');
+const CJK_GREATER_THAN = new RegExp(`([${CJK}])(>)([A-Za-z0-9])`, 'g');
+const GREATER_THAN_CJK = new RegExp(`([A-Za-z0-9])(>)([${CJK}])`, 'g');
+
 // the bracket part only includes ( ) [ ] { } < > “ ”
 const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>\u201c])`, 'g');
 const RIGHT_BRACKET_CJK = new RegExp(`([\\)\\]\\}<>\u201d])([${CJK}])`, 'g');
-// Pattern to fix spacing inside brackets - handles both simple and compound brackets
-// This matches content inside (), [], {}, <>, and also handles HTML comments <!--...-->
-const FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET = /([\(\[\{<\u201c]|<!--)[ ]*(.+?)[ ]*([\)\]\}>\u201d]|-->)/g;
 const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([A-Za-z0-9${CJK}])[ ]*([\u201c])([A-Za-z0-9${CJK}\\-_ ]+)([\u201d])`, 'g');
 const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([\u201c])([A-Za-z0-9${CJK}\\-_ ]+)([\u201d])[ ]*([A-Za-z0-9${CJK}])`, 'g');
 
@@ -141,8 +144,6 @@ export class Pangu {
       return `${HTML_TAG_PLACEHOLDER}${index}\u0000`;
     });
 
-
-
     // https://stackoverflow.com/questions/4285472/multiple-regex-replace
     newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK, (_match, leftCjk, symbols, rightCjk) => {
       const fullwidthSymbols = self.convertToFullwidth(symbols);
@@ -179,6 +180,12 @@ export class Pangu {
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
 
+    // Handle < and > as comparison operators
+    newText = newText.replace(CJK_LESS_THAN, '$1 $2 $3');
+    newText = newText.replace(LESS_THAN_CJK, '$1 $2 $3');
+    newText = newText.replace(CJK_GREATER_THAN, '$1 $2 $3');
+    newText = newText.replace(GREATER_THAN_CJK, '$1 $2 $3');
+
     // Add space before filesystem paths after CJK (e.g., "和/root" -> "和 /root")
     newText = newText.replace(CJK_FILESYSTEM_PATH, '$1 $2');
 
@@ -190,7 +197,6 @@ export class Pangu {
 
     newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
     newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
-    newText = newText.replace(FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET, '$1$2$3');
     newText = newText.replace(ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET, '$1 $2$3$4');
     newText = newText.replace(LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK, '$1$2$3 $4');
 
@@ -204,11 +210,46 @@ export class Pangu {
 
     newText = newText.replace(MIDDLE_DOT, '・');
 
+    // Fix spacing inside brackets according to the special rules:
+    // DO NOT change the first and last characters inside brackets AT ALL
+    // Only ensure no unwanted spaces immediately after opening or before closing brackets
+    const fixBracketSpacing = (text: string): string => {
+      // Process each bracket type
+      const processBracket = (pattern: RegExp, openBracket: string, closeBracket: string) => {
+        text = text.replace(pattern, (_match, innerContent) => {
+          if (!innerContent) {
+            return `${openBracket}${closeBracket}`;
+          }
+
+          // Remove spaces at the very beginning and end of content
+          const trimmedContent = innerContent.replace(/^ +| +$/g, '');
+
+          return `${openBracket}${trimmedContent}${closeBracket}`;
+        });
+      };
+
+      // Only process < > as brackets if they're not HTML tags
+      // HTML tags have already been protected by placeholders
+      processBracket(/<([^<>]*)>/g, '<', '>');
+      processBracket(/\(([^()]*)\)/g, '(', ')');
+      processBracket(/\[([^\[\]]*)\]/g, '[', ']');
+      processBracket(/\{([^{}]*)\}/g, '{', '}');
+
+      return text;
+    };
+
+    newText = fixBracketSpacing(newText);
+
     // Restore HTML tags from placeholders
     const HTML_TAG_RESTORE = new RegExp(`${HTML_TAG_PLACEHOLDER}(\\d+)\u0000`, 'g');
     newText = newText.replace(HTML_TAG_RESTORE, (_match, index) => {
       return htmlTags[parseInt(index, 10)] || '';
     });
+
+    // Final fix for HTML comments: ensure no space after <!--
+    // This is needed because <!-- is not protected as an HTML tag
+    // and the ! character gets spaced by ANS_CJK pattern
+    newText = newText.replace(/<!--\s+/g, '<!--');
 
     return newText;
   }

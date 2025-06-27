@@ -397,8 +397,24 @@ describe('Pangu', () => {
 
     // 成對符號：相異
 
-    // DO NOT add spaces to the first and last characters inside the brackets,
-    // only handle the content between them
+    // TODO:
+    // I think **we should have a special pattern (like FILESYSTEM_PATH)** for brackets,
+    // then handle `<fcontentl>`, `(fcontentl)`, `[fcontentl]`, `{fcontentl}` as a whole,
+    // f -> the first character inside the brackets
+    // content -> the content inside the brackets but exclude the first and last characters
+    // l -> the last character inside the brackets
+    // and DO NOT change the "first" and "last" characters inside the brackets AT ALL,
+    // only spacing the content between them
+    //
+    // if a string like `<!--進擊的Java-->`, we should not have a special rule for HTML comment syntax,
+    // instead, we should treat it as a regular `<xxxx>` pattern which:
+    // f is !
+    // content is --進擊的Java-
+    // l is -
+
+    // TODO:
+    // similar to the above rules, but for the brackets which left and right are the same,
+    // `"fcontentl"`, `'fcontentl'`
 
     it('should handle < > symbols', () => {
       expect(pangu.spacingText('前面<中文123漢字>後面')).toBe('前面 <中文 123 漢字> 後面');
