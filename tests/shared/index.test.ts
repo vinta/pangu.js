@@ -397,6 +397,9 @@ describe('Pangu', () => {
 
     // 成對符號：相異
 
+    // DO NOT add spaces to the first and last characters inside the brackets,
+    // only handle the content between them
+
     it('should handle < > symbols', () => {
       expect(pangu.spacingText('前面<中文123漢字>後面')).toBe('前面 <中文 123 漢字> 後面');
       expect(pangu.spacingText('前面<中文123>後面')).toBe('前面 <中文 123> 後面');
@@ -404,6 +407,9 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面<中文123> tail')).toBe('前面 <中文 123> tail');
       expect(pangu.spacingText('head <中文123漢字>後面')).toBe('head <中文 123 漢字> 後面');
       expect(pangu.spacingText('head <中文123漢字> tail')).toBe('head <中文 123 漢字> tail');
+
+      // prettier-ignore
+      expect(pangu.spacingText('<attackOnJava>那一天，人類終於回想起了，曾經一度被XML所支配的恐懼</attackOnJava> <!--進擊的Java-->')).toBe('<attackOnJava>那一天，人類終於回想起了，曾經一度被 XML 所支配的恐懼</attackOnJava> <!--進擊的 Java-->');
     });
 
     it('should handle ( ) symbols', () => {

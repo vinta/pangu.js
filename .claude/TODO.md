@@ -21,6 +21,9 @@ pangu.js is a mature text spacing library that automatically inserts whitespace 
 - [x] Fixed input field auto-spacing (#158) (files: browser/pangu.ts)
 - [x] Fixed slash pattern conflicts (files: shared/index.ts)
 - [x] Improved filesystem path pattern (files: shared/index.ts)
+- [x] Fixed HTML comment spacing to handle `<!--content-->` properly (files: shared/index.ts)
+  - Updated `FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET` pattern to support compound brackets
+  - Ensures no spaces after `<!--` or before `-->`
 
 ### Testing & Investigation
 
@@ -33,11 +36,11 @@ pangu.js is a mature text spacing library that automatically inserts whitespace 
 
 ### Current Focus
 
-- [ ] Fix spacing between span and link elements (YouTube hashtag case)
-  - What's done: Investigation complete, limitation documented
-  - What's left: Architectural changes needed for proper fix
-  - Blockers: Current XPath-based approach can't handle adjacent siblings
-  - Workaround: Use CSS margins/padding for visual spacing
+- [ ] Fix HTML comment spacing implementation
+  - What's done: Updated bracket pattern to handle `<!--...-->`
+  - What's left: Need to handle the `!` character being treated as ANS before bracket fix
+  - Blockers: Pattern ordering - ANS_CJK runs before FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET
+  - Solution: Add specific HTML comment handling before ANS_CJK pattern
 
 ## Upcoming Tasks
 
