@@ -29,11 +29,12 @@ jobs:
 
       - name: Check issue title
         id: check
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
         run: |
-          TITLE="${{ github.event.issue.title }}"
-          echo "Checking title: $TITLE"
+          echo "Checking title: $ISSUE_TITLE"
 
-          if npx pangu --check "$TITLE"; then
+          if npx pangu --check "$ISSUE_TITLE"; then
             echo "has_proper_spacing=true" >> $GITHUB_OUTPUT
           else
             echo "has_proper_spacing=false" >> $GITHUB_OUTPUT
