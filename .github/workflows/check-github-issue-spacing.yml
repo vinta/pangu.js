@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: "lts/*"
 
-      - name: Install pangu from npm
+      - name: Install pangu.js
         run: npm install -g pangu
 
       - name: Check issue title
