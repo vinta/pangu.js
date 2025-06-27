@@ -210,9 +210,15 @@ export class Pangu {
 
     newText = newText.replace(MIDDLE_DOT, '・');
 
-    // Fix spacing inside brackets according to the special rules:
+    // Brackets: <fcontentl> (fcontentl) [fcontentl] {fcontentl}
+    // f: the first character inside the brackets
+    // l: the last character inside the brackets
+    // content: the content inside the brackets but exclude the first and last characters
     // DO NOT change the first and last characters inside brackets AT ALL
-    // Only ensure no unwanted spaces immediately after opening or before closing brackets
+    // ONLY spacing the content between them
+
+    // Fix spacing inside brackets according to the above rules:
+    // Ensure no unwanted spaces immediately after opening or before closing brackets
     const fixBracketSpacing = (text: string): string => {
       // Process each bracket type
       const processBracket = (pattern: RegExp, openBracket: string, closeBracket: string) => {
