@@ -517,10 +517,10 @@ describe('Pangu', () => {
     });
   });
 
-  describe('hasPerfectSpacing()', () => {
-    it('should return true if the text has perfect spacing', () => {
-      expect(pangu.hasPerfectSpacing('Claude Code 用起來真的他媽爽')).toBe(true);
-      expect(pangu.hasPerfectSpacing('Claude Code用起來真的他媽爽')).toBe(false);
+  describe('hasProperSpacing()', () => {
+    it('should return true if the text has proper spacing', () => {
+      expect(pangu.hasProperSpacing('Claude Code 用起來真的他媽爽')).toBe(true);
+      expect(pangu.hasProperSpacing('Claude Code用起來真的他媽爽')).toBe(false);
     });
   });
 });
