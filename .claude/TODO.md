@@ -21,23 +21,16 @@ pangu.js is a mature text spacing library that automatically inserts whitespace 
 - [x] Fixed input field auto-spacing (#158) (files: browser/pangu.ts)
 - [x] Fixed slash pattern conflicts (files: shared/index.ts)
 - [x] Improved filesystem path pattern (files: shared/index.ts)
-
-### Testing & Investigation
-
-- [x] Investigated adjacent sibling spacing (YouTube hashtags) (files: tests/browser/pangu.playwright.ts)
-  - What's done: Multiple approach attempts (sibling checking, post-processing, XPath mods)
-  - Result: Fundamental XPath algorithm limitation
-  - Test skipped at line 195 with documentation
+- [x] Fixed HTML comment spacing to handle `<!--content-->` properly (files: shared/index.ts)
+  - Updated `FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET` pattern to support compound brackets
+  - Ensures no spaces after `<!--` or before `-->`
+- [x] Major algorithm update: Paranoid Text Spacing v6 (files: shared/index.ts)
+  - Special handling for all bracket types: `()` `[]` `{}` `<>`
+  - Improved slash `/` pattern handling
 
 ## In Progress
 
-### Current Focus
-
-- [ ] Fix spacing between span and link elements (YouTube hashtag case)
-  - What's done: Investigation complete, limitation documented
-  - What's left: Architectural changes needed for proper fix
-  - Blockers: Current XPath-based approach can't handle adjacent siblings
-  - Workaround: Use CSS margins/padding for visual spacing
+- [ ] None
 
 ## Upcoming Tasks
 
@@ -59,7 +52,6 @@ pangu.js is a mature text spacing library that automatically inserts whitespace 
 
 ## Known Issues & Limitations
 
-- Issue: Adjacent sibling elements don't get spaced | Impact: YouTube hashtags, inline elements
-- Workaround: Use CSS margins or require architectural rewrite for proper fix
-- Issue: Performance on very large DOM trees | Impact: Slow initial load on heavy pages
-- Workaround: Skip auto-spacing option, manual trigger
+- [x] Investigated adjacent sibling spacing (YouTube hashtags) (files: tests/browser/pangu.playwright.ts)
+  - What's done: Multiple approach attempts (sibling checking, post-processing, XPath mods)
+  - Result: Fundamental XPath algorithm limitation

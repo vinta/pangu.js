@@ -19,12 +19,16 @@ const FIX_POSSESSIVE_SINGLE_QUOTE = new RegExp(`([A-Za-z0-9${CJK}])( )('s)`, "g"
 const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, "g");
 const CJK_HASH = new RegExp(`([${CJK}])(#([^ ]))`, "g");
 const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, "g");
-const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*=&<>])([A-Za-z0-9])`, "g");
-const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*=&<>])([${CJK}])`, "g");
+const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*=&])([A-Za-z0-9])`, "g");
+const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*=&])([${CJK}])`, "g");
 const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, "g");
+const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([A-Za-z])([\\+\\-\\*])([${CJK}])`, "g");
+const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([A-Za-z0-9])`, "g");
+const LESS_THAN_CJK = new RegExp(`([A-Za-z0-9])(<)([${CJK}])`, "g");
+const CJK_GREATER_THAN = new RegExp(`([${CJK}])(>)([A-Za-z0-9])`, "g");
+const GREATER_THAN_CJK = new RegExp(`([A-Za-z0-9])(>)([${CJK}])`, "g");
 const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>\u201C])`, "g");
 const RIGHT_BRACKET_CJK = new RegExp(`([\\)\\]\\}<>\u201D])([${CJK}])`, "g");
-const FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET = /([\(\[\{<\u201c]+)[ ]*(.+?)[ ]*([\)\]\}>\u201d]+)/;
 const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([A-Za-z0-9${CJK}])[ ]*([\u201C])([A-Za-z0-9${CJK}\\-_ ]+)([\u201D])`, "g");
 const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([\u201C])([A-Za-z0-9${CJK}\\-_ ]+)([\u201D])[ ]*([A-Za-z0-9${CJK}])`, "g");
 const AN_LEFT_BRACKET = new RegExp("([A-Za-z0-9])(?<!\\.[A-Za-z0-9]*)([\\(\\[\\{])", "g");
@@ -38,7 +42,7 @@ const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 class Pangu {
   constructor() {
     __publicField(this, "version");
-    this.version = "5.3.3";
+    this.version = "6.0.0";
   }
   spacingText(text) {
     if (typeof text !== "string") {
@@ -83,14 +87,18 @@ class Pangu {
     newText = newText.replace(HASH_ANS_CJK_HASH, "$1 $2$3$4 $5");
     newText = newText.replace(CJK_HASH, "$1 $2");
     newText = newText.replace(HASH_CJK, "$1 $3");
+    newText = newText.replace(SINGLE_LETTER_GRADE_CJK, "$1$2 $3");
     newText = newText.replace(CJK_OPERATOR_ANS, "$1 $2 $3");
     newText = newText.replace(ANS_OPERATOR_CJK, "$1 $2 $3");
+    newText = newText.replace(CJK_LESS_THAN, "$1 $2 $3");
+    newText = newText.replace(LESS_THAN_CJK, "$1 $2 $3");
+    newText = newText.replace(CJK_GREATER_THAN, "$1 $2 $3");
+    newText = newText.replace(GREATER_THAN_CJK, "$1 $2 $3");
     newText = newText.replace(CJK_FILESYSTEM_PATH, "$1 $2");
     newText = newText.replace(FILESYSTEM_PATH_SLASH_CJK, "$1 $2");
     newText = newText.replace(CJK_SLASH_CJK, "$1 $2 $3");
     newText = newText.replace(CJK_LEFT_BRACKET, "$1 $2");
     newText = newText.replace(RIGHT_BRACKET_CJK, "$1 $2");
-    newText = newText.replace(FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET, "$1$2$3");
     newText = newText.replace(ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET, "$1 $2$3$4");
     newText = newText.replace(LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK, "$1$2$3 $4");
     newText = newText.replace(AN_LEFT_BRACKET, "$1 $2");
@@ -99,10 +107,28 @@ class Pangu {
     newText = newText.replace(ANS_CJK, "$1 $2");
     newText = newText.replace(S_A, "$1 $2");
     newText = newText.replace(MIDDLE_DOT, "\u30FB");
+    const fixBracketSpacing = (text2) => {
+      const processBracket = (pattern, openBracket, closeBracket) => {
+        text2 = text2.replace(pattern, (_match, innerContent) => {
+          if (!innerContent) {
+            return `${openBracket}${closeBracket}`;
+          }
+          const trimmedContent = innerContent.replace(/^ +| +$/g, "");
+          return `${openBracket}${trimmedContent}${closeBracket}`;
+        });
+      };
+      processBracket(/<([^<>]*)>/g, "<", ">");
+      processBracket(/\(([^()]*)\)/g, "(", ")");
+      processBracket(/\[([^\[\]]*)\]/g, "[", "]");
+      processBracket(/\{([^{}]*)\}/g, "{", "}");
+      return text2;
+    };
+    newText = fixBracketSpacing(newText);
     const HTML_TAG_RESTORE = new RegExp(`${HTML_TAG_PLACEHOLDER}(\\d+)\0`, "g");
     newText = newText.replace(HTML_TAG_RESTORE, (_match, index) => {
       return htmlTags[parseInt(index, 10)] || "";
     });
+    newText = newText.replace(/<!--\s+/g, "<!--");
     return newText;
   }
   // alias for spacingText()

@@ -28,10 +28,10 @@ test.describe('BrowserPangu', () => {
   test.describe('spacing()', () => {
     test('should process text strings', async ({ page }) => {
       const result = await page.evaluate(() => {
-        return pangu.spacing('新八的構造成分有95%是眼鏡、3%是水、2%是垃圾');
+        return pangu.spacing('小明在開發軟體時總是嚴格地遵循各項協定與標準，直到他看了ISO 3166-1');
       });
 
-      expect(result).toBe('新八的構造成分有 95% 是眼鏡、3% 是水、2% 是垃圾');
+      expect(result).toBe('小明在開發軟體時總是嚴格地遵循各項協定與標準，直到他看了 ISO 3166-1');
     });
   });
 
@@ -50,13 +50,13 @@ test.describe('BrowserPangu', () => {
     test('should process element nodes', async ({ page }) => {
       const result = await page.evaluate(() => {
         const div = document.createElement('div');
-        div.textContent = '新八的構造成分有95%是眼鏡、3%是水、2%是垃圾';
+        div.textContent = '聽說桐島rm -rf /*了';
         document.body.appendChild(div);
         pangu.spacingNode(div);
         return div.textContent;
       });
 
-      expect(result).toBe('新八的構造成分有 95% 是眼鏡、3% 是水、2% 是垃圾');
+      expect(result).toBe('聽說桐島 rm -rf /* 了');
     });
   });
 
@@ -208,12 +208,12 @@ test.describe('BrowserPangu', () => {
       const textarea = await page.inputValue('#textarea');
 
       // Input fields should not be modified
-      expect(textInput).toBe('測試test123');
+      expect(textInput).toBe('Workaround雖可恥但有用');
       expect(emailInput).toBe('user@example中文.com');
       expect(passwordInput).toBe('密碼password123');
 
       // Textarea was already in ignoredTags, so it should also not be modified
-      expect(textarea).toBe('測試test123');
+      expect(textarea).toBe('哇！是擅長Over-engineering的朋友呢！');
     });
 
     test('should still add spaces to text outside input fields', async ({ page }) => {
@@ -233,6 +233,7 @@ test.describe('BrowserPangu', () => {
     });
   });
 
+  // FIXME
   test.describe('autoSpacingPage()', () => {
     test('should handle dynamic content with MutationObserver', async ({ page }) => {
       await page.evaluate(() => {
@@ -255,5 +256,4 @@ test.describe('BrowserPangu', () => {
       expect(result).toBe('新八的構造成分有 95% 是眼鏡');
     });
   });
-
 });

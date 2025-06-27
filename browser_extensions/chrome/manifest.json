@@ -3,7 +3,7 @@
   "name": "__MSG_extension_name__",
   "description": "__MSG_extension_description__",
   "short_name": "__MSG_god_of_spacing__",
-  "version": "5.3.3",
+  "version": "6.0.0",
   "author": "Vinta",
   "default_locale": "zh_TW",
   "icons": {

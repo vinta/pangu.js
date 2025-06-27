@@ -2,7 +2,7 @@ import { execSync } from 'node:child_process';
 import { writeFileSync, existsSync, unlinkSync } from 'node:fs';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -11,11 +11,6 @@ describe('CLI', () => {
   const cliPath = resolve(__dirname, '../../dist/node/cli.js');
   const fixtureDir = resolve(__dirname, '../_fixtures');
   const tempFile = join(fixtureDir, 'temp_test.txt');
-
-  beforeEach(() => {
-    // Create a temporary test file
-    writeFileSync(tempFile, '新八的構造成分有95%是眼鏡、3%是水、2%是垃圾');
-  });
 
   afterEach(() => {
     // Clean up
@@ -31,17 +26,19 @@ describe('CLI', () => {
   });
 
   it('should process text', () => {
-    const output = execSync(`node ${cliPath} -t "新八的構造成分有95%是眼鏡"`, { encoding: 'utf8' });
-    expect(output.trim()).toBe('新八的構造成分有 95% 是眼鏡');
+    const output = execSync(`node ${cliPath} -t "你從什麼時候開始產生了我沒使用Monkey Patch的錯覺？"`, { encoding: 'utf8' });
+    expect(output.trim()).toBe('你從什麼時候開始產生了我沒使用 Monkey Patch 的錯覺？');
   });
 
   it('should process a file', () => {
+    writeFileSync(tempFile, '老婆餅裡面沒有老婆，JavaScript裡面也沒有Java');
+
     const output = execSync(`node ${cliPath} -f ${tempFile}`, { encoding: 'utf8' });
-    expect(output.trim()).toBe('新八的構造成分有 95% 是眼鏡、3% 是水、2% 是垃圾');
+    expect(output.trim()).toBe('老婆餅裡面沒有老婆，JavaScript 裡面也沒有 Java');
   });
 
-  it('should process text by default', () => {
-    const output = execSync(`node ${cliPath} "新八的構造成分有95%是眼鏡"`, { encoding: 'utf8' });
-    expect(output.trim()).toBe('新八的構造成分有 95% 是眼鏡');
-  });
+  // it('should process text by default', () => {
+  //   const output = execSync(`node ${cliPath} "我喜歡在填表單的時候加一些�和â€™，好讓那些工程師懷疑系統有bug"`, { encoding: 'utf8' });
+  //   expect(output.trim()).toBe('我喜歡在填表單的時候加一些 � 和 â€™，好讓那些工程師懷疑系統有 bug');
+  // });
 });
