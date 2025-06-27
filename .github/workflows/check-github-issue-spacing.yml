@@ -15,17 +15,12 @@ jobs:
       issues: write
 
     steps:
-      - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run build
-        run: npm run build:lib
+      - name: Install pangu from npm
+        run: npm install -g pangu
 
       - name: Check issue title
         id: check
@@ -34,7 +29,7 @@ jobs:
         run: |
           echo "Checking title: $ISSUE_TITLE"
 
-          if npx pangu --check "$ISSUE_TITLE"; then
+          if pangu --check "$ISSUE_TITLE"; then
             echo "has_proper_spacing=true" >> $GITHUB_OUTPUT
           else
             echo "has_proper_spacing=false" >> $GITHUB_OUTPUT
