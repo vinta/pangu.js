@@ -44,7 +44,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: `Hi @${context.payload.issue.user.login},\n\nIf you're here to report spacing issues, but your issue title doesn't even have proper spacing, how do you expect anyone to take you seriously?`
+              body: `Hi @${context.payload.issue.user.login},\n\nYou're reporting a text spacing glitch to a software specifically crafted for text spacing, and you can't even manage to write an Issue Title with proper spacing? Security! Security!`
             });
 
             await github.rest.issues.addLabels({
