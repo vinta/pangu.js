@@ -24,23 +24,13 @@ pangu.js is a mature text spacing library that automatically inserts whitespace 
 - [x] Fixed HTML comment spacing to handle `<!--content-->` properly (files: shared/index.ts)
   - Updated `FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET` pattern to support compound brackets
   - Ensures no spaces after `<!--` or before `-->`
-
-### Testing & Investigation
-
-- [x] Investigated adjacent sibling spacing (YouTube hashtags) (files: tests/browser/pangu.playwright.ts)
-  - What's done: Multiple approach attempts (sibling checking, post-processing, XPath mods)
-  - Result: Fundamental XPath algorithm limitation
-  - Test skipped at line 195 with documentation
+- [x] Major algorithm update: Paranoid Text Spacing v6 (files: shared/index.ts)
+  - Special handling for all bracket types: `()` `[]` `{}` `<>`
+  - Improved slash `/` pattern handling
 
 ## In Progress
 
-### Current Focus
-
-- [ ] Fix HTML comment spacing implementation
-  - What's done: Updated bracket pattern to handle `<!--...-->`
-  - What's left: Need to handle the `!` character being treated as ANS before bracket fix
-  - Blockers: Pattern ordering - ANS_CJK runs before FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET
-  - Solution: Add specific HTML comment handling before ANS_CJK pattern
+- [ ] None
 
 ## Upcoming Tasks
 
@@ -62,7 +52,6 @@ pangu.js is a mature text spacing library that automatically inserts whitespace 
 
 ## Known Issues & Limitations
 
-- Issue: Adjacent sibling elements don't get spaced | Impact: YouTube hashtags, inline elements
-- Workaround: Use CSS margins or require architectural rewrite for proper fix
-- Issue: Performance on very large DOM trees | Impact: Slow initial load on heavy pages
-- Workaround: Skip auto-spacing option, manual trigger
+- [x] Investigated adjacent sibling spacing (YouTube hashtags) (files: tests/browser/pangu.playwright.ts)
+  - What's done: Multiple approach attempts (sibling checking, post-processing, XPath mods)
+  - Result: Fundamental XPath algorithm limitation
