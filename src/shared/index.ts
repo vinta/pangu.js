@@ -214,7 +214,7 @@ export class Pangu {
     return this.spacingText(text);
   }
 
-  public hasPerfectSpacing(text: string) {
+  public hasProperSpacing(text: string) {
     return this.spacingText(text) === text;
   }
 
