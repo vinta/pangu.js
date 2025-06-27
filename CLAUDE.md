@@ -51,9 +51,8 @@ npm run lint:fix           # Run ESLint with auto-fix
 npm run publish-package 1.2.3   # Bump version, update docs, build, commit, and tag
 
 # Extension packaging
-npm run pack-extension          # Package both Chrome and Firefox extensions
+npm run pack-extension          # Package browser extensions
 npm run pack-extension:chrome   # Package Chrome extension only (.zip)
-npm run pack-extension:firefox  # Package Firefox extension only (.xpi)
 ```
 
 ## Code Architecture
@@ -173,19 +172,11 @@ pangu.spacingFileSync('input.txt');
 interface Settings {
   spacing_mode: 'spacing_when_load' | 'spacing_when_click';
   spacing_rule: 'blacklist' | 'whitelist';
-  blacklist: string[]; // Valid match patterns only
-  whitelist: string[]; // Valid match patterns only
+  blacklist: string[];
+  whitelist: string[];
   is_mute_sound_effects: boolean;
 }
 ```
-
-#### Match Patterns
-
-The extension uses Chrome's match pattern format for URL filtering:
-
-- Format: `<scheme>://<host><path>`
-- Example: `*://example.com/*`
-- [Chrome Match Pattern Documentation](https://developer.chrome.com/docs/extensions/develop/concepts/match-patterns)
 
 ## Development Guidelines
 
