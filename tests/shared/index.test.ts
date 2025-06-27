@@ -481,6 +481,10 @@ describe('Pangu', () => {
       expect(pangu.spacingText('我看过的电影(1404)')).toBe('我看过的电影 (1404)');
 
       // prettier-ignore
+      expect(pangu.spacingText('預定於繳款截止日114/07/02(遇假日順延)之次一營業日進行扣款'))
+                         .toBe('預定於繳款截止日 114/07/02 (遇假日順延) 之次一營業日進行扣款');
+
+      // prettier-ignore
       expect(pangu.spacingText("OperationalError: (2006, 'MySQL server has gone away')"))
                          .toBe("OperationalError: (2006, 'MySQL server has gone away')");
 
