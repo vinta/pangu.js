@@ -110,7 +110,7 @@ class Pangu {
   spacing(text) {
     return this.spacingText(text);
   }
-  hasPerfectSpacing(text) {
+  hasProperSpacing(text) {
     return this.spacingText(text) === text;
   }
   convertToFullwidth(symbols) {

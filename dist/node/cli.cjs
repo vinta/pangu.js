@@ -416,11 +416,11 @@ function printSpacingFile(path) {
 }
 function checkSpacing(text) {
   if (typeof text === "string") {
-    const hasPerfectSpacing = pangu.hasPerfectSpacing(text);
-    if (!hasPerfectSpacing) {
+    const hasProperSpacing = pangu.hasProperSpacing(text);
+    if (!hasProperSpacing) {
       console.error(`Corrected: ${pangu.spacingText(text)}`);
     }
-    process.exit(hasPerfectSpacing ? 0 : 1);
+    process.exit(hasProperSpacing ? 0 : 1);
   } else {
     console.log(usage);
     process.exit(1);
@@ -428,6 +428,7 @@ function checkSpacing(text) {
 }
 if (args.length === 0) {
   console.log(usage);
+  process.exit(1);
 } else {
   switch (args[0]) {
     case "-h":
