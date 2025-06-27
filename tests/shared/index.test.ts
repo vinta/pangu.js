@@ -157,13 +157,15 @@ describe('Pangu', () => {
       expect(pangu.spacingText('Vinta-陳上進')).toBe('Vinta - 陳上進');
       expect(pangu.spacingText('陳上進-Vinta')).toBe('陳上進 - Vinta');
       expect(pangu.spacingText('得到一個A-B的結果')).toBe('得到一個 A-B 的結果');
+      expect(pangu.spacingText('得到一個 A - B 的結果')).toBe('得到一個 A - B 的結果');
 
       // prettier-ignore
       expect(pangu.spacingText('长者的智慧和复杂的维斯特洛- 文章'))
                          .toBe('长者的智慧和复杂的维斯特洛 - 文章');
 
-      // TODO
-      // expect(pangu.spacing('陳上進--Vinta')).toBe('陳上進 -- Vinta');
+      // FIXME
+      // expect(pangu.spacingText('陳上進--Vinta')).toBe('陳上進 -- Vinta');
+      // expect(pangu.spacingText('陳上進---Vinta')).toBe('陳上進 --- Vinta');
     });
 
     it('should handle = symbol', () => {
@@ -182,10 +184,11 @@ describe('Pangu', () => {
       expect(pangu.spacingText('Vinta+陳上進')).toBe('Vinta + 陳上進');
       expect(pangu.spacingText('陳上進+Vinta')).toBe('陳上進 + Vinta');
       expect(pangu.spacingText('得到一個A+B的結果')).toBe('得到一個 A+B 的結果');
+      expect(pangu.spacingText('得到一個A+的結果')).toBe('得到一個 A+ 的結果');
+      expect(pangu.spacingText('得到一個D-的結果')).toBe('得到一個 D- 的結果');
+      expect(pangu.spacingText('得到一個 A+ 的結果')).toBe('得到一個 A+ 的結果');
       expect(pangu.spacingText('得到一個C++的結果')).toBe('得到一個 C++ 的結果');
-
-      // TODO
-      // expect(pangu.spacing('得到一個A+的結果')).toBe('得到一個 A+ 的結果');
+      expect(pangu.spacingText('得到一個 C++ 的結果')).toBe('得到一個 C++ 的結果');
     });
 
     it('should handle | symbol', () => {

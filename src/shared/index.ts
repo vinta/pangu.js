@@ -69,6 +69,11 @@ const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*=&])([${CJK}])`, 'g
 // Only add spaces around / when both sides are CJK
 const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
 
+// Special handling for single letter grades/ratings (A+, B-, C*) before CJK
+// These should have space after the operator, not before
+// Use word boundary to ensure it's a single letter, not part of a longer word
+const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([A-Za-z])([\\+\\-\\*])([${CJK}])`, 'g');
+
 // Special handling for < and > as comparison operators (not brackets)
 const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([A-Za-z0-9])`, 'g');
 const LESS_THAN_CJK = new RegExp(`([A-Za-z0-9])(<)([${CJK}])`, 'g');
@@ -176,6 +181,10 @@ export class Pangu {
     newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
     newText = newText.replace(CJK_HASH, '$1 $2');
     newText = newText.replace(HASH_CJK, '$1 $3');
+
+    // Handle single letter grades (A+, B-, etc.) before general operator rules
+    // This ensures "A+的" becomes "A+ 的" not "A + 的"
+    newText = newText.replace(SINGLE_LETTER_GRADE_CJK, '$1$2 $3');
 
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
