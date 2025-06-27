@@ -26,6 +26,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*=&])([A-Za-z0-9])`, "g");
   const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*=&])([${CJK}])`, "g");
   const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, "g");
+  const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([A-Za-z])([\\+\\-\\*])([${CJK}])`, "g");
   const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([A-Za-z0-9])`, "g");
   const LESS_THAN_CJK = new RegExp(`([A-Za-z0-9])(<)([${CJK}])`, "g");
   const CJK_GREATER_THAN = new RegExp(`([${CJK}])(>)([A-Za-z0-9])`, "g");
@@ -45,7 +46,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   class Pangu {
     constructor() {
       __publicField(this, "version");
-      this.version = "5.3.3";
+      this.version = "6.0.0";
     }
     spacingText(text) {
       if (typeof text !== "string") {
@@ -90,6 +91,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       newText = newText.replace(HASH_ANS_CJK_HASH, "$1 $2$3$4 $5");
       newText = newText.replace(CJK_HASH, "$1 $2");
       newText = newText.replace(HASH_CJK, "$1 $3");
+      newText = newText.replace(SINGLE_LETTER_GRADE_CJK, "$1$2 $3");
       newText = newText.replace(CJK_OPERATOR_ANS, "$1 $2 $3");
       newText = newText.replace(ANS_OPERATOR_CJK, "$1 $2 $3");
       newText = newText.replace(CJK_LESS_THAN, "$1 $2 $3");
