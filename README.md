@@ -100,6 +100,9 @@ You **SHOULD NOT** use `pangu.js` directly to spacing Markdown documents, this l
 $ pangu "不能信任那些Terminal或Editor用白底的人"
 不能信任那些 Terminal 或 Editor 用白底的人
 
+$ pangu "為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip"
+為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip
+
 $ pangu --help
 usage: pangu [-h] [-v] [-t] [-f] text_or_path
 

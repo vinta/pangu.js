@@ -12,6 +12,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面 _ 後面')).toBe('前面 _ 後面');
       expect(pangu.spacingText('Vinta_Mollie')).toBe('Vinta_Mollie');
       expect(pangu.spacingText('Vinta _ Mollie')).toBe('Vinta _ Mollie');
+      expect(pangu.spacingText('為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip')).toBe('為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip');
     });
 
     // 兩邊都加空格
@@ -519,8 +520,8 @@ describe('Pangu', () => {
 
   describe('hasProperSpacing()', () => {
     it('should return true if the text has proper spacing', () => {
-      expect(pangu.hasProperSpacing('Claude Code 用起來真的他媽爽')).toBe(true);
-      expect(pangu.hasProperSpacing('Claude Code用起來真的他媽爽')).toBe(false);
+      expect(pangu.hasProperSpacing('♫ 每條大街小巷，每個工程師的嘴裡，見面第一句話，就是不要在過年前 Deploy ♫')).toBe(true);
+      expect(pangu.hasProperSpacing('♫每條大街小巷，每個工程師的嘴裡，見面第一句話，就是不要在過年前Deploy ♫')).toBe(false);
     });
   });
 });
