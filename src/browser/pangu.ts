@@ -192,7 +192,7 @@ export class BrowserPangu extends Pangu {
 
     // 因為 xPathQuery 會是用 text() 結尾，所以這些 nodes 會是 text 而不是 DOM element
     // snapshotLength 要配合 XPathResult.ORDERED_NODE_SNAPSHOT_TYPE 使用
-    // https://developer.mozilla.org/en-US/docs/DOM/document.evaluate
+    // https://developer.mozilla.org/en-US/docs/Web/API/Document/evaluate
     // https://developer.mozilla.org/en-US/docs/Web/API/XPathResult
     const textNodes = document.evaluate(xPathQuery, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
