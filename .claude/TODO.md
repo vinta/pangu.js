@@ -55,3 +55,10 @@ pangu.js is a mature text spacing library that automatically inserts whitespace 
 - [x] Investigated adjacent sibling spacing (YouTube hashtags) (files: tests/browser/pangu.playwright.ts)
   - What's done: Multiple approach attempts (sibling checking, post-processing, XPath mods)
   - Result: Fundamental XPath algorithm limitation
+
+## Survey
+
+- Survey `createTreeWalker()`
+  - https://developer.mozilla.org/en-US/docs/Web/API/Document/createTreeWalker
+- Survey `requestIdleCallback()`
+  - https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback
