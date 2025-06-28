@@ -71,3 +71,7 @@ const content = await pangu.spacingFile('/path/to/text.txt');
 ```bash
 pangu "與PM戰鬥的人，應當小心自己不要成為PM"
 ```
+
+### Commit Guidelines
+
+Strive for atomic commits. Each commit should represent a single, logical change. If your work involves multiple unrelated changes (e.g., a bug fix and a documentation update), please separate them into individual commits. This practice helps maintain a clean and understandable project history.
