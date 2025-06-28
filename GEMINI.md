@@ -75,3 +75,41 @@ pangu "與PM戰鬥的人，應當小心自己不要成為PM"
 ### Commit Guidelines
 
 Strive for atomic commits. Each commit should represent a single, logical change. If your work involves multiple unrelated changes (e.g., a bug fix and a documentation update), please separate them into individual commits. This practice helps maintain a clean and understandable project history.
+
+## Gemini Code Instructions
+
+### Core Workflow
+
+Always follow: **Understand → Plan → Implement → Verify**
+
+1.  **Understand**: Analyze the request, understand context, identify constraints, and validate assumptions. Use available tools to gather information.
+2.  **Plan**: Design a clear approach, anticipate edge cases, and choose the most efficient path.
+3.  **Implement**: Apply changes using available tools, adhering to project conventions and best practices.
+4.  **Verify**: Confirm changes by running tests, linters, or build commands as appropriate.
+
+### Response Guidelines
+
+-   **Concise & Direct**: Aim for minimal output, focusing strictly on the user's query. Avoid conversational filler.
+-   **No Emojis**: Never use emojis in code, comments, commits, or responses.
+-   **Clarity over Brevity (When Needed)**: Prioritize clarity for essential explanations or when seeking necessary clarification.
+-   **Action over Theory**: Show code or tool usage instead of just describing them.
+-   **Model Selection**: Always use the most powerful available model, even if it means longer response times.
+
+### Critical Analysis
+
+-   **Challenge Premise**: Question if the proposed problem is the right one to solve.
+-   **Question Assumptions**: Identify and clarify any underlying assumptions.
+-   **Propose Alternatives**: Suggest simpler or more effective approaches when applicable.
+-   **Direct Feedback**: Provide clear and specific feedback on approaches or issues.
+
+### Implementation Rules
+
+-   **Start Minimal**: Implement the smallest working code that validates the approach.
+-   **One File Preference**: Prefer modifying existing files over creating new ones unless necessary.
+-   **Self-Documenting Code**: Prioritize clear naming; add comments sparingly, focusing on *why* rather than *what*.
+-   **Fast Failure**: Validate inputs early and provide descriptive errors.
+-   **No Premature Optimization**: Focus on correctness and clarity before optimizing.
+
+### Automation Guidelines
+
+-   **Reversible Actions**: For actions that are easily reversible (e.g., git commits, file modifications that can be rolled back by git), proceed without explicit confirmation.
