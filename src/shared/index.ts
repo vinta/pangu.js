@@ -22,11 +22,16 @@
 
 const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
 
-// Define filesystem path pattern that can be reused
-// Matches Unix paths like /home, /usr/bin, /etc/nginx.conf
-// Also matches Windows paths like C:/ D:/
-// Only matches paths that clearly start with known system directories, hidden files, or common development directories
-const FILESYSTEM_PATH = /(?:[A-Z]:)?\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+]+)*/;
+// Unix absolute paths: system dirs + common project paths
+// Examples: /home, /usr/bin, /etc/nginx.conf, /.bashrc, /node_modules/@babel/core, /path/to/your/project
+const UNIX_ABSOLUTE_FILE_PATH = /\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path|project|src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|your)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+\*]+)*/;
+
+// Unix relative paths common in documentation and blog posts
+// Examples: src/main.py, dist/index.js, test/spec.js, ./.claude/CLAUDE.md, templates/*.html
+const UNIX_RELATIVE_FILE_PATH = /(?:\.\/)?(?:src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|node_modules|\.claude|\.git|\.vscode)(?:\/[A-Za-z0-9_\-\.@\+\*]+)+/;
+
+// Windows paths: C:\Users\name\, D:\Program Files\, C:\Windows\System32
+const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
 
 const ANY_CJK = new RegExp(`[${CJK}]`);
 
@@ -98,11 +103,13 @@ const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([\u201c])([A-Za-z0-9
 const AN_LEFT_BRACKET = /([A-Za-z0-9])(?<!\.[A-Za-z0-9]*)([\(\[\{])/g;
 const RIGHT_BRACKET_AN = /([\)\]\}])([A-Za-z0-9])/g;
 
-// Special pattern for filesystem paths like /home, /root, /dev/random after CJK
-const CJK_FILESYSTEM_PATH = new RegExp(`([${CJK}])(${FILESYSTEM_PATH.source})`, 'g');
+// Special patterns for filesystem paths after CJK
+const CJK_UNIX_ABSOLUTE_FILE_PATH = new RegExp(`([${CJK}])(${UNIX_ABSOLUTE_FILE_PATH.source})`, 'g');
+const CJK_UNIX_RELATIVE_FILE_PATH = new RegExp(`([${CJK}])(${UNIX_RELATIVE_FILE_PATH.source})`, 'g');
+const CJK_WINDOWS_PATH = new RegExp(`([${CJK}])(${WINDOWS_FILE_PATH.source})`, 'g');
 
-// Pattern for filesystem path ending with / followed by CJK
-const FILESYSTEM_PATH_SLASH_CJK = new RegExp(`(${FILESYSTEM_PATH.source}/)([${CJK}])`, 'g');
+// Pattern for Unix absolute path ending with / followed by CJK
+const UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}/)([${CJK}])`, 'g');
 
 const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])`, 'g');
 const ANS_CJK = new RegExp(`([A-Za-z\u0370-\u03ff0-9~\\$%\\^&\\*\\-\\+\\\\=!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])([${CJK}])`, 'g');
@@ -232,19 +239,43 @@ export class Pangu {
     newText = newText.replace(GREATER_THAN_CJK, '$1 $2 $3');
     newText = newText.replace(ANS_GREATER_THAN_ANS, '$1 $2 $3');
 
-    // Add space before filesystem paths after CJK (e.g., "和/root" -> "和 /root")
-    newText = newText.replace(CJK_FILESYSTEM_PATH, '$1 $2');
+    // Add space before filesystem paths after CJK
+    // Unix absolute paths: "和/root" -> "和 /root"
+    newText = newText.replace(CJK_UNIX_ABSOLUTE_FILE_PATH, '$1 $2');
+    // Unix relative paths: "檢查src/main.py" -> "檢查 src/main.py"
+    newText = newText.replace(CJK_UNIX_RELATIVE_FILE_PATH, '$1 $2');
+    // Windows paths: "檔案在C:\Users" -> "檔案在 C:\Users"
+    newText = newText.replace(CJK_WINDOWS_PATH, '$1 $2');
 
-    // Add space after filesystem paths ending with / before CJK (e.g., "/home/與" -> "/home/ 與")
-    newText = newText.replace(FILESYSTEM_PATH_SLASH_CJK, '$1 $2');
+    // Add space after Unix absolute paths ending with / before CJK (e.g., "/home/與" -> "/home/ 與")
+    newText = newText.replace(UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK, '$1 $2');
 
     // Context-aware slash handling: single slash = operator, multiple slashes = separator
+    // But exclude slashes that are part of file paths by protecting them first
     if (slashCount === 1) {
-      // Single slash acts as operator - add spaces
+      // Temporarily protect file paths from slash operator processing
+      const FILE_PATH_PLACEHOLDER = '\uE000'; // Private Use Area character
+      const filePaths: string[] = [];
+      let pathIndex = 0;
+
+      // Store all file paths and replace with placeholders
+      const allFilePathPattern = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}|${UNIX_RELATIVE_FILE_PATH.source})`, 'g');
+      newText = newText.replace(allFilePathPattern, (match) => {
+        filePaths[pathIndex] = match;
+        return `${FILE_PATH_PLACEHOLDER}${pathIndex++}\uE001`;
+      });
+
+      // Now apply slash operator spacing
       newText = newText.replace(CJK_SLASH_CJK, '$1 $2 $3');
       newText = newText.replace(CJK_SLASH_ANS, '$1 $2 $3');
       newText = newText.replace(ANS_SLASH_CJK, '$1 $2 $3');
       newText = newText.replace(ANS_SLASH_ANS, '$1 $2 $3');
+
+      // Restore file paths
+      const FILE_PATH_RESTORE = new RegExp(`${FILE_PATH_PLACEHOLDER}(\\d+)\uE001`, 'g');
+      newText = newText.replace(FILE_PATH_RESTORE, (_match, index) => {
+        return filePaths[parseInt(index, 10)] || '';
+      });
     }
     // If multiple slashes, treat as separator - do nothing (no spaces)
 

@@ -477,7 +477,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('Mollie / 陳上進 / 貓咪')).toBe('Mollie / 陳上進 / 貓咪');
     });
 
-    it('should handle / symbol as Unix file path', () => {
+    it('should handle / symbol as Unix absolute file path', () => {
       // prettier-ignore
       expect(pangu.spacingText('/home和/root是Linux中的頂級目錄'))
                          .toBe('/home 和 /root 是 Linux 中的頂級目錄');
