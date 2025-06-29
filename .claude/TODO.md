@@ -28,14 +28,52 @@ pangu.js is a mature text spacing library that automatically inserts whitespace 
   - Special handling for all bracket types: `()` `[]` `{}` `<>`
   - Improved slash `/` pattern handling
 
+### Test Updates (2025-06-29)
+
+- [x] Reorganized test file structure with clearer categorization (files: tests/shared/index.test.ts)
+- [x] Updated test expectations to match new spacing rules
+- [x] Added comprehensive test cases for operators, separators, and special symbols
+
 ## In Progress
 
-- [ ] None
+### Current Focus: Implement Updated Spacing Rules
+
+- [ ] Operator Rules Update
+  - What's done: Analyzed test changes, identified missing operators
+  - What's left: Add `< >` and `^` to operator regex patterns in shared/index.ts
+  - Impact: Lines 66-67, 77-81 need updates
+
+- [ ] Context-Aware Slash (`/`) Handling
+  - What's done: Identified dual behavior requirement
+  - What's left: Implement count-based logic (single = operator, multiple = separator)
+  - Implementation: Need new regex patterns and logic around line 70
+
+- [ ] Enhanced Hyphen (`-`) Handling
+  - What's done: Identified compound word patterns (state-of-the-art)
+  - What's left: Add detection for hyphenated compounds vs operators
+  - Implementation: New pattern to detect compound words
+
+- [ ] Special Programming Terms
+  - What's done: Some cases handled (C++, A+)
+  - What's left: Ensure consistent handling for all programming terms
+  - Cases: `C++`, `i++`, `A+`, `D-`, `C#`, `F#`
+
+- [ ] File Path Improvements
+  - What's done: Basic Unix path detection exists
+  - What's left: Better handling for dots in filenames, Windows paths
+  - Implementation: Enhance FILESYSTEM_PATH pattern
+
+- [ ] Separator Rules
+  - What's done: Identified `_` and `|` should never get spaces
+  - What's left: Ensure these are excluded from spacing rules
+  - Implementation: May need to add protection patterns
 
 ## Upcoming Tasks
 
 ### High Priority
 
+- [ ] Complete implementation of updated spacing rules based on test expectations
+- [ ] Run all tests to ensure no regressions
 - [ ] Add CSS `text-autospace` instructions in options page (Reason: Native browser feature is faster)
 
 ### Medium Priority
@@ -49,6 +87,34 @@ pangu.js is a mature text spacing library that automatically inserts whitespace 
 
 - [ ] Fix issue #216 - Markdown syntax protection
 - [ ] Fix issue #161 - Comprehensive Markdown support
+
+## Technical Decisions & Notes
+
+- **Decision**: Reorganized test expectations to clarify operator vs separator rules | **Rationale**: Test file was growing unwieldy and inconsistent
+- **Important**: All operators (`=`, `+`, `-`, `*`, `/`, `<`, `>`, `&`, `^`) should ALWAYS add spaces when CJK is present
+- **Important**: All separators (`_`, `|`) should NEVER add spaces regardless of context
+- **Context-Aware**: Slash `/` has dual behavior - single occurrence as operator, multiple as separator
+- **Dependencies**: Zero runtime dependencies maintained
+
+## Implementation Context (2025-06-29)
+
+### Current State
+- Version 6.1.0 with Paranoid Text Spacing algorithm
+- 106 test cases covering various Unicode blocks
+- Test file reorganized with clearer categorization
+- Expected results updated for consistency
+
+### Key File Locations
+- Core logic: `src/shared/index.ts` (lines 35-99 contain regex patterns)
+- Test expectations: `tests/shared/index.test.ts`
+- Operator patterns: Lines 66-67, 77-81 in shared/index.ts
+- Slash handling: Around line 70 in shared/index.ts
+
+### Pattern Analysis Completed
+- Identified missing operators: `^` needs to be added to operator regex
+- Confirmed separators `_` and `|` are handled correctly
+- Context-aware `/` handling needed for operator vs separator behavior
+- Special programming terms (C++, A+, etc.) pattern enhancement needed
 
 ## Known Issues & Limitations
 
