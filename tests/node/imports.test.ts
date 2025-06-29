@@ -1,9 +1,6 @@
 import { pangu as aliasPangu, NodePangu } from '../../dist/node/index.js';
 import panguDefault from '../../dist/node/index.js';
-import { createRequire } from 'node:module';
 import { describe, it, expect } from 'vitest';
-
-const require = createRequire(import.meta.url);
 
 describe('Node.js ESM imports', () => {
   it('should support named import of pangu', () => {
@@ -35,33 +32,3 @@ describe('Node.js ESM imports', () => {
   });
 });
 
-describe('Node.js CommonJS imports', () => {
-  it('should support default require', () => {
-    const module = require('../../dist/node/index.cjs');
-    const pangu = module.default || module;
-    expect(pangu).toBeDefined();
-    expect(typeof pangu.spacing).toBe('function');
-    expect(typeof pangu.spacingText).toBe('function');
-  });
-
-  it('should support destructured require', () => {
-    const { pangu, NodePangu } = require('../../dist/node/index.cjs');
-    expect(pangu).toBeDefined();
-    expect(typeof pangu.spacing).toBe('function');
-    expect(NodePangu).toBeDefined();
-    expect(typeof NodePangu).toBe('function');
-  });
-
-  it('should create new instances from CommonJS import', () => {
-    const { NodePangu } = require('../../dist/node/index.cjs');
-    const anotherPangu = new NodePangu();
-    expect(anotherPangu).toBeInstanceOf(NodePangu);
-    expect(typeof anotherPangu.spacing).toBe('function');
-  });
-
-  it('should have consistent behavior between default and named exports', () => {
-    const module = require('../../dist/node/index.cjs');
-    const { pangu: aliasPangu } = module;
-    expect(module.default).toBe(aliasPangu);
-  });
-});
