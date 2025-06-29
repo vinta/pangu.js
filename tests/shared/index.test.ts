@@ -97,13 +97,16 @@ describe('Pangu', () => {
       expect(pangu.spacingText('請@陳上進 吃大便')).toBe('請 @陳上進 吃大便');
     });
 
-    it('should handle # symbol', () => {
+    it('should handle # symbol as hashtag', () => {
       expect(pangu.spacingText('前面#後面')).toBe('前面 #後面');
-      expect(pangu.spacingText('前面C#後面')).toBe('前面 C# 後面');
       expect(pangu.spacingText('前面#H2G2後面')).toBe('前面 #H2G2 後面');
       expect(pangu.spacingText('前面 #銀河便車指南 後面')).toBe('前面 #銀河便車指南 後面');
       expect(pangu.spacingText('前面#銀河便車指南 後面')).toBe('前面 #銀河便車指南 後面');
       expect(pangu.spacingText('前面#銀河公車指南 #銀河拖吊車指南 後面')).toBe('前面 #銀河公車指南 #銀河拖吊車指南 後面');
+
+      // Special cases
+      expect(pangu.spacingText('前面C#後面')).toBe('前面 C# 後面');
+      expect(pangu.spacingText('前面F#後面')).toBe('前面 F# 後面');
     });
 
     // 只加右空格
@@ -179,6 +182,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面: I have no idea後面')).toBe('前面: I have no idea 後面');
     });
 
+    // When the symbol appears 2+ times or more in one line
     it('should handle : symbol as separator', () => {
       // TODO
     });
@@ -229,202 +233,251 @@ describe('Pangu', () => {
     // 計算符號
 
     // When the symbol appears only 1 time or shows up with other operators in one line
-    it('should handle = symbol as operator', () => {
+    it('should handle = symbol as operator, ALWAYS spacing', () => {
       expect(pangu.spacingText('前面=後面')).toBe('前面 = 後面');
-      expect(pangu.spacingText('前面 = 後面')).toBe('前面 = 後面');
-      expect(pangu.spacingText('Vinta=Mollie')).toBe('Vinta=Mollie');
+      expect(pangu.spacingText('Vinta=Mollie')).toBe('Vinta=Mollie'); // If no CJK, DO NOT change
       expect(pangu.spacingText('Vinta=陳上進')).toBe('Vinta = 陳上進');
       expect(pangu.spacingText('陳上進=Vinta')).toBe('陳上進 = Vinta');
-      expect(pangu.spacingText('得到一個A=B的結果')).toBe('得到一個 A=B 的結果');
+      expect(pangu.spacingText('得到一個A=B的結果')).toBe('得到一個 A = B 的結果');
+
+      // DO NOT change if already spacing
+      expect(pangu.spacingText('前面 = 後面')).toBe('前面 = 後面');
+      expect(pangu.spacingText('Vinta = Mollie')).toBe('Vinta = Mollie');
+      expect(pangu.spacingText('Vinta = 陳上進')).toBe('Vinta = 陳上進');
+      expect(pangu.spacingText('陳上進 = Vinta')).toBe('陳上進 = Vinta');
+      expect(pangu.spacingText('得到一個 A = B 的結果')).toBe('得到一個 A = B 的結果');
     });
 
     // When the symbol appears only 1 time or shows up with other operators in one line
-    it('should handle + symbol as operator', () => {
+    it('should handle + symbol as operator, ALWAYS spacing', () => {
       expect(pangu.spacingText('前面+後面')).toBe('前面 + 後面');
-      expect(pangu.spacingText('前面 + 後面')).toBe('前面 + 後面');
-      expect(pangu.spacingText('Vinta+Mollie')).toBe('Vinta+Mollie');
+      expect(pangu.spacingText('Vinta+Mollie')).toBe('Vinta+Mollie'); // If no CJK, DO NOT change
       expect(pangu.spacingText('Vinta+陳上進')).toBe('Vinta + 陳上進');
       expect(pangu.spacingText('陳上進+Vinta')).toBe('陳上進 + Vinta');
-      expect(pangu.spacingText('得到一個A+B的結果')).toBe('得到一個 A+B 的結果');
+      expect(pangu.spacingText('得到一個A+B的結果')).toBe('得到一個 A + B 的結果');
+
+      // DO NOT change if already spacing
+      expect(pangu.spacingText('前面 + 後面')).toBe('前面 + 後面');
+      expect(pangu.spacingText('Vinta + Mollie')).toBe('Vinta + Mollie');
+      expect(pangu.spacingText('Vinta + 陳上進')).toBe('Vinta + 陳上進');
+      expect(pangu.spacingText('陳上進 + Vinta')).toBe('陳上進 + Vinta');
+      expect(pangu.spacingText('得到一個 A + B 的結果')).toBe('得到一個 A + B 的結果');
+
+      // Special cases
       expect(pangu.spacingText('得到一個A+的結果')).toBe('得到一個 A+ 的結果');
-      expect(pangu.spacingText('得到一個D-的結果')).toBe('得到一個 D- 的結果');
       expect(pangu.spacingText('得到一個 A+ 的結果')).toBe('得到一個 A+ 的結果');
       expect(pangu.spacingText('得到一個C++的結果')).toBe('得到一個 C++ 的結果');
-      expect(pangu.spacingText('得到一個 C++ 的結果')).toBe('得到一個 C++ 的結果');
+      expect(pangu.spacingText('得到一個 C++的結果')).toBe('得到一個 C++ 的結果');
+      expect(pangu.spacingText('得到一個i++的結果')).toBe('得到一個 i++ 的結果');
     });
 
     // When the symbol appears only 1 time or shows up with other operators in one line
-    it('should handle - symbol as operator', () => {
+    it('should handle - symbol as operator, ALWAYS spacing', () => {
       expect(pangu.spacingText('前面-後面')).toBe('前面 - 後面');
-      expect(pangu.spacingText('前面 - 後面')).toBe('前面 - 後面');
-      expect(pangu.spacingText('Vinta-Mollie')).toBe('Vinta-Mollie');
+      expect(pangu.spacingText('Vinta-Mollie')).toBe('Vinta-Mollie'); // If no CJK, DO NOT change
       expect(pangu.spacingText('Vinta-陳上進')).toBe('Vinta - 陳上進');
       expect(pangu.spacingText('陳上進-Vinta')).toBe('陳上進 - Vinta');
-      expect(pangu.spacingText('得到一個A-B的結果')).toBe('得到一個 A-B 的結果');
+      expect(pangu.spacingText('得到一個A-B的結果')).toBe('得到一個 A - B 的結果');
+
+      // DO NOT change if already spacing
+      expect(pangu.spacingText('前面 - 後面')).toBe('前面 - 後面');
+      expect(pangu.spacingText('Vinta - Mollie')).toBe('Vinta - Mollie');
+      expect(pangu.spacingText('Vinta - 陳上進')).toBe('Vinta - 陳上進');
+      expect(pangu.spacingText('陳上進 - Vinta')).toBe('陳上進 - Vinta');
       expect(pangu.spacingText('得到一個 A - B 的結果')).toBe('得到一個 A - B 的結果');
 
-      // prettier-ignore
-      expect(pangu.spacingText('长者的智慧和复杂的维斯特洛- 文章'))
-                         .toBe('长者的智慧和复杂的维斯特洛 - 文章');
+      // Compound words
+      expect(pangu.spacingText('Sci-Fi')).toBe('Sci-Fi');
 
-      // FIXME
+      // prettier-ignore
+      expect(pangu.spacingText('The company offered a state-of-the-art machine-learning-powered real-time fraud-detection system with end-to-end encryption and cutting-edge performance.'))
+                         .toBe('The company offered a state-of-the-art machine-learning-powered real-time fraud-detection system with end-to-end encryption and cutting-edge performance.');
+
+      // prettier-ignore
+      expect(pangu.spacingText('這間公司提供了一套state-of-the-art、machine-learning-powered的real-time fraud-detection系統，具備end-to-end加密功能以及cutting-edge的效能。'))
+                         .toBe('這間公司提供了一套 state-of-the-art、machine-learning-powered 的 real-time fraud-detection 系統，具備 end-to-end 加密功能以及 cutting-edge 的效能。');
+
+      expect(pangu.spacingText('得到一個D-的結果')).toBe('得到一個 D- 的結果');
+      expect(pangu.spacingText('得到一個D--的結果')).toBe('得到一個 D-- 的結果');
+
+      // prettier-ignore
+      expect(pangu.spacingText('长者的智慧和复杂的维斯特洛- 文章')).toBe('长者的智慧和复杂的维斯特洛 - 文章');
+
+      // TODO: TDB
       // expect(pangu.spacingText('陳上進--Vinta')).toBe('陳上進 -- Vinta');
       // expect(pangu.spacingText('陳上進---Vinta')).toBe('陳上進 --- Vinta');
     });
 
     // When the symbol appears only 1 time or shows up with other operators in one line
-    it('should handle * symbol as operator', () => {
+    it('should handle * symbol as operator, ALWAYS spacing', () => {
       expect(pangu.spacingText('前面*後面')).toBe('前面 * 後面');
-      expect(pangu.spacingText('前面 * 後面')).toBe('前面 * 後面');
-      expect(pangu.spacingText('前面* 後面')).toBe('前面 * 後面');
-      expect(pangu.spacingText('前面 *後面')).toBe('前面 * 後面');
-      expect(pangu.spacingText('Vinta*Mollie')).toBe('Vinta*Mollie');
+      expect(pangu.spacingText('Vinta*Mollie')).toBe('Vinta*Mollie'); // If no CJK, DO NOT change
       expect(pangu.spacingText('Vinta*陳上進')).toBe('Vinta * 陳上進');
       expect(pangu.spacingText('陳上進*Vinta')).toBe('陳上進 * Vinta');
-      expect(pangu.spacingText('得到一個A*B的結果')).toBe('得到一個 A*B 的結果');
+      expect(pangu.spacingText('得到一個A*B的結果')).toBe('得到一個 A * B 的結果');
+
+      // DO NOT change if already spacing
+      expect(pangu.spacingText('前面 * 後面')).toBe('前面 * 後面');
+      expect(pangu.spacingText('Vinta * Mollie')).toBe('Vinta * Mollie');
+      expect(pangu.spacingText('Vinta * 陳上進')).toBe('Vinta * 陳上進');
+      expect(pangu.spacingText('陳上進 * Vinta')).toBe('陳上進 * Vinta');
+      expect(pangu.spacingText('得到一個 A * B 的結果')).toBe('得到一個 A * B 的結果');
     });
 
     // When the symbol appears only 1 time or shows up with other operators in one line
-    it('should handle < symbol as operator', () => {
+    it('should handle < symbol as operator, ALWAYS spacing', () => {
       expect(pangu.spacingText('前面<後面')).toBe('前面 < 後面');
-      expect(pangu.spacingText('前面 < 後面')).toBe('前面 < 後面');
-      expect(pangu.spacingText('Vinta<Mollie')).toBe('Vinta<Mollie');
+      expect(pangu.spacingText('Vinta<Mollie')).toBe('Vinta<Mollie'); // If no CJK, DO NOT change
       expect(pangu.spacingText('Vinta<陳上進')).toBe('Vinta < 陳上進');
       expect(pangu.spacingText('陳上進<Vinta')).toBe('陳上進 < Vinta');
-      expect(pangu.spacingText('得到一個A<B的結果')).toBe('得到一個 A<B 的結果');
+      expect(pangu.spacingText('得到一個A<B的結果')).toBe('得到一個 A < B 的結果');
+
+      // DO NOT change if already spacing
+      expect(pangu.spacingText('前面 < 後面')).toBe('前面 < 後面');
+      expect(pangu.spacingText('Vinta < Mollie')).toBe('Vinta < Mollie');
+      expect(pangu.spacingText('Vinta < 陳上進')).toBe('Vinta < 陳上進');
+      expect(pangu.spacingText('陳上進 < Vinta')).toBe('陳上進 < Vinta');
+      expect(pangu.spacingText('得到一個 A < B 的結果')).toBe('得到一個 A < B 的結果');
     });
 
     // When the symbol appears only 1 time or shows up with other operators in one line
-    it('should handle > symbol as operator', () => {
+    it('should handle > symbol as operator, ALWAYS spacing', () => {
       expect(pangu.spacingText('前面>後面')).toBe('前面 > 後面');
-      expect(pangu.spacingText('前面 > 後面')).toBe('前面 > 後面');
-      expect(pangu.spacingText('Vinta>Mollie')).toBe('Vinta>Mollie');
+      expect(pangu.spacingText('Vinta>Mollie')).toBe('Vinta>Mollie'); // If no CJK, DO NOT change
       expect(pangu.spacingText('Vinta>陳上進')).toBe('Vinta > 陳上進');
       expect(pangu.spacingText('陳上進>Vinta')).toBe('陳上進 > Vinta');
-      expect(pangu.spacingText('得到一個A>B的結果')).toBe('得到一個 A>B 的結果');
+      expect(pangu.spacingText('得到一個A>B的結果')).toBe('得到一個 A > B 的結果');
+
+      // DO NOT change if already spacing
+      expect(pangu.spacingText('前面 > 後面')).toBe('前面 > 後面');
+      expect(pangu.spacingText('Vinta > Mollie')).toBe('Vinta > Mollie');
+      expect(pangu.spacingText('Vinta > 陳上進')).toBe('Vinta > 陳上進');
+      expect(pangu.spacingText('陳上進 > Vinta')).toBe('陳上進 > Vinta');
+      expect(pangu.spacingText('得到一個 A > B 的結果')).toBe('得到一個 A > B 的結果');
     });
 
     // When the symbol appears only 1 time or shows up with other operators in one line
-    it('should handle & symbol as operator', () => {
+    it('should handle & symbol as operator, ALWAYS spacing', () => {
       expect(pangu.spacingText('前面&後面')).toBe('前面 & 後面');
-      expect(pangu.spacingText('前面 & 後面')).toBe('前面 & 後面');
-      expect(pangu.spacingText('Vinta&Mollie')).toBe('Vinta&Mollie');
+      expect(pangu.spacingText('Vinta&Mollie')).toBe('Vinta&Mollie'); // If no CJK, DO NOT change
       expect(pangu.spacingText('Vinta&陳上進')).toBe('Vinta & 陳上進');
       expect(pangu.spacingText('陳上進&Vinta')).toBe('陳上進 & Vinta');
-      expect(pangu.spacingText('得到一個A&B的結果')).toBe('得到一個 A&B 的結果');
+      expect(pangu.spacingText('得到一個A&B的結果')).toBe('得到一個 A & B 的結果');
+
+      // DO NOT change if already spacing
+      expect(pangu.spacingText('前面 & 後面')).toBe('前面 & 後面');
+      expect(pangu.spacingText('Vinta & Mollie')).toBe('Vinta & Mollie');
+      expect(pangu.spacingText('Vinta & 陳上進')).toBe('Vinta & 陳上進');
+      expect(pangu.spacingText('陳上進 & Vinta')).toBe('陳上進 & Vinta');
+      expect(pangu.spacingText('得到一個 A & B 的結果')).toBe('得到一個 A & B 的結果');
     });
 
     // When the symbol appears only 1 time or shows up with other operators in one line
-    it('should handle ^ symbol as operator', () => {
+    it('should handle ^ symbol as operator, ALWAYS spacing', () => {
       expect(pangu.spacingText('前面^後面')).toBe('前面 ^ 後面');
       expect(pangu.spacingText('前面 ^ 後面')).toBe('前面 ^ 後面');
     });
 
     // 分隔符號
 
-    it('should handle _ symbol as separator with no spacing', () => {
+    it('should handle _ symbol as separator, DO NOT spacing', () => {
       expect(pangu.spacingText('前面_後面')).toBe('前面_後面');
-      expect(pangu.spacingText('前面 _ 後面')).toBe('前面 _ 後面');
-
       expect(pangu.spacingText('Vinta_Mollie')).toBe('Vinta_Mollie');
-      expect(pangu.spacingText('Vinta _ Mollie')).toBe('Vinta _ Mollie');
-
       expect(pangu.spacingText('Vinta_Mollie_Kitten')).toBe('Vinta_Mollie_Kitten');
-      expect(pangu.spacingText('Vinta _ Mollie _ Kitten')).toBe('Vinta _ Mollie _ Kitten');
-
       expect(pangu.spacingText('Mollie_陳上進')).toBe('Mollie_陳上進');
       expect(pangu.spacingText('陳上進_Mollie')).toBe('陳上進_Mollie');
-
       expect(pangu.spacingText('陳上進_貓咪_Mollie')).toBe('陳上進_貓咪_Mollie');
-      expect(pangu.spacingText('陳上進 _ 貓咪 _ Mollie')).toBe('陳上進 _ 貓咪 _ Mollie');
-
       expect(pangu.spacingText('陳上進_Mollie_貓咪')).toBe('陳上進_Mollie_貓咪');
-      expect(pangu.spacingText('陳上進 _ Mollie _ 貓咪')).toBe('陳上進 _ Mollie _ 貓咪');
-
       expect(pangu.spacingText('Mollie_Vinta_貓咪')).toBe('Mollie_Vinta_貓咪');
-      expect(pangu.spacingText('Mollie _ Vinta _ 貓咪')).toBe('Mollie _ Vinta _ 貓咪');
-
       expect(pangu.spacingText('Mollie_陳上進_貓咪')).toBe('Mollie_陳上進_貓咪');
-      expect(pangu.spacingText('Mollie _ 陳上進 _ 貓咪')).toBe('Mollie _ 陳上進 _ 貓咪');
-
-      expect(pangu.spacingText('得到一個A_B的結果')).toBe('得到一個 A_B 的結果');
 
       // prettier-ignore
       expect(pangu.spacingText('為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip'))
                          .toBe('為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip');
+
+      // DO NOT change if already spacing, rare cases, ignore
+      // expect(pangu.spacingText('前面 _ 後面')).toBe('前面 _ 後面');
+      // expect(pangu.spacingText('Vinta _ Mollie')).toBe('Vinta _ Mollie');
+      // expect(pangu.spacingText('Vinta _ Mollie _ Kitten')).toBe('Vinta _ Mollie _ Kitten');
+      // expect(pangu.spacingText('陳上進 _ 貓咪 _ Mollie')).toBe('陳上進 _ 貓咪 _ Mollie');
+      // expect(pangu.spacingText('陳上進 _ Mollie _ 貓咪')).toBe('陳上進 _ Mollie _ 貓咪');
+      // expect(pangu.spacingText('Mollie _ Vinta _ 貓咪')).toBe('Mollie _ Vinta _ 貓咪');
+      // expect(pangu.spacingText('Mollie _ 陳上進 _ 貓咪')).toBe('Mollie _ 陳上進 _ 貓咪');
+
+      // TODO: TBD
+      // expect(pangu.spacingText('得到一個A_B的結果')).toBe('得到一個A_B的結果');
     });
 
-    it('should handle | symbol as separator', () => {
+    it('should handle | symbol as separator, DO NOT spacing', () => {
       expect(pangu.spacingText('前面|後面')).toBe('前面|後面');
-      expect(pangu.spacingText('前面 | 後面')).toBe('前面 | 後面');
-
       expect(pangu.spacingText('Vinta|Mollie')).toBe('Vinta|Mollie');
-      expect(pangu.spacingText('Vinta | Mollie')).toBe('Vinta | Mollie');
-
       expect(pangu.spacingText('Vinta|Mollie|Kitten')).toBe('Vinta|Mollie|Kitten');
-      expect(pangu.spacingText('Vinta | Mollie | Kitten')).toBe('Vinta | Mollie | Kitten');
-
       expect(pangu.spacingText('Mollie|陳上進')).toBe('Mollie|陳上進');
-      expect(pangu.spacingText('Mollie | 陳上進')).toBe('Mollie | 陳上進');
-
       expect(pangu.spacingText('陳上進|Mollie')).toBe('陳上進|Mollie');
-      expect(pangu.spacingText('陳上進 | Mollie')).toBe('陳上進 | Mollie');
-
       expect(pangu.spacingText('陳上進|貓咪|Mollie')).toBe('陳上進|貓咪|Mollie');
-      expect(pangu.spacingText('陳上進 | 貓咪 | Mollie')).toBe('陳上進 | 貓咪 | Mollie');
-
       expect(pangu.spacingText('陳上進|Mollie|貓咪')).toBe('陳上進|Mollie|貓咪');
-      expect(pangu.spacingText('陳上進 | Mollie | 貓咪')).toBe('陳上進 | Mollie | 貓咪');
-
       expect(pangu.spacingText('Mollie|Vinta|貓咪')).toBe('Mollie|Vinta|貓咪');
-      expect(pangu.spacingText('Mollie | Vinta | 貓咪')).toBe('Mollie | Vinta | 貓咪');
-
       expect(pangu.spacingText('Mollie|陳上進|貓咪')).toBe('Mollie|陳上進|貓咪');
-      expect(pangu.spacingText('Mollie | 陳上進 | 貓咪')).toBe('Mollie | 陳上進 | 貓咪');
 
-      expect(pangu.spacingText('得到一個A|B的結果')).toBe('得到一個 A|B 的結果');
+      // DO NOT change if already spacing, rare cases, ignore
+      // expect(pangu.spacingText('前面 | 後面')).toBe('前面 | 後面');
+      // expect(pangu.spacingText('Vinta | Mollie')).toBe('Vinta | Mollie');
+      // expect(pangu.spacingText('Vinta | Mollie | Kitten')).toBe('Vinta | Mollie | Kitten');
+      // expect(pangu.spacingText('陳上進 | 貓咪 | Mollie')).toBe('陳上進 | 貓咪 | Mollie');
+      // expect(pangu.spacingText('陳上進 | Mollie | 貓咪')).toBe('陳上進 | Mollie | 貓咪');
+      // expect(pangu.spacingText('Mollie | Vinta | 貓咪')).toBe('Mollie | Vinta | 貓咪');
+      // expect(pangu.spacingText('Mollie | 陳上進 | 貓咪')).toBe('Mollie | 陳上進 | 貓咪');
+
+      // TODO: TBD
+      // expect(pangu.spacingText('得到一個A|B的結果')).toBe('得到一個A|B的結果');
     });
 
-    // unless it's in Unix file path
-    it('should handle / symbol as separator', () => {
+    // When the symbol appears only 1 time or shows up with other operators in one line
+    it('should handle / symbol as operator, ALWAYS spacing', () => {
       expect(pangu.spacingText('前面/後面')).toBe('前面 / 後面');
-      expect(pangu.spacingText('前面 / 後面')).toBe('前面 / 後面');
-      expect(pangu.spacingText('Vinta/Mollie')).toBe('Vinta/Mollie');
-      expect(pangu.spacingText('Vinta / Mollie')).toBe('Vinta / Mollie');
-      expect(pangu.spacingText('Vinta/Mollie/Kitten')).toBe('Vinta/Mollie/Kitten');
-      expect(pangu.spacingText('Vinta / Mollie / Kitten')).toBe('Vinta / Mollie / Kitten');
+      expect(pangu.spacingText('Vinta/Mollie')).toBe('Vinta/Mollie'); // If no CJK, DO NOT change
       expect(pangu.spacingText('Mollie/陳上進')).toBe('Mollie / 陳上進');
-      expect(pangu.spacingText('Mollie / 陳上進')).toBe('Mollie / 陳上進');
-
       expect(pangu.spacingText('陳上進/Mollie')).toBe('陳上進 / Mollie');
-      expect(pangu.spacingText('陳上進 / Mollie')).toBe('陳上進 / Mollie');
-
       expect(pangu.spacingText('得到一個A/B的結果')).toBe('得到一個 A / B 的結果');
-      expect(pangu.spacingText('吃apple / banana')).toBe('吃 apple / banana');
-      expect(pangu.spacingText('好人 / bad guy')).toBe('好人 / bad guy');
 
-      expect(pangu.spacingText('陳上進/貓咪/Mollie')).toBe('陳上進 / 貓咪 / Mollie');
-      expect(pangu.spacingText('陳上進 / 貓咪 / Mollie')).toBe('陳上進 / 貓咪 / Mollie');
-      expect(pangu.spacingText('陳上進/Mollie/貓咪')).toBe('陳上進 / Mollie / 貓咪');
-      expect(pangu.spacingText('陳上進 / Mollie / 貓咪')).toBe('陳上進 / Mollie / 貓咪');
-      expect(pangu.spacingText('Mollie/Vinta/貓咪')).toBe('Mollie / Vinta / 貓咪');
-      expect(pangu.spacingText('Mollie / Vinta / 貓咪')).toBe('Mollie / Vinta / 貓咪');
-      expect(pangu.spacingText('Mollie/陳上進/貓咪')).toBe('Mollie / 陳上進 / 貓咪');
-      expect(pangu.spacingText('Mollie / 陳上進 / 貓咪')).toBe('Mollie / 陳上進 / 貓咪');
+      expect(pangu.spacingText('吃apple / banana')).toBe('吃 apple / banana');
+
+      // DO NOT change if already spacing
+      expect(pangu.spacingText('前面 / 後面')).toBe('前面 / 後面');
+      expect(pangu.spacingText('Vinta / Mollie')).toBe('Vinta / Mollie');
+      expect(pangu.spacingText('Mollie / 陳上進')).toBe('Mollie / 陳上進');
+      expect(pangu.spacingText('陳上進 / Mollie')).toBe('陳上進 / Mollie');
+      expect(pangu.spacingText('得到一個 A / B 的結果')).toBe('得到一個 A / B 的結果');
+      expect(pangu.spacingText('好人 / bad guy')).toBe('好人 / bad guy');
+    });
+
+    // When the symbol appears 2+ times or more in one line
+    it('should handle / symbol as separator, DO NOT spacing', () => {
+      expect(pangu.spacingText('陳上進/貓咪/Mollie')).toBe('陳上進/貓咪/Mollie');
+      expect(pangu.spacingText('陳上進/Mollie/貓咪')).toBe('陳上進/Mollie/貓咪');
+      expect(pangu.spacingText('Mollie/Vinta/貓咪')).toBe('Mollie/Vinta/貓咪');
+      expect(pangu.spacingText('Mollie/陳上進/貓咪')).toBe('Mollie/陳上進/貓咪');
 
       // prettier-ignore
       expect(pangu.spacingText("8964/3★集會所接待員/克隆·麻煩大師/手卷師傅（已退休）/主程式毀滅者/dae-dae-o/#絕地家庭小會議/#今天大掃除了沒有/NS編號在banner裡/discord:史單力#3230"))
-                         .toBe("8964 / 3★集會所接待員 / 克隆・麻煩大師 / 手卷師傅（已退休） / 主程式毀滅者 / dae-dae-o / #絕地家庭小會議 / #今天大掃除了沒有 / NS 編號在 banner 裡 / discord: 史單力 #3230");
+                         .toBe("8964/3★集會所接待員/克隆・麻煩大師/手卷師傅（已退休）/主程式毀滅者/dae-dae-o/#絕地家庭小會議/#今天大掃除了沒有/NS 編號在 banner 裡/discord: 史單力 #3230");
 
       // prettier-ignore
       expect(pangu.spacingText("after 80'/气象工作者/不苟同/关注abc天气变化/向往123自由/热爱科学、互联网、编程Node.js Web C++ Julia Python"))
-                         .toBe("after 80' / 气象工作者 / 不苟同 / 关注 abc 天气变化 / 向往 123 自由 / 热爱科学、互联网、编程 Node.js Web C++ Julia Python");
+                         .toBe("after 80'/气象工作者/不苟同/关注 abc 天气变化/向往 123 自由/热爱科学、互联网、编程 Node.js Web C++ Julia Python");
 
       // prettier-ignore
       expect(pangu.spacingText('2016-12-26(奇幻电影节) / 2017-01-20(美国) / 詹姆斯麦卡沃伊'))
                          .toBe('2016-12-26 (奇幻电影节) / 2017-01-20 (美国) / 詹姆斯麦卡沃伊');
+
+      // DO NOT change if already spacing
+      expect(pangu.spacingText('陳上進 / 貓咪 / Mollie')).toBe('陳上進 / 貓咪 / Mollie');
+      expect(pangu.spacingText('陳上進 / Mollie / 貓咪')).toBe('陳上進 / Mollie / 貓咪');
+      expect(pangu.spacingText('Mollie / Vinta / 貓咪')).toBe('Mollie / Vinta / 貓咪');
+      expect(pangu.spacingText('Mollie / 陳上進 / 貓咪')).toBe('Mollie / 陳上進 / 貓咪');
     });
 
+    // TODO: TBD
     // it('should handle / symbol as Unix file path', () => {
     //   // prettier-ignore
     //   expect(pangu.spacingText('/home和/root是Linux中的頂級目錄'))
@@ -616,7 +669,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面`中間`後面')).toBe('前面 `中間` 後面');
     });
 
-    it('should handle # # symbols', () => {
+    it('should handle # # symbols as Weibo-like hashtags', () => {
       expect(pangu.spacingText('前面#H2G2#後面')).toBe('前面 #H2G2# 後面');
       expect(pangu.spacingText('前面#銀河閃電霹靂車指南#後面')).toBe('前面 #銀河閃電霹靂車指南# 後面');
     });
@@ -662,7 +715,7 @@ describe('Pangu', () => {
       expect(results).toEqual([
         'Xcode 7.1 配備了全新的 AppleTV 開發工具',
         '新 MacBook Pro 有 15 寸和 13 寸兩個版本',
-        'ChromeDriver 2.20 支援 Chrome v43-48',
+        'ChromeDriver 2.20 支援 Chrome v43 - 48',
       ]);
     });
   });
