@@ -9,6 +9,6 @@
     "server": "node server.js"
   },
   "dependencies": {
-    "pangu": "6.1.1"
+    "pangu": "6.1.2"
   }
 }

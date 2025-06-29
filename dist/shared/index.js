@@ -54,7 +54,7 @@ const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 class Pangu {
   constructor() {
     __publicField(this, "version");
-    this.version = "6.1.1";
+    this.version = "6.1.2";
   }
   spacingText(text) {
     if (typeof text !== "string") {
