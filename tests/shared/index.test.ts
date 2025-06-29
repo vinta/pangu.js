@@ -322,17 +322,28 @@ describe('Pangu', () => {
 
     // 分隔符號
 
-    it('should handle _ symbol as separator', () => {
+    it('should handle _ symbol as separator with no spacing', () => {
       expect(pangu.spacingText('前面_後面')).toBe('前面_後面');
       expect(pangu.spacingText('前面 _ 後面')).toBe('前面 _ 後面');
+
       expect(pangu.spacingText('Vinta_Mollie')).toBe('Vinta_Mollie');
       expect(pangu.spacingText('Vinta _ Mollie')).toBe('Vinta _ Mollie');
+
+      expect(pangu.spacingText('Vinta_Mollie_Kitten')).toBe('Vinta_Mollie_Kitten');
+      expect(pangu.spacingText('Vinta _ Mollie _ Kitten')).toBe('Vinta _ Mollie _ Kitten');
+
       expect(pangu.spacingText('Mollie_陳上進')).toBe('Mollie_陳上進');
       expect(pangu.spacingText('陳上進_Mollie')).toBe('陳上進_Mollie');
+
       expect(pangu.spacingText('陳上進_貓咪_Mollie')).toBe('陳上進_貓咪_Mollie');
       expect(pangu.spacingText('陳上進 _ 貓咪 _ Mollie')).toBe('陳上進 _ 貓咪 _ Mollie');
+
       expect(pangu.spacingText('陳上進_Mollie_貓咪')).toBe('陳上進_Mollie_貓咪');
       expect(pangu.spacingText('陳上進 _ Mollie _ 貓咪')).toBe('陳上進 _ Mollie _ 貓咪');
+
+      expect(pangu.spacingText('Mollie_Vinta_貓咪')).toBe('Mollie_Vinta_貓咪');
+      expect(pangu.spacingText('Mollie _ Vinta _ 貓咪')).toBe('Mollie _ Vinta _ 貓咪');
+
       expect(pangu.spacingText('Mollie_陳上進_貓咪')).toBe('Mollie_陳上進_貓咪');
       expect(pangu.spacingText('Mollie _ 陳上進 _ 貓咪')).toBe('Mollie _ 陳上進 _ 貓咪');
 
@@ -346,14 +357,28 @@ describe('Pangu', () => {
     it('should handle | symbol as separator', () => {
       expect(pangu.spacingText('前面|後面')).toBe('前面|後面');
       expect(pangu.spacingText('前面 | 後面')).toBe('前面 | 後面');
+
       expect(pangu.spacingText('Vinta|Mollie')).toBe('Vinta|Mollie');
       expect(pangu.spacingText('Vinta | Mollie')).toBe('Vinta | Mollie');
+
+      expect(pangu.spacingText('Vinta|Mollie|Kitten')).toBe('Vinta|Mollie|Kitten');
+      expect(pangu.spacingText('Vinta | Mollie | Kitten')).toBe('Vinta | Mollie | Kitten');
+
       expect(pangu.spacingText('Mollie|陳上進')).toBe('Mollie|陳上進');
+      expect(pangu.spacingText('Mollie | 陳上進')).toBe('Mollie | 陳上進');
+
       expect(pangu.spacingText('陳上進|Mollie')).toBe('陳上進|Mollie');
+      expect(pangu.spacingText('陳上進 | Mollie')).toBe('陳上進 | Mollie');
+
       expect(pangu.spacingText('陳上進|貓咪|Mollie')).toBe('陳上進|貓咪|Mollie');
       expect(pangu.spacingText('陳上進 | 貓咪 | Mollie')).toBe('陳上進 | 貓咪 | Mollie');
+
       expect(pangu.spacingText('陳上進|Mollie|貓咪')).toBe('陳上進|Mollie|貓咪');
       expect(pangu.spacingText('陳上進 | Mollie | 貓咪')).toBe('陳上進 | Mollie | 貓咪');
+
+      expect(pangu.spacingText('Mollie|Vinta|貓咪')).toBe('Mollie|Vinta|貓咪');
+      expect(pangu.spacingText('Mollie | Vinta | 貓咪')).toBe('Mollie | Vinta | 貓咪');
+
       expect(pangu.spacingText('Mollie|陳上進|貓咪')).toBe('Mollie|陳上進|貓咪');
       expect(pangu.spacingText('Mollie | 陳上進 | 貓咪')).toBe('Mollie | 陳上進 | 貓咪');
 
