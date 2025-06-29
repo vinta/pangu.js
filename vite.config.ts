@@ -1,18 +1,20 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { copyFile } from 'node:fs/promises';
 import { defineConfig, build } from 'vite';
 import dts from 'vite-plugin-dts';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const projectRoot = __dirname;
 
+
 // Custom plugin to handle multiple builds
 const multiBuildPlugin = () => {
   return {
     name: 'multi-build',
     closeBundle: async () => {
-      // Build CommonJS for Node
-      console.log('\nBuilding CommonJS modules...');
+      // Build CommonJS for shared module first
+      console.log('\nBuilding CommonJS shared module...');
       await build({
         configFile: false,
         build: {
@@ -21,17 +23,51 @@ const multiBuildPlugin = () => {
           sourcemap: true,
           minify: false,
           lib: {
-            entry: {
-              'node/index': resolve(projectRoot, 'dist/node/index.js'),
-              'node/cli': resolve(projectRoot, 'dist/node/cli.js'),
-            },
+            entry: resolve(projectRoot, 'dist/shared/index.js'),
             formats: ['cjs'],
+            fileName: () => 'shared/index.cjs',
           },
           rollupOptions: {
             output: {
-              entryFileNames: '[name].cjs',
-              chunkFileNames: 'shared/[name].cjs',
               exports: 'named',
+              interop: 'auto',
+            },
+          },
+        },
+        esbuild: {
+          target: 'es2022',
+          format: 'cjs',
+          charset: 'ascii',
+        },
+      });
+
+      // Build CommonJS for Node
+      console.log('\nBuilding CommonJS modules...');
+      
+      // Copy the CommonJS wrapper for node/index.cjs
+      console.log('Copying CommonJS wrapper for node/index...');
+      await copyFile(
+        resolve(projectRoot, 'scripts/cjs-wrapper.js'),
+        resolve(projectRoot, 'dist/node/index.cjs')
+      );
+      
+      // Build node/cli.cjs normally
+      await build({
+        configFile: false,
+        build: {
+          outDir: 'dist',
+          emptyOutDir: false,
+          sourcemap: true,
+          minify: false,
+          lib: {
+            entry: resolve(projectRoot, 'dist/node/cli.js'),
+            formats: ['cjs'],
+            fileName: () => 'node/cli.cjs',
+          },
+          rollupOptions: {
+            output: {
+              exports: 'named',
+              interop: 'auto',
             },
             external: (id) => {
               return id.startsWith('node:') || ['fs', 'path', 'process'].includes(id);
