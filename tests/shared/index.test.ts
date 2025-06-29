@@ -477,61 +477,60 @@ describe('Pangu', () => {
       expect(pangu.spacingText('Mollie / 陳上進 / 貓咪')).toBe('Mollie / 陳上進 / 貓咪');
     });
 
-    // TODO: TBD
-    // it('should handle / symbol as Unix file path', () => {
-    //   // prettier-ignore
-    //   expect(pangu.spacingText('/home和/root是Linux中的頂級目錄'))
-    //                      .toBe('/home 和 /root 是 Linux 中的頂級目錄');
+    it('should handle / symbol as Unix file path', () => {
+      // prettier-ignore
+      expect(pangu.spacingText('/home和/root是Linux中的頂級目錄'))
+                         .toBe('/home 和 /root 是 Linux 中的頂級目錄');
 
-    //   // prettier-ignore
-    //   expect(pangu.spacingText('/home/與/root是Linux中的頂級目錄'))
-    //                      .toBe('/home/ 與 /root 是 Linux 中的頂級目錄');
+      // prettier-ignore
+      expect(pangu.spacingText('/home/與/root是Linux中的頂級目錄'))
+                         .toBe('/home/ 與 /root 是 Linux 中的頂級目錄');
 
-    //   // prettier-ignore
-    //   expect(pangu.spacingText('"/home/"和"/root"是Linux中的頂級目錄'))
-    //                      .toBe('"/home/" 和 "/root" 是 Linux 中的頂級目錄');
+      // prettier-ignore
+      expect(pangu.spacingText('"/home/"和"/root"是Linux中的頂級目錄'))
+                         .toBe('"/home/" 和 "/root" 是 Linux 中的頂級目錄');
 
-    //   // prettier-ignore
-    //   expect(pangu.spacingText('當你用cat和od指令查看/dev/random和/dev/urandom的內容時'))
-    //                      .toBe('當你用 cat 和 od 指令查看 /dev/random 和 /dev/urandom 的內容時');
+      // prettier-ignore
+      expect(pangu.spacingText('當你用cat和od指令查看/dev/random和/dev/urandom的內容時'))
+                         .toBe('當你用 cat 和 od 指令查看 /dev/random 和 /dev/urandom 的內容時');
 
-    //   // prettier-ignore
-    //   expect(pangu.spacingText('當你用cat和od指令查看"/dev/random"和"/dev/urandom"的內容時'))
-    //                      .toBe('當你用 cat 和 od 指令查看 "/dev/random" 和 "/dev/urandom" 的內容時');
+      // prettier-ignore
+      expect(pangu.spacingText('當你用cat和od指令查看"/dev/random"和"/dev/urandom"的內容時'))
+                         .toBe('當你用 cat 和 od 指令查看 "/dev/random" 和 "/dev/urandom" 的內容時');
 
-    //   // Basic Unix paths
-    //   expect(pangu.spacingText('在/home目錄')).toBe('在 /home 目錄');
-    //   expect(pangu.spacingText('查看/etc/passwd文件')).toBe('查看 /etc/passwd 文件');
-    //   expect(pangu.spacingText('進入/usr/local/bin目錄')).toBe('進入 /usr/local/bin 目錄');
+      // Basic Unix paths
+      expect(pangu.spacingText('在/home目錄')).toBe('在 /home 目錄');
+      expect(pangu.spacingText('查看/etc/passwd文件')).toBe('查看 /etc/passwd 文件');
+      expect(pangu.spacingText('進入/usr/local/bin目錄')).toBe('進入 /usr/local/bin 目錄');
 
-    //   // Paths with dots
-    //   expect(pangu.spacingText('配置檔在/etc/nginx/nginx.conf')).toBe('配置檔在 /etc/nginx/nginx.conf');
-    //   expect(pangu.spacingText('隱藏檔案/.bashrc很重要')).toBe('隱藏檔案 /.bashrc 很重要');
-    //   expect(pangu.spacingText('查看/home/.config/settings')).toBe('查看 /home/.config/settings');
+      // Paths with dots
+      expect(pangu.spacingText('配置檔在/etc/nginx/nginx.conf')).toBe('配置檔在 /etc/nginx/nginx.conf');
+      expect(pangu.spacingText('隱藏檔案/.bashrc很重要')).toBe('隱藏檔案 /.bashrc 很重要');
+      expect(pangu.spacingText('查看/home/.config/settings')).toBe('查看 /home/.config/settings');
 
-    //   // Paths with version numbers
-    //   expect(pangu.spacingText('安裝到/usr/lib/python3.9/')).toBe('安裝到 /usr/lib/python3.9/');
-    //   expect(pangu.spacingText('位於/opt/node-v16.14.0/bin')).toBe('位於 /opt/node-v16.14.0/bin');
+      // Paths with version numbers
+      expect(pangu.spacingText('安裝到/usr/lib/python3.9/')).toBe('安裝到 /usr/lib/python3.9/');
+      expect(pangu.spacingText('位於/opt/node-v16.14.0/bin')).toBe('位於 /opt/node-v16.14.0/bin');
 
-    //   // Paths with special characters
-    //   expect(pangu.spacingText('備份到/mnt/backup.2024-01-01/')).toBe('備份到 /mnt/backup.2024-01-01/');
-    //   expect(pangu.spacingText('日誌在/var/log/app-name.log')).toBe('日誌在 /var/log/app-name.log');
+      // Paths with special characters
+      expect(pangu.spacingText('備份到/mnt/backup.2024-01-01/')).toBe('備份到 /mnt/backup.2024-01-01/');
+      expect(pangu.spacingText('日誌在/var/log/app-name.log')).toBe('日誌在 /var/log/app-name.log');
 
-    //   // Paths with @ symbols (npm packages)
-    //   expect(pangu.spacingText('模組在/node_modules/@babel/core')).toBe('模組在 /node_modules/@babel/core');
-    //   expect(pangu.spacingText('套件在/node_modules/@types/node')).toBe('套件在 /node_modules/@types/node');
+      // Paths with @ symbols (npm packages)
+      expect(pangu.spacingText('模組在/node_modules/@babel/core')).toBe('模組在 /node_modules/@babel/core');
+      expect(pangu.spacingText('套件在/node_modules/@types/node')).toBe('套件在 /node_modules/@types/node');
 
-    //   // Paths with + symbols
-    //   expect(pangu.spacingText('編譯器在/usr/bin/g++')).toBe('編譯器在 /usr/bin/g++');
+      // Paths with + symbols
+      expect(pangu.spacingText('編譯器在/usr/bin/g++')).toBe('編譯器在 /usr/bin/g++');
 
-    //   // prettier-ignore
-    //   expect(pangu.spacingText('套件在/usr/lib/gcc/x86_64-linux-gnu/11++'))
-    //                      .toBe('套件在 /usr/lib/gcc/x86_64-linux-gnu/11++');
+      // prettier-ignore
+      expect(pangu.spacingText('套件在/usr/lib/gcc/x86_64-linux-gnu/11++'))
+                         .toBe('套件在 /usr/lib/gcc/x86_64-linux-gnu/11++');
 
-    //   // Paths ending with slash before CJK
-    //   expect(pangu.spacingText('目錄/usr/bin/包含執行檔')).toBe('目錄 /usr/bin/ 包含執行檔');
-    //   expect(pangu.spacingText('資料夾/etc/nginx/存放設定')).toBe('資料夾 /etc/nginx/ 存放設定');
-    // });
+      // Paths ending with slash before CJK
+      expect(pangu.spacingText('目錄/usr/bin/包含執行檔')).toBe('目錄 /usr/bin/ 包含執行檔');
+      expect(pangu.spacingText('資料夾/etc/nginx/存放設定')).toBe('資料夾 /etc/nginx/ 存放設定');
+    });
 
     it('should handle \\ symbol', () => {
       expect(pangu.spacingText('前面\\後面')).toBe('前面 \\ 後面');
