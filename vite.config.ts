@@ -1,6 +1,5 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { copyFile } from 'node:fs/promises';
 import { defineConfig, build } from 'vite';
 import dts from 'vite-plugin-dts';
 
@@ -44,7 +43,7 @@ const multiBuildPlugin = () => {
       // Build CommonJS for Node
       console.log('\nBuilding CommonJS modules...');
       
-      // Build node/index.cjs first as a regular build
+      // Build node/index.cjs from the CommonJS source
       await build({
         configFile: false,
         build: {
@@ -53,13 +52,12 @@ const multiBuildPlugin = () => {
           sourcemap: true,
           minify: false,
           lib: {
-            entry: resolve(projectRoot, 'dist/node/index.js'),
+            entry: resolve(projectRoot, 'src/node/index.cjs.ts'),
             formats: ['cjs'],
-            fileName: () => 'node/index.cjs.tmp',
+            fileName: () => 'node/index.cjs',
           },
           rollupOptions: {
             output: {
-              exports: 'named',
               interop: 'auto',
             },
             external: (id) => {
@@ -73,28 +71,6 @@ const multiBuildPlugin = () => {
           charset: 'ascii',
         },
       });
-      
-      // Post-process the CommonJS build to make it export pangu as default
-      const { readFile, writeFile } = await import('node:fs/promises');
-      const cjsContent = await readFile(resolve(projectRoot, 'dist/node/index.cjs.tmp'), 'utf8');
-      
-      // Create a wrapper that exports pangu as the main export
-      const wrapperContent = `${cjsContent}
-
-// Make pangu the main export
-const _pangu = exports.pangu || exports.default;
-module.exports = _pangu;
-
-// Add named exports as properties
-module.exports.pangu = _pangu;
-module.exports.NodePangu = exports.NodePangu;
-module.exports.default = _pangu;
-`;
-      
-      await writeFile(resolve(projectRoot, 'dist/node/index.cjs'), wrapperContent);
-      
-      // Clean up temp file
-      await import('node:fs').then(fs => fs.promises.unlink(resolve(projectRoot, 'dist/node/index.cjs.tmp')));
       
       // Build node/cli.cjs
       await build({
