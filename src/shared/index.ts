@@ -1,4 +1,4 @@
-// CJK is an acronym for Chinese, Japanese, and Korean.
+// CJK is short for Chinese, Japanese, and Korean.
 //
 // CJK includes the following Unicode blocks:
 // \u2e80-\u2eff CJK Radicals Supplement
@@ -12,35 +12,35 @@
 // \uf900-\ufaff CJK Compatibility Ideographs
 //
 // For more information about Unicode blocks, see
-// http://unicode-table.com/en/
-// https://github.com/vinta/pangu
+// https://symbl.cc/en/unicode-table/
 //
-// all J below does not include \u30fb
-const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
-
-// Define filesystem path pattern that can be reused
-// Matches Unix paths like /home, /usr/bin, /etc/nginx.conf
-// Also matches Windows paths like C:/ D:/
-// Only matches paths that clearly start with known system directories, hidden files, or common development directories
-const FILESYSTEM_PATH = /(?:[A-Z]:)?\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+]+)*/;
-
 // ANS is short for Alphabets, Numbers, and Symbols.
 //
 // A includes A-Za-z\u0370-\u03ff
 // N includes 0-9
 // S includes `~!@#$%^&*()-_=+[]{}\|;:'",<.>/?
 //
-// some S below does not include all symbols
+// Some S below does not include all symbols
+
+// All J below does not include \u30fb
+const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
+
+// FIXME: This approach is too hacky
+// Define filesystem path pattern that can be reused
+// Matches Unix paths like /home, /usr/bin, /etc/nginx.conf
+// Also matches Windows paths like C:/ D:/
+// Only matches paths that clearly start with known system directories, hidden files, or common development directories
+const FILESYSTEM_PATH = /(?:[A-Z]:)?\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+]+)*/;
 
 const ANY_CJK = new RegExp(`[${CJK}]`);
 
-// the symbol part only includes ~ ! ; : , . ? but . only matches one character
+// The symbol part only includes ~ ! ; : , . ? but . only matches one character
 const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK = new RegExp(`([${CJK}])[ ]*([\\:]+|\\.)[ ]*([${CJK}])`, 'g');
 const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS = new RegExp(`([${CJK}])[ ]*([~\\!;,\\?]+)[ ]*`, 'g');
 const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, 'g');
 const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([A-Z0-9\\(\\)])`, 'g');
 
-// the symbol part does not include '
+// The symbol part does not include '
 const CJK_QUOTE = new RegExp(`([${CJK}])([\`"\u05f4])`, 'g');
 const QUOTE_CJK = new RegExp(`([\`"\u05f4])([${CJK}])`, 'g');
 const FIX_QUOTE_ANY_QUOTE = /([`"\u05f4]+)[ ]*(.+?)[ ]*([`"\u05f4]+)/g;
