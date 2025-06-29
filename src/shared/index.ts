@@ -66,8 +66,12 @@ const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, 'g');
 const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*=&])([A-Za-z0-9])`, 'g');
 const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*=&])([${CJK}])`, 'g');
 
-// Only add spaces around / when both sides are CJK
-const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
+// Separator symbols that are commonly used in lists/categories
+const SEPARATORS = '|/:';
+
+// Pattern for detecting list-like structures with separators
+// Matches patterns like: 分类1|分类2|分类3 or name1/name2/name3
+const CJK_SEPARATOR_LIST = new RegExp(`([${CJK}]+(?:[${SEPARATORS}][${CJK}]+){2,})`, 'g');
 
 // Special handling for single letter grades/ratings (A+, B-, C*) before CJK
 // These should have space after the operator, not before
@@ -201,8 +205,39 @@ export class Pangu {
     // Add space after filesystem paths ending with / before CJK (e.g., "/home/與" -> "/home/ 與")
     newText = newText.replace(FILESYSTEM_PATH_SLASH_CJK, '$1 $2');
 
-    // Only add spaces around / when both sides are CJK
-    newText = newText.replace(CJK_SLASH_CJK, '$1 $2 $3');
+    // Special handling for separators (|, /, :)
+    // When used in list-like structures (3+ segments), preserve without spaces
+    // When used as single separators, handle based on the separator type
+    const preservedLists: string[] = [];
+    const LIST_PLACEHOLDER = '\u0001LIST_PLACEHOLDER_';
+    
+    // First, preserve list patterns for all separators
+    newText = newText.replace(CJK_SEPARATOR_LIST, (match) => {
+      const index = preservedLists.length;
+      preservedLists.push(match);
+      return `${LIST_PLACEHOLDER}${index}\u0001`;
+    });
+    
+    // Handle single separators between CJK
+    // Note: Colons are already handled by CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK
+    // so we only need to handle | and / here
+    const CJK_SLASH_PIPE_CJK = new RegExp(`([${CJK}])([|/])([${CJK}])`, 'g');
+    newText = newText.replace(CJK_SLASH_PIPE_CJK, (match, p1, sep, p3) => {
+      if (sep === '|') {
+        // Pipe remains as separator without spaces
+        return match;
+      } else if (sep === '/') {
+        // Single slash gets spaces
+        return `${p1} ${sep} ${p3}`;
+      }
+      return match;
+    });
+    
+    // Restore preserved lists
+    const LIST_RESTORE = new RegExp(`${LIST_PLACEHOLDER}(\\d+)\u0001`, 'g');
+    newText = newText.replace(LIST_RESTORE, (_match, index) => {
+      return preservedLists[parseInt(index, 10)] || '';
+    });
 
     newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
     newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
