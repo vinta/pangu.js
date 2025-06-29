@@ -33,7 +33,7 @@ if (newMajor < currMajor || (newMajor === currMajor && newMinor < currMinor) || 
 
 console.log(`Bumping version from ${currentVersion} to ${newVersion}...`);
 
-execSync(`npm version ${newVersion} --no-git-tag-version`, { stdio: 'inherit' });
+execSync(`npm version ${newVersion} --no-git-tag-version`, { stdio: 'pipe' });
 
 // Update version in other files
 console.log('Updating version in other files...');
@@ -53,11 +53,18 @@ writeFileSync(sharedIndexPath, updatedIndex, 'utf8');
 console.log(`Updated ${sharedIndexPath}`);
 
 // Build
-execSync('npm run build', { stdio: 'inherit' });
+execSync('npm run build', { stdio: 'pipe' });
 
 // Copy updated pangu.umd.js to Chrome extension
 console.log('Copying updated pangu.umd.js to Chrome extension...');
-execSync('cp -f dist/browser/pangu.umd.js browser_extensions/chrome/vendors/pangu/pangu.umd.js', { stdio: 'inherit' });
+execSync('cp -f dist/browser/pangu.umd.js browser_extensions/chrome/vendors/pangu/pangu.umd.js', { stdio: 'pipe' });
+
+// Update examples/package.json
+const examplesPackagePath = join(projectRoot, 'examples/package.json');
+const examplesPackageContent = readFileSync(examplesPackagePath, 'utf8');
+const updatedExamplesPackage = examplesPackageContent.replace(/"pangu":\s*"[\d.]+"/, `"pangu": "${newVersion}"`);
+writeFileSync(examplesPackagePath, updatedExamplesPackage, 'utf8');
+console.log(`Updated ${examplesPackagePath}`);
 
 // Update README.md
 const readmePath = join(projectRoot, 'README.md');
@@ -66,8 +73,10 @@ const updatedReadme = readmeContent.replace(/pangu@[\d.]+/g, `pangu@${newVersion
 writeFileSync(readmePath, updatedReadme, 'utf8');
 console.log(`Updated ${readmePath}`);
 
-console.log(`\nVersion bumped to ${newVersion}`);
+console.log(`Version bumped to ${newVersion}`);
 
 // Pack extensions
 console.log('Packing extensions...');
-execSync('npm run pack-extension', { stdio: 'inherit' });
+execSync('npm run pack-extension', { stdio: 'pipe' });
+
+console.log('Done!');

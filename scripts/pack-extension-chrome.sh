@@ -1,13 +1,13 @@
 #!/bin/bash
 echo "Building Chrome Extension..."
 
-echo "1. Building browser bundle..."
+echo "Building browser bundle..."
 npm run build
 
-echo "2. Copying pangu.umd.js to extension..."
+echo "Copying pangu.umd.js to extension..."
 cp -f dist/browser/pangu.umd.js browser_extensions/chrome/vendors/pangu/pangu.umd.js
 
-echo "3. Creating extension package..."
+echo "Creating extension package..."
 cd browser_extensions/chrome/
 rm -f ../paranoid-auto-spacing.zip
 zip -r ../paranoid-auto-spacing.zip . \
