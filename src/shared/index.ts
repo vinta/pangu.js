@@ -241,9 +241,9 @@ export class Pangu {
     let compoundIndex = 0;
 
     // Pattern to detect compound words: alphanumeric-alphanumeric combinations that look like compound words/product names
-    // Examples: state-of-the-art, machine-learning, GPT-4o, real-time, end-to-end, gpt-4o
-    // Match: word-word(s) where at least one part contains lowercase letters (to distinguish from operators like A-B)
-    const COMPOUND_WORD_PATTERN = /\b(?:[A-Za-z0-9]*[a-z][A-Za-z0-9]*-[A-Za-z0-9]+|[A-Za-z0-9]+-[A-Za-z0-9]*[a-z][A-Za-z0-9]*)(?:-[A-Za-z0-9]*[a-z][A-Za-z0-9]*)*\b/g;
+    // Examples: state-of-the-art, machine-learning, GPT-4o, real-time, end-to-end, gpt-4o, GPT-5, claude-4-opus
+    // Match: word-word(s) where at least one part contains lowercase letters OR contains mix of letters and numbers (like GPT-5)
+    const COMPOUND_WORD_PATTERN = /\b(?:[A-Za-z0-9]*[a-z][A-Za-z0-9]*-[A-Za-z0-9]+|[A-Za-z0-9]+-[A-Za-z0-9]*[a-z][A-Za-z0-9]*|[A-Za-z]+-[0-9]+|[A-Za-z]+[0-9]+-[A-Za-z0-9]+)(?:-[A-Za-z0-9]+)*\b/g;
 
     // Store compound words and replace with placeholders
     newText = newText.replace(COMPOUND_WORD_PATTERN, (match) => {
