@@ -44,14 +44,59 @@ const multiBuildPlugin = () => {
       // Build CommonJS for Node
       console.log('\nBuilding CommonJS modules...');
       
-      // Copy the CommonJS wrapper for node/index.cjs
-      console.log('Copying CommonJS wrapper for node/index...');
-      await copyFile(
-        resolve(projectRoot, 'scripts/cjs-wrapper.js'),
-        resolve(projectRoot, 'dist/node/index.cjs')
-      );
+      // Build node/index.cjs first as a regular build
+      await build({
+        configFile: false,
+        build: {
+          outDir: 'dist',
+          emptyOutDir: false,
+          sourcemap: true,
+          minify: false,
+          lib: {
+            entry: resolve(projectRoot, 'dist/node/index.js'),
+            formats: ['cjs'],
+            fileName: () => 'node/index.cjs.tmp',
+          },
+          rollupOptions: {
+            output: {
+              exports: 'named',
+              interop: 'auto',
+            },
+            external: (id) => {
+              return id.startsWith('node:') || ['fs', 'path', 'process'].includes(id);
+            },
+          },
+        },
+        esbuild: {
+          target: 'es2022',
+          format: 'cjs',
+          charset: 'ascii',
+        },
+      });
       
-      // Build node/cli.cjs normally
+      // Post-process the CommonJS build to make it export pangu as default
+      const { readFile, writeFile } = await import('node:fs/promises');
+      const cjsContent = await readFile(resolve(projectRoot, 'dist/node/index.cjs.tmp'), 'utf8');
+      
+      // Create a wrapper that exports pangu as the main export
+      const wrapperContent = `${cjsContent}
+
+// Make pangu the main export
+const _pangu = exports.pangu || exports.default;
+module.exports = _pangu;
+
+// Add named exports as properties
+module.exports.pangu = _pangu;
+module.exports.NodePangu = exports.NodePangu;
+module.exports.default = _pangu;
+`;
+      
+      await writeFile(resolve(projectRoot, 'dist/node/index.cjs'), wrapperContent);
+      
+      // Clean up temp file
+      await import('node:fs').then(fs => fs.promises.unlink(resolve(projectRoot, 'dist/node/index.cjs.tmp')));
+      
+      // Build node/cli.cjs
       await build({
         configFile: false,
         build: {

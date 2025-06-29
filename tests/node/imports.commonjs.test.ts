@@ -9,7 +9,7 @@ describe('Node.js CommonJS imports', () => {
 
     expect(pangu.spacingText('Hello世界')).toBe('Hello 世界');
 
-    // In CommonJS, NodePangu is a property of pangu
+    // NodePangu is available as a property on pangu
     const anotherPangu = new pangu.NodePangu();
     expect(anotherPangu.spacingText('Hello世界')).toBe('Hello 世界');
   });
