@@ -30,7 +30,10 @@ const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u
 // Matches Unix paths like /home, /usr/bin, /etc/nginx.conf
 // Also matches Windows paths like C:/ D:/
 // Only matches paths that clearly start with known system directories, hidden files, or common development directories
-const FILESYSTEM_PATH = /(?:[A-Z]:)?\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+]+)*/;
+// const FILESYSTEM_PATH = /(?:[A-Z]:)?\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+]+)*/;
+// const FILESYSTEM_PATH_WITH_CJK = new RegExp(
+//   `(?:[A-Z]:)?/(?:\\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path|project)|\\.(?:[A-Za-z0-9_\\-]+))(?:/[A-Za-z0-9_\\-\\.@\\+${CJK}]+)*`,
+// );
 
 const ANY_CJK = new RegExp(`[${CJK}]`);
 
@@ -94,10 +97,10 @@ const AN_LEFT_BRACKET = /([A-Za-z0-9])(?<!\.[A-Za-z0-9]*)([\(\[\{])/g;
 const RIGHT_BRACKET_AN = /([\)\]\}])([A-Za-z0-9])/g;
 
 // Special pattern for filesystem paths like /home, /root, /dev/random after CJK
-const CJK_FILESYSTEM_PATH = new RegExp(`([${CJK}])(${FILESYSTEM_PATH.source})`, 'g');
+// const CJK_FILESYSTEM_PATH = new RegExp(`([${CJK}])(${FILESYSTEM_PATH.source})`, 'g');
 
 // Pattern for filesystem path ending with / followed by CJK
-const FILESYSTEM_PATH_SLASH_CJK = new RegExp(`(${FILESYSTEM_PATH.source}/)([${CJK}])`, 'g');
+// const FILESYSTEM_PATH_SLASH_CJK = new RegExp(`(${FILESYSTEM_PATH.source}/)([${CJK}])`, 'g');
 
 const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])`, 'g');
 const ANS_CJK = new RegExp(`([A-Za-z\u0370-\u03ff0-9~\\$%\\^&\\*\\-\\+\\\\=!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])([${CJK}])`, 'g');
@@ -110,7 +113,7 @@ export class Pangu {
   version: string;
 
   constructor() {
-    this.version = '6.0.0';
+    this.version = '6.1.0';
   }
 
   public spacingText(text: string) {
@@ -166,6 +169,16 @@ export class Pangu {
 
     newText = newText.replace(DOTS_CJK, '$1 $2');
     newText = newText.replace(FIX_CJK_COLON_ANS, '$1：$2');
+
+    // // Preserve quoted paths before quote processing to prevent breaking them
+    // const preservedQuotedPaths: string[] = [];
+    // const QUOTED_PATH_PLACEHOLDER = '__PANGU_QUOTED_PATH_';
+    // const QUOTED_PATH_PATTERN = /"[^"]*\/[^"]*"/g;
+    // newText = newText.replace(QUOTED_PATH_PATTERN, (match) => {
+    //   const index = preservedQuotedPaths.length;
+    //   preservedQuotedPaths.push(match);
+    //   return `${QUOTED_PATH_PLACEHOLDER}${index}__`;
+    // });
 
     newText = newText.replace(CJK_QUOTE, '$1 $2');
     newText = newText.replace(QUOTE_CJK, '$1 $2');
