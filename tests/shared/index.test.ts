@@ -5,6 +5,18 @@ const pangu = new Pangu();
 
 describe('Pangu', () => {
   describe('spacingText()', () => {
+    it('should handle short text', () => {
+      expect(pangu.spacingText('中a')).toBe('中 a');
+      expect(pangu.spacingText('a中')).toBe('a 中');
+      expect(pangu.spacingText('1中')).toBe('1 中');
+      expect(pangu.spacingText('中1')).toBe('中 1');
+      expect(pangu.spacingText('中a1')).toBe('中 a1');
+      expect(pangu.spacingText('a1中')).toBe('a1 中');
+      expect(pangu.spacingText('1中a')).toBe('1 中 a');
+      expect(pangu.spacingText('a中1')).toBe('a 中 1');
+      expect(pangu.spacingText('1中a')).toBe('1 中 a');
+    });
+
     // 兩邊都加空格
 
     it('should handle alphabets', () => {
@@ -550,7 +562,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('輸出到target/release/資料夾')).toBe('輸出到 target/release/ 資料夾');
       expect(pangu.spacingText('發布到public/static/路徑')).toBe('發布到 public/static/ 路徑');
 
-      // Development directories  
+      // Development directories
       expect(pangu.spacingText('安裝node_modules/@babel/core套件')).toBe('安裝 node_modules/@babel/core 套件');
       expect(pangu.spacingText('設定.git/hooks/pre-commit鉤子')).toBe('設定 .git/hooks/pre-commit 鉤子');
       expect(pangu.spacingText('編輯.vscode/settings.json配置')).toBe('編輯 .vscode/settings.json 配置');
