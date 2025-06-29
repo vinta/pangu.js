@@ -261,10 +261,11 @@ export class Pangu {
       return htmlTags[parseInt(index, 10)] || '';
     });
 
+    // TODO: TBD
     // Final fix for HTML comments: ensure no space after <!--
     // This is needed because <!-- is not protected as an HTML tag
     // and the ! character gets spaced by ANS_CJK pattern
-    newText = newText.replace(/<!--\s+/g, '<!--');
+    // newText = newText.replace(/<!--\s+/g, '<!--');
 
     return newText;
   }
