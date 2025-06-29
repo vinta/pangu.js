@@ -2,8 +2,10 @@ import { test, expect } from '@playwright/test';
 
 test.describe('URLPattern', () => {
   test('should handle various URLPattern scenarios', async ({ page, browserName }) => {
-    // Only run this test in Chromium
-    test.skip(browserName !== 'chromium', 'This test is Chrome-specific');
+    // Only test URLPattern in Chromium since it's a Chrome-specific API
+    if (browserName !== 'chromium') {
+      return;
+    }
 
     const testResults = await page.evaluate(() => {
       const results: { pattern: string; url: string; expected: boolean; actual: boolean }[] = [];

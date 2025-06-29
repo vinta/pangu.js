@@ -1,6 +1,4 @@
-// CJK is an acronym for Chinese, Japanese, and Korean.
-//
-// CJK includes the following Unicode blocks:
+// CJK is short for Chinese, Japanese, and Korean:
 // \u2e80-\u2eff CJK Radicals Supplement
 // \u2f00-\u2fdf Kangxi Radicals
 // \u3040-\u309f Hiragana
@@ -11,36 +9,41 @@
 // \u4e00-\u9fff CJK Unified Ideographs
 // \uf900-\ufaff CJK Compatibility Ideographs
 //
-// For more information about Unicode blocks, see
-// http://unicode-table.com/en/
-// https://github.com/vinta/pangu
-//
-// all J below does not include \u30fb
-const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
-
-// Define filesystem path pattern that can be reused
-// Matches Unix paths like /home, /usr/bin, /etc/nginx.conf
-// Also matches Windows paths like C:/ D:/
-// Only matches paths that clearly start with known system directories, hidden files, or common development directories
-const FILESYSTEM_PATH = /(?:[A-Z]:)?\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+]+)*/;
-
-// ANS is short for Alphabets, Numbers, and Symbols.
-//
+// ANS is short for Alphabets, Numbers, and Symbols:
 // A includes A-Za-z\u0370-\u03ff
 // N includes 0-9
 // S includes `~!@#$%^&*()-_=+[]{}\|;:'",<.>/?
 //
-// some S below does not include all symbols
+// All J below does not include \u30fb
+// Some S below does not include all symbols
+//
+// For more information about Unicode blocks, see
+// https://symbl.cc/en/unicode-table/
+
+const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
+
+// prettier-ignore
+// Unix absolute paths: system dirs + common project paths
+// Examples: /home, /usr/bin, /etc/nginx.conf, /.bashrc, /node_modules/@babel/core, /path/to/your/project
+const UNIX_ABSOLUTE_FILE_PATH = /\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path|project|src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|your)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+\*]+)*/;
+
+// prettier-ignore
+// Unix relative paths common in documentation and blog posts
+// Examples: src/main.py, dist/index.js, test/spec.js, ./.claude/CLAUDE.md, templates/*.html
+const UNIX_RELATIVE_FILE_PATH = /(?:\.\/)?(?:src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|node_modules|\.claude|\.git|\.vscode)(?:\/[A-Za-z0-9_\-\.@\+\*]+)+/;
+
+// Windows paths: C:\Users\name\, D:\Program Files\, C:\Windows\System32
+const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
 
 const ANY_CJK = new RegExp(`[${CJK}]`);
 
-// the symbol part only includes ~ ! ; : , . ? but . only matches one character
+// The symbol part only includes ~ ! ; : , . ? but . only matches one character
 const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK = new RegExp(`([${CJK}])[ ]*([\\:]+|\\.)[ ]*([${CJK}])`, 'g');
 const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS = new RegExp(`([${CJK}])[ ]*([~\\!;,\\?]+)[ ]*`, 'g');
 const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, 'g');
 const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([A-Z0-9\\(\\)])`, 'g');
 
-// the symbol part does not include '
+// The symbol part does not include '
 const CJK_QUOTE = new RegExp(`([${CJK}])([\`"\u05f4])`, 'g');
 const QUOTE_CJK = new RegExp(`([\`"\u05f4])([${CJK}])`, 'g');
 const FIX_QUOTE_ANY_QUOTE = /([`"\u05f4]+)[ ]*(.+?)[ ]*([`"\u05f4]+)/g;
@@ -62,12 +65,22 @@ const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, 'g
 const CJK_HASH = new RegExp(`([${CJK}])(#([^ ]))`, 'g');
 const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, 'g');
 
-// the symbol part only includes + - * = & (excluding | / < >)
+// The symbol part only includes + - * = & (excluding | / < >)
 const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*=&])([A-Za-z0-9])`, 'g');
 const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*=&])([${CJK}])`, 'g');
+// Handle operators between alphanumeric characters when CJK is present in text
+// But exclude hyphens that are part of compound words
+const ANS_OPERATOR_ANS = new RegExp(`([A-Za-z0-9])([\\+\\*=&])([A-Za-z0-9])`, 'g');
+// Special pattern for hyphens that are NOT part of compound words or dates
+// Space hyphens in these cases: letter-letter, letter-number, number-letter, version ranges (letter+number-number)
+// But NOT: pure number-number (dates like 2016-12-26)
+const ANS_HYPHEN_ANS_NOT_COMPOUND = new RegExp(`([A-Za-z])(-(?![a-z]))([A-Za-z0-9])|([A-Za-z]+[0-9]+)(-(?![a-z]))([0-9])|([0-9])(-(?![a-z0-9]))([A-Za-z])`, 'g');
 
-// Only add spaces around / when both sides are CJK
+// Slash patterns for operator vs separator behavior
 const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
+const CJK_SLASH_ANS = new RegExp(`([${CJK}])([/])([A-Za-z0-9])`, 'g');
+const ANS_SLASH_CJK = new RegExp(`([A-Za-z0-9])([/])([${CJK}])`, 'g');
+const ANS_SLASH_ANS = new RegExp(`([A-Za-z0-9])([/])([A-Za-z0-9])`, 'g');
 
 // Special handling for single letter grades/ratings (A+, B-, C*) before CJK
 // These should have space after the operator, not before
@@ -79,8 +92,11 @@ const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([A-Za-z0-9])`, 'g');
 const LESS_THAN_CJK = new RegExp(`([A-Za-z0-9])(<)([${CJK}])`, 'g');
 const CJK_GREATER_THAN = new RegExp(`([${CJK}])(>)([A-Za-z0-9])`, 'g');
 const GREATER_THAN_CJK = new RegExp(`([A-Za-z0-9])(>)([${CJK}])`, 'g');
+// Handle < and > between alphanumeric characters when CJK is present in text
+const ANS_LESS_THAN_ANS = new RegExp(`([A-Za-z0-9])(<)([A-Za-z0-9])`, 'g');
+const ANS_GREATER_THAN_ANS = new RegExp(`([A-Za-z0-9])(>)([A-Za-z0-9])`, 'g');
 
-// the bracket part only includes ( ) [ ] { } < > “ ”
+// The bracket part only includes ( ) [ ] { } < > “ ”
 const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>\u201c])`, 'g');
 const RIGHT_BRACKET_CJK = new RegExp(`([\\)\\]\\}<>\u201d])([${CJK}])`, 'g');
 const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([A-Za-z0-9${CJK}])[ ]*([\u201c])([A-Za-z0-9${CJK}\\-_ ]+)([\u201d])`, 'g');
@@ -89,11 +105,14 @@ const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([\u201c])([A-Za-z0-9
 const AN_LEFT_BRACKET = /([A-Za-z0-9])(?<!\.[A-Za-z0-9]*)([\(\[\{])/g;
 const RIGHT_BRACKET_AN = /([\)\]\}])([A-Za-z0-9])/g;
 
-// Special pattern for filesystem paths like /home, /root, /dev/random after CJK
-const CJK_FILESYSTEM_PATH = new RegExp(`([${CJK}])(${FILESYSTEM_PATH.source})`, 'g');
+// Special patterns for filesystem paths after CJK
+const CJK_UNIX_ABSOLUTE_FILE_PATH = new RegExp(`([${CJK}])(${UNIX_ABSOLUTE_FILE_PATH.source})`, 'g');
+const CJK_UNIX_RELATIVE_FILE_PATH = new RegExp(`([${CJK}])(${UNIX_RELATIVE_FILE_PATH.source})`, 'g');
+const CJK_WINDOWS_PATH = new RegExp(`([${CJK}])(${WINDOWS_FILE_PATH.source})`, 'g');
 
-// Pattern for filesystem path ending with / followed by CJK
-const FILESYSTEM_PATH_SLASH_CJK = new RegExp(`(${FILESYSTEM_PATH.source}/)([${CJK}])`, 'g');
+// Pattern for Unix paths ending with / followed by CJK
+const UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}/)([${CJK}])`, 'g');
+const UNIX_RELATIVE_FILE_PATH_SLASH_CJK = new RegExp(`(${UNIX_RELATIVE_FILE_PATH.source}/)([${CJK}])`, 'g');
 
 const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])`, 'g');
 const ANS_CJK = new RegExp(`([A-Za-z\u0370-\u03ff0-9~\\$%\\^&\\*\\-\\+\\\\=!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])([${CJK}])`, 'g');
@@ -106,7 +125,7 @@ export class Pangu {
   version: string;
 
   constructor() {
-    this.version = '6.0.0';
+    this.version = '6.1.0';
   }
 
   public spacingText(text: string) {
@@ -124,30 +143,35 @@ export class Pangu {
 
     let newText = text;
 
-    // Protect HTML tags from being processed
+    // HTML tag processing variables
     const htmlTags: string[] = [];
     const HTML_TAG_PLACEHOLDER = '\u0000HTML_TAG_PLACEHOLDER_';
+    let hasHtmlTags = false;
 
-    // More specific HTML tag pattern:
-    // - Opening tags: <tagname ...> or <tagname>
-    // - Closing tags: </tagname>
-    // - Self-closing tags: <tagname ... />
-    // This pattern ensures we only match actual HTML tags, not just any < > content
-    const HTML_TAG_PATTERN = /<\/?[a-zA-Z][a-zA-Z0-9]*(?:\s+[^>]*)?>/g;
+    // Early return for HTML processing if no HTML tags present
+    if (newText.includes('<')) {
+      hasHtmlTags = true;
+      // More specific HTML tag pattern:
+      // - Opening tags: <tagname ...> or <tagname>
+      // - Closing tags: </tagname>
+      // - Self-closing tags: <tagname ... />
+      // This pattern ensures we only match actual HTML tags, not just any < > content
+      const HTML_TAG_PATTERN = /<\/?[a-zA-Z][a-zA-Z0-9]*(?:\s+[^>]*)?>/g;
 
-    // Replace all HTML tags with placeholders, but process attribute values
-    newText = newText.replace(HTML_TAG_PATTERN, (match) => {
-      // Process attribute values inside the tag
-      const processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName, attrValue) => {
-        // Process the attribute value with spacing
-        const processedValue = self.spacingText(attrValue);
-        return `${attrName}="${processedValue}"`;
+      // Replace all HTML tags with placeholders, but process attribute values
+      newText = newText.replace(HTML_TAG_PATTERN, (match) => {
+        // Process attribute values inside the tag
+        const processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName, attrValue) => {
+          // Process the attribute value with spacing
+          const processedValue = self.spacingText(attrValue);
+          return `${attrName}="${processedValue}"`;
+        });
+
+        const index = htmlTags.length;
+        htmlTags.push(processedTag);
+        return `${HTML_TAG_PLACEHOLDER}${index}\u0000`;
       });
-
-      const index = htmlTags.length;
-      htmlTags.push(processedTag);
-      return `${HTML_TAG_PLACEHOLDER}${index}\u0000`;
-    });
+    }
 
     // https://stackoverflow.com/questions/4285472/multiple-regex-replace
     newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK, (_match, leftCjk, symbols, rightCjk) => {
@@ -178,9 +202,54 @@ export class Pangu {
     newText = newText.replace(SINGLE_QUOTE_CJK, '$1 $2');
     newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
 
-    newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
-    newText = newText.replace(CJK_HASH, '$1 $2');
-    newText = newText.replace(HASH_CJK, '$1 $3');
+    // Early return for complex patterns that need longer text
+    const textLength = newText.length;
+
+    // Check slash count early to determine hashtag behavior
+    const slashCount = (newText.match(/\//g) || []).length;
+
+    // Early return for slash processing if no slashes present
+    if (slashCount === 0) {
+      // Apply normal hashtag spacing without slash considerations
+      // HASH_ANS_CJK_HASH pattern needs at least 5 characters
+      if (textLength >= 5) {
+        newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
+      }
+      newText = newText.replace(CJK_HASH, '$1 $2');
+      newText = newText.replace(HASH_CJK, '$1 $3');
+    } else if (slashCount <= 1) {
+      // Single or no slash - apply normal hashtag spacing
+      // HASH_ANS_CJK_HASH pattern needs at least 5 characters
+      if (textLength >= 5) {
+        newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
+      }
+      newText = newText.replace(CJK_HASH, '$1 $2');
+      newText = newText.replace(HASH_CJK, '$1 $3');
+    } else {
+      // Multiple slashes - skip hashtag processing to preserve path structure
+      // But add space before final hashtag if it's not preceded by a slash
+      // HASH_ANS_CJK_HASH pattern needs at least 5 characters
+      if (textLength >= 5) {
+        newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
+      }
+      newText = newText.replace(new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`), '$1$2 $3');
+    }
+
+    // Protect compound words from operator spacing
+    const COMPOUND_WORD_PLACEHOLDER = '\uE002'; // Private Use Area character
+    const compoundWords: string[] = [];
+    let compoundIndex = 0;
+
+    // Pattern to detect compound words: alphanumeric-alphanumeric combinations that look like compound words/product names
+    // Examples: state-of-the-art, machine-learning, GPT-4o, real-time, end-to-end, gpt-4o, GPT-5, claude-4-opus
+    // Match: word-word(s) where at least one part contains lowercase letters OR contains mix of letters and numbers (like GPT-5)
+    const COMPOUND_WORD_PATTERN = /\b(?:[A-Za-z0-9]*[a-z][A-Za-z0-9]*-[A-Za-z0-9]+|[A-Za-z0-9]+-[A-Za-z0-9]*[a-z][A-Za-z0-9]*|[A-Za-z]+-[0-9]+|[A-Za-z]+[0-9]+-[A-Za-z0-9]+)(?:-[A-Za-z0-9]+)*\b/g;
+
+    // Store compound words and replace with placeholders
+    newText = newText.replace(COMPOUND_WORD_PATTERN, (match) => {
+      compoundWords[compoundIndex] = match;
+      return `${COMPOUND_WORD_PLACEHOLDER}${compoundIndex++}\uE003`;
+    });
 
     // Handle single letter grades (A+, B-, etc.) before general operator rules
     // This ensures "A+的" becomes "A+ 的" not "A + 的"
@@ -188,21 +257,78 @@ export class Pangu {
 
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
+    newText = newText.replace(ANS_OPERATOR_ANS, '$1 $2 $3');
+    newText = newText.replace(ANS_HYPHEN_ANS_NOT_COMPOUND, (match, ...groups) => {
+      // Handle all patterns in the alternation
+      if (groups[0] && groups[1] && groups[2]) {
+        // First pattern: letter-alphanumeric
+        return `${groups[0]} ${groups[1]} ${groups[2]}`;
+      } else if (groups[3] && groups[4] && groups[5]) {
+        // Second pattern: version range (letter+number-number)
+        return `${groups[3]} ${groups[4]} ${groups[5]}`;
+      } else if (groups[6] && groups[7] && groups[8]) {
+        // Third pattern: number-letter
+        return `${groups[6]} ${groups[7]} ${groups[8]}`;
+      }
+      return match;
+    });
 
     // Handle < and > as comparison operators
     newText = newText.replace(CJK_LESS_THAN, '$1 $2 $3');
     newText = newText.replace(LESS_THAN_CJK, '$1 $2 $3');
+    newText = newText.replace(ANS_LESS_THAN_ANS, '$1 $2 $3');
     newText = newText.replace(CJK_GREATER_THAN, '$1 $2 $3');
     newText = newText.replace(GREATER_THAN_CJK, '$1 $2 $3');
+    newText = newText.replace(ANS_GREATER_THAN_ANS, '$1 $2 $3');
 
-    // Add space before filesystem paths after CJK (e.g., "和/root" -> "和 /root")
-    newText = newText.replace(CJK_FILESYSTEM_PATH, '$1 $2');
+    // Add space before filesystem paths after CJK
+    // Unix absolute paths: "和/root" -> "和 /root"
+    newText = newText.replace(CJK_UNIX_ABSOLUTE_FILE_PATH, '$1 $2');
+    // Unix relative paths: "檢查src/main.py" -> "檢查 src/main.py"
+    newText = newText.replace(CJK_UNIX_RELATIVE_FILE_PATH, '$1 $2');
+    // Windows paths: "檔案在C:\Users" -> "檔案在 C:\Users"
+    newText = newText.replace(CJK_WINDOWS_PATH, '$1 $2');
 
-    // Add space after filesystem paths ending with / before CJK (e.g., "/home/與" -> "/home/ 與")
-    newText = newText.replace(FILESYSTEM_PATH_SLASH_CJK, '$1 $2');
+    // Add space after Unix paths ending with / before CJK
+    // Absolute paths: "/home/與" -> "/home/ 與"
+    newText = newText.replace(UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK, '$1 $2');
+    // Relative paths: "build/temp/目錄" -> "build/temp/ 目錄"
+    newText = newText.replace(UNIX_RELATIVE_FILE_PATH_SLASH_CJK, '$1 $2');
 
-    // Only add spaces around / when both sides are CJK
-    newText = newText.replace(CJK_SLASH_CJK, '$1 $2 $3');
+    // Context-aware slash handling: single slash = operator, multiple slashes = separator
+    // But exclude slashes that are part of file paths by protecting them first
+    if (slashCount === 1) {
+      // Temporarily protect file paths from slash operator processing
+      const FILE_PATH_PLACEHOLDER = '\uE000'; // Private Use Area character
+      const filePaths: string[] = [];
+      let pathIndex = 0;
+
+      // Store all file paths and replace with placeholders
+      const allFilePathPattern = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}|${UNIX_RELATIVE_FILE_PATH.source})`, 'g');
+      newText = newText.replace(allFilePathPattern, (match) => {
+        filePaths[pathIndex] = match;
+        return `${FILE_PATH_PLACEHOLDER}${pathIndex++}\uE001`;
+      });
+
+      // Now apply slash operator spacing
+      newText = newText.replace(CJK_SLASH_CJK, '$1 $2 $3');
+      newText = newText.replace(CJK_SLASH_ANS, '$1 $2 $3');
+      newText = newText.replace(ANS_SLASH_CJK, '$1 $2 $3');
+      newText = newText.replace(ANS_SLASH_ANS, '$1 $2 $3');
+
+      // Restore file paths
+      const FILE_PATH_RESTORE = new RegExp(`${FILE_PATH_PLACEHOLDER}(\\d+)\uE001`, 'g');
+      newText = newText.replace(FILE_PATH_RESTORE, (_match, index) => {
+        return filePaths[parseInt(index, 10)] || '';
+      });
+    }
+    // If multiple slashes, treat as separator - do nothing (no spaces)
+
+    // Restore compound words from placeholders
+    const COMPOUND_WORD_RESTORE = new RegExp(`${COMPOUND_WORD_PLACEHOLDER}(\\d+)\uE003`, 'g');
+    newText = newText.replace(COMPOUND_WORD_RESTORE, (_match, index) => {
+      return compoundWords[parseInt(index, 10)] || '';
+    });
 
     newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
     newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
@@ -255,16 +381,19 @@ export class Pangu {
 
     newText = fixBracketSpacing(newText);
 
-    // Restore HTML tags from placeholders
-    const HTML_TAG_RESTORE = new RegExp(`${HTML_TAG_PLACEHOLDER}(\\d+)\u0000`, 'g');
-    newText = newText.replace(HTML_TAG_RESTORE, (_match, index) => {
-      return htmlTags[parseInt(index, 10)] || '';
-    });
+    // Restore HTML tags from placeholders (only if HTML processing occurred)
+    if (hasHtmlTags) {
+      const HTML_TAG_RESTORE = new RegExp(`${HTML_TAG_PLACEHOLDER}(\\d+)\u0000`, 'g');
+      newText = newText.replace(HTML_TAG_RESTORE, (_match, index) => {
+        return htmlTags[parseInt(index, 10)] || '';
+      });
+    }
 
+    // TODO: TBD
     // Final fix for HTML comments: ensure no space after <!--
     // This is needed because <!-- is not protected as an HTML tag
     // and the ! character gets spaced by ANS_CJK pattern
-    newText = newText.replace(/<!--\s+/g, '<!--');
+    // newText = newText.replace(/<!--\s+/g, '<!--');
 
     return newText;
   }

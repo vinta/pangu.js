@@ -1,8 +1,13 @@
 # History
 
+## v6.1.0 / 2025-06-30
+
+- 各位強迫症患者，Paranoid Text Spacing 演算法 v6.1
+  - 好啦好啦，我要去玩死亡擱淺 2 了
+
 ## v6.0.0 / 2025-06-28
 
-- 各位觀眾，Paranoid Text Spacing 演算法 v6！
+- 各位強迫症患者，Paranoid Text Spacing 演算法 v6
   - 特別處理了各種括號 `()` `[]` `{}` `<>` 和 `/` 的問題，仁至義盡了
 
 ## v5.3.2 / 2025-06-27
@@ -11,7 +16,7 @@
 
 ## v5.2.0 / 2025-06-26
 
-- 各位觀眾，Paranoid Text Spacing 演算法 v5！
+- 各位強迫症患者，Paranoid Text Spacing 演算法 v5
 
 ## v5.1.1 / 2025-06-24
 
@@ -52,7 +57,7 @@
 
 ## v4.0.0 / 2019-01-27
 
-- 各位觀眾，Paranoid Text Spacing 演算法 v4！
+- 各位強迫症患者，Paranoid Text Spacing 演算法 v4
 - 大幅地改進 Chrome extension 的效能，使用 `MutationObserver` 和 `debounce`
 - 忍痛拿掉「空格之神顯靈了」
 - 修正 `Pangu.spacingText()` 的 error callback
