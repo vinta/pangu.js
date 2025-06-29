@@ -12,7 +12,6 @@ describe('Pangu', () => {
       expect(pangu.spacingText('中1')).toBe('中 1');
       expect(pangu.spacingText('中a1')).toBe('中 a1');
       expect(pangu.spacingText('a1中')).toBe('a1 中');
-      expect(pangu.spacingText('1中a')).toBe('1 中 a');
       expect(pangu.spacingText('a中1')).toBe('a 中 1');
       expect(pangu.spacingText('1中a')).toBe('1 中 a');
     });
