@@ -13,3 +13,6 @@ playwright-report/
 # Environment files
 .env
 .env.*
+
+# Examples
+examples/package-lock.json

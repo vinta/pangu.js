@@ -1,0 +1,14 @@
+{
+  "name": "pangu-examples",
+  "version": "1.0.0",
+  "description": "pangu.js Example app",
+  "scripts": {
+    "test:commonjs": "node test-commonjs.js",
+    "test:esm": "node test-esm.mjs",
+    "test": "npm run test:commonjs && npm run test:esm",
+    "server": "node server.js"
+  },
+  "dependencies": {
+    "pangu": "6.1.1"
+  }
+}
