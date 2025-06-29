@@ -309,6 +309,12 @@ describe('Pangu', () => {
       expect(pangu.spacingText('這間公司提供了一套state-of-the-art、machine-learning-powered的real-time fraud-detection系統，具備end-to-end加密功能以及cutting-edge的效能。'))
                          .toBe('這間公司提供了一套 state-of-the-art、machine-learning-powered 的 real-time fraud-detection 系統，具備 end-to-end 加密功能以及 cutting-edge 的效能。');
 
+      expect(pangu.spacingText('Anthropic的claude-4-opus模型')).toBe('Anthropic 的 claude-4-opus 模型');
+      expect(pangu.spacingText('OpenAI的o3-pro模型')).toBe('OpenAI 的 o3-pro 模型');
+      expect(pangu.spacingText('OpenAI的gpt-4o模型')).toBe('OpenAI 的 gpt-4o 模型');
+      expect(pangu.spacingText('OpenAI的GPT-5模型')).toBe('OpenAI 的 GPT-5 模型');
+      expect(pangu.spacingText('Google的gemini-2.5-pro模型')).toBe('Google 的 gemini-2.5-pro 模型');
+
       expect(pangu.spacingText('得到一個D-的結果')).toBe('得到一個 D- 的結果');
       expect(pangu.spacingText('得到一個D--的結果')).toBe('得到一個 D-- 的結果');
 
@@ -768,7 +774,7 @@ describe('Pangu', () => {
       expect(results).toEqual([
         'Xcode 7.1 配備了全新的 AppleTV 開發工具',
         '新 MacBook Pro 有 15 寸和 13 寸兩個版本',
-        'ChromeDriver 2.20 支援 Chrome v43 - 48',
+        'ChromeDriver 2.20 支援 Chrome v43-48',
       ]);
     });
   });

@@ -22,10 +22,12 @@
 
 const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
 
+// prettier-ignore
 // Unix absolute paths: system dirs + common project paths
 // Examples: /home, /usr/bin, /etc/nginx.conf, /.bashrc, /node_modules/@babel/core, /path/to/your/project
 const UNIX_ABSOLUTE_FILE_PATH = /\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path|project|src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|your)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+\*]+)*/;
 
+// prettier-ignore
 // Unix relative paths common in documentation and blog posts
 // Examples: src/main.py, dist/index.js, test/spec.js, ./.claude/CLAUDE.md, templates/*.html
 const UNIX_RELATIVE_FILE_PATH = /(?:\.\/)?(?:src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|node_modules|\.claude|\.git|\.vscode)(?:\/[A-Za-z0-9_\-\.@\+\*]+)+/;
@@ -141,30 +143,35 @@ export class Pangu {
 
     let newText = text;
 
-    // Protect HTML tags from being processed
+    // HTML tag processing variables
     const htmlTags: string[] = [];
     const HTML_TAG_PLACEHOLDER = '\u0000HTML_TAG_PLACEHOLDER_';
+    let hasHtmlTags = false;
 
-    // More specific HTML tag pattern:
-    // - Opening tags: <tagname ...> or <tagname>
-    // - Closing tags: </tagname>
-    // - Self-closing tags: <tagname ... />
-    // This pattern ensures we only match actual HTML tags, not just any < > content
-    const HTML_TAG_PATTERN = /<\/?[a-zA-Z][a-zA-Z0-9]*(?:\s+[^>]*)?>/g;
+    // Early return for HTML processing if no HTML tags present
+    if (newText.includes('<')) {
+      hasHtmlTags = true;
+      // More specific HTML tag pattern:
+      // - Opening tags: <tagname ...> or <tagname>
+      // - Closing tags: </tagname>
+      // - Self-closing tags: <tagname ... />
+      // This pattern ensures we only match actual HTML tags, not just any < > content
+      const HTML_TAG_PATTERN = /<\/?[a-zA-Z][a-zA-Z0-9]*(?:\s+[^>]*)?>/g;
 
-    // Replace all HTML tags with placeholders, but process attribute values
-    newText = newText.replace(HTML_TAG_PATTERN, (match) => {
-      // Process attribute values inside the tag
-      const processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName, attrValue) => {
-        // Process the attribute value with spacing
-        const processedValue = self.spacingText(attrValue);
-        return `${attrName}="${processedValue}"`;
+      // Replace all HTML tags with placeholders, but process attribute values
+      newText = newText.replace(HTML_TAG_PATTERN, (match) => {
+        // Process attribute values inside the tag
+        const processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName, attrValue) => {
+          // Process the attribute value with spacing
+          const processedValue = self.spacingText(attrValue);
+          return `${attrName}="${processedValue}"`;
+        });
+
+        const index = htmlTags.length;
+        htmlTags.push(processedTag);
+        return `${HTML_TAG_PLACEHOLDER}${index}\u0000`;
       });
-
-      const index = htmlTags.length;
-      htmlTags.push(processedTag);
-      return `${HTML_TAG_PLACEHOLDER}${index}\u0000`;
-    });
+    }
 
     // https://stackoverflow.com/questions/4285472/multiple-regex-replace
     newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK, (_match, leftCjk, symbols, rightCjk) => {
@@ -195,20 +202,54 @@ export class Pangu {
     newText = newText.replace(SINGLE_QUOTE_CJK, '$1 $2');
     newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
 
+    // Early return for complex patterns that need longer text
+    const textLength = newText.length;
+
     // Check slash count early to determine hashtag behavior
     const slashCount = (newText.match(/\//g) || []).length;
 
-    if (slashCount <= 1) {
+    // Early return for slash processing if no slashes present
+    if (slashCount === 0) {
+      // Apply normal hashtag spacing without slash considerations
+      // HASH_ANS_CJK_HASH pattern needs at least 5 characters
+      if (textLength >= 5) {
+        newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
+      }
+      newText = newText.replace(CJK_HASH, '$1 $2');
+      newText = newText.replace(HASH_CJK, '$1 $3');
+    } else if (slashCount <= 1) {
       // Single or no slash - apply normal hashtag spacing
-      newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
+      // HASH_ANS_CJK_HASH pattern needs at least 5 characters
+      if (textLength >= 5) {
+        newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
+      }
       newText = newText.replace(CJK_HASH, '$1 $2');
       newText = newText.replace(HASH_CJK, '$1 $3');
     } else {
       // Multiple slashes - skip hashtag processing to preserve path structure
       // But add space before final hashtag if it's not preceded by a slash
-      newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
+      // HASH_ANS_CJK_HASH pattern needs at least 5 characters
+      if (textLength >= 5) {
+        newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
+      }
       newText = newText.replace(new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`), '$1$2 $3');
     }
+
+    // Protect compound words from operator spacing
+    const COMPOUND_WORD_PLACEHOLDER = '\uE002'; // Private Use Area character
+    const compoundWords: string[] = [];
+    let compoundIndex = 0;
+
+    // Pattern to detect compound words: alphanumeric-alphanumeric combinations that look like compound words/product names
+    // Examples: state-of-the-art, machine-learning, GPT-4o, real-time, end-to-end, gpt-4o
+    // Match: word-word(s) where at least one part contains lowercase letters (to distinguish from operators like A-B)
+    const COMPOUND_WORD_PATTERN = /\b(?:[A-Za-z0-9]*[a-z][A-Za-z0-9]*-[A-Za-z0-9]+|[A-Za-z0-9]+-[A-Za-z0-9]*[a-z][A-Za-z0-9]*)(?:-[A-Za-z0-9]*[a-z][A-Za-z0-9]*)*\b/g;
+
+    // Store compound words and replace with placeholders
+    newText = newText.replace(COMPOUND_WORD_PATTERN, (match) => {
+      compoundWords[compoundIndex] = match;
+      return `${COMPOUND_WORD_PLACEHOLDER}${compoundIndex++}\uE003`;
+    });
 
     // Handle single letter grades (A+, B-, etc.) before general operator rules
     // This ensures "A+的" becomes "A+ 的" not "A + 的"
@@ -283,6 +324,12 @@ export class Pangu {
     }
     // If multiple slashes, treat as separator - do nothing (no spaces)
 
+    // Restore compound words from placeholders
+    const COMPOUND_WORD_RESTORE = new RegExp(`${COMPOUND_WORD_PLACEHOLDER}(\\d+)\uE003`, 'g');
+    newText = newText.replace(COMPOUND_WORD_RESTORE, (_match, index) => {
+      return compoundWords[parseInt(index, 10)] || '';
+    });
+
     newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
     newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
     newText = newText.replace(ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET, '$1 $2$3$4');
@@ -334,11 +381,13 @@ export class Pangu {
 
     newText = fixBracketSpacing(newText);
 
-    // Restore HTML tags from placeholders
-    const HTML_TAG_RESTORE = new RegExp(`${HTML_TAG_PLACEHOLDER}(\\d+)\u0000`, 'g');
-    newText = newText.replace(HTML_TAG_RESTORE, (_match, index) => {
-      return htmlTags[parseInt(index, 10)] || '';
-    });
+    // Restore HTML tags from placeholders (only if HTML processing occurred)
+    if (hasHtmlTags) {
+      const HTML_TAG_RESTORE = new RegExp(`${HTML_TAG_PLACEHOLDER}(\\d+)\u0000`, 'g');
+      newText = newText.replace(HTML_TAG_RESTORE, (_match, index) => {
+        return htmlTags[parseInt(index, 10)] || '';
+      });
+    }
 
     // TODO: TBD
     // Final fix for HTML comments: ensure no space after <!--
