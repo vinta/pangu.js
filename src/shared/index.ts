@@ -65,9 +65,19 @@ const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, 'g');
 // the symbol part only includes + - * = & (excluding | / < >)
 const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*=&])([A-Za-z0-9])`, 'g');
 const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*=&])([${CJK}])`, 'g');
+// Handle operators between alphanumeric characters when CJK is present in text
+// But exclude hyphens that are part of compound words
+const ANS_OPERATOR_ANS = new RegExp(`([A-Za-z0-9])([\\+\\*=&])([A-Za-z0-9])`, 'g');
+// Special pattern for hyphens that are NOT part of compound words or dates
+// Space hyphens in these cases: letter-letter, letter-number, number-letter, version ranges (letter+number-number)
+// But NOT: pure number-number (dates like 2016-12-26)
+const ANS_HYPHEN_ANS_NOT_COMPOUND = new RegExp(`([A-Za-z])(-(?![a-z]))([A-Za-z0-9])|([A-Za-z]+[0-9]+)(-(?![a-z]))([0-9])|([0-9])(-(?![a-z0-9]))([A-Za-z])`, 'g');
 
-// Only add spaces around / when both sides are CJK
+// Slash patterns for operator vs separator behavior
 const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
+const CJK_SLASH_ANS = new RegExp(`([${CJK}])([/])([A-Za-z0-9])`, 'g');
+const ANS_SLASH_CJK = new RegExp(`([A-Za-z0-9])([/])([${CJK}])`, 'g');
+const ANS_SLASH_ANS = new RegExp(`([A-Za-z0-9])([/])([A-Za-z0-9])`, 'g');
 
 // Special handling for single letter grades/ratings (A+, B-, C*) before CJK
 // These should have space after the operator, not before
@@ -79,6 +89,9 @@ const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([A-Za-z0-9])`, 'g');
 const LESS_THAN_CJK = new RegExp(`([A-Za-z0-9])(<)([${CJK}])`, 'g');
 const CJK_GREATER_THAN = new RegExp(`([${CJK}])(>)([A-Za-z0-9])`, 'g');
 const GREATER_THAN_CJK = new RegExp(`([A-Za-z0-9])(>)([${CJK}])`, 'g');
+// Handle < and > between alphanumeric characters when CJK is present in text
+const ANS_LESS_THAN_ANS = new RegExp(`([A-Za-z0-9])(<)([A-Za-z0-9])`, 'g');
+const ANS_GREATER_THAN_ANS = new RegExp(`([A-Za-z0-9])(>)([A-Za-z0-9])`, 'g');
 
 // the bracket part only includes ( ) [ ] { } < > “ ”
 const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>\u201c])`, 'g');
@@ -178,9 +191,20 @@ export class Pangu {
     newText = newText.replace(SINGLE_QUOTE_CJK, '$1 $2');
     newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
 
-    newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
-    newText = newText.replace(CJK_HASH, '$1 $2');
-    newText = newText.replace(HASH_CJK, '$1 $3');
+    // Check slash count early to determine hashtag behavior
+    const slashCount = (newText.match(/\//g) || []).length;
+    
+    if (slashCount <= 1) {
+      // Single or no slash - apply normal hashtag spacing
+      newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
+      newText = newText.replace(CJK_HASH, '$1 $2');
+      newText = newText.replace(HASH_CJK, '$1 $3');
+    } else {
+      // Multiple slashes - skip hashtag processing to preserve path structure
+      // But add space before final hashtag if it's not preceded by a slash
+      newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
+      newText = newText.replace(new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`), '$1$2 $3');
+    }
 
     // Handle single letter grades (A+, B-, etc.) before general operator rules
     // This ensures "A+的" becomes "A+ 的" not "A + 的"
@@ -188,12 +212,29 @@ export class Pangu {
 
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
+    newText = newText.replace(ANS_OPERATOR_ANS, '$1 $2 $3');
+    newText = newText.replace(ANS_HYPHEN_ANS_NOT_COMPOUND, (match, ...groups) => {
+      // Handle all patterns in the alternation
+      if (groups[0] && groups[1] && groups[2]) {
+        // First pattern: letter-alphanumeric
+        return `${groups[0]} ${groups[1]} ${groups[2]}`;
+      } else if (groups[3] && groups[4] && groups[5]) {
+        // Second pattern: version range (letter+number-number)
+        return `${groups[3]} ${groups[4]} ${groups[5]}`;
+      } else if (groups[6] && groups[7] && groups[8]) {
+        // Third pattern: number-letter
+        return `${groups[6]} ${groups[7]} ${groups[8]}`;
+      }
+      return match;
+    });
 
     // Handle < and > as comparison operators
     newText = newText.replace(CJK_LESS_THAN, '$1 $2 $3');
     newText = newText.replace(LESS_THAN_CJK, '$1 $2 $3');
+    newText = newText.replace(ANS_LESS_THAN_ANS, '$1 $2 $3');
     newText = newText.replace(CJK_GREATER_THAN, '$1 $2 $3');
     newText = newText.replace(GREATER_THAN_CJK, '$1 $2 $3');
+    newText = newText.replace(ANS_GREATER_THAN_ANS, '$1 $2 $3');
 
     // Add space before filesystem paths after CJK (e.g., "和/root" -> "和 /root")
     newText = newText.replace(CJK_FILESYSTEM_PATH, '$1 $2');
@@ -201,8 +242,15 @@ export class Pangu {
     // Add space after filesystem paths ending with / before CJK (e.g., "/home/與" -> "/home/ 與")
     newText = newText.replace(FILESYSTEM_PATH_SLASH_CJK, '$1 $2');
 
-    // Only add spaces around / when both sides are CJK
-    newText = newText.replace(CJK_SLASH_CJK, '$1 $2 $3');
+    // Context-aware slash handling: single slash = operator, multiple slashes = separator
+    if (slashCount === 1) {
+      // Single slash acts as operator - add spaces
+      newText = newText.replace(CJK_SLASH_CJK, '$1 $2 $3');
+      newText = newText.replace(CJK_SLASH_ANS, '$1 $2 $3');
+      newText = newText.replace(ANS_SLASH_CJK, '$1 $2 $3');
+      newText = newText.replace(ANS_SLASH_ANS, '$1 $2 $3');
+    }
+    // If multiple slashes, treat as separator - do nothing (no spaces)
 
     newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
     newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
