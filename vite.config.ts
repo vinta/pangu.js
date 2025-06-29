@@ -22,7 +22,7 @@ const multiBuildPlugin = () => {
           sourcemap: true,
           minify: false,
           lib: {
-            entry: resolve(projectRoot, 'dist/shared/index.js'),
+            entry: resolve(projectRoot, 'src/shared/index.ts'),
             formats: ['cjs'],
             fileName: () => 'shared/index.cjs',
           },

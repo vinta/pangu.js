@@ -1,8 +1,8 @@
-// CommonJS entry point that provides the expected interface:
-// const pangu = require('pangu') -> gives pangu instance directly
-import { Pangu } from '../shared/index';
-import { readFileSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
+/* eslint-disable @typescript-eslint/no-require-imports */
+const { Pangu } = require('../shared/index.cjs');
+const { readFileSync } = require('node:fs');
+const { readFile } = require('node:fs/promises');
+/* eslint-enable @typescript-eslint/no-require-imports */
 
 // Re-implement NodePangu here to avoid circular imports
 class NodePangu extends Pangu {
