@@ -92,7 +92,7 @@ const text = pangu.spacingText('不能信任那些Terminal或Editor用白底的�
 const content = await pangu.spacingFile('/path/to/text.txt');
 ```
 
-You **SHOULD NOT** use `pangu.js` directly to spacing Markdown documents, this library is specially designed for HTML webpages and plain texts without any markup language. See [issue #127](https://github.com/vinta/pangu.js/issues/127).
+You **SHOULD NOT** use `pangu.js` to spacing Markdown documents, this library is specially designed for HTML webpages and plain texts without any markup language. See [issue #127](https://github.com/vinta/pangu.js/issues/127).
 
 ### CLI
 
@@ -100,8 +100,7 @@ You **SHOULD NOT** use `pangu.js` directly to spacing Markdown documents, this l
 $ pangu "與PM戰鬥的人，應當小心自己不要成為PM"
 與 PM 戰鬥的人，應當小心自己不要成為 PM
 
-$ pangu "盤古新聞網：工程師會議中默不作聲，PM恐成最大贏家"
-盤古新聞網：工程師會議中默不作聲，PM 恐成最大贏家
+$ pangu --check "盤古新聞網：工程師會議中默不作聲，PM 恐成最大贏家"
 
 $ pangu --help
 usage: pangu [-h] [-v] [-t] [-f] [-c] text_or_path
