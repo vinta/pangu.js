@@ -1,6 +1,4 @@
-// CJK is an acronym for Chinese, Japanese, and Korean.
-//
-// CJK includes the following Unicode blocks:
+// CJK is short for Chinese, Japanese, and Korean:
 // \u2e80-\u2eff CJK Radicals Supplement
 // \u2f00-\u2fdf Kangxi Radicals
 // \u3040-\u309f Hiragana
@@ -11,11 +9,17 @@
 // \u4e00-\u9fff CJK Unified Ideographs
 // \uf900-\ufaff CJK Compatibility Ideographs
 //
-// For more information about Unicode blocks, see
-// http://unicode-table.com/en/
-// https://github.com/vinta/pangu
+// ANS is short for Alphabets, Numbers, and Symbols:
+// A includes A-Za-z\u0370-\u03ff
+// N includes 0-9
+// S includes `~!@#$%^&*()-_=+[]{}\|;:'",<.>/?
 //
-// all J below does not include \u30fb
+// All J below does not include \u30fb
+// Some S below does not include all symbols
+//
+// For more information about Unicode blocks, see
+// https://symbl.cc/en/unicode-table/
+
 const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
 
 // Define filesystem path pattern that can be reused
@@ -24,23 +28,15 @@ const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u
 // Only matches paths that clearly start with known system directories, hidden files, or common development directories
 const FILESYSTEM_PATH = /(?:[A-Z]:)?\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+]+)*/;
 
-// ANS is short for Alphabets, Numbers, and Symbols.
-//
-// A includes A-Za-z\u0370-\u03ff
-// N includes 0-9
-// S includes `~!@#$%^&*()-_=+[]{}\|;:'",<.>/?
-//
-// some S below does not include all symbols
-
 const ANY_CJK = new RegExp(`[${CJK}]`);
 
-// the symbol part only includes ~ ! ; : , . ? but . only matches one character
+// The symbol part only includes ~ ! ; : , . ? but . only matches one character
 const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK = new RegExp(`([${CJK}])[ ]*([\\:]+|\\.)[ ]*([${CJK}])`, 'g');
 const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS = new RegExp(`([${CJK}])[ ]*([~\\!;,\\?]+)[ ]*`, 'g');
 const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, 'g');
 const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([A-Z0-9\\(\\)])`, 'g');
 
-// the symbol part does not include '
+// The symbol part does not include '
 const CJK_QUOTE = new RegExp(`([${CJK}])([\`"\u05f4])`, 'g');
 const QUOTE_CJK = new RegExp(`([\`"\u05f4])([${CJK}])`, 'g');
 const FIX_QUOTE_ANY_QUOTE = /([`"\u05f4]+)[ ]*(.+?)[ ]*([`"\u05f4]+)/g;
@@ -62,7 +58,7 @@ const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, 'g
 const CJK_HASH = new RegExp(`([${CJK}])(#([^ ]))`, 'g');
 const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, 'g');
 
-// the symbol part only includes + - * = & (excluding | / < >)
+// The symbol part only includes + - * = & (excluding | / < >)
 const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*=&])([A-Za-z0-9])`, 'g');
 const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*=&])([${CJK}])`, 'g');
 // Handle operators between alphanumeric characters when CJK is present in text
@@ -93,7 +89,7 @@ const GREATER_THAN_CJK = new RegExp(`([A-Za-z0-9])(>)([${CJK}])`, 'g');
 const ANS_LESS_THAN_ANS = new RegExp(`([A-Za-z0-9])(<)([A-Za-z0-9])`, 'g');
 const ANS_GREATER_THAN_ANS = new RegExp(`([A-Za-z0-9])(>)([A-Za-z0-9])`, 'g');
 
-// the bracket part only includes ( ) [ ] { } < > “ ”
+// The bracket part only includes ( ) [ ] { } < > “ ”
 const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>\u201c])`, 'g');
 const RIGHT_BRACKET_CJK = new RegExp(`([\\)\\]\\}<>\u201d])([${CJK}])`, 'g');
 const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([A-Za-z0-9${CJK}])[ ]*([\u201c])([A-Za-z0-9${CJK}\\-_ ]+)([\u201d])`, 'g');
@@ -193,7 +189,7 @@ export class Pangu {
 
     // Check slash count early to determine hashtag behavior
     const slashCount = (newText.match(/\//g) || []).length;
-    
+
     if (slashCount <= 1) {
       // Single or no slash - apply normal hashtag spacing
       newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
