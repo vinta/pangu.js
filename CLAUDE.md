@@ -188,6 +188,11 @@ interface Settings {
 - Keep regex patterns readable with comments
 - Always use `node:` prefix for Node.js built-in modules
 
+### Implementation Details
+
+- Core spacing logic: @src/shared/index.ts
+- Core test cases: @tests/shared/index.test.ts
+
 ## Future Improvements
 
 See @.claude/TODO.md for planned improvements and technical debt.
