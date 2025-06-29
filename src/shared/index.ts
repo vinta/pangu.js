@@ -108,8 +108,9 @@ const CJK_UNIX_ABSOLUTE_FILE_PATH = new RegExp(`([${CJK}])(${UNIX_ABSOLUTE_FILE_
 const CJK_UNIX_RELATIVE_FILE_PATH = new RegExp(`([${CJK}])(${UNIX_RELATIVE_FILE_PATH.source})`, 'g');
 const CJK_WINDOWS_PATH = new RegExp(`([${CJK}])(${WINDOWS_FILE_PATH.source})`, 'g');
 
-// Pattern for Unix absolute path ending with / followed by CJK
+// Pattern for Unix paths ending with / followed by CJK
 const UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}/)([${CJK}])`, 'g');
+const UNIX_RELATIVE_FILE_PATH_SLASH_CJK = new RegExp(`(${UNIX_RELATIVE_FILE_PATH.source}/)([${CJK}])`, 'g');
 
 const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])`, 'g');
 const ANS_CJK = new RegExp(`([A-Za-z\u0370-\u03ff0-9~\\$%\\^&\\*\\-\\+\\\\=!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])([${CJK}])`, 'g');
@@ -247,8 +248,11 @@ export class Pangu {
     // Windows paths: "檔案在C:\Users" -> "檔案在 C:\Users"
     newText = newText.replace(CJK_WINDOWS_PATH, '$1 $2');
 
-    // Add space after Unix absolute paths ending with / before CJK (e.g., "/home/與" -> "/home/ 與")
+    // Add space after Unix paths ending with / before CJK
+    // Absolute paths: "/home/與" -> "/home/ 與"
     newText = newText.replace(UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK, '$1 $2');
+    // Relative paths: "build/temp/目錄" -> "build/temp/ 目錄"
+    newText = newText.replace(UNIX_RELATIVE_FILE_PATH_SLASH_CJK, '$1 $2');
 
     // Context-aware slash handling: single slash = operator, multiple slashes = separator
     // But exclude slashes that are part of file paths by protecting them first

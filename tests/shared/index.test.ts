@@ -532,6 +532,47 @@ describe('Pangu', () => {
       expect(pangu.spacingText('資料夾/etc/nginx/存放設定')).toBe('資料夾 /etc/nginx/ 存放設定');
     });
 
+    it('should handle / symbol as Unix relative file path', () => {
+      // Basic relative paths
+      expect(pangu.spacingText('檢查src/main.py文件')).toBe('檢查 src/main.py 文件');
+      expect(pangu.spacingText('構建dist/index.js完成')).toBe('構建 dist/index.js 完成');
+      expect(pangu.spacingText('運行test/spec.js測試')).toBe('運行 test/spec.js 測試');
+      expect(pangu.spacingText('編輯docs/README.md文檔')).toBe('編輯 docs/README.md 文檔');
+
+      // Project directories
+      expect(pangu.spacingText('查看templates/base.html模板')).toBe('查看 templates/base.html 模板');
+      expect(pangu.spacingText('複製assets/images/logo.png圖片')).toBe('複製 assets/images/logo.png 圖片');
+      expect(pangu.spacingText('配置config/database.yml設定')).toBe('配置 config/database.yml 設定');
+      expect(pangu.spacingText('執行scripts/deploy.sh腳本')).toBe('執行 scripts/deploy.sh 腳本');
+
+      // Build/output directories
+      expect(pangu.spacingText('清理build/temp/目錄')).toBe('清理 build/temp/ 目錄');
+      expect(pangu.spacingText('輸出到target/release/資料夾')).toBe('輸出到 target/release/ 資料夾');
+      expect(pangu.spacingText('發布到public/static/路徑')).toBe('發布到 public/static/ 路徑');
+
+      // Development directories  
+      expect(pangu.spacingText('安裝node_modules/@babel/core套件')).toBe('安裝 node_modules/@babel/core 套件');
+      expect(pangu.spacingText('設定.git/hooks/pre-commit鉤子')).toBe('設定 .git/hooks/pre-commit 鉤子');
+      expect(pangu.spacingText('編輯.vscode/settings.json配置')).toBe('編輯 .vscode/settings.json 配置');
+
+      // With leading ./
+      expect(pangu.spacingText('參考./docs/API.md文件')).toBe('參考 ./docs/API.md 文件');
+      expect(pangu.spacingText('執行./scripts/test.sh腳本')).toBe('執行 ./scripts/test.sh 腳本');
+      expect(pangu.spacingText('查看./.claude/CLAUDE.md說明')).toBe('查看 ./.claude/CLAUDE.md 說明');
+
+      // Wildcard patterns
+      expect(pangu.spacingText('模板在templates/*.html裡')).toBe('模板在 templates/*.html 裡');
+      expect(pangu.spacingText('測試所有test/**/*.js檔案')).toBe('測試所有 test/**/*.js 檔案');
+
+      // Nested paths
+      expect(pangu.spacingText('位於src/components/Button/index.tsx')).toBe('位於 src/components/Button/index.tsx');
+      expect(pangu.spacingText('存放在assets/fonts/Inter/Regular.woff2')).toBe('存放在 assets/fonts/Inter/Regular.woff2');
+
+      // Multiple file paths in one sentence
+      expect(pangu.spacingText('從src/utils.js複製到dist/utils.js')).toBe('從 src/utils.js 複製到 dist/utils.js');
+      expect(pangu.spacingText('比較test/fixtures/input.txt和test/fixtures/output.txt')).toBe('比較 test/fixtures/input.txt 和 test/fixtures/output.txt');
+    });
+
     it('should handle \\ symbol', () => {
       expect(pangu.spacingText('前面\\後面')).toBe('前面 \\ 後面');
       expect(pangu.spacingText('前面 \\ 後面')).toBe('前面 \\ 後面');
