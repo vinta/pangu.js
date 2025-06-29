@@ -1,19 +1,19 @@
 "use strict";
-Object.defineProperties(exports, { __esModule: { value: true }, [Symbol.toStringTag]: { value: "Module" } });
-const promises = require("node:fs/promises");
-const node_fs = require("node:fs");
-const index = require("../shared/index.cjs");
-class NodePangu extends index.Pangu {
+var import_shared = require("../shared/index");
+var import_node_fs = require("node:fs");
+var import_promises = require("node:fs/promises");
+class NodePangu extends import_shared.Pangu {
   async spacingFile(path) {
-    const data = await promises.readFile(path, "utf8");
+    const data = await (0, import_promises.readFile)(path, "utf8");
     return this.spacingText(data);
   }
   spacingFileSync(path) {
-    return this.spacingText(node_fs.readFileSync(path, "utf8"));
+    return this.spacingText((0, import_node_fs.readFileSync)(path, "utf8"));
   }
 }
 const pangu = new NodePangu();
-exports.NodePangu = NodePangu;
-exports.default = pangu;
-exports.pangu = pangu;
+pangu.NodePangu = NodePangu;
+pangu.pangu = pangu;
+pangu.default = pangu;
+module.exports = pangu;
 //# sourceMappingURL=index.cjs.map

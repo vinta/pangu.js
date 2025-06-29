@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperties(exports, { __esModule: { value: true }, [Symbol.toStringTag]: { value: "Module" } });
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, key + "", value);
@@ -55,7 +56,7 @@ const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 class Pangu {
   constructor() {
     __publicField(this, "version");
-    this.version = "6.1.0";
+    this.version = "6.1.1";
   }
   spacingText(text) {
     if (typeof text !== "string") {
@@ -222,6 +223,9 @@ class Pangu {
     return symbols.replace(/~/g, "\uFF5E").replace(/!/g, "\uFF01").replace(/;/g, "\uFF1B").replace(/:/g, "\uFF1A").replace(/,/g, "\uFF0C").replace(/\./g, "\u3002").replace(/\?/g, "\uFF1F");
   }
 }
-new Pangu();
+const pangu = new Pangu();
+exports.ANY_CJK = ANY_CJK;
 exports.Pangu = Pangu;
+exports.default = pangu;
+exports.pangu = pangu;
 //# sourceMappingURL=index.cjs.map

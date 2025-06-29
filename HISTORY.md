@@ -1,5 +1,9 @@
 # History
 
+## v6.1.1 / 2025-06-30
+
+- 修正 Node.js imports
+
 ## v6.1.0 / 2025-06-30
 
 - 各位強迫症患者，Paranoid Text Spacing 演算法 v6.1
