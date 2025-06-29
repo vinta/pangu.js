@@ -659,7 +659,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('水平線<hr />分隔')).toBe('水平線<hr />分隔');
 
       // prettier-ignore
-      // rare cases, ignore
+      // FIXME
       // expect(pangu.spacingText('<attackOnJava>那一天，人類終於回想起了，曾經一度被XML所支配的恐懼</attackOnJava> <!--進擊的Java-->'))
       //                    .toBe('<attackOnJava>那一天，人類終於回想起了，曾經一度被 XML 所支配的恐懼</attackOnJava> <!--進擊的 Java-->');
     });
