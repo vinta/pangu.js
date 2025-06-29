@@ -66,12 +66,12 @@ const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, 'g');
 const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*=&])([A-Za-z0-9])`, 'g');
 const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*=&])([${CJK}])`, 'g');
 
-// Separator symbols that are commonly used in lists/categories
-const SEPARATORS = '|/:';
-
 // Pattern for detecting list-like structures with separators
 // Matches patterns like: 分类1|分类2|分类3 or name1/name2/name3
-const CJK_SEPARATOR_LIST = new RegExp(`([${CJK}]+(?:[${SEPARATORS}][${CJK}]+){2,})`, 'g');
+// For slashes: preserve if 2+ slashes (3+ segments)
+// For other separators: preserve any occurrence
+// Also matches mixed CJK/non-CJK lists like: 陳上進/貓咪/Mollie
+const CJK_SEPARATOR_LIST = new RegExp(`([${CJK}]+(?:[|:_][${CJK}]+)+|[${CJK}]+(?:/[${CJK}A-Za-z0-9]+){2,})`, 'g');
 
 // Special handling for single letter grades/ratings (A+, B-, C*) before CJK
 // These should have space after the operator, not before
@@ -220,11 +220,11 @@ export class Pangu {
     
     // Handle single separators between CJK
     // Note: Colons are already handled by CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK
-    // so we only need to handle | and / here
-    const CJK_SLASH_PIPE_CJK = new RegExp(`([${CJK}])([|/])([${CJK}])`, 'g');
-    newText = newText.replace(CJK_SLASH_PIPE_CJK, (match, p1, sep, p3) => {
-      if (sep === '|') {
-        // Pipe remains as separator without spaces
+    // so we only need to handle |, /, and _ here
+    const CJK_SEPARATOR_SINGLE = new RegExp(`([${CJK}])([|/_])([${CJK}])`, 'g');
+    newText = newText.replace(CJK_SEPARATOR_SINGLE, (match, p1, sep, p3) => {
+      if (sep === '|' || sep === '_') {
+        // Pipe and underscore remain as separators without spaces
         return match;
       } else if (sep === '/') {
         // Single slash gets spaces

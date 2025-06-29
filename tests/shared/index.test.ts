@@ -167,6 +167,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('所以，請問Jackey的鼻子有幾個?3.14個')).toBe('所以，請問 Jackey 的鼻子有幾個？3.14 個');
     });
 
+    // When the symbol appears only 1 time in one line
     it('should handle : symbol as colon', () => {
       expect(pangu.spacingText('前面:後面')).toBe('前面：後面');
       expect(pangu.spacingText('前面 : 後面')).toBe('前面：後面');
@@ -326,6 +327,16 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面 _ 後面')).toBe('前面 _ 後面');
       expect(pangu.spacingText('Vinta_Mollie')).toBe('Vinta_Mollie');
       expect(pangu.spacingText('Vinta _ Mollie')).toBe('Vinta _ Mollie');
+      expect(pangu.spacingText('Mollie_陳上進')).toBe('Mollie_陳上進');
+      expect(pangu.spacingText('陳上進_Mollie')).toBe('陳上進_Mollie');
+      expect(pangu.spacingText('陳上進_貓咪_Mollie')).toBe('陳上進_貓咪_Mollie');
+      expect(pangu.spacingText('陳上進 _ 貓咪 _ Mollie')).toBe('陳上進 _ 貓咪 _ Mollie');
+      expect(pangu.spacingText('陳上進_Mollie_貓咪')).toBe('陳上進_Mollie_貓咪');
+      expect(pangu.spacingText('陳上進 _ Mollie _ 貓咪')).toBe('陳上進 _ Mollie _ 貓咪');
+      expect(pangu.spacingText('Mollie_陳上進_貓咪')).toBe('Mollie_陳上進_貓咪');
+      expect(pangu.spacingText('Mollie _ 陳上進 _ 貓咪')).toBe('Mollie _ 陳上進 _ 貓咪');
+
+      expect(pangu.spacingText('得到一個A_B的結果')).toBe('得到一個 A_B 的結果');
 
       // prettier-ignore
       expect(pangu.spacingText('為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip'))
@@ -336,10 +347,16 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面|後面')).toBe('前面|後面');
       expect(pangu.spacingText('前面 | 後面')).toBe('前面 | 後面');
       expect(pangu.spacingText('Vinta|Mollie')).toBe('Vinta|Mollie');
+      expect(pangu.spacingText('Vinta | Mollie')).toBe('Vinta | Mollie');
       expect(pangu.spacingText('Mollie|陳上進')).toBe('Mollie|陳上進');
       expect(pangu.spacingText('陳上進|Mollie')).toBe('陳上進|Mollie');
       expect(pangu.spacingText('陳上進|貓咪|Mollie')).toBe('陳上進|貓咪|Mollie');
+      expect(pangu.spacingText('陳上進 | 貓咪 | Mollie')).toBe('陳上進 | 貓咪 | Mollie');
       expect(pangu.spacingText('陳上進|Mollie|貓咪')).toBe('陳上進|Mollie|貓咪');
+      expect(pangu.spacingText('陳上進 | Mollie | 貓咪')).toBe('陳上進 | Mollie | 貓咪');
+      expect(pangu.spacingText('Mollie|陳上進|貓咪')).toBe('Mollie|陳上進|貓咪');
+      expect(pangu.spacingText('Mollie | 陳上進 | 貓咪')).toBe('Mollie | 陳上進 | 貓咪');
+
       expect(pangu.spacingText('得到一個A|B的結果')).toBe('得到一個 A|B 的結果');
     });
 
@@ -364,6 +381,8 @@ describe('Pangu', () => {
       expect(pangu.spacingText('陳上進 / 貓咪 / Mollie')).toBe('陳上進 / 貓咪 / Mollie');
       expect(pangu.spacingText('陳上進/Mollie/貓咪')).toBe('陳上進/Mollie/貓咪');
       expect(pangu.spacingText('陳上進 / Mollie / 貓咪')).toBe('陳上進 / Mollie / 貓咪');
+      expect(pangu.spacingText('Mollie/陳上進/貓咪')).toBe('Mollie/陳上進/貓咪');
+      expect(pangu.spacingText('Mollie / 陳上進 / 貓咪')).toBe('Mollie / 陳上進 / 貓咪');
 
       // prettier-ignore
       expect(pangu.spacingText("after 80'/气象工作者/不苟同/关注天气变化/向往自由/热爱科学、互联网、编程Node.js Web C++ Julia Python"))
