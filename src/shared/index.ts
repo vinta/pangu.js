@@ -68,6 +68,8 @@ const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, 'g');
 // the symbol part only includes + - * = & (excluding | / < >)
 const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*=&])([A-Za-z0-9])`, 'g');
 const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*=&])([${CJK}])`, 'g');
+// Also handle operators between AN-AN when CJK is present in the text
+const AN_OPERATOR_AN = new RegExp(`([A-Za-z0-9])([\\+\\-\\*=&])([A-Za-z0-9])`, 'g');
 
 // Pattern for detecting list-like structures with separators
 // Matches patterns like: 中文1|中文2|中文3
@@ -86,6 +88,18 @@ const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([A-Za-z0-9])`, 'g');
 const LESS_THAN_CJK = new RegExp(`([A-Za-z0-9])(<)([${CJK}])`, 'g');
 const CJK_GREATER_THAN = new RegExp(`([${CJK}])(>)([A-Za-z0-9])`, 'g');
 const GREATER_THAN_CJK = new RegExp(`([A-Za-z0-9])(>)([${CJK}])`, 'g');
+
+// Special handling for caret operator
+const CJK_CARET_ANS = new RegExp(`([${CJK}])(\\^)([A-Za-z0-9])`, 'g');
+const ANS_CARET_CJK = new RegExp(`([A-Za-z0-9])(\\^)([${CJK}])`, 'g');
+
+// Special handling for ++ and -- (increment/decrement operators)
+// Match patterns like C++, i++, x-- etc. These are treated as single units
+const DOUBLE_PLUS_MINUS = /\b([A-Za-z0-9]+)(\+\+|--)/g;
+
+// Pattern for compound words with hyphens
+// Matches patterns like state-of-the-art, machine-learning-powered, etc.
+const COMPOUND_WORD_PATTERN = /\b([A-Za-z]+(?:-[A-Za-z]+)+)\b/g;
 
 // the bracket part only includes ( ) [ ] { } < > “ ”
 const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>\u201c])`, 'g');
@@ -134,6 +148,23 @@ export class Pangu {
     // Protect HTML tags from being processed
     const htmlTags: string[] = [];
     const HTML_TAG_PLACEHOLDER = '\u0000HTML_TAG_PLACEHOLDER_';
+
+    // Protect HTML comments specifically
+    const htmlComments: string[] = [];
+    const HTML_COMMENT_PLACEHOLDER = '\u0000HTML_COMMENT_PLACEHOLDER_';
+    const HTML_COMMENT_PATTERN = /<!--[\s\S]*?-->/g;
+
+    // First preserve HTML comments with their content processed
+    newText = newText.replace(HTML_COMMENT_PATTERN, (match) => {
+      // Extract content between <!-- and -->
+      const content = match.slice(4, -3);
+      // Process the content
+      const processedContent = self.spacingText(content);
+      const processedComment = `<!--${processedContent}-->`;
+      const index = htmlComments.length;
+      htmlComments.push(processedComment);
+      return `${HTML_COMMENT_PLACEHOLDER}${index}\u0000`;
+    });
 
     // More specific HTML tag pattern:
     // - Opening tags: <tagname ...> or <tagname>
@@ -195,18 +226,63 @@ export class Pangu {
     newText = newText.replace(SINGLE_QUOTE_CJK, '$1 $2');
     newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
 
+    // First handle ++ and -- patterns (C++, i++, etc.)
+    // These should be treated as single units with spaces around them
+    const preservedIncrements: string[] = [];
+    const INCREMENT_PLACEHOLDER = '__PANGU_INCREMENT_';
+    newText = newText.replace(DOUBLE_PLUS_MINUS, (_match, varName, operator) => {
+      const index = preservedIncrements.length;
+      preservedIncrements.push(`${varName}${operator}`);
+      return `${INCREMENT_PLACEHOLDER}${index}__`;
+    });
+
+    // Preserve compound words with hyphens
+    const preservedCompounds: string[] = [];
+    const COMPOUND_PLACEHOLDER = '__PANGU_COMPOUND_';
+    newText = newText.replace(COMPOUND_WORD_PATTERN, (match) => {
+      const index = preservedCompounds.length;
+      preservedCompounds.push(match);
+      return `${COMPOUND_PLACEHOLDER}${index}__`;
+    });
+
     // Handle single letter grades (A+, B-, etc.) before general operator rules
     // This ensures "A+的" becomes "A+ 的" not "A + 的"
     newText = newText.replace(SINGLE_LETTER_GRADE_CJK, '$1$2 $3');
 
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
+    // Always handle AN-AN operators
+    newText = newText.replace(AN_OPERATOR_AN, '$1 $2 $3');
 
     // Handle < and > as comparison operators
     newText = newText.replace(CJK_LESS_THAN, '$1 $2 $3');
     newText = newText.replace(LESS_THAN_CJK, '$1 $2 $3');
     newText = newText.replace(CJK_GREATER_THAN, '$1 $2 $3');
     newText = newText.replace(GREATER_THAN_CJK, '$1 $2 $3');
+    // Always handle AN-AN cases for < and >
+    const AN_LESS_THAN_AN = /([A-Za-z0-9])(<)([A-Za-z0-9])/g;
+    const AN_GREATER_THAN_AN = /([A-Za-z0-9])(>)([A-Za-z0-9])/g;
+    newText = newText.replace(AN_LESS_THAN_AN, '$1 $2 $3');
+    newText = newText.replace(AN_GREATER_THAN_AN, '$1 $2 $3');
+
+    // Handle caret operator
+    newText = newText.replace(CJK_CARET_ANS, '$1 $2 $3');
+    newText = newText.replace(ANS_CARET_CJK, '$1 $2 $3');
+    // Always handle AN-AN cases for caret
+    const AN_CARET_AN = /([A-Za-z0-9])(\^)([A-Za-z0-9])/g;
+    newText = newText.replace(AN_CARET_AN, '$1 $2 $3');
+
+    // Restore increment/decrement patterns
+    const INCREMENT_RESTORE = new RegExp(`${INCREMENT_PLACEHOLDER}(\\d+)__`, 'g');
+    newText = newText.replace(INCREMENT_RESTORE, (_match, index) => {
+      return preservedIncrements[parseInt(index, 10)] || '';
+    });
+
+    // Restore compound words
+    const COMPOUND_RESTORE = new RegExp(`${COMPOUND_PLACEHOLDER}(\\d+)__`, 'g');
+    newText = newText.replace(COMPOUND_RESTORE, (_match, index) => {
+      return preservedCompounds[parseInt(index, 10)] || '';
+    });
 
     // Add space before filesystem paths after CJK (e.g., "和/root" -> "和 /root")
     // newText = newText.replace(CJK_FILESYSTEM_PATH, '$1 $2');
@@ -238,6 +314,11 @@ export class Pangu {
     const preservedLists: string[] = [];
     const LIST_PLACEHOLDER = '__PANGU_LIST_PLACEHOLDER_';
 
+    // First, check for slash patterns that indicate it's being used as a separator
+    // Count slashes in the line - if 2 or more, treat all slashes as separators
+    const slashCount = (newText.match(/\//g) || []).length;
+    const treatSlashAsSeparator = slashCount >= 2;
+
     // First, preserve list patterns for all separators
     newText = newText.replace(CJK_SEPARATOR_LIST, (match) => {
       const index = preservedLists.length;
@@ -245,54 +326,77 @@ export class Pangu {
       return `${LIST_PLACEHOLDER}${index}__`;
     });
 
+    // Also preserve patterns that are clearly lists (e.g., patterns with multiple slashes)
+    if (treatSlashAsSeparator) {
+      // Find patterns like A/B/C or 中文/中文/中文 and preserve them
+      // Also preserve special cases like "discord: user#1234"
+      const SLASH_LIST_PATTERN = /([^\s\/]+(?:\/[^\s\/]+){2,})/g;
+      const DISCORD_PATTERN = /discord:\s*[^\s]+/gi;
+      
+      newText = newText.replace(DISCORD_PATTERN, (match) => {
+        const index = preservedLists.length;
+        preservedLists.push(match);
+        return `${LIST_PLACEHOLDER}${index}__`;
+      });
+      
+      newText = newText.replace(SLASH_LIST_PATTERN, (match) => {
+        const index = preservedLists.length;
+        preservedLists.push(match);
+        return `${LIST_PLACEHOLDER}${index}__`;
+      });
+    }
+
     // Handle separators
     // Note: Colons are already handled by CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK
     // Pipe and underscore: no spaces
     // Slash: always add spaces (unless it's a file path)
 
-    // Between CJK characters
-    const CJK_SEPARATOR_CJK = new RegExp(`([${CJK}])([|/_])([${CJK}])`, 'g');
-    newText = newText.replace(CJK_SEPARATOR_CJK, (match, p1, sep, p3) => {
-      if (sep === '|' || sep === '_') {
-        return match; // No spaces
-      } else if (sep === '/') {
-        return `${p1} ${sep} ${p3}`; // Add spaces
-      }
-      return match;
-    });
+    // Handle slashes based on context
+    if (treatSlashAsSeparator) {
+      // Multiple slashes detected - treat as separator in lists
+      // Only add spaces around single slashes that are clearly operators
+      // Preserve slash lists without spaces
+    } else {
+      // Single slash or clearly an operator - always add spaces
+      // Between CJK characters
+      const CJK_SLASH_CJK = new RegExp(`([${CJK}])(/)([${CJK}])`, 'g');
+      newText = newText.replace(CJK_SLASH_CJK, '$1 / $3');
 
-    // Between AN and CJK, or AN and AN (but only if there's CJK in the text)
-    const AN_SLASH_CJK = new RegExp(`([A-Za-z0-9])(/)([${CJK}])`, 'g');
-    const CJK_SLASH_AN = new RegExp(`([${CJK}])(/)([A-Za-z0-9])`, 'g');
-    const AN_SLASH_AN = new RegExp(`([A-Za-z0-9])(/)([A-Za-z0-9])`, 'g');
-    const APOSTROPHE_SLASH = new RegExp(`(')(/)`, 'g'); // Handle cases like 80'/
+      // Between AN and CJK
+      const AN_SLASH_CJK = new RegExp(`([A-Za-z0-9])(/)([${CJK}])`, 'g');
+      const CJK_SLASH_AN = new RegExp(`([${CJK}])(/)([A-Za-z0-9])`, 'g');
+      newText = newText.replace(AN_SLASH_CJK, '$1 / $3');
+      newText = newText.replace(CJK_SLASH_AN, '$1 / $3');
 
-    // Handle slash before/after special characters
-    const AN_SLASH_SPECIAL = new RegExp(`([A-Za-z0-9])(/)([#@])`, 'g');
-    const CJK_SLASH_SPECIAL = new RegExp(`([${CJK}])(/)([#@:])`, 'g');
-
-    // Handle slash after closing brackets/parentheses
-    const BRACKET_SLASH = new RegExp(`([\\)\\]\\}\\>])(/)`, 'g');
-
-    // Generic pattern: any non-space character followed by slash followed by non-space (as fallback)
-    const ANY_SLASH_ANY = /([^\s\/])(\/(?=[^\s]))/g;
-
-    newText = newText.replace(AN_SLASH_CJK, '$1 / $3');
-    newText = newText.replace(CJK_SLASH_AN, '$1 / $3');
-    newText = newText.replace(APOSTROPHE_SLASH, '$1 / ');
-    newText = newText.replace(AN_SLASH_SPECIAL, '$1 / $3');
-    newText = newText.replace(CJK_SLASH_SPECIAL, '$1 / $3');
-    newText = newText.replace(BRACKET_SLASH, '$1 / ');
-
-    // Only add spaces to AN/AN if there's CJK in the original text
-    if (ANY_CJK.test(text)) {
+      // Always handle AN/AN slashes as operators
+      const AN_SLASH_AN = new RegExp(`([A-Za-z0-9])(/)([A-Za-z0-9])`, 'g');
       newText = newText.replace(AN_SLASH_AN, '$1 / $3');
-    }
 
-    // Apply generic slash spacing for any remaining cases (but only if CJK present)
-    if (ANY_CJK.test(text)) {
+      // Handle slash before/after special characters
+      const AN_SLASH_SPECIAL = new RegExp(`([A-Za-z0-9])(/)([#@])`, 'g');
+      const CJK_SLASH_SPECIAL = new RegExp(`([${CJK}])(/)([#@:])`, 'g');
+      newText = newText.replace(AN_SLASH_SPECIAL, '$1 / $3');
+      newText = newText.replace(CJK_SLASH_SPECIAL, '$1 / $3');
+
+      // Handle slash after apostrophe or closing brackets/parentheses
+      const APOSTROPHE_SLASH = new RegExp(`(')(/)`, 'g');
+      const BRACKET_SLASH = new RegExp(`([\\)\\]\\}\\>])(/)`, 'g');
+      newText = newText.replace(APOSTROPHE_SLASH, '$1 / ');
+      newText = newText.replace(BRACKET_SLASH, '$1 / ');
+
+      // Generic pattern: any non-space character followed by slash followed by non-space (as fallback)
+      const ANY_SLASH_ANY = /([^\s\/])(\/(?=[^\s]))/g;
       newText = newText.replace(ANY_SLASH_ANY, '$1 / ');
     }
+
+    // Handle pipe and underscore as separators (never add spaces)
+    const CJK_SEPARATOR_CJK = new RegExp(`([${CJK}])([|_])([${CJK}])`, 'g');
+    const AN_SEPARATOR_CJK = new RegExp(`([A-Za-z0-9])([|_])([${CJK}])`, 'g');
+    const CJK_SEPARATOR_AN = new RegExp(`([${CJK}])([|_])([A-Za-z0-9])`, 'g');
+    // Keep separators without spaces
+    newText = newText.replace(CJK_SEPARATOR_CJK, '$1$2$3');
+    newText = newText.replace(AN_SEPARATOR_CJK, '$1$2$3');
+    newText = newText.replace(CJK_SEPARATOR_AN, '$1$2$3');
 
     // Restore preserved lists
     const LIST_RESTORE = new RegExp(`${LIST_PLACEHOLDER}(\\d+)__`, 'g');
@@ -311,9 +415,25 @@ export class Pangu {
     // newText = newText.replace(FILESYSTEM_PATH_SLASH_CJK, '$1 $2');
 
     // Handle hash patterns AFTER slash handling to avoid conflicts
+    // But first preserve hashtags to avoid adding spaces inside them
+    const preservedHashtags: string[] = [];
+    const HASHTAG_PLACEHOLDER = '__PANGU_HASHTAG_PLACEHOLDER_';
+    const HASHTAG_PATTERN = /#[A-Za-z0-9\u4e00-\u9fff]+/g;
+    newText = newText.replace(HASHTAG_PATTERN, (match) => {
+      const index = preservedHashtags.length;
+      preservedHashtags.push(match);
+      return `${HASHTAG_PLACEHOLDER}${index}__`;
+    });
+
     newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
     newText = newText.replace(CJK_HASH, '$1 $2');
     newText = newText.replace(HASH_CJK, '$1 $3');
+
+    // Restore hashtags
+    const HASHTAG_RESTORE = new RegExp(`${HASHTAG_PLACEHOLDER}(\\d+)__`, 'g');
+    newText = newText.replace(HASHTAG_RESTORE, (_match, index) => {
+      return preservedHashtags[parseInt(index, 10)] || '';
+    });
 
     newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
     newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
@@ -337,45 +457,29 @@ export class Pangu {
     // DO NOT change the first and last characters inside brackets AT ALL
     // ONLY spacing the content between them
 
-    // Fix spacing inside brackets according to the above rules:
-    // Ensure no unwanted spaces immediately after opening or before closing brackets
-    const fixBracketSpacing = (text: string): string => {
-      // Process each bracket type
-      const processBracket = (pattern: RegExp, openBracket: string, closeBracket: string) => {
-        text = text.replace(pattern, (_match, innerContent) => {
-          if (!innerContent) {
-            return `${openBracket}${closeBracket}`;
-          }
+    // Special handling for compound brackets: <!-- -->, </ />, etc.
+    // Pattern to fix spacing issues with compound brackets
+    const FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET = /([(<\[{])(\s*)([^)>\]}]+?)(\s*)([)>\]}])/g;
+    newText = newText.replace(FIX_LEFT_BRACKET_ANY_RIGHT_BRACKET, (match, leftBracket, _leftSpace, content, _rightSpace, rightBracket) => {
+      // Special case: if it's <!-- --> pattern, don't add spaces
+      if (leftBracket === '<' && content.startsWith('!--') && content.endsWith('--') && rightBracket === '>') {
+        return match; // Keep as is
+      }
+      // For other brackets, remove internal spaces at edges
+      return `${leftBracket}${content}${rightBracket}`;
+    });
 
-          // Remove spaces at the very beginning and end of content
-          const trimmedContent = innerContent.replace(/^ +| +$/g, '');
-
-          return `${openBracket}${trimmedContent}${closeBracket}`;
-        });
-      };
-
-      // Only process < > as brackets if they're not HTML tags
-      // HTML tags have already been protected by placeholders
-      processBracket(/<([^<>]*)>/g, '<', '>');
-      processBracket(/\(([^()]*)\)/g, '(', ')');
-      processBracket(/\[([^\[\]]*)\]/g, '[', ']');
-      processBracket(/\{([^{}]*)\}/g, '{', '}');
-
-      return text;
-    };
-
-    newText = fixBracketSpacing(newText);
+    // Restore HTML comments first
+    const HTML_COMMENT_RESTORE = new RegExp(`${HTML_COMMENT_PLACEHOLDER}(\\d+)\u0000`, 'g');
+    newText = newText.replace(HTML_COMMENT_RESTORE, (_match, index) => {
+      return htmlComments[parseInt(index, 10)] || '';
+    });
 
     // Restore HTML tags from placeholders
     const HTML_TAG_RESTORE = new RegExp(`${HTML_TAG_PLACEHOLDER}(\\d+)\u0000`, 'g');
     newText = newText.replace(HTML_TAG_RESTORE, (_match, index) => {
       return htmlTags[parseInt(index, 10)] || '';
     });
-
-    // Final fix for HTML comments: ensure no space after <!--
-    // This is needed because <!-- is not protected as an HTML tag
-    // and the ! character gets spaced by ANS_CJK pattern
-    newText = newText.replace(/<!--\s+/g, '<!--');
 
     return newText;
   }
