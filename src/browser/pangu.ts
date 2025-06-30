@@ -33,6 +33,18 @@ export interface IdleSpacingConfig {
   timeout: number;
 }
 
+export interface VisibilityCheckConfig {
+  enabled: boolean;
+  checkDuringIdle: boolean;
+  commonHiddenPatterns: {
+    clipRect: boolean;
+    displayNone: boolean;
+    visibilityHidden: boolean;
+    opacityZero: boolean;
+    heightWidth1px: boolean;
+  };
+}
+
 export interface IdleSpacingCallbacks {
   onComplete?: () => void;
   onProgress?: (processed: number, total: number) => void;
@@ -248,6 +260,7 @@ export class BrowserPangu extends Pangu {
   protected performanceMonitor: PerformanceMonitor;
   protected idleQueue: IdleQueue;
   protected idleSpacingConfig: IdleSpacingConfig;
+  protected visibilityCheckConfig: VisibilityCheckConfig;
 
   public blockTags: RegExp;
   public ignoredTags: RegExp;
@@ -272,6 +285,19 @@ export class BrowserPangu extends Pangu {
       enabled: false, // Disabled by default for backward compatibility
       chunkSize: 10,  // Process 10 text nodes per idle cycle
       timeout: 5000   // 5 second timeout for idle processing
+    };
+
+    // Initialize visibility check configuration
+    this.visibilityCheckConfig = {
+      enabled: false, // Disabled by default for backward compatibility
+      checkDuringIdle: true, // Use idle time for visibility checks
+      commonHiddenPatterns: {
+        clipRect: true,         // clip: rect(1px, 1px, 1px, 1px) patterns
+        displayNone: true,      // display: none
+        visibilityHidden: true, // visibility: hidden
+        opacityZero: true,      // opacity: 0
+        heightWidth1px: true    // height: 1px; width: 1px
+      }
     };
 
     this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
@@ -619,38 +645,51 @@ export class BrowserPangu extends Pangu {
                 if (nextTextNode.previousSibling) {
                   if (!this.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
                     if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
-                      nextTextNode.data = ` ${nextTextNode.data}`;
+                      // Check visibility before adding space
+                      if (!this.shouldSkipSpacingAfterNode(currentTextNode)) {
+                        nextTextNode.data = ` ${nextTextNode.data}`;
+                      }
                     }
                   }
                 } else {
                   if (!this.canIgnoreNode(nextTextNode)) {
                     if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
-                      nextTextNode.data = ` ${nextTextNode.data}`;
+                      // Check visibility before adding space
+                      if (!this.shouldSkipSpacingAfterNode(currentTextNode)) {
+                        nextTextNode.data = ` ${nextTextNode.data}`;
+                      }
                     }
                   }
                 }
               }
             } else if (!this.spaceSensitiveTags.test(currentNode.nodeName)) {
               if (currentTextNode instanceof Text && !currentTextNode.data.endsWith(' ')) {
-                currentTextNode.data = `${currentTextNode.data} `;
-              }
-            } else {
-              const panguSpace = document.createElement('pangu');
-              panguSpace.innerHTML = ' ';
-
-              if (nextNode.parentNode) {
-                if (nextNode.previousSibling) {
-                  if (!this.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
-                    nextNode.parentNode.insertBefore(panguSpace, nextNode);
-                  }
-                } else {
-                  nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                // Check visibility before adding space
+                if (!this.shouldSkipSpacingAfterNode(currentTextNode)) {
+                  currentTextNode.data = `${currentTextNode.data} `;
                 }
               }
+            } else {
+              // Check visibility before inserting space element
+              if (!this.shouldSkipSpacingAfterNode(currentTextNode)) {
+                const panguSpace = document.createElement('pangu');
+                panguSpace.innerHTML = ' ';
 
-              if (!panguSpace.previousElementSibling) {
-                if (panguSpace.parentNode) {
-                  panguSpace.parentNode.removeChild(panguSpace);
+                if (nextNode.parentNode) {
+                  if (nextNode.previousSibling) {
+                    if (!this.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
+                      nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                    }
+                  } else {
+                    nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                  }
+                }
+
+                // Clean up orphaned space element
+                if (!panguSpace.previousElementSibling) {
+                  if (panguSpace.parentNode) {
+                    panguSpace.parentNode.removeChild(panguSpace);
+                  }
                 }
               }
             }
@@ -1002,6 +1041,111 @@ export class BrowserPangu extends Pangu {
 
     // Process all collected text nodes with idle callback
     this.processTextNodesWithIdleCallback(allTextNodes, callbacks);
+  }
+
+  // Visibility check configuration methods
+
+  public enableVisibilityCheck(config?: Partial<VisibilityCheckConfig>): void {
+    this.visibilityCheckConfig = {
+      ...this.visibilityCheckConfig,
+      enabled: true,
+      ...config
+    };
+  }
+
+  public disableVisibilityCheck(): void {
+    this.visibilityCheckConfig.enabled = false;
+  }
+
+  public getVisibilityCheckConfig(): VisibilityCheckConfig {
+    return { ...this.visibilityCheckConfig };
+  }
+
+  // Visibility checking utility methods
+
+  public isElementVisuallyHidden(element: Element): boolean {
+    if (!this.visibilityCheckConfig.enabled) {
+      return false;
+    }
+
+    const style = window.getComputedStyle(element);
+    const config = this.visibilityCheckConfig.commonHiddenPatterns;
+
+    // Check display: none
+    if (config.displayNone && style.display === 'none') {
+      return true;
+    }
+
+    // Check visibility: hidden
+    if (config.visibilityHidden && style.visibility === 'hidden') {
+      return true;
+    }
+
+    // Check opacity: 0
+    if (config.opacityZero && parseFloat(style.opacity) === 0) {
+      return true;
+    }
+
+    // Check clip: rect patterns (screen reader only content)
+    if (config.clipRect) {
+      const clip = style.clip;
+      // Common patterns: rect(1px, 1px, 1px, 1px) or rect(0, 0, 0, 0)
+      if (clip && (
+        clip.includes('rect(1px, 1px, 1px, 1px)') ||
+        clip.includes('rect(0px, 0px, 0px, 0px)') ||
+        clip.includes('rect(0, 0, 0, 0)')
+      )) {
+        return true;
+      }
+    }
+
+    // Check height: 1px; width: 1px patterns
+    if (config.heightWidth1px) {
+      const height = parseInt(style.height, 10);
+      const width = parseInt(style.width, 10);
+      
+      if (height === 1 && width === 1) {
+        // Additional checks for common screen reader patterns
+        const overflow = style.overflow;
+        const position = style.position;
+        
+        if (overflow === 'hidden' && position === 'absolute') {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  protected shouldSkipSpacingAfterNode(node: Node): boolean {
+    if (!this.visibilityCheckConfig.enabled) {
+      return false;
+    }
+
+    // Check if the node or its parent element is visually hidden
+    let elementToCheck: Element | null = null;
+    
+    if (node instanceof Element) {
+      elementToCheck = node;
+    } else if (node.parentElement) {
+      elementToCheck = node.parentElement;
+    }
+
+    if (elementToCheck && this.isElementVisuallyHidden(elementToCheck)) {
+      return true;
+    }
+
+    // Check if any ancestor is visually hidden
+    let currentElement = elementToCheck?.parentElement;
+    while (currentElement) {
+      if (this.isElementVisuallyHidden(currentElement)) {
+        return true;
+      }
+      currentElement = currentElement.parentElement;
+    }
+
+    return false;
   }
 }
 

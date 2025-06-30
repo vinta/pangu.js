@@ -70,7 +70,7 @@ No task in progress
   - Created spacingNodesWithIdleCallback for multiple node processing
   - Verified cross-browser compatibility and timing
   - Enables non-blocking processing of dynamically added content
-- [ ] **CSS Visibility Check with requestIdleCallback**
+- [x] **CSS Visibility Check with requestIdleCallback**
   - Check computed styles during idle time to detect visually hidden elements
   - Avoid adding spaces between hidden and visible elements (e.g., screen-reader-only text)
   - Make it opt-in via configuration to maintain backward compatibility
