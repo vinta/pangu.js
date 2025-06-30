@@ -317,6 +317,45 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
+    // Test for fragmented text nodes with white-space: pre-wrap CSS
+    test('should not add double spaces when HTML whitespace already provides spacing', async ({ page }) => {
+      const htmlContent = loadFixture('test_fragmented_text_with_whitespace.html');
+      const expected = loadFixture('test_fragmented_text_with_whitespace_expected.html').trim();
+
+      await page.setContent(htmlContent);
+      await page.evaluate(() => {
+        pangu.spacingPage();
+      });
+      const actual = await page.evaluate(() => document.body.innerHTML.trim());
+      expect(actual).toBe(expected);
+    });
+
+    // Test for CJK fragmented text nodes with white-space: pre-wrap
+    test('should handle CJK text nodes with newlines that render as spaces', async ({ page }) => {
+      const htmlContent = loadFixture('test_fragmented_cjk_with_whitespace.html');
+      const expected = loadFixture('test_fragmented_cjk_with_whitespace_expected.html').trim();
+
+      await page.setContent(htmlContent);
+      await page.evaluate(() => {
+        pangu.spacingPage();
+      });
+      const actual = await page.evaluate(() => document.body.innerHTML.trim());
+      expect(actual).toBe(expected);
+    });
+
+    // Test for double spacing issue with pre-wrap and pre-spaced text
+    test('should not create double spaces when text already has proper spacing and newlines render as spaces', async ({ page }) => {
+      const htmlContent = loadFixture('test_double_spacing_issue.html');
+      const expected = loadFixture('test_double_spacing_issue_expected.html').trim();
+
+      await page.setContent(htmlContent);
+      await page.evaluate(() => {
+        pangu.spacingPage();
+      });
+      const actual = await page.evaluate(() => document.body.innerHTML.trim());
+      expect(actual).toBe(expected);
+    });
+
     // Test for fragmented text nodes with spaces at boundaries
     test('should handle fragmented text nodes with spaces at boundaries', async ({ page }) => {
       await page.setContent('<div id="test"></div>');
