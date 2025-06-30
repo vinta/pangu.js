@@ -127,15 +127,14 @@ const S_A = /(%)([A-Za-z])/g;
 
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
-// Helper class to manage placeholder replacements
-class PlaceholderManager {
+class PlaceholderReplacer {
   private placeholder: string;
   private items: string[] = [];
   private index: number = 0;
   private startDelimiter: string;
   private endDelimiter: string;
 
-  constructor(placeholder: string, startDelimiter: string = '', endDelimiter: string = '\u0000') {
+  constructor(placeholder: string, startDelimiter: string, endDelimiter: string) {
     this.placeholder = placeholder;
     this.startDelimiter = startDelimiter;
     this.endDelimiter = endDelimiter;
@@ -147,10 +146,7 @@ class PlaceholderManager {
   }
 
   restore(text: string): string {
-    const pattern = new RegExp(
-      `${this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}${this.placeholder}(\\d+)${this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`,
-      'g'
-    );
+    const pattern = new RegExp(`${this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}${this.placeholder}(\\d+)${this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g');
     return text.replace(pattern, (_match, index) => {
       return this.items[parseInt(index, 10)] || '';
     });
@@ -185,7 +181,7 @@ export class Pangu {
     let newText = text;
 
     // Initialize placeholder managers
-    const htmlTagManager = new PlaceholderManager('\u0000HTML_TAG_PLACEHOLDER_', '', '\u0000');
+    const htmlTagManager = new PlaceholderReplacer('HTML_TAG_PLACEHOLDER_', '\uE000', '\uE001');
     let hasHtmlTags = false;
 
     // Early return for HTML processing if no HTML tags present
@@ -274,7 +270,7 @@ export class Pangu {
     }
 
     // Protect compound words from operator spacing
-    const compoundWordManager = new PlaceholderManager('\uE002', '', '\uE003');
+    const compoundWordManager = new PlaceholderReplacer('COMPOUND_WORD_PLACEHOLDER_', '\uE010', '\uE011');
 
     // Pattern to detect compound words: alphanumeric-alphanumeric combinations that look like compound words/product names
     // Examples: state-of-the-art, machine-learning, GPT-4o, real-time, end-to-end, gpt-4o, GPT-5, claude-4-opus
@@ -334,7 +330,7 @@ export class Pangu {
     // But exclude slashes that are part of file paths by protecting them first
     if (slashCount === 1) {
       // Temporarily protect file paths from slash operator processing
-      const filePathManager = new PlaceholderManager('\uE000', '', '\uE001');
+      const filePathManager = new PlaceholderReplacer('FILE_PATH_PLACEHOLDER_', '\uE020', '\uE021');
 
       // Store all file paths and replace with placeholders
       const allFilePathPattern = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}|${UNIX_RELATIVE_FILE_PATH.source})`, 'g');
