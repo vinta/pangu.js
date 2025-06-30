@@ -28,6 +28,7 @@ __export(shared_exports, {
 });
 module.exports = __toCommonJS(shared_exports);
 const CJK = "\u2E80-\u2EFF\u2F00-\u2FDF\u3040-\u309F\u30A0-\u30FA\u30FC-\u30FF\u3100-\u312F\u3200-\u32FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF";
+const AN = "A-Za-z0-9";
 const UNIX_ABSOLUTE_FILE_PATH = /\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path|project|src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|your)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+\*]+)*/;
 const UNIX_RELATIVE_FILE_PATH = /(?:\.\/)?(?:src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|node_modules|\.claude|\.git|\.vscode)(?:\/[A-Za-z0-9_\-\.@\+\*]+)+/;
 const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
@@ -39,11 +40,11 @@ const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([A-Z0-9\\(\\)])`, "g");
 const CJK_QUOTE = new RegExp(`([${CJK}])([\`"\u05F4])`, "g");
 const QUOTE_CJK = new RegExp(`([\`"\u05F4])([${CJK}])`, "g");
 const FIX_QUOTE_ANY_QUOTE = /([`"\u05f4]+)[ ]*(.+?)[ ]*([`"\u05f4]+)/g;
-const QUOTE_AN = /([\u201d])([A-Za-z0-9])/g;
-const CJK_QUOTE_AN = new RegExp(`([${CJK}])(")([A-Za-z0-9])`, "g");
+const QUOTE_AN = new RegExp(`([\u201D])([${AN}])`, "g");
+const CJK_QUOTE_AN = new RegExp(`([${CJK}])(")([${AN}])`, "g");
 const CJK_SINGLE_QUOTE_BUT_POSSESSIVE = new RegExp(`([${CJK}])('[^s])`, "g");
 const SINGLE_QUOTE_CJK = new RegExp(`(')([${CJK}])`, "g");
-const FIX_POSSESSIVE_SINGLE_QUOTE = new RegExp(`([A-Za-z0-9${CJK}])( )('s)`, "g");
+const FIX_POSSESSIVE_SINGLE_QUOTE = new RegExp(`([${AN}${CJK}])( )('s)`, "g");
 const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, "g");
 const CJK_HASH = new RegExp(`([${CJK}])(#([^ ]))`, "g");
 const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, "g");
@@ -77,6 +78,32 @@ const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z\u0370-\u03FF0-9@\\$%\\^&\\*\\-\\+
 const ANS_CJK = new RegExp(`([A-Za-z\u0370-\u03FF0-9~\\$%\\^&\\*\\-\\+\\\\=!;:,\\.\\?\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF])([${CJK}])`, "g");
 const S_A = /(%)([A-Za-z])/g;
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
+class PlaceholderReplacer {
+  constructor(placeholder, startDelimiter, endDelimiter) {
+    __publicField(this, "placeholder");
+    __publicField(this, "items", []);
+    __publicField(this, "index", 0);
+    __publicField(this, "startDelimiter");
+    __publicField(this, "endDelimiter");
+    this.placeholder = placeholder;
+    this.startDelimiter = startDelimiter;
+    this.endDelimiter = endDelimiter;
+  }
+  store(item) {
+    this.items[this.index] = item;
+    return `${this.startDelimiter}${this.placeholder}${this.index++}${this.endDelimiter}`;
+  }
+  restore(text) {
+    const pattern = new RegExp(`${this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${this.placeholder}(\\d+)${this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "g");
+    return text.replace(pattern, (_match, index) => {
+      return this.items[parseInt(index, 10)] || "";
+    });
+  }
+  reset() {
+    this.items = [];
+    this.index = 0;
+  }
+}
 class Pangu {
   constructor() {
     __publicField(this, "version");
@@ -92,8 +119,7 @@ class Pangu {
     }
     const self = this;
     let newText = text;
-    const htmlTags = [];
-    const HTML_TAG_PLACEHOLDER = "\0HTML_TAG_PLACEHOLDER_";
+    const htmlTagManager = new PlaceholderReplacer("HTML_TAG_PLACEHOLDER_", "\uE000", "\uE001");
     let hasHtmlTags = false;
     if (newText.includes("<")) {
       hasHtmlTags = true;
@@ -103,9 +129,7 @@ class Pangu {
           const processedValue = self.spacingText(attrValue);
           return `${attrName}="${processedValue}"`;
         });
-        const index = htmlTags.length;
-        htmlTags.push(processedTag);
-        return `${HTML_TAG_PLACEHOLDER}${index}\0`;
+        return htmlTagManager.store(processedTag);
       });
     }
     newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK, (_match, leftCjk, symbols, rightCjk) => {
@@ -146,13 +170,10 @@ class Pangu {
       }
       newText = newText.replace(new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`), "$1$2 $3");
     }
-    const COMPOUND_WORD_PLACEHOLDER = "\uE002";
-    const compoundWords = [];
-    let compoundIndex = 0;
+    const compoundWordManager = new PlaceholderReplacer("COMPOUND_WORD_PLACEHOLDER_", "\uE010", "\uE011");
     const COMPOUND_WORD_PATTERN = /\b(?:[A-Za-z0-9]*[a-z][A-Za-z0-9]*-[A-Za-z0-9]+|[A-Za-z0-9]+-[A-Za-z0-9]*[a-z][A-Za-z0-9]*|[A-Za-z]+-[0-9]+|[A-Za-z]+[0-9]+-[A-Za-z0-9]+)(?:-[A-Za-z0-9]+)*\b/g;
     newText = newText.replace(COMPOUND_WORD_PATTERN, (match) => {
-      compoundWords[compoundIndex] = match;
-      return `${COMPOUND_WORD_PLACEHOLDER}${compoundIndex++}\uE003`;
+      return compoundWordManager.store(match);
     });
     newText = newText.replace(SINGLE_LETTER_GRADE_CJK, "$1$2 $3");
     newText = newText.replace(CJK_OPERATOR_ANS, "$1 $2 $3");
@@ -180,27 +201,18 @@ class Pangu {
     newText = newText.replace(UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK, "$1 $2");
     newText = newText.replace(UNIX_RELATIVE_FILE_PATH_SLASH_CJK, "$1 $2");
     if (slashCount === 1) {
-      const FILE_PATH_PLACEHOLDER = "\uE000";
-      const filePaths = [];
-      let pathIndex = 0;
+      const filePathManager = new PlaceholderReplacer("FILE_PATH_PLACEHOLDER_", "\uE020", "\uE021");
       const allFilePathPattern = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}|${UNIX_RELATIVE_FILE_PATH.source})`, "g");
       newText = newText.replace(allFilePathPattern, (match) => {
-        filePaths[pathIndex] = match;
-        return `${FILE_PATH_PLACEHOLDER}${pathIndex++}\uE001`;
+        return filePathManager.store(match);
       });
       newText = newText.replace(CJK_SLASH_CJK, "$1 $2 $3");
       newText = newText.replace(CJK_SLASH_ANS, "$1 $2 $3");
       newText = newText.replace(ANS_SLASH_CJK, "$1 $2 $3");
       newText = newText.replace(ANS_SLASH_ANS, "$1 $2 $3");
-      const FILE_PATH_RESTORE = new RegExp(`${FILE_PATH_PLACEHOLDER}(\\d+)\uE001`, "g");
-      newText = newText.replace(FILE_PATH_RESTORE, (_match, index) => {
-        return filePaths[parseInt(index, 10)] || "";
-      });
+      newText = filePathManager.restore(newText);
     }
-    const COMPOUND_WORD_RESTORE = new RegExp(`${COMPOUND_WORD_PLACEHOLDER}(\\d+)\uE003`, "g");
-    newText = newText.replace(COMPOUND_WORD_RESTORE, (_match, index) => {
-      return compoundWords[parseInt(index, 10)] || "";
-    });
+    newText = compoundWordManager.restore(newText);
     newText = newText.replace(CJK_LEFT_BRACKET, "$1 $2");
     newText = newText.replace(RIGHT_BRACKET_CJK, "$1 $2");
     newText = newText.replace(ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET, "$1 $2$3$4");
@@ -229,10 +241,7 @@ class Pangu {
     };
     newText = fixBracketSpacing(newText);
     if (hasHtmlTags) {
-      const HTML_TAG_RESTORE = new RegExp(`${HTML_TAG_PLACEHOLDER}(\\d+)\0`, "g");
-      newText = newText.replace(HTML_TAG_RESTORE, (_match, index) => {
-        return htmlTags[parseInt(index, 10)] || "";
-      });
+      newText = htmlTagManager.restore(newText);
     }
     return newText;
   }

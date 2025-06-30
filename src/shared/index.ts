@@ -22,6 +22,9 @@
 
 const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
 
+// Basic character classes
+const AN = 'A-Za-z0-9';
+
 // prettier-ignore
 // Unix absolute paths: system dirs + common project paths
 // Examples: /home, /usr/bin, /etc/nginx.conf, /.bashrc, /node_modules/@babel/core, /path/to/your/project
@@ -51,15 +54,15 @@ const FIX_QUOTE_ANY_QUOTE = /([`"\u05f4]+)[ ]*(.+?)[ ]*([`"\u05f4]+)/g;
 // Handle curly quotes with alphanumeric characters
 // These patterns should only apply to curly quotes, not straight quotes
 // Straight quotes are already handled by CJK_QUOTE, QUOTE_CJK and FIX_QUOTE_ANY_QUOTE
-const QUOTE_AN = /([\u201d])([A-Za-z0-9])/g; // Only closing curly quotes + AN
+const QUOTE_AN = new RegExp(`([\u201d])([${AN}])`, 'g'); // Only closing curly quotes + AN
 
 // Special handling for straight quotes followed by alphanumeric after CJK
 // This catches patterns like: 社"DF where the quote appears to be closing a quoted CJK phrase
-const CJK_QUOTE_AN = new RegExp(`([${CJK}])(")([A-Za-z0-9])`, 'g');
+const CJK_QUOTE_AN = new RegExp(`([${CJK}])(")([${AN}])`, 'g');
 
 const CJK_SINGLE_QUOTE_BUT_POSSESSIVE = new RegExp(`([${CJK}])('[^s])`, 'g');
 const SINGLE_QUOTE_CJK = new RegExp(`(')([${CJK}])`, 'g');
-const FIX_POSSESSIVE_SINGLE_QUOTE = new RegExp(`([A-Za-z0-9${CJK}])( )('s)`, 'g');
+const FIX_POSSESSIVE_SINGLE_QUOTE = new RegExp(`([${AN}${CJK}])( )('s)`, 'g');
 
 const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, 'g');
 const CJK_HASH = new RegExp(`([${CJK}])(#([^ ]))`, 'g');
