@@ -1,5 +1,9 @@
 # History
 
+## v6.1.3 / 2025-07-01
+
+- 修正 Asana 的 comments 會被重複加空格的問題
+
 ## v6.1.2 / 2025-06-30
 
 - 修正 Node.js imports
