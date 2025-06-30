@@ -256,8 +256,19 @@ export class BrowserPangu extends Pangu {
         const currentEndsWithSpace = currentTextNode.data.endsWith(' ');
         const nextStartsWithSpace = nextTextNode.data.startsWith(' ');
         
-        // If either node already has space at the boundary, skip processing
-        if (currentEndsWithSpace || nextStartsWithSpace) {
+        // Check if there's whitespace between the nodes (e.g., newlines that render as spaces with white-space: pre-wrap)
+        let hasWhitespaceBetween = false;
+        let nodeBetween = currentTextNode.nextSibling;
+        while (nodeBetween && nodeBetween !== nextTextNode) {
+          if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
+            hasWhitespaceBetween = true;
+            break;
+          }
+          nodeBetween = nodeBetween.nextSibling;
+        }
+        
+        // If either node already has space at the boundary, or there's whitespace between nodes, skip processing
+        if (currentEndsWithSpace || nextStartsWithSpace || hasWhitespaceBetween) {
           nextTextNode = currentTextNode;
           continue;
         }
