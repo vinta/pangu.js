@@ -408,5 +408,79 @@ test.describe('BrowserPangu', () => {
       const fullText = await page.evaluate(() => document.body.textContent);
       expect(fullText).toBe('1,228 個跟隨中');
     });
+
+    test('handle various whitespace types between span elements', async ({ page }) => {
+      // Test case 1: When there IS whitespace between spans, don't add extra space
+      const whitespaceTestCases = [
+        { name: 'single space', html: '<div><span>測試</span> <span>文字</span></div>' },
+        { name: 'multiple spaces', html: '<div><span>測試</span>   <span>文字</span></div>' },
+        { name: 'newline', html: '<div><span>測試</span>\n<span>文字</span></div>' },
+        { name: 'tab', html: '<div><span>測試</span>\t<span>文字</span></div>' },
+        { name: 'mixed whitespace', html: '<div><span>測試</span> \n\t <span>文字</span></div>' },
+        { 
+          name: 'newline with indentation', 
+          html: `<div>
+  <span>測試</span>
+  <span>文字</span>
+</div>` 
+        }
+      ];
+
+      for (const testCase of whitespaceTestCases) {
+        await page.setContent(testCase.html);
+        
+        await page.evaluate(() => {
+          pangu.spacingPageBody();
+        });
+        
+        // Check that the second span content remains unchanged (no space added)
+        const secondSpanContent = await page.evaluate(() => {
+          const spans = document.querySelectorAll('span');
+          return spans[1]?.textContent || '';
+        });
+        
+        expect(secondSpanContent).toBe('文字');
+        expect(secondSpanContent).not.toMatch(/^ /);
+        
+        // Verify overall spacing is maintained
+        const fullText = await page.evaluate(() => {
+          return document.body.textContent?.replace(/\s+/g, ' ').trim();
+        });
+        expect(fullText).toBe('測試 文字');
+      }
+
+      // Test case 2: The limitation of current approach
+      // When there is NO whitespace between spans and text nodes are the only children,
+      // the current algorithm doesn't add space because it can't find a suitable location
+      await page.setContent('<div><span>測試</span><span>文字</span></div>');
+      
+      await page.evaluate(() => {
+        pangu.spacingPageBody();
+      });
+      
+      // Currently this doesn't work as expected - no space is added
+      const noSpaceResult = await page.evaluate(() => {
+        return document.body.textContent?.trim();
+      });
+      
+      // This is a known limitation - when spans are directly adjacent with no whitespace
+      // and each contains only a text node, the algorithm doesn't know where to insert space
+      expect(noSpaceResult).toBe('測試文字'); // Currently no space is added
+      
+      // However, if we have a different structure where text nodes can have siblings,
+      // or there's some whitespace, it works correctly
+      await page.setContent('<div>測試<span>文字</span></div>');
+      
+      await page.evaluate(() => {
+        pangu.spacingPageBody();
+      });
+      
+      const withSpaceResult = await page.evaluate(() => {
+        return document.body.textContent?.trim();
+      });
+      
+      // This case works because the first text node is not wrapped in a span
+      expect(withSpaceResult).toBe('測試 文字');
+    });
   });
 });
