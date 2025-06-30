@@ -275,8 +275,8 @@ test.describe('BrowserPangu', () => {
     });
 
     test('handle text nodes with newlines and CSS {white-space: pre-wrap}', async ({ page }) => {
-      const htmlContent = loadFixture('test_fragmented_asana_style.html');
-      const expected = loadFixture('test_fragmented_asana_style_expected.html').trim();
+      const htmlContent = loadFixture('whitespace_pre_wrap.html');
+      const expected = loadFixture('whitespace_pre_wrap_expected.html').trim();
 
       await page.setContent(htmlContent);
 

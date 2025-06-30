@@ -143,7 +143,7 @@ pangu.spacingFileSync('input.txt');
 
 - **Unit Tests**: Vitest for shared/node code
 - **Browser Tests**: Playwright for cross-browser testing
-- **Test Fixtures**: Located in `tests/fixtures/`
+- **Test Fixtures**: Located in `fixtures/`
 - **Coverage**: 106 tests covering various Unicode blocks
 
 ### Chrome Extension
