@@ -310,6 +310,38 @@ test.describe('BrowserPangu', () => {
       const expected = loadFixture('test_html_fragment_1_expected.html').trim();
 
       await page.setContent(htmlContent);
+      
+      // Verify that newlines between text fragments are rendered as whitespace
+      const analysis = await page.evaluate(() => {
+        const div = document.querySelector('.HighlightSol');
+        if (!div) return { renderedText: '', childNodesCount: 0 };
+        
+        // Get the rendered text (what the user sees)
+        const renderedText = div.innerText;
+        
+        // Get info about child nodes
+        const childNodesInfo = [];
+        for (let i = 0; i < div.childNodes.length; i++) {
+          const node = div.childNodes[i];
+          childNodesInfo.push({
+            nodeType: node.nodeType,
+            nodeValue: node.nodeValue,
+            textContent: node.textContent,
+            isWhitespace: node.nodeType === Node.TEXT_NODE && /^\s+$/.test(node.textContent || '')
+          });
+        }
+        
+        return {
+          renderedText,
+          childNodesCount: div.childNodes.length,
+          childNodesInfo
+        };
+      });
+      
+      console.log('Before spacing - Analysis:', JSON.stringify(analysis, null, 2));
+      // With white-space: pre-wrap, newlines should be rendered as spaces
+      expect(analysis.renderedText).toMatch(/\s/); // Should contain whitespace
+      
       await page.evaluate(() => {
         pangu.spacingPage();
       });
@@ -317,38 +349,51 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
-    // Test for fragmented text nodes with white-space: pre-wrap CSS
-    test('should not add double spaces when HTML whitespace already provides spacing', async ({ page }) => {
-      const htmlContent = loadFixture('test_fragmented_text_with_whitespace.html');
-      const expected = loadFixture('test_fragmented_text_with_whitespace_expected.html').trim();
+    // Test for Asana-style fragmented text with pre-wrap CSS
+    test('should handle fragmented text nodes like Asana with pre-wrap', async ({ page }) => {
+      const htmlContent = loadFixture('test_fragmented_asana_style.html');
+      const expected = loadFixture('test_fragmented_asana_style_expected.html').trim();
 
       await page.setContent(htmlContent);
+      
+      // Verify that newlines are rendered as whitespace before spacing
+      const renderedTextBefore = await page.evaluate(() => {
+        const div = document.querySelector('.HighlightSol');
+        return div ? div.innerText : '';
+      });
+      // With white-space: pre-wrap, the newlines between text fragments should be visible as spaces
+      expect(renderedTextBefore).toContain(' ');
+      
       await page.evaluate(() => {
         pangu.spacingPage();
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);
     });
-
-    // Test for CJK fragmented text nodes with white-space: pre-wrap
-    test('should handle CJK text nodes with newlines that render as spaces', async ({ page }) => {
-      const htmlContent = loadFixture('test_fragmented_cjk_with_whitespace.html');
-      const expected = loadFixture('test_fragmented_cjk_with_whitespace_expected.html').trim();
+    
+    // Test for realistic Asana case without quotes
+    test('should handle realistic Asana text with newlines (no quotes)', async ({ page }) => {
+      const htmlContent = loadFixture('test_asana_realistic.html');
+      const expected = loadFixture('test_asana_realistic_expected.html').trim();
 
       await page.setContent(htmlContent);
-      await page.evaluate(() => {
-        pangu.spacingPage();
+      
+      // Verify the rendered text shows spaces due to newlines
+      const analysis = await page.evaluate(() => {
+        const div = document.querySelector('.HighlightSol');
+        if (!div) return null;
+        
+        return {
+          innerHTML: div.innerHTML,
+          innerText: div.innerText,
+          textContent: div.textContent,
+          hasNewlines: div.textContent?.includes('\n') || false
+        };
       });
-      const actual = await page.evaluate(() => document.body.innerHTML.trim());
-      expect(actual).toBe(expected);
-    });
-
-    // Test for double spacing issue with pre-wrap and pre-spaced text
-    test('should not create double spaces when text already has proper spacing and newlines render as spaces', async ({ page }) => {
-      const htmlContent = loadFixture('test_double_spacing_issue.html');
-      const expected = loadFixture('test_double_spacing_issue_expected.html').trim();
-
-      await page.setContent(htmlContent);
+      
+      console.log('Realistic Asana test - Before spacing:', JSON.stringify(analysis, null, 2));
+      expect(analysis?.hasNewlines).toBe(true);
+      
       await page.evaluate(() => {
         pangu.spacingPage();
       });
