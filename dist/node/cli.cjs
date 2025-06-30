@@ -479,8 +479,16 @@ class BrowserPangu extends Pangu {
         const currentEndsWithSpace = currentTextNode.data.endsWith(" ");
         const nextStartsWithSpace = nextTextNode.data.startsWith(" ");
         let hasWhitespaceBetween = false;
-        let nodeBetween = currentTextNode.nextSibling;
-        while (nodeBetween && nodeBetween !== nextTextNode) {
+        let currentAncestor = currentTextNode;
+        while (currentAncestor.parentNode && this.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !this.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
+          currentAncestor = currentAncestor.parentNode;
+        }
+        let nextAncestor = nextTextNode;
+        while (nextAncestor.parentNode && this.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !this.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
+          nextAncestor = nextAncestor.parentNode;
+        }
+        let nodeBetween = currentAncestor.nextSibling;
+        while (nodeBetween && nodeBetween !== nextAncestor) {
           if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
             hasWhitespaceBetween = true;
             break;

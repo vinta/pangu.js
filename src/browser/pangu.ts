@@ -330,8 +330,27 @@ export class BrowserPangu extends Pangu {
 
         // Check if there's whitespace between the nodes
         let hasWhitespaceBetween = false;
-        let nodeBetween = currentTextNode.nextSibling;
-        while (nodeBetween && nodeBetween !== nextTextNode) {
+        
+        // We need to check at different levels of the DOM tree
+        // First, find the highest ancestor that contains only the current text node
+        let currentAncestor = currentTextNode as Node;
+        while (currentAncestor.parentNode && 
+               this.isLastTextChild(currentAncestor.parentNode, currentAncestor) &&
+               !this.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
+          currentAncestor = currentAncestor.parentNode;
+        }
+        
+        // Find the highest ancestor that contains only the next text node
+        let nextAncestor = nextTextNode as Node;
+        while (nextAncestor.parentNode && 
+               this.isFirstTextChild(nextAncestor.parentNode, nextAncestor) &&
+               !this.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
+          nextAncestor = nextAncestor.parentNode;
+        }
+        
+        // Check for whitespace between these ancestors
+        let nodeBetween = currentAncestor.nextSibling;
+        while (nodeBetween && nodeBetween !== nextAncestor) {
           if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
             hasWhitespaceBetween = true;
             break;

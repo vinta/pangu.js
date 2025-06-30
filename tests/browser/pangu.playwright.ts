@@ -377,5 +377,36 @@ test.describe('BrowserPangu', () => {
       });
       expect(result2).not.toContain('   ');
     });
+
+    test('handle whitespace between span elements correctly', async ({ page }) => {
+      // Test the issue from fixtures/whitespace.html
+      const htmlContent = '<div class="css-175oi2r r-1rtiivn"><a href="/vinta/following" dir="ltr" role="link" class="css-146c3p1 r-bcqeeo r-1ttztb7 r-qvutc0 r-37j5jr r-a023e6 r-rjixqe r-16dba41 r-1loqt21" style="color: rgb(15, 20, 25);"><span class="css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3 r-1b43r93 r-1cwl3u0 r-b88u0q" style="color: rgb(15, 20, 25);"><span class="css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3">1,228</span></span> <span class="css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3 r-1b43r93 r-1cwl3u0" style="color: rgb(83, 100, 113);"><span class="css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3">個跟隨中</span></span></a></div>';
+      
+      await page.setContent(htmlContent);
+      
+      // Apply spacing
+      await page.evaluate(() => {
+        pangu.spacingPageBody();
+      });
+      
+      // Check that we don't add extra space inside the second span
+      const innerSpanText = await page.evaluate(() => {
+        const spans = document.querySelectorAll('span');
+        // Find the span that contains "個跟隨中"
+        for (const span of spans) {
+          if (span.textContent === '個跟隨中' || span.textContent === ' 個跟隨中') {
+            return span.textContent;
+          }
+        }
+        return null;
+      });
+      
+      // The text should remain "個跟隨中", not " 個跟隨中"
+      expect(innerSpanText).toBe('個跟隨中');
+      
+      // The overall text should still have proper spacing
+      const fullText = await page.evaluate(() => document.body.textContent);
+      expect(fullText).toBe('1,228 個跟隨中');
+    });
   });
 });
