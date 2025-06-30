@@ -117,47 +117,20 @@ export class BrowserPangu extends Pangu {
   }
 
   public spacingPageTitle() {
-    const xPathQuery = '/html/head/title/text()';
-    this.spacingNodeByXPath(xPathQuery, document);
+    const titleElement = document.querySelector('head > title');
+    if (titleElement) {
+      this.spacingNode(titleElement);
+    }
   }
 
   public spacingPageBody() {
-    // // >> 任意位置的節點
-    // . >> 當前節點
-    // .. >> 父節點
-    // [] >> 條件
-    // text() >> 節點的文字內容，例如 hello 之於 <tag>hello</tag>
-    // https://www.w3schools.com/xml/xpath_syntax.asp
-    //
-    // [@contenteditable]
-    // 帶有 contenteditable 屬性的節點
-    //
-    // normalize-space(.)
-    // 當前節點的頭尾的空白字元都會被移除，大於兩個以上的空白字元會被置換成單一空白
-    // https://developer.mozilla.org/en-US/docs/Web/XPath/Functions/normalize-space
-    //
-    // name(..)
-    // 父節點的名稱
-    // https://developer.mozilla.org/en-US/docs/Web/XPath/Functions/name
-    //
-    // translate(string, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")
-    // 將 string 轉換成小寫，因為 XML 是 case-sensitive 的
-    // https://developer.mozilla.org/en-US/docs/Web/XPath/Functions/translate
-    //
-    // 1. 處理 <title>
-    // 2. 處理 <body> 底下的節點
-    // 3. 略過 contentEditable 的節點
-    // 4. 略過特定節點，例如 <script> 和 <style>
-    //
-    // 注意，以下的 query 只會取出各節點的 text 內容！
-    let xPathQuery = '/html/body//*/text()[normalize-space(.)]';
-    for (const tag of ['script', 'style', 'textarea']) {
-      // 理論上這幾個 tag 裡面不會包含其他 tag
-      // 所以可以直接用 .. 取父節點
-      // 例如 [translate(name(..), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") != "script"]
-      xPathQuery = `${xPathQuery}[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
-    }
-    this.spacingNodeByXPath(xPathQuery, document);
+    // Process the entire body element
+    // The collectTextNodes method already filters out:
+    // 1. Whitespace-only text nodes (like XPath's normalize-space)
+    // 2. Text inside ignored tags (script, style, textarea, etc.)
+    // 3. Text inside contentEditable elements
+    // 4. Text inside elements with no-pangu-spacing class
+    this.spacingNode(document.body);
   }
 
   public spacingNode(contextNode: Node) {
@@ -200,8 +173,10 @@ export class BrowserPangu extends Pangu {
   }
 
   public spacingElementByClassName(className: string) {
-    const xPathQuery = `//*[contains(concat(" ", normalize-space(@class), " "), "${className}")]//text()`;
-    this.spacingNodeByXPath(xPathQuery, document);
+    const elements = document.getElementsByClassName(className);
+    for (let i = 0; i < elements.length; i++) {
+      this.spacingNode(elements[i]);
+    }
   }
 
   public spacingElementByTagName(tagName: string) {
