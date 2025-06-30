@@ -27,7 +27,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('autoSpacingPage()', () => {
-    test('should handle dynamic content with MutationObserver', async ({ page }) => {
+    test('handle dynamic content with MutationObserver', async ({ page }) => {
       await page.evaluate(() => {
         pangu.autoSpacingPage({});
       });
@@ -50,7 +50,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('spacingNode()', () => {
-    test('should process text nodes', async ({ page }) => {
+    test('handle text nodes', async ({ page }) => {
       const result = await page.evaluate(() => {
         const textNode = document.createTextNode('早安！こんにちは！안녕하세요!');
         document.body.appendChild(textNode);
@@ -61,7 +61,7 @@ test.describe('BrowserPangu', () => {
       expect(result).toBe('早安！こんにちは！안녕하세요!');
     });
 
-    test('should process element nodes', async ({ page }) => {
+    test('handle element nodes', async ({ page }) => {
       const result = await page.evaluate(() => {
         const div = document.createElement('div');
         div.textContent = '聽說桐島rm -rf /*了';
@@ -75,7 +75,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('spacingElementById()', () => {
-    test('should process elements by ID', async ({ page }) => {
+    test('handle elements by ID', async ({ page }) => {
       const htmlContent = loadFixture('id_name.html');
       const expected = loadFixture('id_name_expected.html').trim();
 
@@ -89,7 +89,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('spacingElementByClassName()', () => {
-    test('should process elements by class name (single element)', async ({ page }) => {
+    test('handle elements by class name (single element)', async ({ page }) => {
       const htmlContent = loadFixture('class_name_1.html');
       const expected = loadFixture('class_name_1_expected.html').trim();
 
@@ -101,7 +101,7 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
-    test('should process elements by class name (multiple elements)', async ({ page }) => {
+    test('handle elements by class name (multiple elements)', async ({ page }) => {
       const htmlContent = loadFixture('class_name_2.html');
       const expected = loadFixture('class_name_2_expected.html').trim();
 
@@ -113,7 +113,7 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
-    test('should process elements by class name (nested elements)', async ({ page }) => {
+    test('handle elements by class name (nested elements)', async ({ page }) => {
       const htmlContent = loadFixture('class_name_3.html');
       const expected = loadFixture('class_name_3_expected.html').trim();
 
@@ -127,7 +127,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('spacingElementByTagName()', () => {
-    test('should process elements by tag name', async ({ page }) => {
+    test('handle elements by tag name', async ({ page }) => {
       const htmlContent = loadFixture('tag_name.html');
       const expected = loadFixture('tag_name_expected.html').trim();
 
@@ -141,7 +141,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('spacingPageTitle()', () => {
-    test('should process page title', async ({ page }) => {
+    test('handle page title', async ({ page }) => {
       await page.evaluate(() => {
         document.title = "Mr.龍島主道：「Let's Party!各位高明博雅君子！」";
         pangu.spacingPageTitle();
@@ -153,7 +153,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('spacingPageBody()', () => {
-    test('should process page body', async ({ page }) => {
+    test('handle page body', async ({ page }) => {
       const htmlContent = loadFixture('body.html');
       const expected = loadFixture('body_expected.html').trim();
 
@@ -167,7 +167,7 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('spacingPage()', () => {
-    test('should process entire page (title and body)', async ({ page }) => {
+    test('handle entire page (title and body)', async ({ page }) => {
       const htmlContent = loadFixture('body.html');
       const expected = loadFixture('body_expected.html').trim();
 
@@ -184,7 +184,7 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
-    test.skip('should handle YouTube formatted strings with hashtags', async ({ page }) => {
+    test.skip('handle YouTube formatted strings with hashtags', async ({ page }) => {
       // Skip: Known limitation with XPath-based approach for adjacent sibling elements
       // Current behavior doesn't add space between <span> and <a> elements
       const htmlContent = loadFixture('youtube_format_string.html');
@@ -198,7 +198,7 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
-    test('should handle contenteditable elements by skipping them', async ({ page }) => {
+    test('handle contenteditable elements by skipping them', async ({ page }) => {
       await page.setContent('<div contenteditable="true">abc漢字1</div>');
       await page.evaluate(() => {
         pangu.spacingPageBody();
@@ -207,7 +207,7 @@ test.describe('BrowserPangu', () => {
       expect(content).toContain('<div contenteditable="true">abc漢字1</div>');
     });
 
-    test('should handle input field values by preserving them', async ({ page }) => {
+    test('handle input field values by preserving them', async ({ page }) => {
       const htmlContent = loadFixture('input_fields.html');
 
       await page.setContent(htmlContent);
@@ -230,7 +230,7 @@ test.describe('BrowserPangu', () => {
       expect(textarea).toBe('哇！是擅長Over-engineering的朋友呢！');
     });
 
-    test('should process text outside input fields while preserving input values', async ({ page }) => {
+    test('handle text outside input fields while preserving input values', async ({ page }) => {
       const htmlContent = loadFixture('input_fields_mixed.html');
       const expected = loadFixture('input_fields_mixed_expected.html').trim();
 
@@ -246,7 +246,7 @@ test.describe('BrowserPangu', () => {
       expect(inputValue).toBe('測試text123');
     });
 
-    test('should handle fragmented text nodes with quotes', async ({ page }) => {
+    test('handle fragmented text nodes with quotes', async ({ page }) => {
       // Test case 1: Simple fragmented nodes
       await page.setContent('<div id="test1"><span>社</span>"<span>DF</span></div>');
       await page.evaluate(() => {
@@ -272,7 +272,7 @@ test.describe('BrowserPangu', () => {
       expect(result3).toBe('【UCG 中字】"數毛社" DF 的《戰神 4》全新演示解析');
     });
 
-    test('should handle text nodes with newlines and CSS {white-space: pre-wrap}', async ({ page }) => {
+    test('handle text nodes with newlines and CSS {white-space: pre-wrap}', async ({ page }) => {
       const htmlContent = loadFixture('test_fragmented_asana_style.html');
       const expected = loadFixture('test_fragmented_asana_style_expected.html').trim();
 
@@ -298,7 +298,7 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
-    test('should handle fragmented text nodes with spaces at boundaries', async ({ page }) => {
+    test('handle fragmented text nodes with spaces at boundaries', async ({ page }) => {
       await page.setContent('<div id="test"></div>');
 
       // Create fragmented nodes like Asana does
@@ -329,7 +329,7 @@ test.describe('BrowserPangu', () => {
       expect(afterText).toBe('整天等 EAS build 就飽了啊，每次 build 都要跑十幾二十分鐘');
     });
 
-    test.skip('should handle mixed fragmented nodes correctly (edge case: consecutive text nodes without spaces)', async ({ page }) => {
+    test.skip('handle mixed fragmented nodes correctly (edge case: consecutive text nodes without spaces)', async ({ page }) => {
       // The fix for preventing double spaces in already-spaced text (like Asana) makes this specific case not work.
       // This is an acceptable trade-off since real-world cases like Asana typically have spaces at fragment boundaries.
       await page.setContent('<div id="test"></div>');
@@ -361,7 +361,7 @@ test.describe('BrowserPangu', () => {
       expect(result).toBe('整天等 EAS build 就飽了啊，每次 build 都要跑十幾二十分鐘');
     });
 
-    test('should handle spacing edge cases correctly', async ({ page }) => {
+    test('handle spacing edge cases correctly', async ({ page }) => {
       // Test case 1: Already properly spaced text should not be modified
       const properlySpacedText = '整天等 EAS build 就飽了啊，每次 build 都要跑十幾二十分鐘';
       await page.setContent(`<div id="test1">${properlySpacedText}</div>`);

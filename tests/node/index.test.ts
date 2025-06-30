@@ -11,7 +11,7 @@ describe('NodePangu', () => {
   const fixtureDir = resolve(__dirname, '../_fixtures');
 
   describe('spacingFile()', () => {
-    it('should process text file asynchronously', async () => {
+    it('handle text file asynchronously', async () => {
       const data = await pangu.spacingFile(`${fixtureDir}/test_file.txt`);
       const expected = readFileSync(`${fixtureDir}/test_file.expected.txt`, 'utf8');
       expect(data).toBe(expected);
@@ -19,7 +19,7 @@ describe('NodePangu', () => {
   });
 
   describe('spacingFileSync()', () => {
-    it('should process text file synchronously', () => {
+    it('handle text file synchronously', () => {
       const data = pangu.spacingFileSync(`${fixtureDir}/test_file.txt`);
       const expected = readFileSync(`${fixtureDir}/test_file.expected.txt`, 'utf8');
       expect(data).toBe(expected);
