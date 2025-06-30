@@ -4,9 +4,31 @@ export interface AutoSpacingPageConfig {
     nodeDelayMs?: number;
     nodeMaxWaitMs?: number;
 }
+export interface PerformanceStats {
+    count: number;
+    avg: number;
+    min: number;
+    max: number;
+    total: number;
+}
+export interface PerformanceReport {
+    [key: string]: PerformanceStats;
+}
+declare class PerformanceMonitor {
+    private metrics;
+    private enabled;
+    constructor(enabled?: boolean);
+    measure<T>(label: string, fn: () => T): T;
+    getStats(label: string): PerformanceStats | null;
+    getAllStats(): PerformanceReport;
+    reset(): void;
+    setEnabled(enabled: boolean): void;
+    logResults(): void;
+}
 export declare class BrowserPangu extends Pangu {
     isAutoSpacingPageExecuted: boolean;
     protected autoSpacingPageObserver: MutationObserver | null;
+    protected performanceMonitor: PerformanceMonitor;
     blockTags: RegExp;
     ignoredTags: RegExp;
     presentationalTags: RegExp;
@@ -34,6 +56,12 @@ export declare class BrowserPangu extends Pangu {
     protected collectTextNodes(contextNode: Node, reverse?: boolean): Text[];
     protected spacingNodeWithTreeWalker(contextNode: Node): void;
     protected setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number): void;
+    enablePerformanceMonitoring(): void;
+    disablePerformanceMonitoring(): void;
+    getPerformanceReport(): PerformanceReport;
+    getPerformanceStats(label: string): PerformanceStats | null;
+    resetPerformanceMetrics(): void;
+    logPerformanceResults(): void;
 }
 export declare const pangu: BrowserPangu;
 export default pangu;

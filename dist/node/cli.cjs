@@ -248,6 +248,68 @@ new Pangu();
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+class PerformanceMonitor {
+  constructor(enabled = false) {
+    __publicField(this, "metrics", /* @__PURE__ */ new Map());
+    __publicField(this, "enabled");
+    this.enabled = enabled;
+  }
+  measure(label, fn) {
+    if (!this.enabled) {
+      return fn();
+    }
+    const start = performance.now();
+    const result = fn();
+    const duration = performance.now() - start;
+    if (!this.metrics.has(label)) {
+      this.metrics.set(label, []);
+    }
+    this.metrics.get(label).push(duration);
+    return result;
+  }
+  getStats(label) {
+    const times = this.metrics.get(label);
+    if (!times || times.length === 0) {
+      return null;
+    }
+    const total = times.reduce((a, b) => a + b, 0);
+    return {
+      count: times.length,
+      avg: total / times.length,
+      min: Math.min(...times),
+      max: Math.max(...times),
+      total
+    };
+  }
+  getAllStats() {
+    const report = {};
+    for (const [label] of this.metrics) {
+      const stats = this.getStats(label);
+      if (stats) {
+        report[label] = stats;
+      }
+    }
+    return report;
+  }
+  reset() {
+    this.metrics.clear();
+  }
+  setEnabled(enabled) {
+    this.enabled = enabled;
+  }
+  logResults() {
+    if (!this.enabled) {
+      return;
+    }
+    const report = this.getAllStats();
+    if (Object.keys(report).length === 0) {
+      return;
+    }
+    console.group("\u{1F680} Pangu.js Performance Report");
+    console.table(report);
+    console.groupEnd();
+  }
+}
 function once(func) {
   let executed = false;
   return function(...args2) {
@@ -281,9 +343,11 @@ function debounce(func, delay, mustRunDelay = Infinity) {
 }
 class BrowserPangu extends Pangu {
   constructor() {
+    var _a;
     super();
     __publicField(this, "isAutoSpacingPageExecuted");
     __publicField(this, "autoSpacingPageObserver");
+    __publicField(this, "performanceMonitor");
     __publicField(this, "blockTags");
     __publicField(this, "ignoredTags");
     __publicField(this, "presentationalTags");
@@ -292,6 +356,8 @@ class BrowserPangu extends Pangu {
     __publicField(this, "ignoredClass");
     this.isAutoSpacingPageExecuted = false;
     this.autoSpacingPageObserver = null;
+    const isDevelopment = typeof process !== "undefined" && ((_a = process.env) == null ? void 0 : _a.NODE_ENV) === "development";
+    this.performanceMonitor = new PerformanceMonitor(isDevelopment);
     this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
     this.ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
     this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
@@ -334,17 +400,24 @@ class BrowserPangu extends Pangu {
     this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
   }
   spacingPage() {
-    this.spacingPageTitle();
-    this.spacingPageBody();
+    this.performanceMonitor.measure("spacingPage", () => {
+      this.spacingPageTitle();
+      this.spacingPageBody();
+    });
+    this.performanceMonitor.logResults();
   }
   spacingPageTitle() {
-    const titleElement = document.querySelector("head > title");
-    if (titleElement) {
-      this.spacingNode(titleElement);
-    }
+    this.performanceMonitor.measure("spacingPageTitle", () => {
+      const titleElement = document.querySelector("head > title");
+      if (titleElement) {
+        this.spacingNode(titleElement);
+      }
+    });
   }
   spacingPageBody() {
-    this.spacingNode(document.body);
+    this.performanceMonitor.measure("spacingPageBody", () => {
+      this.spacingNode(document.body);
+    });
   }
   spacingNode(contextNode) {
     this.spacingNodeWithTreeWalker(contextNode);
@@ -607,8 +680,12 @@ class BrowserPangu extends Pangu {
     if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
       return;
     }
-    const textNodes = this.collectTextNodes(contextNode, true);
-    this.processTextNodes(textNodes);
+    const textNodes = this.performanceMonitor.measure("collectTextNodes", () => {
+      return this.collectTextNodes(contextNode, true);
+    });
+    this.performanceMonitor.measure("processTextNodes", () => {
+      this.processTextNodes(textNodes);
+    });
   }
   setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs) {
     if (this.autoSpacingPageObserver) {
@@ -677,6 +754,25 @@ class BrowserPangu extends Pangu {
       subtree: true
       // Need subtree to observe text node changes inside title
     });
+  }
+  // Performance monitoring methods
+  enablePerformanceMonitoring() {
+    this.performanceMonitor.setEnabled(true);
+  }
+  disablePerformanceMonitoring() {
+    this.performanceMonitor.setEnabled(false);
+  }
+  getPerformanceReport() {
+    return this.performanceMonitor.getAllStats();
+  }
+  getPerformanceStats(label) {
+    return this.performanceMonitor.getStats(label);
+  }
+  resetPerformanceMetrics() {
+    this.performanceMonitor.reset();
+  }
+  logPerformanceResults() {
+    this.performanceMonitor.logResults();
   }
 }
 const pangu = new BrowserPangu();

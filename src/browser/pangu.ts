@@ -6,6 +6,94 @@ export interface AutoSpacingPageConfig {
   nodeMaxWaitMs?: number;
 }
 
+export interface PerformanceStats {
+  count: number;
+  avg: number;
+  min: number;
+  max: number;
+  total: number;
+}
+
+export interface PerformanceReport {
+  [key: string]: PerformanceStats;
+}
+
+class PerformanceMonitor {
+  private metrics: Map<string, number[]> = new Map();
+  private enabled: boolean;
+
+  constructor(enabled = false) {
+    this.enabled = enabled;
+  }
+
+  measure<T>(label: string, fn: () => T): T {
+    if (!this.enabled) {
+      return fn();
+    }
+
+    const start = performance.now();
+    const result = fn();
+    const duration = performance.now() - start;
+    
+    if (!this.metrics.has(label)) {
+      this.metrics.set(label, []);
+    }
+    this.metrics.get(label)!.push(duration);
+    
+    return result;
+  }
+
+  getStats(label: string): PerformanceStats | null {
+    const times = this.metrics.get(label);
+    if (!times || times.length === 0) {
+      return null;
+    }
+
+    const total = times.reduce((a, b) => a + b, 0);
+    return {
+      count: times.length,
+      avg: total / times.length,
+      min: Math.min(...times),
+      max: Math.max(...times),
+      total
+    };
+  }
+
+  getAllStats(): PerformanceReport {
+    const report: PerformanceReport = {};
+    for (const [label] of this.metrics) {
+      const stats = this.getStats(label);
+      if (stats) {
+        report[label] = stats;
+      }
+    }
+    return report;
+  }
+
+  reset(): void {
+    this.metrics.clear();
+  }
+
+  setEnabled(enabled: boolean): void {
+    this.enabled = enabled;
+  }
+
+  logResults(): void {
+    if (!this.enabled) {
+      return;
+    }
+
+    const report = this.getAllStats();
+    if (Object.keys(report).length === 0) {
+      return;
+    }
+
+    console.group('🚀 Pangu.js Performance Report');
+    console.table(report);
+    console.groupEnd();
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function once<T extends (...args: any[]) => any>(func: T) {
   let executed = false;
@@ -48,6 +136,7 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 export class BrowserPangu extends Pangu {
   public isAutoSpacingPageExecuted: boolean;
   protected autoSpacingPageObserver: MutationObserver | null;
+  protected performanceMonitor: PerformanceMonitor;
 
   public blockTags: RegExp;
   public ignoredTags: RegExp;
@@ -61,6 +150,10 @@ export class BrowserPangu extends Pangu {
 
     this.isAutoSpacingPageExecuted = false;
     this.autoSpacingPageObserver = null;
+    
+    // Enable performance monitoring in development mode
+    const isDevelopment = typeof process !== 'undefined' && process.env?.NODE_ENV === 'development';
+    this.performanceMonitor = new PerformanceMonitor(isDevelopment);
 
     this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
     this.ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
@@ -112,25 +205,32 @@ export class BrowserPangu extends Pangu {
   }
 
   public spacingPage() {
-    this.spacingPageTitle();
-    this.spacingPageBody();
+    this.performanceMonitor.measure('spacingPage', () => {
+      this.spacingPageTitle();
+      this.spacingPageBody();
+    });
+    this.performanceMonitor.logResults();
   }
 
   public spacingPageTitle() {
-    const titleElement = document.querySelector('head > title');
-    if (titleElement) {
-      this.spacingNode(titleElement);
-    }
+    this.performanceMonitor.measure('spacingPageTitle', () => {
+      const titleElement = document.querySelector('head > title');
+      if (titleElement) {
+        this.spacingNode(titleElement);
+      }
+    });
   }
 
   public spacingPageBody() {
-    // Process the entire body element
-    // The collectTextNodes method already filters out:
-    // 1. Whitespace-only text nodes
-    // 2. Text inside ignored tags (script, style, textarea, etc.)
-    // 3. Text inside contentEditable elements
-    // 4. Text inside elements with no-pangu-spacing class
-    this.spacingNode(document.body);
+    this.performanceMonitor.measure('spacingPageBody', () => {
+      // Process the entire body element
+      // The collectTextNodes method already filters out:
+      // 1. Whitespace-only text nodes
+      // 2. Text inside ignored tags (script, style, textarea, etc.)
+      // 3. Text inside contentEditable elements
+      // 4. Text inside elements with no-pangu-spacing class
+      this.spacingNode(document.body);
+    });
   }
 
   public spacingNode(contextNode: Node) {
@@ -503,10 +603,14 @@ export class BrowserPangu extends Pangu {
     }
 
     // Use TreeWalker to collect text nodes with content
-    const textNodes = this.collectTextNodes(contextNode, true);
+    const textNodes = this.performanceMonitor.measure('collectTextNodes', () => {
+      return this.collectTextNodes(contextNode, true);
+    });
 
     // Process the collected text nodes using the shared logic
-    this.processTextNodes(textNodes);
+    this.performanceMonitor.measure('processTextNodes', () => {
+      this.processTextNodes(textNodes);
+    });
   }
 
   protected setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number) {
@@ -602,6 +706,32 @@ export class BrowserPangu extends Pangu {
       childList: true,
       subtree: true, // Need subtree to observe text node changes inside title
     });
+  }
+
+  // Performance monitoring methods
+
+  public enablePerformanceMonitoring(): void {
+    this.performanceMonitor.setEnabled(true);
+  }
+
+  public disablePerformanceMonitoring(): void {
+    this.performanceMonitor.setEnabled(false);
+  }
+
+  public getPerformanceReport(): PerformanceReport {
+    return this.performanceMonitor.getAllStats();
+  }
+
+  public getPerformanceStats(label: string): PerformanceStats | null {
+    return this.performanceMonitor.getStats(label);
+  }
+
+  public resetPerformanceMetrics(): void {
+    this.performanceMonitor.reset();
+  }
+
+  public logPerformanceResults(): void {
+    this.performanceMonitor.logResults();
   }
 }
 
