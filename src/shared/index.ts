@@ -69,11 +69,16 @@ const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, 'g');
 const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([\\+\\-\\*=&])([A-Za-z0-9])`, 'g');
 const ANS_OPERATOR_CJK = new RegExp(`([A-Za-z0-9])([\\+\\-\\*=&])([${CJK}])`, 'g');
 // Handle operators between alphanumeric characters when CJK is present in text
-// But exclude hyphens that are part of compound words
+// Note: This pattern excludes hyphens entirely (only + * = &) to avoid conflicts with compound words
 const ANS_OPERATOR_ANS = new RegExp(`([A-Za-z0-9])([\\+\\*=&])([A-Za-z0-9])`, 'g');
-// Special pattern for hyphens that are NOT part of compound words or dates
-// Space hyphens in these cases: letter-letter, letter-number, number-letter, version ranges (letter+number-number)
-// But NOT: pure number-number (dates like 2016-12-26)
+
+// Hyphens that should be treated as operators (with spaces) rather than word connectors
+// This regex has 3 patterns to catch different cases while preserving compound words:
+// 1. Letter-Letter/Number: A-B, X-5 (spaces added) BUT NOT co-author, X-ray, GPT-5 (preserved)
+// 2. Mixed alphanumeric-number patterns that aren't already protected as compound words
+// 3. Number-Letter: 5-A, 3-B (spaces added) BUT NOT 5-year, 2016-12-26 (preserved)
+// Note: Patterns like GPT4-5, v1-2 are protected by COMPOUND_WORD_PATTERN and won't get spaces
+// The negative lookahead (?![a-z]) prevents matching hyphens followed by lowercase letters
 const ANS_HYPHEN_ANS_NOT_COMPOUND = new RegExp(`([A-Za-z])(-(?![a-z]))([A-Za-z0-9])|([A-Za-z]+[0-9]+)(-(?![a-z]))([0-9])|([0-9])(-(?![a-z0-9]))([A-Za-z])`, 'g');
 
 // Slash patterns for operator vs separator behavior
@@ -96,7 +101,8 @@ const GREATER_THAN_CJK = new RegExp(`([A-Za-z0-9])(>)([${CJK}])`, 'g');
 const ANS_LESS_THAN_ANS = new RegExp(`([A-Za-z0-9])(<)([A-Za-z0-9])`, 'g');
 const ANS_GREATER_THAN_ANS = new RegExp(`([A-Za-z0-9])(>)([A-Za-z0-9])`, 'g');
 
-// The bracket part only includes ( ) [ ] { } < > “ ”
+// Bracket patterns: ( ) [ ] { } and also < > (though < > are also handled as operators separately)
+// Note: The curly quotes " " (\u201c \u201d) appear in CJK_LEFT_BRACKET/RIGHT_BRACKET_CJK but are primarily handled in the patterns below
 const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>\u201c])`, 'g');
 const RIGHT_BRACKET_CJK = new RegExp(`([\\)\\]\\}<>\u201d])([${CJK}])`, 'g');
 const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([A-Za-z0-9${CJK}])[ ]*([\u201c])([A-Za-z0-9${CJK}\\-_ ]+)([\u201d])`, 'g');
