@@ -19,6 +19,17 @@
 - [x] Pipe character `|`: Now correctly treated as separator (#194)
 - [x] Filesystem paths: Special characters in paths preserved (#209, #218, #219)
 
+### XPath to TreeWalker Migration (Phases 1-6)
+
+- [x] **Phase 1**: Create TreeWalker text collection helper (`collectTextNodes`)
+- [x] **Phase 2**: Migrate `spacingNode()` method from XPath to TreeWalker
+- [x] **Phase 3**: Extract core processing logic into `processTextNodes()`
+- [x] **Phase 4**: Migrate `spacingElementByTagName()` and `spacingElementById()`
+- [x] **Phase 5**: Migrate `spacingElementByClassName()` and page methods
+- [x] **Phase 6**: Remove XPath infrastructure completely
+- **Result**: Achieved 5.5x performance improvement in text node traversal
+- Fixed whitespace detection issue between span elements
+
 ## In Progress
 
 No task in progress
@@ -27,14 +38,17 @@ No task in progress
 
 ### High Priority
 
-- [x] Migrate XPath query to `TreeWalker` (COMPLETED)
-  - https://developer.mozilla.org/en-US/docs/Web/API/TreeWalker
-  - Achieved 5.5x performance improvement
-- [ ] Use `requestIdleCallback()` for checking CSS visibility
+- [ ] **Phase 7-10: requestIdleCallback Integration**
+  - [ ] Phase 7: Add performance monitoring and establish baseline
+  - [ ] Phase 8: Add requestIdleCallback polyfill and IdleQueue infrastructure
+  - [ ] Phase 9: Make initial page spacing non-blocking with chunking
+  - [ ] Phase 10: Extend idle processing to MutationObserver for dynamic content
+- [ ] **CSS Visibility Check with requestIdleCallback**
   - Check computed styles during idle time to detect visually hidden elements
   - Avoid adding spaces between hidden and visible elements (e.g., screen-reader-only text)
   - Make it opt-in via configuration to maintain backward compatibility
   - Related to issue with hidden-adjacent-node.html fixture where pangu.js adds space after visually hidden "Description:" element
+  - Consider common patterns: sr-only, visually-hidden, clip: rect(1px)
 
 ### Medium Priority
 

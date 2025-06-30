@@ -247,6 +247,7 @@ export class BrowserPangu extends Pangu {
     return false;
   }
 
+
   protected isFirstTextChild(parentNode: Node, targetNode: Node) {
     const { childNodes } = parentNode;
 
