@@ -9,7 +9,7 @@ const __dirname = dirname(__filename);
 
 describe('CLI', () => {
   const cliPath = resolve(__dirname, '../../dist/node/cli.js');
-  const fixtureDir = resolve(__dirname, '../fixtures');
+  const fixtureDir = resolve(__dirname, '../../fixtures');
   const tempFile = join(fixtureDir, 'temp_test.txt');
 
   afterEach(() => {

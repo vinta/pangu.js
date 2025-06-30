@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 describe('NodePangu', () => {
-  const fixtureDir = resolve(__dirname, '../fixtures');
+  const fixtureDir = resolve(__dirname, '../../fixtures');
 
   describe('spacingFile()', () => {
     it('handle text file asynchronously', async () => {
