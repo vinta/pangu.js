@@ -26,14 +26,27 @@ export interface IdleSpacingConfig {
     chunkSize: number;
     timeout: number;
 }
+export interface IdleSpacingCallbacks {
+    onComplete?: () => void;
+    onProgress?: (processed: number, total: number) => void;
+}
 declare class IdleQueue {
     private queue;
     private isProcessing;
     private requestIdleCallback;
+    private totalItems;
+    private processedItems;
+    private callbacks;
     constructor();
     add(work: () => void): void;
     clear(): void;
+    setCallbacks(callbacks: IdleSpacingCallbacks): void;
     get length(): number;
+    get progress(): {
+        processed: number;
+        total: number;
+        percentage: number;
+    };
     private scheduleProcessing;
     private process;
 }
@@ -80,6 +93,7 @@ export declare class BrowserPangu extends Pangu {
     protected processTextNodes(textNodes: Node[]): void;
     protected collectTextNodes(contextNode: Node, reverse?: boolean): Text[];
     protected spacingNodeWithTreeWalker(contextNode: Node): void;
+    protected processTextNodesWithIdleCallback(textNodes: Node[], callbacks?: IdleSpacingCallbacks): void;
     protected setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number): void;
     enablePerformanceMonitoring(): void;
     disablePerformanceMonitoring(): void;
@@ -92,6 +106,13 @@ export declare class BrowserPangu extends Pangu {
     getIdleSpacingConfig(): IdleSpacingConfig;
     getIdleQueueLength(): number;
     clearIdleQueue(): void;
+    getIdleProgress(): {
+        processed: number;
+        total: number;
+        percentage: number;
+    };
+    spacingPageWithIdleCallback(callbacks?: IdleSpacingCallbacks): void;
+    spacingNodeWithIdleCallback(contextNode: Node, callbacks?: IdleSpacingCallbacks): void;
 }
 export declare const pangu: BrowserPangu;
 export default pangu;

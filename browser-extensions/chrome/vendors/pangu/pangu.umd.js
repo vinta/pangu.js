@@ -251,6 +251,9 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       __publicField(this, "queue", []);
       __publicField(this, "isProcessing", false);
       __publicField(this, "requestIdleCallback");
+      __publicField(this, "totalItems", 0);
+      __publicField(this, "processedItems", 0);
+      __publicField(this, "callbacks", {});
       if (typeof window.requestIdleCallback === "function") {
         this.requestIdleCallback = window.requestIdleCallback.bind(window);
       } else {
@@ -269,13 +272,27 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
     add(work) {
       this.queue.push(work);
+      this.totalItems++;
       this.scheduleProcessing();
     }
     clear() {
       this.queue.length = 0;
+      this.totalItems = 0;
+      this.processedItems = 0;
+      this.callbacks = {};
+    }
+    setCallbacks(callbacks) {
+      this.callbacks = callbacks;
     }
     get length() {
       return this.queue.length;
+    }
+    get progress() {
+      return {
+        processed: this.processedItems,
+        total: this.totalItems,
+        percentage: this.totalItems > 0 ? this.processedItems / this.totalItems * 100 : 0
+      };
     }
     scheduleProcessing() {
       if (!this.isProcessing && this.queue.length > 0) {
@@ -284,13 +301,20 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
     }
     process(deadline) {
+      var _a, _b, _c, _d;
       while (deadline.timeRemaining() > 0 && this.queue.length > 0) {
         const work = this.queue.shift();
         work == null ? void 0 : work();
+        this.processedItems++;
+        (_b = (_a = this.callbacks).onProgress) == null ? void 0 : _b.call(_a, this.processedItems, this.totalItems);
       }
       this.isProcessing = false;
       if (this.queue.length > 0) {
         this.scheduleProcessing();
+      } else if (this.processedItems === this.totalItems && this.totalItems > 0) {
+        (_d = (_c = this.callbacks).onComplete) == null ? void 0 : _d.call(_c);
+        this.totalItems = 0;
+        this.processedItems = 0;
       }
     }
   }
@@ -740,8 +764,35 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       const textNodes = this.performanceMonitor.measure("collectTextNodes", () => {
         return this.collectTextNodes(contextNode, true);
       });
-      this.performanceMonitor.measure("processTextNodes", () => {
-        this.processTextNodes(textNodes);
+      if (this.idleSpacingConfig.enabled) {
+        this.processTextNodesWithIdleCallback(textNodes);
+      } else {
+        this.performanceMonitor.measure("processTextNodes", () => {
+          this.processTextNodes(textNodes);
+        });
+      }
+    }
+    processTextNodesWithIdleCallback(textNodes, callbacks) {
+      var _a;
+      if (textNodes.length === 0) {
+        (_a = callbacks == null ? void 0 : callbacks.onComplete) == null ? void 0 : _a.call(callbacks);
+        return;
+      }
+      this.idleQueue.clear();
+      if (callbacks) {
+        this.idleQueue.setCallbacks(callbacks);
+      }
+      const chunkSize = this.idleSpacingConfig.chunkSize;
+      const chunks = [];
+      for (let i = 0; i < textNodes.length; i += chunkSize) {
+        chunks.push(textNodes.slice(i, i + chunkSize));
+      }
+      chunks.forEach((chunk, index) => {
+        this.idleQueue.add(() => {
+          this.performanceMonitor.measure(`processTextNodesChunk${index}`, () => {
+            this.processTextNodes(chunk);
+          });
+        });
       });
     }
     setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs) {
@@ -851,6 +902,35 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
     clearIdleQueue() {
       this.idleQueue.clear();
+    }
+    getIdleProgress() {
+      return this.idleQueue.progress;
+    }
+    spacingPageWithIdleCallback(callbacks) {
+      var _a;
+      if (!this.idleSpacingConfig.enabled) {
+        this.spacingPage();
+        (_a = callbacks == null ? void 0 : callbacks.onComplete) == null ? void 0 : _a.call(callbacks);
+        return;
+      }
+      this.spacingPageTitle();
+      this.spacingNodeWithIdleCallback(document.body, callbacks);
+    }
+    spacingNodeWithIdleCallback(contextNode, callbacks) {
+      var _a, _b;
+      if (!this.idleSpacingConfig.enabled) {
+        this.spacingNode(contextNode);
+        (_a = callbacks == null ? void 0 : callbacks.onComplete) == null ? void 0 : _a.call(callbacks);
+        return;
+      }
+      if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
+        (_b = callbacks == null ? void 0 : callbacks.onComplete) == null ? void 0 : _b.call(callbacks);
+        return;
+      }
+      const textNodes = this.performanceMonitor.measure("collectTextNodes", () => {
+        return this.collectTextNodes(contextNode, true);
+      });
+      this.processTextNodesWithIdleCallback(textNodes, callbacks);
     }
   }
   const pangu = new BrowserPangu();

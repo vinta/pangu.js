@@ -164,4 +164,139 @@ test.describe('Idle Processing Infrastructure', () => {
     expect(result.config2.chunkSize).toBe(5); // Preserved from first update
     expect(result.config2.timeout).toBe(1000); // New value
   });
+
+  test('should process page content with idle callbacks and chunking', async ({ page }) => {
+    await page.setContent(`
+      <div>
+        <p>測試中文abc混合內容123</p>
+        <span>更多測試text456</span>
+        <div>第三段content789</div>
+        <article>第四段material012</article>
+        <section>最後一段data345</section>
+      </div>
+    `);
+
+    const result = await page.evaluate(() => {
+      return new Promise((resolve) => {
+        // Enable idle spacing with small chunk size to test chunking
+        pangu.enableIdleSpacing({ chunkSize: 2 });
+
+        let progressUpdates: Array<{processed: number, total: number}> = [];
+        let completionCalled = false;
+
+        pangu.spacingPageWithIdleCallback({
+          onProgress: (processed, total) => {
+            progressUpdates.push({ processed, total });
+          },
+          onComplete: () => {
+            completionCalled = true;
+            const finalText = document.body.textContent;
+            const progress = pangu.getIdleProgress();
+            
+            resolve({
+              finalText,
+              progressUpdates,
+              completionCalled,
+              finalProgress: progress
+            });
+          }
+        });
+      });
+    });
+
+    expect(result.completionCalled).toBe(true);
+    expect(result.progressUpdates.length).toBeGreaterThan(0);
+    
+    // Should have spaced the content correctly
+    expect(result.finalText).toContain('測試中文 abc 混合內容 123');
+    expect(result.finalText).toContain('更多測試 text456');
+    expect(result.finalText).toContain('第三段 content789');
+
+    // Progress should start from 0 and end at 100%
+    const firstProgress = result.progressUpdates[0];
+    const lastProgress = result.progressUpdates[result.progressUpdates.length - 1];
+    
+    expect(firstProgress.processed).toBeGreaterThan(0);
+    expect(lastProgress.processed).toBe(lastProgress.total);
+    expect(result.finalProgress.percentage).toBe(100);
+  });
+
+  test('should provide progress tracking for idle processing', async ({ page }) => {
+    await page.setContent(`
+      <div>
+        <p>測試progress tracking功能</p>
+        <span>更多text content</span>
+      </div>
+    `);
+
+    const result = await page.evaluate(() => {
+      return new Promise((resolve) => {
+        // Enable idle spacing
+        pangu.enableIdleSpacing({ chunkSize: 1 }); // Very small chunks for more progress updates
+
+        const progressSnapshots: Array<{processed: number, total: number, percentage: number}> = [];
+
+        pangu.spacingNodeWithIdleCallback(document.body, {
+          onProgress: (processed, total) => {
+            const progress = pangu.getIdleProgress();
+            progressSnapshots.push(progress);
+          },
+          onComplete: () => {
+            const finalProgress = pangu.getIdleProgress();
+            resolve({
+              progressSnapshots,
+              finalProgress
+            });
+          }
+        });
+      });
+    });
+
+    expect(result.progressSnapshots.length).toBeGreaterThan(0);
+    
+    // Progress should increase monotonically
+    for (let i = 1; i < result.progressSnapshots.length; i++) {
+      const prev = result.progressSnapshots[i - 1];
+      const curr = result.progressSnapshots[i];
+      expect(curr.processed).toBeGreaterThanOrEqual(prev.processed);
+      expect(curr.percentage).toBeGreaterThanOrEqual(prev.percentage);
+    }
+
+    // Final progress should be 100%
+    expect(result.finalProgress.percentage).toBe(100);
+  });
+
+  test('should fallback to synchronous processing when idle spacing is disabled', async ({ page }) => {
+    await page.setContent(`
+      <div>
+        <p>測試synchronous fallback功能abc123</p>
+      </div>
+    `);
+
+    const result = await page.evaluate(() => {
+      return new Promise((resolve) => {
+        // Ensure idle spacing is disabled
+        pangu.disableIdleSpacing();
+
+        let completionCalled = false;
+
+        // This should fallback to synchronous processing and call onComplete immediately
+        pangu.spacingPageWithIdleCallback({
+          onComplete: () => {
+            completionCalled = true;
+            const text = document.body.textContent;
+            resolve({
+              completionCalled,
+              text,
+              idleEnabled: pangu.getIdleSpacingConfig().enabled
+            });
+          }
+        });
+      });
+    });
+
+    expect(result.completionCalled).toBe(true);
+    expect(result.idleEnabled).toBe(false);
+    expect(result.text).toContain('測試 synchronous fallback 功能 abc123');
+  });
 });

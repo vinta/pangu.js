@@ -33,10 +33,18 @@ export interface IdleSpacingConfig {
   timeout: number;
 }
 
+export interface IdleSpacingCallbacks {
+  onComplete?: () => void;
+  onProgress?: (processed: number, total: number) => void;
+}
+
 class IdleQueue {
   private queue: (() => void)[] = [];
   private isProcessing = false;
   private requestIdleCallback: (callback: IdleRequestCallback, options?: { timeout?: number }) => number;
+  private totalItems = 0;
+  private processedItems = 0;
+  private callbacks: IdleSpacingCallbacks = {};
 
   constructor() {
     // Simple fallback for Safari and other browsers without requestIdleCallback
@@ -61,15 +69,31 @@ class IdleQueue {
 
   add(work: () => void): void {
     this.queue.push(work);
+    this.totalItems++;
     this.scheduleProcessing();
   }
 
   clear(): void {
     this.queue.length = 0;
+    this.totalItems = 0;
+    this.processedItems = 0;
+    this.callbacks = {};
+  }
+
+  setCallbacks(callbacks: IdleSpacingCallbacks): void {
+    this.callbacks = callbacks;
   }
 
   get length(): number {
     return this.queue.length;
+  }
+
+  get progress(): { processed: number; total: number; percentage: number } {
+    return {
+      processed: this.processedItems,
+      total: this.totalItems,
+      percentage: this.totalItems > 0 ? (this.processedItems / this.totalItems) * 100 : 0
+    };
   }
 
   private scheduleProcessing(): void {
@@ -83,11 +107,22 @@ class IdleQueue {
     while (deadline.timeRemaining() > 0 && this.queue.length > 0) {
       const work = this.queue.shift();
       work?.();
+      this.processedItems++;
+      
+      // Call progress callback if provided
+      this.callbacks.onProgress?.(this.processedItems, this.totalItems);
     }
 
     this.isProcessing = false;
+    
     if (this.queue.length > 0) {
       this.scheduleProcessing();
+    } else if (this.processedItems === this.totalItems && this.totalItems > 0) {
+      // All work completed, call completion callback
+      this.callbacks.onComplete?.();
+      // Reset counters for next batch
+      this.totalItems = 0;
+      this.processedItems = 0;
     }
   }
 }
@@ -691,9 +726,46 @@ export class BrowserPangu extends Pangu {
       return this.collectTextNodes(contextNode, true);
     });
 
-    // Process the collected text nodes using the shared logic
-    this.performanceMonitor.measure('processTextNodes', () => {
-      this.processTextNodes(textNodes);
+    // Choose processing method based on idle spacing configuration
+    if (this.idleSpacingConfig.enabled) {
+      this.processTextNodesWithIdleCallback(textNodes);
+    } else {
+      // Process the collected text nodes using the shared logic (synchronous)
+      this.performanceMonitor.measure('processTextNodes', () => {
+        this.processTextNodes(textNodes);
+      });
+    }
+  }
+
+  protected processTextNodesWithIdleCallback(textNodes: Node[], callbacks?: IdleSpacingCallbacks): void {
+    if (textNodes.length === 0) {
+      callbacks?.onComplete?.();
+      return;
+    }
+
+    // Clear any existing work from previous calls
+    this.idleQueue.clear();
+
+    // Set up callbacks for progress tracking
+    if (callbacks) {
+      this.idleQueue.setCallbacks(callbacks);
+    }
+
+    // Split text nodes into chunks
+    const chunkSize = this.idleSpacingConfig.chunkSize;
+    const chunks: Node[][] = [];
+    
+    for (let i = 0; i < textNodes.length; i += chunkSize) {
+      chunks.push(textNodes.slice(i, i + chunkSize));
+    }
+
+    // Add each chunk as a work item to the idle queue
+    chunks.forEach((chunk, index) => {
+      this.idleQueue.add(() => {
+        this.performanceMonitor.measure(`processTextNodesChunk${index}`, () => {
+          this.processTextNodes(chunk);
+        });
+      });
     });
   }
 
@@ -843,6 +915,48 @@ export class BrowserPangu extends Pangu {
 
   public clearIdleQueue(): void {
     this.idleQueue.clear();
+  }
+
+  public getIdleProgress(): { processed: number; total: number; percentage: number } {
+    return this.idleQueue.progress;
+  }
+
+  public spacingPageWithIdleCallback(callbacks?: IdleSpacingCallbacks): void {
+    if (!this.idleSpacingConfig.enabled) {
+      // Fallback to synchronous processing if idle spacing is disabled
+      this.spacingPage();
+      callbacks?.onComplete?.();
+      return;
+    }
+
+    // Process title synchronously (it's typically small)
+    this.spacingPageTitle();
+    
+    // Process body with idle callback
+    this.spacingNodeWithIdleCallback(document.body, callbacks);
+  }
+
+  public spacingNodeWithIdleCallback(contextNode: Node, callbacks?: IdleSpacingCallbacks): void {
+    if (!this.idleSpacingConfig.enabled) {
+      // Fallback to synchronous processing if idle spacing is disabled
+      this.spacingNode(contextNode);
+      callbacks?.onComplete?.();
+      return;
+    }
+
+    // DocumentFragments don't support TreeWalker properly
+    if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
+      callbacks?.onComplete?.();
+      return;
+    }
+
+    // Use TreeWalker to collect text nodes with content
+    const textNodes = this.performanceMonitor.measure('collectTextNodes', () => {
+      return this.collectTextNodes(contextNode, true);
+    });
+
+    // Process with idle callback
+    this.processTextNodesWithIdleCallback(textNodes, callbacks);
   }
 }
 
