@@ -185,7 +185,7 @@ export class Pangu {
   version: string;
 
   constructor() {
-    this.version = '6.1.3';
+    this.version = '7.0.0';
   }
 
   public spacingText(text: string) {
