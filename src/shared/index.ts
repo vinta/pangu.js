@@ -37,7 +37,7 @@ const QUOTES_FULL = '\`"\u05f4'; // Backtick, straight quote, Hebrew punctuation
 
 // Brackets - different sets!
 const LEFT_BRACKETS_BASIC = '\\(\\[\\{'; // For AN_LEFT_BRACKET
-const RIGHT_BRACKETS_BASIC = '\\)\\]\\}'; // For RIGHT_BRACKET_AN  
+const RIGHT_BRACKETS_BASIC = '\\)\\]\\}'; // For RIGHT_BRACKET_AN
 const LEFT_BRACKETS_EXTENDED = '\\(\\[\\{<>\u201c'; // For CJK_LEFT_BRACKET (includes angle brackets + curly quote)
 const RIGHT_BRACKETS_EXTENDED = '\\)\\]\\}<>\u201d'; // For RIGHT_BRACKET_CJK
 
@@ -336,17 +336,12 @@ export class Pangu {
     newText = newText.replace(ANS_GREATER_THAN_ANS, '$1 $2 $3');
 
     // Add space before filesystem paths after CJK
-    // Unix absolute paths: "和/root" -> "和 /root"
     newText = newText.replace(CJK_UNIX_ABSOLUTE_FILE_PATH, '$1 $2');
-    // Unix relative paths: "檢查src/main.py" -> "檢查 src/main.py"
     newText = newText.replace(CJK_UNIX_RELATIVE_FILE_PATH, '$1 $2');
-    // Windows paths: "檔案在C:\Users" -> "檔案在 C:\Users"
     newText = newText.replace(CJK_WINDOWS_PATH, '$1 $2');
 
     // Add space after Unix paths ending with / before CJK
-    // Absolute paths: "/home/與" -> "/home/ 與"
     newText = newText.replace(UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK, '$1 $2');
-    // Relative paths: "build/temp/目錄" -> "build/temp/ 目錄"
     newText = newText.replace(UNIX_RELATIVE_FILE_PATH_SLASH_CJK, '$1 $2');
 
     // Context-aware slash handling: single slash = operator, multiple slashes = separator
