@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Expected Result - After Pangu.js Processing</title>
+    <style>
+        .highlight { background-color: yellow; }
+    </style>
+</head>
+<body>
+    <h2>Expected Results After Pangu.js Processing</h2>
+    
+    <!-- Expected: 社 "DF -->
+    <div class="test-case">
+        <h3>Test 1: 社"DF → 社 "DF</h3>
+        <div>
+            <span>社</span><span class="highlight"> "</span><span>DF</span>
+        </div>
+    </div>
+
+    <!-- Expected: 前面的文字 "中间的内容" 后面的文字 -->
+    <div class="test-case">
+        <h3>Test 2: Complex Quote Structure</h3>
+        <div>
+            前面的文字<span class="highlight"> "</span><span>中间的内容</span><span class="highlight">" </span>后面的文字
+        </div>
+    </div>
+
+    <!-- Expected: 【UCG 中字】"數毛社" DF 的《戰神 4》全新演示解析 -->
+    <div class="test-case">
+        <h3>Test 3: Full Example from Issue</h3>
+        <div>
+            【UCG<span class="highlight"> </span>中字】<span class="highlight">"</span>數毛社<span class="highlight">" </span>DF<span class="highlight"> </span>的《戰神<span class="highlight"> </span>4》全新演示解析
+        </div>
+    </div>
+
+    <script>
+        // Visual demonstration of what should happen
+        document.querySelectorAll('.highlight').forEach(el => {
+            el.title = 'Space added by pangu.js';
+        });
+    </script>
+</body>
+</html>

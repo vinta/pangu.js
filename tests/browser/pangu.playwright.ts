@@ -231,6 +231,77 @@ test.describe('BrowserPangu', () => {
       const inputValue = await page.inputValue('#input');
       expect(inputValue).toBe('測試text123');
     });
+
+    // Test for fragmented text nodes issue - Test Case 1
+    test('should handle simple fragmented text nodes: 社"DF', async ({ page }) => {
+      await page.setContent('<div id="test1"><span>社</span>"<span>DF</span></div>');
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test1'));
+      });
+      const result1 = await page.evaluate(() => document.getElementById('test1').textContent);
+      expect(result1).toBe('社 "DF');
+    });
+
+    // Test Case 2: Complex quote structure  
+    test('should handle complex quote structure', async ({ page }) => {
+      await page.setContent('<div id="test2">前面的文字"<span>中间的内容</span>"后面的文字</div>');
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test2'));
+      });
+      const result2 = await page.evaluate(() => document.getElementById('test2').textContent);
+      expect(result2).toBe('前面的文字 "中间的内容" 后面的文字');
+    });
+
+    // Test Case 3: Full example from GitHub issue
+    test('should handle full example from GitHub issue', async ({ page }) => {
+      await page.setContent('<div id="test3">【UCG中字】"數毛社"DF的《戰神4》全新演示解析</div>');
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test3'));
+      });
+      const result3 = await page.evaluate(() => document.getElementById('test3').textContent);
+      expect(result3).toBe('【UCG 中字】"數毛社" DF 的《戰神 4》全新演示解析');
+    });
+
+    // Analyze why fragmented nodes might fail
+    test('should analyze fragmented text node processing', async ({ page }) => {
+      await page.setContent('<div id="test"><span>社</span>"<span>DF</span></div>');
+      
+      const analysis = await page.evaluate(() => {
+        const container = document.getElementById('test');
+        const before = [];
+        const after = [];
+        
+        // Collect nodes before processing
+        for (let i = 0; i < container.childNodes.length; i++) {
+          const node = container.childNodes[i];
+          before.push({
+            nodeType: node.nodeType,
+            nodeName: node.nodeName,
+            textContent: node.textContent,
+            nodeValue: node.nodeValue
+          });
+        }
+        
+        // Process with pangu
+        pangu.spacingNode(container);
+        
+        // Collect nodes after processing
+        for (let i = 0; i < container.childNodes.length; i++) {
+          const node = container.childNodes[i];
+          after.push({
+            nodeType: node.nodeType,
+            nodeName: node.nodeName,
+            textContent: node.textContent,
+            nodeValue: node.nodeValue
+          });
+        }
+        
+        return { before, after, finalText: container.textContent };
+      });
+      
+      console.log('Fragmented node analysis:', JSON.stringify(analysis, null, 2));
+      expect(analysis.finalText).toBe('社 "DF');
+    });
   });
 
   // FIXME

@@ -161,10 +161,10 @@ export class BrowserPangu extends Pangu {
   }
 
   public spacingNode(contextNode: Node) {
-    let xPathQuery = './/*/text()[normalize-space(.)]';
-    if (contextNode instanceof Element && contextNode.children && contextNode.children.length === 0) {
-      xPathQuery = './/text()[normalize-space(.)]';
-    }
+    // Use .//text() to include all text nodes, not just those that are children of elements
+    // This handles cases like <div><span>社</span>"<span>DF</span></div>
+    // where the quote is a direct child of the div
+    const xPathQuery = './/text()[normalize-space(.)]';
     this.spacingNodeByXPath(xPathQuery, contextNode);
   }
 
@@ -206,31 +206,8 @@ export class BrowserPangu extends Pangu {
         continue;
       }
 
-      if (currentTextNode.parentNode && this.isSpecificTag(currentTextNode.parentNode, this.presentationalTags) && !this.isInsideSpecificTag(currentTextNode.parentNode, this.ignoredTags)) {
-        const elementNode = currentTextNode.parentNode;
-
-        if (elementNode.previousSibling) {
-          const { previousSibling } = elementNode;
-          if (previousSibling.nodeType === Node.TEXT_NODE) {
-            const testText = (previousSibling as Text).data.slice(-1) + (currentTextNode as Text).data.charAt(0);
-            const testNewText = this.spacingText(testText);
-            if (testText !== testNewText) {
-              (previousSibling as Text).data = `${(previousSibling as Text).data} `;
-            }
-          }
-        }
-
-        if (elementNode.nextSibling) {
-          const { nextSibling } = elementNode;
-          if (nextSibling.nodeType === Node.TEXT_NODE) {
-            const testText = (currentTextNode as Text).data.slice(-1) + (nextSibling as Text).data.charAt(0);
-            const testNewText = this.spacingText(testText);
-            if (testText !== testNewText) {
-              (nextSibling as Text).data = ` ${(nextSibling as Text).data}`;
-            }
-          }
-        }
-      }
+      // Skip presentational tag handling - it's causing issues with fragmented nodes
+      // The main spacing logic below handles most cases correctly
 
       if (this.canIgnoreNode(currentTextNode)) {
         nextTextNode = currentTextNode;
@@ -238,9 +215,25 @@ export class BrowserPangu extends Pangu {
       }
 
       if (currentTextNode instanceof Text) {
-        const newText = this.spacingText(currentTextNode.data);
-        if (currentTextNode.data !== newText) {
-          currentTextNode.data = newText;
+        // Special handling for standalone quote nodes
+        if (currentTextNode.data.length === 1 && (currentTextNode.data === '"' || currentTextNode.data === '"' || currentTextNode.data === '"')) {
+          // Check context to determine if space is needed before the quote
+          if (currentTextNode.previousSibling) {
+            const prevNode = currentTextNode.previousSibling;
+            if (prevNode.nodeType === Node.ELEMENT_NODE && prevNode.textContent) {
+              const lastChar = prevNode.textContent.slice(-1);
+              // If previous element ends with CJK, add space before quote
+              if (/[\u4e00-\u9fff]/.test(lastChar)) {
+                currentTextNode.data = ` ${currentTextNode.data}`;
+              }
+            }
+          }
+        } else {
+          // Normal text processing
+          const newText = this.spacingText(currentTextNode.data);
+          if (currentTextNode.data !== newText) {
+            currentTextNode.data = newText;
+          }
         }
       }
 
@@ -258,9 +251,35 @@ export class BrowserPangu extends Pangu {
         if (!(currentTextNode instanceof Text) || !(nextTextNode instanceof Text)) {
           continue;
         }
+        
+        // Check if there's already proper spacing between nodes
+        const currentEndsWithSpace = currentTextNode.data.endsWith(' ');
+        const nextStartsWithSpace = nextTextNode.data.startsWith(' ');
+        
+        // If either node already has space at the boundary, skip processing
+        if (currentEndsWithSpace || nextStartsWithSpace) {
+          nextTextNode = currentTextNode;
+          continue;
+        }
+        
         const testText = currentTextNode.data.slice(-1) + nextTextNode.data.slice(0, 1);
         const testNewText = this.spacingText(testText);
-        if (testNewText !== testText) {
+        
+        // Special handling for quotes to prevent breaking quoted content
+        const currentLast = currentTextNode.data.slice(-1);
+        const nextFirst = nextTextNode.data.slice(0, 1);
+        const isQuote = (char: string) => char === '"' || char === '"' || char === '"';
+        const isCJK = (char: string) => /[\u4e00-\u9fff]/.test(char);
+        
+        // Skip spacing in these cases:
+        // 1. Quote followed by CJK (e.g., "中)
+        // 2. CJK followed by quote (e.g., 容")
+        const skipSpacing = (
+          (isQuote(currentLast) && isCJK(nextFirst)) ||
+          (isCJK(currentLast) && isQuote(nextFirst))
+        );
+        
+        if (testNewText !== testText && !skipSpacing) {
           // 往上找 nextTextNode 的 parent node
           // 直到遇到 spaceSensitiveTags
           // 而且 nextTextNode 必須是第一個 text child
@@ -287,21 +306,21 @@ export class BrowserPangu extends Pangu {
               if (!this.ignoredTags.test(nextNode.nodeName) && !this.blockTags.test(nextNode.nodeName)) {
                 if (nextTextNode.previousSibling) {
                   if (!this.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
-                    if (nextTextNode instanceof Text) {
+                    if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
                       nextTextNode.data = ` ${nextTextNode.data}`;
                     }
                   }
                 } else {
                   // dirty hack
                   if (!this.canIgnoreNode(nextTextNode)) {
-                    if (nextTextNode instanceof Text) {
+                    if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
                       nextTextNode.data = ` ${nextTextNode.data}`;
                     }
                   }
                 }
               }
             } else if (!this.spaceSensitiveTags.test(currentNode.nodeName)) {
-              if (currentTextNode instanceof Text) {
+              if (currentTextNode instanceof Text && !currentTextNode.data.endsWith(' ')) {
                 currentTextNode.data = `${currentTextNode.data} `;
               }
             } else {

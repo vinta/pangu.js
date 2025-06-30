@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Detailed Browser Test</title>
+</head>
+<body>
+    <h2>Test Case 2 Detailed Analysis</h2>
+    
+    <div id="test">前面的文字"<span>中间的内容</span>"后面的文字</div>
+    
+    <pre id="output"></pre>
+    
+    <script src="../../dist/browser/pangu.umd.js"></script>
+    <script>
+        const container = document.getElementById('test');
+        const output = document.getElementById('output');
+        
+        function analyzeBeforeAfter() {
+            let result = 'BEFORE PROCESSING:\n';
+            result += `Full text: "${container.textContent}"\n\n`;
+            
+            result += 'Nodes:\n';
+            for (let i = 0; i < container.childNodes.length; i++) {
+                const node = container.childNodes[i];
+                if (node.nodeType === Node.TEXT_NODE) {
+                    result += `[${i}] TEXT: "${node.textContent}"\n`;
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    result += `[${i}] <${node.tagName.toLowerCase()}>: "${node.textContent}"\n`;
+                }
+            }
+            
+            // Apply spacing
+            window.pangu.spacingNode(container);
+            
+            result += '\n\nAFTER PROCESSING:\n';
+            result += `Full text: "${container.textContent}"\n\n`;
+            
+            result += 'Nodes:\n';
+            for (let i = 0; i < container.childNodes.length; i++) {
+                const node = container.childNodes[i];
+                if (node.nodeType === Node.TEXT_NODE) {
+                    result += `[${i}] TEXT: "${node.textContent}"\n`;
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    result += `[${i}] <${node.tagName.toLowerCase()}>: "${node.textContent}"\n`;
+                    // Check child nodes
+                    for (let j = 0; j < node.childNodes.length; j++) {
+                        const child = node.childNodes[j];
+                        if (child.nodeType === Node.TEXT_NODE) {
+                            result += `    [${j}] TEXT: "${child.textContent}"\n`;
+                        }
+                    }
+                }
+            }
+            
+            result += '\n\nEXPECTED: "前面的文字 "中间的内容" 后面的文字"\n';
+            result += `ACTUAL:   "${container.textContent}"`;
+            
+            output.textContent = result;
+        }
+        
+        // Also test what the shared logic would produce
+        const testShared = window.pangu.spacingText('前面的文字"中间的内容"后面的文字');
+        console.log('Shared logic result:', testShared);
+        
+        analyzeBeforeAfter();
+    </script>
+</body>
+</html>

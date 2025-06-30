@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Debug Fragmented Nodes - Step by Step</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-case { border: 1px solid #ddd; padding: 15px; margin: 10px 0; }
+        .before { background: #ffeeee; }
+        .after { background: #eeffee; }
+        .debug { background: #333; color: #0f0; padding: 10px; font-family: monospace; white-space: pre; }
+        button { margin: 5px; padding: 5px 10px; }
+    </style>
+</head>
+<body>
+    <h1>Debugging Fragmented Text Node Processing</h1>
+    
+    <div class="test-case">
+        <h3>Test Case: <span>社</span>"<span>DF</span></h3>
+        <div id="test" class="before">
+            <span>社</span>"<span>DF</span>
+        </div>
+        <button onclick="analyzeStep()">Analyze Step by Step</button>
+        <button onclick="applyPangu()">Apply Pangu</button>
+        <button onclick="reset()">Reset</button>
+        <div id="debug" class="debug"></div>
+    </div>
+
+    <script src="../../dist/browser/pangu.umd.js"></script>
+    <script>
+        const originalHTML = '<span>社</span>"<span>DF</span>';
+        
+        function reset() {
+            document.getElementById('test').innerHTML = originalHTML;
+            document.getElementById('test').className = 'before';
+            document.getElementById('debug').textContent = 'Reset to original state';
+        }
+        
+        function analyzeStep() {
+            const container = document.getElementById('test');
+            const debug = document.getElementById('debug');
+            let output = 'Step-by-step analysis:\n\n';
+            
+            // Analyze current structure
+            output += '1. Current DOM structure:\n';
+            for (let i = 0; i < container.childNodes.length; i++) {
+                const node = container.childNodes[i];
+                if (node.nodeType === Node.TEXT_NODE) {
+                    output += `   [${i}] TEXT: "${node.textContent}"\n`;
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    output += `   [${i}] <${node.tagName.toLowerCase()}>: "${node.textContent}"\n`;
+                }
+            }
+            
+            // Simulate what pangu would do
+            output += '\n2. What pangu.spacingNodeByXPath would process:\n';
+            
+            // XPath would select text nodes
+            const xPathQuery = './/*/text()[normalize-space(.)]';
+            const textNodes = document.evaluate(xPathQuery, container, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+            
+            output += `   Found ${textNodes.snapshotLength} text nodes via XPath\n`;
+            
+            for (let i = textNodes.snapshotLength - 1; i >= 0; i--) {
+                const textNode = textNodes.snapshotItem(i);
+                output += `\n   Processing text node [${i}]: "${textNode.textContent}"\n`;
+                
+                if (textNode.parentNode && textNode.parentNode.nodeName === 'SPAN') {
+                    output += `   - Parent is <span>\n`;
+                    output += `   - Checking presentational tag handling...\n`;
+                    
+                    const elementNode = textNode.parentNode;
+                    if (elementNode.previousSibling) {
+                        output += `   - Previous sibling exists: `;
+                        if (elementNode.previousSibling.nodeType === Node.TEXT_NODE) {
+                            output += `TEXT "${elementNode.previousSibling.textContent}"\n`;
+                            
+                            // This is what the code does
+                            const testText = elementNode.previousSibling.textContent.slice(-1) + textNode.textContent.charAt(0);
+                            output += `   - Testing: "${testText}" (last char of prev + first char of current)\n`;
+                            
+                            // Simulate spacing
+                            const spacedTest = testText.replace(/([一-龥])([a-zA-Z])/, '$1 $2')
+                                                      .replace(/([\"\"])([a-zA-Z])/, '$1 $2');
+                            
+                            if (testText !== spacedTest) {
+                                output += `   - Space needed! Would change to: "${spacedTest}"\n`;
+                                output += `   - BUT: The code adds space to previousSibling, not current node!\n`;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            debug.textContent = output;
+        }
+        
+        function applyPangu() {
+            const container = document.getElementById('test');
+            const debug = document.getElementById('debug');
+            
+            // Apply pangu
+            window.pangu.spacingNode(container);
+            
+            // Show result
+            container.className = 'after';
+            
+            let output = 'After applying pangu:\n\n';
+            output += `Final text: "${container.textContent}"\n\n`;
+            output += 'Final DOM structure:\n';
+            
+            for (let i = 0; i < container.childNodes.length; i++) {
+                const node = container.childNodes[i];
+                if (node.nodeType === Node.TEXT_NODE) {
+                    output += `   [${i}] TEXT: "${node.textContent}"\n`;
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    output += `   [${i}] <${node.tagName.toLowerCase()}>: "${node.textContent}"\n`;
+                }
+            }
+            
+            debug.textContent = output;
+        }
+        
+        // Auto-analyze on load
+        window.addEventListener('DOMContentLoaded', analyzeStep);
+    </script>
+</body>
+</html>
