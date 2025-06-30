@@ -336,154 +336,33 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.spacingPageBody();
     }
     spacingPageTitle() {
-      const xPathQuery = "/html/head/title/text()";
-      this.spacingNodeByXPath(xPathQuery, document);
+      const titleElement = document.querySelector("head > title");
+      if (titleElement) {
+        this.spacingNode(titleElement);
+      }
     }
     spacingPageBody() {
-      let xPathQuery = "/html/body//*/text()[normalize-space(.)]";
-      for (const tag of ["script", "style", "textarea"]) {
-        xPathQuery = `${xPathQuery}[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
-      }
-      this.spacingNodeByXPath(xPathQuery, document);
+      this.spacingNode(document.body);
     }
     spacingNode(contextNode) {
       this.spacingNodeWithTreeWalker(contextNode);
     }
     spacingElementById(idName) {
-      const xPathQuery = `id("${idName}")//text()`;
-      this.spacingNodeByXPath(xPathQuery, document);
+      const element = document.getElementById(idName);
+      if (element) {
+        this.spacingNode(element);
+      }
     }
     spacingElementByClassName(className) {
-      const xPathQuery = `//*[contains(concat(" ", normalize-space(@class), " "), "${className}")]//text()`;
-      this.spacingNodeByXPath(xPathQuery, document);
+      const elements = document.getElementsByClassName(className);
+      for (let i = 0; i < elements.length; i++) {
+        this.spacingNode(elements[i]);
+      }
     }
     spacingElementByTagName(tagName) {
-      const xPathQuery = `//${tagName}//text()`;
-      this.spacingNodeByXPath(xPathQuery, document);
-    }
-    // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
-    spacingNodeByXPath(xPathQuery, contextNode) {
-      if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
-        return;
-      }
-      const textNodes = document.evaluate(xPathQuery, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-      let currentTextNode;
-      let nextTextNode = null;
-      for (let i = textNodes.snapshotLength - 1; i > -1; --i) {
-        currentTextNode = textNodes.snapshotItem(i);
-        if (!currentTextNode) {
-          continue;
-        }
-        if (this.canIgnoreNode(currentTextNode)) {
-          nextTextNode = currentTextNode;
-          continue;
-        }
-        if (currentTextNode instanceof Text) {
-          if (currentTextNode.data.length === 1 && /["\u201c\u201d]/.test(currentTextNode.data)) {
-            if (currentTextNode.previousSibling) {
-              const prevNode = currentTextNode.previousSibling;
-              if (prevNode.nodeType === Node.ELEMENT_NODE && prevNode.textContent) {
-                const lastChar = prevNode.textContent.slice(-1);
-                if (/[\u4e00-\u9fff]/.test(lastChar)) {
-                  currentTextNode.data = ` ${currentTextNode.data}`;
-                }
-              }
-            }
-          } else {
-            const newText = this.spacingText(currentTextNode.data);
-            if (currentTextNode.data !== newText) {
-              currentTextNode.data = newText;
-            }
-          }
-        }
-        if (nextTextNode) {
-          if (currentTextNode.nextSibling && this.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
-            nextTextNode = currentTextNode;
-            continue;
-          }
-          if (!(currentTextNode instanceof Text) || !(nextTextNode instanceof Text)) {
-            continue;
-          }
-          const currentEndsWithSpace = currentTextNode.data.endsWith(" ");
-          const nextStartsWithSpace = nextTextNode.data.startsWith(" ");
-          let hasWhitespaceBetween = false;
-          let nodeBetween = currentTextNode.nextSibling;
-          while (nodeBetween && nodeBetween !== nextTextNode) {
-            if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
-              hasWhitespaceBetween = true;
-              break;
-            }
-            nodeBetween = nodeBetween.nextSibling;
-          }
-          if (currentEndsWithSpace || nextStartsWithSpace || hasWhitespaceBetween) {
-            nextTextNode = currentTextNode;
-            continue;
-          }
-          const testText = currentTextNode.data.slice(-1) + nextTextNode.data.slice(0, 1);
-          const testNewText = this.spacingText(testText);
-          const currentLast = currentTextNode.data.slice(-1);
-          const nextFirst = nextTextNode.data.slice(0, 1);
-          const isQuote = (char) => /["\u201c\u201d]/.test(char);
-          const isCJK = (char) => /[\u4e00-\u9fff]/.test(char);
-          const skipSpacing = isQuote(currentLast) && isCJK(nextFirst) || isCJK(currentLast) && isQuote(nextFirst);
-          if (testNewText !== testText && !skipSpacing) {
-            let nextNode = nextTextNode;
-            while (nextNode.parentNode && !this.spaceSensitiveTags.test(nextNode.nodeName) && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
-              nextNode = nextNode.parentNode;
-            }
-            let currentNode = currentTextNode;
-            while (currentNode.parentNode && !this.spaceSensitiveTags.test(currentNode.nodeName) && this.isLastTextChild(currentNode.parentNode, currentNode)) {
-              currentNode = currentNode.parentNode;
-            }
-            if (currentNode.nextSibling) {
-              if (this.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
-                nextTextNode = currentTextNode;
-                continue;
-              }
-            }
-            if (!this.blockTags.test(currentNode.nodeName)) {
-              if (!this.spaceSensitiveTags.test(nextNode.nodeName)) {
-                if (!this.ignoredTags.test(nextNode.nodeName) && !this.blockTags.test(nextNode.nodeName)) {
-                  if (nextTextNode.previousSibling) {
-                    if (!this.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
-                      if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
-                        nextTextNode.data = ` ${nextTextNode.data}`;
-                      }
-                    }
-                  } else {
-                    if (!this.canIgnoreNode(nextTextNode)) {
-                      if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
-                        nextTextNode.data = ` ${nextTextNode.data}`;
-                      }
-                    }
-                  }
-                }
-              } else if (!this.spaceSensitiveTags.test(currentNode.nodeName)) {
-                if (currentTextNode instanceof Text && !currentTextNode.data.endsWith(" ")) {
-                  currentTextNode.data = `${currentTextNode.data} `;
-                }
-              } else {
-                const panguSpace = document.createElement("pangu");
-                panguSpace.innerHTML = " ";
-                if (nextNode.parentNode) {
-                  if (nextNode.previousSibling) {
-                    if (!this.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
-                      nextNode.parentNode.insertBefore(panguSpace, nextNode);
-                    }
-                  } else {
-                    nextNode.parentNode.insertBefore(panguSpace, nextNode);
-                  }
-                }
-                if (!panguSpace.previousElementSibling) {
-                  if (panguSpace.parentNode) {
-                    panguSpace.parentNode.removeChild(panguSpace);
-                  }
-                }
-              }
-            }
-          }
-        }
-        nextTextNode = currentTextNode;
+      const elements = document.getElementsByTagName(tagName);
+      for (let i = 0; i < elements.length; i++) {
+        this.spacingNode(elements[i]);
       }
     }
     stopAutoSpacingPage() {
@@ -557,48 +436,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
       return false;
     }
-    collectTextNodes(contextNode, reverse = false) {
-      const nodes = [];
-      if (!contextNode || contextNode instanceof DocumentFragment) {
-        return nodes;
-      }
-      const walker = document.createTreeWalker(
-        contextNode,
-        NodeFilter.SHOW_TEXT,
-        {
-          acceptNode: (node) => {
-            if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
-              return NodeFilter.FILTER_REJECT;
-            }
-            let currentNode = node;
-            while (currentNode) {
-              if (currentNode instanceof Element) {
-                if (this.ignoredTags.test(currentNode.nodeName)) {
-                  return NodeFilter.FILTER_REJECT;
-                }
-                if (this.isContentEditable(currentNode)) {
-                  return NodeFilter.FILTER_REJECT;
-                }
-                if (currentNode.classList.contains(this.ignoredClass)) {
-                  return NodeFilter.FILTER_REJECT;
-                }
-              }
-              currentNode = currentNode.parentNode;
-            }
-            return NodeFilter.FILTER_ACCEPT;
-          }
-        }
-      );
-      while (walker.nextNode()) {
-        nodes.push(walker.currentNode);
-      }
-      return reverse ? nodes.reverse() : nodes;
-    }
-    spacingNodeWithTreeWalker(contextNode) {
-      if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
-        return;
-      }
-      const textNodes = this.collectTextNodes(contextNode, true);
+    processTextNodes(textNodes) {
       let currentTextNode;
       let nextTextNode = null;
       for (let i = 0; i < textNodes.length; i++) {
@@ -717,6 +555,50 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         }
         nextTextNode = currentTextNode;
       }
+    }
+    collectTextNodes(contextNode, reverse = false) {
+      const nodes = [];
+      if (!contextNode || contextNode instanceof DocumentFragment) {
+        return nodes;
+      }
+      const walker = document.createTreeWalker(
+        contextNode,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode: (node) => {
+            if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            let currentNode = node;
+            while (currentNode) {
+              if (currentNode instanceof Element) {
+                if (this.ignoredTags.test(currentNode.nodeName)) {
+                  return NodeFilter.FILTER_REJECT;
+                }
+                if (this.isContentEditable(currentNode)) {
+                  return NodeFilter.FILTER_REJECT;
+                }
+                if (currentNode.classList.contains(this.ignoredClass)) {
+                  return NodeFilter.FILTER_REJECT;
+                }
+              }
+              currentNode = currentNode.parentNode;
+            }
+            return NodeFilter.FILTER_ACCEPT;
+          }
+        }
+      );
+      while (walker.nextNode()) {
+        nodes.push(walker.currentNode);
+      }
+      return reverse ? nodes.reverse() : nodes;
+    }
+    spacingNodeWithTreeWalker(contextNode) {
+      if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
+        return;
+      }
+      const textNodes = this.collectTextNodes(contextNode, true);
+      this.processTextNodes(textNodes);
     }
     setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs) {
       if (this.autoSpacingPageObserver) {

@@ -126,7 +126,7 @@ export class BrowserPangu extends Pangu {
   public spacingPageBody() {
     // Process the entire body element
     // The collectTextNodes method already filters out:
-    // 1. Whitespace-only text nodes (like XPath's normalize-space)
+    // 1. Whitespace-only text nodes
     // 2. Text inside ignored tags (script, style, textarea, etc.)
     // 3. Text inside contentEditable elements
     // 4. Text inside elements with no-pangu-spacing class
@@ -134,11 +134,11 @@ export class BrowserPangu extends Pangu {
   }
 
   public spacingNode(contextNode: Node) {
-    // Use TreeWalker to collect all text nodes, similar to XPath's .//text()
+    // Use TreeWalker to collect all text nodes in the DOM tree
     // This handles cases like <div><span>中文</span>"<span>ABC</span></div> where the quote is a direct child of the div
     //
     // The collectTextNodes helper filters out text nodes that contain only whitespace,
-    // similar to XPath's normalize-space(.) predicate
+    // ensuring we only process nodes with actual content
     //
     // Example HTML with CSS {white-space: pre-wrap}
     //   <div>
@@ -159,9 +159,8 @@ export class BrowserPangu extends Pangu {
     // - Add complexity (algorithm expects meaningful content)
     //
     // However, those filtered whitespace nodes still exist in the DOM and can render as spaces with CSS like {white-space: pre-wrap}.
-    // This is why spacingNodeByXPath includes logic to detect whitespace between selected text nodes.
+    // The processTextNodes method includes logic to detect whitespace between selected text nodes.
     
-    // Phase 2: Use TreeWalker instead of XPath for better performance
     this.spacingNodeWithTreeWalker(contextNode);
   }
 
@@ -186,31 +185,6 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
-  public spacingNodeByXPath(xPathQuery: string, contextNode: Node) {
-    // DocumentFragments don't support XPath queries
-    if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
-      return;
-    }
-
-    // 因為 xPathQuery 會是用 text() 結尾，所以這些 nodes 會是 text 而不是 DOM element
-    // snapshotLength 要配合 XPathResult.ORDERED_NODE_SNAPSHOT_TYPE 使用
-    // https://developer.mozilla.org/en-US/docs/Web/API/Document/evaluate
-    // https://developer.mozilla.org/en-US/docs/Web/API/XPathResult
-    const xPathResult = document.evaluate(xPathQuery, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-
-    // Collect nodes in reverse order (從最下面、最裡面的節點開始)
-    const textNodes: Node[] = [];
-    for (let i = xPathResult.snapshotLength - 1; i > -1; --i) {
-      const node = xPathResult.snapshotItem(i);
-      if (node) {
-        textNodes.push(node);
-      }
-    }
-
-    // Process the collected text nodes using the shared logic
-    this.processTextNodes(textNodes);
-  }
 
   public stopAutoSpacingPage() {
     if (this.autoSpacingPageObserver) {
@@ -462,7 +436,7 @@ export class BrowserPangu extends Pangu {
       NodeFilter.SHOW_TEXT,
       {
         acceptNode: (node) => {
-          // Replicate XPath's normalize-space() - skip whitespace-only nodes
+          // Skip whitespace-only nodes
           if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
             return NodeFilter.FILTER_REJECT;
           }
@@ -498,7 +472,7 @@ export class BrowserPangu extends Pangu {
       nodes.push(walker.currentNode as Text);
     }
 
-    // Return in reverse order if requested (to match XPath behavior)
+    // Return in reverse order if requested
     return reverse ? nodes.reverse() : nodes;
   }
 
@@ -508,7 +482,7 @@ export class BrowserPangu extends Pangu {
       return;
     }
 
-    // Use TreeWalker to collect text nodes (similar to XPath's .//text()[normalize-space(.)])
+    // Use TreeWalker to collect text nodes with content
     const textNodes = this.collectTextNodes(contextNode, true);
 
     // Process the collected text nodes using the shared logic

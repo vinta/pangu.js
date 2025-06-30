@@ -22,7 +22,6 @@ export declare class BrowserPangu extends Pangu {
     spacingElementById(idName: string): void;
     spacingElementByClassName(className: string): void;
     spacingElementByTagName(tagName: string): void;
-    spacingNodeByXPath(xPathQuery: string, contextNode: Node): void;
     stopAutoSpacingPage(): void;
     protected isContentEditable(node: any): any;
     protected isSpecificTag(node: Node, tagRegex: RegExp): boolean | "";
@@ -31,6 +30,7 @@ export declare class BrowserPangu extends Pangu {
     protected canIgnoreNode(node: Node): boolean;
     protected isFirstTextChild(parentNode: Node, targetNode: Node): boolean;
     protected isLastTextChild(parentNode: Node, targetNode: Node): boolean;
+    protected processTextNodes(textNodes: Node[]): void;
     protected collectTextNodes(contextNode: Node, reverse?: boolean): Text[];
     protected spacingNodeWithTreeWalker(contextNode: Node): void;
     protected setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number): void;
