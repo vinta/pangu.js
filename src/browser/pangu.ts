@@ -162,8 +162,7 @@ export class BrowserPangu extends Pangu {
 
   public spacingNode(contextNode: Node) {
     // Use .//text() to include all text nodes, not just those that are children of elements
-    // This handles cases like <div><span>社</span>"<span>DF</span></div>
-    // where the quote is a direct child of the div
+    // This handles cases like <div><span>中文</span>"<span>ABC</span></div> where the quote is a direct child of the div
     //
     // The normalize-space(.) predicate "filters out" text nodes that contain only whitespace
     //
@@ -185,9 +184,8 @@ export class BrowserPangu extends Pangu {
     // - Impact performance (processing many empty nodes)
     // - Add complexity (algorithm expects meaningful content)
     //
-    // However, those filtered whitespace nodes still exist in the DOM and can render
-    // as spaces with CSS like white-space: pre-wrap. This is why spacingNodeByXPath
-    // includes logic to detect whitespace between selected text nodes.
+    // However, those filtered whitespace nodes still exist in the DOM and can render as spaces with CSS like {white-space: pre-wrap}.
+    // This is why spacingNodeByXPath includes logic to detect whitespace between selected text nodes.
     const xPathQuery = './/text()[normalize-space(.)]';
     this.spacingNodeByXPath(xPathQuery, contextNode);
   }
