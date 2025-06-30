@@ -163,7 +163,16 @@ class BrowserPangu extends Pangu {
         }
         const currentEndsWithSpace = currentTextNode.data.endsWith(" ");
         const nextStartsWithSpace = nextTextNode.data.startsWith(" ");
-        if (currentEndsWithSpace || nextStartsWithSpace) {
+        let hasWhitespaceBetween = false;
+        let nodeBetween = currentTextNode.nextSibling;
+        while (nodeBetween && nodeBetween !== nextTextNode) {
+          if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
+            hasWhitespaceBetween = true;
+            break;
+          }
+          nodeBetween = nodeBetween.nextSibling;
+        }
+        if (currentEndsWithSpace || nextStartsWithSpace || hasWhitespaceBetween) {
           nextTextNode = currentTextNode;
           continue;
         }
