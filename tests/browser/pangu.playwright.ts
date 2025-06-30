@@ -251,42 +251,46 @@ test.describe('BrowserPangu', () => {
       // Test case 1: Simple fragmented nodes
       await page.setContent('<div id="test1"><span>社</span>"<span>DF</span></div>');
       await page.evaluate(() => {
-        pangu.spacingNode(document.getElementById('test1'));
+        pangu.spacingNode(document.getElementById('test1')!);
       });
-      const result1 = await page.evaluate(() => document.getElementById('test1').textContent);
+      const result1 = await page.evaluate(() => document.getElementById('test1')!.textContent);
       expect(result1).toBe('社 "DF');
 
       // Test case 2: Complex quote structure
       await page.setContent('<div id="test2">前面的文字"<span>中间的内容</span>"后面的文字</div>');
       await page.evaluate(() => {
-        pangu.spacingNode(document.getElementById('test2'));
+        pangu.spacingNode(document.getElementById('test2')!);
       });
-      const result2 = await page.evaluate(() => document.getElementById('test2').textContent);
+      const result2 = await page.evaluate(() => document.getElementById('test2')!.textContent);
       expect(result2).toBe('前面的文字 "中间的内容" 后面的文字');
 
       // Test case 3: Full example from GitHub issue
       await page.setContent('<div id="test3">【UCG中字】"數毛社"DF的《戰神4》全新演示解析</div>');
       await page.evaluate(() => {
-        pangu.spacingNode(document.getElementById('test3'));
+        pangu.spacingNode(document.getElementById('test3')!);
       });
-      const result3 = await page.evaluate(() => document.getElementById('test3').textContent);
+      const result3 = await page.evaluate(() => document.getElementById('test3')!.textContent);
       expect(result3).toBe('【UCG 中字】"數毛社" DF 的《戰神 4》全新演示解析');
     });
 
-    // Test for Asana-style fragmented text with pre-wrap CSS
-    test('should handle fragmented text nodes like Asana with pre-wrap', async ({ page }) => {
+    test('should handle text nodes with newlines and CSS {white-space: pre-wrap}', async ({ page }) => {
       const htmlContent = loadFixture('test_fragmented_asana_style.html');
       const expected = loadFixture('test_fragmented_asana_style_expected.html').trim();
 
       await page.setContent(htmlContent);
 
+      // With CSS {white-space: pre-wrap}, the newlines between text nodes should be visible as spaces
       // Verify that newlines are rendered as whitespace before spacing
-      const renderedTextBefore = await page.evaluate(() => {
-        const div = document.querySelector('.HighlightSol');
-        return div ? div.innerText : '';
-      });
-      // With white-space: pre-wrap, the newlines between text fragments should be visible as spaces
-      expect(renderedTextBefore).toContain(' ');
+      const renderedTextBefore = await page.evaluate(() => document.querySelector('.HighlightSol')!.textContent);
+      // prettier-ignore
+      expect(renderedTextBefore).toBe(
+        '整天等 \n' + // NOTE: There is a whitespace before the newline
+        'EAS \n' +
+        'build \n' +
+        '就飽了啊，每次 \n' +
+        'build \n' +
+        '都要跑十幾二十分鐘'
+      );
 
       await page.evaluate(() => {
         pangu.spacingPage();
@@ -331,7 +335,6 @@ test.describe('BrowserPangu', () => {
     // The fix for preventing double spaces in already-spaced text (like Asana)
     // makes this specific case not work. This is an acceptable trade-off since
     // real-world cases like Asana typically have spaces at fragment boundaries.
-
     test.skip('should handle mixed fragmented nodes correctly', async ({ page }) => {
       await page.setContent('<div id="test"></div>');
 
