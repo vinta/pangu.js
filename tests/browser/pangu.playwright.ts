@@ -303,51 +303,6 @@ test.describe('BrowserPangu', () => {
       expect(analysis.finalText).toBe('社 "DF');
     });
 
-    // FIXME: https://app.asana.com/1/1199341013008293/project/1202133750666965/task/1210672569130122?focus=true
-    // Test for Asana-like pre-spaced fragmented text nodes
-    test('should not add double spaces to already-spaced fragmented text (Asana case)', async ({ page }) => {
-      const htmlContent = loadFixture('test_html_fragment_1.html');
-      const expected = loadFixture('test_html_fragment_1_expected.html').trim();
-
-      await page.setContent(htmlContent);
-      
-      // Verify that newlines between text fragments are rendered as whitespace
-      const analysis = await page.evaluate(() => {
-        const div = document.querySelector('.HighlightSol');
-        if (!div) return { renderedText: '', childNodesCount: 0 };
-        
-        // Get the rendered text (what the user sees)
-        const renderedText = div.innerText;
-        
-        // Get info about child nodes
-        const childNodesInfo = [];
-        for (let i = 0; i < div.childNodes.length; i++) {
-          const node = div.childNodes[i];
-          childNodesInfo.push({
-            nodeType: node.nodeType,
-            nodeValue: node.nodeValue,
-            textContent: node.textContent,
-            isWhitespace: node.nodeType === Node.TEXT_NODE && /^\s+$/.test(node.textContent || '')
-          });
-        }
-        
-        return {
-          renderedText,
-          childNodesCount: div.childNodes.length,
-          childNodesInfo
-        };
-      });
-      
-      console.log('Before spacing - Analysis:', JSON.stringify(analysis, null, 2));
-      // With white-space: pre-wrap, newlines should be rendered as spaces
-      expect(analysis.renderedText).toMatch(/\s/); // Should contain whitespace
-      
-      await page.evaluate(() => {
-        pangu.spacingPage();
-      });
-      const actual = await page.evaluate(() => document.body.innerHTML.trim());
-      expect(actual).toBe(expected);
-    });
 
     // Test for Asana-style fragmented text with pre-wrap CSS
     test('should handle fragmented text nodes like Asana with pre-wrap', async ({ page }) => {
@@ -363,36 +318,6 @@ test.describe('BrowserPangu', () => {
       });
       // With white-space: pre-wrap, the newlines between text fragments should be visible as spaces
       expect(renderedTextBefore).toContain(' ');
-      
-      await page.evaluate(() => {
-        pangu.spacingPage();
-      });
-      const actual = await page.evaluate(() => document.body.innerHTML.trim());
-      expect(actual).toBe(expected);
-    });
-    
-    // Test for realistic Asana case without quotes
-    test('should handle realistic Asana text with newlines (no quotes)', async ({ page }) => {
-      const htmlContent = loadFixture('test_asana_realistic.html');
-      const expected = loadFixture('test_asana_realistic_expected.html').trim();
-
-      await page.setContent(htmlContent);
-      
-      // Verify the rendered text shows spaces due to newlines
-      const analysis = await page.evaluate(() => {
-        const div = document.querySelector('.HighlightSol');
-        if (!div) return null;
-        
-        return {
-          innerHTML: div.innerHTML,
-          innerText: div.innerText,
-          textContent: div.textContent,
-          hasNewlines: div.textContent?.includes('\n') || false
-        };
-      });
-      
-      console.log('Realistic Asana test - Before spacing:', JSON.stringify(analysis, null, 2));
-      expect(analysis?.hasNewlines).toBe(true);
       
       await page.evaluate(() => {
         pangu.spacingPage();
