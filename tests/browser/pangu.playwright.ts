@@ -42,7 +42,7 @@ test.describe('BrowserPangu', () => {
 
         await new Promise((resolve) => setTimeout(resolve, 600));
 
-        return document.getElementById('test-div')?.textContent;
+        return document.getElementById('test-div')!.textContent;
       });
 
       expect(result).toBe('小明在開發軟體時總是嚴格地遵循各項協定與標準，直到他看了 ISO 3166-1');
@@ -198,7 +198,7 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
-    test('should not process contenteditable elements', async ({ page }) => {
+    test('should handle contenteditable elements by skipping them', async ({ page }) => {
       await page.setContent('<div contenteditable="true">abc漢字1</div>');
       await page.evaluate(() => {
         pangu.spacingPageBody();
@@ -207,7 +207,7 @@ test.describe('BrowserPangu', () => {
       expect(content).toContain('<div contenteditable="true">abc漢字1</div>');
     });
 
-    test('should not add spaces to input field values', async ({ page }) => {
+    test('should handle input field values by preserving them', async ({ page }) => {
       const htmlContent = loadFixture('input_fields.html');
 
       await page.setContent(htmlContent);
@@ -230,7 +230,7 @@ test.describe('BrowserPangu', () => {
       expect(textarea).toBe('哇！是擅長Over-engineering的朋友呢！');
     });
 
-    test('should still add spaces to text outside input fields', async ({ page }) => {
+    test('should process text outside input fields while preserving input values', async ({ page }) => {
       const htmlContent = loadFixture('input_fields_mixed.html');
       const expected = loadFixture('input_fields_mixed_expected.html').trim();
 
@@ -246,7 +246,6 @@ test.describe('BrowserPangu', () => {
       expect(inputValue).toBe('測試text123');
     });
 
-    // Test for fragmented text nodes with quotes
     test('should handle fragmented text nodes with quotes', async ({ page }) => {
       // Test case 1: Simple fragmented nodes
       await page.setContent('<div id="test1"><span>社</span>"<span>DF</span></div>');
@@ -299,7 +298,6 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
-    // Test for fragmented text nodes with spaces at boundaries
     test('should handle fragmented text nodes with spaces at boundaries', async ({ page }) => {
       await page.setContent('<div id="test"></div>');
 
@@ -324,18 +322,16 @@ test.describe('BrowserPangu', () => {
         }
       });
 
-      const afterText = await page.evaluate(() => document.getElementById('test')?.textContent || '');
+      const afterText = await page.evaluate(() => document.getElementById('test')!.textContent);
 
       // Should not have double spaces
       expect(afterText).not.toContain('  ');
       expect(afterText).toBe('整天等 EAS build 就飽了啊，每次 build 都要跑十幾二十分鐘');
     });
 
-    // Skip: This is an edge case where consecutive text nodes need spacing between them.
-    // The fix for preventing double spaces in already-spaced text (like Asana)
-    // makes this specific case not work. This is an acceptable trade-off since
-    // real-world cases like Asana typically have spaces at fragment boundaries.
-    test.skip('should handle mixed fragmented nodes correctly', async ({ page }) => {
+    test.skip('should handle mixed fragmented nodes correctly (edge case: consecutive text nodes without spaces)', async ({ page }) => {
+      // The fix for preventing double spaces in already-spaced text (like Asana) makes this specific case not work.
+      // This is an acceptable trade-off since real-world cases like Asana typically have spaces at fragment boundaries.
       await page.setContent('<div id="test"></div>');
 
       await page.evaluate(() => {
@@ -358,14 +354,13 @@ test.describe('BrowserPangu', () => {
         }
       });
 
-      const result = await page.evaluate(() => document.getElementById('test')?.textContent || '');
+      const result = await page.evaluate(() => document.getElementById('test')!.textContent);
 
       // Should add spaces where needed but not double up
       expect(result).not.toContain('  ');
       expect(result).toBe('整天等 EAS build 就飽了啊，每次 build 都要跑十幾二十分鐘');
     });
 
-    // Test spacing edge cases
     test('should handle spacing edge cases correctly', async ({ page }) => {
       // Test case 1: Already properly spaced text should not be modified
       const properlySpacedText = '整天等 EAS build 就飽了啊，每次 build 都要跑十幾二十分鐘';
@@ -376,7 +371,7 @@ test.describe('BrowserPangu', () => {
           pangu.spacingNode(element);
         }
       });
-      const result1 = await page.evaluate(() => document.getElementById('test1')?.textContent || '');
+      const result1 = await page.evaluate(() => document.getElementById('test1')!.textContent);
       expect(result1).toBe(properlySpacedText);
 
       // Test case 2: Should not create triple or more spaces
@@ -397,7 +392,7 @@ test.describe('BrowserPangu', () => {
           pangu.spacingNode(element);
         }
       });
-      const result2 = await page.evaluate(() => document.getElementById('test2')?.textContent || '');
+      const result2 = await page.evaluate(() => document.getElementById('test2')!.textContent);
       expect(result2).not.toContain('   ');
     });
   });

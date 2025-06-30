@@ -19,18 +19,18 @@ describe('CLI', () => {
     }
   });
 
-  it('should display help message', () => {
+  it('should handle help message display', () => {
     const output = execSync(`node ${cliPath} --help`, { encoding: 'utf8' });
     expect(output).toContain('usage: pangu');
     expect(output).toContain('Paranoid text spacing');
   });
 
-  it('should process text', () => {
+  it('should process text from command line', () => {
     const output = execSync(`node ${cliPath} -t "你從什麼時候開始產生了我沒使用Monkey Patch的錯覺？"`, { encoding: 'utf8' });
     expect(output.trim()).toBe('你從什麼時候開始產生了我沒使用 Monkey Patch 的錯覺？');
   });
 
-  it('should process a file', () => {
+  it('should process file content', () => {
     writeFileSync(tempFile, '老婆餅裡面沒有老婆，JavaScript裡面也沒有Java');
 
     const output = execSync(`node ${cliPath} -f ${tempFile}`, { encoding: 'utf8' });

@@ -761,7 +761,7 @@ describe('Pangu', () => {
   });
 
   describe('spacing()', () => {
-    it('should work with multiple texts sequentially', () => {
+    it('should handle multiple texts sequentially', () => {
       // prettier-ignore
       const results = [
         pangu.spacing('Xcode 7.1配備了全新的AppleTV開發工具'),
@@ -779,7 +779,7 @@ describe('Pangu', () => {
   });
 
   describe('hasProperSpacing()', () => {
-    it('should return true if the text has proper spacing', () => {
+    it('should handle proper spacing detection', () => {
       expect(pangu.hasProperSpacing('♫ 每條大街小巷，每個工程師的嘴裡，見面第一句話，就是不要在過年前 Deploy ♫')).toBe(true);
       expect(pangu.hasProperSpacing('♫每條大街小巷，每個工程師的嘴裡，見面第一句話，就是不要在過年前Deploy♫')).toBe(false);
     });

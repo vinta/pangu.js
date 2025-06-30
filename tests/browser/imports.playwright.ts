@@ -8,7 +8,7 @@ test.describe('Browser UMD imports', () => {
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
   });
 
-  test('should expose global pangu object', async ({ page }) => {
+  test('should handle global pangu object exposure', async ({ page }) => {
     const result = await page.evaluate(() => {
       return {
         hasGlobalPangu: typeof window.pangu !== 'undefined',
@@ -26,7 +26,7 @@ test.describe('Browser UMD imports', () => {
     expect(result.canCreateInstance).toBe(true);
   });
 
-  test('should have working spacing functionality', async ({ page }) => {
+  test('should process text with spacing functionality', async ({ page }) => {
     const result = await page.evaluate(() => {
       const text = 'Hello世界';
       const spaced = pangu.spacing(text);
