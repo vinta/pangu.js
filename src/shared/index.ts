@@ -25,6 +25,7 @@ const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u
 // Basic character classes
 const AN = 'A-Za-z0-9';
 const A = 'A-Za-z';
+const UPPER_AN = 'A-Z0-9';  // For FIX_CJK_COLON_ANS
 
 // Operators - note the different sets!
 const OPERATORS_WITH_HYPHEN = '\\+\\-\\*=&';  // For CJK patterns
@@ -39,6 +40,10 @@ const LEFT_BRACKETS_BASIC = '\\(\\[\\{';              // For AN_LEFT_BRACKET
 const RIGHT_BRACKETS_BASIC = '\\)\\]\\}';             // For RIGHT_BRACKET_AN  
 const LEFT_BRACKETS_EXTENDED = '\\(\\[\\{<>\u201c';   // For CJK_LEFT_BRACKET (includes angle brackets + curly quote)
 const RIGHT_BRACKETS_EXTENDED = '\\)\\]\\}<>\u201d';  // For RIGHT_BRACKET_CJK
+
+// ANS extended sets - CAREFUL: different symbols!
+const ANS_CJK_AFTER = `${A}\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf`;          // Has @, no punctuation
+const ANS_BEFORE_CJK = `${A}\u0370-\u03ff0-9~\\$%\\^&\\*\\-\\+\\\\=!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf`; // Has punctuation, no @
 
 // prettier-ignore
 // Unix absolute paths: system dirs + common project paths
@@ -59,7 +64,7 @@ const ANY_CJK = new RegExp(`[${CJK}]`);
 const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK = new RegExp(`([${CJK}])[ ]*([\\:]+|\\.)[ ]*([${CJK}])`, 'g');
 const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS = new RegExp(`([${CJK}])[ ]*([~\\!;,\\?]+)[ ]*`, 'g');
 const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, 'g');
-const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([A-Z0-9\\(\\)])`, 'g');
+const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, 'g');
 
 // The symbol part does not include '
 const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES_FULL}])`, 'g');
@@ -101,9 +106,9 @@ const ANS_HYPHEN_ANS_NOT_COMPOUND = new RegExp(`([A-Za-z])(-(?![a-z]))([A-Za-z0-
 
 // Slash patterns for operator vs separator behavior
 const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
-const CJK_SLASH_ANS = new RegExp(`([${CJK}])([/])([A-Za-z0-9])`, 'g');
-const ANS_SLASH_CJK = new RegExp(`([A-Za-z0-9])([/])([${CJK}])`, 'g');
-const ANS_SLASH_ANS = new RegExp(`([A-Za-z0-9])([/])([A-Za-z0-9])`, 'g');
+const CJK_SLASH_ANS = new RegExp(`([${CJK}])([/])([${AN}])`, 'g');
+const ANS_SLASH_CJK = new RegExp(`([${AN}])([/])([${CJK}])`, 'g');
+const ANS_SLASH_ANS = new RegExp(`([${AN}])([/])([${AN}])`, 'g');
 
 // Special handling for single letter grades/ratings (A+, B-, C*) before CJK
 // These should have space after the operator, not before
@@ -111,13 +116,13 @@ const ANS_SLASH_ANS = new RegExp(`([A-Za-z0-9])([/])([A-Za-z0-9])`, 'g');
 const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([${A}])([${GRADE_OPERATORS}])([${CJK}])`, 'g');
 
 // Special handling for < and > as comparison operators (not brackets)
-const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([A-Za-z0-9])`, 'g');
-const LESS_THAN_CJK = new RegExp(`([A-Za-z0-9])(<)([${CJK}])`, 'g');
-const CJK_GREATER_THAN = new RegExp(`([${CJK}])(>)([A-Za-z0-9])`, 'g');
-const GREATER_THAN_CJK = new RegExp(`([A-Za-z0-9])(>)([${CJK}])`, 'g');
+const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([${AN}])`, 'g');
+const LESS_THAN_CJK = new RegExp(`([${AN}])(<)([${CJK}])`, 'g');
+const CJK_GREATER_THAN = new RegExp(`([${CJK}])(>)([${AN}])`, 'g');
+const GREATER_THAN_CJK = new RegExp(`([${AN}])(>)([${CJK}])`, 'g');
 // Handle < and > between alphanumeric characters when CJK is present in text
-const ANS_LESS_THAN_ANS = new RegExp(`([A-Za-z0-9])(<)([A-Za-z0-9])`, 'g');
-const ANS_GREATER_THAN_ANS = new RegExp(`([A-Za-z0-9])(>)([A-Za-z0-9])`, 'g');
+const ANS_LESS_THAN_ANS = new RegExp(`([${AN}])(<)([${AN}])`, 'g');
+const ANS_GREATER_THAN_ANS = new RegExp(`([${AN}])(>)([${AN}])`, 'g');
 
 // Bracket patterns: ( ) [ ] { } and also < > (though < > are also handled as operators separately)
 // Note: The curly quotes " " (\u201c \u201d) appear in CJK_LEFT_BRACKET/RIGHT_BRACKET_CJK but are primarily handled in the patterns below
@@ -138,10 +143,10 @@ const CJK_WINDOWS_PATH = new RegExp(`([${CJK}])(${WINDOWS_FILE_PATH.source})`, '
 const UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}/)([${CJK}])`, 'g');
 const UNIX_RELATIVE_FILE_PATH_SLASH_CJK = new RegExp(`(${UNIX_RELATIVE_FILE_PATH.source}/)([${CJK}])`, 'g');
 
-const CJK_ANS = new RegExp(`([${CJK}])([A-Za-z\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])`, 'g');
-const ANS_CJK = new RegExp(`([A-Za-z\u0370-\u03ff0-9~\\$%\\^&\\*\\-\\+\\\\=!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf])([${CJK}])`, 'g');
+const CJK_ANS = new RegExp(`([${CJK}])([${ANS_CJK_AFTER}])`, 'g');
+const ANS_CJK = new RegExp(`([${ANS_BEFORE_CJK}])([${CJK}])`, 'g');
 
-const S_A = /(%)([A-Za-z])/g;
+const S_A = new RegExp(`(%)([${A}])`, 'g');
 
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
