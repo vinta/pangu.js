@@ -34,6 +34,12 @@ const GRADE_OPERATORS = '\\+\\-\\*';          // For single letter grades
 // Quotes
 const QUOTES_FULL = '\`"\u05f4';  // Backtick, straight quote, Hebrew punctuation
 
+// Brackets - different sets!
+const LEFT_BRACKETS_BASIC = '\\(\\[\\{';              // For AN_LEFT_BRACKET
+const RIGHT_BRACKETS_BASIC = '\\)\\]\\}';             // For RIGHT_BRACKET_AN  
+const LEFT_BRACKETS_EXTENDED = '\\(\\[\\{<>\u201c';   // For CJK_LEFT_BRACKET (includes angle brackets + curly quote)
+const RIGHT_BRACKETS_EXTENDED = '\\)\\]\\}<>\u201d';  // For RIGHT_BRACKET_CJK
+
 // prettier-ignore
 // Unix absolute paths: system dirs + common project paths
 // Examples: /home, /usr/bin, /etc/nginx.conf, /.bashrc, /node_modules/@babel/core, /path/to/your/project
@@ -115,13 +121,13 @@ const ANS_GREATER_THAN_ANS = new RegExp(`([A-Za-z0-9])(>)([A-Za-z0-9])`, 'g');
 
 // Bracket patterns: ( ) [ ] { } and also < > (though < > are also handled as operators separately)
 // Note: The curly quotes " " (\u201c \u201d) appear in CJK_LEFT_BRACKET/RIGHT_BRACKET_CJK but are primarily handled in the patterns below
-const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([\\(\\[\\{<>\u201c])`, 'g');
-const RIGHT_BRACKET_CJK = new RegExp(`([\\)\\]\\}<>\u201d])([${CJK}])`, 'g');
-const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([A-Za-z0-9${CJK}])[ ]*([\u201c])([A-Za-z0-9${CJK}\\-_ ]+)([\u201d])`, 'g');
-const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([\u201c])([A-Za-z0-9${CJK}\\-_ ]+)([\u201d])[ ]*([A-Za-z0-9${CJK}])`, 'g');
+const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([${LEFT_BRACKETS_EXTENDED}])`, 'g');
+const RIGHT_BRACKET_CJK = new RegExp(`([${RIGHT_BRACKETS_EXTENDED}])([${CJK}])`, 'g');
+const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([${AN}${CJK}])[ ]*([\u201c])([${AN}${CJK}\\-_ ]+)([\u201d])`, 'g');
+const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([\u201c])([${AN}${CJK}\\-_ ]+)([\u201d])[ ]*([${AN}${CJK}])`, 'g');
 
-const AN_LEFT_BRACKET = /([A-Za-z0-9])(?<!\.[A-Za-z0-9]*)([\(\[\{])/g;
-const RIGHT_BRACKET_AN = /([\)\]\}])([A-Za-z0-9])/g;
+const AN_LEFT_BRACKET = new RegExp(`([${AN}])(?<!\\.[${AN}]*)([${LEFT_BRACKETS_BASIC}])`, 'g');
+const RIGHT_BRACKET_AN = new RegExp(`([${RIGHT_BRACKETS_BASIC}])([${AN}])`, 'g');
 
 // Special patterns for filesystem paths after CJK
 const CJK_UNIX_ABSOLUTE_FILE_PATH = new RegExp(`([${CJK}])(${UNIX_ABSOLUTE_FILE_PATH.source})`, 'g');
