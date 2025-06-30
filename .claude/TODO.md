@@ -31,6 +31,9 @@ No task in progress
 
 ### Medium Priority
 
+- [ ] Fix issue #155 - DO NOT spacing URL
+  - `https://xxxxx/不要加空格.html`
+  - `https://%E5%A6%82`
 - [ ] Fix issue #201 - Spaces between image-separated text
 - [ ] Fix issue #173 - Full-width quotes spacing, `「」` and `『』`
 - [ ] Fix issue #169 - YouTube title persistence
