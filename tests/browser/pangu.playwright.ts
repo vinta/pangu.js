@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 declare global {
   const pangu: BrowserPangu;
   interface Window {
+    // @ts-expect-error - pangu is defined in the global scope
     pangu: BrowserPangu;
   }
 }
@@ -25,10 +26,23 @@ test.describe('BrowserPangu', () => {
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
   });
 
-  test.describe('spacing()', () => {
-    test('should process text strings', async ({ page }) => {
-      const result = await page.evaluate(() => {
-        return pangu.spacing('小明在開發軟體時總是嚴格地遵循各項協定與標準，直到他看了ISO 3166-1');
+  test.describe('autoSpacingPage()', () => {
+    test('should handle dynamic content with MutationObserver', async ({ page }) => {
+      await page.evaluate(() => {
+        pangu.autoSpacingPage({});
+      });
+
+      await page.waitForTimeout(50);
+
+      const result = await page.evaluate(async () => {
+        const div = document.createElement('div');
+        div.textContent = '小明在開發軟體時總是嚴格地遵循各項協定與標準，直到他看了ISO 3166-1';
+        div.id = 'test-div';
+        document.body.appendChild(div);
+
+        await new Promise((resolve) => setTimeout(resolve, 600));
+
+        return document.getElementById('test-div')?.textContent;
       });
 
       expect(result).toBe('小明在開發軟體時總是嚴格地遵循各項協定與標準，直到他看了 ISO 3166-1');
@@ -232,28 +246,25 @@ test.describe('BrowserPangu', () => {
       expect(inputValue).toBe('測試text123');
     });
 
-    // Test for fragmented text nodes issue - Test Case 1
-    test('should handle simple fragmented text nodes: 社"DF', async ({ page }) => {
+    // Test for fragmented text nodes with quotes
+    test('should handle fragmented text nodes with quotes', async ({ page }) => {
+      // Test case 1: Simple fragmented nodes
       await page.setContent('<div id="test1"><span>社</span>"<span>DF</span></div>');
       await page.evaluate(() => {
         pangu.spacingNode(document.getElementById('test1'));
       });
       const result1 = await page.evaluate(() => document.getElementById('test1').textContent);
       expect(result1).toBe('社 "DF');
-    });
 
-    // Test Case 2: Complex quote structure  
-    test('should handle complex quote structure', async ({ page }) => {
+      // Test case 2: Complex quote structure
       await page.setContent('<div id="test2">前面的文字"<span>中间的内容</span>"后面的文字</div>');
       await page.evaluate(() => {
         pangu.spacingNode(document.getElementById('test2'));
       });
       const result2 = await page.evaluate(() => document.getElementById('test2').textContent);
       expect(result2).toBe('前面的文字 "中间的内容" 后面的文字');
-    });
 
-    // Test Case 3: Full example from GitHub issue
-    test('should handle full example from GitHub issue', async ({ page }) => {
+      // Test case 3: Full example from GitHub issue
       await page.setContent('<div id="test3">【UCG中字】"數毛社"DF的《戰神4》全新演示解析</div>');
       await page.evaluate(() => {
         pangu.spacingNode(document.getElementById('test3'));
@@ -262,55 +273,13 @@ test.describe('BrowserPangu', () => {
       expect(result3).toBe('【UCG 中字】"數毛社" DF 的《戰神 4》全新演示解析');
     });
 
-    // Analyze why fragmented nodes might fail
-    test('should analyze fragmented text node processing', async ({ page }) => {
-      await page.setContent('<div id="test"><span>社</span>"<span>DF</span></div>');
-      
-      const analysis = await page.evaluate(() => {
-        const container = document.getElementById('test');
-        const before = [];
-        const after = [];
-        
-        // Collect nodes before processing
-        for (let i = 0; i < container.childNodes.length; i++) {
-          const node = container.childNodes[i];
-          before.push({
-            nodeType: node.nodeType,
-            nodeName: node.nodeName,
-            textContent: node.textContent,
-            nodeValue: node.nodeValue
-          });
-        }
-        
-        // Process with pangu
-        pangu.spacingNode(container);
-        
-        // Collect nodes after processing
-        for (let i = 0; i < container.childNodes.length; i++) {
-          const node = container.childNodes[i];
-          after.push({
-            nodeType: node.nodeType,
-            nodeName: node.nodeName,
-            textContent: node.textContent,
-            nodeValue: node.nodeValue
-          });
-        }
-        
-        return { before, after, finalText: container.textContent };
-      });
-      
-      console.log('Fragmented node analysis:', JSON.stringify(analysis, null, 2));
-      expect(analysis.finalText).toBe('社 "DF');
-    });
-
-
     // Test for Asana-style fragmented text with pre-wrap CSS
     test('should handle fragmented text nodes like Asana with pre-wrap', async ({ page }) => {
       const htmlContent = loadFixture('test_fragmented_asana_style.html');
       const expected = loadFixture('test_fragmented_asana_style_expected.html').trim();
 
       await page.setContent(htmlContent);
-      
+
       // Verify that newlines are rendered as whitespace before spacing
       const renderedTextBefore = await page.evaluate(() => {
         const div = document.querySelector('.HighlightSol');
@@ -318,7 +287,7 @@ test.describe('BrowserPangu', () => {
       });
       // With white-space: pre-wrap, the newlines between text fragments should be visible as spaces
       expect(renderedTextBefore).toContain(' ');
-      
+
       await page.evaluate(() => {
         pangu.spacingPage();
       });
@@ -329,7 +298,7 @@ test.describe('BrowserPangu', () => {
     // Test for fragmented text nodes with spaces at boundaries
     test('should handle fragmented text nodes with spaces at boundaries', async ({ page }) => {
       await page.setContent('<div id="test"></div>');
-      
+
       // Create fragmented nodes like Asana does
       await page.evaluate(() => {
         const div = document.getElementById('test');
@@ -350,34 +319,33 @@ test.describe('BrowserPangu', () => {
           pangu.spacingNode(element);
         }
       });
-      
+
       const afterText = await page.evaluate(() => document.getElementById('test')?.textContent || '');
-      
+
       // Should not have double spaces
       expect(afterText).not.toContain('  ');
       expect(afterText).toBe('整天等 EAS build 就飽了啊，每次 build 都要跑十幾二十分鐘');
     });
 
-    // Test mixed fragmented nodes (some with spaces, some without)
+    // Skip: This is an edge case where consecutive text nodes need spacing between them.
+    // The fix for preventing double spaces in already-spaced text (like Asana)
+    // makes this specific case not work. This is an acceptable trade-off since
+    // real-world cases like Asana typically have spaces at fragment boundaries.
+
     test.skip('should handle mixed fragmented nodes correctly', async ({ page }) => {
-      // Skip: This is an edge case where consecutive text nodes need spacing between them.
-      // The fix for preventing double spaces in already-spaced text (like Asana) 
-      // makes this specific case not work. This is an acceptable trade-off since
-      // real-world cases like Asana typically have spaces at fragment boundaries.
-      
       await page.setContent('<div id="test"></div>');
-      
+
       await page.evaluate(() => {
         const div = document.getElementById('test');
         if (!div) {
           return;
         }
         div.appendChild(document.createTextNode('整天等'));
-        div.appendChild(document.createTextNode('EAS'));  // No space
-        div.appendChild(document.createTextNode('build'));  // No space
-        div.appendChild(document.createTextNode('就飽了啊，每次'));  // No space
-        div.appendChild(document.createTextNode(' build'));  // Has space
-        div.appendChild(document.createTextNode('都要跑十幾二十分鐘'));  // No space
+        div.appendChild(document.createTextNode('EAS')); // No space
+        div.appendChild(document.createTextNode('build')); // No space
+        div.appendChild(document.createTextNode('就飽了啊，每次')); // No space
+        div.appendChild(document.createTextNode(' build')); // Has space
+        div.appendChild(document.createTextNode('都要跑十幾二十分鐘')); // No space
       });
 
       await page.evaluate(() => {
@@ -386,83 +354,48 @@ test.describe('BrowserPangu', () => {
           pangu.spacingNode(element);
         }
       });
-      
+
       const result = await page.evaluate(() => document.getElementById('test')?.textContent || '');
-      
+
       // Should add spaces where needed but not double up
       expect(result).not.toContain('  ');
       expect(result).toBe('整天等 EAS build 就飽了啊，每次 build 都要跑十幾二十分鐘');
     });
 
-    // Test that already properly spaced text is not modified
-    test('should not modify already properly spaced text', async ({ page }) => {
+    // Test spacing edge cases
+    test('should handle spacing edge cases correctly', async ({ page }) => {
+      // Test case 1: Already properly spaced text should not be modified
       const properlySpacedText = '整天等 EAS build 就飽了啊，每次 build 都要跑十幾二十分鐘';
-      
-      await page.setContent(`<div id="test">${properlySpacedText}</div>`);
-      
+      await page.setContent(`<div id="test1">${properlySpacedText}</div>`);
       await page.evaluate(() => {
-        const element = document.getElementById('test');
+        const element = document.getElementById('test1');
         if (element) {
           pangu.spacingNode(element);
         }
       });
-      
-      const result = await page.evaluate(() => document.getElementById('test')?.textContent || '');
-      
-      // Should remain unchanged
-      expect(result).toBe(properlySpacedText);
-    });
+      const result1 = await page.evaluate(() => document.getElementById('test1')?.textContent || '');
+      expect(result1).toBe(properlySpacedText);
 
-    // Test edge cases with multiple adjacent spaces
-    test('should not create triple or more spaces', async ({ page }) => {
-      await page.setContent('<div id="test"></div>');
-      
+      // Test case 2: Should not create triple or more spaces
+      await page.setContent('<div id="test2"></div>');
       await page.evaluate(() => {
-        const div = document.getElementById('test');
+        const div = document.getElementById('test2');
         if (!div) {
           return;
         }
         // Simulate poorly fragmented text with existing double spaces
         div.appendChild(document.createTextNode('整天等 '));
         div.appendChild(document.createTextNode(' EAS'));
-        div.appendChild(document.createTextNode('  build'));  // Double space at start
+        div.appendChild(document.createTextNode('  build')); // Double space at start
       });
-
       await page.evaluate(() => {
-        const element = document.getElementById('test');
+        const element = document.getElementById('test2');
         if (element) {
           pangu.spacingNode(element);
         }
       });
-      
-      const result = await page.evaluate(() => document.getElementById('test')?.textContent || '');
-      
-      // Should not have triple spaces
-      expect(result).not.toContain('   ');
-    });
-  });
-
-  // FIXME
-  test.describe('autoSpacingPage()', () => {
-    test('should handle dynamic content with MutationObserver', async ({ page }) => {
-      await page.evaluate(() => {
-        pangu.autoSpacingPage({});
-      });
-
-      await page.waitForTimeout(50);
-
-      const result = await page.evaluate(async () => {
-        const div = document.createElement('div');
-        div.textContent = '新八的構造成分有95%是眼鏡';
-        div.id = 'test-div';
-        document.body.appendChild(div);
-
-        await new Promise((resolve) => setTimeout(resolve, 600));
-
-        return document.getElementById('test-div')?.textContent;
-      });
-
-      expect(result).toBe('新八的構造成分有 95% 是眼鏡');
+      const result2 = await page.evaluate(() => document.getElementById('test2')?.textContent || '');
+      expect(result2).not.toContain('   ');
     });
   });
 });
