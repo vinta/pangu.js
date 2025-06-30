@@ -77,7 +77,7 @@ const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES_FULL}]+)[ ]*(.+?)[ ]*([${QUOT
 const QUOTE_AN = new RegExp(`([\u201d])([${AN}])`, 'g'); // Only closing curly quotes + AN
 
 // Special handling for straight quotes followed by alphanumeric after CJK
-// This catches patterns like: 社"DF where the quote appears to be closing a quoted CJK phrase
+// This catches patterns like: 中文"ABC where the quote appears to be closing a quoted CJK phrase
 const CJK_QUOTE_AN = new RegExp(`([${CJK}])(")([${AN}])`, 'g');
 
 const CJK_SINGLE_QUOTE_BUT_POSSESSIVE = new RegExp(`([${CJK}])('[^s])`, 'g');
@@ -125,7 +125,7 @@ const ANS_LESS_THAN_ANS = new RegExp(`([${AN}])(<)([${AN}])`, 'g');
 const ANS_GREATER_THAN_ANS = new RegExp(`([${AN}])(>)([${AN}])`, 'g');
 
 // Bracket patterns: ( ) [ ] { } and also < > (though < > are also handled as operators separately)
-// Note: The curly quotes " " (\u201c \u201d) appear in CJK_LEFT_BRACKET/RIGHT_BRACKET_CJK but are primarily handled in the patterns below
+// Note: The curly quotes “ ” (\u201c \u201d) appear in CJK_LEFT_BRACKET/RIGHT_BRACKET_CJK but are primarily handled in the patterns below
 const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([${LEFT_BRACKETS_EXTENDED}])`, 'g');
 const RIGHT_BRACKET_CJK = new RegExp(`([${RIGHT_BRACKETS_EXTENDED}])([${CJK}])`, 'g');
 const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([${AN}${CJK}])[ ]*([\u201c])([${AN}${CJK}\\-_ ]+)([\u201d])`, 'g');
@@ -185,7 +185,7 @@ export class Pangu {
   version: string;
 
   constructor() {
-    this.version = '6.1.2';
+    this.version = '6.1.3';
   }
 
   public spacingText(text: string) {

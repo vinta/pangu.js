@@ -38,8 +38,8 @@ execSync(`npm version ${newVersion} --no-git-tag-version`, { stdio: 'pipe' });
 // Update version in other files
 console.log('Updating version in other files...');
 
-// Update browser_extensions/chrome/manifest.json
-const chromeManifestPath = join(projectRoot, 'browser_extensions/chrome/manifest.json');
+// Update browser-extensions/chrome/manifest.json
+const chromeManifestPath = join(projectRoot, 'browser-extensions/chrome/manifest.json');
 const manifestContent = readFileSync(chromeManifestPath, 'utf8');
 const updatedManifest = manifestContent.replace(/"version":\s*"[^"]+"/, `"version": "${newVersion}"`);
 writeFileSync(chromeManifestPath, updatedManifest, 'utf8');
@@ -57,7 +57,7 @@ execSync('npm run build', { stdio: 'pipe' });
 
 // Copy updated pangu.umd.js to Chrome extension
 console.log('Copying updated pangu.umd.js to Chrome extension...');
-execSync('cp -f dist/browser/pangu.umd.js browser_extensions/chrome/vendors/pangu/pangu.umd.js', { stdio: 'pipe' });
+execSync('cp -f dist/browser/pangu.umd.js browser-extensions/chrome/vendors/pangu/pangu.umd.js', { stdio: 'pipe' });
 
 // Update examples/package.json
 const examplesPackagePath = join(projectRoot, 'examples/package.json');

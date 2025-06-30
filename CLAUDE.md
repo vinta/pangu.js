@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Extends: `@~/.claude/CLAUDE.md` (mandatory base instructions)
+Extends: @~/.claude/CLAUDE.md (mandatory base instructions)
 
 Everything in the base instructions MUST be followed strictly.
 
@@ -143,15 +143,15 @@ pangu.spacingFileSync('input.txt');
 
 - **Unit Tests**: Vitest for shared/node code
 - **Browser Tests**: Playwright for cross-browser testing
-- **Test Fixtures**: Located in `tests/_fixtures/`
+- **Test Fixtures**: Located in `fixtures/`
 - **Coverage**: 106 tests covering various Unicode blocks
 
 ### Chrome Extension
 
 - **Manifest Version**: V3 (modern Chrome extension format)
-- **Location**: `browser_extensions/chrome/`
-- **Source**: TypeScript files in `browser_extensions/chrome/src/`
-- **Build Output**: `browser_extensions/chrome/dist/`
+- **Location**: `browser-extensions/chrome/`
+- **Source**: TypeScript files in `browser-extensions/chrome/src/`
+- **Build Output**: `browser-extensions/chrome/dist/`
 - **Build Command**: `npm run build:extension`
 - **Permissions**: Uses `activeTab` instead of broad `tabs` permission
 - **Content Scripts**: Dynamically registered based on user settings

@@ -8,20 +8,32 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 describe('NodePangu', () => {
-  const fixtureDir = resolve(__dirname, '../_fixtures');
+  const fixtureDir = resolve(__dirname, '../../fixtures');
 
   describe('spacingFile()', () => {
-    it('performs on a text file', async () => {
-      const data = await pangu.spacingFile(`${fixtureDir}/test_file.txt`);
-      const expected = readFileSync(`${fixtureDir}/test_file.expected.txt`, 'utf8');
+    it('handle text file asynchronously', async () => {
+      const data = await pangu.spacingFile(`${fixtureDir}/text-file.txt`);
+      const expected = readFileSync(`${fixtureDir}/text-file.expected.txt`, 'utf8');
+      expect(data).toBe(expected);
+    });
+
+    it('handle text file without EOF newline asynchronously', async () => {
+      const data = await pangu.spacingFile(`${fixtureDir}/text-file-no-eof-newline.txt`);
+      const expected = readFileSync(`${fixtureDir}/text-file-no-eof-newline.expected.txt`, 'utf8');
       expect(data).toBe(expected);
     });
   });
 
   describe('spacingFileSync()', () => {
-    it('performs on a text file', () => {
-      const data = pangu.spacingFileSync(`${fixtureDir}/test_file.txt`);
-      const expected = readFileSync(`${fixtureDir}/test_file.expected.txt`, 'utf8');
+    it('handle text file synchronously', () => {
+      const data = pangu.spacingFileSync(`${fixtureDir}/text-file.txt`);
+      const expected = readFileSync(`${fixtureDir}/text-file.expected.txt`, 'utf8');
+      expect(data).toBe(expected);
+    });
+
+    it('handle text file without EOF newline synchronously', () => {
+      const data = pangu.spacingFileSync(`${fixtureDir}/text-file-no-eof-newline.txt`);
+      const expected = readFileSync(`${fixtureDir}/text-file-no-eof-newline.expected.txt`, 'utf8');
       expect(data).toBe(expected);
     });
   });

@@ -5,11 +5,11 @@ import tseslint from 'typescript-eslint';
 export default tseslint.config(
   {
     // Global ignores
-    ignores: ['node_modules/', 'dist/', 'browser_extensions/chrome/dist/', 'browser_extensions/chrome/vendors/'],
+    ignores: ['node_modules/', 'dist/', 'browser-extensions/chrome/dist/', 'browser-extensions/chrome/vendors/'],
   },
   {
     // TypeScript files
-    files: ['src/**/*.ts', 'browser_extensions/chrome/src/**/*.ts', 'tests/**/*.ts'],
+    files: ['src/**/*.ts', 'browser-extensions/chrome/src/**/*.ts', 'tests/**/*.ts'],
     extends: [...tseslint.configs.recommended],
     languageOptions: {
       parser: tseslint.parser,
@@ -24,7 +24,7 @@ export default tseslint.config(
       'unicorn/prefer-node-protocol': 'error',
       'unicorn/no-array-for-each': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-non-null-assertion': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',

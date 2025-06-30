@@ -103,10 +103,7 @@ class BrowserPangu extends Pangu {
     this.spacingNodeByXPath(xPathQuery, document);
   }
   spacingNode(contextNode) {
-    let xPathQuery = ".//*/text()[normalize-space(.)]";
-    if (contextNode instanceof Element && contextNode.children && contextNode.children.length === 0) {
-      xPathQuery = ".//text()[normalize-space(.)]";
-    }
+    const xPathQuery = ".//text()[normalize-space(.)]";
     this.spacingNodeByXPath(xPathQuery, contextNode);
   }
   spacingElementById(idName) {
@@ -134,37 +131,26 @@ class BrowserPangu extends Pangu {
       if (!currentTextNode) {
         continue;
       }
-      if (currentTextNode.parentNode && this.isSpecificTag(currentTextNode.parentNode, this.presentationalTags) && !this.isInsideSpecificTag(currentTextNode.parentNode, this.ignoredTags)) {
-        const elementNode = currentTextNode.parentNode;
-        if (elementNode.previousSibling) {
-          const { previousSibling } = elementNode;
-          if (previousSibling.nodeType === Node.TEXT_NODE) {
-            const testText = previousSibling.data.slice(-1) + currentTextNode.data.charAt(0);
-            const testNewText = this.spacingText(testText);
-            if (testText !== testNewText) {
-              previousSibling.data = `${previousSibling.data} `;
-            }
-          }
-        }
-        if (elementNode.nextSibling) {
-          const { nextSibling } = elementNode;
-          if (nextSibling.nodeType === Node.TEXT_NODE) {
-            const testText = currentTextNode.data.slice(-1) + nextSibling.data.charAt(0);
-            const testNewText = this.spacingText(testText);
-            if (testText !== testNewText) {
-              nextSibling.data = ` ${nextSibling.data}`;
-            }
-          }
-        }
-      }
       if (this.canIgnoreNode(currentTextNode)) {
         nextTextNode = currentTextNode;
         continue;
       }
       if (currentTextNode instanceof Text) {
-        const newText = this.spacingText(currentTextNode.data);
-        if (currentTextNode.data !== newText) {
-          currentTextNode.data = newText;
+        if (currentTextNode.data.length === 1 && /["\u201c\u201d]/.test(currentTextNode.data)) {
+          if (currentTextNode.previousSibling) {
+            const prevNode = currentTextNode.previousSibling;
+            if (prevNode.nodeType === Node.ELEMENT_NODE && prevNode.textContent) {
+              const lastChar = prevNode.textContent.slice(-1);
+              if (/[\u4e00-\u9fff]/.test(lastChar)) {
+                currentTextNode.data = ` ${currentTextNode.data}`;
+              }
+            }
+          }
+        } else {
+          const newText = this.spacingText(currentTextNode.data);
+          if (currentTextNode.data !== newText) {
+            currentTextNode.data = newText;
+          }
         }
       }
       if (nextTextNode) {
@@ -175,9 +161,29 @@ class BrowserPangu extends Pangu {
         if (!(currentTextNode instanceof Text) || !(nextTextNode instanceof Text)) {
           continue;
         }
+        const currentEndsWithSpace = currentTextNode.data.endsWith(" ");
+        const nextStartsWithSpace = nextTextNode.data.startsWith(" ");
+        let hasWhitespaceBetween = false;
+        let nodeBetween = currentTextNode.nextSibling;
+        while (nodeBetween && nodeBetween !== nextTextNode) {
+          if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
+            hasWhitespaceBetween = true;
+            break;
+          }
+          nodeBetween = nodeBetween.nextSibling;
+        }
+        if (currentEndsWithSpace || nextStartsWithSpace || hasWhitespaceBetween) {
+          nextTextNode = currentTextNode;
+          continue;
+        }
         const testText = currentTextNode.data.slice(-1) + nextTextNode.data.slice(0, 1);
         const testNewText = this.spacingText(testText);
-        if (testNewText !== testText) {
+        const currentLast = currentTextNode.data.slice(-1);
+        const nextFirst = nextTextNode.data.slice(0, 1);
+        const isQuote = (char) => /["\u201c\u201d]/.test(char);
+        const isCJK = (char) => /[\u4e00-\u9fff]/.test(char);
+        const skipSpacing = isQuote(currentLast) && isCJK(nextFirst) || isCJK(currentLast) && isQuote(nextFirst);
+        if (testNewText !== testText && !skipSpacing) {
           let nextNode = nextTextNode;
           while (nextNode.parentNode && !this.spaceSensitiveTags.test(nextNode.nodeName) && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
             nextNode = nextNode.parentNode;
@@ -197,20 +203,20 @@ class BrowserPangu extends Pangu {
               if (!this.ignoredTags.test(nextNode.nodeName) && !this.blockTags.test(nextNode.nodeName)) {
                 if (nextTextNode.previousSibling) {
                   if (!this.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
-                    if (nextTextNode instanceof Text) {
+                    if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
                       nextTextNode.data = ` ${nextTextNode.data}`;
                     }
                   }
                 } else {
                   if (!this.canIgnoreNode(nextTextNode)) {
-                    if (nextTextNode instanceof Text) {
+                    if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
                       nextTextNode.data = ` ${nextTextNode.data}`;
                     }
                   }
                 }
               }
             } else if (!this.spaceSensitiveTags.test(currentNode.nodeName)) {
-              if (currentTextNode instanceof Text) {
+              if (currentTextNode instanceof Text && !currentTextNode.data.endsWith(" ")) {
                 currentTextNode.data = `${currentTextNode.data} `;
               }
             } else {
