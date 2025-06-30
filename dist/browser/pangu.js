@@ -103,8 +103,7 @@ class BrowserPangu extends Pangu {
     this.spacingNodeByXPath(xPathQuery, document);
   }
   spacingNode(contextNode) {
-    const xPathQuery = ".//text()[normalize-space(.)]";
-    this.spacingNodeByXPath(xPathQuery, contextNode);
+    this.spacingNodeWithTreeWalker(contextNode);
   }
   spacingElementById(idName) {
     const xPathQuery = `id("${idName}")//text()`;
@@ -313,6 +312,167 @@ class BrowserPangu extends Pangu {
       }
     }
     return false;
+  }
+  collectTextNodes(contextNode, reverse = false) {
+    const nodes = [];
+    if (!contextNode || contextNode instanceof DocumentFragment) {
+      return nodes;
+    }
+    const walker = document.createTreeWalker(
+      contextNode,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: (node) => {
+          if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          let currentNode = node;
+          while (currentNode) {
+            if (currentNode instanceof Element) {
+              if (this.ignoredTags.test(currentNode.nodeName)) {
+                return NodeFilter.FILTER_REJECT;
+              }
+              if (this.isContentEditable(currentNode)) {
+                return NodeFilter.FILTER_REJECT;
+              }
+              if (currentNode.classList.contains(this.ignoredClass)) {
+                return NodeFilter.FILTER_REJECT;
+              }
+            }
+            currentNode = currentNode.parentNode;
+          }
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      }
+    );
+    while (walker.nextNode()) {
+      nodes.push(walker.currentNode);
+    }
+    return reverse ? nodes.reverse() : nodes;
+  }
+  spacingNodeWithTreeWalker(contextNode) {
+    if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
+      return;
+    }
+    const textNodes = this.collectTextNodes(contextNode, true);
+    let currentTextNode;
+    let nextTextNode = null;
+    for (let i = 0; i < textNodes.length; i++) {
+      currentTextNode = textNodes[i];
+      if (!currentTextNode) {
+        continue;
+      }
+      if (this.canIgnoreNode(currentTextNode)) {
+        nextTextNode = currentTextNode;
+        continue;
+      }
+      if (currentTextNode instanceof Text) {
+        if (currentTextNode.data.length === 1 && /["\u201c\u201d]/.test(currentTextNode.data)) {
+          if (currentTextNode.previousSibling) {
+            const prevNode = currentTextNode.previousSibling;
+            if (prevNode.nodeType === Node.ELEMENT_NODE && prevNode.textContent) {
+              const lastChar = prevNode.textContent.slice(-1);
+              if (/[\u4e00-\u9fff]/.test(lastChar)) {
+                currentTextNode.data = ` ${currentTextNode.data}`;
+              }
+            }
+          }
+        } else {
+          const newText = this.spacingText(currentTextNode.data);
+          if (currentTextNode.data !== newText) {
+            currentTextNode.data = newText;
+          }
+        }
+      }
+      if (nextTextNode) {
+        if (currentTextNode.nextSibling && this.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
+          nextTextNode = currentTextNode;
+          continue;
+        }
+        if (!(currentTextNode instanceof Text) || !(nextTextNode instanceof Text)) {
+          continue;
+        }
+        const currentEndsWithSpace = currentTextNode.data.endsWith(" ");
+        const nextStartsWithSpace = nextTextNode.data.startsWith(" ");
+        let hasWhitespaceBetween = false;
+        let nodeBetween = currentTextNode.nextSibling;
+        while (nodeBetween && nodeBetween !== nextTextNode) {
+          if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
+            hasWhitespaceBetween = true;
+            break;
+          }
+          nodeBetween = nodeBetween.nextSibling;
+        }
+        if (currentEndsWithSpace || nextStartsWithSpace || hasWhitespaceBetween) {
+          nextTextNode = currentTextNode;
+          continue;
+        }
+        const testText = currentTextNode.data.slice(-1) + nextTextNode.data.slice(0, 1);
+        const testNewText = this.spacingText(testText);
+        const currentLast = currentTextNode.data.slice(-1);
+        const nextFirst = nextTextNode.data.slice(0, 1);
+        const isQuote = (char) => /["\u201c\u201d]/.test(char);
+        const isCJK = (char) => /[\u4e00-\u9fff]/.test(char);
+        const skipSpacing = isQuote(currentLast) && isCJK(nextFirst) || isCJK(currentLast) && isQuote(nextFirst);
+        if (testNewText !== testText && !skipSpacing) {
+          let nextNode = nextTextNode;
+          while (nextNode.parentNode && !this.spaceSensitiveTags.test(nextNode.nodeName) && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
+            nextNode = nextNode.parentNode;
+          }
+          let currentNode = currentTextNode;
+          while (currentNode.parentNode && !this.spaceSensitiveTags.test(currentNode.nodeName) && this.isLastTextChild(currentNode.parentNode, currentNode)) {
+            currentNode = currentNode.parentNode;
+          }
+          if (currentNode.nextSibling) {
+            if (this.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
+              nextTextNode = currentTextNode;
+              continue;
+            }
+          }
+          if (!this.blockTags.test(currentNode.nodeName)) {
+            if (!this.spaceSensitiveTags.test(nextNode.nodeName)) {
+              if (!this.ignoredTags.test(nextNode.nodeName) && !this.blockTags.test(nextNode.nodeName)) {
+                if (nextTextNode.previousSibling) {
+                  if (!this.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
+                    if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
+                      nextTextNode.data = ` ${nextTextNode.data}`;
+                    }
+                  }
+                } else {
+                  if (!this.canIgnoreNode(nextTextNode)) {
+                    if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
+                      nextTextNode.data = ` ${nextTextNode.data}`;
+                    }
+                  }
+                }
+              }
+            } else if (!this.spaceSensitiveTags.test(currentNode.nodeName)) {
+              if (currentTextNode instanceof Text && !currentTextNode.data.endsWith(" ")) {
+                currentTextNode.data = `${currentTextNode.data} `;
+              }
+            } else {
+              const panguSpace = document.createElement("pangu");
+              panguSpace.innerHTML = " ";
+              if (nextNode.parentNode) {
+                if (nextNode.previousSibling) {
+                  if (!this.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
+                    nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                  }
+                } else {
+                  nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                }
+              }
+              if (!panguSpace.previousElementSibling) {
+                if (panguSpace.parentNode) {
+                  panguSpace.parentNode.removeChild(panguSpace);
+                }
+              }
+            }
+          }
+        }
+      }
+      nextTextNode = currentTextNode;
+    }
   }
   setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs) {
     if (this.autoSpacingPageObserver) {

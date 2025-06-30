@@ -161,10 +161,11 @@ export class BrowserPangu extends Pangu {
   }
 
   public spacingNode(contextNode: Node) {
-    // Use .//text() to include all text nodes, not just those that are children of elements
+    // Use TreeWalker to collect all text nodes, similar to XPath's .//text()
     // This handles cases like <div><span>中文</span>"<span>ABC</span></div> where the quote is a direct child of the div
     //
-    // The normalize-space(.) predicate "filters out" text nodes that contain only whitespace
+    // The collectTextNodes helper filters out text nodes that contain only whitespace,
+    // similar to XPath's normalize-space(.) predicate
     //
     // Example HTML with CSS {white-space: pre-wrap}
     //   <div>
@@ -180,14 +181,15 @@ export class BrowserPangu extends Pangu {
     // 4. "\n  "      -> filtered out (whitespace only)
     // 5. "build"     -> selected (has content)
     //
-    // Without normalize-space, we'd process the whitespace nodes too, which would:
+    // Without filtering whitespace, we'd process the whitespace nodes too, which would:
     // - Impact performance (processing many empty nodes)
     // - Add complexity (algorithm expects meaningful content)
     //
     // However, those filtered whitespace nodes still exist in the DOM and can render as spaces with CSS like {white-space: pre-wrap}.
     // This is why spacingNodeByXPath includes logic to detect whitespace between selected text nodes.
-    const xPathQuery = './/text()[normalize-space(.)]';
-    this.spacingNodeByXPath(xPathQuery, contextNode);
+    
+    // Phase 2: Use TreeWalker instead of XPath for better performance
+    this.spacingNodeWithTreeWalker(contextNode);
   }
 
   public spacingElementById(idName: string) {
@@ -470,6 +472,217 @@ export class BrowserPangu extends Pangu {
       }
     }
     return false;
+  }
+
+  protected collectTextNodes(contextNode: Node, reverse = false): Text[] {
+    const nodes: Text[] = [];
+    
+    // Handle edge cases
+    if (!contextNode || contextNode instanceof DocumentFragment) {
+      return nodes;
+    }
+
+    const walker = document.createTreeWalker(
+      contextNode,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: (node) => {
+          // Replicate XPath's normalize-space() - skip whitespace-only nodes
+          if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          
+          // Skip nodes that should be ignored (same as canIgnoreNode check)
+          // We need to check the node itself and its ancestors
+          let currentNode = node;
+          while (currentNode) {
+            if (currentNode instanceof Element) {
+              // Check for ignored tags
+              if (this.ignoredTags.test(currentNode.nodeName)) {
+                return NodeFilter.FILTER_REJECT;
+              }
+              // Check for contentEditable
+              if (this.isContentEditable(currentNode)) {
+                return NodeFilter.FILTER_REJECT;
+              }
+              // Check for ignored class
+              if (currentNode.classList.contains(this.ignoredClass)) {
+                return NodeFilter.FILTER_REJECT;
+              }
+            }
+            currentNode = currentNode.parentNode as Node;
+          }
+          
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      }
+    );
+
+    // Collect all text nodes
+    while (walker.nextNode()) {
+      nodes.push(walker.currentNode as Text);
+    }
+
+    // Return in reverse order if requested (to match XPath behavior)
+    return reverse ? nodes.reverse() : nodes;
+  }
+
+  protected spacingNodeWithTreeWalker(contextNode: Node) {
+    // DocumentFragments don't support TreeWalker properly
+    if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
+      return;
+    }
+
+    // Use TreeWalker to collect text nodes (similar to XPath's .//text()[normalize-space(.)])
+    const textNodes = this.collectTextNodes(contextNode, true);
+
+    let currentTextNode: Node | null;
+    let nextTextNode: Node | null = null;
+
+    // Process nodes in reverse order (same as XPath implementation)
+    for (let i = 0; i < textNodes.length; i++) {
+      currentTextNode = textNodes[i];
+      if (!currentTextNode) {
+        continue;
+      }
+
+      // Skip nodes that should be ignored (already filtered by collectTextNodes, but double-check)
+      if (this.canIgnoreNode(currentTextNode)) {
+        nextTextNode = currentTextNode;
+        continue;
+      }
+
+      if (currentTextNode instanceof Text) {
+        // Special handling for standalone quote nodes
+        if (currentTextNode.data.length === 1 && /["\u201c\u201d]/.test(currentTextNode.data)) {
+          // Check context to determine if space is needed before the quote
+          if (currentTextNode.previousSibling) {
+            const prevNode = currentTextNode.previousSibling;
+            if (prevNode.nodeType === Node.ELEMENT_NODE && prevNode.textContent) {
+              const lastChar = prevNode.textContent.slice(-1);
+              // If previous element ends with CJK, add space before quote
+              if (/[\u4e00-\u9fff]/.test(lastChar)) {
+                currentTextNode.data = ` ${currentTextNode.data}`;
+              }
+            }
+          }
+        } else {
+          // Normal text processing
+          const newText = this.spacingText(currentTextNode.data);
+          if (currentTextNode.data !== newText) {
+            currentTextNode.data = newText;
+          }
+        }
+      }
+
+      // Handle nested tag text processing (same logic as spacingNodeByXPath)
+      if (nextTextNode) {
+        if (currentTextNode.nextSibling && this.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
+          nextTextNode = currentTextNode;
+          continue;
+        }
+
+        if (!(currentTextNode instanceof Text) || !(nextTextNode instanceof Text)) {
+          continue;
+        }
+
+        // Check if there's already proper spacing between nodes
+        const currentEndsWithSpace = currentTextNode.data.endsWith(' ');
+        const nextStartsWithSpace = nextTextNode.data.startsWith(' ');
+
+        // Check if there's whitespace between the nodes
+        let hasWhitespaceBetween = false;
+        let nodeBetween = currentTextNode.nextSibling;
+        while (nodeBetween && nodeBetween !== nextTextNode) {
+          if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
+            hasWhitespaceBetween = true;
+            break;
+          }
+          nodeBetween = nodeBetween.nextSibling;
+        }
+
+        // Skip if proper spacing exists
+        if (currentEndsWithSpace || nextStartsWithSpace || hasWhitespaceBetween) {
+          nextTextNode = currentTextNode;
+          continue;
+        }
+
+        const testText = currentTextNode.data.slice(-1) + nextTextNode.data.slice(0, 1);
+        const testNewText = this.spacingText(testText);
+
+        // Special handling for quotes
+        const currentLast = currentTextNode.data.slice(-1);
+        const nextFirst = nextTextNode.data.slice(0, 1);
+        const isQuote = (char: string) => /["\u201c\u201d]/.test(char);
+        const isCJK = (char: string) => /[\u4e00-\u9fff]/.test(char);
+
+        const skipSpacing = (isQuote(currentLast) && isCJK(nextFirst)) || (isCJK(currentLast) && isQuote(nextFirst));
+
+        if (testNewText !== testText && !skipSpacing) {
+          let nextNode: Node = nextTextNode;
+          while (nextNode.parentNode && !this.spaceSensitiveTags.test(nextNode.nodeName) && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
+            nextNode = nextNode.parentNode;
+          }
+
+          let currentNode: Node = currentTextNode;
+          while (currentNode.parentNode && !this.spaceSensitiveTags.test(currentNode.nodeName) && this.isLastTextChild(currentNode.parentNode, currentNode)) {
+            currentNode = currentNode.parentNode;
+          }
+
+          if (currentNode.nextSibling) {
+            if (this.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
+              nextTextNode = currentTextNode;
+              continue;
+            }
+          }
+
+          if (!this.blockTags.test(currentNode.nodeName)) {
+            if (!this.spaceSensitiveTags.test(nextNode.nodeName)) {
+              if (!this.ignoredTags.test(nextNode.nodeName) && !this.blockTags.test(nextNode.nodeName)) {
+                if (nextTextNode.previousSibling) {
+                  if (!this.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
+                    if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
+                      nextTextNode.data = ` ${nextTextNode.data}`;
+                    }
+                  }
+                } else {
+                  if (!this.canIgnoreNode(nextTextNode)) {
+                    if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
+                      nextTextNode.data = ` ${nextTextNode.data}`;
+                    }
+                  }
+                }
+              }
+            } else if (!this.spaceSensitiveTags.test(currentNode.nodeName)) {
+              if (currentTextNode instanceof Text && !currentTextNode.data.endsWith(' ')) {
+                currentTextNode.data = `${currentTextNode.data} `;
+              }
+            } else {
+              const panguSpace = document.createElement('pangu');
+              panguSpace.innerHTML = ' ';
+
+              if (nextNode.parentNode) {
+                if (nextNode.previousSibling) {
+                  if (!this.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
+                    nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                  }
+                } else {
+                  nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                }
+              }
+
+              if (!panguSpace.previousElementSibling) {
+                if (panguSpace.parentNode) {
+                  panguSpace.parentNode.removeChild(panguSpace);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      nextTextNode = currentTextNode;
+    }
   }
 
   protected setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number) {
