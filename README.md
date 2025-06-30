@@ -74,25 +74,25 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 </script>
 ```
 
-Also on:
-
-- https://cdn.jsdelivr.net/npm/pangu@6.1.3/dist/browser/pangu.umd.js
-- https://unpkg.com/pangu@6.1.3/dist/browser/pangu.umd.js
-
 #### ES Modules
 
 ```html
 <script type="module">
   import { pangu } from 'pangu/browser';
 
-  const text = pangu.spacingText('當你凝視著bug，bug也凝視著你');
-  // text = '當你凝視著 bug，bug 也凝視著你'
+  const text = pangu.spacingText('這個人老是在寫程式，是不是有bin啊？');
+  // text = '這個人老是在寫程式，是不是有 bin 啊？'
 
   pangu.spacingElementById('main');
   pangu.spacingElementByClassName('comment');
   pangu.spacingElementByTagName('p');
 </script>
 ```
+
+Also on:
+
+- https://cdn.jsdelivr.net/npm/pangu@6.1.3/dist/browser/pangu.umd.js
+- https://unpkg.com/pangu@6.1.3/dist/browser/pangu.umd.js
 
 ### Node.js
 

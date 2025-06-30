@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-// Browser ESM imports are tested in the Node.js environment
-// since they use the same ES modules. UMD is the primary browser target.
+// Browser ESM imports are tested in the Node.js environment since they use the same ES modules
+// UMD is the primary browser target
 test.describe('Browser UMD imports', () => {
   test.beforeEach(async ({ page }) => {
     await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
@@ -12,10 +12,8 @@ test.describe('Browser UMD imports', () => {
     const result = await page.evaluate(() => {
       return {
         hasGlobalPangu: typeof window.pangu !== 'undefined',
-        hasAutoSpacingPage: typeof window.pangu?.autoSpacingPage === 'function',
-        // @ts-expect-error - UMD bundle attaches BrowserPangu to the pangu instance
-        hasBrowserPanguClass: typeof window.pangu?.BrowserPangu === 'function',
-        // @ts-expect-error - UMD bundle attaches BrowserPangu to the pangu instance
+        hasAutoSpacingPage: typeof window.pangu.autoSpacingPage === 'function',
+        hasBrowserPanguClass: typeof window.pangu.BrowserPangu === 'function',
         canCreateInstance: window.pangu?.BrowserPangu ? new window.pangu.BrowserPangu() instanceof window.pangu.BrowserPangu : false,
       };
     });
