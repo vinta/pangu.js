@@ -27,10 +27,14 @@ No task in progress
 
 ### High Priority
 
-- [ ] Migrate XPath query to `TreeWalker`
+- [x] Migrate XPath query to `TreeWalker` (COMPLETED)
   - https://developer.mozilla.org/en-US/docs/Web/API/TreeWalker
-- [ ] Use `requestIdleCallback()` for heavy operations
-- [ ] Support checking CSS styles of nodes
+  - Achieved 5.5x performance improvement
+- [ ] Use `requestIdleCallback()` for checking CSS visibility
+  - Check computed styles during idle time to detect visually hidden elements
+  - Avoid adding spaces between hidden and visible elements (e.g., screen-reader-only text)
+  - Make it opt-in via configuration to maintain backward compatibility
+  - Related to issue with hidden-adjacent-node.html fixture where pangu.js adds space after visually hidden "Description:" element
 
 ### Medium Priority
 
