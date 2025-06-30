@@ -810,10 +810,18 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       );
       const debouncedSpacingNode = debounce(
         () => {
-          while (queue.length) {
-            const node = queue.shift();
-            if (node) {
-              this.spacingNode(node);
+          if (this.idleSpacingConfig.enabled) {
+            const nodesToProcess = [...queue];
+            queue.length = 0;
+            if (nodesToProcess.length > 0) {
+              this.spacingNodesWithIdleCallback(nodesToProcess);
+            }
+          } else {
+            while (queue.length) {
+              const node = queue.shift();
+              if (node) {
+                this.spacingNode(node);
+              }
             }
           }
         },
@@ -931,6 +939,31 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         return this.collectTextNodes(contextNode, true);
       });
       this.processTextNodesWithIdleCallback(textNodes, callbacks);
+    }
+    spacingNodesWithIdleCallback(nodes, callbacks) {
+      var _a, _b;
+      if (!this.idleSpacingConfig.enabled) {
+        for (const node of nodes) {
+          this.spacingNode(node);
+        }
+        (_a = callbacks == null ? void 0 : callbacks.onComplete) == null ? void 0 : _a.call(callbacks);
+        return;
+      }
+      if (nodes.length === 0) {
+        (_b = callbacks == null ? void 0 : callbacks.onComplete) == null ? void 0 : _b.call(callbacks);
+        return;
+      }
+      const allTextNodes = [];
+      for (const node of nodes) {
+        if (!(node instanceof Node) || node instanceof DocumentFragment) {
+          continue;
+        }
+        const textNodes = this.performanceMonitor.measure("collectTextNodes", () => {
+          return this.collectTextNodes(node, true);
+        });
+        allTextNodes.push(...textNodes);
+      }
+      this.processTextNodesWithIdleCallback(allTextNodes, callbacks);
     }
   }
   const pangu = new BrowserPangu();

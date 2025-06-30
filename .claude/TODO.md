@@ -19,7 +19,7 @@
 - [x] Pipe character `|`: Now correctly treated as separator (#194)
 - [x] Filesystem paths: Special characters in paths preserved (#209, #218, #219)
 
-### XPath to TreeWalker Migration (Phases 1-6)
+### XPath to TreeWalker Migration with Idle Processing (Phases 1-10)
 
 - [x] **Phase 1**: Create TreeWalker text collection helper (`collectTextNodes`)
 - [x] **Phase 2**: Migrate `spacingNode()` method from XPath to TreeWalker
@@ -27,7 +27,11 @@
 - [x] **Phase 4**: Migrate `spacingElementByTagName()` and `spacingElementById()`
 - [x] **Phase 5**: Migrate `spacingElementByClassName()` and page methods
 - [x] **Phase 6**: Remove XPath infrastructure completely
-- **Result**: Achieved 5.5x performance improvement in text node traversal
+- [x] **Phase 7**: Performance monitoring infrastructure
+- [x] **Phase 8**: IdleQueue with Safari compatibility
+- [x] **Phase 9**: Chunked idle processing for non-blocking text spacing
+- [x] **Phase 10**: MutationObserver idle processing for dynamic content
+- **Result**: Achieved 5.5x performance improvement + non-blocking processing capability
 - Fixed whitespace detection issue between span elements
 
 ## In Progress
@@ -53,9 +57,19 @@ No task in progress
   - Maintains backward compatibility (disabled by default)
   - Cross-browser compatibility verified (Chrome, Firefox, Safari)
 
-- [ ] **Phase 9-10: Idle Processing Implementation**
-  - [ ] Phase 9: Make initial page spacing non-blocking with chunking
-  - [ ] Phase 10: Extend idle processing to MutationObserver for dynamic content
+- [x] **Phase 9: Chunked Idle Processing** ✅ COMPLETED
+  - Modified spacingNodeWithTreeWalker to support idle processing when enabled
+  - Created processTextNodesWithIdleCallback for non-blocking text processing
+  - Enhanced IdleQueue with progress tracking and callbacks
+  - Added public APIs: spacingPageWithIdleCallback, spacingNodeWithIdleCallback, getIdleProgress
+  - Maintains backward compatibility with synchronous processing as default
+
+- [x] **Phase 10: MutationObserver Idle Processing** ✅ COMPLETED
+  - Extended MutationObserver to use idle processing for dynamic content
+  - Modified debouncedSpacingNode to check idleSpacingConfig.enabled
+  - Created spacingNodesWithIdleCallback for multiple node processing
+  - Verified cross-browser compatibility and timing
+  - Enables non-blocking processing of dynamically added content
 - [ ] **CSS Visibility Check with requestIdleCallback**
   - Check computed styles during idle time to detect visually hidden elements
   - Avoid adding spaces between hidden and visible elements (e.g., screen-reader-only text)

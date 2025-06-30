@@ -113,6 +113,7 @@ export declare class BrowserPangu extends Pangu {
     };
     spacingPageWithIdleCallback(callbacks?: IdleSpacingCallbacks): void;
     spacingNodeWithIdleCallback(contextNode: Node, callbacks?: IdleSpacingCallbacks): void;
+    spacingNodesWithIdleCallback(nodes: Node[], callbacks?: IdleSpacingCallbacks): void;
 }
 export declare const pangu: BrowserPangu;
 export default pangu;

@@ -789,10 +789,21 @@ export class BrowserPangu extends Pangu {
     const debouncedSpacingNode = debounce(
       () => {
         // NOTE: a single node could be very big which contains a lot of child nodes
-        while (queue.length) {
-          const node = queue.shift();
-          if (node) {
-            this.spacingNode(node);
+        if (this.idleSpacingConfig.enabled) {
+          // Use idle processing for dynamic content
+          const nodesToProcess = [...queue];
+          queue.length = 0; // Clear the queue
+          
+          if (nodesToProcess.length > 0) {
+            this.spacingNodesWithIdleCallback(nodesToProcess);
+          }
+        } else {
+          // Synchronous processing (original behavior)
+          while (queue.length) {
+            const node = queue.shift();
+            if (node) {
+              this.spacingNode(node);
+            }
           }
         }
       },
@@ -957,6 +968,40 @@ export class BrowserPangu extends Pangu {
 
     // Process with idle callback
     this.processTextNodesWithIdleCallback(textNodes, callbacks);
+  }
+
+  public spacingNodesWithIdleCallback(nodes: Node[], callbacks?: IdleSpacingCallbacks): void {
+    if (!this.idleSpacingConfig.enabled) {
+      // Fallback to synchronous processing if idle spacing is disabled
+      for (const node of nodes) {
+        this.spacingNode(node);
+      }
+      callbacks?.onComplete?.();
+      return;
+    }
+
+    if (nodes.length === 0) {
+      callbacks?.onComplete?.();
+      return;
+    }
+
+    // Collect all text nodes from all input nodes
+    const allTextNodes: Node[] = [];
+    for (const node of nodes) {
+      // Skip DocumentFragments as they don't support TreeWalker properly
+      if (!(node instanceof Node) || node instanceof DocumentFragment) {
+        continue;
+      }
+
+      const textNodes = this.performanceMonitor.measure('collectTextNodes', () => {
+        return this.collectTextNodes(node, true);
+      });
+      
+      allTextNodes.push(...textNodes);
+    }
+
+    // Process all collected text nodes with idle callback
+    this.processTextNodesWithIdleCallback(allTextNodes, callbacks);
   }
 }
 
