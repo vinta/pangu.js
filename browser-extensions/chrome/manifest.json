@@ -7,16 +7,16 @@
   "author": "Vinta",
   "default_locale": "zh_TW",
   "icons": {
-    "16": "icons/icon_16.png",
-    "32": "icons/icon_32.png",
-    "48": "icons/icon_48.png",
-    "128": "icons/icon_128.png"
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
   },
   "action": {
     "default_icon": {
-      "16": "icons/icon_16.png",
-      "24": "icons/icon_24.png",
-      "32": "icons/icon_32.png"
+      "16": "icons/icon-16.png",
+      "24": "icons/icon-24.png",
+      "32": "icons/icon-32.png"
     },
     "default_title": "__MSG_extension_name__",
     "default_popup": "pages/popup.html"
