@@ -127,6 +127,41 @@ const S_A = /(%)([A-Za-z])/g;
 
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
+// Helper class to manage placeholder replacements
+class PlaceholderManager {
+  private placeholder: string;
+  private items: string[] = [];
+  private index: number = 0;
+  private startDelimiter: string;
+  private endDelimiter: string;
+
+  constructor(placeholder: string, startDelimiter: string = '', endDelimiter: string = '\u0000') {
+    this.placeholder = placeholder;
+    this.startDelimiter = startDelimiter;
+    this.endDelimiter = endDelimiter;
+  }
+
+  store(item: string): string {
+    this.items[this.index] = item;
+    return `${this.startDelimiter}${this.placeholder}${this.index++}${this.endDelimiter}`;
+  }
+
+  restore(text: string): string {
+    const pattern = new RegExp(
+      `${this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}${this.placeholder}(\\d+)${this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`,
+      'g'
+    );
+    return text.replace(pattern, (_match, index) => {
+      return this.items[parseInt(index, 10)] || '';
+    });
+  }
+
+  reset(): void {
+    this.items = [];
+    this.index = 0;
+  }
+}
+
 export class Pangu {
   version: string;
 
@@ -149,9 +184,8 @@ export class Pangu {
 
     let newText = text;
 
-    // HTML tag processing variables
-    const htmlTags: string[] = [];
-    const HTML_TAG_PLACEHOLDER = '\u0000HTML_TAG_PLACEHOLDER_';
+    // Initialize placeholder managers
+    const htmlTagManager = new PlaceholderManager('\u0000HTML_TAG_PLACEHOLDER_', '', '\u0000');
     let hasHtmlTags = false;
 
     // Early return for HTML processing if no HTML tags present
@@ -173,9 +207,7 @@ export class Pangu {
           return `${attrName}="${processedValue}"`;
         });
 
-        const index = htmlTags.length;
-        htmlTags.push(processedTag);
-        return `${HTML_TAG_PLACEHOLDER}${index}\u0000`;
+        return htmlTagManager.store(processedTag);
       });
     }
 
@@ -242,9 +274,7 @@ export class Pangu {
     }
 
     // Protect compound words from operator spacing
-    const COMPOUND_WORD_PLACEHOLDER = '\uE002'; // Private Use Area character
-    const compoundWords: string[] = [];
-    let compoundIndex = 0;
+    const compoundWordManager = new PlaceholderManager('\uE002', '', '\uE003');
 
     // Pattern to detect compound words: alphanumeric-alphanumeric combinations that look like compound words/product names
     // Examples: state-of-the-art, machine-learning, GPT-4o, real-time, end-to-end, gpt-4o, GPT-5, claude-4-opus
@@ -253,8 +283,7 @@ export class Pangu {
 
     // Store compound words and replace with placeholders
     newText = newText.replace(COMPOUND_WORD_PATTERN, (match) => {
-      compoundWords[compoundIndex] = match;
-      return `${COMPOUND_WORD_PLACEHOLDER}${compoundIndex++}\uE003`;
+      return compoundWordManager.store(match);
     });
 
     // Handle single letter grades (A+, B-, etc.) before general operator rules
@@ -305,15 +334,12 @@ export class Pangu {
     // But exclude slashes that are part of file paths by protecting them first
     if (slashCount === 1) {
       // Temporarily protect file paths from slash operator processing
-      const FILE_PATH_PLACEHOLDER = '\uE000'; // Private Use Area character
-      const filePaths: string[] = [];
-      let pathIndex = 0;
+      const filePathManager = new PlaceholderManager('\uE000', '', '\uE001');
 
       // Store all file paths and replace with placeholders
       const allFilePathPattern = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}|${UNIX_RELATIVE_FILE_PATH.source})`, 'g');
       newText = newText.replace(allFilePathPattern, (match) => {
-        filePaths[pathIndex] = match;
-        return `${FILE_PATH_PLACEHOLDER}${pathIndex++}\uE001`;
+        return filePathManager.store(match);
       });
 
       // Now apply slash operator spacing
@@ -323,18 +349,12 @@ export class Pangu {
       newText = newText.replace(ANS_SLASH_ANS, '$1 $2 $3');
 
       // Restore file paths
-      const FILE_PATH_RESTORE = new RegExp(`${FILE_PATH_PLACEHOLDER}(\\d+)\uE001`, 'g');
-      newText = newText.replace(FILE_PATH_RESTORE, (_match, index) => {
-        return filePaths[parseInt(index, 10)] || '';
-      });
+      newText = filePathManager.restore(newText);
     }
     // If multiple slashes, treat as separator - do nothing (no spaces)
 
     // Restore compound words from placeholders
-    const COMPOUND_WORD_RESTORE = new RegExp(`${COMPOUND_WORD_PLACEHOLDER}(\\d+)\uE003`, 'g');
-    newText = newText.replace(COMPOUND_WORD_RESTORE, (_match, index) => {
-      return compoundWords[parseInt(index, 10)] || '';
-    });
+    newText = compoundWordManager.restore(newText);
 
     newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
     newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
@@ -389,10 +409,7 @@ export class Pangu {
 
     // Restore HTML tags from placeholders (only if HTML processing occurred)
     if (hasHtmlTags) {
-      const HTML_TAG_RESTORE = new RegExp(`${HTML_TAG_PLACEHOLDER}(\\d+)\u0000`, 'g');
-      newText = newText.replace(HTML_TAG_RESTORE, (_match, index) => {
-        return htmlTags[parseInt(index, 10)] || '';
-      });
+      newText = htmlTagManager.restore(newText);
     }
 
     // TODO: TBD
