@@ -76,8 +76,8 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 
 Also on:
 
-- https://cdn.jsdelivr.net/npm/pangu@6.1.2/dist/browser/pangu.umd.js
-- https://unpkg.com/pangu@6.1.2/dist/browser/pangu.umd.js
+- https://cdn.jsdelivr.net/npm/pangu@6.1.3/dist/browser/pangu.umd.js
+- https://unpkg.com/pangu@6.1.3/dist/browser/pangu.umd.js
 
 #### ES Modules
 
