@@ -27,7 +27,10 @@ No task in progress
 
 ### High Priority
 
-- [ ] Add CSS `text-autospace` instructions in options page (Reason: Native browser feature is faster)
+- [ ] Migrate XPath query to `TreeWalker`
+  - https://developer.mozilla.org/en-US/docs/Web/API/TreeWalker
+- [ ] Use `requestIdleCallback()` for heavy operations
+- [ ] Support checking CSS styles of nodes
 
 ### Medium Priority
 
@@ -41,12 +44,6 @@ No task in progress
 
 ### Low Priority
 
+- [ ] Add CSS `text-autospace` instructions in options page (Reason: Native browser feature is faster)
 - [ ] Handle HTML comment spacing: `<!-- content -->`
 - [ ] Fix issue #161 #216 - Comprehensive Markdown support
-
-## Researches
-
-- Survey `createTreeWalker()`
-  - https://developer.mozilla.org/en-US/docs/Web/API/Document/createTreeWalker
-- Survey `requestIdleCallback()`
-  - https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback
