@@ -193,8 +193,10 @@ export class BrowserPangu extends Pangu {
   }
 
   public spacingElementById(idName: string) {
-    const xPathQuery = `id("${idName}")//text()`;
-    this.spacingNodeByXPath(xPathQuery, document);
+    const element = document.getElementById(idName);
+    if (element) {
+      this.spacingNode(element);
+    }
   }
 
   public spacingElementByClassName(className: string) {
@@ -203,8 +205,10 @@ export class BrowserPangu extends Pangu {
   }
 
   public spacingElementByTagName(tagName: string) {
-    const xPathQuery = `//${tagName}//text()`;
-    this.spacingNodeByXPath(xPathQuery, document);
+    const elements = document.getElementsByTagName(tagName);
+    for (let i = 0; i < elements.length; i++) {
+      this.spacingNode(elements[i]);
+    }
   }
 
   // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
@@ -218,173 +222,19 @@ export class BrowserPangu extends Pangu {
     // snapshotLength 要配合 XPathResult.ORDERED_NODE_SNAPSHOT_TYPE 使用
     // https://developer.mozilla.org/en-US/docs/Web/API/Document/evaluate
     // https://developer.mozilla.org/en-US/docs/Web/API/XPathResult
-    const textNodes = document.evaluate(xPathQuery, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+    const xPathResult = document.evaluate(xPathQuery, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
-    let currentTextNode: Node | null;
-    let nextTextNode: Node | null = null;
-
-    // 從最下面、最裡面的節點開始，所以是倒序的
-    for (let i = textNodes.snapshotLength - 1; i > -1; --i) {
-      currentTextNode = textNodes.snapshotItem(i);
-      if (!currentTextNode) {
-        continue;
+    // Collect nodes in reverse order (從最下面、最裡面的節點開始)
+    const textNodes: Node[] = [];
+    for (let i = xPathResult.snapshotLength - 1; i > -1; --i) {
+      const node = xPathResult.snapshotItem(i);
+      if (node) {
+        textNodes.push(node);
       }
-
-      // Skip presentational tag handling - it's causing issues with fragmented nodes
-      // The main spacing logic below handles most cases correctly
-
-      if (this.canIgnoreNode(currentTextNode)) {
-        nextTextNode = currentTextNode;
-        continue;
-      }
-
-      if (currentTextNode instanceof Text) {
-        // Special handling for standalone quote nodes
-        if (currentTextNode.data.length === 1 && /["\u201c\u201d]/.test(currentTextNode.data)) {
-          // Check context to determine if space is needed before the quote
-          if (currentTextNode.previousSibling) {
-            const prevNode = currentTextNode.previousSibling;
-            if (prevNode.nodeType === Node.ELEMENT_NODE && prevNode.textContent) {
-              const lastChar = prevNode.textContent.slice(-1);
-              // If previous element ends with CJK, add space before quote
-              if (/[\u4e00-\u9fff]/.test(lastChar)) {
-                currentTextNode.data = ` ${currentTextNode.data}`;
-              }
-            }
-          }
-        } else {
-          // Normal text processing
-          const newText = this.spacingText(currentTextNode.data);
-          if (currentTextNode.data !== newText) {
-            currentTextNode.data = newText;
-          }
-        }
-      }
-
-      // 處理嵌套的 <tag> 中的文字
-      if (nextTextNode) {
-        // TODO
-        // 現在只是簡單地判斷相鄰的下一個 node 是不是 <br>
-        // 萬一遇上嵌套的標籤就不行了
-        if (currentTextNode.nextSibling && this.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
-          nextTextNode = currentTextNode;
-          continue;
-        }
-
-        // currentTextNode 的最後一個字 + nextTextNode 的第一個字
-        if (!(currentTextNode instanceof Text) || !(nextTextNode instanceof Text)) {
-          continue;
-        }
-
-        // Check if there's already proper spacing between nodes
-        const currentEndsWithSpace = currentTextNode.data.endsWith(' ');
-        const nextStartsWithSpace = nextTextNode.data.startsWith(' ');
-
-        // Check if there's whitespace between the nodes (e.g., newlines that render as spaces with white-space: pre-wrap)
-        let hasWhitespaceBetween = false;
-        let nodeBetween = currentTextNode.nextSibling;
-        while (nodeBetween && nodeBetween !== nextTextNode) {
-          if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
-            hasWhitespaceBetween = true;
-            break;
-          }
-          nodeBetween = nodeBetween.nextSibling;
-        }
-
-        // If either node already has space at the boundary, or there's whitespace between nodes, skip processing
-        if (currentEndsWithSpace || nextStartsWithSpace || hasWhitespaceBetween) {
-          nextTextNode = currentTextNode;
-          continue;
-        }
-
-        const testText = currentTextNode.data.slice(-1) + nextTextNode.data.slice(0, 1);
-        const testNewText = this.spacingText(testText);
-
-        // Special handling for quotes to prevent breaking quoted content
-        const currentLast = currentTextNode.data.slice(-1);
-        const nextFirst = nextTextNode.data.slice(0, 1);
-        const isQuote = (char: string) => /["\u201c\u201d]/.test(char);
-        const isCJK = (char: string) => /[\u4e00-\u9fff]/.test(char);
-
-        // Skip spacing in these cases:
-        // 1. Quote followed by CJK (e.g., "中)
-        // 2. CJK followed by quote (e.g., 容")
-        const skipSpacing = (isQuote(currentLast) && isCJK(nextFirst)) || (isCJK(currentLast) && isQuote(nextFirst));
-
-        if (testNewText !== testText && !skipSpacing) {
-          // 往上找 nextTextNode 的 parent node
-          // 直到遇到 spaceSensitiveTags
-          // 而且 nextTextNode 必須是第一個 text child
-          // 才能把空格加在 nextTextNode 的前面
-          let nextNode: Node = nextTextNode;
-          while (nextNode.parentNode && !this.spaceSensitiveTags.test(nextNode.nodeName) && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
-            nextNode = nextNode.parentNode;
-          }
-
-          let currentNode: Node = currentTextNode;
-          while (currentNode.parentNode && !this.spaceSensitiveTags.test(currentNode.nodeName) && this.isLastTextChild(currentNode.parentNode, currentNode)) {
-            currentNode = currentNode.parentNode;
-          }
-
-          if (currentNode.nextSibling) {
-            if (this.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
-              nextTextNode = currentTextNode;
-              continue;
-            }
-          }
-
-          if (!this.blockTags.test(currentNode.nodeName)) {
-            if (!this.spaceSensitiveTags.test(nextNode.nodeName)) {
-              if (!this.ignoredTags.test(nextNode.nodeName) && !this.blockTags.test(nextNode.nodeName)) {
-                if (nextTextNode.previousSibling) {
-                  if (!this.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
-                    if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
-                      nextTextNode.data = ` ${nextTextNode.data}`;
-                    }
-                  }
-                } else {
-                  // dirty hack
-                  if (!this.canIgnoreNode(nextTextNode)) {
-                    if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
-                      nextTextNode.data = ` ${nextTextNode.data}`;
-                    }
-                  }
-                }
-              }
-            } else if (!this.spaceSensitiveTags.test(currentNode.nodeName)) {
-              if (currentTextNode instanceof Text && !currentTextNode.data.endsWith(' ')) {
-                currentTextNode.data = `${currentTextNode.data} `;
-              }
-            } else {
-              const panguSpace = document.createElement('pangu');
-              panguSpace.innerHTML = ' ';
-
-              // 避免一直被加空格
-              if (nextNode.parentNode) {
-                if (nextNode.previousSibling) {
-                  if (!this.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
-                    nextNode.parentNode.insertBefore(panguSpace, nextNode);
-                  }
-                } else {
-                  nextNode.parentNode.insertBefore(panguSpace, nextNode);
-                }
-              }
-
-              // TODO
-              // 主要是想要避免在元素（通常都是 <li>）的開頭加空格
-              // 這個做法有點蠢，但是不管還是先硬上
-              if (!panguSpace.previousElementSibling) {
-                if (panguSpace.parentNode) {
-                  panguSpace.parentNode.removeChild(panguSpace);
-                }
-              }
-            }
-          }
-        }
-      }
-
-      nextTextNode = currentTextNode;
     }
+
+    // Process the collected text nodes using the shared logic
+    this.processTextNodes(textNodes);
   }
 
   public stopAutoSpacingPage() {
@@ -474,79 +324,18 @@ export class BrowserPangu extends Pangu {
     return false;
   }
 
-  protected collectTextNodes(contextNode: Node, reverse = false): Text[] {
-    const nodes: Text[] = [];
-    
-    // Handle edge cases
-    if (!contextNode || contextNode instanceof DocumentFragment) {
-      return nodes;
-    }
-
-    const walker = document.createTreeWalker(
-      contextNode,
-      NodeFilter.SHOW_TEXT,
-      {
-        acceptNode: (node) => {
-          // Replicate XPath's normalize-space() - skip whitespace-only nodes
-          if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
-            return NodeFilter.FILTER_REJECT;
-          }
-          
-          // Skip nodes that should be ignored (same as canIgnoreNode check)
-          // We need to check the node itself and its ancestors
-          let currentNode = node;
-          while (currentNode) {
-            if (currentNode instanceof Element) {
-              // Check for ignored tags
-              if (this.ignoredTags.test(currentNode.nodeName)) {
-                return NodeFilter.FILTER_REJECT;
-              }
-              // Check for contentEditable
-              if (this.isContentEditable(currentNode)) {
-                return NodeFilter.FILTER_REJECT;
-              }
-              // Check for ignored class
-              if (currentNode.classList.contains(this.ignoredClass)) {
-                return NodeFilter.FILTER_REJECT;
-              }
-            }
-            currentNode = currentNode.parentNode as Node;
-          }
-          
-          return NodeFilter.FILTER_ACCEPT;
-        }
-      }
-    );
-
-    // Collect all text nodes
-    while (walker.nextNode()) {
-      nodes.push(walker.currentNode as Text);
-    }
-
-    // Return in reverse order if requested (to match XPath behavior)
-    return reverse ? nodes.reverse() : nodes;
-  }
-
-  protected spacingNodeWithTreeWalker(contextNode: Node) {
-    // DocumentFragments don't support TreeWalker properly
-    if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
-      return;
-    }
-
-    // Use TreeWalker to collect text nodes (similar to XPath's .//text()[normalize-space(.)])
-    const textNodes = this.collectTextNodes(contextNode, true);
-
+  protected processTextNodes(textNodes: Node[]) {
     let currentTextNode: Node | null;
     let nextTextNode: Node | null = null;
 
-    // Process nodes in reverse order (same as XPath implementation)
+    // Process nodes in the order provided
     for (let i = 0; i < textNodes.length; i++) {
       currentTextNode = textNodes[i];
       if (!currentTextNode) {
         continue;
       }
 
-      // Skip nodes that should be ignored (already filtered by collectTextNodes, but double-check)
+      // Skip nodes that should be ignored
       if (this.canIgnoreNode(currentTextNode)) {
         nextTextNode = currentTextNode;
         continue;
@@ -575,7 +364,7 @@ export class BrowserPangu extends Pangu {
         }
       }
 
-      // Handle nested tag text processing (same logic as spacingNodeByXPath)
+      // Handle nested tag text processing
       if (nextTextNode) {
         if (currentTextNode.nextSibling && this.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
           nextTextNode = currentTextNode;
@@ -683,6 +472,72 @@ export class BrowserPangu extends Pangu {
 
       nextTextNode = currentTextNode;
     }
+  }
+
+  protected collectTextNodes(contextNode: Node, reverse = false): Text[] {
+    const nodes: Text[] = [];
+    
+    // Handle edge cases
+    if (!contextNode || contextNode instanceof DocumentFragment) {
+      return nodes;
+    }
+
+    const walker = document.createTreeWalker(
+      contextNode,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: (node) => {
+          // Replicate XPath's normalize-space() - skip whitespace-only nodes
+          if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          
+          // Skip nodes that should be ignored (same as canIgnoreNode check)
+          // We need to check the node itself and its ancestors
+          let currentNode = node;
+          while (currentNode) {
+            if (currentNode instanceof Element) {
+              // Check for ignored tags
+              if (this.ignoredTags.test(currentNode.nodeName)) {
+                return NodeFilter.FILTER_REJECT;
+              }
+              // Check for contentEditable
+              if (this.isContentEditable(currentNode)) {
+                return NodeFilter.FILTER_REJECT;
+              }
+              // Check for ignored class
+              if (currentNode.classList.contains(this.ignoredClass)) {
+                return NodeFilter.FILTER_REJECT;
+              }
+            }
+            currentNode = currentNode.parentNode as Node;
+          }
+          
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      }
+    );
+
+    // Collect all text nodes
+    while (walker.nextNode()) {
+      nodes.push(walker.currentNode as Text);
+    }
+
+    // Return in reverse order if requested (to match XPath behavior)
+    return reverse ? nodes.reverse() : nodes;
+  }
+
+  protected spacingNodeWithTreeWalker(contextNode: Node) {
+    // DocumentFragments don't support TreeWalker properly
+    if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
+      return;
+    }
+
+    // Use TreeWalker to collect text nodes (similar to XPath's .//text()[normalize-space(.)])
+    const textNodes = this.collectTextNodes(contextNode, true);
+
+    // Process the collected text nodes using the shared logic
+    this.processTextNodes(textNodes);
   }
 
   protected setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number) {
