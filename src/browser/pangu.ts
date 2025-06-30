@@ -240,7 +240,7 @@ export class BrowserPangu extends Pangu {
 
       if (currentTextNode instanceof Text) {
         // Special handling for standalone quote nodes
-        if (currentTextNode.data.length === 1 && (currentTextNode.data === '"' || currentTextNode.data === '"' || currentTextNode.data === '"')) {
+        if (currentTextNode.data.length === 1 && /["\u201c\u201d]/.test(currentTextNode.data)) {
           // Check context to determine if space is needed before the quote
           if (currentTextNode.previousSibling) {
             const prevNode = currentTextNode.previousSibling;
@@ -303,7 +303,7 @@ export class BrowserPangu extends Pangu {
         // Special handling for quotes to prevent breaking quoted content
         const currentLast = currentTextNode.data.slice(-1);
         const nextFirst = nextTextNode.data.slice(0, 1);
-        const isQuote = (char: string) => char === '"' || char === '"' || char === '"';
+        const isQuote = (char: string) => /["\u201c\u201d]/.test(char);
         const isCJK = (char: string) => /[\u4e00-\u9fff]/.test(char);
 
         // Skip spacing in these cases:
