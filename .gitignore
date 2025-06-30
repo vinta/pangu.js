@@ -1,6 +1,6 @@
 *.log
 *.pem
-browser_extensions/paranoid-auto-spacing.zip
+browser-extensions/paranoid-auto-spacing.zip
 node_modules/
 
 # Test results

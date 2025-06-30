@@ -75,8 +75,8 @@ test.describe('BrowserPangu', () => {
 
   test.describe('spacingElementById()', () => {
     test('handle elements by ID', async ({ page }) => {
-      const htmlContent = loadFixture('id_name.html');
-      const expected = loadFixture('id_name_expected.html').trim();
+      const htmlContent = loadFixture('id-name.html');
+      const expected = loadFixture('id-name-expected.html').trim();
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
@@ -89,8 +89,8 @@ test.describe('BrowserPangu', () => {
 
   test.describe('spacingElementByClassName()', () => {
     test('handle elements by class name (single element)', async ({ page }) => {
-      const htmlContent = loadFixture('class_name_1.html');
-      const expected = loadFixture('class_name_1_expected.html').trim();
+      const htmlContent = loadFixture('class-name-1.html');
+      const expected = loadFixture('class-name-1-expected.html').trim();
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
@@ -101,8 +101,8 @@ test.describe('BrowserPangu', () => {
     });
 
     test('handle elements by class name (multiple elements)', async ({ page }) => {
-      const htmlContent = loadFixture('class_name_2.html');
-      const expected = loadFixture('class_name_2_expected.html').trim();
+      const htmlContent = loadFixture('class-name-2.html');
+      const expected = loadFixture('class-name-2-expected.html').trim();
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
@@ -113,8 +113,8 @@ test.describe('BrowserPangu', () => {
     });
 
     test('handle elements by class name (nested elements)', async ({ page }) => {
-      const htmlContent = loadFixture('class_name_3.html');
-      const expected = loadFixture('class_name_3_expected.html').trim();
+      const htmlContent = loadFixture('class-name-3.html');
+      const expected = loadFixture('class-name-3-expected.html').trim();
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
@@ -127,8 +127,8 @@ test.describe('BrowserPangu', () => {
 
   test.describe('spacingElementByTagName()', () => {
     test('handle elements by tag name', async ({ page }) => {
-      const htmlContent = loadFixture('tag_name.html');
-      const expected = loadFixture('tag_name_expected.html').trim();
+      const htmlContent = loadFixture('tag-name.html');
+      const expected = loadFixture('tag-name-expected.html').trim();
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
@@ -154,7 +154,7 @@ test.describe('BrowserPangu', () => {
   test.describe('spacingPageBody()', () => {
     test('handle page body', async ({ page }) => {
       const htmlContent = loadFixture('body.html');
-      const expected = loadFixture('body_expected.html').trim();
+      const expected = loadFixture('body-expected.html').trim();
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
@@ -168,7 +168,7 @@ test.describe('BrowserPangu', () => {
   test.describe('spacingPage()', () => {
     test('handle entire page (title and body)', async ({ page }) => {
       const htmlContent = loadFixture('body.html');
-      const expected = loadFixture('body_expected.html').trim();
+      const expected = loadFixture('body-expected.html').trim();
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
@@ -186,8 +186,8 @@ test.describe('BrowserPangu', () => {
     test.skip('handle YouTube formatted strings with hashtags', async ({ page }) => {
       // Skip: Known limitation with XPath-based approach for adjacent sibling elements
       // Current behavior doesn't add space between <span> and <a> elements
-      const htmlContent = loadFixture('youtube_format_string.html');
-      const expected = loadFixture('youtube_format_string_expected.html').trim();
+      const htmlContent = loadFixture('youtube-format-string.html');
+      const expected = loadFixture('youtube-format-string-expected.html').trim();
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
@@ -207,7 +207,7 @@ test.describe('BrowserPangu', () => {
     });
 
     test('handle input field values by preserving them', async ({ page }) => {
-      const htmlContent = loadFixture('input_fields.html');
+      const htmlContent = loadFixture('input-fields.html');
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
@@ -230,8 +230,8 @@ test.describe('BrowserPangu', () => {
     });
 
     test('handle text outside input fields while preserving input values', async ({ page }) => {
-      const htmlContent = loadFixture('input_fields_mixed.html');
-      const expected = loadFixture('input_fields_mixed_expected.html').trim();
+      const htmlContent = loadFixture('input-fields-mixed.html');
+      const expected = loadFixture('input-fields-mixed-expected.html').trim();
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
@@ -275,8 +275,8 @@ test.describe('BrowserPangu', () => {
     });
 
     test('handle text nodes with newlines and CSS {white-space: pre-wrap}', async ({ page }) => {
-      const htmlContent = loadFixture('whitespace_pre_wrap.html');
-      const expected = loadFixture('whitespace_pre_wrap_expected.html').trim();
+      const htmlContent = loadFixture('whitespace-pre-wrap.html');
+      const expected = loadFixture('whitespace-pre-wrap-expected.html').trim();
 
       await page.setContent(htmlContent);
 

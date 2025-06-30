@@ -149,9 +149,9 @@ pangu.spacingFileSync('input.txt');
 ### Chrome Extension
 
 - **Manifest Version**: V3 (modern Chrome extension format)
-- **Location**: `browser_extensions/chrome/`
-- **Source**: TypeScript files in `browser_extensions/chrome/src/`
-- **Build Output**: `browser_extensions/chrome/dist/`
+- **Location**: `browser-extensions/chrome/`
+- **Source**: TypeScript files in `browser-extensions/chrome/src/`
+- **Build Output**: `browser-extensions/chrome/dist/`
 - **Build Command**: `npm run build:extension`
 - **Permissions**: Uses `activeTab` instead of broad `tabs` permission
 - **Content Scripts**: Dynamically registered based on user settings

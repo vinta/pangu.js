@@ -12,16 +12,16 @@ describe('NodePangu', () => {
 
   describe('spacingFile()', () => {
     it('handle text file asynchronously', async () => {
-      const data = await pangu.spacingFile(`${fixtureDir}/test_file.txt`);
-      const expected = readFileSync(`${fixtureDir}/test_file.expected.txt`, 'utf8');
+      const data = await pangu.spacingFile(`${fixtureDir}/test-file.txt`);
+      const expected = readFileSync(`${fixtureDir}/test-file.expected.txt`, 'utf8');
       expect(data).toBe(expected);
     });
   });
 
   describe('spacingFileSync()', () => {
     it('handle text file synchronously', () => {
-      const data = pangu.spacingFileSync(`${fixtureDir}/test_file.txt`);
-      const expected = readFileSync(`${fixtureDir}/test_file.expected.txt`, 'utf8');
+      const data = pangu.spacingFileSync(`${fixtureDir}/test-file.txt`);
+      const expected = readFileSync(`${fixtureDir}/test-file.expected.txt`, 'utf8');
       expect(data).toBe(expected);
     });
   });

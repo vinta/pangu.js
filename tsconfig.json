@@ -27,5 +27,5 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "exclude": ["dist", "browser_extensions/chrome/dist", "examples", "node_modules"]
+  "exclude": ["dist", "browser-extensions/chrome/dist", "examples", "node_modules"]
 }
