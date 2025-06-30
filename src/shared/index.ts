@@ -25,24 +25,24 @@ const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u
 // Basic character classes
 const AN = 'A-Za-z0-9';
 const A = 'A-Za-z';
-const UPPER_AN = 'A-Z0-9';  // For FIX_CJK_COLON_ANS
+const UPPER_AN = 'A-Z0-9'; // For FIX_CJK_COLON_ANS
 
 // Operators - note the different sets!
-const OPERATORS_WITH_HYPHEN = '\\+\\-\\*=&';  // For CJK patterns
-const OPERATORS_NO_HYPHEN = '\\+\\*=&';       // For ANS_OPERATOR_ANS only
-const GRADE_OPERATORS = '\\+\\-\\*';          // For single letter grades
+const OPERATORS_WITH_HYPHEN = '\\+\\-\\*=&'; // For CJK patterns
+const OPERATORS_NO_HYPHEN = '\\+\\*=&'; // For ANS_OPERATOR_ANS only
+const GRADE_OPERATORS = '\\+\\-\\*'; // For single letter grades
 
 // Quotes
-const QUOTES_FULL = '\`"\u05f4';  // Backtick, straight quote, Hebrew punctuation
+const QUOTES_FULL = '\`"\u05f4'; // Backtick, straight quote, Hebrew punctuation
 
 // Brackets - different sets!
-const LEFT_BRACKETS_BASIC = '\\(\\[\\{';              // For AN_LEFT_BRACKET
-const RIGHT_BRACKETS_BASIC = '\\)\\]\\}';             // For RIGHT_BRACKET_AN  
-const LEFT_BRACKETS_EXTENDED = '\\(\\[\\{<>\u201c';   // For CJK_LEFT_BRACKET (includes angle brackets + curly quote)
-const RIGHT_BRACKETS_EXTENDED = '\\)\\]\\}<>\u201d';  // For RIGHT_BRACKET_CJK
+const LEFT_BRACKETS_BASIC = '\\(\\[\\{'; // For AN_LEFT_BRACKET
+const RIGHT_BRACKETS_BASIC = '\\)\\]\\}'; // For RIGHT_BRACKET_AN  
+const LEFT_BRACKETS_EXTENDED = '\\(\\[\\{<>\u201c'; // For CJK_LEFT_BRACKET (includes angle brackets + curly quote)
+const RIGHT_BRACKETS_EXTENDED = '\\)\\]\\}<>\u201d'; // For RIGHT_BRACKET_CJK
 
 // ANS extended sets - CAREFUL: different symbols!
-const ANS_CJK_AFTER = `${A}\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf`;          // Has @, no punctuation
+const ANS_CJK_AFTER = `${A}\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf`; // Has @, no punctuation
 const ANS_BEFORE_CJK = `${A}\u0370-\u03ff0-9~\\$%\\^&\\*\\-\\+\\\\=!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf`; // Has punctuation, no @
 
 // prettier-ignore
