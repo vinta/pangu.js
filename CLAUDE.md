@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Extends: `@~/.claude/CLAUDE.md` (mandatory base instructions)
+Extends: @~/.claude/CLAUDE.md (mandatory base instructions)
 
 Everything in the base instructions MUST be followed strictly.
 
