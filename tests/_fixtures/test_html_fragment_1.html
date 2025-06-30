@@ -1,47 +1,7 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <title>Test HTML Fragment 1 - Text Node Splitting</title>
-</head>
-<body>
-    <div id="test-container">
-        <p>这是一个测试段落，包含了"引号内容"和其他文字。</p>
-        
-        <!-- Reproducing the exact structure from the browser console -->
-        <div id="split-text-nodes">
-            <!-- Text nodes split around quotes as shown in console -->
-            <span>社</span>"<span>DF</span>
-        </div>
-        
-        <!-- Another example with multiple splits -->
-        <div id="complex-split">
-            前面的文字"<span>中间的内容</span>"后面的文字
-        </div>
-        
-        <!-- Simulating AJAX/dynamic content that might cause this -->
-        <div id="dynamic-content"></div>
-    </div>
-
-    <script>
-        // Simulate dynamic content insertion that might split text nodes
-        document.addEventListener('DOMContentLoaded', function() {
-            const dynamicDiv = document.getElementById('dynamic-content');
-            
-            // Method 1: Direct innerHTML that might get parsed differently
-            dynamicDiv.innerHTML = '动态内容"<span>测试</span>"结束';
-            
-            // Method 2: Creating text nodes programmatically
-            const container2 = document.createElement('div');
-            container2.appendChild(document.createTextNode('程序生成的'));
-            container2.appendChild(document.createTextNode('"'));
-            const span = document.createElement('span');
-            span.textContent = '内容';
-            container2.appendChild(span);
-            container2.appendChild(document.createTextNode('"'));
-            container2.appendChild(document.createTextNode('文字'));
-            document.body.appendChild(container2);
-        });
-    </script>
-</body>
-</html>
+<div class="BlockStoryStructure-body">
+   <div class="TruncatedRichText" role="presentation">
+      <div class="RichText3 TruncatedRichText-richText">
+         <div class="TypographyPresentation TypographyPresentation--medium RichText3-paragraph--withVSpacingNormal RichText3-paragraph HighlightSol HighlightSol--buildingBlock">整天等 EAS build 就飽了啊，每次 build 都要跑十幾二十分鐘</div>
+      </div>
+   </div>
+</div>
