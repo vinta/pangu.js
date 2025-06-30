@@ -14,6 +14,29 @@ export interface PerformanceStats {
 export interface PerformanceReport {
     [key: string]: PerformanceStats;
 }
+export interface IdleDeadline {
+    didTimeout: boolean;
+    timeRemaining(): number;
+}
+export interface IdleRequestCallback {
+    (deadline: IdleDeadline): void;
+}
+export interface IdleSpacingConfig {
+    enabled: boolean;
+    chunkSize: number;
+    timeout: number;
+}
+declare class IdleQueue {
+    private queue;
+    private isProcessing;
+    private requestIdleCallback;
+    constructor();
+    add(work: () => void): void;
+    clear(): void;
+    get length(): number;
+    private scheduleProcessing;
+    private process;
+}
 declare class PerformanceMonitor {
     private metrics;
     private enabled;
@@ -29,6 +52,8 @@ export declare class BrowserPangu extends Pangu {
     isAutoSpacingPageExecuted: boolean;
     protected autoSpacingPageObserver: MutationObserver | null;
     protected performanceMonitor: PerformanceMonitor;
+    protected idleQueue: IdleQueue;
+    protected idleSpacingConfig: IdleSpacingConfig;
     blockTags: RegExp;
     ignoredTags: RegExp;
     presentationalTags: RegExp;
@@ -62,6 +87,11 @@ export declare class BrowserPangu extends Pangu {
     getPerformanceStats(label: string): PerformanceStats | null;
     resetPerformanceMetrics(): void;
     logPerformanceResults(): void;
+    enableIdleSpacing(config?: Partial<IdleSpacingConfig>): void;
+    disableIdleSpacing(): void;
+    getIdleSpacingConfig(): IdleSpacingConfig;
+    getIdleQueueLength(): number;
+    clearIdleQueue(): void;
 }
 export declare const pangu: BrowserPangu;
 export default pangu;

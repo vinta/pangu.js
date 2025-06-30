@@ -32,9 +32,7 @@
 
 ## In Progress
 
-- **Phase 8**: Adding requestIdleCallback fallback and IdleQueue infrastructure
-  - Safari browser compatibility research completed
-  - Ready to implement lightweight fallback solution without external dependencies
+No task in progress
 
 ## Upcoming Tasks
 
@@ -47,11 +45,17 @@
   - Supports both development logging and programmatic access
   - Established baseline metrics for requestIdleCallback integration
 
-- [ ] **Phase 8-10: requestIdleCallback Integration**
-  - [ ] Phase 8: Add simple requestIdleCallback fallback and IdleQueue infrastructure
+- [x] **Phase 8: IdleQueue Infrastructure** ✅ COMPLETED
+  - Added IdleQueue class with requestIdleCallback integration
+  - Implemented Safari fallback using setTimeout with 16ms time budget simulation
+  - Added configuration system (chunkSize, timeout, enabled flag)
+  - Created public API for controlling idle spacing behavior
+  - Maintains backward compatibility (disabled by default)
+  - Cross-browser compatibility verified (Chrome, Firefox, Safari)
+
+- [ ] **Phase 9-10: Idle Processing Implementation**
   - [ ] Phase 9: Make initial page spacing non-blocking with chunking
   - [ ] Phase 10: Extend idle processing to MutationObserver for dynamic content
-  - [ ] Add Safari requestIdleCallback support detection and fallback (Safari lacks native support)
 - [ ] **CSS Visibility Check with requestIdleCallback**
   - Check computed styles during idle time to detect visually hidden elements
   - Avoid adding spaces between hidden and visible elements (e.g., screen-reader-only text)

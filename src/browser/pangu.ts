@@ -18,6 +18,80 @@ export interface PerformanceReport {
   [key: string]: PerformanceStats;
 }
 
+export interface IdleDeadline {
+  didTimeout: boolean;
+  timeRemaining(): number;
+}
+
+export interface IdleRequestCallback {
+  (deadline: IdleDeadline): void;
+}
+
+export interface IdleSpacingConfig {
+  enabled: boolean;
+  chunkSize: number;
+  timeout: number;
+}
+
+class IdleQueue {
+  private queue: (() => void)[] = [];
+  private isProcessing = false;
+  private requestIdleCallback: (callback: IdleRequestCallback, options?: { timeout?: number }) => number;
+
+  constructor() {
+    // Simple fallback for Safari and other browsers without requestIdleCallback
+    if (typeof window.requestIdleCallback === 'function') {
+      this.requestIdleCallback = window.requestIdleCallback.bind(window);
+    } else {
+      // Fallback using setTimeout for browsers without requestIdleCallback (Safari)
+      this.requestIdleCallback = (callback: IdleRequestCallback, _options?: { timeout?: number }) => {
+        const start = performance.now();
+        return window.setTimeout(() => {
+          callback({
+            didTimeout: false,
+            timeRemaining() {
+              // Simulate ~16ms budget (60fps frame)
+              return Math.max(0, 16 - (performance.now() - start));
+            }
+          });
+        }, 0);
+      };
+    }
+  }
+
+  add(work: () => void): void {
+    this.queue.push(work);
+    this.scheduleProcessing();
+  }
+
+  clear(): void {
+    this.queue.length = 0;
+  }
+
+  get length(): number {
+    return this.queue.length;
+  }
+
+  private scheduleProcessing(): void {
+    if (!this.isProcessing && this.queue.length > 0) {
+      this.isProcessing = true;
+      this.requestIdleCallback((deadline) => this.process(deadline), { timeout: 5000 });
+    }
+  }
+
+  private process(deadline: IdleDeadline): void {
+    while (deadline.timeRemaining() > 0 && this.queue.length > 0) {
+      const work = this.queue.shift();
+      work?.();
+    }
+
+    this.isProcessing = false;
+    if (this.queue.length > 0) {
+      this.scheduleProcessing();
+    }
+  }
+}
+
 class PerformanceMonitor {
   private metrics: Map<string, number[]> = new Map();
   private enabled: boolean;
@@ -137,6 +211,8 @@ export class BrowserPangu extends Pangu {
   public isAutoSpacingPageExecuted: boolean;
   protected autoSpacingPageObserver: MutationObserver | null;
   protected performanceMonitor: PerformanceMonitor;
+  protected idleQueue: IdleQueue;
+  protected idleSpacingConfig: IdleSpacingConfig;
 
   public blockTags: RegExp;
   public ignoredTags: RegExp;
@@ -154,6 +230,14 @@ export class BrowserPangu extends Pangu {
     // Enable performance monitoring in development mode
     const isDevelopment = typeof process !== 'undefined' && process.env?.NODE_ENV === 'development';
     this.performanceMonitor = new PerformanceMonitor(isDevelopment);
+
+    // Initialize idle processing infrastructure
+    this.idleQueue = new IdleQueue();
+    this.idleSpacingConfig = {
+      enabled: false, // Disabled by default for backward compatibility
+      chunkSize: 10,  // Process 10 text nodes per idle cycle
+      timeout: 5000   // 5 second timeout for idle processing
+    };
 
     this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
     this.ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
@@ -732,6 +816,33 @@ export class BrowserPangu extends Pangu {
 
   public logPerformanceResults(): void {
     this.performanceMonitor.logResults();
+  }
+
+  // Idle processing configuration methods
+
+  public enableIdleSpacing(config?: Partial<IdleSpacingConfig>): void {
+    this.idleSpacingConfig = {
+      ...this.idleSpacingConfig,
+      enabled: true,
+      ...config
+    };
+  }
+
+  public disableIdleSpacing(): void {
+    this.idleSpacingConfig.enabled = false;
+    this.idleQueue.clear();
+  }
+
+  public getIdleSpacingConfig(): IdleSpacingConfig {
+    return { ...this.idleSpacingConfig };
+  }
+
+  public getIdleQueueLength(): number {
+    return this.idleQueue.length;
+  }
+
+  public clearIdleQueue(): void {
+    this.idleQueue.clear();
   }
 }
 

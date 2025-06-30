@@ -95,7 +95,7 @@ class PlaceholderReplacer {
 class Pangu {
   constructor() {
     __publicField$1(this, "version");
-    this.version = "6.1.3";
+    this.version = "7.0.0";
   }
   spacingText(text) {
     if (typeof text !== "string") {
@@ -248,6 +248,54 @@ new Pangu();
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+class IdleQueue {
+  constructor() {
+    __publicField(this, "queue", []);
+    __publicField(this, "isProcessing", false);
+    __publicField(this, "requestIdleCallback");
+    if (typeof window.requestIdleCallback === "function") {
+      this.requestIdleCallback = window.requestIdleCallback.bind(window);
+    } else {
+      this.requestIdleCallback = (callback, _options) => {
+        const start = performance.now();
+        return window.setTimeout(() => {
+          callback({
+            didTimeout: false,
+            timeRemaining() {
+              return Math.max(0, 16 - (performance.now() - start));
+            }
+          });
+        }, 0);
+      };
+    }
+  }
+  add(work) {
+    this.queue.push(work);
+    this.scheduleProcessing();
+  }
+  clear() {
+    this.queue.length = 0;
+  }
+  get length() {
+    return this.queue.length;
+  }
+  scheduleProcessing() {
+    if (!this.isProcessing && this.queue.length > 0) {
+      this.isProcessing = true;
+      this.requestIdleCallback((deadline) => this.process(deadline), { timeout: 5e3 });
+    }
+  }
+  process(deadline) {
+    while (deadline.timeRemaining() > 0 && this.queue.length > 0) {
+      const work = this.queue.shift();
+      work == null ? void 0 : work();
+    }
+    this.isProcessing = false;
+    if (this.queue.length > 0) {
+      this.scheduleProcessing();
+    }
+  }
+}
 class PerformanceMonitor {
   constructor(enabled = false) {
     __publicField(this, "metrics", /* @__PURE__ */ new Map());
@@ -348,6 +396,8 @@ class BrowserPangu extends Pangu {
     __publicField(this, "isAutoSpacingPageExecuted");
     __publicField(this, "autoSpacingPageObserver");
     __publicField(this, "performanceMonitor");
+    __publicField(this, "idleQueue");
+    __publicField(this, "idleSpacingConfig");
     __publicField(this, "blockTags");
     __publicField(this, "ignoredTags");
     __publicField(this, "presentationalTags");
@@ -358,6 +408,15 @@ class BrowserPangu extends Pangu {
     this.autoSpacingPageObserver = null;
     const isDevelopment = typeof process !== "undefined" && ((_a = process.env) == null ? void 0 : _a.NODE_ENV) === "development";
     this.performanceMonitor = new PerformanceMonitor(isDevelopment);
+    this.idleQueue = new IdleQueue();
+    this.idleSpacingConfig = {
+      enabled: false,
+      // Disabled by default for backward compatibility
+      chunkSize: 10,
+      // Process 10 text nodes per idle cycle
+      timeout: 5e3
+      // 5 second timeout for idle processing
+    };
     this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
     this.ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
     this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
@@ -773,6 +832,27 @@ class BrowserPangu extends Pangu {
   }
   logPerformanceResults() {
     this.performanceMonitor.logResults();
+  }
+  // Idle processing configuration methods
+  enableIdleSpacing(config) {
+    this.idleSpacingConfig = {
+      ...this.idleSpacingConfig,
+      enabled: true,
+      ...config
+    };
+  }
+  disableIdleSpacing() {
+    this.idleSpacingConfig.enabled = false;
+    this.idleQueue.clear();
+  }
+  getIdleSpacingConfig() {
+    return { ...this.idleSpacingConfig };
+  }
+  getIdleQueueLength() {
+    return this.idleQueue.length;
+  }
+  clearIdleQueue() {
+    this.idleQueue.clear();
   }
 }
 const pangu = new BrowserPangu();
