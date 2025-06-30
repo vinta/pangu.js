@@ -303,6 +303,7 @@ test.describe('BrowserPangu', () => {
       expect(analysis.finalText).toBe('社 "DF');
     });
 
+    // FIXME: https://app.asana.com/1/1199341013008293/project/1202133750666965/task/1210672569130122?focus=true
     // Test for Asana-like pre-spaced fragmented text nodes
     test('should not add double spaces to already-spaced fragmented text (Asana case)', async ({ page }) => {
       const htmlContent = loadFixture('test_html_fragment_1.html');
