@@ -31,6 +31,9 @@ const OPERATORS_WITH_HYPHEN = '\\+\\-\\*=&';  // For CJK patterns
 const OPERATORS_NO_HYPHEN = '\\+\\*=&';       // For ANS_OPERATOR_ANS only
 const GRADE_OPERATORS = '\\+\\-\\*';          // For single letter grades
 
+// Quotes
+const QUOTES_FULL = '\`"\u05f4';  // Backtick, straight quote, Hebrew punctuation
+
 // prettier-ignore
 // Unix absolute paths: system dirs + common project paths
 // Examples: /home, /usr/bin, /etc/nginx.conf, /.bashrc, /node_modules/@babel/core, /path/to/your/project
@@ -53,9 +56,9 @@ const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, 'g');
 const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([A-Z0-9\\(\\)])`, 'g');
 
 // The symbol part does not include '
-const CJK_QUOTE = new RegExp(`([${CJK}])([\`"\u05f4])`, 'g');
-const QUOTE_CJK = new RegExp(`([\`"\u05f4])([${CJK}])`, 'g');
-const FIX_QUOTE_ANY_QUOTE = /([`"\u05f4]+)[ ]*(.+?)[ ]*([`"\u05f4]+)/g;
+const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES_FULL}])`, 'g');
+const QUOTE_CJK = new RegExp(`([${QUOTES_FULL}])([${CJK}])`, 'g');
+const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES_FULL}]+)[ ]*(.+?)[ ]*([${QUOTES_FULL}]+)`, 'g');
 
 // Handle curly quotes with alphanumeric characters
 // These patterns should only apply to curly quotes, not straight quotes
