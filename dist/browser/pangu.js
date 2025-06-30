@@ -136,7 +136,7 @@ class BrowserPangu extends Pangu {
         continue;
       }
       if (currentTextNode instanceof Text) {
-        if (currentTextNode.data.length === 1 && (currentTextNode.data === '"' || currentTextNode.data === '"' || currentTextNode.data === '"')) {
+        if (currentTextNode.data.length === 1 && /["\u201c\u201d]/.test(currentTextNode.data)) {
           if (currentTextNode.previousSibling) {
             const prevNode = currentTextNode.previousSibling;
             if (prevNode.nodeType === Node.ELEMENT_NODE && prevNode.textContent) {
@@ -180,7 +180,7 @@ class BrowserPangu extends Pangu {
         const testNewText = this.spacingText(testText);
         const currentLast = currentTextNode.data.slice(-1);
         const nextFirst = nextTextNode.data.slice(0, 1);
-        const isQuote = (char) => char === '"' || char === '"' || char === '"';
+        const isQuote = (char) => /["\u201c\u201d]/.test(char);
         const isCJK = (char) => /[\u4e00-\u9fff]/.test(char);
         const skipSpacing = isQuote(currentLast) && isCJK(nextFirst) || isCJK(currentLast) && isQuote(nextFirst);
         if (testNewText !== testText && !skipSpacing) {
