@@ -274,17 +274,15 @@ export class BrowserPangu extends Pangu {
 
     this.isAutoSpacingPageExecuted = false;
     this.autoSpacingPageObserver = null;
-    
-    // Enable performance monitoring in development mode
-    const isDevelopment = typeof process !== 'undefined' && process.env?.NODE_ENV === 'development';
-    this.performanceMonitor = new PerformanceMonitor(isDevelopment);
+
+    this.performanceMonitor = new PerformanceMonitor();
 
     // Initialize idle processing infrastructure
     this.idleQueue = new IdleQueue();
     this.idleSpacingConfig = {
       enabled: false, // Disabled by default for backward compatibility
-      chunkSize: 10,  // Process 10 text nodes per idle cycle
-      timeout: 5000   // 5 second timeout for idle processing
+      chunkSize: 10, // Process 10 text nodes per idle cycle
+      timeout: 5000, // 5 second timeout for idle processing
     };
 
     // Initialize visibility check configuration
