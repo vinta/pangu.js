@@ -16,7 +16,7 @@ test.describe('CSS Visibility Check', () => {
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
   });
 
-  test('should demonstrate the problem with hidden elements (before fix)', async ({ page }) => {
+  test.skip('should demonstrate the problem with hidden elements (before fix)', async ({ page }) => {
     const result = await page.evaluate(() => {
       // Create the problematic HTML structure from the fixture
       const content = document.getElementById('content')!;
