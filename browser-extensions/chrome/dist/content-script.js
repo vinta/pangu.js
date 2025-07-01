@@ -3,13 +3,36 @@
   async function autoSpacingPage() {
     const pangu = window.pangu;
     if (pangu) {
+      pangu.enableIdleSpacing({
+        chunkSize: 20,
+        // Process 20 text nodes per idle cycle
+        timeout: 2e3
+        // 2 second timeout
+      });
+      pangu.enableVisibilityCheck({
+        checkDuringIdle: true,
+        commonHiddenPatterns: {
+          clipRect: true,
+          displayNone: true,
+          visibilityHidden: true,
+          opacityZero: true,
+          heightWidth1px: true
+        }
+      });
       pangu.autoSpacingPage();
     }
   }
   function spacingPage() {
     const pangu = window.pangu;
     if (pangu) {
-      pangu.spacingPage();
+      pangu.spacingPageWithIdleCallback({
+        onComplete: () => {
+          console.log("[Pangu.js] Manual spacing completed");
+        },
+        onProgress: (processed, total) => {
+          console.log(`[Pangu.js] Progress: ${processed}/${total} (${Math.round(processed / total * 100)}%)`);
+        }
+      });
     }
   }
   const loadedMessage = { type: "CONTENT_SCRIPT_LOADED" };

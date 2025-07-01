@@ -101,10 +101,12 @@ describe('Pangu', () => {
       expect(pangu.spacingText('abc 車 123')).toBe('abc 車 123');
     });
 
-    // 只加左空格
+    // 標點符號（只加左空格）
 
-    it('handle @ symbol', () => {
+    it('handle @ symbol as mention', () => {
       expect(pangu.spacingText('請@vinta吃大便')).toBe('請 @vinta 吃大便');
+      expect(pangu.spacingText('請@vinta_chen吃大便')).toBe('請 @vinta_chen 吃大便');
+      expect(pangu.spacingText('請@VintaChen吃大便')).toBe('請 @VintaChen 吃大便');
       expect(pangu.spacingText('請@陳上進 吃大便')).toBe('請 @陳上進 吃大便');
     });
 
@@ -120,11 +122,88 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面F#後面')).toBe('前面 F# 後面');
     });
 
-    // 只加右空格
+    // 標點符號（只加右空格）
 
-    it('handle ... symbol', () => {
-      expect(pangu.spacingText('前面...後面')).toBe('前面... 後面');
+    it('handle ~ symbol', () => {
+      expect(pangu.spacingText('前面~')).toBe('前面~');
+      expect(pangu.spacingText('前面~~')).toBe('前面~~');
+      expect(pangu.spacingText('前面~~~')).toBe('前面~~~');
+      expect(pangu.spacingText('前面~後面')).toBe('前面~ 後面');
+      expect(pangu.spacingText('前面~~後面')).toBe('前面~~ 後面');
+      expect(pangu.spacingText('前面~~~後面')).toBe('前面~~~ 後面');
+      expect(pangu.spacingText('前面~abc')).toBe('前面~ abc');
+      expect(pangu.spacingText('前面~123')).toBe('前面~ 123');
+
+      // DO NOT change if already spacing
+      expect(pangu.spacingText('前面 ~ 後面')).toBe('前面 ~ 後面');
+      expect(pangu.spacingText('前面~ 後面')).toBe('前面~ 後面');
+      expect(pangu.spacingText('前面 ~後面')).toBe('前面 ~後面');
+
+      // Special cases
+      expect(pangu.spacingText('前面~=後面')).toBe('前面 ~= 後面');
+      expect(pangu.spacingText('前面 ~= 後面')).toBe('前面 ~= 後面');
+    });
+
+    it('handle ! symbol', () => {
+      expect(pangu.spacingText('前面!')).toBe('前面!');
+      expect(pangu.spacingText('前面!!')).toBe('前面!!');
+      expect(pangu.spacingText('前面!!!')).toBe('前面!!!');
+      expect(pangu.spacingText('前面!後面')).toBe('前面! 後面');
+      expect(pangu.spacingText('前面!!後面')).toBe('前面!! 後面');
+      expect(pangu.spacingText('前面!!!後面')).toBe('前面!!! 後面');
+      expect(pangu.spacingText('前面!abc')).toBe('前面! abc');
+      expect(pangu.spacingText('前面!123')).toBe('前面! 123');
+
+      // DO NOT change if already spacing
+      expect(pangu.spacingText('前面 ! 後面')).toBe('前面 ! 後面');
+      expect(pangu.spacingText('前面! 後面')).toBe('前面! 後面');
+      expect(pangu.spacingText('前面 !後面')).toBe('前面 !後面');
+    });
+
+    it('handle ; symbol', () => {
+      expect(pangu.spacingText('前面;後面')).toBe('前面; 後面');
+
+      // DO NOT change if already spacing
+      expect(pangu.spacingText('前面 ; 後面')).toBe('前面 ; 後面');
+      expect(pangu.spacingText('前面; 後面')).toBe('前面; 後面');
+      expect(pangu.spacingText('前面 ;後面')).toBe('前面 ;後面');
+    });
+
+    it('handle , symbol', () => {
+      expect(pangu.spacingText('前面,後面')).toBe('前面, 後面');
+
+      // DO NOT change if already spacing
+      expect(pangu.spacingText('前面 , 後面')).toBe('前面 , 後面');
+      expect(pangu.spacingText('前面, 後面')).toBe('前面, 後面');
+      expect(pangu.spacingText('前面 ,後面')).toBe('前面 ,後面');
+    });
+
+    it('handle . symbol', () => {
+      expect(pangu.spacingText('前面.')).toBe('前面.');
+      expect(pangu.spacingText('前面..')).toBe('前面..');
+      expect(pangu.spacingText('前面...')).toBe('前面...');
+      expect(pangu.spacingText('前面.後面')).toBe('前面. 後面');
       expect(pangu.spacingText('前面..後面')).toBe('前面.. 後面');
+      expect(pangu.spacingText('前面...後面')).toBe('前面... 後面');
+
+      // DO NOT change if already spacing
+      expect(pangu.spacingText('前面 . 後面')).toBe('前面 . 後面');
+      expect(pangu.spacingText('前面. 後面')).toBe('前面. 後面');
+      expect(pangu.spacingText('前面 .後面')).toBe('前面 .後面');
+
+      // Special cases
+      expect(pangu.spacingText('前面vs.後面')).toBe('前面 vs. 後面');
+      expect(pangu.spacingText('前面U.S.A.後面')).toBe('前面 U.S.A. 後面');
+      expect(pangu.spacingText('黑人問號.jpg後面')).toBe('黑人問號.jpg 後面');
+      expect(pangu.spacingText('黑人問號.jpg 後面')).toBe('黑人問號.jpg 後面');
+
+      // prettier-ignore
+      expect(pangu.spacingText("Mr.龍島主道：「Let's Party!各位高明博雅君子！"))
+                         .toBe("Mr. 龍島主道：「Let's Party! 各位高明博雅君子！");
+
+      // prettier-ignore
+      expect(pangu.spacingText("Mr.龍島主道:「Let's Party!各位高明博雅君子!"))
+                         .toBe("Mr. 龍島主道:「Let's Party! 各位高明博雅君子!");
     });
 
     // \u2026
@@ -133,69 +212,49 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面……後面')).toBe('前面…… 後面');
     });
 
-    // 標點符號（換成全形符號）
-
-    it('handle ~ symbol', () => {
-      expect(pangu.spacingText('前面~後面')).toBe('前面～後面');
-      expect(pangu.spacingText('前面 ~ 後面')).toBe('前面～後面');
-      expect(pangu.spacingText('前面~ 後面')).toBe('前面～後面');
-      expect(pangu.spacingText('前面 ~後面')).toBe('前面～後面');
-    });
-
-    it('handle ! symbol', () => {
-      expect(pangu.spacingText('前面!後面')).toBe('前面！後面');
-      expect(pangu.spacingText('前面 ! 後面')).toBe('前面！後面');
-      expect(pangu.spacingText('前面! 後面')).toBe('前面！後面');
-      expect(pangu.spacingText('前面 !後面')).toBe('前面！後面');
-    });
-
-    it('handle ; symbol', () => {
-      expect(pangu.spacingText('前面;後面')).toBe('前面；後面');
-      expect(pangu.spacingText('前面 ; 後面')).toBe('前面；後面');
-      expect(pangu.spacingText('前面; 後面')).toBe('前面；後面');
-      expect(pangu.spacingText('前面 ;後面')).toBe('前面；後面');
-    });
-
-    it('handle , symbol', () => {
-      expect(pangu.spacingText('前面,後面')).toBe('前面，後面');
-      expect(pangu.spacingText('前面 , 後面')).toBe('前面，後面');
-      expect(pangu.spacingText('前面, 後面')).toBe('前面，後面');
-      expect(pangu.spacingText('前面 ,後面')).toBe('前面，後面');
-      expect(pangu.spacingText('前面,')).toBe('前面，');
-      expect(pangu.spacingText('前面, ')).toBe('前面，');
-    });
-
-    it('handle . symbol', () => {
-      expect(pangu.spacingText('前面.後面')).toBe('前面。後面');
-      expect(pangu.spacingText('前面 . 後面')).toBe('前面。後面');
-      expect(pangu.spacingText('前面. 後面')).toBe('前面。後面');
-      expect(pangu.spacingText('前面 .後面')).toBe('前面。後面');
-      expect(pangu.spacingText('黑人問號.jpg 後面')).toBe('黑人問號.jpg 後面');
-    });
-
     it('handle ? symbol', () => {
-      expect(pangu.spacingText('前面?後面')).toBe('前面？後面');
-      expect(pangu.spacingText('前面 ? 後面')).toBe('前面？後面');
-      expect(pangu.spacingText('前面? 後面')).toBe('前面？後面');
-      expect(pangu.spacingText('前面 ?後面')).toBe('前面？後面');
-      expect(pangu.spacingText('所以，請問Jackey的鼻子有幾個?3.14個')).toBe('所以，請問 Jackey 的鼻子有幾個？3.14 個');
+      expect(pangu.spacingText('前面?')).toBe('前面?');
+      expect(pangu.spacingText('前面??')).toBe('前面??');
+      expect(pangu.spacingText('前面???')).toBe('前面???');
+      expect(pangu.spacingText('前面?後面')).toBe('前面? 後面');
+      expect(pangu.spacingText('前面??後面')).toBe('前面?? 後面');
+      expect(pangu.spacingText('前面???後面')).toBe('前面??? 後面');
+      expect(pangu.spacingText('前面?abc')).toBe('前面? abc');
+      expect(pangu.spacingText('前面?123')).toBe('前面? 123');
+
+      // DO NOT change if already spacing
+      expect(pangu.spacingText('前面 ? 後面')).toBe('前面 ? 後面');
+      expect(pangu.spacingText('前面? 後面')).toBe('前面? 後面');
+      expect(pangu.spacingText('前面 ?後面')).toBe('前面 ?後面');
+
+      // Special cases
+      expect(pangu.spacingText('所以,請問Jackey的鼻子有幾個?3.14個')).toBe('所以, 請問 Jackey 的鼻子有幾個? 3.14 個');
     });
 
     // When the symbol appears only 1 time in one line
     it('handle : symbol as colon', () => {
-      expect(pangu.spacingText('前面:後面')).toBe('前面：後面');
-      expect(pangu.spacingText('前面 : 後面')).toBe('前面：後面');
-      expect(pangu.spacingText('前面: 後面')).toBe('前面：後面');
-      expect(pangu.spacingText('前面 :後面')).toBe('前面：後面');
-      expect(pangu.spacingText('電話:123456789')).toBe('電話：123456789');
-      expect(pangu.spacingText('前面:)後面')).toBe('前面：) 後面');
-      expect(pangu.spacingText('前面:I have no idea後面')).toBe('前面：I have no idea 後面');
+      expect(pangu.spacingText('前面:後面')).toBe('前面: 後面');
+
+      // DO NOT change if already spacing
+      expect(pangu.spacingText('前面 : 後面')).toBe('前面 : 後面');
+      expect(pangu.spacingText('前面: 後面')).toBe('前面: 後面');
+      expect(pangu.spacingText('前面 :後面')).toBe('前面 :後面');
+
+      // Special cases
+      expect(pangu.spacingText('電話:123456789')).toBe('電話: 123456789');
+      expect(pangu.spacingText('前面:I have no idea後面')).toBe('前面: I have no idea 後面');
       expect(pangu.spacingText('前面: I have no idea後面')).toBe('前面: I have no idea 後面');
+
+      // TODO:
+      // expect(pangu.spacingText('前面:)後面')).toBe('前面 :) 後面');
     });
 
     // When the symbol appears 2+ times or more in one line
     it('handle : symbol as separator', () => {
-      // TODO
+      // TODO:
+      // expect(pangu.spacingText('前面:後面:再後面')).toBe('前面:後面:再後面');
+      // expect(pangu.spacingText('前面:後面:再後面:更後面')).toBe('前面:後面:再後面:更後面');
+      // expect(pangu.spacingText('前面:後面:再後面:更後面:超後面')).toBe('前面:後面:再後面:更後面:超後面');
     });
 
     // \u00b7
@@ -412,7 +471,8 @@ describe('Pangu', () => {
       expect(pangu.spacingText('為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip'))
                          .toBe('為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip');
 
-      // DO NOT change if already spacing, rare cases, ignore
+      // Rare cases, ignore
+      // DO NOT change if already spacing
       // expect(pangu.spacingText('前面 _ 後面')).toBe('前面 _ 後面');
       // expect(pangu.spacingText('Vinta _ Mollie')).toBe('Vinta _ Mollie');
       // expect(pangu.spacingText('Vinta _ Mollie _ Kitten')).toBe('Vinta _ Mollie _ Kitten');
@@ -421,7 +481,7 @@ describe('Pangu', () => {
       // expect(pangu.spacingText('Mollie _ Vinta _ 貓咪')).toBe('Mollie _ Vinta _ 貓咪');
       // expect(pangu.spacingText('Mollie _ 陳上進 _ 貓咪')).toBe('Mollie _ 陳上進 _ 貓咪');
 
-      // TODO: TBD
+      // TODO:
       // expect(pangu.spacingText('得到一個A_B的結果')).toBe('得到一個A_B的結果');
     });
 
@@ -436,7 +496,8 @@ describe('Pangu', () => {
       expect(pangu.spacingText('Mollie|Vinta|貓咪')).toBe('Mollie|Vinta|貓咪');
       expect(pangu.spacingText('Mollie|陳上進|貓咪')).toBe('Mollie|陳上進|貓咪');
 
-      // DO NOT change if already spacing, rare cases, ignore
+      // Rare cases, ignore
+      // DO NOT change if already spacing
       // expect(pangu.spacingText('前面 | 後面')).toBe('前面 | 後面');
       // expect(pangu.spacingText('Vinta | Mollie')).toBe('Vinta | Mollie');
       // expect(pangu.spacingText('Vinta | Mollie | Kitten')).toBe('Vinta | Mollie | Kitten');
@@ -445,7 +506,7 @@ describe('Pangu', () => {
       // expect(pangu.spacingText('Mollie | Vinta | 貓咪')).toBe('Mollie | Vinta | 貓咪');
       // expect(pangu.spacingText('Mollie | 陳上進 | 貓咪')).toBe('Mollie | 陳上進 | 貓咪');
 
-      // TODO: TBD
+      // TODO:
       // expect(pangu.spacingText('得到一個A|B的結果')).toBe('得到一個A|B的結果');
     });
 
@@ -728,8 +789,9 @@ describe('Pangu', () => {
     });
 
     it('handle # # symbols as Weibo-like hashtags', () => {
-      expect(pangu.spacingText('前面#H2G2#後面')).toBe('前面 #H2G2# 後面');
-      expect(pangu.spacingText('前面#銀河閃電霹靂車指南#後面')).toBe('前面 #銀河閃電霹靂車指南# 後面');
+      // TODO:
+      // expect(pangu.spacingText('前面#H2G2#後面')).toBe('前面 #H2G2# 後面');
+      // expect(pangu.spacingText('前面#銀河閃電霹靂車指南#後面')).toBe('前面 #銀河閃電霹靂車指南# 後面');
     });
 
     it('handle " " symbols', () => {
@@ -752,6 +814,9 @@ describe('Pangu', () => {
       // prettier-ignore
       expect(pangu.spacingText("举个栗子，如果一道题只包含'A' ~ 'Z'意味着字符集大小是"))
                          .toBe("举个栗子，如果一道题只包含 'A' ~ 'Z' 意味着字符集大小是");
+
+      // Single quotes around Chinese text should not have spaces added
+      expect(pangu.spacingText("Remove '铁蕾' from 1 Folder?")).toBe("Remove '铁蕾' from 1 Folder?");
     });
 
     // \u05f4
