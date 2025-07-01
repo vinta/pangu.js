@@ -43,7 +43,7 @@ const RIGHT_BRACKETS_EXTENDED = '\\)\\]\\}<>\u201d'; // For RIGHT_BRACKET_CJK
 
 // ANS extended sets - CAREFUL: different symbols!
 const ANS_CJK_AFTER = `${A}\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf`; // Has @, no punctuation
-const ANS_BEFORE_CJK = `${A}\u0370-\u03ff0-9~\\$%\\^&\\*\\-\\+\\\\=!;:,\\.\\?\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf`; // Has punctuation, no @
+const ANS_BEFORE_CJK = `${A}\u0370-\u03ff0-9\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf`; // No punctuation symbols
 
 // prettier-ignore
 // Unix absolute paths: system dirs + common project paths
@@ -60,10 +60,17 @@ const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
 
 const ANY_CJK = new RegExp(`[${CJK}]`);
 
-// The symbol part only includes ~ ! ; : , . ? but . only matches one character
-const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK = new RegExp(`([${CJK}])[ ]*([\\:]+|\\.)[ ]*([${CJK}])`, 'g');
-const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS = new RegExp(`([${CJK}])[ ]*([~\\!;,\\?]+)[ ]*`, 'g');
+// Handle punctuation after CJK - add space but don't convert to full-width
+const CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:])(?! )`, 'g');
+// Handle tilde separately for special cases like ~=
+const CJK_TILDE = new RegExp(`([${CJK}])(~)(?!=)(?! )`, 'g');
+const CJK_TILDE_EQUALS = new RegExp(`([${CJK}])(~=)`, 'g');
+// Handle period separately to avoid matching file extensions, multiple dots, and file paths
+const CJK_PERIOD = new RegExp(`([${CJK}])(\\.)(?![${AN}\\./])(?! )`, 'g');
+// Handle colon between AN and CJK
+const AN_COLON_CJK = new RegExp(`([${AN}])(:)([${CJK}])`, 'g');
 const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, 'g');
+// Special case for colon before uppercase letters/parentheses (convert to full-width)
 const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, 'g');
 
 // The symbol part does not include '
@@ -230,18 +237,19 @@ export class Pangu {
       });
     }
 
-    // https://stackoverflow.com/questions/4285472/multiple-regex-replace
-    newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK, (_match, leftCjk, symbols, rightCjk) => {
-      const fullwidthSymbols = self.convertToFullwidth(symbols);
-      return `${leftCjk}${fullwidthSymbols}${rightCjk}`;
-    });
-
-    newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS, (_match, cjk, symbols) => {
-      const fullwidthSymbols = self.convertToFullwidth(symbols);
-      return `${cjk}${fullwidthSymbols}`;
-    });
-
+    // Handle multiple dots first (before single period)
     newText = newText.replace(DOTS_CJK, '$1 $2');
+    
+    // Handle punctuation after CJK - add space but don't convert to full-width
+    newText = newText.replace(CJK_PUNCTUATION, '$1$2 ');
+    // Handle tilde separately for special cases
+    newText = newText.replace(CJK_TILDE, '$1$2 ');
+    newText = newText.replace(CJK_TILDE_EQUALS, '$1 $2 ');
+    // Handle period separately to avoid file extensions
+    newText = newText.replace(CJK_PERIOD, '$1$2 ');
+    // Handle colon between AN and CJK
+    newText = newText.replace(AN_COLON_CJK, '$1$2 $3');
+    // Only convert colon to full-width in specific cases (before uppercase/parentheses)
     newText = newText.replace(FIX_CJK_COLON_ANS, '$1：$2');
 
     newText = newText.replace(CJK_QUOTE, '$1 $2');
