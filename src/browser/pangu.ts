@@ -6,18 +6,6 @@ export interface AutoSpacingPageConfig {
   nodeMaxWaitMs?: number;
 }
 
-export interface PerformanceStats {
-  count: number;
-  avg: number;
-  min: number;
-  max: number;
-  total: number;
-}
-
-export interface PerformanceReport {
-  [key: string]: PerformanceStats;
-}
-
 export interface IdleDeadline {
   didTimeout: boolean;
   timeRemaining(): number;
@@ -139,82 +127,6 @@ class IdleQueue {
   }
 }
 
-class PerformanceMonitor {
-  private metrics: Map<string, number[]> = new Map();
-  private enabled: boolean;
-
-  constructor(enabled = false) {
-    this.enabled = enabled;
-  }
-
-  measure<T>(label: string, fn: () => T): T {
-    if (!this.enabled) {
-      return fn();
-    }
-
-    const start = performance.now();
-    const result = fn();
-    const duration = performance.now() - start;
-
-    if (!this.metrics.has(label)) {
-      this.metrics.set(label, []);
-    }
-    this.metrics.get(label)!.push(duration);
-
-    return result;
-  }
-
-  getStats(label: string): PerformanceStats | null {
-    const times = this.metrics.get(label);
-    if (!times || times.length === 0) {
-      return null;
-    }
-
-    const total = times.reduce((a, b) => a + b, 0);
-    return {
-      count: times.length,
-      avg: total / times.length,
-      min: Math.min(...times),
-      max: Math.max(...times),
-      total,
-    };
-  }
-
-  getAllStats(): PerformanceReport {
-    const report: PerformanceReport = {};
-    for (const [label] of this.metrics) {
-      const stats = this.getStats(label);
-      if (stats) {
-        report[label] = stats;
-      }
-    }
-    return report;
-  }
-
-  reset(): void {
-    this.metrics.clear();
-  }
-
-  setEnabled(enabled: boolean): void {
-    this.enabled = enabled;
-  }
-
-  logResults(): void {
-    if (!this.enabled) {
-      return;
-    }
-
-    const report = this.getAllStats();
-    if (Object.keys(report).length === 0) {
-      return;
-    }
-
-    console.group('🚀 Pangu.js Performance Report');
-    console.table(report);
-    console.groupEnd();
-  }
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function once<T extends (...args: any[]) => any>(func: T) {
   let executed = false;
@@ -257,7 +169,6 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 export class BrowserPangu extends Pangu {
   public isAutoSpacingPageExecuted: boolean;
   protected autoSpacingPageObserver: MutationObserver | null;
-  protected performanceMonitor: PerformanceMonitor;
   protected idleQueue: IdleQueue;
   protected idleSpacingConfig: IdleSpacingConfig;
   protected visibilityCheckConfig: VisibilityCheckConfig;
@@ -275,8 +186,6 @@ export class BrowserPangu extends Pangu {
     this.isAutoSpacingPageExecuted = false;
     this.autoSpacingPageObserver = null;
 
-    this.performanceMonitor = new PerformanceMonitor();
-
     // Initialize idle processing infrastructure
     this.idleQueue = new IdleQueue();
     this.idleSpacingConfig = {
@@ -287,7 +196,7 @@ export class BrowserPangu extends Pangu {
 
     // Initialize visibility check configuration
     this.visibilityCheckConfig = {
-      enabled: true, // Enable for testing in Chrome extension
+      enabled: false, // Disabled by default for backward compatibility
       checkDuringIdle: true, // Use idle time for visibility checks
       commonHiddenPatterns: {
         clipRect: true, // clip: rect(1px, 1px, 1px, 1px) patterns
@@ -348,32 +257,25 @@ export class BrowserPangu extends Pangu {
   }
 
   public spacingPage() {
-    this.performanceMonitor.measure('spacingPage', () => {
-      this.spacingPageTitle();
-      this.spacingPageBody();
-    });
-    this.performanceMonitor.logResults();
+    this.spacingPageTitle();
+    this.spacingPageBody();
   }
 
   public spacingPageTitle() {
-    this.performanceMonitor.measure('spacingPageTitle', () => {
-      const titleElement = document.querySelector('head > title');
-      if (titleElement) {
-        this.spacingNode(titleElement);
-      }
-    });
+    const titleElement = document.querySelector('head > title');
+    if (titleElement) {
+      this.spacingNode(titleElement);
+    }
   }
 
   public spacingPageBody() {
-    this.performanceMonitor.measure('spacingPageBody', () => {
-      // Process the entire body element
-      // The collectTextNodes method already filters out:
-      // 1. Whitespace-only text nodes
-      // 2. Text inside ignored tags (script, style, textarea, etc.)
-      // 3. Text inside contentEditable elements
-      // 4. Text inside elements with no-pangu-spacing class
-      this.spacingNode(document.body);
-    });
+    // Process the entire body element
+    // The collectTextNodes method already filters out:
+    // 1. Whitespace-only text nodes
+    // 2. Text inside ignored tags (script, style, textarea, etc.)
+    // 3. Text inside contentEditable elements
+    // 4. Text inside elements with no-pangu-spacing class
+    this.spacingNode(document.body);
   }
 
   public spacingNode(contextNode: Node) {
@@ -749,18 +651,14 @@ export class BrowserPangu extends Pangu {
     }
 
     // Use TreeWalker to collect text nodes with content
-    const textNodes = this.performanceMonitor.measure('collectTextNodes', () => {
-      return this.collectTextNodes(contextNode, true);
-    });
+    const textNodes = this.collectTextNodes(contextNode, true);
 
     // Choose processing method based on idle spacing configuration
     if (this.idleSpacingConfig.enabled) {
       this.processTextNodesWithIdleCallback(textNodes);
     } else {
       // Process the collected text nodes using the shared logic (synchronous)
-      this.performanceMonitor.measure('processTextNodes', () => {
-        this.processTextNodes(textNodes);
-      });
+      this.processTextNodes(textNodes);
     }
   }
 
@@ -791,11 +689,9 @@ export class BrowserPangu extends Pangu {
     }
 
     // Add each chunk as a work item to the idle queue
-    for (const [index, chunk] of chunks.entries()) {
+    for (const chunk of chunks) {
       this.idleQueue.add(() => {
-        this.performanceMonitor.measure(`processTextNodesChunk${index}`, () => {
-          this.processTextNodes(chunk);
-        });
+        this.processTextNodes(chunk);
       });
     }
   }
@@ -906,32 +802,6 @@ export class BrowserPangu extends Pangu {
     });
   }
 
-  // Performance monitoring methods
-
-  public enablePerformanceMonitoring(): void {
-    this.performanceMonitor.setEnabled(true);
-  }
-
-  public disablePerformanceMonitoring(): void {
-    this.performanceMonitor.setEnabled(false);
-  }
-
-  public getPerformanceReport(): PerformanceReport {
-    return this.performanceMonitor.getAllStats();
-  }
-
-  public getPerformanceStats(label: string): PerformanceStats | null {
-    return this.performanceMonitor.getStats(label);
-  }
-
-  public resetPerformanceMetrics(): void {
-    this.performanceMonitor.reset();
-  }
-
-  public logPerformanceResults(): void {
-    this.performanceMonitor.logResults();
-  }
-
   // Idle processing configuration methods
 
   public enableIdleSpacing(config?: Partial<IdleSpacingConfig>): void {
@@ -993,9 +863,7 @@ export class BrowserPangu extends Pangu {
     }
 
     // Use TreeWalker to collect text nodes with content
-    const textNodes = this.performanceMonitor.measure('collectTextNodes', () => {
-      return this.collectTextNodes(contextNode, true);
-    });
+    const textNodes = this.collectTextNodes(contextNode, true);
 
     // Process with idle callback
     this.processTextNodesWithIdleCallback(textNodes, callbacks);
@@ -1024,9 +892,7 @@ export class BrowserPangu extends Pangu {
         continue;
       }
 
-      const textNodes = this.performanceMonitor.measure('collectTextNodes', () => {
-        return this.collectTextNodes(node, true);
-      });
+      const textNodes = this.collectTextNodes(node, true);
 
       allTextNodes.push(...textNodes);
     }

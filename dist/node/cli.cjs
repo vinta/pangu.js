@@ -330,68 +330,6 @@ class IdleQueue {
     }
   }
 }
-class PerformanceMonitor {
-  constructor(enabled = false) {
-    __publicField(this, "metrics", /* @__PURE__ */ new Map());
-    __publicField(this, "enabled");
-    this.enabled = enabled;
-  }
-  measure(label, fn) {
-    if (!this.enabled) {
-      return fn();
-    }
-    const start = performance.now();
-    const result = fn();
-    const duration = performance.now() - start;
-    if (!this.metrics.has(label)) {
-      this.metrics.set(label, []);
-    }
-    this.metrics.get(label).push(duration);
-    return result;
-  }
-  getStats(label) {
-    const times = this.metrics.get(label);
-    if (!times || times.length === 0) {
-      return null;
-    }
-    const total = times.reduce((a, b) => a + b, 0);
-    return {
-      count: times.length,
-      avg: total / times.length,
-      min: Math.min(...times),
-      max: Math.max(...times),
-      total
-    };
-  }
-  getAllStats() {
-    const report = {};
-    for (const [label] of this.metrics) {
-      const stats = this.getStats(label);
-      if (stats) {
-        report[label] = stats;
-      }
-    }
-    return report;
-  }
-  reset() {
-    this.metrics.clear();
-  }
-  setEnabled(enabled) {
-    this.enabled = enabled;
-  }
-  logResults() {
-    if (!this.enabled) {
-      return;
-    }
-    const report = this.getAllStats();
-    if (Object.keys(report).length === 0) {
-      return;
-    }
-    console.group("\u{1F680} Pangu.js Performance Report");
-    console.table(report);
-    console.groupEnd();
-  }
-}
 function once(func) {
   let executed = false;
   return function(...args2) {
@@ -428,7 +366,6 @@ class BrowserPangu extends Pangu {
     super();
     __publicField(this, "isAutoSpacingPageExecuted");
     __publicField(this, "autoSpacingPageObserver");
-    __publicField(this, "performanceMonitor");
     __publicField(this, "idleQueue");
     __publicField(this, "idleSpacingConfig");
     __publicField(this, "visibilityCheckConfig");
@@ -440,7 +377,6 @@ class BrowserPangu extends Pangu {
     __publicField(this, "ignoredClass");
     this.isAutoSpacingPageExecuted = false;
     this.autoSpacingPageObserver = null;
-    this.performanceMonitor = new PerformanceMonitor();
     this.idleQueue = new IdleQueue();
     this.idleSpacingConfig = {
       enabled: false,
@@ -451,8 +387,8 @@ class BrowserPangu extends Pangu {
       // 5 second timeout for idle processing
     };
     this.visibilityCheckConfig = {
-      enabled: true,
-      // Enable for testing in Chrome extension
+      enabled: false,
+      // Disabled by default for backward compatibility
       checkDuringIdle: true,
       // Use idle time for visibility checks
       commonHiddenPatterns: {
@@ -510,24 +446,17 @@ class BrowserPangu extends Pangu {
     this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
   }
   spacingPage() {
-    this.performanceMonitor.measure("spacingPage", () => {
-      this.spacingPageTitle();
-      this.spacingPageBody();
-    });
-    this.performanceMonitor.logResults();
+    this.spacingPageTitle();
+    this.spacingPageBody();
   }
   spacingPageTitle() {
-    this.performanceMonitor.measure("spacingPageTitle", () => {
-      const titleElement = document.querySelector("head > title");
-      if (titleElement) {
-        this.spacingNode(titleElement);
-      }
-    });
+    const titleElement = document.querySelector("head > title");
+    if (titleElement) {
+      this.spacingNode(titleElement);
+    }
   }
   spacingPageBody() {
-    this.performanceMonitor.measure("spacingPageBody", () => {
-      this.spacingNode(document.body);
-    });
+    this.spacingNode(document.body);
   }
   spacingNode(contextNode) {
     this.spacingNodeWithTreeWalker(contextNode);
@@ -794,15 +723,11 @@ class BrowserPangu extends Pangu {
     if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
       return;
     }
-    const textNodes = this.performanceMonitor.measure("collectTextNodes", () => {
-      return this.collectTextNodes(contextNode, true);
-    });
+    const textNodes = this.collectTextNodes(contextNode, true);
     if (this.idleSpacingConfig.enabled) {
       this.processTextNodesWithIdleCallback(textNodes);
     } else {
-      this.performanceMonitor.measure("processTextNodes", () => {
-        this.processTextNodes(textNodes);
-      });
+      this.processTextNodes(textNodes);
     }
   }
   processTextNodesWithIdleCallback(textNodes, callbacks) {
@@ -819,11 +744,9 @@ class BrowserPangu extends Pangu {
     for (let i = 0; i < textNodes.length; i += chunkSize) {
       chunks.push(textNodes.slice(i, i + chunkSize));
     }
-    for (const [index, chunk] of chunks.entries()) {
+    for (const chunk of chunks) {
       this.idleQueue.add(() => {
-        this.performanceMonitor.measure(`processTextNodesChunk${index}`, () => {
-          this.processTextNodes(chunk);
-        });
+        this.processTextNodes(chunk);
       });
     }
   }
@@ -903,25 +826,6 @@ class BrowserPangu extends Pangu {
       // Need subtree to observe text node changes inside title
     });
   }
-  // Performance monitoring methods
-  enablePerformanceMonitoring() {
-    this.performanceMonitor.setEnabled(true);
-  }
-  disablePerformanceMonitoring() {
-    this.performanceMonitor.setEnabled(false);
-  }
-  getPerformanceReport() {
-    return this.performanceMonitor.getAllStats();
-  }
-  getPerformanceStats(label) {
-    return this.performanceMonitor.getStats(label);
-  }
-  resetPerformanceMetrics() {
-    this.performanceMonitor.reset();
-  }
-  logPerformanceResults() {
-    this.performanceMonitor.logResults();
-  }
   // Idle processing configuration methods
   enableIdleSpacing(config) {
     this.idleSpacingConfig = {
@@ -967,9 +871,7 @@ class BrowserPangu extends Pangu {
       (_b = callbacks == null ? void 0 : callbacks.onComplete) == null ? void 0 : _b.call(callbacks);
       return;
     }
-    const textNodes = this.performanceMonitor.measure("collectTextNodes", () => {
-      return this.collectTextNodes(contextNode, true);
-    });
+    const textNodes = this.collectTextNodes(contextNode, true);
     this.processTextNodesWithIdleCallback(textNodes, callbacks);
   }
   spacingNodesWithIdleCallback(nodes, callbacks) {
@@ -990,9 +892,7 @@ class BrowserPangu extends Pangu {
       if (!(node instanceof Node) || node instanceof DocumentFragment) {
         continue;
       }
-      const textNodes = this.performanceMonitor.measure("collectTextNodes", () => {
-        return this.collectTextNodes(node, true);
-      });
+      const textNodes = this.collectTextNodes(node, true);
       allTextNodes.push(...textNodes);
     }
     this.processTextNodesWithIdleCallback(allTextNodes, callbacks);
