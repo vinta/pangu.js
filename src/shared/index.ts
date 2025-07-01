@@ -255,9 +255,27 @@ export class Pangu {
     // Handle CJK followed by closing quote followed by alphanumeric
     newText = newText.replace(CJK_QUOTE_AN, '$1$2 $3');
 
+    // Handle single quotes more intelligently
+    // First, handle possessive case
+    newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
+    
+    // Process single quotes around pure CJK text differently from mixed content
+    const singleQuoteCJKManager = new PlaceholderReplacer('SINGLE_QUOTE_CJK_PLACEHOLDER_', '\uE030', '\uE031');
+    
+    // Pattern to match single quotes around pure CJK text (no spaces, no other characters)
+    const SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, 'g');
+    
+    // Protect pure CJK content in single quotes
+    newText = newText.replace(SINGLE_QUOTE_PURE_CJK, (match) => {
+      return singleQuoteCJKManager.store(match);
+    });
+    
+    // Now process other single quote patterns
     newText = newText.replace(CJK_SINGLE_QUOTE_BUT_POSSESSIVE, '$1 $2');
     newText = newText.replace(SINGLE_QUOTE_CJK, '$1 $2');
-    newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
+    
+    // Restore protected pure CJK content
+    newText = singleQuoteCJKManager.restore(newText);
 
     // Early return for complex patterns that need longer text
     const textLength = newText.length;
