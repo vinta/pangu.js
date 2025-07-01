@@ -197,6 +197,17 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
+    // FIXME
+    test.skip('handle single quote', async ({ page }) => {
+      await page.setContent(`<div id="test"><h2 class="bgr6M8LczKBmaAn4sO0X UlmxiRo0duAvtZZW__30 zW32yWxwexOf03jBk4S7" id=":r31s:">Remove '铁蕾' from 1 Folder?</h2></div>`);
+      const result = await page.evaluate(() => {
+        const element = document.getElementById('test')!;
+        pangu.spacingNode(element);
+        return element.textContent;
+      });
+      expect(result).toBe(`Remove '铁蕾' from 1 Folder?`);
+    });
+
     test('handle contenteditable elements by skipping them', async ({ page }) => {
       await page.setContent('<div contenteditable="true">abc漢字1</div>');
       await page.evaluate(() => {
