@@ -61,11 +61,13 @@ const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
 const ANY_CJK = new RegExp(`[${CJK}]`);
 
 // Handle punctuation after CJK - add space but don't convert to full-width
-const CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:])(?! )`, 'g');
+// Support multiple consecutive punctuation marks
+const CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:]+)(?! )`, 'g');
 // Handle tilde separately for special cases like ~=
-const CJK_TILDE = new RegExp(`([${CJK}])(~)(?!=)(?! )`, 'g');
+const CJK_TILDE = new RegExp(`([${CJK}])(~+)(?!=)(?! )`, 'g');
 const CJK_TILDE_EQUALS = new RegExp(`([${CJK}])(~=)`, 'g');
 // Handle period separately to avoid matching file extensions, multiple dots, and file paths
+// Note: Multiple dots are handled by DOTS_CJK pattern first
 const CJK_PERIOD = new RegExp(`([${CJK}])(\\.)(?![${AN}\\./])(?! )`, 'g');
 // Handle colon between AN and CJK
 const AN_COLON_CJK = new RegExp(`([${AN}])(:)([${CJK}])`, 'g');

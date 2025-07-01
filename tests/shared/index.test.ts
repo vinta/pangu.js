@@ -126,6 +126,10 @@ describe('Pangu', () => {
 
     it('handle ~ symbol', () => {
       expect(pangu.spacingText('前面~後面')).toBe('前面~ 後面');
+      expect(pangu.spacingText('前面~~後面')).toBe('前面~~ 後面');
+      expect(pangu.spacingText('前面~~~後面')).toBe('前面~~~ 後面');
+      expect(pangu.spacingText('前面~abc')).toBe('前面~ abc');
+      expect(pangu.spacingText('前面~123')).toBe('前面~ 123');
 
       // DO NOT change if already spacing
       expect(pangu.spacingText('前面 ~ 後面')).toBe('前面 ~ 後面');
@@ -139,6 +143,10 @@ describe('Pangu', () => {
 
     it('handle ! symbol', () => {
       expect(pangu.spacingText('前面!後面')).toBe('前面! 後面');
+      expect(pangu.spacingText('前面!!後面')).toBe('前面!! 後面');
+      expect(pangu.spacingText('前面!!!後面')).toBe('前面!!! 後面');
+      expect(pangu.spacingText('前面!abc')).toBe('前面! abc');
+      expect(pangu.spacingText('前面!123')).toBe('前面! 123');
 
       // DO NOT change if already spacing
       expect(pangu.spacingText('前面 ! 後面')).toBe('前面 ! 後面');
@@ -166,6 +174,8 @@ describe('Pangu', () => {
 
     it('handle . symbol', () => {
       expect(pangu.spacingText('前面.後面')).toBe('前面. 後面');
+      expect(pangu.spacingText('前面..後面')).toBe('前面.. 後面');
+      expect(pangu.spacingText('前面...後面')).toBe('前面... 後面');
 
       // DO NOT change if already spacing
       expect(pangu.spacingText('前面 . 後面')).toBe('前面 . 後面');
@@ -175,8 +185,6 @@ describe('Pangu', () => {
       // Special cases
       expect(pangu.spacingText('黑人問號.jpg後面')).toBe('黑人問號.jpg 後面');
       expect(pangu.spacingText('黑人問號.jpg 後面')).toBe('黑人問號.jpg 後面');
-      expect(pangu.spacingText('前面...後面')).toBe('前面... 後面');
-      expect(pangu.spacingText('前面..後面')).toBe('前面.. 後面');
     });
 
     // \u2026
@@ -187,12 +195,18 @@ describe('Pangu', () => {
 
     it('handle ? symbol', () => {
       expect(pangu.spacingText('前面?後面')).toBe('前面? 後面');
-      expect(pangu.spacingText('所以，請問Jackey的鼻子有幾個?3.14個')).toBe('所以，請問 Jackey 的鼻子有幾個? 3.14 個');
+      expect(pangu.spacingText('前面??後面')).toBe('前面?? 後面');
+      expect(pangu.spacingText('前面???後面')).toBe('前面??? 後面');
+      expect(pangu.spacingText('前面?abc')).toBe('前面? abc');
+      expect(pangu.spacingText('前面?123')).toBe('前面? 123');
 
       // DO NOT change if already spacing
       expect(pangu.spacingText('前面 ? 後面')).toBe('前面 ? 後面');
       expect(pangu.spacingText('前面? 後面')).toBe('前面? 後面');
       expect(pangu.spacingText('前面 ?後面')).toBe('前面 ?後面');
+
+      // Special cases
+      expect(pangu.spacingText('所以，請問Jackey的鼻子有幾個?3.14個')).toBe('所以，請問 Jackey 的鼻子有幾個? 3.14 個');
     });
 
     // When the symbol appears only 1 time in one line
