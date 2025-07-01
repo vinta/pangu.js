@@ -218,7 +218,7 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面 ?後面')).toBe('前面 ?後面');
 
       // Special cases
-      expect(pangu.spacingText('所以，請問Jackey的鼻子有幾個?3.14個')).toBe('所以，請問 Jackey 的鼻子有幾個? 3.14 個');
+      expect(pangu.spacingText('所以,請問Jackey的鼻子有幾個?3.14個')).toBe('所以, 請問 Jackey 的鼻子有幾個? 3.14 個');
     });
 
     // When the symbol appears only 1 time in one line
