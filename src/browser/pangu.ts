@@ -289,7 +289,7 @@ export class BrowserPangu extends Pangu {
 
     // Initialize visibility check configuration
     this.visibilityCheckConfig = {
-      enabled: false, // Disabled by default for backward compatibility
+      enabled: true, // Enable for testing in Chrome extension
       checkDuringIdle: true, // Use idle time for visibility checks
       commonHiddenPatterns: {
         clipRect: true,         // clip: rect(1px, 1px, 1px, 1px) patterns
