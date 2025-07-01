@@ -18,13 +18,16 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   const LEFT_BRACKETS_EXTENDED = "\\(\\[\\{<>\u201C";
   const RIGHT_BRACKETS_EXTENDED = "\\)\\]\\}<>\u201D";
   const ANS_CJK_AFTER = `${A}\u0370-\u03FF0-9@\\$%\\^&\\*\\-\\+\\\\=\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF`;
-  const ANS_BEFORE_CJK = `${A}\u0370-\u03FF0-9~\\$%\\^&\\*\\-\\+\\\\=!;:,\\.\\?\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF`;
+  const ANS_BEFORE_CJK = `${A}\u0370-\u03FF0-9\\$%\\^&\\*\\-\\+\\\\=\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF`;
   const UNIX_ABSOLUTE_FILE_PATH = /\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path|project|src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|your)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+\*]+)*/;
   const UNIX_RELATIVE_FILE_PATH = /(?:\.\/)?(?:src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|node_modules|\.claude|\.git|\.vscode)(?:\/[A-Za-z0-9_\-\.@\+\*]+)+/;
   const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
   const ANY_CJK = new RegExp(`[${CJK}]`);
-  const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK = new RegExp(`([${CJK}])[ ]*([\\:]+|\\.)[ ]*([${CJK}])`, "g");
-  const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS = new RegExp(`([${CJK}])[ ]*([~\\!;,\\?]+)[ ]*`, "g");
+  const CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:])(?! )`, "g");
+  const CJK_TILDE = new RegExp(`([${CJK}])(~)(?!=)(?! )`, "g");
+  const CJK_TILDE_EQUALS = new RegExp(`([${CJK}])(~=)`, "g");
+  const CJK_PERIOD = new RegExp(`([${CJK}])(\\.)(?![${AN}\\./])(?! )`, "g");
+  const AN_COLON_CJK = new RegExp(`([${AN}])(:)([${CJK}])`, "g");
   const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, "g");
   const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, "g");
   const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES_FULL}])`, "g");
@@ -122,15 +125,12 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           return htmlTagManager.store(processedTag);
         });
       }
-      newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK, (_match, leftCjk, symbols, rightCjk) => {
-        const fullwidthSymbols = self2.convertToFullwidth(symbols);
-        return `${leftCjk}${fullwidthSymbols}${rightCjk}`;
-      });
-      newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS, (_match, cjk, symbols) => {
-        const fullwidthSymbols = self2.convertToFullwidth(symbols);
-        return `${cjk}${fullwidthSymbols}`;
-      });
       newText = newText.replace(DOTS_CJK, "$1 $2");
+      newText = newText.replace(CJK_PUNCTUATION, "$1$2 ");
+      newText = newText.replace(CJK_TILDE, "$1$2 ");
+      newText = newText.replace(CJK_TILDE_EQUALS, "$1 $2 ");
+      newText = newText.replace(CJK_PERIOD, "$1$2 ");
+      newText = newText.replace(AN_COLON_CJK, "$1$2 $3");
       newText = newText.replace(FIX_CJK_COLON_ANS, "$1\uFF1A$2");
       newText = newText.replace(CJK_QUOTE, "$1 $2");
       newText = newText.replace(QUOTE_CJK, "$1 $2");
