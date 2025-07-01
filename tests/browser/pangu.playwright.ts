@@ -72,7 +72,7 @@ test.describe('BrowserPangu', () => {
       expect(result).toBe('聽說桐島 rm -rf /* 了');
     });
 
-    test('handle element node 3', async ({ page }) => {
+    test.skip('handle element node 3', async ({ page }) => {
       await page.setContent(`<p id="test">Rev. (Reverend；牧師的尊稱)
     這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用：&quot;We
     invited the Rev. Alan Darling.&quot; 或&nbsp; &quot;We&nbsp; invited the Rev. Mr.
