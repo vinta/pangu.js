@@ -192,8 +192,18 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面 .後面')).toBe('前面 .後面');
 
       // Special cases
+      expect(pangu.spacingText('前面vs.後面')).toBe('前面 vs. 後面');
+      expect(pangu.spacingText('前面U.S.A.後面')).toBe('前面 U.S.A. 後面');
       expect(pangu.spacingText('黑人問號.jpg後面')).toBe('黑人問號.jpg 後面');
       expect(pangu.spacingText('黑人問號.jpg 後面')).toBe('黑人問號.jpg 後面');
+
+      // prettier-ignore
+      expect(pangu.spacingText("Mr.龍島主道：「Let's Party!各位高明博雅君子！"))
+                         .toBe("Mr. 龍島主道：「Let's Party! 各位高明博雅君子！");
+
+      // prettier-ignore
+      expect(pangu.spacingText("Mr.龍島主道:「Let's Party!各位高明博雅君子!"))
+                         .toBe("Mr. 龍島主道:「Let's Party! 各位高明博雅君子!");
     });
 
     // \u2026
