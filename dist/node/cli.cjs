@@ -422,6 +422,7 @@ class BrowserPangu extends Pangu {
     __publicField(this, "performanceMonitor");
     __publicField(this, "idleQueue");
     __publicField(this, "idleSpacingConfig");
+    __publicField(this, "visibilityCheckConfig");
     __publicField(this, "blockTags");
     __publicField(this, "ignoredTags");
     __publicField(this, "presentationalTags");
@@ -440,6 +441,24 @@ class BrowserPangu extends Pangu {
       // Process 10 text nodes per idle cycle
       timeout: 5e3
       // 5 second timeout for idle processing
+    };
+    this.visibilityCheckConfig = {
+      enabled: true,
+      // Enable for testing in Chrome extension
+      checkDuringIdle: true,
+      // Use idle time for visibility checks
+      commonHiddenPatterns: {
+        clipRect: true,
+        // clip: rect(1px, 1px, 1px, 1px) patterns
+        displayNone: true,
+        // display: none
+        visibilityHidden: true,
+        // visibility: hidden
+        opacityZero: true,
+        // opacity: 0
+        heightWidth1px: true
+        // height: 1px; width: 1px
+      }
     };
     this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
     this.ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
@@ -683,36 +702,44 @@ class BrowserPangu extends Pangu {
                 if (nextTextNode.previousSibling) {
                   if (!this.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
                     if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
-                      nextTextNode.data = ` ${nextTextNode.data}`;
+                      if (!this.shouldSkipSpacingAfterNode(currentTextNode)) {
+                        nextTextNode.data = ` ${nextTextNode.data}`;
+                      }
                     }
                   }
                 } else {
                   if (!this.canIgnoreNode(nextTextNode)) {
                     if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
-                      nextTextNode.data = ` ${nextTextNode.data}`;
+                      if (!this.shouldSkipSpacingAfterNode(currentTextNode)) {
+                        nextTextNode.data = ` ${nextTextNode.data}`;
+                      }
                     }
                   }
                 }
               }
             } else if (!this.spaceSensitiveTags.test(currentNode.nodeName)) {
               if (currentTextNode instanceof Text && !currentTextNode.data.endsWith(" ")) {
-                currentTextNode.data = `${currentTextNode.data} `;
-              }
-            } else {
-              const panguSpace = document.createElement("pangu");
-              panguSpace.innerHTML = " ";
-              if (nextNode.parentNode) {
-                if (nextNode.previousSibling) {
-                  if (!this.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
-                    nextNode.parentNode.insertBefore(panguSpace, nextNode);
-                  }
-                } else {
-                  nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                if (!this.shouldSkipSpacingAfterNode(currentTextNode)) {
+                  currentTextNode.data = `${currentTextNode.data} `;
                 }
               }
-              if (!panguSpace.previousElementSibling) {
-                if (panguSpace.parentNode) {
-                  panguSpace.parentNode.removeChild(panguSpace);
+            } else {
+              if (!this.shouldSkipSpacingAfterNode(currentTextNode)) {
+                const panguSpace = document.createElement("pangu");
+                panguSpace.innerHTML = " ";
+                if (nextNode.parentNode) {
+                  if (nextNode.previousSibling) {
+                    if (!this.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
+                      nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                    }
+                  } else {
+                    nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                  }
+                }
+                if (!panguSpace.previousElementSibling) {
+                  if (panguSpace.parentNode) {
+                    panguSpace.parentNode.removeChild(panguSpace);
+                  }
                 }
               }
             }
@@ -966,6 +993,77 @@ class BrowserPangu extends Pangu {
       allTextNodes.push(...textNodes);
     }
     this.processTextNodesWithIdleCallback(allTextNodes, callbacks);
+  }
+  // Visibility check configuration methods
+  enableVisibilityCheck(config) {
+    this.visibilityCheckConfig = {
+      ...this.visibilityCheckConfig,
+      enabled: true,
+      ...config
+    };
+  }
+  disableVisibilityCheck() {
+    this.visibilityCheckConfig.enabled = false;
+  }
+  getVisibilityCheckConfig() {
+    return { ...this.visibilityCheckConfig };
+  }
+  // Visibility checking utility methods
+  isElementVisuallyHidden(element) {
+    if (!this.visibilityCheckConfig.enabled) {
+      return false;
+    }
+    const style = window.getComputedStyle(element);
+    const config = this.visibilityCheckConfig.commonHiddenPatterns;
+    if (config.displayNone && style.display === "none") {
+      return true;
+    }
+    if (config.visibilityHidden && style.visibility === "hidden") {
+      return true;
+    }
+    if (config.opacityZero && parseFloat(style.opacity) === 0) {
+      return true;
+    }
+    if (config.clipRect) {
+      const clip = style.clip;
+      if (clip && (clip.includes("rect(1px, 1px, 1px, 1px)") || clip.includes("rect(0px, 0px, 0px, 0px)") || clip.includes("rect(0, 0, 0, 0)"))) {
+        return true;
+      }
+    }
+    if (config.heightWidth1px) {
+      const height = parseInt(style.height, 10);
+      const width = parseInt(style.width, 10);
+      if (height === 1 && width === 1) {
+        const overflow = style.overflow;
+        const position = style.position;
+        if (overflow === "hidden" && position === "absolute") {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  shouldSkipSpacingAfterNode(node) {
+    if (!this.visibilityCheckConfig.enabled) {
+      return false;
+    }
+    let elementToCheck = null;
+    if (node instanceof Element) {
+      elementToCheck = node;
+    } else if (node.parentElement) {
+      elementToCheck = node.parentElement;
+    }
+    if (elementToCheck && this.isElementVisuallyHidden(elementToCheck)) {
+      return true;
+    }
+    let currentElement = elementToCheck == null ? void 0 : elementToCheck.parentElement;
+    while (currentElement) {
+      if (this.isElementVisuallyHidden(currentElement)) {
+        return true;
+      }
+      currentElement = currentElement.parentElement;
+    }
+    return false;
   }
 }
 const pangu = new BrowserPangu();

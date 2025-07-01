@@ -26,6 +26,17 @@ export interface IdleSpacingConfig {
     chunkSize: number;
     timeout: number;
 }
+export interface VisibilityCheckConfig {
+    enabled: boolean;
+    checkDuringIdle: boolean;
+    commonHiddenPatterns: {
+        clipRect: boolean;
+        displayNone: boolean;
+        visibilityHidden: boolean;
+        opacityZero: boolean;
+        heightWidth1px: boolean;
+    };
+}
 export interface IdleSpacingCallbacks {
     onComplete?: () => void;
     onProgress?: (processed: number, total: number) => void;
@@ -67,6 +78,7 @@ export declare class BrowserPangu extends Pangu {
     protected performanceMonitor: PerformanceMonitor;
     protected idleQueue: IdleQueue;
     protected idleSpacingConfig: IdleSpacingConfig;
+    protected visibilityCheckConfig: VisibilityCheckConfig;
     blockTags: RegExp;
     ignoredTags: RegExp;
     presentationalTags: RegExp;
@@ -114,6 +126,11 @@ export declare class BrowserPangu extends Pangu {
     spacingPageWithIdleCallback(callbacks?: IdleSpacingCallbacks): void;
     spacingNodeWithIdleCallback(contextNode: Node, callbacks?: IdleSpacingCallbacks): void;
     spacingNodesWithIdleCallback(nodes: Node[], callbacks?: IdleSpacingCallbacks): void;
+    enableVisibilityCheck(config?: Partial<VisibilityCheckConfig>): void;
+    disableVisibilityCheck(): void;
+    getVisibilityCheckConfig(): VisibilityCheckConfig;
+    isElementVisuallyHidden(element: Element): boolean;
+    protected shouldSkipSpacingAfterNode(node: Node): boolean;
 }
 export declare const pangu: BrowserPangu;
 export default pangu;
