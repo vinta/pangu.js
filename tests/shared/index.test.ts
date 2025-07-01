@@ -209,13 +209,16 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面:I have no idea後面')).toBe('前面: I have no idea 後面');
       expect(pangu.spacingText('前面: I have no idea後面')).toBe('前面: I have no idea 後面');
 
-      // TODO: TBD
+      // TODO:
       // expect(pangu.spacingText('前面:)後面')).toBe('前面 :) 後面');
     });
 
     // When the symbol appears 2+ times or more in one line
     it('handle : symbol as separator', () => {
-      // TODO
+      // TODO:
+      // expect(pangu.spacingText('前面:後面:再後面')).toBe('前面:後面:再後面');
+      // expect(pangu.spacingText('前面:後面:再後面:更後面')).toBe('前面:後面:再後面:更後面');
+      // expect(pangu.spacingText('前面:後面:再後面:更後面:超後面')).toBe('前面:後面:再後面:更後面:超後面');
     });
 
     // \u00b7
@@ -442,7 +445,7 @@ describe('Pangu', () => {
       // expect(pangu.spacingText('Mollie _ Vinta _ 貓咪')).toBe('Mollie _ Vinta _ 貓咪');
       // expect(pangu.spacingText('Mollie _ 陳上進 _ 貓咪')).toBe('Mollie _ 陳上進 _ 貓咪');
 
-      // TODO: TBD
+      // TODO:
       // expect(pangu.spacingText('得到一個A_B的結果')).toBe('得到一個A_B的結果');
     });
 
@@ -467,7 +470,7 @@ describe('Pangu', () => {
       // expect(pangu.spacingText('Mollie | Vinta | 貓咪')).toBe('Mollie | Vinta | 貓咪');
       // expect(pangu.spacingText('Mollie | 陳上進 | 貓咪')).toBe('Mollie | 陳上進 | 貓咪');
 
-      // TODO: TBD
+      // TODO:
       // expect(pangu.spacingText('得到一個A|B的結果')).toBe('得到一個A|B的結果');
     });
 
@@ -749,11 +752,11 @@ describe('Pangu', () => {
       expect(pangu.spacingText('前面`中間`後面')).toBe('前面 `中間` 後面');
     });
 
-    // TODO: TBD
-    // it('handle # # symbols as Weibo-like hashtags', () => {
-    //   expect(pangu.spacingText('前面#H2G2#後面')).toBe('前面 #H2G2# 後面');
-    //   expect(pangu.spacingText('前面#銀河閃電霹靂車指南#後面')).toBe('前面 #銀河閃電霹靂車指南# 後面');
-    // });
+    it('handle # # symbols as Weibo-like hashtags', () => {
+      // TODO:
+      // expect(pangu.spacingText('前面#H2G2#後面')).toBe('前面 #H2G2# 後面');
+      // expect(pangu.spacingText('前面#銀河閃電霹靂車指南#後面')).toBe('前面 #銀河閃電霹靂車指南# 後面');
+    });
 
     it('handle " " symbols', () => {
       expect(pangu.spacingText('前面"中文123漢字"後面')).toBe('前面 "中文 123 漢字" 後面');
