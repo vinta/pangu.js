@@ -197,8 +197,7 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
-    // FIXME
-    test.skip('handle single quote', async ({ page }) => {
+    test('handle single quote', async ({ page }) => {
       await page.setContent(`<div id="test"><h2 class="bgr6M8LczKBmaAn4sO0X UlmxiRo0duAvtZZW__30 zW32yWxwexOf03jBk4S7" id=":r31s:">Remove '铁蕾' from 1 Folder?</h2></div>`);
       const result = await page.evaluate(() => {
         const element = document.getElementById('test')!;
@@ -552,23 +551,12 @@ test.describe('BrowserPangu', () => {
       const hasLeadingSpace = visibleTextAfter.startsWith(' ');
       console.log('Has leading space after pangu.js:', hasLeadingSpace);
 
-      // The issue: pangu.js might be adding a space between "Description:" and "一律轉整數"
-      // because it sees them as adjacent text that needs spacing
-      if (hasLeadingSpace) {
-        // This is the reported issue - pangu.js adds space even though the first element is hidden
-        console.log('Issue confirmed: pangu.js added a space at the beginning of visible text');
-      }
+      // With visibility check enabled, pangu.js now detects that the first span
+      // is visually hidden and should NOT add space between hidden and visible elements
+      expect(hasLeadingSpace).toBe(false); // With visibility check enabled
 
-      // Currently pangu.js doesn't check if elements are visually hidden
-      // So it may add space between hidden and visible elements
-      expect(hasLeadingSpace).toBe(true); // This is the current behavior
-
-      // NOTE: This is a known limitation. pangu.js operates on DOM text content,
-      // not visual presentation. Checking computed styles for visibility would
-      // significantly impact performance.
-      //
-      // TODO: Implement CSS visibility check with requestIdleCallback() to handle
-      // this case without performance impact. See .claude/TODO.md for details.
+      // The visibility check feature successfully prevents spacing after hidden elements
+      // by checking computed styles during text processing
     });
   });
 });

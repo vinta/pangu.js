@@ -133,9 +133,15 @@ class Pangu {
     newText = newText.replace(FIX_QUOTE_ANY_QUOTE, "$1$2$3");
     newText = newText.replace(QUOTE_AN, "$1 $2");
     newText = newText.replace(CJK_QUOTE_AN, "$1$2 $3");
+    newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
+    const singleQuoteCJKManager = new PlaceholderReplacer("SINGLE_QUOTE_CJK_PLACEHOLDER_", "\uE030", "\uE031");
+    const SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, "g");
+    newText = newText.replace(SINGLE_QUOTE_PURE_CJK, (match) => {
+      return singleQuoteCJKManager.store(match);
+    });
     newText = newText.replace(CJK_SINGLE_QUOTE_BUT_POSSESSIVE, "$1 $2");
     newText = newText.replace(SINGLE_QUOTE_CJK, "$1 $2");
-    newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
+    newText = singleQuoteCJKManager.restore(newText);
     const textLength = newText.length;
     const slashCount = (newText.match(/\//g) || []).length;
     if (slashCount === 0) {
