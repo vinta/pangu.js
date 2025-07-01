@@ -27,7 +27,7 @@ test.describe('Idle Processing Infrastructure', () => {
 
   test('should enable idle spacing with default config', async ({ page }) => {
     const result = await page.evaluate(() => {
-      pangu.enableIdleSpacing();
+      pangu.updateIdleSpacingConfig({ enabled: true });
       return pangu.getIdleSpacingConfig();
     });
 
@@ -38,7 +38,7 @@ test.describe('Idle Processing Infrastructure', () => {
 
   test('should enable idle spacing with custom config', async ({ page }) => {
     const result = await page.evaluate(() => {
-      pangu.enableIdleSpacing({
+      pangu.updateIdleSpacingConfig({ enabled: true,
         chunkSize: 20,
         timeout: 3000
       });
@@ -53,11 +53,11 @@ test.describe('Idle Processing Infrastructure', () => {
   test('should disable idle spacing and clear queue', async ({ page }) => {
     const result = await page.evaluate(() => {
       // Enable idle spacing first
-      pangu.enableIdleSpacing();
+      pangu.updateIdleSpacingConfig({ enabled: true });
       let configBefore = pangu.getIdleSpacingConfig();
       
       // Disable it
-      pangu.disableIdleSpacing();
+      pangu.updateIdleSpacingConfig({ enabled: false });
       let configAfter = pangu.getIdleSpacingConfig();
       
       return {
@@ -98,7 +98,7 @@ test.describe('Idle Processing Infrastructure', () => {
       const hasNativeSupport = typeof window.requestIdleCallback === 'function';
       
       // Enable idle spacing to ensure infrastructure is working
-      pangu.enableIdleSpacing();
+      pangu.updateIdleSpacingConfig({ enabled: true });
       const config = pangu.getIdleSpacingConfig();
       
       return {
@@ -124,7 +124,7 @@ test.describe('Idle Processing Infrastructure', () => {
 
     const result = await page.evaluate(() => {
       // Ensure idle spacing is disabled (default state)
-      pangu.disableIdleSpacing();
+      pangu.updateIdleSpacingConfig({ enabled: false });
       
       // Run normal spacing
       pangu.spacingPageBody();
@@ -144,11 +144,11 @@ test.describe('Idle Processing Infrastructure', () => {
   test('should handle partial config updates correctly', async ({ page }) => {
     const result = await page.evaluate(() => {
       // Enable with partial config
-      pangu.enableIdleSpacing({ chunkSize: 5 });
+      pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 5 });
       const config1 = pangu.getIdleSpacingConfig();
       
       // Update again with different partial config
-      pangu.enableIdleSpacing({ timeout: 1000 });
+      pangu.updateIdleSpacingConfig({ enabled: true, timeout: 1000 });
       const config2 = pangu.getIdleSpacingConfig();
       
       return { config1, config2 };
@@ -179,7 +179,7 @@ test.describe('Idle Processing Infrastructure', () => {
     const result = await page.evaluate(() => {
       return new Promise((resolve) => {
         // Enable idle spacing with small chunk size to test chunking
-        pangu.enableIdleSpacing({ chunkSize: 2 });
+        pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 2 });
 
         let progressUpdates: Array<{processed: number, total: number}> = [];
         let completionCalled = false;
@@ -232,7 +232,7 @@ test.describe('Idle Processing Infrastructure', () => {
     const result = await page.evaluate(() => {
       return new Promise((resolve) => {
         // Enable idle spacing
-        pangu.enableIdleSpacing({ chunkSize: 1 }); // Very small chunks for more progress updates
+        pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 1 }); // Very small chunks for more progress updates
 
         const progressSnapshots: Array<{processed: number, total: number, percentage: number}> = [];
 
@@ -276,7 +276,7 @@ test.describe('Idle Processing Infrastructure', () => {
     const result = await page.evaluate(() => {
       return new Promise((resolve) => {
         // Ensure idle spacing is disabled
-        pangu.disableIdleSpacing();
+        pangu.updateIdleSpacingConfig({ enabled: false });
 
         let completionCalled = false;
 

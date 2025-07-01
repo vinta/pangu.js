@@ -37,7 +37,7 @@ test.describe('CSS Visibility Check', () => {
       `;
       
       // Process with default behavior (no visibility checking)
-      pangu.disableVisibilityCheck(); // Ensure it's disabled
+      pangu.updateVisibilityCheckConfig({ enabled: false }); // Ensure it's disabled
       pangu.spacingPage();
       
       const hiddenSpan = content.querySelector('.sr-only')!;
@@ -59,9 +59,9 @@ test.describe('CSS Visibility Check', () => {
 
   test('should have visibility check configuration disabled by default', async ({ page }) => {
     const hasConfig = await page.evaluate(() => {
-      return typeof pangu.enableVisibilityCheck === 'function' && 
-             typeof pangu.disableVisibilityCheck === 'function' &&
-             typeof pangu.getVisibilityCheckConfig === 'function';
+      // Check if visibility check config is available and disabled by default
+      const config = window.pangu.getVisibilityCheckConfig();
+      return config && config.enabled === false;
     });
 
     expect(hasConfig).toBe(true);
@@ -89,7 +89,7 @@ test.describe('CSS Visibility Check', () => {
       `;
       
       // Enable visibility checking
-      pangu.enableVisibilityCheck({ checkDuringIdle: true });
+      pangu.updateVisibilityCheckConfig({ enabled: true, checkDuringIdle: true });
       
       // Test the helper method for visibility detection
       const spans = content.querySelectorAll('span');
@@ -131,7 +131,7 @@ test.describe('CSS Visibility Check', () => {
       `;
       
       // Enable visibility checking 
-      pangu.enableVisibilityCheck();
+      pangu.updateVisibilityCheckConfig({ enabled: true });
       
       // Process with visibility-aware spacing (synchronous)
       pangu.spacingPage();
@@ -161,7 +161,7 @@ test.describe('CSS Visibility Check', () => {
         </div>
       `;
       
-      pangu.enableVisibilityCheck();
+      pangu.updateVisibilityCheckConfig({ enabled: true });
       
       // Process with visibility checking enabled (synchronous)
       pangu.spacingPage();
@@ -201,7 +201,7 @@ test.describe('CSS Visibility Check', () => {
         </div>
       `;
       
-      pangu.enableVisibilityCheck();
+      pangu.updateVisibilityCheckConfig({ enabled: true });
       
       // Process with visibility checking (synchronous)
       pangu.spacingPage();

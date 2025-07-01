@@ -27,7 +27,7 @@ test.describe('MutationObserver Idle Processing', () => {
   test('should process nodes synchronously when idle disabled', async ({ page }) => {
     const result = await page.evaluate(() => {
       // Ensure idle processing is disabled
-      pangu.disableIdleSpacing();
+      pangu.updateIdleSpacingConfig({ enabled: false });
       
       const content = document.getElementById('content')!;
       const div = document.createElement('div');
@@ -46,7 +46,7 @@ test.describe('MutationObserver Idle Processing', () => {
   test('should process nodes with idle processing when enabled', async ({ page }) => {
     const result = await page.evaluate(async () => {
       // Enable idle processing
-      pangu.enableIdleSpacing({ chunkSize: 1, timeoutMs: 100 });
+      pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 1, timeoutMs: 100 });
       
       const content = document.getElementById('content')!;
       const div = document.createElement('div');
@@ -84,7 +84,7 @@ test.describe('MutationObserver Idle Processing', () => {
 
   test('should handle multiple nodes at once', async ({ page }) => {
     const result = await page.evaluate(async () => {
-      pangu.enableIdleSpacing({ chunkSize: 2, timeoutMs: 100 });
+      pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 2, timeoutMs: 100 });
       
       const content = document.getElementById('content')!;
       
@@ -127,7 +127,7 @@ test.describe('MutationObserver Idle Processing', () => {
   test('should verify mutation observer integration by manual trigger', async ({ page }) => {
     const result = await page.evaluate(async () => {
       // Enable idle processing 
-      pangu.enableIdleSpacing({ chunkSize: 1, timeoutMs: 100 });
+      pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 1, timeoutMs: 100 });
       
       // Set up auto spacing
       pangu.autoSpacingPage();

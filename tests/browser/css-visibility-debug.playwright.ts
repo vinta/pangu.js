@@ -22,7 +22,7 @@ test.describe('CSS Visibility Check Debug', () => {
       content.innerHTML = `<span>第一個visible</span><span>第二個visible</span>`;
       
       // Enable visibility checking
-      pangu.enableVisibilityCheck();
+      pangu.updateVisibilityCheckConfig({ enabled: true });
       
       const spans = content.querySelectorAll('span');
       const span1 = spans[0];
@@ -69,7 +69,7 @@ test.describe('CSS Visibility Check Debug', () => {
       `;
       
       // Enable visibility checking
-      pangu.enableVisibilityCheck();
+      pangu.updateVisibilityCheckConfig({ enabled: true });
       
       const spans = content.querySelectorAll('span');
       const hiddenSpan = spans[0];
@@ -105,7 +105,7 @@ test.describe('CSS Visibility Check Debug', () => {
       content.innerHTML = `<span>第一個visible</span><span>第二個visible</span>`;
       
       // Ensure visibility checking is disabled
-      pangu.disableVisibilityCheck();
+      pangu.updateVisibilityCheckConfig({ enabled: false });
       
       // Process the content
       pangu.spacingPage();
