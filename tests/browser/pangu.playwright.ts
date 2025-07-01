@@ -71,6 +71,26 @@ test.describe('BrowserPangu', () => {
       });
       expect(result).toBe('聽說桐島 rm -rf /* 了');
     });
+
+    test('handle element node 3', async ({ page }) => {
+      await page.setContent(`<p id="test">Rev. (Reverend；牧師的尊稱)
+    這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用：&quot;We
+    invited the Rev. Alan Darling.&quot; 或&nbsp; &quot;We&nbsp; invited the Rev. Mr.
+    Darling.&quot; ，而非 &quot;We invited the Rev. Darling.&quot; 我們也不可以說&nbsp;
+    &quot;We invited the reverend to dinner.&quot; -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的
+    rev. 是 review 的縮寫，算是雙關語)</p>`);
+      const result = await page.evaluate(() => {
+        const div = document.getElementById('test')!;
+        pangu.spacingNode(div);
+        return div.textContent;
+      });
+      expect(result).toBe(`Rev. (Reverend；牧師的尊稱)
+    這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We
+    invited the Rev. Alan Darling." 或 "We  invited the Rev. Mr.
+    Darling."，而非" We invited the Rev. Darling." 我們也不可以說 
+    "We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的
+    rev. 是 review 的縮寫，算是雙關語)`);
+    });
   });
 
   test.describe('spacingElementById()', () => {
