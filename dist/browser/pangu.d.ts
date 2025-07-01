@@ -85,8 +85,7 @@ export declare class BrowserPangu extends Pangu {
     protected spacingNodeWithTreeWalker(contextNode: Node): void;
     protected processTextNodesWithIdleCallback(textNodes: Node[], callbacks?: IdleSpacingCallbacks): void;
     protected setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number): void;
-    enableIdleSpacing(config?: Partial<IdleSpacingConfig>): void;
-    disableIdleSpacing(): void;
+    updateIdleSpacingConfig(config: Partial<IdleSpacingConfig>): void;
     getIdleSpacingConfig(): IdleSpacingConfig;
     getIdleQueueLength(): number;
     clearIdleQueue(): void;
@@ -98,8 +97,7 @@ export declare class BrowserPangu extends Pangu {
     spacingPageWithIdleCallback(callbacks?: IdleSpacingCallbacks): void;
     spacingNodeWithIdleCallback(contextNode: Node, callbacks?: IdleSpacingCallbacks): void;
     spacingNodesWithIdleCallback(nodes: Node[], callbacks?: IdleSpacingCallbacks): void;
-    enableVisibilityCheck(config?: Partial<VisibilityCheckConfig>): void;
-    disableVisibilityCheck(): void;
+    updateVisibilityCheckConfig(config: Partial<VisibilityCheckConfig>): void;
     getVisibilityCheckConfig(): VisibilityCheckConfig;
     isElementVisuallyHidden(element: Element): boolean;
     protected shouldSkipSpacingAfterNode(node: Node): boolean;

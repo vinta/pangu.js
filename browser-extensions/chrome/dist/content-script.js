@@ -3,8 +3,8 @@
   async function autoSpacingPage() {
     const pangu = window.pangu;
     if (pangu) {
-      pangu.enableIdleSpacing();
-      pangu.enableVisibilityCheck();
+      pangu.updateIdleSpacingConfig({ enabled: true });
+      pangu.updateVisibilityCheckConfig({ enabled: true });
       pangu.autoSpacingPage();
     }
   }

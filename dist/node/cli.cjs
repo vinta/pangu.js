@@ -827,16 +827,14 @@ class BrowserPangu extends Pangu {
     });
   }
   // Idle processing configuration methods
-  enableIdleSpacing(config) {
+  updateIdleSpacingConfig(config) {
     this.idleSpacingConfig = {
       ...this.idleSpacingConfig,
-      enabled: true,
       ...config
     };
-  }
-  disableIdleSpacing() {
-    this.idleSpacingConfig.enabled = false;
-    this.idleQueue.clear();
+    if (config.enabled === false) {
+      this.idleQueue.clear();
+    }
   }
   getIdleSpacingConfig() {
     return { ...this.idleSpacingConfig };
@@ -898,15 +896,11 @@ class BrowserPangu extends Pangu {
     this.processTextNodesWithIdleCallback(allTextNodes, callbacks);
   }
   // Visibility check configuration methods
-  enableVisibilityCheck(config) {
+  updateVisibilityCheckConfig(config) {
     this.visibilityCheckConfig = {
       ...this.visibilityCheckConfig,
-      enabled: true,
       ...config
     };
-  }
-  disableVisibilityCheck() {
-    this.visibilityCheckConfig.enabled = false;
   }
   getVisibilityCheckConfig() {
     return { ...this.visibilityCheckConfig };

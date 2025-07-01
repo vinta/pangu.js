@@ -825,16 +825,14 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       });
     }
     // Idle processing configuration methods
-    enableIdleSpacing(config) {
+    updateIdleSpacingConfig(config) {
       this.idleSpacingConfig = {
         ...this.idleSpacingConfig,
-        enabled: true,
         ...config
       };
-    }
-    disableIdleSpacing() {
-      this.idleSpacingConfig.enabled = false;
-      this.idleQueue.clear();
+      if (config.enabled === false) {
+        this.idleQueue.clear();
+      }
     }
     getIdleSpacingConfig() {
       return { ...this.idleSpacingConfig };
@@ -896,15 +894,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.processTextNodesWithIdleCallback(allTextNodes, callbacks);
     }
     // Visibility check configuration methods
-    enableVisibilityCheck(config) {
+    updateVisibilityCheckConfig(config) {
       this.visibilityCheckConfig = {
         ...this.visibilityCheckConfig,
-        enabled: true,
         ...config
       };
-    }
-    disableVisibilityCheck() {
-      this.visibilityCheckConfig.enabled = false;
     }
     getVisibilityCheckConfig() {
       return { ...this.visibilityCheckConfig };
