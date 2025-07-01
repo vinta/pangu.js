@@ -804,17 +804,16 @@ export class BrowserPangu extends Pangu {
 
   // Idle processing configuration methods
 
-  public enableIdleSpacing(config?: Partial<IdleSpacingConfig>): void {
+  public updateIdleSpacingConfig(config: Partial<IdleSpacingConfig>): void {
     this.idleSpacingConfig = {
       ...this.idleSpacingConfig,
       ...config,
-      enabled: true,
     };
-  }
-
-  public disableIdleSpacing(): void {
-    this.idleSpacingConfig.enabled = false;
-    this.idleQueue.clear();
+    
+    // Clear queue when disabling
+    if (config.enabled === false) {
+      this.idleQueue.clear();
+    }
   }
 
   public getIdleSpacingConfig(): IdleSpacingConfig {
@@ -903,16 +902,11 @@ export class BrowserPangu extends Pangu {
 
   // Visibility check configuration methods
 
-  public enableVisibilityCheck(config?: Partial<VisibilityCheckConfig>): void {
+  public updateVisibilityCheckConfig(config: Partial<VisibilityCheckConfig>): void {
     this.visibilityCheckConfig = {
       ...this.visibilityCheckConfig,
-      enabled: true,
       ...config,
     };
-  }
-
-  public disableVisibilityCheck(): void {
-    this.visibilityCheckConfig.enabled = false;
   }
 
   public getVisibilityCheckConfig(): VisibilityCheckConfig {
