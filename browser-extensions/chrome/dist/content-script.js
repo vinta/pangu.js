@@ -4,10 +4,10 @@
     const pangu = window.pangu;
     if (pangu) {
       pangu.enableIdleSpacing({
-        chunkSize: 10,
-        // Process 10 text nodes per idle cycle
-        timeout: 5e3
-        // 5 second timeout
+        chunkSize: 20,
+        // Process 20 text nodes per idle cycle
+        timeout: 2e3
+        // 2 second timeout
       });
       pangu.enableVisibilityCheck({
         checkDuringIdle: true,
@@ -19,12 +19,7 @@
           heightWidth1px: true
         }
       });
-      pangu.enablePerformanceMonitoring();
       pangu.autoSpacingPage();
-      setTimeout(() => {
-        console.log("[Pangu.js] Performance Report:");
-        pangu.logPerformanceResults();
-      }, 1e4);
     }
   }
   function spacingPage() {

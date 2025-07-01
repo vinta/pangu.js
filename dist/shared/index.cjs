@@ -46,9 +46,11 @@ const UNIX_RELATIVE_FILE_PATH = /(?:\.\/)?(?:src|dist|test|tests|docs|templates|
 const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
 const ANY_CJK = new RegExp(`[${CJK}]`);
 const CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:]+)(?=[${CJK}${AN}])`, "g");
+const AN_PUNCTUATION_CJK = new RegExp(`([${AN}])([!;,\\?]+)([${CJK}])`, "g");
 const CJK_TILDE = new RegExp(`([${CJK}])(~+)(?!=)(?=[${CJK}${AN}])`, "g");
 const CJK_TILDE_EQUALS = new RegExp(`([${CJK}])(~=)`, "g");
 const CJK_PERIOD = new RegExp(`([${CJK}])(\\.)(?![${AN}\\./])(?=[${CJK}${AN}])`, "g");
+const AN_PERIOD_CJK = new RegExp(`([${AN}])(\\.)([${CJK}])`, "g");
 const AN_COLON_CJK = new RegExp(`([${AN}])(:)([${CJK}])`, "g");
 const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, "g");
 const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, "g");
@@ -149,9 +151,11 @@ class Pangu {
     }
     newText = newText.replace(DOTS_CJK, "$1 $2");
     newText = newText.replace(CJK_PUNCTUATION, "$1$2 ");
+    newText = newText.replace(AN_PUNCTUATION_CJK, "$1$2 $3");
     newText = newText.replace(CJK_TILDE, "$1$2 ");
     newText = newText.replace(CJK_TILDE_EQUALS, "$1 $2 ");
     newText = newText.replace(CJK_PERIOD, "$1$2 ");
+    newText = newText.replace(AN_PERIOD_CJK, "$1$2 $3");
     newText = newText.replace(AN_COLON_CJK, "$1$2 $3");
     newText = newText.replace(FIX_CJK_COLON_ANS, "$1\uFF1A$2");
     newText = newText.replace(CJK_QUOTE, "$1 $2");

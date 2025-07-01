@@ -22,9 +22,11 @@ const UNIX_RELATIVE_FILE_PATH = /(?:\.\/)?(?:src|dist|test|tests|docs|templates|
 const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
 const ANY_CJK = new RegExp(`[${CJK}]`);
 const CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:]+)(?=[${CJK}${AN}])`, "g");
+const AN_PUNCTUATION_CJK = new RegExp(`([${AN}])([!;,\\?]+)([${CJK}])`, "g");
 const CJK_TILDE = new RegExp(`([${CJK}])(~+)(?!=)(?=[${CJK}${AN}])`, "g");
 const CJK_TILDE_EQUALS = new RegExp(`([${CJK}])(~=)`, "g");
 const CJK_PERIOD = new RegExp(`([${CJK}])(\\.)(?![${AN}\\./])(?=[${CJK}${AN}])`, "g");
+const AN_PERIOD_CJK = new RegExp(`([${AN}])(\\.)([${CJK}])`, "g");
 const AN_COLON_CJK = new RegExp(`([${AN}])(:)([${CJK}])`, "g");
 const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, "g");
 const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, "g");
@@ -125,9 +127,11 @@ class Pangu {
     }
     newText = newText.replace(DOTS_CJK, "$1 $2");
     newText = newText.replace(CJK_PUNCTUATION, "$1$2 ");
+    newText = newText.replace(AN_PUNCTUATION_CJK, "$1$2 $3");
     newText = newText.replace(CJK_TILDE, "$1$2 ");
     newText = newText.replace(CJK_TILDE_EQUALS, "$1 $2 ");
     newText = newText.replace(CJK_PERIOD, "$1$2 ");
+    newText = newText.replace(AN_PERIOD_CJK, "$1$2 $3");
     newText = newText.replace(AN_COLON_CJK, "$1$2 $3");
     newText = newText.replace(FIX_CJK_COLON_ANS, "$1\uFF1A$2");
     newText = newText.replace(CJK_QUOTE, "$1 $2");
@@ -421,7 +425,6 @@ function debounce(func, delay, mustRunDelay = Infinity) {
 }
 class BrowserPangu extends Pangu {
   constructor() {
-    var _a;
     super();
     __publicField(this, "isAutoSpacingPageExecuted");
     __publicField(this, "autoSpacingPageObserver");
@@ -437,8 +440,7 @@ class BrowserPangu extends Pangu {
     __publicField(this, "ignoredClass");
     this.isAutoSpacingPageExecuted = false;
     this.autoSpacingPageObserver = null;
-    const isDevelopment = typeof process !== "undefined" && ((_a = process.env) == null ? void 0 : _a.NODE_ENV) === "development";
-    this.performanceMonitor = new PerformanceMonitor(isDevelopment);
+    this.performanceMonitor = new PerformanceMonitor();
     this.idleQueue = new IdleQueue();
     this.idleSpacingConfig = {
       enabled: false,
@@ -760,33 +762,29 @@ class BrowserPangu extends Pangu {
     if (!contextNode || contextNode instanceof DocumentFragment) {
       return nodes;
     }
-    const walker = document.createTreeWalker(
-      contextNode,
-      NodeFilter.SHOW_TEXT,
-      {
-        acceptNode: (node) => {
-          if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
-            return NodeFilter.FILTER_REJECT;
-          }
-          let currentNode = node;
-          while (currentNode) {
-            if (currentNode instanceof Element) {
-              if (this.ignoredTags.test(currentNode.nodeName)) {
-                return NodeFilter.FILTER_REJECT;
-              }
-              if (this.isContentEditable(currentNode)) {
-                return NodeFilter.FILTER_REJECT;
-              }
-              if (currentNode.classList.contains(this.ignoredClass)) {
-                return NodeFilter.FILTER_REJECT;
-              }
-            }
-            currentNode = currentNode.parentNode;
-          }
-          return NodeFilter.FILTER_ACCEPT;
+    const walker = document.createTreeWalker(contextNode, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) => {
+        if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
+          return NodeFilter.FILTER_REJECT;
         }
+        let currentNode = node;
+        while (currentNode) {
+          if (currentNode instanceof Element) {
+            if (this.ignoredTags.test(currentNode.nodeName)) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            if (this.isContentEditable(currentNode)) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            if (currentNode.classList.contains(this.ignoredClass)) {
+              return NodeFilter.FILTER_REJECT;
+            }
+          }
+          currentNode = currentNode.parentNode;
+        }
+        return NodeFilter.FILTER_ACCEPT;
       }
-    );
+    });
     while (walker.nextNode()) {
       nodes.push(walker.currentNode);
     }

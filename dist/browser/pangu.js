@@ -169,7 +169,6 @@ function debounce(func, delay, mustRunDelay = Infinity) {
 }
 class BrowserPangu extends Pangu {
   constructor() {
-    var _a;
     super();
     __publicField(this, "isAutoSpacingPageExecuted");
     __publicField(this, "autoSpacingPageObserver");
@@ -185,8 +184,7 @@ class BrowserPangu extends Pangu {
     __publicField(this, "ignoredClass");
     this.isAutoSpacingPageExecuted = false;
     this.autoSpacingPageObserver = null;
-    const isDevelopment = typeof process !== "undefined" && ((_a = process.env) == null ? void 0 : _a.NODE_ENV) === "development";
-    this.performanceMonitor = new PerformanceMonitor(isDevelopment);
+    this.performanceMonitor = new PerformanceMonitor();
     this.idleQueue = new IdleQueue();
     this.idleSpacingConfig = {
       enabled: false,
@@ -508,33 +506,29 @@ class BrowserPangu extends Pangu {
     if (!contextNode || contextNode instanceof DocumentFragment) {
       return nodes;
     }
-    const walker = document.createTreeWalker(
-      contextNode,
-      NodeFilter.SHOW_TEXT,
-      {
-        acceptNode: (node) => {
-          if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
-            return NodeFilter.FILTER_REJECT;
-          }
-          let currentNode = node;
-          while (currentNode) {
-            if (currentNode instanceof Element) {
-              if (this.ignoredTags.test(currentNode.nodeName)) {
-                return NodeFilter.FILTER_REJECT;
-              }
-              if (this.isContentEditable(currentNode)) {
-                return NodeFilter.FILTER_REJECT;
-              }
-              if (currentNode.classList.contains(this.ignoredClass)) {
-                return NodeFilter.FILTER_REJECT;
-              }
-            }
-            currentNode = currentNode.parentNode;
-          }
-          return NodeFilter.FILTER_ACCEPT;
+    const walker = document.createTreeWalker(contextNode, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) => {
+        if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
+          return NodeFilter.FILTER_REJECT;
         }
+        let currentNode = node;
+        while (currentNode) {
+          if (currentNode instanceof Element) {
+            if (this.ignoredTags.test(currentNode.nodeName)) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            if (this.isContentEditable(currentNode)) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            if (currentNode.classList.contains(this.ignoredClass)) {
+              return NodeFilter.FILTER_REJECT;
+            }
+          }
+          currentNode = currentNode.parentNode;
+        }
+        return NodeFilter.FILTER_ACCEPT;
       }
-    );
+    });
     while (walker.nextNode()) {
       nodes.push(walker.currentNode);
     }

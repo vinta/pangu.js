@@ -72,7 +72,7 @@ class IdleQueue {
             timeRemaining() {
               // Simulate ~16ms budget (60fps frame)
               return Math.max(0, 16 - (performance.now() - start));
-            }
+            },
           });
         }, 0);
       };
@@ -104,7 +104,7 @@ class IdleQueue {
     return {
       processed: this.processedItems,
       total: this.totalItems,
-      percentage: this.totalItems > 0 ? (this.processedItems / this.totalItems) * 100 : 0
+      percentage: this.totalItems > 0 ? (this.processedItems / this.totalItems) * 100 : 0,
     };
   }
 
@@ -120,13 +120,13 @@ class IdleQueue {
       const work = this.queue.shift();
       work?.();
       this.processedItems++;
-      
+
       // Call progress callback if provided
       this.callbacks.onProgress?.(this.processedItems, this.totalItems);
     }
 
     this.isProcessing = false;
-    
+
     if (this.queue.length > 0) {
       this.scheduleProcessing();
     } else if (this.processedItems === this.totalItems && this.totalItems > 0) {
@@ -155,12 +155,12 @@ class PerformanceMonitor {
     const start = performance.now();
     const result = fn();
     const duration = performance.now() - start;
-    
+
     if (!this.metrics.has(label)) {
       this.metrics.set(label, []);
     }
     this.metrics.get(label)!.push(duration);
-    
+
     return result;
   }
 
@@ -176,7 +176,7 @@ class PerformanceMonitor {
       avg: total / times.length,
       min: Math.min(...times),
       max: Math.max(...times),
-      total
+      total,
     };
   }
 
@@ -290,12 +290,12 @@ export class BrowserPangu extends Pangu {
       enabled: true, // Enable for testing in Chrome extension
       checkDuringIdle: true, // Use idle time for visibility checks
       commonHiddenPatterns: {
-        clipRect: true,         // clip: rect(1px, 1px, 1px, 1px) patterns
-        displayNone: true,      // display: none
+        clipRect: true, // clip: rect(1px, 1px, 1px, 1px) patterns
+        displayNone: true, // display: none
         visibilityHidden: true, // visibility: hidden
-        opacityZero: true,      // opacity: 0
-        heightWidth1px: true    // height: 1px; width: 1px
-      }
+        opacityZero: true, // opacity: 0
+        heightWidth1px: true, // height: 1px; width: 1px
+      },
     };
 
     this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
@@ -403,7 +403,7 @@ export class BrowserPangu extends Pangu {
     //
     // However, those filtered whitespace nodes still exist in the DOM and can render as spaces with CSS like {white-space: pre-wrap}.
     // The processTextNodes method includes logic to detect whitespace between selected text nodes.
-    
+
     this.spacingNodeWithTreeWalker(contextNode);
   }
 
@@ -427,7 +427,6 @@ export class BrowserPangu extends Pangu {
       this.spacingNode(elements[i]);
     }
   }
-
 
   public stopAutoSpacingPage() {
     if (this.autoSpacingPageObserver) {
@@ -489,7 +488,6 @@ export class BrowserPangu extends Pangu {
     }
     return false;
   }
-
 
   protected isFirstTextChild(parentNode: Node, targetNode: Node) {
     const { childNodes } = parentNode;
@@ -574,24 +572,20 @@ export class BrowserPangu extends Pangu {
 
         // Check if there's whitespace between the nodes
         let hasWhitespaceBetween = false;
-        
+
         // We need to check at different levels of the DOM tree
         // First, find the highest ancestor that contains only the current text node
         let currentAncestor = currentTextNode as Node;
-        while (currentAncestor.parentNode && 
-               this.isLastTextChild(currentAncestor.parentNode, currentAncestor) &&
-               !this.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
+        while (currentAncestor.parentNode && this.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !this.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
           currentAncestor = currentAncestor.parentNode;
         }
-        
+
         // Find the highest ancestor that contains only the next text node
         let nextAncestor = nextTextNode as Node;
-        while (nextAncestor.parentNode && 
-               this.isFirstTextChild(nextAncestor.parentNode, nextAncestor) &&
-               !this.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
+        while (nextAncestor.parentNode && this.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !this.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
           nextAncestor = nextAncestor.parentNode;
         }
-        
+
         // Check for whitespace between these ancestors
         let nodeBetween = currentAncestor.nextSibling;
         while (nodeBetween && nodeBetween !== nextAncestor) {
@@ -701,47 +695,43 @@ export class BrowserPangu extends Pangu {
 
   protected collectTextNodes(contextNode: Node, reverse = false): Text[] {
     const nodes: Text[] = [];
-    
+
     // Handle edge cases
     if (!contextNode || contextNode instanceof DocumentFragment) {
       return nodes;
     }
 
-    const walker = document.createTreeWalker(
-      contextNode,
-      NodeFilter.SHOW_TEXT,
-      {
-        acceptNode: (node) => {
-          // Skip whitespace-only nodes
-          if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
-            return NodeFilter.FILTER_REJECT;
-          }
-          
-          // Skip nodes that should be ignored (same as canIgnoreNode check)
-          // We need to check the node itself and its ancestors
-          let currentNode = node;
-          while (currentNode) {
-            if (currentNode instanceof Element) {
-              // Check for ignored tags
-              if (this.ignoredTags.test(currentNode.nodeName)) {
-                return NodeFilter.FILTER_REJECT;
-              }
-              // Check for contentEditable
-              if (this.isContentEditable(currentNode)) {
-                return NodeFilter.FILTER_REJECT;
-              }
-              // Check for ignored class
-              if (currentNode.classList.contains(this.ignoredClass)) {
-                return NodeFilter.FILTER_REJECT;
-              }
-            }
-            currentNode = currentNode.parentNode as Node;
-          }
-          
-          return NodeFilter.FILTER_ACCEPT;
+    const walker = document.createTreeWalker(contextNode, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) => {
+        // Skip whitespace-only nodes
+        if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
+          return NodeFilter.FILTER_REJECT;
         }
-      }
-    );
+
+        // Skip nodes that should be ignored (same as canIgnoreNode check)
+        // We need to check the node itself and its ancestors
+        let currentNode = node;
+        while (currentNode) {
+          if (currentNode instanceof Element) {
+            // Check for ignored tags
+            if (this.ignoredTags.test(currentNode.nodeName)) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            // Check for contentEditable
+            if (this.isContentEditable(currentNode)) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            // Check for ignored class
+            if (currentNode.classList.contains(this.ignoredClass)) {
+              return NodeFilter.FILTER_REJECT;
+            }
+          }
+          currentNode = currentNode.parentNode as Node;
+        }
+
+        return NodeFilter.FILTER_ACCEPT;
+      },
+    });
 
     // Collect all text nodes
     while (walker.nextNode()) {
@@ -791,7 +781,7 @@ export class BrowserPangu extends Pangu {
     // Split text nodes into chunks
     const chunkSize = this.idleSpacingConfig.chunkSize;
     const chunks: Node[][] = [];
-    
+
     for (let i = 0; i < textNodes.length; i += chunkSize) {
       chunks.push(textNodes.slice(i, i + chunkSize));
     }
@@ -830,7 +820,7 @@ export class BrowserPangu extends Pangu {
           // Use idle processing for dynamic content
           const nodesToProcess = [...queue];
           queue.length = 0; // Clear the queue
-          
+
           if (nodesToProcess.length > 0) {
             this.spacingNodesWithIdleCallback(nodesToProcess);
           }
@@ -944,7 +934,7 @@ export class BrowserPangu extends Pangu {
     this.idleSpacingConfig = {
       ...this.idleSpacingConfig,
       enabled: true,
-      ...config
+      ...config,
     };
   }
 
@@ -979,7 +969,7 @@ export class BrowserPangu extends Pangu {
 
     // Process title synchronously (it's typically small)
     this.spacingPageTitle();
-    
+
     // Process body with idle callback
     this.spacingNodeWithIdleCallback(document.body, callbacks);
   }
@@ -1033,7 +1023,7 @@ export class BrowserPangu extends Pangu {
       const textNodes = this.performanceMonitor.measure('collectTextNodes', () => {
         return this.collectTextNodes(node, true);
       });
-      
+
       allTextNodes.push(...textNodes);
     }
 
@@ -1047,7 +1037,7 @@ export class BrowserPangu extends Pangu {
     this.visibilityCheckConfig = {
       ...this.visibilityCheckConfig,
       enabled: true,
-      ...config
+      ...config,
     };
   }
 
@@ -1088,11 +1078,7 @@ export class BrowserPangu extends Pangu {
     if (config.clipRect) {
       const clip = style.clip;
       // Common patterns: rect(1px, 1px, 1px, 1px) or rect(0, 0, 0, 0)
-      if (clip && (
-        clip.includes('rect(1px, 1px, 1px, 1px)') ||
-        clip.includes('rect(0px, 0px, 0px, 0px)') ||
-        clip.includes('rect(0, 0, 0, 0)')
-      )) {
+      if (clip && (clip.includes('rect(1px, 1px, 1px, 1px)') || clip.includes('rect(0px, 0px, 0px, 0px)') || clip.includes('rect(0, 0, 0, 0)'))) {
         return true;
       }
     }
@@ -1101,12 +1087,12 @@ export class BrowserPangu extends Pangu {
     if (config.heightWidth1px) {
       const height = parseInt(style.height, 10);
       const width = parseInt(style.width, 10);
-      
+
       if (height === 1 && width === 1) {
         // Additional checks for common screen reader patterns
         const overflow = style.overflow;
         const position = style.position;
-        
+
         if (overflow === 'hidden' && position === 'absolute') {
           return true;
         }
@@ -1123,7 +1109,7 @@ export class BrowserPangu extends Pangu {
 
     // Check if the node or its parent element is visually hidden
     let elementToCheck: Element | null = null;
-    
+
     if (node instanceof Element) {
       elementToCheck = node;
     } else if (node.parentElement) {
