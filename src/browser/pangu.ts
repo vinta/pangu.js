@@ -38,6 +38,45 @@ export interface IdleSpacingCallbacks {
   onProgress?: (processed: number, total: number) => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function once<T extends (...args: any[]) => any>(func: T) {
+  let executed = false;
+  return function (...args: Parameters<T>) {
+    if (executed) {
+      return undefined;
+    }
+    executed = true;
+    return func(...args);
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mustRunDelay: number = Infinity) {
+  let timer: number | null = null;
+  let startTime: number | null = null;
+
+  return function (...args: Parameters<T>) {
+    const currentTime = Date.now();
+
+    if (timer) {
+      clearTimeout(timer);
+    }
+
+    if (!startTime) {
+      startTime = currentTime;
+    }
+
+    if (currentTime - startTime >= mustRunDelay) {
+      func(...args);
+      startTime = currentTime;
+    } else {
+      timer = window.setTimeout(() => {
+        func(...args);
+      }, delay);
+    }
+  };
+}
+
 class IdleQueue {
   private requestIdleCallback: (callback: IdleRequestCallback, options?: { timeout?: number }) => number;
   private queue: (() => void)[] = [];
@@ -125,45 +164,6 @@ class IdleQueue {
       this.processedItems = 0;
     }
   }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function once<T extends (...args: any[]) => any>(func: T) {
-  let executed = false;
-  return function (...args: Parameters<T>) {
-    if (executed) {
-      return undefined;
-    }
-    executed = true;
-    return func(...args);
-  };
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mustRunDelay: number = Infinity) {
-  let timer: number | null = null;
-  let startTime: number | null = null;
-
-  return function (...args: Parameters<T>) {
-    const currentTime = Date.now();
-
-    if (timer) {
-      clearTimeout(timer);
-    }
-
-    if (!startTime) {
-      startTime = currentTime;
-    }
-
-    if (currentTime - startTime >= mustRunDelay) {
-      func(...args);
-      startTime = currentTime;
-    } else {
-      timer = window.setTimeout(() => {
-        func(...args);
-      }, delay);
-    }
-  };
 }
 
 export class BrowserPangu extends Pangu {
@@ -814,7 +814,6 @@ export class BrowserPangu extends Pangu {
   public getIdleSpacingConfig() {
     return { ...this.idleSpacingConfig };
   }
-
 
   public spacingPageWithIdleCallback(callbacks?: IdleSpacingCallbacks) {
     if (!this.idleSpacingConfig.enabled) {
