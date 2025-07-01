@@ -14,10 +14,10 @@ async function autoSpacingPage() {
   if (pangu) {
     // Enable idle processing for non-blocking text spacing
     pangu.enableIdleSpacing({
-      chunkSize: 10,  // Process 10 text nodes per idle cycle
-      timeout: 5000   // 5 second timeout
+      chunkSize: 20, // Process 20 text nodes per idle cycle
+      timeout: 2000, // 2 second timeout
     });
-    
+
     // Enable visibility check to skip hidden elements
     pangu.enableVisibilityCheck({
       checkDuringIdle: true,
@@ -26,20 +26,20 @@ async function autoSpacingPage() {
         displayNone: true,
         visibilityHidden: true,
         opacityZero: true,
-        heightWidth1px: true
-      }
+        heightWidth1px: true,
+      },
     });
-    
+
     // Enable performance monitoring for debugging
-    pangu.enablePerformanceMonitoring();
-    
+    // pangu.enablePerformanceMonitoring();
+
     pangu.autoSpacingPage();
-    
+
     // Log performance results after a delay
-    setTimeout(() => {
-      console.log('[Pangu.js] Performance Report:');
-      pangu.logPerformanceResults();
-    }, 10000); // Log after 10 seconds
+    // setTimeout(() => {
+    //   console.log('[Pangu.js] Performance Report:');
+    //   pangu.logPerformanceResults();
+    // }, 10000); // Log after 10 seconds
   }
 }
 
@@ -52,8 +52,8 @@ function spacingPage() {
         console.log('[Pangu.js] Manual spacing completed');
       },
       onProgress: (processed, total) => {
-        console.log(`[Pangu.js] Progress: ${processed}/${total} (${Math.round((processed/total) * 100)}%)`);
-      }
+        console.log(`[Pangu.js] Progress: ${processed}/${total} (${Math.round((processed / total) * 100)}%)`);
+      },
     });
   }
 }
