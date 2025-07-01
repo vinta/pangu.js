@@ -45,10 +45,10 @@ const UNIX_ABSOLUTE_FILE_PATH = /\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mn
 const UNIX_RELATIVE_FILE_PATH = /(?:\.\/)?(?:src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|node_modules|\.claude|\.git|\.vscode)(?:\/[A-Za-z0-9_\-\.@\+\*]+)+/;
 const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
 const ANY_CJK = new RegExp(`[${CJK}]`);
-const CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:]+)(?! )`, "g");
-const CJK_TILDE = new RegExp(`([${CJK}])(~+)(?!=)(?! )`, "g");
+const CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:]+)(?=[${CJK}${AN}])`, "g");
+const CJK_TILDE = new RegExp(`([${CJK}])(~+)(?!=)(?=[${CJK}${AN}])`, "g");
 const CJK_TILDE_EQUALS = new RegExp(`([${CJK}])(~=)`, "g");
-const CJK_PERIOD = new RegExp(`([${CJK}])(\\.)(?![${AN}\\./])(?! )`, "g");
+const CJK_PERIOD = new RegExp(`([${CJK}])(\\.)(?![${AN}\\./])(?=[${CJK}${AN}])`, "g");
 const AN_COLON_CJK = new RegExp(`([${AN}])(:)([${CJK}])`, "g");
 const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, "g");
 const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, "g");
