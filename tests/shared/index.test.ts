@@ -125,6 +125,9 @@ describe('Pangu', () => {
     // 標點符號（只加右空格）
 
     it('handle ~ symbol', () => {
+      expect(pangu.spacingText('前面~')).toBe('前面~');
+      expect(pangu.spacingText('前面~~')).toBe('前面~~');
+      expect(pangu.spacingText('前面~~~')).toBe('前面~~~');
       expect(pangu.spacingText('前面~後面')).toBe('前面~ 後面');
       expect(pangu.spacingText('前面~~後面')).toBe('前面~~ 後面');
       expect(pangu.spacingText('前面~~~後面')).toBe('前面~~~ 後面');
@@ -142,6 +145,9 @@ describe('Pangu', () => {
     });
 
     it('handle ! symbol', () => {
+      expect(pangu.spacingText('前面!')).toBe('前面!');
+      expect(pangu.spacingText('前面!!')).toBe('前面!!');
+      expect(pangu.spacingText('前面!!!')).toBe('前面!!!');
       expect(pangu.spacingText('前面!後面')).toBe('前面! 後面');
       expect(pangu.spacingText('前面!!後面')).toBe('前面!! 後面');
       expect(pangu.spacingText('前面!!!後面')).toBe('前面!!! 後面');
@@ -173,6 +179,9 @@ describe('Pangu', () => {
     });
 
     it('handle . symbol', () => {
+      expect(pangu.spacingText('前面.')).toBe('前面.');
+      expect(pangu.spacingText('前面..')).toBe('前面..');
+      expect(pangu.spacingText('前面...')).toBe('前面...');
       expect(pangu.spacingText('前面.後面')).toBe('前面. 後面');
       expect(pangu.spacingText('前面..後面')).toBe('前面.. 後面');
       expect(pangu.spacingText('前面...後面')).toBe('前面... 後面');
@@ -194,6 +203,9 @@ describe('Pangu', () => {
     });
 
     it('handle ? symbol', () => {
+      expect(pangu.spacingText('前面?')).toBe('前面?');
+      expect(pangu.spacingText('前面??')).toBe('前面??');
+      expect(pangu.spacingText('前面???')).toBe('前面???');
       expect(pangu.spacingText('前面?後面')).toBe('前面? 後面');
       expect(pangu.spacingText('前面??後面')).toBe('前面?? 後面');
       expect(pangu.spacingText('前面???後面')).toBe('前面??? 後面');
