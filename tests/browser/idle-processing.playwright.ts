@@ -63,7 +63,7 @@ test.describe('Idle Processing Infrastructure', () => {
       return {
         enabledBefore: configBefore.enabled,
         enabledAfter: configAfter.enabled,
-        queueLength: pangu.getIdleQueueLength()
+        queueLength: pangu.idleQueue.length
       };
     });
 
@@ -75,11 +75,11 @@ test.describe('Idle Processing Infrastructure', () => {
   test('should provide queue management methods', async ({ page }) => {
     const result = await page.evaluate(() => {
       // Initial queue length
-      const initialLength = pangu.getIdleQueueLength();
+      const initialLength = pangu.idleQueue.length;
       
       // Clear queue (should be no-op if empty)
-      pangu.clearIdleQueue();
-      const lengthAfterClear = pangu.getIdleQueueLength();
+      pangu.idleQueue.clear();
+      const lengthAfterClear = pangu.idleQueue.length;
       
       return {
         initialLength,
@@ -191,7 +191,7 @@ test.describe('Idle Processing Infrastructure', () => {
           onComplete: () => {
             completionCalled = true;
             const finalText = document.body.textContent;
-            const progress = pangu.getIdleProgress();
+            const progress = pangu.idleQueue.getProgress();
             
             resolve({
               finalText,
@@ -238,11 +238,11 @@ test.describe('Idle Processing Infrastructure', () => {
 
         pangu.spacingNodeWithIdleCallback(document.body, {
           onProgress: (_processed, _total) => {
-            const progress = pangu.getIdleProgress();
+            const progress = pangu.idleQueue.getProgress();
             progressSnapshots.push(progress);
           },
           onComplete: () => {
-            const finalProgress = pangu.getIdleProgress();
+            const finalProgress = pangu.idleQueue.getProgress();
             resolve({
               progressSnapshots,
               finalProgress

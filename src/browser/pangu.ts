@@ -39,11 +39,11 @@ export interface IdleSpacingCallbacks {
 }
 
 class IdleQueue {
-  private queue: (() => void)[] = [];
-  private isProcessing = false;
   private requestIdleCallback: (callback: IdleRequestCallback, options?: { timeout?: number }) => number;
+  private queue: (() => void)[] = [];
   private totalItems = 0;
   private processedItems = 0;
+  private isProcessing = false;
   private callbacks: IdleSpacingCallbacks = {};
 
   constructor() {
@@ -88,7 +88,7 @@ class IdleQueue {
     return this.queue.length;
   }
 
-  get progress() {
+  getProgress() {
     return {
       processed: this.processedItems,
       total: this.totalItems,
@@ -169,7 +169,7 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 export class BrowserPangu extends Pangu {
   public isAutoSpacingPageExecuted: boolean;
   protected autoSpacingPageObserver: MutationObserver | null;
-  protected idleQueue: IdleQueue;
+  public idleQueue: IdleQueue;
   protected idleSpacingConfig: IdleSpacingConfig;
   protected visibilityCheckConfig: VisibilityCheckConfig;
 
@@ -815,17 +815,6 @@ export class BrowserPangu extends Pangu {
     return { ...this.idleSpacingConfig };
   }
 
-  public getIdleQueueLength() {
-    return this.idleQueue.length;
-  }
-
-  public clearIdleQueue() {
-    this.idleQueue.clear();
-  }
-
-  public getIdleProgress() {
-    return this.idleQueue.progress;
-  }
 
   public spacingPageWithIdleCallback(callbacks?: IdleSpacingCallbacks) {
     if (!this.idleSpacingConfig.enabled) {
