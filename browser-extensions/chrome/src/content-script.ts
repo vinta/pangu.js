@@ -12,34 +12,9 @@ declare global {
 async function autoSpacingPage() {
   const pangu = window.pangu;
   if (pangu) {
-    // Enable idle processing for non-blocking text spacing
-    pangu.enableIdleSpacing({
-      chunkSize: 20, // Process 20 text nodes per idle cycle
-      timeout: 2000, // 2 second timeout
-    });
-
-    // Enable visibility check to skip hidden elements
-    pangu.enableVisibilityCheck({
-      checkDuringIdle: true,
-      commonHiddenPatterns: {
-        clipRect: true,
-        displayNone: true,
-        visibilityHidden: true,
-        opacityZero: true,
-        heightWidth1px: true,
-      },
-    });
-
-    // Enable performance monitoring for debugging
-    // pangu.enablePerformanceMonitoring();
-
+    pangu.enableIdleSpacing();
+    pangu.enableVisibilityCheck();
     pangu.autoSpacingPage();
-
-    // Log performance results after a delay
-    // setTimeout(() => {
-    //   console.log('[Pangu.js] Performance Report:');
-    //   pangu.logPerformanceResults();
-    // }, 10000); // Log after 10 seconds
   }
 }
 

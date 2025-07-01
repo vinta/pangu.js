@@ -807,8 +807,8 @@ export class BrowserPangu extends Pangu {
   public enableIdleSpacing(config?: Partial<IdleSpacingConfig>): void {
     this.idleSpacingConfig = {
       ...this.idleSpacingConfig,
-      enabled: true,
       ...config,
+      enabled: true,
     };
   }
 
