@@ -809,7 +809,6 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         (_a = callbacks == null ? void 0 : callbacks.onComplete) == null ? void 0 : _a.call(callbacks);
         return;
       }
-      this.idleQueue.clear();
       if (callbacks) {
         this.idleQueue.setCallbacks(callbacks);
       }
@@ -818,13 +817,13 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       for (let i = 0; i < textNodes.length; i += chunkSize) {
         chunks.push(textNodes.slice(i, i + chunkSize));
       }
-      chunks.forEach((chunk, index) => {
+      for (const [index, chunk] of chunks.entries()) {
         this.idleQueue.add(() => {
           this.performanceMonitor.measure(`processTextNodesChunk${index}`, () => {
             this.processTextNodes(chunk);
           });
         });
-      });
+      }
     }
     setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs) {
       if (this.autoSpacingPageObserver) {
