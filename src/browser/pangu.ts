@@ -770,10 +770,14 @@ export class BrowserPangu extends Pangu {
       return;
     }
 
-    // Clear any existing work from previous calls
-    this.idleQueue.clear();
+    // IMPORTANT: Don't clear the queue to ensure all text nodes get processed
+    // If there's already work in progress, we'll add to it instead of replacing it
+    // This prevents text from being skipped when dynamic content is added during processing
 
     // Set up callbacks for progress tracking
+    // NOTE: This overwrites previous callbacks, which is a limitation when multiple
+    // sources add work to the queue. However, ensuring all text gets processed
+    // is more important than perfect callback handling.
     if (callbacks) {
       this.idleQueue.setCallbacks(callbacks);
     }
@@ -787,13 +791,13 @@ export class BrowserPangu extends Pangu {
     }
 
     // Add each chunk as a work item to the idle queue
-    chunks.forEach((chunk, index) => {
+    for (const [index, chunk] of chunks.entries()) {
       this.idleQueue.add(() => {
         this.performanceMonitor.measure(`processTextNodesChunk${index}`, () => {
           this.processTextNodes(chunk);
         });
       });
-    });
+    }
   }
 
   protected setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number) {
