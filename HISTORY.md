@@ -3,7 +3,8 @@
 ## v7.0.0 / 2025-07-xx
 
 - 各位觀眾！Paranoid Text Spacing 演算法 v7 橫空出世！
-  - 現在還會自動判斷某些元素是不是被 CSS 隱藏來決定要不要加空格
+  - 會自動判斷某些元素是不是被 CSS 隱藏來決定要不要加空格
+  - 不會把半形的標點符號轉成全形了
 - 史詩級性能提升！
   - 把 XPath 換成 [TreeWalker](https://developer.mozilla.org/en-US/docs/Web/API/TreeWalker)，快他媽 5 倍！
   - 比較慢的操作都丟到 [requestIdleCallback()](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback)，內容太多的網站終於不卡了！
