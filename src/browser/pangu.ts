@@ -67,28 +67,28 @@ class IdleQueue {
     }
   }
 
-  add(work: () => void): void {
+  add(work: () => void) {
     this.queue.push(work);
     this.totalItems++;
     this.scheduleProcessing();
   }
 
-  clear(): void {
+  clear() {
     this.queue.length = 0;
     this.totalItems = 0;
     this.processedItems = 0;
     this.callbacks = {};
   }
 
-  setCallbacks(callbacks: IdleSpacingCallbacks): void {
+  setCallbacks(callbacks: IdleSpacingCallbacks) {
     this.callbacks = callbacks;
   }
 
-  get length(): number {
+  get length() {
     return this.queue.length;
   }
 
-  get progress(): { processed: number; total: number; percentage: number } {
+  get progress() {
     return {
       processed: this.processedItems,
       total: this.totalItems,
@@ -96,14 +96,14 @@ class IdleQueue {
     };
   }
 
-  private scheduleProcessing(): void {
+  private scheduleProcessing() {
     if (!this.isProcessing && this.queue.length > 0) {
       this.isProcessing = true;
       this.requestIdleCallback((deadline) => this.process(deadline), { timeout: 5000 });
     }
   }
 
-  private process(deadline: IdleDeadline): void {
+  private process(deadline: IdleDeadline) {
     while (deadline.timeRemaining() > 0 && this.queue.length > 0) {
       const work = this.queue.shift();
       work?.();
@@ -595,7 +595,7 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  protected collectTextNodes(contextNode: Node, reverse = false): Text[] {
+  protected collectTextNodes(contextNode: Node, reverse = false) {
     const nodes: Text[] = [];
 
     // Handle edge cases
@@ -662,7 +662,7 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  protected processTextNodesWithIdleCallback(textNodes: Node[], callbacks?: IdleSpacingCallbacks): void {
+  protected processTextNodesWithIdleCallback(textNodes: Node[], callbacks?: IdleSpacingCallbacks) {
     if (textNodes.length === 0) {
       callbacks?.onComplete?.();
       return;
@@ -804,35 +804,30 @@ export class BrowserPangu extends Pangu {
 
   // Idle processing configuration methods
 
-  public updateIdleSpacingConfig(config: Partial<IdleSpacingConfig>): void {
+  public updateIdleSpacingConfig(config: Partial<IdleSpacingConfig>) {
     this.idleSpacingConfig = {
       ...this.idleSpacingConfig,
       ...config,
     };
-    
-    // Clear queue when disabling
-    if (config.enabled === false) {
-      this.idleQueue.clear();
-    }
   }
 
-  public getIdleSpacingConfig(): IdleSpacingConfig {
+  public getIdleSpacingConfig() {
     return { ...this.idleSpacingConfig };
   }
 
-  public getIdleQueueLength(): number {
+  public getIdleQueueLength() {
     return this.idleQueue.length;
   }
 
-  public clearIdleQueue(): void {
+  public clearIdleQueue() {
     this.idleQueue.clear();
   }
 
-  public getIdleProgress(): { processed: number; total: number; percentage: number } {
+  public getIdleProgress() {
     return this.idleQueue.progress;
   }
 
-  public spacingPageWithIdleCallback(callbacks?: IdleSpacingCallbacks): void {
+  public spacingPageWithIdleCallback(callbacks?: IdleSpacingCallbacks) {
     if (!this.idleSpacingConfig.enabled) {
       // Fallback to synchronous processing if idle spacing is disabled
       this.spacingPage();
@@ -847,7 +842,7 @@ export class BrowserPangu extends Pangu {
     this.spacingNodeWithIdleCallback(document.body, callbacks);
   }
 
-  public spacingNodeWithIdleCallback(contextNode: Node, callbacks?: IdleSpacingCallbacks): void {
+  public spacingNodeWithIdleCallback(contextNode: Node, callbacks?: IdleSpacingCallbacks) {
     if (!this.idleSpacingConfig.enabled) {
       // Fallback to synchronous processing if idle spacing is disabled
       this.spacingNode(contextNode);
@@ -868,7 +863,7 @@ export class BrowserPangu extends Pangu {
     this.processTextNodesWithIdleCallback(textNodes, callbacks);
   }
 
-  public spacingNodesWithIdleCallback(nodes: Node[], callbacks?: IdleSpacingCallbacks): void {
+  public spacingNodesWithIdleCallback(nodes: Node[], callbacks?: IdleSpacingCallbacks) {
     if (!this.idleSpacingConfig.enabled) {
       // Fallback to synchronous processing if idle spacing is disabled
       for (const node of nodes) {
@@ -902,20 +897,20 @@ export class BrowserPangu extends Pangu {
 
   // Visibility check configuration methods
 
-  public updateVisibilityCheckConfig(config: Partial<VisibilityCheckConfig>): void {
+  public updateVisibilityCheckConfig(config: Partial<VisibilityCheckConfig>) {
     this.visibilityCheckConfig = {
       ...this.visibilityCheckConfig,
       ...config,
     };
   }
 
-  public getVisibilityCheckConfig(): VisibilityCheckConfig {
+  public getVisibilityCheckConfig() {
     return { ...this.visibilityCheckConfig };
   }
 
   // Visibility checking utility methods
 
-  public isElementVisuallyHidden(element: Element): boolean {
+  public isElementVisuallyHidden(element: Element) {
     if (!this.visibilityCheckConfig.enabled) {
       return false;
     }
@@ -966,7 +961,7 @@ export class BrowserPangu extends Pangu {
     return false;
   }
 
-  protected shouldSkipSpacingAfterNode(node: Node): boolean {
+  protected shouldSkipSpacingAfterNode(node: Node) {
     if (!this.visibilityCheckConfig.enabled) {
       return false;
     }

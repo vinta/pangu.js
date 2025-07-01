@@ -179,19 +179,19 @@ class PlaceholderReplacer {
     this.endDelimiter = endDelimiter;
   }
 
-  store(item: string): string {
+  store(item: string) {
     this.items[this.index] = item;
     return `${this.startDelimiter}${this.placeholder}${this.index++}${this.endDelimiter}`;
   }
 
-  restore(text: string): string {
+  restore(text: string) {
     const pattern = new RegExp(`${this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}${this.placeholder}(\\d+)${this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g');
     return text.replace(pattern, (_match, index) => {
       return this.items[parseInt(index, 10)] || '';
     });
   }
 
-  reset(): void {
+  reset() {
     this.items = [];
     this.index = 0;
   }
@@ -432,7 +432,7 @@ export class Pangu {
 
     // Fix spacing inside brackets according to the above rules:
     // Ensure no unwanted spaces immediately after opening or before closing brackets
-    const fixBracketSpacing = (text: string): string => {
+    const fixBracketSpacing = (text: string) => {
       // Process each bracket type
       const processBracket = (pattern: RegExp, openBracket: string, closeBracket: string) => {
         text = text.replace(pattern, (_match, innerContent) => {
@@ -482,7 +482,7 @@ export class Pangu {
     return this.spacingText(text) === text;
   }
 
-  protected convertToFullwidth(symbols: string): string {
+  protected convertToFullwidth(symbols: string) {
     // prettier-ignore
     return symbols
       .replace(/~/g, '～')

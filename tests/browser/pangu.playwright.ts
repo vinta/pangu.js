@@ -15,7 +15,7 @@ declare global {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-function loadFixture(filename: string): string {
+function loadFixture(filename: string) {
   const fixturePath = join(__dirname, '../../fixtures', filename);
   return readFileSync(fixturePath, 'utf8');
 }

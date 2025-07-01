@@ -54,11 +54,11 @@ test.describe('Idle Processing Infrastructure', () => {
     const result = await page.evaluate(() => {
       // Enable idle spacing first
       pangu.updateIdleSpacingConfig({ enabled: true });
-      let configBefore = pangu.getIdleSpacingConfig();
+      const configBefore = pangu.getIdleSpacingConfig();
       
       // Disable it
       pangu.updateIdleSpacingConfig({ enabled: false });
-      let configAfter = pangu.getIdleSpacingConfig();
+      const configAfter = pangu.getIdleSpacingConfig();
       
       return {
         enabledBefore: configBefore.enabled,
@@ -181,7 +181,7 @@ test.describe('Idle Processing Infrastructure', () => {
         // Enable idle spacing with small chunk size to test chunking
         pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 2 });
 
-        let progressUpdates: Array<{processed: number, total: number}> = [];
+        const progressUpdates: Array<{processed: number, total: number}> = [];
         let completionCalled = false;
 
         pangu.spacingPageWithIdleCallback({
@@ -237,7 +237,7 @@ test.describe('Idle Processing Infrastructure', () => {
         const progressSnapshots: Array<{processed: number, total: number, percentage: number}> = [];
 
         pangu.spacingNodeWithIdleCallback(document.body, {
-          onProgress: (processed, total) => {
+          onProgress: (_processed, _total) => {
             const progress = pangu.getIdleProgress();
             progressSnapshots.push(progress);
           },
