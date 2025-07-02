@@ -11,6 +11,11 @@ declare global {
 
 test.describe('Idle Processing Infrastructure', () => {
   test.beforeEach(async ({ page }) => {
+    const hasSupport = await page.evaluate(() => typeof window.requestIdleCallback === 'function');
+    test.skip(!hasSupport, 'requestIdleCallback is not supported');
+  });
+
+  test.beforeEach(async ({ page }) => {
     await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
   });
@@ -67,8 +72,8 @@ test.describe('Idle Processing Infrastructure', () => {
     expect(result.lengthAfterClear).toBe(0);
   });
 
-  test('should handle requestIdleCallback availability detection', async ({ page }) => {
-    // Test that the system works regardless of requestIdleCallback support
+  test('should require native requestIdleCallback support', async ({ page }) => {
+    // Test that the system requires native requestIdleCallback
     const result = await page.evaluate(() => {
       // Check if requestIdleCallback is available
       const hasNativeSupport = typeof window.requestIdleCallback === 'function';
@@ -83,11 +88,10 @@ test.describe('Idle Processing Infrastructure', () => {
       };
     });
 
-    // Should work whether or not requestIdleCallback is natively supported
+    // Should only work with native requestIdleCallback support
     expect(result.idleSpacingEnabled).toBe(true);
-
-    // Log the support status for debugging
-    console.log(`requestIdleCallback native support: ${result.hasNativeSupport}`);
+    // Modern browsers should have native support
+    expect(result.hasNativeSupport).toBe(true);
   });
 
   test('should maintain backward compatibility when idle spacing is disabled', async ({ page }) => {
@@ -136,7 +140,7 @@ test.describe('Idle Processing Infrastructure', () => {
       pangu.spacingPage();
 
       // Since idle processing is async, we need to wait a bit
-      return new Promise((resolve) => {
+      return new Promise<{ finalText: string | null }>((resolve) => {
         setTimeout(() => {
           const finalText = document.body.textContent;
           resolve({
@@ -160,7 +164,7 @@ test.describe('Idle Processing Infrastructure', () => {
     `);
 
     const result = await page.evaluate(() => {
-      return new Promise((resolve) => {
+      return new Promise<{ completionCalled: boolean; text: string | null; idleEnabled: boolean }>((resolve) => {
         // Ensure idle spacing is disabled
         pangu.updateIdleSpacingConfig({ enabled: false });
 

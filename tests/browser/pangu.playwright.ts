@@ -548,14 +548,14 @@ test.describe('BrowserPangu', () => {
       await page.setContent(htmlContent);
 
       // First, let's check what the visible text looks like to the user BEFORE spacing
-      const visibleTextBefore = await page.evaluate(() => {
+      const _visibleTextBefore = await page.evaluate(() => {
         const div = document.getElementById('xDetDlgDesc');
         // Get only the visible text (not including hidden elements)
         const visibleSpan = div?.querySelector('span:not(.XuJrye)');
         return visibleSpan?.textContent || '';
       });
 
-      console.log('Visible text before:', visibleTextBefore.substring(0, 20));
+      // console.log('Visible text before:', _visibleTextBefore.substring(0, 20));
 
       // Apply spacing
       await page.evaluate(() => {
@@ -569,11 +569,11 @@ test.describe('BrowserPangu', () => {
         return visibleSpan?.textContent || '';
       });
 
-      console.log('Visible text after:', visibleTextAfter.substring(0, 20));
+      // console.log('Visible text after:', visibleTextAfter.substring(0, 20));
 
       // Check if a space was added at the beginning
       const hasLeadingSpace = visibleTextAfter.startsWith(' ');
-      console.log('Has leading space after pangu.js:', hasLeadingSpace);
+      // console.log('Has leading space after pangu.js:', hasLeadingSpace);
 
       // With visibility check enabled, pangu.js now detects that the first span
       // is visually hidden and should NOT add space between hidden and visible elements

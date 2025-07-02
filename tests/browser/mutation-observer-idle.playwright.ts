@@ -16,6 +16,14 @@ test.describe('MutationObserver Idle Processing', () => {
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
   });
 
+  // Skip all tests in this describe block if requestIdleCallback is not supported
+  test.beforeEach(async ({ page, browserName }) => {
+    const hasSupport = await page.evaluate(() => typeof window.requestIdleCallback === 'function');
+    if (!hasSupport) {
+      test.skip(browserName === 'webkit', 'requestIdleCallback is not supported in WebKit/Safari');
+    }
+  });
+
   test('should process dynamic content with idle processing when enabled', async ({ page }) => {
     const result = await page.evaluate(async () => {
       // Enable idle processing and auto-spacing
@@ -84,7 +92,9 @@ test.describe('MutationObserver Idle Processing', () => {
       const texts = [];
       for (let i = 1; i <= 5; i++) {
         const elem = content.querySelector(`.item-${i}`);
-        if (elem) texts.push(elem.textContent);
+        if (elem) {
+          texts.push(elem.textContent);
+        }
       }
       
       return texts;
