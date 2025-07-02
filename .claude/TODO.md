@@ -28,7 +28,7 @@
 - [x] **Phase 5**: Migrate `spacingElementByClassName()` and page methods
 - [x] **Phase 6**: Remove XPath infrastructure completely
 - [x] **Phase 7**: Performance monitoring infrastructure
-- [x] **Phase 8**: IdleQueue with Safari compatibility
+- [x] **Phase 8**: IdleQueue infrastructure
 - [x] **Phase 9**: Chunked idle processing for non-blocking text spacing
 - [x] **Phase 10**: MutationObserver idle processing for dynamic content
 - **Result**: Achieved 5.5x performance improvement + non-blocking processing capability
@@ -51,11 +51,11 @@ No task in progress
 
 - [x] **Phase 8: IdleQueue Infrastructure** ✅ COMPLETED
   - Added IdleQueue class with requestIdleCallback integration
-  - Implemented Safari fallback using setTimeout with 16ms time budget simulation
+  - Requires native requestIdleCallback support (no Safari fallback)
   - Added configuration system (chunkSize, timeout, enabled flag)
   - Created public API for controlling idle spacing behavior
   - Maintains backward compatibility (disabled by default)
-  - Cross-browser compatibility verified (Chrome, Firefox, Safari)
+  - Requires browsers with native requestIdleCallback support
 
 - [x] **Phase 9: Chunked Idle Processing** ✅ COMPLETED
   - Modified spacingNodeWithTreeWalker to support idle processing when enabled
