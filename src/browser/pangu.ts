@@ -33,9 +33,6 @@ export interface VisibilityCheckConfig {
   };
 }
 
-export interface IdleSpacingCallbacks {
-  onComplete?: () => void;
-}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function once<T extends (...args: any[]) => any>(func: T) {
@@ -80,7 +77,7 @@ class IdleQueue {
   private requestIdleCallback: (callback: IdleRequestCallback, options?: { timeout?: number }) => number;
   private queue: (() => void)[] = [];
   private isProcessing = false;
-  private callbacks: IdleSpacingCallbacks = {};
+  private onComplete?: () => void;
 
   constructor() {
     // Simple fallback for Safari and other browsers without requestIdleCallback
@@ -110,11 +107,11 @@ class IdleQueue {
 
   clear() {
     this.queue.length = 0;
-    this.callbacks = {};
+    this.onComplete = undefined;
   }
 
-  setCallbacks(callbacks: IdleSpacingCallbacks) {
-    this.callbacks = callbacks;
+  setOnComplete(onComplete?: () => void) {
+    this.onComplete = onComplete;
   }
 
   get length() {
@@ -140,15 +137,15 @@ class IdleQueue {
       this.scheduleProcessing();
     } else {
       // All work completed, call completion callback
-      this.callbacks.onComplete?.();
+      this.onComplete?.();
     }
   }
 }
 
 export class BrowserPangu extends Pangu {
   public isAutoSpacingPageExecuted: boolean;
-  protected autoSpacingPageObserver: MutationObserver | null;
   public idleQueue: IdleQueue;
+  protected autoSpacingPageObserver: MutationObserver | null;
   protected idleSpacingConfig: IdleSpacingConfig;
   protected visibilityCheckConfig: VisibilityCheckConfig;
 
@@ -641,9 +638,9 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  protected processTextNodesWithIdleCallback(textNodes: Node[], callbacks?: IdleSpacingCallbacks) {
+  protected processTextNodesWithIdleCallback(textNodes: Node[], onComplete?: () => void) {
     if (textNodes.length === 0) {
-      callbacks?.onComplete?.();
+      onComplete?.();
       return;
     }
 
@@ -651,12 +648,12 @@ export class BrowserPangu extends Pangu {
     // If there's already work in progress, we'll add to it instead of replacing it
     // This prevents text from being skipped when dynamic content is added during processing
 
-    // Set up callbacks for progress tracking
-    // NOTE: This overwrites previous callbacks, which is a limitation when multiple
+    // Set up completion callback
+    // NOTE: This overwrites previous callback, which is a limitation when multiple
     // sources add work to the queue. However, ensuring all text gets processed
     // is more important than perfect callback handling.
-    if (callbacks) {
-      this.idleQueue.setCallbacks(callbacks);
+    if (onComplete) {
+      this.idleQueue.setOnComplete(onComplete);
     }
 
     // Split text nodes into chunks
@@ -794,11 +791,11 @@ export class BrowserPangu extends Pangu {
     return { ...this.idleSpacingConfig };
   }
 
-  public spacingPageWithIdleCallback(callbacks?: IdleSpacingCallbacks) {
+  public spacingPageWithIdleCallback(onComplete?: () => void) {
     if (!this.idleSpacingConfig.enabled) {
       // Fallback to synchronous processing if idle spacing is disabled
       this.spacingPage();
-      callbacks?.onComplete?.();
+      onComplete?.();
       return;
     }
 
@@ -806,20 +803,20 @@ export class BrowserPangu extends Pangu {
     this.spacingPageTitle();
 
     // Process body with idle callback
-    this.spacingNodeWithIdleCallback(document.body, callbacks);
+    this.spacingNodeWithIdleCallback(document.body, onComplete);
   }
 
-  public spacingNodeWithIdleCallback(contextNode: Node, callbacks?: IdleSpacingCallbacks) {
+  public spacingNodeWithIdleCallback(contextNode: Node, onComplete?: () => void) {
     if (!this.idleSpacingConfig.enabled) {
       // Fallback to synchronous processing if idle spacing is disabled
       this.spacingNode(contextNode);
-      callbacks?.onComplete?.();
+      onComplete?.();
       return;
     }
 
     // DocumentFragments don't support TreeWalker properly
     if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
-      callbacks?.onComplete?.();
+      onComplete?.();
       return;
     }
 
@@ -827,21 +824,21 @@ export class BrowserPangu extends Pangu {
     const textNodes = this.collectTextNodes(contextNode, true);
 
     // Process with idle callback
-    this.processTextNodesWithIdleCallback(textNodes, callbacks);
+    this.processTextNodesWithIdleCallback(textNodes, onComplete);
   }
 
-  public spacingNodesWithIdleCallback(nodes: Node[], callbacks?: IdleSpacingCallbacks) {
+  public spacingNodesWithIdleCallback(nodes: Node[], onComplete?: () => void) {
     if (!this.idleSpacingConfig.enabled) {
       // Fallback to synchronous processing if idle spacing is disabled
       for (const node of nodes) {
         this.spacingNode(node);
       }
-      callbacks?.onComplete?.();
+      onComplete?.();
       return;
     }
 
     if (nodes.length === 0) {
-      callbacks?.onComplete?.();
+      onComplete?.();
       return;
     }
 
@@ -859,7 +856,7 @@ export class BrowserPangu extends Pangu {
     }
 
     // Process all collected text nodes with idle callback
-    this.processTextNodesWithIdleCallback(allTextNodes, callbacks);
+    this.processTextNodesWithIdleCallback(allTextNodes, onComplete);
   }
 
   // Visibility check configuration methods
