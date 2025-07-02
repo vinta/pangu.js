@@ -245,15 +245,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
       return newText;
     }
-    // alias for spacingText()
-    spacing(text) {
-      return this.spacingText(text);
-    }
     hasProperSpacing(text) {
       return this.spacingText(text) === text;
-    }
-    convertToFullwidth(symbols) {
-      return symbols.replace(/~/g, "\uFF5E").replace(/!/g, "\uFF01").replace(/;/g, "\uFF1B").replace(/:/g, "\uFF1A").replace(/,/g, "\uFF0C").replace(/\./g, "\u3002").replace(/\?/g, "\uFF1F");
     }
   }
   function once(func) {
@@ -310,7 +303,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     scheduleProcessing() {
       if (!this.isProcessing && this.queue.length > 0) {
         this.isProcessing = true;
-        window.requestIdleCallback((deadline) => this.process(deadline), { timeout: 5e3 });
+        requestIdleCallback((deadline) => this.process(deadline), { timeout: 5e3 });
       }
     }
     process(deadline) {
@@ -809,7 +802,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       if (!this.visibilityCheckConfig.enabled) {
         return false;
       }
-      const style = window.getComputedStyle(element);
+      const style = getComputedStyle(element);
       const config = this.visibilityCheckConfig.commonHiddenPatterns;
       if (config.displayNone && style.display === "none") {
         return true;
