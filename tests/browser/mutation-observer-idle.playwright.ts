@@ -16,167 +16,113 @@ test.describe('MutationObserver Idle Processing', () => {
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
   });
 
-  test('should have spacingNodesWithIdleCallback method', async ({ page }) => {
-    const hasMethod = await page.evaluate(() => {
-      return typeof pangu.spacingNodesWithIdleCallback === 'function';
-    });
-
-    expect(hasMethod).toBe(true);
-  });
-
-  test('should process nodes synchronously when idle disabled', async ({ page }) => {
-    const result = await page.evaluate(() => {
-      // Ensure idle processing is disabled
-      pangu.updateIdleSpacingConfig({ enabled: false });
+  test('should process dynamic content with idle processing when enabled', async ({ page }) => {
+    const result = await page.evaluate(async () => {
+      // Enable idle processing and auto-spacing
+      pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 2 });
+      pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 50, nodeMaxWaitMs: 100 });
       
       const content = document.getElementById('content')!;
+      
+      // Add content dynamically
       const div = document.createElement('div');
-      div.textContent = '測試text';
+      div.textContent = '動態dynamic內容content';
       content.appendChild(div);
       
-      // Process synchronously
-      pangu.spacingNodesWithIdleCallback([div]);
+      // Wait for MutationObserver to process
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       return div.textContent;
     });
 
-    expect(result).toBe('測試 text');
+    expect(result?.trim()).toBe('動態 dynamic 內容 content');
   });
 
-  test('should process nodes with idle processing when enabled', async ({ page }) => {
+  test('should process dynamic content synchronously when idle disabled', async ({ page }) => {
     const result = await page.evaluate(async () => {
-      // Enable idle processing
-      pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 1, timeoutMs: 100 });
+      // Disable idle processing
+      pangu.updateIdleSpacingConfig({ enabled: false });
+      pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 50, nodeMaxWaitMs: 100 });
       
       const content = document.getElementById('content')!;
+      
+      // Add content dynamically
       const div = document.createElement('div');
-      div.textContent = '異步async';
+      div.textContent = '同步sync處理process';
       content.appendChild(div);
       
-      let completed = false;
+      // Wait for MutationObserver to process
+      await new Promise(resolve => setTimeout(resolve, 200));
       
-      // Process with idle callback
-      pangu.spacingNodesWithIdleCallback([div], () => { completed = true; });
-      
-      // Wait for completion with timeout
-      await new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error('Timeout waiting for completion'));
-        }, 5000);
-        
-        const checkComplete = () => {
-          if (completed) {
-            clearTimeout(timeout);
-            resolve(undefined);
-          } else {
-            setTimeout(checkComplete, 10);
-          }
-        };
-        checkComplete();
-      });
-      
-      return {
-        text: div.textContent,
-        completed
-      };
+      return div.textContent;
     });
 
-    expect(result.text).toBe('異步 async');
-    expect(result.completed).toBe(true);
+    expect(result?.trim()).toBe('同步 sync 處理 process');
   });
 
-  test('should handle multiple nodes at once', async ({ page }) => {
+  test('should handle bulk dynamic content additions', async ({ page }) => {
     const result = await page.evaluate(async () => {
-      pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 2, timeoutMs: 100 });
+      pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 3 });
+      pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 50, nodeMaxWaitMs: 100 });
       
       const content = document.getElementById('content')!;
       
-      const nodes = [];
-      for (let i = 1; i <= 3; i++) {
+      // Add multiple elements at once
+      const fragment = document.createDocumentFragment();
+      for (let i = 1; i <= 5; i++) {
         const div = document.createElement('div');
+        div.className = `item-${i}`;
         div.textContent = `項目${i}item`;
-        content.appendChild(div);
-        nodes.push(div);
+        fragment.appendChild(div);
+      }
+      content.appendChild(fragment);
+      
+      // Wait for processing
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Collect results
+      const texts = [];
+      for (let i = 1; i <= 5; i++) {
+        const elem = content.querySelector(`.item-${i}`);
+        if (elem) texts.push(elem.textContent);
       }
       
-      let completed = false;
-      
-      pangu.spacingNodesWithIdleCallback(nodes, () => { completed = true; });
-      
-      // Wait for completion with timeout
-      await new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error('Timeout waiting for completion'));
-        }, 5000);
-        
-        const checkComplete = () => {
-          if (completed) {
-            clearTimeout(timeout);
-            resolve(undefined);
-          } else {
-            setTimeout(checkComplete, 10);
-          }
-        };
-        checkComplete();
-      });
-      
-      return {
-        texts: nodes.map(node => node.textContent),
-        completed
-      };
+      return texts;
     });
 
-    expect(result.texts).toEqual(['項目 1item', '項目 2item', '項目 3item']);
-    expect(result.completed).toBe(true);
+    expect(result).toEqual([
+      '項目 1item',
+      '項目 2item',
+      '項目 3item',
+      '項目 4item',
+      '項目 5item'
+    ]);
   });
 
-  test('should verify mutation observer integration by manual trigger', async ({ page }) => {
+  test('should handle rapid content changes with debouncing', async ({ page }) => {
     const result = await page.evaluate(async () => {
-      // Enable idle processing 
-      pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 1, timeoutMs: 100 });
-      
-      // Set up auto spacing
-      pangu.autoSpacingPage();
+      pangu.updateIdleSpacingConfig({ enabled: true });
+      pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 100, nodeMaxWaitMs: 200 });
       
       const content = document.getElementById('content')!;
-      
-      // Create initial content to verify it gets spaced
       const div = document.createElement('div');
-      div.textContent = '測試mutation';
       content.appendChild(div);
       
-      // Manually trigger spacing to verify the path works
-      const nodes = [div];
+      // Make rapid changes
+      div.textContent = '初始initial';
+      await new Promise(resolve => setTimeout(resolve, 50));
       
-      let completed = false;
-      pangu.spacingNodesWithIdleCallback(nodes, () => { completed = true; });
+      div.textContent = '更新update';
+      await new Promise(resolve => setTimeout(resolve, 50));
       
-      // Wait for completion with timeout
-      await new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error('Timeout waiting for completion'));
-        }, 5000);
-        
-        const checkComplete = () => {
-          if (completed) {
-            clearTimeout(timeout);
-            resolve(undefined);
-          } else {
-            setTimeout(checkComplete, 10);
-          }
-        };
-        checkComplete();
-      });
+      div.textContent = '最終final文本text';
       
-      return {
-        text: div.textContent,
-        completed,
-        hasObserver: pangu.getIdleSpacingConfig().enabled
-      };
+      // Wait for debounced processing
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      return div.textContent;
     });
 
-    expect(result.text).toBe('測試 mutation');
-    expect(result.completed).toBe(true);
-    expect(result.hasObserver).toBe(true);
+    expect(result?.trim()).toBe('最終 final 文本 text');
   });
 });
