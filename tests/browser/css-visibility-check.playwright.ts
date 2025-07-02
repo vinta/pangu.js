@@ -116,6 +116,31 @@ test.describe('CSS Visibility Check', () => {
     ]);
   });
 
+  test('should verify visibility check configuration state', async ({ page }) => {
+    const result = await page.evaluate(() => {
+      // Test initial state
+      const initialConfig = pangu.getVisibilityCheckConfig();
+      
+      // Update configuration
+      pangu.updateVisibilityCheckConfig({ enabled: true });
+      const enabledConfig = pangu.getVisibilityCheckConfig();
+      
+      // Disable again
+      pangu.updateVisibilityCheckConfig({ enabled: false });
+      const disabledConfig = pangu.getVisibilityCheckConfig();
+      
+      return {
+        initial: initialConfig,
+        enabled: enabledConfig,
+        disabled: disabledConfig,
+      };
+    });
+
+    expect(result.initial.enabled).toBe(false);
+    expect(result.enabled.enabled).toBe(true);
+    expect(result.disabled.enabled).toBe(false);
+  });
+
   test('should avoid spacing after hidden elements when visibility check enabled', async ({ page }) => {
     const result = await page.evaluate(() => {
       const content = document.getElementById('content')!;
@@ -185,6 +210,56 @@ test.describe('CSS Visibility Check', () => {
     expect(result.secondStartsWithSpace).toBe(true); // Space added between visible elements
   });
 
+  test('should properly handle direct isElementVisuallyHidden API', async ({ page }) => {
+    const result = await page.evaluate(() => {
+      const content = document.getElementById('content')!;
+      content.innerHTML = `
+        <style>
+          .sr-only { 
+            clip: rect(1px, 1px, 1px, 1px); 
+            height: 1px; 
+            overflow: hidden; 
+            position: absolute; 
+            width: 1px; 
+          }
+        </style>
+        <span class="sr-only">Description:</span><span>一律轉整數</span>
+      `;
+      
+      const hiddenSpan = content.querySelector('.sr-only')!;
+      const visibleSpan = content.querySelector('span:not(.sr-only)')!;
+      
+      // Test with visibility check disabled
+      pangu.updateVisibilityCheckConfig({ enabled: false });
+      const hiddenCheckDisabled = pangu.isElementVisuallyHidden(hiddenSpan);
+      const visibleCheckDisabled = pangu.isElementVisuallyHidden(visibleSpan);
+      
+      // Test with visibility check enabled
+      pangu.updateVisibilityCheckConfig({ enabled: true });
+      const hiddenCheckEnabled = pangu.isElementVisuallyHidden(hiddenSpan);
+      const visibleCheckEnabled = pangu.isElementVisuallyHidden(visibleSpan);
+      
+      return {
+        disabled: {
+          hiddenIsHidden: hiddenCheckDisabled,
+          visibleIsHidden: visibleCheckDisabled,
+        },
+        enabled: {
+          hiddenIsHidden: hiddenCheckEnabled,
+          visibleIsHidden: visibleCheckEnabled,
+        }
+      };
+    });
+
+    // When disabled, always returns false
+    expect(result.disabled.hiddenIsHidden).toBe(false);
+    expect(result.disabled.visibleIsHidden).toBe(false);
+    
+    // When enabled, correctly detects visibility
+    expect(result.enabled.hiddenIsHidden).toBe(true);
+    expect(result.enabled.visibleIsHidden).toBe(false);
+  });
+
   test('should work with complex nested hidden structures', async ({ page }) => {
     const result = await page.evaluate(() => {
       const content = document.getElementById('content')!;
@@ -226,10 +301,10 @@ test.describe('CSS Visibility Check', () => {
 
       return {
         visibleAfterHiddenText: visibleAfterHidden.textContent,
-        visibleNestedText: visibleNested.textContent,
+        visibleNestedText: visibleNested?.textContent || '',
         // Neither should start with space due to hidden adjacent elements
         afterHiddenStartsWithSpace: visibleAfterHidden.textContent?.startsWith(' ') || false,
-        nestedStartsWithSpace: visibleNested.textContent?.startsWith(' ') || false,
+        nestedStartsWithSpace: visibleNested?.textContent?.startsWith(' ') || false,
       };
     });
 
