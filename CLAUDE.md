@@ -6,16 +6,13 @@ Everything in the base instructions MUST be followed strictly.
 
 ## Project Overview
 
-pangu.js is a text spacing library that automatically inserts whitespace between CJK (Chinese, Japanese, Korean) characters and half-width characters (alphabetical letters, numerical digits, and symbols) for better readability.
+`pangu.js` is a text spacing library that automatically inserts whitespace between CJK (Chinese, Japanese, Korean) characters and half-width characters (alphabetical letters, numerical digits, and symbols) for better readability.
 
-**Language**: TypeScript (migrated from JavaScript)
-
-**Dependencies**: Zero runtime dependencies
-
-**Main build targets:**
-
-1. Chrome extension (Manifest V3) - Automatically adds spacing to web pages
-2. npm package - JavaScript library for Node.js and browser use (ESM/CommonJS/UMD)
+- Language: TypeScript (migrated from JavaScript)
+- Dependencies: Zero runtime dependencies
+- Build targets:
+  1. npm package - JavaScript library for Node.js and browser use (ESM/CommonJS/UMD)
+  2. Chrome extension (Manifest V3) - Automatically adds spacing to web pages
 
 ## Common Development Commands
 
@@ -94,6 +91,7 @@ dist/                           # Library builds
 
 - `spacingText(text)` - Process text strings (main method)
 - `spacing(text)` - Alias for spacingText() for backward compatibility
+- `hasProperSpacing(text)` - Check if text already has proper spacing
 
 **Browser-specific:**
 
@@ -104,7 +102,13 @@ dist/                           # Library builds
 - `spacingPageTitle()` - Process page title
 - `spacingPageBody()` - Process page body
 - `spacingPage()` - Process entire page
-- `autoSpacingPage()` - Auto-spacing with MutationObserver
+- `autoSpacingPage(config?)` - Auto-spacing with MutationObserver
+- `stopAutoSpacingPage()` - Stop auto-spacing
+- `updateIdleSpacingConfig(config)` - Configure idle processing behavior
+- `getIdleSpacingConfig()` - Get current idle processing config
+- `updateVisibilityCheckConfig(config)` - Configure visibility checking
+- `getVisibilityCheckConfig()` - Get current visibility check config
+- `isElementVisuallyHidden(element)` - Check if element is hidden by CSS
 
 **Node.js-specific:**
 
@@ -178,6 +182,31 @@ interface Settings {
 }
 ```
 
+#### Idle Processing Configuration
+
+```typescript
+interface IdleSpacingConfig {
+  enabled: boolean; // Default: true
+  chunkSize: number; // Default: 40 (text nodes per cycle)
+  timeout: number; // Default: 2000ms
+}
+```
+
+#### Visibility Check Configuration
+
+```typescript
+interface VisibilityCheckConfig {
+  enabled: boolean; // Default: false
+  commonHiddenPatterns: {
+    clipRect: boolean; // clip: rect(1px, 1px, 1px, 1px)
+    displayNone: boolean; // display: none
+    visibilityHidden: boolean; // visibility: hidden
+    opacityZero: boolean; // opacity: 0
+    heightWidth1px: boolean; // height: 1px; width: 1px
+  };
+}
+```
+
 ## Development Guidelines
 
 ### Code Style
@@ -190,8 +219,51 @@ interface Settings {
 
 ### Implementation Details
 
-- Core spacing logic: @src/shared/index.ts
-- Core test cases: @tests/shared/index.test.ts
+- Core spacing logic: `src/shared/index.ts`
+- Core test cases: `tests/shared/index.test.ts`
+- Browser DOM processing: Uses TreeWalker API for 5.5x performance improvement
+- Idle processing: Uses requestIdleCallback() for non-blocking operations
+- Visibility detection: Detects CSS-hidden elements to avoid unnecessary spacing
+
+### Performance Optimizations v7
+
+- **TreeWalker Migration**: Replaced XPath with TreeWalker API for ~5.5x performance gain
+- **Idle Processing**: Heavy operations use requestIdleCallback() to prevent blocking
+- **Visibility Checks**: Skip spacing for CSS-hidden elements (disabled by default)
+- **Debounced MutationObserver**: Batches DOM mutations for efficient processing
+
+### Paranoid Text Spacing Algorithm v7
+
+**Core Features:**
+
+- **Context-Aware Symbol Handling**:
+
+  - Operators (`= + - * / < > & ^`): Always add spaces when CJK is present
+  - Separators (`_ |`): Never add spaces regardless of context
+  - Dual-behavior slash `/`: Single occurrence = operator (add spaces), multiple = file path separator (no spaces)
+
+- **Smart Pattern Recognition**:
+
+  - Preserves compound words: `state-of-the-art`, `GPT-5`, `claude-4-opus`
+  - Handles programming terms correctly: `C++`, `A+`, `i++`, `D-`, `C#`, `F#`
+  - Protects file paths: Unix (`/usr/bin`, `src/main.py`) and Windows (`C:\Users\`)
+  - Special handling for grades: `A+` before CJK becomes `A+ ` not `A + `
+
+- **Improved Punctuation**:
+
+  - No longer converts half-width punctuation to full-width
+  - Smart handling of quotes, brackets, and special characters
+  - Preserves multiple consecutive punctuation marks
+
+- **HTML Support**:
+
+  - Processes text within HTML attributes while preserving tag structure
+  - Protects HTML tags from being altered by spacing rules
+
+- **Performance Enhancements**:
+  - 5.5x faster with TreeWalker API replacing XPath
+  - Non-blocking processing with requestIdleCallback()
+  - CSS visibility detection to skip hidden elements
 
 ## Future Improvements
 
