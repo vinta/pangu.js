@@ -15,12 +15,12 @@ test.describe('Idle Processing Infrastructure', () => {
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
   });
 
-  test('should have idle spacing disabled by default', async ({ page }) => {
+  test('should have idle spacing enabled by default', async ({ page }) => {
     const config = await page.evaluate(() => {
       return pangu.getIdleSpacingConfig();
     });
 
-    expect(config.enabled).toBe(false);
+    expect(config.enabled).toBe(true);
     expect(config.chunkSize).toBe(10);
     expect(config.timeout).toBe(5000);
   });
