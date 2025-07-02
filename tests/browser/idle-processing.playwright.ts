@@ -183,16 +183,14 @@ test.describe('Idle Processing Infrastructure', () => {
 
         let completionCalled = false;
 
-        pangu.spacingPageWithIdleCallback({
-          onComplete: () => {
-            completionCalled = true;
-            const finalText = document.body.textContent;
-            
-            resolve({
-              finalText,
-              completionCalled
-            });
-          }
+        pangu.spacingPageWithIdleCallback(() => {
+          completionCalled = true;
+          const finalText = document.body.textContent;
+          
+          resolve({
+            finalText,
+            completionCalled
+          });
         });
       });
     });
@@ -221,16 +219,14 @@ test.describe('Idle Processing Infrastructure', () => {
         let completionCalled = false;
 
         // This should fallback to synchronous processing and call onComplete immediately
-        pangu.spacingPageWithIdleCallback({
-          onComplete: () => {
-            completionCalled = true;
-            const text = document.body.textContent;
-            resolve({
-              completionCalled,
-              text,
-              idleEnabled: pangu.getIdleSpacingConfig().enabled
-            });
-          }
+        pangu.spacingPageWithIdleCallback(() => {
+          completionCalled = true;
+          const text = document.body.textContent;
+          resolve({
+            completionCalled,
+            text,
+            idleEnabled: pangu.getIdleSpacingConfig().enabled
+          });
         });
       });
     });

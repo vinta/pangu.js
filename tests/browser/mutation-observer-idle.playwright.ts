@@ -56,14 +56,17 @@ test.describe('MutationObserver Idle Processing', () => {
       let completed = false;
       
       // Process with idle callback
-      pangu.spacingNodesWithIdleCallback([div], {
-        onComplete: () => { completed = true; }
-      });
+      pangu.spacingNodesWithIdleCallback([div], () => { completed = true; });
       
-      // Wait for completion
-      await new Promise(resolve => {
+      // Wait for completion with timeout
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Timeout waiting for completion'));
+        }, 5000);
+        
         const checkComplete = () => {
           if (completed) {
+            clearTimeout(timeout);
             resolve(undefined);
           } else {
             setTimeout(checkComplete, 10);
@@ -98,14 +101,17 @@ test.describe('MutationObserver Idle Processing', () => {
       
       let completed = false;
       
-      pangu.spacingNodesWithIdleCallback(nodes, {
-        onComplete: () => { completed = true; }
-      });
+      pangu.spacingNodesWithIdleCallback(nodes, () => { completed = true; });
       
-      // Wait for completion
-      await new Promise(resolve => {
+      // Wait for completion with timeout
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Timeout waiting for completion'));
+        }, 5000);
+        
         const checkComplete = () => {
           if (completed) {
+            clearTimeout(timeout);
             resolve(undefined);
           } else {
             setTimeout(checkComplete, 10);
@@ -143,14 +149,17 @@ test.describe('MutationObserver Idle Processing', () => {
       const nodes = [div];
       
       let completed = false;
-      pangu.spacingNodesWithIdleCallback(nodes, {
-        onComplete: () => { completed = true; }
-      });
+      pangu.spacingNodesWithIdleCallback(nodes, () => { completed = true; });
       
-      // Wait for completion
-      await new Promise(resolve => {
+      // Wait for completion with timeout
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Timeout waiting for completion'));
+        }, 5000);
+        
         const checkComplete = () => {
           if (completed) {
+            clearTimeout(timeout);
             resolve(undefined);
           } else {
             setTimeout(checkComplete, 10);
