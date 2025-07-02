@@ -72,30 +72,12 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 }
 
 class IdleQueue {
-  private requestIdleCallback: (callback: IdleRequestCallback, options?: { timeout?: number }) => number;
   private queue: (() => void)[] = [];
   private isProcessing = false;
   private onComplete?: () => void;
 
   constructor() {
-    // Simple fallback for Safari and other browsers without requestIdleCallback
-    if (typeof window.requestIdleCallback === 'function') {
-      this.requestIdleCallback = window.requestIdleCallback.bind(window);
-    } else {
-      // Fallback using setTimeout for browsers without requestIdleCallback (Safari)
-      this.requestIdleCallback = (callback: IdleRequestCallback, _options?: { timeout?: number }) => {
-        const start = performance.now();
-        return window.setTimeout(() => {
-          callback({
-            didTimeout: false,
-            timeRemaining() {
-              // Simulate ~16ms budget (60fps frame)
-              return Math.max(0, 16 - (performance.now() - start));
-            },
-          });
-        }, 0);
-      };
-    }
+    // No fallback - require native requestIdleCallback
   }
 
   add(work: () => void) {
@@ -119,7 +101,7 @@ class IdleQueue {
   private scheduleProcessing() {
     if (!this.isProcessing && this.queue.length > 0) {
       this.isProcessing = true;
-      this.requestIdleCallback((deadline) => this.process(deadline), { timeout: 5000 });
+      window.requestIdleCallback((deadline) => this.process(deadline), { timeout: 5000 });
     }
   }
 
