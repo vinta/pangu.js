@@ -348,33 +348,24 @@ class IdleQueue {
 class BrowserPangu extends Pangu {
   constructor() {
     super();
-    __publicField(this, "isAutoSpacingPageExecuted");
-    __publicField(this, "idleQueue");
-    __publicField(this, "autoSpacingPageObserver");
-    __publicField(this, "idleSpacingConfig");
-    __publicField(this, "visibilityCheckConfig");
-    __publicField(this, "blockTags");
-    __publicField(this, "ignoredTags");
-    __publicField(this, "presentationalTags");
-    __publicField(this, "spaceLikeTags");
-    __publicField(this, "spaceSensitiveTags");
-    __publicField(this, "ignoredClass");
-    this.isAutoSpacingPageExecuted = false;
-    this.autoSpacingPageObserver = null;
-    this.idleQueue = new IdleQueue();
-    this.idleSpacingConfig = {
+    __publicField(this, "isAutoSpacingPageExecuted", false);
+    __publicField(this, "idleQueue", new IdleQueue());
+    __publicField(this, "blockTags", /^(div|p|h1|h2|h3|h4|h5|h6)$/i);
+    __publicField(this, "ignoredTags", /^(code|pre|script|style|textarea|iframe|input)$/i);
+    __publicField(this, "presentationalTags", /^(b|code|del|em|i|s|strong|kbd)$/i);
+    __publicField(this, "spaceLikeTags", /^(br|hr|i|img|pangu)$/i);
+    __publicField(this, "spaceSensitiveTags", /^(a|del|pre|s|strike|u)$/i);
+    __publicField(this, "ignoredClass", "no-pangu-spacing");
+    __publicField(this, "autoSpacingPageObserver", null);
+    __publicField(this, "idleSpacingConfig", {
       enabled: true,
-      // Enable by default for better performance
-      chunkSize: 10,
-      // Process 10 text nodes per idle cycle
-      timeout: 5e3
-      // 5 second timeout for idle processing
-    };
-    this.visibilityCheckConfig = {
+      chunkSize: 40,
+      // Process 40 text nodes per idle cycle
+      timeout: 2e3
+      // 2 second timeout for idle processing
+    });
+    __publicField(this, "visibilityCheckConfig", {
       enabled: false,
-      // Disabled by default for backward compatibility
-      checkDuringIdle: true,
-      // Use idle time for visibility checks
       commonHiddenPatterns: {
         clipRect: true,
         // clip: rect(1px, 1px, 1px, 1px) patterns
@@ -387,13 +378,7 @@ class BrowserPangu extends Pangu {
         heightWidth1px: true
         // height: 1px; width: 1px
       }
-    };
-    this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
-    this.ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
-    this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
-    this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
-    this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-    this.ignoredClass = "no-pangu-spacing";
+    });
   }
   autoSpacingPage({ pageDelayMs = 1e3, nodeDelayMs = 500, nodeMaxWaitMs = 2e3 } = {}) {
     if (!(document.body instanceof Node)) {

@@ -18,7 +18,6 @@ export interface IdleSpacingConfig {
 }
 export interface VisibilityCheckConfig {
     enabled: boolean;
-    checkDuringIdle: boolean;
     commonHiddenPatterns: {
         clipRect: boolean;
         displayNone: boolean;
@@ -43,15 +42,15 @@ declare class IdleQueue {
 export declare class BrowserPangu extends Pangu {
     isAutoSpacingPageExecuted: boolean;
     idleQueue: IdleQueue;
-    protected autoSpacingPageObserver: MutationObserver | null;
-    protected idleSpacingConfig: IdleSpacingConfig;
-    protected visibilityCheckConfig: VisibilityCheckConfig;
     blockTags: RegExp;
     ignoredTags: RegExp;
     presentationalTags: RegExp;
     spaceLikeTags: RegExp;
     spaceSensitiveTags: RegExp;
     ignoredClass: string;
+    protected autoSpacingPageObserver: MutationObserver | null;
+    protected idleSpacingConfig: IdleSpacingConfig;
+    protected visibilityCheckConfig: VisibilityCheckConfig;
     constructor();
     autoSpacingPage({ pageDelayMs, nodeDelayMs, nodeMaxWaitMs }?: AutoSpacingPageConfig): void;
     spacingPage(): void;
@@ -83,7 +82,6 @@ export declare class BrowserPangu extends Pangu {
     updateVisibilityCheckConfig(config: Partial<VisibilityCheckConfig>): void;
     getVisibilityCheckConfig(): {
         enabled: boolean;
-        checkDuringIdle: boolean;
         commonHiddenPatterns: {
             clipRect: boolean;
             displayNone: boolean;
