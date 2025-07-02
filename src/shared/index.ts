@@ -464,7 +464,7 @@ export class Pangu {
       newText = htmlTagManager.restore(newText);
     }
 
-    // TODO: TBD
+    // TODO:
     // Final fix for HTML comments: ensure no space after <!--
     // This is needed because <!-- is not protected as an HTML tag
     // and the ! character gets spaced by ANS_CJK pattern
