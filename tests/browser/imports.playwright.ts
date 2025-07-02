@@ -27,7 +27,7 @@ test.describe('Browser UMD imports', () => {
   test('handle text with spacing functionality', async ({ page }) => {
     const result = await page.evaluate(() => {
       const text = 'Hello世界';
-      const spaced = pangu.spacing(text);
+      const spaced = pangu.spacingText(text);
       return { original: text, spaced };
     });
 

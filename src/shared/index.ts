@@ -248,7 +248,7 @@ export class Pangu {
 
     // Handle multiple dots first (before single period)
     newText = newText.replace(DOTS_CJK, '$1 $2');
-    
+
     // Handle punctuation after CJK - add space but don't convert to full-width
     newText = newText.replace(CJK_PUNCTUATION, '$1$2 ');
     // Handle punctuation between AN and CJK
@@ -278,22 +278,22 @@ export class Pangu {
     // Handle single quotes more intelligently
     // First, handle possessive case
     newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
-    
+
     // Process single quotes around pure CJK text differently from mixed content
     const singleQuoteCJKManager = new PlaceholderReplacer('SINGLE_QUOTE_CJK_PLACEHOLDER_', '\uE030', '\uE031');
-    
+
     // Pattern to match single quotes around pure CJK text (no spaces, no other characters)
     const SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, 'g');
-    
+
     // Protect pure CJK content in single quotes
     newText = newText.replace(SINGLE_QUOTE_PURE_CJK, (match) => {
       return singleQuoteCJKManager.store(match);
     });
-    
+
     // Now process other single quote patterns
     newText = newText.replace(CJK_SINGLE_QUOTE_BUT_POSSESSIVE, '$1 $2');
     newText = newText.replace(SINGLE_QUOTE_CJK, '$1 $2');
-    
+
     // Restore protected pure CJK content
     newText = singleQuoteCJKManager.restore(newText);
 
@@ -473,25 +473,8 @@ export class Pangu {
     return newText;
   }
 
-  // alias for spacingText()
-  public spacing(text: string) {
-    return this.spacingText(text);
-  }
-
   public hasProperSpacing(text: string) {
     return this.spacingText(text) === text;
-  }
-
-  protected convertToFullwidth(symbols: string) {
-    // prettier-ignore
-    return symbols
-      .replace(/~/g, '～')
-      .replace(/!/g, '！')
-      .replace(/;/g, '；')
-      .replace(/:/g, '：')
-      .replace(/,/g, '，')
-      .replace(/\./g, '。')
-      .replace(/\?/g, '？');
   }
 }
 
