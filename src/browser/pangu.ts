@@ -23,7 +23,6 @@ export interface IdleSpacingConfig {
 
 export interface VisibilityCheckConfig {
   enabled: boolean;
-  checkDuringIdle: boolean;
   commonHiddenPatterns: {
     clipRect: boolean;
     displayNone: boolean;
@@ -32,7 +31,6 @@ export interface VisibilityCheckConfig {
     heightWidth1px: boolean;
   };
 }
-
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function once<T extends (...args: any[]) => any>(func: T) {
@@ -143,52 +141,34 @@ class IdleQueue {
 }
 
 export class BrowserPangu extends Pangu {
-  public isAutoSpacingPageExecuted: boolean;
-  public idleQueue: IdleQueue;
-  protected autoSpacingPageObserver: MutationObserver | null;
-  protected idleSpacingConfig: IdleSpacingConfig;
-  protected visibilityCheckConfig: VisibilityCheckConfig;
+  public isAutoSpacingPageExecuted = false;
+  public idleQueue = new IdleQueue();
+  public blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
+  public ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
+  public presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
+  public spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
+  public spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
+  public ignoredClass = 'no-pangu-spacing';
 
-  public blockTags: RegExp;
-  public ignoredTags: RegExp;
-  public presentationalTags: RegExp;
-  public spaceLikeTags: RegExp;
-  public spaceSensitiveTags: RegExp;
-  public ignoredClass: string;
+  protected autoSpacingPageObserver: MutationObserver | null = null;
+  protected idleSpacingConfig: IdleSpacingConfig = {
+    enabled: true,
+    chunkSize: 40, // Process 40 text nodes per idle cycle
+    timeout: 2000, // 2 second timeout for idle processing
+  };
+  protected visibilityCheckConfig: VisibilityCheckConfig = {
+    enabled: false,
+    commonHiddenPatterns: {
+      clipRect: true, // clip: rect(1px, 1px, 1px, 1px) patterns
+      displayNone: true, // display: none
+      visibilityHidden: true, // visibility: hidden
+      opacityZero: true, // opacity: 0
+      heightWidth1px: true, // height: 1px; width: 1px
+    },
+  };
 
   constructor() {
     super();
-
-    this.isAutoSpacingPageExecuted = false;
-    this.autoSpacingPageObserver = null;
-
-    // Initialize idle processing infrastructure
-    this.idleQueue = new IdleQueue();
-    this.idleSpacingConfig = {
-      enabled: true, // Enable by default for better performance
-      chunkSize: 10, // Process 10 text nodes per idle cycle
-      timeout: 5000, // 5 second timeout for idle processing
-    };
-
-    // Initialize visibility check configuration
-    this.visibilityCheckConfig = {
-      enabled: false, // Disabled by default for backward compatibility
-      checkDuringIdle: true, // Use idle time for visibility checks
-      commonHiddenPatterns: {
-        clipRect: true, // clip: rect(1px, 1px, 1px, 1px) patterns
-        displayNone: true, // display: none
-        visibilityHidden: true, // visibility: hidden
-        opacityZero: true, // opacity: 0
-        heightWidth1px: true, // height: 1px; width: 1px
-      },
-    };
-
-    this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
-    this.ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
-    this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
-    this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
-    this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-    this.ignoredClass = 'no-pangu-spacing';
   }
 
   public autoSpacingPage({ pageDelayMs = 1000, nodeDelayMs = 500, nodeMaxWaitMs = 2000 }: AutoSpacingPageConfig = {}) {

@@ -39,19 +39,19 @@ test.describe('CSS Visibility Check', () => {
           <span class="sr-only">Description:</span><span>一律轉整數，小數點太小會被某些交易所吃掉Transfer123USDC</span>
         </div>
       `;
-      
+
       // Process with default behavior (no visibility checking)
       pangu.updateVisibilityCheckConfig({ enabled: false }); // Ensure it's disabled
       pangu.spacingPage();
-      
+
       const hiddenSpan = content.querySelector('.sr-only')!;
       const visibleSpan = content.querySelector('span:not(.sr-only)')!;
-      
+
       return {
         hiddenText: hiddenSpan.textContent,
         visibleText: visibleSpan.textContent,
         // Check if there's unwanted space at start of visible text
-        startsWithSpace: visibleSpan.textContent?.startsWith(' ') || false
+        startsWithSpace: visibleSpan.textContent?.startsWith(' ') || false,
       };
     });
 
@@ -91,18 +91,18 @@ test.describe('CSS Visibility Check', () => {
           <span>Visible text</span>
         </div>
       `;
-      
+
       // Enable visibility checking
-      pangu.updateVisibilityCheckConfig({ enabled: true, checkDuringIdle: true });
-      
+      pangu.updateVisibilityCheckConfig({ enabled: true });
+
       // Test the helper method for visibility detection
       const spans = content.querySelectorAll('span');
-      const visibilityResults = Array.from(spans).map(span => ({
+      const visibilityResults = Array.from(spans).map((span) => ({
         className: span.className,
         text: span.textContent,
-        isHidden: pangu.isElementVisuallyHidden(span)
+        isHidden: pangu.isElementVisuallyHidden(span),
       }));
-      
+
       return visibilityResults;
     });
 
@@ -112,7 +112,7 @@ test.describe('CSS Visibility Check', () => {
       { className: 'hidden', text: 'Display None:', isHidden: true },
       { className: 'invisible', text: 'Visibility Hidden:', isHidden: true },
       { className: 'opacity-zero', text: 'Opacity Zero:', isHidden: true },
-      { className: '', text: 'Visible text', isHidden: false }
+      { className: '', text: 'Visible text', isHidden: false },
     ]);
   });
 
@@ -121,33 +121,33 @@ test.describe('CSS Visibility Check', () => {
       const content = document.getElementById('content')!;
       content.innerHTML = `
         <style>
-          .sr-only { 
-            clip: rect(1px, 1px, 1px, 1px); 
-            height: 1px; 
-            overflow: hidden; 
-            position: absolute; 
-            width: 1px; 
+          .sr-only {
+            clip: rect(1px, 1px, 1px, 1px);
+            height: 1px;
+            overflow: hidden;
+            position: absolute;
+            width: 1px;
           }
         </style>
         <div>
           <span class="sr-only">Description:</span><span>測試visibility check功能</span>
         </div>
       `;
-      
-      // Enable visibility checking 
+
+      // Enable visibility checking
       pangu.updateVisibilityCheckConfig({ enabled: true });
-      
+
       // Process with visibility-aware spacing (synchronous)
       pangu.spacingPage();
-      
+
       const hiddenSpan = content.querySelector('.sr-only')!;
       const visibleSpan = content.querySelector('span:not(.sr-only)')!;
-      
+
       return {
         hiddenText: hiddenSpan.textContent,
         visibleText: visibleSpan.textContent,
         // Should not start with space since previous element is hidden
-        startsWithSpace: visibleSpan.textContent?.startsWith(' ') || false
+        startsWithSpace: visibleSpan.textContent?.startsWith(' ') || false,
       };
     });
 
@@ -164,19 +164,19 @@ test.describe('CSS Visibility Check', () => {
           <span>第一個visible</span><span>第二個visible</span>
         </div>
       `;
-      
+
       pangu.updateVisibilityCheckConfig({ enabled: true });
-      
+
       // Process with visibility checking enabled (synchronous)
       pangu.spacingPage();
-      
+
       const spans = content.querySelectorAll('span');
-      
+
       return {
         firstText: spans[0].textContent,
         secondText: spans[1].textContent,
         // Second span should start with space since first is visible
-        secondStartsWithSpace: spans[1].textContent?.startsWith(' ') || false
+        secondStartsWithSpace: spans[1].textContent?.startsWith(' ') || false,
       };
     });
 
@@ -204,17 +204,17 @@ test.describe('CSS Visibility Check', () => {
           </div>
         </div>
       `;
-      
+
       pangu.updateVisibilityCheckConfig({ enabled: true });
-      
+
       // Process with visibility checking (synchronous)
       pangu.spacingPage();
-      
+
       // Get the spans we actually want by text content to avoid selector issues
       const allDivs = content.querySelectorAll('div');
       const visibleAfterHidden = content.querySelector('div.sr-only + span')!;
       let visibleNested = null;
-      
+
       // Find the last div (which is not sr-only) and get its last span
       for (let i = allDivs.length - 1; i >= 0; i--) {
         if (!allDivs[i].classList.contains('sr-only')) {
@@ -223,13 +223,13 @@ test.describe('CSS Visibility Check', () => {
           break;
         }
       }
-      
+
       return {
         visibleAfterHiddenText: visibleAfterHidden.textContent,
         visibleNestedText: visibleNested.textContent,
         // Neither should start with space due to hidden adjacent elements
         afterHiddenStartsWithSpace: visibleAfterHidden.textContent?.startsWith(' ') || false,
-        nestedStartsWithSpace: visibleNested.textContent?.startsWith(' ') || false
+        nestedStartsWithSpace: visibleNested.textContent?.startsWith(' ') || false,
       };
     });
 
