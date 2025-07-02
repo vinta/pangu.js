@@ -35,7 +35,6 @@ export interface VisibilityCheckConfig {
 
 export interface IdleSpacingCallbacks {
   onComplete?: () => void;
-  onProgress?: (processed: number, total: number) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,8 +79,6 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 class IdleQueue {
   private requestIdleCallback: (callback: IdleRequestCallback, options?: { timeout?: number }) => number;
   private queue: (() => void)[] = [];
-  private totalItems = 0;
-  private processedItems = 0;
   private isProcessing = false;
   private callbacks: IdleSpacingCallbacks = {};
 
@@ -108,14 +105,11 @@ class IdleQueue {
 
   add(work: () => void) {
     this.queue.push(work);
-    this.totalItems++;
     this.scheduleProcessing();
   }
 
   clear() {
     this.queue.length = 0;
-    this.totalItems = 0;
-    this.processedItems = 0;
     this.callbacks = {};
   }
 
@@ -125,14 +119,6 @@ class IdleQueue {
 
   get length() {
     return this.queue.length;
-  }
-
-  getProgress() {
-    return {
-      processed: this.processedItems,
-      total: this.totalItems,
-      percentage: this.totalItems > 0 ? (this.processedItems / this.totalItems) * 100 : 0,
-    };
   }
 
   private scheduleProcessing() {
@@ -146,22 +132,15 @@ class IdleQueue {
     while (deadline.timeRemaining() > 0 && this.queue.length > 0) {
       const work = this.queue.shift();
       work?.();
-      this.processedItems++;
-
-      // Call progress callback if provided
-      this.callbacks.onProgress?.(this.processedItems, this.totalItems);
     }
 
     this.isProcessing = false;
 
     if (this.queue.length > 0) {
       this.scheduleProcessing();
-    } else if (this.processedItems === this.totalItems && this.totalItems > 0) {
+    } else {
       // All work completed, call completion callback
       this.callbacks.onComplete?.();
-      // Reset counters for next batch
-      this.totalItems = 0;
-      this.processedItems = 0;
     }
   }
 }

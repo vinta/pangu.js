@@ -181,23 +181,16 @@ test.describe('Idle Processing Infrastructure', () => {
         // Enable idle spacing with small chunk size to test chunking
         pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 2 });
 
-        const progressUpdates: Array<{processed: number, total: number}> = [];
         let completionCalled = false;
 
         pangu.spacingPageWithIdleCallback({
-          onProgress: (processed, total) => {
-            progressUpdates.push({ processed, total });
-          },
           onComplete: () => {
             completionCalled = true;
             const finalText = document.body.textContent;
-            const progress = pangu.idleQueue.getProgress();
             
             resolve({
               finalText,
-              progressUpdates,
-              completionCalled,
-              finalProgress: progress
+              completionCalled
             });
           }
         });
@@ -205,66 +198,13 @@ test.describe('Idle Processing Infrastructure', () => {
     });
 
     expect(result.completionCalled).toBe(true);
-    expect(result.progressUpdates.length).toBeGreaterThan(0);
     
     // Should have spaced the content correctly
     expect(result.finalText).toContain('測試中文 abc 混合內容 123');
     expect(result.finalText).toContain('更多測試 text456');
     expect(result.finalText).toContain('第三段 content789');
-
-    // Progress should start from 0 and end at 100%
-    const firstProgress = result.progressUpdates[0];
-    const lastProgress = result.progressUpdates[result.progressUpdates.length - 1];
-    
-    expect(firstProgress.processed).toBeGreaterThan(0);
-    expect(lastProgress.processed).toBe(lastProgress.total);
-    expect(result.finalProgress.percentage).toBe(100);
   });
 
-  test('should provide progress tracking for idle processing', async ({ page }) => {
-    await page.setContent(`
-      <div>
-        <p>測試progress tracking功能</p>
-        <span>更多text content</span>
-      </div>
-    `);
-
-    const result = await page.evaluate(() => {
-      return new Promise((resolve) => {
-        // Enable idle spacing
-        pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 1 }); // Very small chunks for more progress updates
-
-        const progressSnapshots: Array<{processed: number, total: number, percentage: number}> = [];
-
-        pangu.spacingNodeWithIdleCallback(document.body, {
-          onProgress: (_processed, _total) => {
-            const progress = pangu.idleQueue.getProgress();
-            progressSnapshots.push(progress);
-          },
-          onComplete: () => {
-            const finalProgress = pangu.idleQueue.getProgress();
-            resolve({
-              progressSnapshots,
-              finalProgress
-            });
-          }
-        });
-      });
-    });
-
-    expect(result.progressSnapshots.length).toBeGreaterThan(0);
-    
-    // Progress should increase monotonically
-    for (let i = 1; i < result.progressSnapshots.length; i++) {
-      const prev = result.progressSnapshots[i - 1];
-      const curr = result.progressSnapshots[i];
-      expect(curr.processed).toBeGreaterThanOrEqual(prev.processed);
-      expect(curr.percentage).toBeGreaterThanOrEqual(prev.percentage);
-    }
-
-    // Final progress should be 100%
-    expect(result.finalProgress.percentage).toBe(100);
-  });
 
   test('should fallback to synchronous processing when idle spacing is disabled', async ({ page }) => {
     await page.setContent(`

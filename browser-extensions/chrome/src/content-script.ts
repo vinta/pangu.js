@@ -26,9 +26,6 @@ function spacingPage() {
       onComplete: () => {
         console.log('[Pangu.js] Manual spacing completed');
       },
-      onProgress: (processed, total) => {
-        console.log(`[Pangu.js] Progress: ${processed}/${total} (${Math.round((processed / total) * 100)}%)`);
-      },
     });
   }
 }
