@@ -26,7 +26,9 @@ describe('Symbol < >', () => {
     expect(pangu.spacingText('<h1>標題</h1><p>內容</p>')).toBe('<h1>標題</h1><p>內容</p>');
 
     // Nested tags
-    expect(pangu.spacingText('<div><p>嵌套<strong>測試</strong></p></div>')).toBe('<div><p>嵌套<strong>測試</strong></p></div>');
+    // prettier-ignore
+    expect(pangu.spacingText('<div><p>嵌套<strong>測試</strong></p></div>'))
+                       .toBe('<div><p>嵌套<strong>測試</strong></p></div>');
 
     // Self-closing tags
     expect(pangu.spacingText('文字<br>換行')).toBe('文字<br>換行');

@@ -32,15 +32,15 @@ describe('Symbol /', () => {
 
     // prettier-ignore
     expect(pangu.spacingText("8964/3★集會所接待員/克隆·麻煩大師/手卷師傅（已退休）/主程式毀滅者/dae-dae-o/#絕地家庭小會議/#今天大掃除了沒有/NS編號在banner裡/discord:史單力#3230"))
-                           .toBe("8964/3★集會所接待員/克隆・麻煩大師/手卷師傅（已退休）/主程式毀滅者/dae-dae-o/#絕地家庭小會議/#今天大掃除了沒有/NS 編號在 banner 裡/discord: 史單力 #3230");
+                       .toBe("8964/3★集會所接待員/克隆・麻煩大師/手卷師傅（已退休）/主程式毀滅者/dae-dae-o/#絕地家庭小會議/#今天大掃除了沒有/NS 編號在 banner 裡/discord: 史單力 #3230");
 
     // prettier-ignore
     expect(pangu.spacingText("after 80'/气象工作者/不苟同/关注abc天气变化/向往123自由/热爱科学、互联网、编程Node.js Web C++ Julia Python"))
-                           .toBe("after 80'/气象工作者/不苟同/关注 abc 天气变化/向往 123 自由/热爱科学、互联网、编程 Node.js Web C++ Julia Python");
+                       .toBe("after 80'/气象工作者/不苟同/关注 abc 天气变化/向往 123 自由/热爱科学、互联网、编程 Node.js Web C++ Julia Python");
 
     // prettier-ignore
     expect(pangu.spacingText('2016-12-26(奇幻电影节) / 2017-01-20(美国) / 詹姆斯麦卡沃伊'))
-                           .toBe('2016-12-26 (奇幻电影节) / 2017-01-20 (美国) / 詹姆斯麦卡沃伊');
+                       .toBe('2016-12-26 (奇幻电影节) / 2017-01-20 (美国) / 詹姆斯麦卡沃伊');
 
     // DO NOT change if already spacing
     expect(pangu.spacingText('陳上進 / 貓咪 / Mollie')).toBe('陳上進 / 貓咪 / Mollie');
@@ -52,23 +52,23 @@ describe('Symbol /', () => {
   it('handle / symbol as Unix absolute file path', () => {
     // prettier-ignore
     expect(pangu.spacingText('/home和/root是Linux中的頂級目錄'))
-                           .toBe('/home 和 /root 是 Linux 中的頂級目錄');
+                       .toBe('/home 和 /root 是 Linux 中的頂級目錄');
 
     // prettier-ignore
     expect(pangu.spacingText('/home/與/root是Linux中的頂級目錄'))
-                           .toBe('/home/ 與 /root 是 Linux 中的頂級目錄');
+                       .toBe('/home/ 與 /root 是 Linux 中的頂級目錄');
 
     // prettier-ignore
     expect(pangu.spacingText('"/home/"和"/root"是Linux中的頂級目錄'))
-                           .toBe('"/home/" 和 "/root" 是 Linux 中的頂級目錄');
+                       .toBe('"/home/" 和 "/root" 是 Linux 中的頂級目錄');
 
     // prettier-ignore
     expect(pangu.spacingText('當你用cat和od指令查看/dev/random和/dev/urandom的內容時'))
-                           .toBe('當你用 cat 和 od 指令查看 /dev/random 和 /dev/urandom 的內容時');
+                       .toBe('當你用 cat 和 od 指令查看 /dev/random 和 /dev/urandom 的內容時');
 
     // prettier-ignore
     expect(pangu.spacingText('當你用cat和od指令查看"/dev/random"和"/dev/urandom"的內容時'))
-                           .toBe('當你用 cat 和 od 指令查看 "/dev/random" 和 "/dev/urandom" 的內容時');
+                       .toBe('當你用 cat 和 od 指令查看 "/dev/random" 和 "/dev/urandom" 的內容時');
 
     // Basic Unix paths
     expect(pangu.spacingText('在/home目錄')).toBe('在 /home 目錄');

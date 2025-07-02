@@ -26,11 +26,11 @@ describe('Symbol -', () => {
 
     // prettier-ignore
     expect(pangu.spacingText('The company offered a state-of-the-art machine-learning-powered real-time fraud-detection system with end-to-end encryption and cutting-edge performance.'))
-                           .toBe('The company offered a state-of-the-art machine-learning-powered real-time fraud-detection system with end-to-end encryption and cutting-edge performance.');
+                       .toBe('The company offered a state-of-the-art machine-learning-powered real-time fraud-detection system with end-to-end encryption and cutting-edge performance.');
 
     // prettier-ignore
     expect(pangu.spacingText('這間公司提供了一套state-of-the-art、machine-learning-powered的real-time fraud-detection系統，具備end-to-end加密功能以及cutting-edge的效能。'))
-                           .toBe('這間公司提供了一套 state-of-the-art、machine-learning-powered 的 real-time fraud-detection 系統，具備 end-to-end 加密功能以及 cutting-edge 的效能。');
+                       .toBe('這間公司提供了一套 state-of-the-art、machine-learning-powered 的 real-time fraud-detection 系統，具備 end-to-end 加密功能以及 cutting-edge 的效能。');
 
     expect(pangu.spacingText('Anthropic的claude-4-opus模型')).toBe('Anthropic 的 claude-4-opus 模型');
     expect(pangu.spacingText('OpenAI的o3-pro模型')).toBe('OpenAI 的 o3-pro 模型');

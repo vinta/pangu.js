@@ -17,7 +17,7 @@ describe('Symbol _', () => {
 
     // prettier-ignore
     expect(pangu.spacingText('為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip'))
-                           .toBe('為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip');
+                       .toBe('為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip');
 
     // Rare cases, ignore
     // DO NOT change if already spacing

@@ -17,22 +17,22 @@ describe('Symbol ( )', () => {
 
     // prettier-ignore
     expect(pangu.spacingText('預定於繳款截止日114/07/02(遇假日順延)之次一營業日進行扣款'))
-                           .toBe('預定於繳款截止日 114/07/02 (遇假日順延) 之次一營業日進行扣款');
+                       .toBe('預定於繳款截止日 114/07/02 (遇假日順延) 之次一營業日進行扣款');
 
     // prettier-ignore
     expect(pangu.spacingText("OperationalError: (2006, 'MySQL server has gone away')"))
-                           .toBe("OperationalError: (2006, 'MySQL server has gone away')");
+                       .toBe("OperationalError: (2006, 'MySQL server has gone away')");
 
     // prettier-ignore
     expect(pangu.spacingText('Chang Stream(变更记录流)是指collection(数据库集合)的变更事件流'))
-                           .toBe('Chang Stream (变更记录流) 是指 collection (数据库集合) 的变更事件流');
+                       .toBe('Chang Stream (变更记录流) 是指 collection (数据库集合) 的变更事件流');
 
     // prettier-ignore
     expect(pangu.spacingText('从结果来看，当a.b销毁后，`a.getB()`返回值为null'))
-                           .toBe('从结果来看，当 a.b 销毁后，`a.getB()` 返回值为 null');
+                       .toBe('从结果来看，当 a.b 销毁后，`a.getB()` 返回值为 null');
 
     // prettier-ignore
     expect(pangu.spacingText("后续会直接用iframe window.addEventListener('message')"))
-                           .toBe("后续会直接用 iframe window.addEventListener('message')");
+                       .toBe("后续会直接用 iframe window.addEventListener('message')");
   });
 });
