@@ -698,7 +698,20 @@ export class BrowserPangu extends Pangu {
           queue.length = 0; // Clear the queue
 
           if (nodesToProcess.length > 0) {
-            this.spacingNodesWithIdleCallback(nodesToProcess);
+            // Collect all text nodes from all input nodes
+            const allTextNodes: Node[] = [];
+            for (const node of nodesToProcess) {
+              // Skip DocumentFragments as they don't support TreeWalker properly
+              if (!(node instanceof Node) || node instanceof DocumentFragment) {
+                continue;
+              }
+
+              const textNodes = this.collectTextNodes(node, true);
+              allTextNodes.push(...textNodes);
+            }
+
+            // Process all collected text nodes with idle callback
+            this.processTextNodesWithIdleCallback(allTextNodes);
           }
         } else {
           // Synchronous processing (original behavior)
@@ -789,74 +802,6 @@ export class BrowserPangu extends Pangu {
 
   public getIdleSpacingConfig() {
     return { ...this.idleSpacingConfig };
-  }
-
-  public spacingPageWithIdleCallback(onComplete?: () => void) {
-    if (!this.idleSpacingConfig.enabled) {
-      // Fallback to synchronous processing if idle spacing is disabled
-      this.spacingPage();
-      onComplete?.();
-      return;
-    }
-
-    // Process title synchronously (it's typically small)
-    this.spacingPageTitle();
-
-    // Process body with idle callback
-    this.spacingNodeWithIdleCallback(document.body, onComplete);
-  }
-
-  public spacingNodeWithIdleCallback(contextNode: Node, onComplete?: () => void) {
-    if (!this.idleSpacingConfig.enabled) {
-      // Fallback to synchronous processing if idle spacing is disabled
-      this.spacingNode(contextNode);
-      onComplete?.();
-      return;
-    }
-
-    // DocumentFragments don't support TreeWalker properly
-    if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
-      onComplete?.();
-      return;
-    }
-
-    // Use TreeWalker to collect text nodes with content
-    const textNodes = this.collectTextNodes(contextNode, true);
-
-    // Process with idle callback
-    this.processTextNodesWithIdleCallback(textNodes, onComplete);
-  }
-
-  public spacingNodesWithIdleCallback(nodes: Node[], onComplete?: () => void) {
-    if (!this.idleSpacingConfig.enabled) {
-      // Fallback to synchronous processing if idle spacing is disabled
-      for (const node of nodes) {
-        this.spacingNode(node);
-      }
-      onComplete?.();
-      return;
-    }
-
-    if (nodes.length === 0) {
-      onComplete?.();
-      return;
-    }
-
-    // Collect all text nodes from all input nodes
-    const allTextNodes: Node[] = [];
-    for (const node of nodes) {
-      // Skip DocumentFragments as they don't support TreeWalker properly
-      if (!(node instanceof Node) || node instanceof DocumentFragment) {
-        continue;
-      }
-
-      const textNodes = this.collectTextNodes(node, true);
-
-      allTextNodes.push(...textNodes);
-    }
-
-    // Process all collected text nodes with idle callback
-    this.processTextNodesWithIdleCallback(allTextNodes, onComplete);
   }
 
   // Visibility check configuration methods
