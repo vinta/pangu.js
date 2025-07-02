@@ -22,10 +22,8 @@ function spacingPage() {
   const pangu = window.pangu;
   if (pangu) {
     // Use idle callback version for manual spacing too
-    pangu.spacingPageWithIdleCallback({
-      onComplete: () => {
-        console.log('[Pangu.js] Manual spacing completed');
-      },
+    pangu.spacingPageWithIdleCallback(() => {
+      console.log('[Pangu.js] Manual spacing completed');
     });
   }
 }

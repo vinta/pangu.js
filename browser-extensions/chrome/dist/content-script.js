@@ -11,13 +11,8 @@
   function spacingPage() {
     const pangu = window.pangu;
     if (pangu) {
-      pangu.spacingPageWithIdleCallback({
-        onComplete: () => {
-          console.log("[Pangu.js] Manual spacing completed");
-        },
-        onProgress: (processed, total) => {
-          console.log(`[Pangu.js] Progress: ${processed}/${total} (${Math.round(processed / total * 100)}%)`);
-        }
+      pangu.spacingPageWithIdleCallback(() => {
+        console.log("[Pangu.js] Manual spacing completed");
       });
     }
   }

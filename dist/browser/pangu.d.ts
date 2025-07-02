@@ -27,34 +27,23 @@ export interface VisibilityCheckConfig {
         heightWidth1px: boolean;
     };
 }
-export interface IdleSpacingCallbacks {
-    onComplete?: () => void;
-    onProgress?: (processed: number, total: number) => void;
-}
 declare class IdleQueue {
+    private requestIdleCallback;
     private queue;
     private isProcessing;
-    private requestIdleCallback;
-    private totalItems;
-    private processedItems;
-    private callbacks;
+    private onComplete?;
     constructor();
     add(work: () => void): void;
     clear(): void;
-    setCallbacks(callbacks: IdleSpacingCallbacks): void;
+    setOnComplete(onComplete?: () => void): void;
     get length(): number;
-    get progress(): {
-        processed: number;
-        total: number;
-        percentage: number;
-    };
     private scheduleProcessing;
     private process;
 }
 export declare class BrowserPangu extends Pangu {
     isAutoSpacingPageExecuted: boolean;
+    idleQueue: IdleQueue;
     protected autoSpacingPageObserver: MutationObserver | null;
-    protected idleQueue: IdleQueue;
     protected idleSpacingConfig: IdleSpacingConfig;
     protected visibilityCheckConfig: VisibilityCheckConfig;
     blockTags: RegExp;
@@ -83,22 +72,29 @@ export declare class BrowserPangu extends Pangu {
     protected processTextNodes(textNodes: Node[]): void;
     protected collectTextNodes(contextNode: Node, reverse?: boolean): Text[];
     protected spacingNodeWithTreeWalker(contextNode: Node): void;
-    protected processTextNodesWithIdleCallback(textNodes: Node[], callbacks?: IdleSpacingCallbacks): void;
+    protected processTextNodesWithIdleCallback(textNodes: Node[], onComplete?: () => void): void;
     protected setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number): void;
     updateIdleSpacingConfig(config: Partial<IdleSpacingConfig>): void;
-    getIdleSpacingConfig(): IdleSpacingConfig;
-    getIdleQueueLength(): number;
-    clearIdleQueue(): void;
-    getIdleProgress(): {
-        processed: number;
-        total: number;
-        percentage: number;
+    getIdleSpacingConfig(): {
+        enabled: boolean;
+        chunkSize: number;
+        timeout: number;
     };
-    spacingPageWithIdleCallback(callbacks?: IdleSpacingCallbacks): void;
-    spacingNodeWithIdleCallback(contextNode: Node, callbacks?: IdleSpacingCallbacks): void;
-    spacingNodesWithIdleCallback(nodes: Node[], callbacks?: IdleSpacingCallbacks): void;
+    spacingPageWithIdleCallback(onComplete?: () => void): void;
+    spacingNodeWithIdleCallback(contextNode: Node, onComplete?: () => void): void;
+    spacingNodesWithIdleCallback(nodes: Node[], onComplete?: () => void): void;
     updateVisibilityCheckConfig(config: Partial<VisibilityCheckConfig>): void;
-    getVisibilityCheckConfig(): VisibilityCheckConfig;
+    getVisibilityCheckConfig(): {
+        enabled: boolean;
+        checkDuringIdle: boolean;
+        commonHiddenPatterns: {
+            clipRect: boolean;
+            displayNone: boolean;
+            visibilityHidden: boolean;
+            opacityZero: boolean;
+            heightWidth1px: boolean;
+        };
+    };
     isElementVisuallyHidden(element: Element): boolean;
     protected shouldSkipSpacingAfterNode(node: Node): boolean;
 }

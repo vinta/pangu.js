@@ -2,78 +2,6 @@ var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 import { Pangu } from "../shared/index.js";
-class IdleQueue {
-  constructor() {
-    __publicField(this, "queue", []);
-    __publicField(this, "isProcessing", false);
-    __publicField(this, "requestIdleCallback");
-    __publicField(this, "totalItems", 0);
-    __publicField(this, "processedItems", 0);
-    __publicField(this, "callbacks", {});
-    if (typeof window.requestIdleCallback === "function") {
-      this.requestIdleCallback = window.requestIdleCallback.bind(window);
-    } else {
-      this.requestIdleCallback = (callback, _options) => {
-        const start = performance.now();
-        return window.setTimeout(() => {
-          callback({
-            didTimeout: false,
-            timeRemaining() {
-              return Math.max(0, 16 - (performance.now() - start));
-            }
-          });
-        }, 0);
-      };
-    }
-  }
-  add(work) {
-    this.queue.push(work);
-    this.totalItems++;
-    this.scheduleProcessing();
-  }
-  clear() {
-    this.queue.length = 0;
-    this.totalItems = 0;
-    this.processedItems = 0;
-    this.callbacks = {};
-  }
-  setCallbacks(callbacks) {
-    this.callbacks = callbacks;
-  }
-  get length() {
-    return this.queue.length;
-  }
-  get progress() {
-    return {
-      processed: this.processedItems,
-      total: this.totalItems,
-      percentage: this.totalItems > 0 ? this.processedItems / this.totalItems * 100 : 0
-    };
-  }
-  scheduleProcessing() {
-    if (!this.isProcessing && this.queue.length > 0) {
-      this.isProcessing = true;
-      this.requestIdleCallback((deadline) => this.process(deadline), { timeout: 5e3 });
-    }
-  }
-  process(deadline) {
-    var _a, _b, _c, _d;
-    while (deadline.timeRemaining() > 0 && this.queue.length > 0) {
-      const work = this.queue.shift();
-      work == null ? void 0 : work();
-      this.processedItems++;
-      (_b = (_a = this.callbacks).onProgress) == null ? void 0 : _b.call(_a, this.processedItems, this.totalItems);
-    }
-    this.isProcessing = false;
-    if (this.queue.length > 0) {
-      this.scheduleProcessing();
-    } else if (this.processedItems === this.totalItems && this.totalItems > 0) {
-      (_d = (_c = this.callbacks).onComplete) == null ? void 0 : _d.call(_c);
-      this.totalItems = 0;
-      this.processedItems = 0;
-    }
-  }
-}
 function once(func) {
   let executed = false;
   return function(...args) {
@@ -105,12 +33,68 @@ function debounce(func, delay, mustRunDelay = Infinity) {
     }
   };
 }
+class IdleQueue {
+  constructor() {
+    __publicField(this, "requestIdleCallback");
+    __publicField(this, "queue", []);
+    __publicField(this, "isProcessing", false);
+    __publicField(this, "onComplete");
+    if (typeof window.requestIdleCallback === "function") {
+      this.requestIdleCallback = window.requestIdleCallback.bind(window);
+    } else {
+      this.requestIdleCallback = (callback, _options) => {
+        const start = performance.now();
+        return window.setTimeout(() => {
+          callback({
+            didTimeout: false,
+            timeRemaining() {
+              return Math.max(0, 16 - (performance.now() - start));
+            }
+          });
+        }, 0);
+      };
+    }
+  }
+  add(work) {
+    this.queue.push(work);
+    this.scheduleProcessing();
+  }
+  clear() {
+    this.queue.length = 0;
+    this.onComplete = void 0;
+  }
+  setOnComplete(onComplete) {
+    this.onComplete = onComplete;
+  }
+  get length() {
+    return this.queue.length;
+  }
+  scheduleProcessing() {
+    if (!this.isProcessing && this.queue.length > 0) {
+      this.isProcessing = true;
+      this.requestIdleCallback((deadline) => this.process(deadline), { timeout: 5e3 });
+    }
+  }
+  process(deadline) {
+    var _a;
+    while (deadline.timeRemaining() > 0 && this.queue.length > 0) {
+      const work = this.queue.shift();
+      work == null ? void 0 : work();
+    }
+    this.isProcessing = false;
+    if (this.queue.length > 0) {
+      this.scheduleProcessing();
+    } else {
+      (_a = this.onComplete) == null ? void 0 : _a.call(this);
+    }
+  }
+}
 class BrowserPangu extends Pangu {
   constructor() {
     super();
     __publicField(this, "isAutoSpacingPageExecuted");
-    __publicField(this, "autoSpacingPageObserver");
     __publicField(this, "idleQueue");
+    __publicField(this, "autoSpacingPageObserver");
     __publicField(this, "idleSpacingConfig");
     __publicField(this, "visibilityCheckConfig");
     __publicField(this, "blockTags");
@@ -474,14 +458,13 @@ class BrowserPangu extends Pangu {
       this.processTextNodes(textNodes);
     }
   }
-  processTextNodesWithIdleCallback(textNodes, callbacks) {
-    var _a;
+  processTextNodesWithIdleCallback(textNodes, onComplete) {
     if (textNodes.length === 0) {
-      (_a = callbacks == null ? void 0 : callbacks.onComplete) == null ? void 0 : _a.call(callbacks);
+      onComplete == null ? void 0 : onComplete();
       return;
     }
-    if (callbacks) {
-      this.idleQueue.setCallbacks(callbacks);
+    if (onComplete) {
+      this.idleQueue.setOnComplete(onComplete);
     }
     const chunkSize = this.idleSpacingConfig.chunkSize;
     const chunks = [];
@@ -576,57 +559,42 @@ class BrowserPangu extends Pangu {
       ...this.idleSpacingConfig,
       ...config
     };
-    if (config.enabled === false) {
-      this.idleQueue.clear();
-    }
   }
   getIdleSpacingConfig() {
     return { ...this.idleSpacingConfig };
   }
-  getIdleQueueLength() {
-    return this.idleQueue.length;
-  }
-  clearIdleQueue() {
-    this.idleQueue.clear();
-  }
-  getIdleProgress() {
-    return this.idleQueue.progress;
-  }
-  spacingPageWithIdleCallback(callbacks) {
-    var _a;
+  spacingPageWithIdleCallback(onComplete) {
     if (!this.idleSpacingConfig.enabled) {
       this.spacingPage();
-      (_a = callbacks == null ? void 0 : callbacks.onComplete) == null ? void 0 : _a.call(callbacks);
+      onComplete == null ? void 0 : onComplete();
       return;
     }
     this.spacingPageTitle();
-    this.spacingNodeWithIdleCallback(document.body, callbacks);
+    this.spacingNodeWithIdleCallback(document.body, onComplete);
   }
-  spacingNodeWithIdleCallback(contextNode, callbacks) {
-    var _a, _b;
+  spacingNodeWithIdleCallback(contextNode, onComplete) {
     if (!this.idleSpacingConfig.enabled) {
       this.spacingNode(contextNode);
-      (_a = callbacks == null ? void 0 : callbacks.onComplete) == null ? void 0 : _a.call(callbacks);
+      onComplete == null ? void 0 : onComplete();
       return;
     }
     if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
-      (_b = callbacks == null ? void 0 : callbacks.onComplete) == null ? void 0 : _b.call(callbacks);
+      onComplete == null ? void 0 : onComplete();
       return;
     }
     const textNodes = this.collectTextNodes(contextNode, true);
-    this.processTextNodesWithIdleCallback(textNodes, callbacks);
+    this.processTextNodesWithIdleCallback(textNodes, onComplete);
   }
-  spacingNodesWithIdleCallback(nodes, callbacks) {
-    var _a, _b;
+  spacingNodesWithIdleCallback(nodes, onComplete) {
     if (!this.idleSpacingConfig.enabled) {
       for (const node of nodes) {
         this.spacingNode(node);
       }
-      (_a = callbacks == null ? void 0 : callbacks.onComplete) == null ? void 0 : _a.call(callbacks);
+      onComplete == null ? void 0 : onComplete();
       return;
     }
     if (nodes.length === 0) {
-      (_b = callbacks == null ? void 0 : callbacks.onComplete) == null ? void 0 : _b.call(callbacks);
+      onComplete == null ? void 0 : onComplete();
       return;
     }
     const allTextNodes = [];
@@ -637,7 +605,7 @@ class BrowserPangu extends Pangu {
       const textNodes = this.collectTextNodes(node, true);
       allTextNodes.push(...textNodes);
     }
-    this.processTextNodesWithIdleCallback(allTextNodes, callbacks);
+    this.processTextNodesWithIdleCallback(allTextNodes, onComplete);
   }
   // Visibility check configuration methods
   updateVisibilityCheckConfig(config) {
