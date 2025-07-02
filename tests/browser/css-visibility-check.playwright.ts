@@ -14,6 +14,10 @@ test.describe('CSS Visibility Check', () => {
     await page.goto('data:text/html,<html><head><title>Test</title></head><body><div id="content"></div></body></html>');
     await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
+    // Disable idle spacing for synchronous tests
+    await page.evaluate(() => {
+      pangu.updateIdleSpacingConfig({ enabled: false });
+    });
   });
 
   test.skip('should demonstrate the problem with hidden elements (before fix)', async ({ page }) => {

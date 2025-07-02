@@ -24,6 +24,10 @@ test.describe('BrowserPangu', () => {
   test.beforeEach(async ({ page }) => {
     await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
+    // Disable idle spacing for synchronous tests
+    await page.evaluate(() => {
+      pangu.updateIdleSpacingConfig({ enabled: false });
+    });
   });
 
   test.describe('autoSpacingPage()', () => {

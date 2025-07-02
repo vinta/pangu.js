@@ -14,6 +14,10 @@ test.describe('CSS Visibility Check Debug', () => {
     await page.goto('data:text/html,<html><head><title>Test</title></head><body><div id="content"></div></body></html>');
     await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
+    // Disable idle spacing for synchronous tests
+    await page.evaluate(() => {
+      pangu.updateIdleSpacingConfig({ enabled: false });
+    });
   });
 
   test('debug simple visible elements spacing with visibility check enabled', async ({ page }) => {
