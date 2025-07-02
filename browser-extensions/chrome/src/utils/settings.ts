@@ -4,7 +4,6 @@ export const DEFAULT_SETTINGS: Settings = {
   spacing_mode: 'spacing_when_load',
   filter_mode: 'blacklist',
   blacklist: [
-    'https://calendar.google.com/*',
     'https://docs.google.com/*',
     'https://gist.github.com/*',
     'https://github.com/*/blob/*',
