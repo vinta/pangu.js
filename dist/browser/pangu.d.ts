@@ -27,7 +27,6 @@ export interface VisibilityCheckConfig {
     };
 }
 declare class IdleQueue {
-    private requestIdleCallback;
     private queue;
     private isProcessing;
     private onComplete?;

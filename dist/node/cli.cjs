@@ -291,25 +291,9 @@ function debounce(func, delay, mustRunDelay = Infinity) {
 }
 class IdleQueue {
   constructor() {
-    __publicField(this, "requestIdleCallback");
     __publicField(this, "queue", []);
     __publicField(this, "isProcessing", false);
     __publicField(this, "onComplete");
-    if (typeof window.requestIdleCallback === "function") {
-      this.requestIdleCallback = window.requestIdleCallback.bind(window);
-    } else {
-      this.requestIdleCallback = (callback, _options) => {
-        const start = performance.now();
-        return window.setTimeout(() => {
-          callback({
-            didTimeout: false,
-            timeRemaining() {
-              return Math.max(0, 16 - (performance.now() - start));
-            }
-          });
-        }, 0);
-      };
-    }
   }
   add(work) {
     this.queue.push(work);
@@ -328,7 +312,7 @@ class IdleQueue {
   scheduleProcessing() {
     if (!this.isProcessing && this.queue.length > 0) {
       this.isProcessing = true;
-      this.requestIdleCallback((deadline) => this.process(deadline), { timeout: 5e3 });
+      window.requestIdleCallback((deadline) => this.process(deadline), { timeout: 5e3 });
     }
   }
   process(deadline) {
