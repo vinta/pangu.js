@@ -361,8 +361,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       this.autoSpacingPageObserver = null;
       this.idleQueue = new IdleQueue();
       this.idleSpacingConfig = {
-        enabled: false,
-        // Disabled by default for backward compatibility
+        enabled: true,
+        // Enable by default for better performance
         chunkSize: 10,
         // Process 10 text nodes per idle cycle
         timeout: 5e3
