@@ -11,9 +11,7 @@
   function spacingPage() {
     const pangu = window.pangu;
     if (pangu) {
-      pangu.spacingPageWithIdleCallback(() => {
-        console.log("[Pangu.js] Manual spacing completed");
-      });
+      pangu.spacingPage();
     }
   }
   const loadedMessage = { type: "CONTENT_SCRIPT_LOADED" };

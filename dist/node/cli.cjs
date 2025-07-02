@@ -752,7 +752,15 @@ class BrowserPangu extends Pangu {
           const nodesToProcess = [...queue];
           queue.length = 0;
           if (nodesToProcess.length > 0) {
-            this.spacingNodesWithIdleCallback(nodesToProcess);
+            const allTextNodes = [];
+            for (const node of nodesToProcess) {
+              if (!(node instanceof Node) || node instanceof DocumentFragment) {
+                continue;
+              }
+              const textNodes = this.collectTextNodes(node, true);
+              allTextNodes.push(...textNodes);
+            }
+            this.processTextNodesWithIdleCallback(allTextNodes);
           }
         } else {
           while (queue.length) {
@@ -818,50 +826,6 @@ class BrowserPangu extends Pangu {
   }
   getIdleSpacingConfig() {
     return { ...this.idleSpacingConfig };
-  }
-  spacingPageWithIdleCallback(onComplete) {
-    if (!this.idleSpacingConfig.enabled) {
-      this.spacingPage();
-      onComplete == null ? void 0 : onComplete();
-      return;
-    }
-    this.spacingPageTitle();
-    this.spacingNodeWithIdleCallback(document.body, onComplete);
-  }
-  spacingNodeWithIdleCallback(contextNode, onComplete) {
-    if (!this.idleSpacingConfig.enabled) {
-      this.spacingNode(contextNode);
-      onComplete == null ? void 0 : onComplete();
-      return;
-    }
-    if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
-      onComplete == null ? void 0 : onComplete();
-      return;
-    }
-    const textNodes = this.collectTextNodes(contextNode, true);
-    this.processTextNodesWithIdleCallback(textNodes, onComplete);
-  }
-  spacingNodesWithIdleCallback(nodes, onComplete) {
-    if (!this.idleSpacingConfig.enabled) {
-      for (const node of nodes) {
-        this.spacingNode(node);
-      }
-      onComplete == null ? void 0 : onComplete();
-      return;
-    }
-    if (nodes.length === 0) {
-      onComplete == null ? void 0 : onComplete();
-      return;
-    }
-    const allTextNodes = [];
-    for (const node of nodes) {
-      if (!(node instanceof Node) || node instanceof DocumentFragment) {
-        continue;
-      }
-      const textNodes = this.collectTextNodes(node, true);
-      allTextNodes.push(...textNodes);
-    }
-    this.processTextNodesWithIdleCallback(allTextNodes, onComplete);
   }
   // Visibility check configuration methods
   updateVisibilityCheckConfig(config) {

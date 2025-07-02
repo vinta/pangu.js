@@ -80,9 +80,6 @@ export declare class BrowserPangu extends Pangu {
         chunkSize: number;
         timeout: number;
     };
-    spacingPageWithIdleCallback(onComplete?: () => void): void;
-    spacingNodeWithIdleCallback(contextNode: Node, onComplete?: () => void): void;
-    spacingNodesWithIdleCallback(nodes: Node[], onComplete?: () => void): void;
     updateVisibilityCheckConfig(config: Partial<VisibilityCheckConfig>): void;
     getVisibilityCheckConfig(): {
         enabled: boolean;
