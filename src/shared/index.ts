@@ -179,19 +179,19 @@ class PlaceholderReplacer {
     this.endDelimiter = endDelimiter;
   }
 
-  store(item: string): string {
+  store(item: string) {
     this.items[this.index] = item;
     return `${this.startDelimiter}${this.placeholder}${this.index++}${this.endDelimiter}`;
   }
 
-  restore(text: string): string {
+  restore(text: string) {
     const pattern = new RegExp(`${this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}${this.placeholder}(\\d+)${this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g');
     return text.replace(pattern, (_match, index) => {
       return this.items[parseInt(index, 10)] || '';
     });
   }
 
-  reset(): void {
+  reset() {
     this.items = [];
     this.index = 0;
   }
@@ -248,7 +248,7 @@ export class Pangu {
 
     // Handle multiple dots first (before single period)
     newText = newText.replace(DOTS_CJK, '$1 $2');
-    
+
     // Handle punctuation after CJK - add space but don't convert to full-width
     newText = newText.replace(CJK_PUNCTUATION, '$1$2 ');
     // Handle punctuation between AN and CJK
@@ -278,22 +278,22 @@ export class Pangu {
     // Handle single quotes more intelligently
     // First, handle possessive case
     newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
-    
+
     // Process single quotes around pure CJK text differently from mixed content
     const singleQuoteCJKManager = new PlaceholderReplacer('SINGLE_QUOTE_CJK_PLACEHOLDER_', '\uE030', '\uE031');
-    
+
     // Pattern to match single quotes around pure CJK text (no spaces, no other characters)
     const SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, 'g');
-    
+
     // Protect pure CJK content in single quotes
     newText = newText.replace(SINGLE_QUOTE_PURE_CJK, (match) => {
       return singleQuoteCJKManager.store(match);
     });
-    
+
     // Now process other single quote patterns
     newText = newText.replace(CJK_SINGLE_QUOTE_BUT_POSSESSIVE, '$1 $2');
     newText = newText.replace(SINGLE_QUOTE_CJK, '$1 $2');
-    
+
     // Restore protected pure CJK content
     newText = singleQuoteCJKManager.restore(newText);
 
@@ -432,7 +432,7 @@ export class Pangu {
 
     // Fix spacing inside brackets according to the above rules:
     // Ensure no unwanted spaces immediately after opening or before closing brackets
-    const fixBracketSpacing = (text: string): string => {
+    const fixBracketSpacing = (text: string) => {
       // Process each bracket type
       const processBracket = (pattern: RegExp, openBracket: string, closeBracket: string) => {
         text = text.replace(pattern, (_match, innerContent) => {
@@ -464,7 +464,7 @@ export class Pangu {
       newText = htmlTagManager.restore(newText);
     }
 
-    // TODO: TBD
+    // TODO:
     // Final fix for HTML comments: ensure no space after <!--
     // This is needed because <!-- is not protected as an HTML tag
     // and the ! character gets spaced by ANS_CJK pattern
@@ -473,25 +473,8 @@ export class Pangu {
     return newText;
   }
 
-  // alias for spacingText()
-  public spacing(text: string) {
-    return this.spacingText(text);
-  }
-
   public hasProperSpacing(text: string) {
     return this.spacingText(text) === text;
-  }
-
-  protected convertToFullwidth(symbols: string): string {
-    // prettier-ignore
-    return symbols
-      .replace(/~/g, '～')
-      .replace(/!/g, '！')
-      .replace(/;/g, '；')
-      .replace(/:/g, '：')
-      .replace(/,/g, '，')
-      .replace(/\./g, '。')
-      .replace(/\?/g, '？');
   }
 }
 

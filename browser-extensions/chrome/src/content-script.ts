@@ -12,49 +12,16 @@ declare global {
 async function autoSpacingPage() {
   const pangu = window.pangu;
   if (pangu) {
-    // Enable idle processing for non-blocking text spacing
-    pangu.enableIdleSpacing({
-      chunkSize: 20, // Process 20 text nodes per idle cycle
-      timeout: 2000, // 2 second timeout
-    });
-
-    // Enable visibility check to skip hidden elements
-    pangu.enableVisibilityCheck({
-      checkDuringIdle: true,
-      commonHiddenPatterns: {
-        clipRect: true,
-        displayNone: true,
-        visibilityHidden: true,
-        opacityZero: true,
-        heightWidth1px: true,
-      },
-    });
-
-    // Enable performance monitoring for debugging
-    // pangu.enablePerformanceMonitoring();
-
+    pangu.updateIdleSpacingConfig({ enabled: true });
+    pangu.updateVisibilityCheckConfig({ enabled: true });
     pangu.autoSpacingPage();
-
-    // Log performance results after a delay
-    // setTimeout(() => {
-    //   console.log('[Pangu.js] Performance Report:');
-    //   pangu.logPerformanceResults();
-    // }, 10000); // Log after 10 seconds
   }
 }
 
 function spacingPage() {
   const pangu = window.pangu;
   if (pangu) {
-    // Use idle callback version for manual spacing too
-    pangu.spacingPageWithIdleCallback({
-      onComplete: () => {
-        console.log('[Pangu.js] Manual spacing completed');
-      },
-      onProgress: (processed, total) => {
-        console.log(`[Pangu.js] Progress: ${processed}/${total} (${Math.round((processed / total) * 100)}%)`);
-      },
-    });
+    pangu.spacingPage();
   }
 }
 

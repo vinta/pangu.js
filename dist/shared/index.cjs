@@ -267,15 +267,8 @@ class Pangu {
     }
     return newText;
   }
-  // alias for spacingText()
-  spacing(text) {
-    return this.spacingText(text);
-  }
   hasProperSpacing(text) {
     return this.spacingText(text) === text;
-  }
-  convertToFullwidth(symbols) {
-    return symbols.replace(/~/g, "\uFF5E").replace(/!/g, "\uFF01").replace(/;/g, "\uFF1B").replace(/:/g, "\uFF1A").replace(/,/g, "\uFF0C").replace(/\./g, "\u3002").replace(/\?/g, "\uFF1F");
   }
 }
 const pangu = new Pangu();

@@ -6,18 +6,6 @@ export interface AutoSpacingPageConfig {
   nodeMaxWaitMs?: number;
 }
 
-export interface PerformanceStats {
-  count: number;
-  avg: number;
-  min: number;
-  max: number;
-  total: number;
-}
-
-export interface PerformanceReport {
-  [key: string]: PerformanceStats;
-}
-
 export interface IdleDeadline {
   didTimeout: boolean;
   timeRemaining(): number;
@@ -35,7 +23,6 @@ export interface IdleSpacingConfig {
 
 export interface VisibilityCheckConfig {
   enabled: boolean;
-  checkDuringIdle: boolean;
   commonHiddenPatterns: {
     clipRect: boolean;
     displayNone: boolean;
@@ -43,176 +30,6 @@ export interface VisibilityCheckConfig {
     opacityZero: boolean;
     heightWidth1px: boolean;
   };
-}
-
-export interface IdleSpacingCallbacks {
-  onComplete?: () => void;
-  onProgress?: (processed: number, total: number) => void;
-}
-
-class IdleQueue {
-  private queue: (() => void)[] = [];
-  private isProcessing = false;
-  private requestIdleCallback: (callback: IdleRequestCallback, options?: { timeout?: number }) => number;
-  private totalItems = 0;
-  private processedItems = 0;
-  private callbacks: IdleSpacingCallbacks = {};
-
-  constructor() {
-    // Simple fallback for Safari and other browsers without requestIdleCallback
-    if (typeof window.requestIdleCallback === 'function') {
-      this.requestIdleCallback = window.requestIdleCallback.bind(window);
-    } else {
-      // Fallback using setTimeout for browsers without requestIdleCallback (Safari)
-      this.requestIdleCallback = (callback: IdleRequestCallback, _options?: { timeout?: number }) => {
-        const start = performance.now();
-        return window.setTimeout(() => {
-          callback({
-            didTimeout: false,
-            timeRemaining() {
-              // Simulate ~16ms budget (60fps frame)
-              return Math.max(0, 16 - (performance.now() - start));
-            },
-          });
-        }, 0);
-      };
-    }
-  }
-
-  add(work: () => void): void {
-    this.queue.push(work);
-    this.totalItems++;
-    this.scheduleProcessing();
-  }
-
-  clear(): void {
-    this.queue.length = 0;
-    this.totalItems = 0;
-    this.processedItems = 0;
-    this.callbacks = {};
-  }
-
-  setCallbacks(callbacks: IdleSpacingCallbacks): void {
-    this.callbacks = callbacks;
-  }
-
-  get length(): number {
-    return this.queue.length;
-  }
-
-  get progress(): { processed: number; total: number; percentage: number } {
-    return {
-      processed: this.processedItems,
-      total: this.totalItems,
-      percentage: this.totalItems > 0 ? (this.processedItems / this.totalItems) * 100 : 0,
-    };
-  }
-
-  private scheduleProcessing(): void {
-    if (!this.isProcessing && this.queue.length > 0) {
-      this.isProcessing = true;
-      this.requestIdleCallback((deadline) => this.process(deadline), { timeout: 5000 });
-    }
-  }
-
-  private process(deadline: IdleDeadline): void {
-    while (deadline.timeRemaining() > 0 && this.queue.length > 0) {
-      const work = this.queue.shift();
-      work?.();
-      this.processedItems++;
-
-      // Call progress callback if provided
-      this.callbacks.onProgress?.(this.processedItems, this.totalItems);
-    }
-
-    this.isProcessing = false;
-
-    if (this.queue.length > 0) {
-      this.scheduleProcessing();
-    } else if (this.processedItems === this.totalItems && this.totalItems > 0) {
-      // All work completed, call completion callback
-      this.callbacks.onComplete?.();
-      // Reset counters for next batch
-      this.totalItems = 0;
-      this.processedItems = 0;
-    }
-  }
-}
-
-class PerformanceMonitor {
-  private metrics: Map<string, number[]> = new Map();
-  private enabled: boolean;
-
-  constructor(enabled = false) {
-    this.enabled = enabled;
-  }
-
-  measure<T>(label: string, fn: () => T): T {
-    if (!this.enabled) {
-      return fn();
-    }
-
-    const start = performance.now();
-    const result = fn();
-    const duration = performance.now() - start;
-
-    if (!this.metrics.has(label)) {
-      this.metrics.set(label, []);
-    }
-    this.metrics.get(label)!.push(duration);
-
-    return result;
-  }
-
-  getStats(label: string): PerformanceStats | null {
-    const times = this.metrics.get(label);
-    if (!times || times.length === 0) {
-      return null;
-    }
-
-    const total = times.reduce((a, b) => a + b, 0);
-    return {
-      count: times.length,
-      avg: total / times.length,
-      min: Math.min(...times),
-      max: Math.max(...times),
-      total,
-    };
-  }
-
-  getAllStats(): PerformanceReport {
-    const report: PerformanceReport = {};
-    for (const [label] of this.metrics) {
-      const stats = this.getStats(label);
-      if (stats) {
-        report[label] = stats;
-      }
-    }
-    return report;
-  }
-
-  reset(): void {
-    this.metrics.clear();
-  }
-
-  setEnabled(enabled: boolean): void {
-    this.enabled = enabled;
-  }
-
-  logResults(): void {
-    if (!this.enabled) {
-      return;
-    }
-
-    const report = this.getAllStats();
-    if (Object.keys(report).length === 0) {
-      return;
-    }
-
-    console.group('🚀 Pangu.js Performance Report');
-    console.table(report);
-    console.groupEnd();
-  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -254,56 +71,86 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
   };
 }
 
-export class BrowserPangu extends Pangu {
-  public isAutoSpacingPageExecuted: boolean;
-  protected autoSpacingPageObserver: MutationObserver | null;
-  protected performanceMonitor: PerformanceMonitor;
-  protected idleQueue: IdleQueue;
-  protected idleSpacingConfig: IdleSpacingConfig;
-  protected visibilityCheckConfig: VisibilityCheckConfig;
+class IdleQueue {
+  private queue: (() => void)[] = [];
+  private isProcessing = false;
+  private onComplete?: () => void;
 
-  public blockTags: RegExp;
-  public ignoredTags: RegExp;
-  public presentationalTags: RegExp;
-  public spaceLikeTags: RegExp;
-  public spaceSensitiveTags: RegExp;
-  public ignoredClass: string;
+  constructor() {
+    // No fallback - require native requestIdleCallback
+  }
+
+  add(work: () => void) {
+    this.queue.push(work);
+    this.scheduleProcessing();
+  }
+
+  clear() {
+    this.queue.length = 0;
+    this.onComplete = undefined;
+  }
+
+  setOnComplete(onComplete?: () => void) {
+    this.onComplete = onComplete;
+  }
+
+  get length() {
+    return this.queue.length;
+  }
+
+  private scheduleProcessing() {
+    if (!this.isProcessing && this.queue.length > 0) {
+      this.isProcessing = true;
+      requestIdleCallback((deadline) => this.process(deadline), { timeout: 5000 });
+    }
+  }
+
+  private process(deadline: IdleDeadline) {
+    while (deadline.timeRemaining() > 0 && this.queue.length > 0) {
+      const work = this.queue.shift();
+      work?.();
+    }
+
+    this.isProcessing = false;
+
+    if (this.queue.length > 0) {
+      this.scheduleProcessing();
+    } else {
+      // All work completed, call completion callback
+      this.onComplete?.();
+    }
+  }
+}
+
+export class BrowserPangu extends Pangu {
+  public isAutoSpacingPageExecuted = false;
+  public idleQueue = new IdleQueue();
+  public blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
+  public ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
+  public presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
+  public spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
+  public spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
+  public ignoredClass = 'no-pangu-spacing';
+
+  protected autoSpacingPageObserver: MutationObserver | null = null;
+  protected idleSpacingConfig: IdleSpacingConfig = {
+    enabled: true,
+    chunkSize: 40, // Process 40 text nodes per idle cycle
+    timeout: 2000, // 2 second timeout for idle processing
+  };
+  protected visibilityCheckConfig: VisibilityCheckConfig = {
+    enabled: false,
+    commonHiddenPatterns: {
+      clipRect: true, // clip: rect(1px, 1px, 1px, 1px) patterns
+      displayNone: true, // display: none
+      visibilityHidden: true, // visibility: hidden
+      opacityZero: true, // opacity: 0
+      heightWidth1px: true, // height: 1px; width: 1px
+    },
+  };
 
   constructor() {
     super();
-
-    this.isAutoSpacingPageExecuted = false;
-    this.autoSpacingPageObserver = null;
-
-    this.performanceMonitor = new PerformanceMonitor();
-
-    // Initialize idle processing infrastructure
-    this.idleQueue = new IdleQueue();
-    this.idleSpacingConfig = {
-      enabled: false, // Disabled by default for backward compatibility
-      chunkSize: 10, // Process 10 text nodes per idle cycle
-      timeout: 5000, // 5 second timeout for idle processing
-    };
-
-    // Initialize visibility check configuration
-    this.visibilityCheckConfig = {
-      enabled: true, // Enable for testing in Chrome extension
-      checkDuringIdle: true, // Use idle time for visibility checks
-      commonHiddenPatterns: {
-        clipRect: true, // clip: rect(1px, 1px, 1px, 1px) patterns
-        displayNone: true, // display: none
-        visibilityHidden: true, // visibility: hidden
-        opacityZero: true, // opacity: 0
-        heightWidth1px: true, // height: 1px; width: 1px
-      },
-    };
-
-    this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
-    this.ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
-    this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
-    this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
-    this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-    this.ignoredClass = 'no-pangu-spacing';
   }
 
   public autoSpacingPage({ pageDelayMs = 1000, nodeDelayMs = 500, nodeMaxWaitMs = 2000 }: AutoSpacingPageConfig = {}) {
@@ -348,32 +195,25 @@ export class BrowserPangu extends Pangu {
   }
 
   public spacingPage() {
-    this.performanceMonitor.measure('spacingPage', () => {
-      this.spacingPageTitle();
-      this.spacingPageBody();
-    });
-    this.performanceMonitor.logResults();
+    this.spacingPageTitle();
+    this.spacingPageBody();
   }
 
   public spacingPageTitle() {
-    this.performanceMonitor.measure('spacingPageTitle', () => {
-      const titleElement = document.querySelector('head > title');
-      if (titleElement) {
-        this.spacingNode(titleElement);
-      }
-    });
+    const titleElement = document.querySelector('head > title');
+    if (titleElement) {
+      this.spacingNode(titleElement);
+    }
   }
 
   public spacingPageBody() {
-    this.performanceMonitor.measure('spacingPageBody', () => {
-      // Process the entire body element
-      // The collectTextNodes method already filters out:
-      // 1. Whitespace-only text nodes
-      // 2. Text inside ignored tags (script, style, textarea, etc.)
-      // 3. Text inside contentEditable elements
-      // 4. Text inside elements with no-pangu-spacing class
-      this.spacingNode(document.body);
-    });
+    // Process the entire body element
+    // The collectTextNodes method already filters out:
+    // 1. Whitespace-only text nodes
+    // 2. Text inside ignored tags (script, style, textarea, etc.)
+    // 3. Text inside contentEditable elements
+    // 4. Text inside elements with no-pangu-spacing class
+    this.spacingNode(document.body);
   }
 
   public spacingNode(contextNode: Node) {
@@ -693,7 +533,7 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  protected collectTextNodes(contextNode: Node, reverse = false): Text[] {
+  protected collectTextNodes(contextNode: Node, reverse = false) {
     const nodes: Text[] = [];
 
     // Handle edge cases
@@ -749,24 +589,20 @@ export class BrowserPangu extends Pangu {
     }
 
     // Use TreeWalker to collect text nodes with content
-    const textNodes = this.performanceMonitor.measure('collectTextNodes', () => {
-      return this.collectTextNodes(contextNode, true);
-    });
+    const textNodes = this.collectTextNodes(contextNode, true);
 
     // Choose processing method based on idle spacing configuration
     if (this.idleSpacingConfig.enabled) {
       this.processTextNodesWithIdleCallback(textNodes);
     } else {
       // Process the collected text nodes using the shared logic (synchronous)
-      this.performanceMonitor.measure('processTextNodes', () => {
-        this.processTextNodes(textNodes);
-      });
+      this.processTextNodes(textNodes);
     }
   }
 
-  protected processTextNodesWithIdleCallback(textNodes: Node[], callbacks?: IdleSpacingCallbacks): void {
+  protected processTextNodesWithIdleCallback(textNodes: Node[], onComplete?: () => void) {
     if (textNodes.length === 0) {
-      callbacks?.onComplete?.();
+      onComplete?.();
       return;
     }
 
@@ -774,12 +610,12 @@ export class BrowserPangu extends Pangu {
     // If there's already work in progress, we'll add to it instead of replacing it
     // This prevents text from being skipped when dynamic content is added during processing
 
-    // Set up callbacks for progress tracking
-    // NOTE: This overwrites previous callbacks, which is a limitation when multiple
+    // Set up completion callback
+    // NOTE: This overwrites previous callback, which is a limitation when multiple
     // sources add work to the queue. However, ensuring all text gets processed
     // is more important than perfect callback handling.
-    if (callbacks) {
-      this.idleQueue.setCallbacks(callbacks);
+    if (onComplete) {
+      this.idleQueue.setOnComplete(onComplete);
     }
 
     // Split text nodes into chunks
@@ -791,11 +627,9 @@ export class BrowserPangu extends Pangu {
     }
 
     // Add each chunk as a work item to the idle queue
-    for (const [index, chunk] of chunks.entries()) {
+    for (const chunk of chunks) {
       this.idleQueue.add(() => {
-        this.performanceMonitor.measure(`processTextNodesChunk${index}`, () => {
-          this.processTextNodes(chunk);
-        });
+        this.processTextNodes(chunk);
       });
     }
   }
@@ -826,7 +660,20 @@ export class BrowserPangu extends Pangu {
           queue.length = 0; // Clear the queue
 
           if (nodesToProcess.length > 0) {
-            this.spacingNodesWithIdleCallback(nodesToProcess);
+            // Collect all text nodes from all input nodes
+            const allTextNodes: Node[] = [];
+            for (const node of nodesToProcess) {
+              // Skip DocumentFragments as they don't support TreeWalker properly
+              if (!(node instanceof Node) || node instanceof DocumentFragment) {
+                continue;
+              }
+
+              const textNodes = this.collectTextNodes(node, true);
+              allTextNodes.push(...textNodes);
+            }
+
+            // Process all collected text nodes with idle callback
+            this.processTextNodesWithIdleCallback(allTextNodes);
           }
         } else {
           // Synchronous processing (original behavior)
@@ -906,161 +753,40 @@ export class BrowserPangu extends Pangu {
     });
   }
 
-  // Performance monitoring methods
-
-  public enablePerformanceMonitoring(): void {
-    this.performanceMonitor.setEnabled(true);
-  }
-
-  public disablePerformanceMonitoring(): void {
-    this.performanceMonitor.setEnabled(false);
-  }
-
-  public getPerformanceReport(): PerformanceReport {
-    return this.performanceMonitor.getAllStats();
-  }
-
-  public getPerformanceStats(label: string): PerformanceStats | null {
-    return this.performanceMonitor.getStats(label);
-  }
-
-  public resetPerformanceMetrics(): void {
-    this.performanceMonitor.reset();
-  }
-
-  public logPerformanceResults(): void {
-    this.performanceMonitor.logResults();
-  }
-
   // Idle processing configuration methods
 
-  public enableIdleSpacing(config?: Partial<IdleSpacingConfig>): void {
+  public updateIdleSpacingConfig(config: Partial<IdleSpacingConfig>) {
     this.idleSpacingConfig = {
       ...this.idleSpacingConfig,
-      enabled: true,
       ...config,
     };
   }
 
-  public disableIdleSpacing(): void {
-    this.idleSpacingConfig.enabled = false;
-    this.idleQueue.clear();
-  }
-
-  public getIdleSpacingConfig(): IdleSpacingConfig {
+  public getIdleSpacingConfig() {
     return { ...this.idleSpacingConfig };
-  }
-
-  public getIdleQueueLength(): number {
-    return this.idleQueue.length;
-  }
-
-  public clearIdleQueue(): void {
-    this.idleQueue.clear();
-  }
-
-  public getIdleProgress(): { processed: number; total: number; percentage: number } {
-    return this.idleQueue.progress;
-  }
-
-  public spacingPageWithIdleCallback(callbacks?: IdleSpacingCallbacks): void {
-    if (!this.idleSpacingConfig.enabled) {
-      // Fallback to synchronous processing if idle spacing is disabled
-      this.spacingPage();
-      callbacks?.onComplete?.();
-      return;
-    }
-
-    // Process title synchronously (it's typically small)
-    this.spacingPageTitle();
-
-    // Process body with idle callback
-    this.spacingNodeWithIdleCallback(document.body, callbacks);
-  }
-
-  public spacingNodeWithIdleCallback(contextNode: Node, callbacks?: IdleSpacingCallbacks): void {
-    if (!this.idleSpacingConfig.enabled) {
-      // Fallback to synchronous processing if idle spacing is disabled
-      this.spacingNode(contextNode);
-      callbacks?.onComplete?.();
-      return;
-    }
-
-    // DocumentFragments don't support TreeWalker properly
-    if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
-      callbacks?.onComplete?.();
-      return;
-    }
-
-    // Use TreeWalker to collect text nodes with content
-    const textNodes = this.performanceMonitor.measure('collectTextNodes', () => {
-      return this.collectTextNodes(contextNode, true);
-    });
-
-    // Process with idle callback
-    this.processTextNodesWithIdleCallback(textNodes, callbacks);
-  }
-
-  public spacingNodesWithIdleCallback(nodes: Node[], callbacks?: IdleSpacingCallbacks): void {
-    if (!this.idleSpacingConfig.enabled) {
-      // Fallback to synchronous processing if idle spacing is disabled
-      for (const node of nodes) {
-        this.spacingNode(node);
-      }
-      callbacks?.onComplete?.();
-      return;
-    }
-
-    if (nodes.length === 0) {
-      callbacks?.onComplete?.();
-      return;
-    }
-
-    // Collect all text nodes from all input nodes
-    const allTextNodes: Node[] = [];
-    for (const node of nodes) {
-      // Skip DocumentFragments as they don't support TreeWalker properly
-      if (!(node instanceof Node) || node instanceof DocumentFragment) {
-        continue;
-      }
-
-      const textNodes = this.performanceMonitor.measure('collectTextNodes', () => {
-        return this.collectTextNodes(node, true);
-      });
-
-      allTextNodes.push(...textNodes);
-    }
-
-    // Process all collected text nodes with idle callback
-    this.processTextNodesWithIdleCallback(allTextNodes, callbacks);
   }
 
   // Visibility check configuration methods
 
-  public enableVisibilityCheck(config?: Partial<VisibilityCheckConfig>): void {
+  public updateVisibilityCheckConfig(config: Partial<VisibilityCheckConfig>) {
     this.visibilityCheckConfig = {
       ...this.visibilityCheckConfig,
-      enabled: true,
       ...config,
     };
   }
 
-  public disableVisibilityCheck(): void {
-    this.visibilityCheckConfig.enabled = false;
-  }
-
-  public getVisibilityCheckConfig(): VisibilityCheckConfig {
+  public getVisibilityCheckConfig() {
     return { ...this.visibilityCheckConfig };
   }
 
   // Visibility checking utility methods
 
-  public isElementVisuallyHidden(element: Element): boolean {
+  public isElementVisuallyHidden(element: Element) {
     if (!this.visibilityCheckConfig.enabled) {
       return false;
     }
 
-    const style = window.getComputedStyle(element);
+    const style = getComputedStyle(element);
     const config = this.visibilityCheckConfig.commonHiddenPatterns;
 
     // Check display: none
@@ -1106,7 +832,7 @@ export class BrowserPangu extends Pangu {
     return false;
   }
 
-  protected shouldSkipSpacingAfterNode(node: Node): boolean {
+  protected shouldSkipSpacingAfterNode(node: Node) {
     if (!this.visibilityCheckConfig.enabled) {
       return false;
     }
