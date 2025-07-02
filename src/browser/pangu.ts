@@ -101,7 +101,7 @@ class IdleQueue {
   private scheduleProcessing() {
     if (!this.isProcessing && this.queue.length > 0) {
       this.isProcessing = true;
-      window.requestIdleCallback((deadline) => this.process(deadline), { timeout: 5000 });
+      requestIdleCallback((deadline) => this.process(deadline), { timeout: 5000 });
     }
   }
 
@@ -786,7 +786,7 @@ export class BrowserPangu extends Pangu {
       return false;
     }
 
-    const style = window.getComputedStyle(element);
+    const style = getComputedStyle(element);
     const config = this.visibilityCheckConfig.commonHiddenPatterns;
 
     // Check display: none
