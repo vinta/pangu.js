@@ -80,24 +80,13 @@ export class BrowserPangu extends Pangu {
   }
 
   public spacingPage() {
-    this.spacingPageTitle();
-    this.spacingPageBody();
-  }
-
-  public spacingPageTitle() {
-    const titleElement = document.querySelector('head > title');
-    if (titleElement) {
-      this.spacingNode(titleElement);
+    // spacing title
+    const title = document.querySelector('head > title');
+    if (title) {
+      this.spacingNode(title);
     }
-  }
 
-  public spacingPageBody() {
-    // Process the entire body element
-    // The collectTextNodes method already filters out:
-    // 1. Whitespace-only text nodes
-    // 2. Text inside ignored tags (script, style, textarea, etc.)
-    // 3. Text inside contentEditable elements
-    // 4. Text inside elements with no-pangu-spacing class
+    // spacing body
     this.spacingNode(document.body);
   }
 
@@ -130,27 +119,6 @@ export class BrowserPangu extends Pangu {
     // The processTextNodes method includes logic to detect whitespace between selected text nodes.
 
     this.spacingNodeWithTreeWalker(contextNode);
-  }
-
-  public spacingElementById(idName: string) {
-    const element = document.getElementById(idName);
-    if (element) {
-      this.spacingNode(element);
-    }
-  }
-
-  public spacingElementByClassName(className: string) {
-    const elements = document.getElementsByClassName(className);
-    for (let i = 0; i < elements.length; i++) {
-      this.spacingNode(elements[i]);
-    }
-  }
-
-  public spacingElementByTagName(tagName: string) {
-    const elements = document.getElementsByTagName(tagName);
-    for (let i = 0; i < elements.length; i++) {
-      this.spacingNode(elements[i]);
-    }
   }
 
   public stopAutoSpacingPage() {
@@ -444,7 +412,10 @@ export class BrowserPangu extends Pangu {
 
     const debouncedSpacingTitle = debounce(
       () => {
-        this.spacingPageTitle();
+        const titleElement = document.querySelector('head > title');
+        if (titleElement) {
+          this.spacingNode(titleElement);
+        }
       },
       nodeDelayMs,
       nodeMaxWaitMs,
