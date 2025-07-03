@@ -21,20 +21,16 @@ export class VisibilityDetector {
     },
   };
 
-  updateConfig(config: Partial<VisibilityCheckConfig>) {
+  public updateConfig(config: Partial<VisibilityCheckConfig>) {
     Object.assign(this.config, config);
-    
+
     // Handle nested commonHiddenPatterns object if provided
     if (config.commonHiddenPatterns) {
       Object.assign(this.config.commonHiddenPatterns, config.commonHiddenPatterns);
     }
   }
 
-  getConfig() {
-    return { ...this.config };
-  }
-
-  isElementVisuallyHidden(element: Element): boolean {
+  public isElementVisuallyHidden(element: Element): boolean {
     if (!this.config.enabled) {
       return false;
     }
@@ -85,7 +81,7 @@ export class VisibilityDetector {
     return false;
   }
 
-  shouldSkipSpacingAfterNode(node: Node): boolean {
+  public shouldSkipSpacingAfterNode(node: Node) {
     if (!this.config.enabled) {
       return false;
     }

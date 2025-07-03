@@ -72,10 +72,6 @@ export class IdleProcessor {
     Object.assign(this.config, config);
   }
 
-  getConfig() {
-    return { ...this.config };
-  }
-
   processInChunks<T>(
     items: T[],
     processor: (chunk: T[]) => void,
