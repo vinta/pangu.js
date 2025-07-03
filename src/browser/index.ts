@@ -72,45 +72,32 @@ export class BrowserPangu extends Pangu {
   }
 
   public spacingPage() {
-    // spacing title
+    // Page title
     const title = document.querySelector('head > title');
     if (title) {
       this.spacingNode(title);
     }
 
-    // spacing body
+    // Page body
     this.spacingNode(document.body);
   }
 
   public spacingNode(contextNode: Node) {
-    // Use TreeWalker to collect all text nodes in the DOM tree
-    // This handles cases like <div><span>中文</span>"<span>ABC</span></div> where the quote is a direct child of the div
-    //
-    // The collectTextNodes helper filters out text nodes that contain only whitespace,
-    // ensuring we only process nodes with actual content
-    //
-    // Example HTML with CSS {white-space: pre-wrap}
-    //   <div>
-    //     "整天等"
-    //     "EAS"
-    //     "build"
-    //   </div>
-    //
-    // This creates these text nodes:
-    // 1. "整天等"     -> selected (has content)
-    // 2. "\n  "      -> filtered out (whitespace only)
-    // 3. "EAS"       -> selected (has content)
-    // 4. "\n  "      -> filtered out (whitespace only)
-    // 5. "build"     -> selected (has content)
-    //
-    // Without filtering whitespace, we'd process the whitespace nodes too, which would:
-    // - Impact performance (processing many empty nodes)
-    // - Add complexity (algorithm expects meaningful content)
-    //
-    // However, those filtered whitespace nodes still exist in the DOM and can render as spaces with CSS like {white-space: pre-wrap}.
-    // The processTextNodes method includes logic to detect whitespace between selected text nodes.
+    // TreeWalker doesn't support DocumentFragment properly
+    if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
+      return;
+    }
 
-    this.spacingNodeWithTreeWalker(contextNode);
+    // Only process nodes with actual content (excluding text nodes that contain only whitespace)
+    const textNodes = DomUtils.collectTextNodes(contextNode, true);
+
+    // Choose processing method based on idle spacing configuration
+    if (this.idleSpacingConfig.enabled) {
+      this.processTextNodesWithIdleCallback(textNodes);
+    } else {
+      // Process the collected text nodes using the shared logic (synchronous)
+      this.processTextNodes(textNodes);
+    }
   }
 
   public stopAutoSpacingPage() {
@@ -322,28 +309,6 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  protected collectTextNodes(contextNode: Node, reverse = false) {
-    return DomUtils.collectTextNodes(contextNode, reverse);
-  }
-
-  protected spacingNodeWithTreeWalker(contextNode: Node) {
-    // DocumentFragments don't support TreeWalker properly
-    if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
-      return;
-    }
-
-    // Use TreeWalker to collect text nodes with content
-    const textNodes = this.collectTextNodes(contextNode, true);
-
-    // Choose processing method based on idle spacing configuration
-    if (this.idleSpacingConfig.enabled) {
-      this.processTextNodesWithIdleCallback(textNodes);
-    } else {
-      // Process the collected text nodes using the shared logic (synchronous)
-      this.processTextNodes(textNodes);
-    }
-  }
-
   protected processTextNodesWithIdleCallback(textNodes: Node[], onComplete?: () => void) {
     this.idleProcessor.processInChunks(textNodes, (chunk) => this.processTextNodes(chunk), onComplete);
   }
@@ -425,12 +390,12 @@ export class BrowserPangu extends Pangu {
             // Collect all text nodes from all input nodes
             const allTextNodes: Node[] = [];
             for (const node of nodesToProcess) {
-              // Skip DocumentFragments as they don't support TreeWalker properly
+              // TreeWalker doesn't support DocumentFragment properly
               if (!(node instanceof Node) || node instanceof DocumentFragment) {
                 continue;
               }
 
-              const textNodes = this.collectTextNodes(node, true);
+              const textNodes = DomUtils.collectTextNodes(node, true);
               allTextNodes.push(...textNodes);
             }
 
@@ -500,18 +465,18 @@ export class BrowserPangu extends Pangu {
     // NOTE: A single MutationObserver can observe multiple targets simultaneously
     // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver/observe:
 
-    // Observe page content changes
-    this.autoSpacingPageObserver.observe(document.body, {
-      characterData: true,
-      childList: true,
-      subtree: true,
-    });
-
     // Observe page title changes
     this.autoSpacingPageObserver.observe(document.head, {
       characterData: true,
       childList: true,
       subtree: true, // Need subtree to observe text node changes inside title
+    });
+
+    // Observe page content changes
+    this.autoSpacingPageObserver.observe(document.body, {
+      characterData: true,
+      childList: true,
+      subtree: true,
     });
   }
 }
