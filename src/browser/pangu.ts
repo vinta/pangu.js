@@ -6,7 +6,6 @@ export interface AutoSpacingPageConfig {
   nodeMaxWaitMs?: number;
 }
 
-
 export interface IdleSpacingConfig {
   enabled: boolean;
   chunkSize: number;
@@ -157,48 +156,7 @@ export class BrowserPangu extends Pangu {
 
     this.isAutoSpacingPageExecuted = true;
 
-    // Wait for videos to load before spacing to avoid layout shifts
-    // See: https://github.com/vinta/pangu.js/issues/117
-    const spacingPageOnce = once(() => {
-      this.spacingPage();
-    });
-
-    const videos = Array.from(document.getElementsByTagName('video'));
-    
-    if (videos.length === 0) {
-      // No videos, proceed with normal delay
-      setTimeout(spacingPageOnce, pageDelayMs);
-    } else {
-      // Check if all videos are already loaded
-      const allVideosLoaded = videos.every(video => video.readyState >= 3);
-      
-      if (allVideosLoaded) {
-        // All videos loaded, proceed with normal delay
-        setTimeout(spacingPageOnce, pageDelayMs);
-      } else {
-        // Wait for all videos to load
-        let loadedCount = 0;
-        const videoCount = videos.length;
-        
-        const checkAllLoaded = () => {
-          loadedCount++;
-          if (loadedCount >= videoCount) {
-            setTimeout(spacingPageOnce, pageDelayMs);
-          }
-        };
-        
-        videos.forEach(video => {
-          if (video.readyState >= 3) {
-            checkAllLoaded();
-          } else {
-            video.addEventListener('loadeddata', checkAllLoaded, { once: true });
-          }
-        });
-        
-        // Fallback timeout in case videos never load
-        setTimeout(spacingPageOnce, pageDelayMs + 5000);
-      }
-    }
+    this.waitForVideosAndSpacePage(pageDelayMs);
 
     this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
   }
@@ -640,6 +598,51 @@ export class BrowserPangu extends Pangu {
       this.idleQueue.add(() => {
         this.processTextNodes(chunk);
       });
+    }
+  }
+
+  protected waitForVideosAndSpacePage(pageDelayMs: number) {
+    // Wait for videos to load before spacing to avoid layout shifts
+    // See: https://github.com/vinta/pangu.js/issues/117
+    const spacingPageOnce = once(() => {
+      this.spacingPage();
+    });
+
+    const videos = Array.from(document.getElementsByTagName('video'));
+
+    if (videos.length === 0) {
+      // No videos, proceed with normal delay
+      setTimeout(spacingPageOnce, pageDelayMs);
+    } else {
+      // Check if all videos are already loaded
+      const allVideosLoaded = videos.every((video) => video.readyState >= 3);
+
+      if (allVideosLoaded) {
+        // All videos loaded, proceed with normal delay
+        setTimeout(spacingPageOnce, pageDelayMs);
+      } else {
+        // Wait for all videos to load
+        let loadedCount = 0;
+        const videoCount = videos.length;
+
+        const checkAllLoaded = () => {
+          loadedCount++;
+          if (loadedCount >= videoCount) {
+            setTimeout(spacingPageOnce, pageDelayMs);
+          }
+        };
+
+        for (const video of videos) {
+          if (video.readyState >= 3) {
+            checkAllLoaded();
+          } else {
+            video.addEventListener('loadeddata', checkAllLoaded, { once: true });
+          }
+        }
+
+        // Fallback timeout in case videos never load
+        setTimeout(spacingPageOnce, pageDelayMs + 5000);
+      }
     }
   }
 
