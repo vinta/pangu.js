@@ -7,18 +7,21 @@ const CJK = "\u2E80-\u2EFF\u2F00-\u2FDF\u3040-\u309F\u30A0-\u30FA\u30FC-\u30FF\u
 const AN = "A-Za-z0-9";
 const A = "A-Za-z";
 const UPPER_AN = "A-Z0-9";
-const OPERATORS_WITH_HYPHEN = "\\+\\-\\*=&";
-const OPERATORS_NO_HYPHEN = "\\+\\*=&";
+const OPERATORS_BASE = "\\+\\*=&";
+const OPERATORS_WITH_HYPHEN = `${OPERATORS_BASE}\\-`;
+const OPERATORS_NO_HYPHEN = OPERATORS_BASE;
 const GRADE_OPERATORS = "\\+\\-\\*";
-const QUOTES_FULL = '`"\u05F4';
+const QUOTES = '`"\u05F4';
 const LEFT_BRACKETS_BASIC = "\\(\\[\\{";
 const RIGHT_BRACKETS_BASIC = "\\)\\]\\}";
 const LEFT_BRACKETS_EXTENDED = "\\(\\[\\{<>\u201C";
 const RIGHT_BRACKETS_EXTENDED = "\\)\\]\\}<>\u201D";
 const ANS_CJK_AFTER = `${A}\u0370-\u03FF0-9@\\$%\\^&\\*\\-\\+\\\\=\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF`;
 const ANS_BEFORE_CJK = `${A}\u0370-\u03FF0-9\\$%\\^&\\*\\-\\+\\\\=\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF`;
-const UNIX_ABSOLUTE_FILE_PATH = /\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path|project|src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|your)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+\*]+)*/;
-const UNIX_RELATIVE_FILE_PATH = /(?:\.\/)?(?:src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|node_modules|\.claude|\.git|\.vscode)(?:\/[A-Za-z0-9_\-\.@\+\*]+)+/;
+const FILE_PATH_DIRS = "home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path|project|src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|your|\\.claude|\\.git|\\.vscode";
+const FILE_PATH_CHARS = "[A-Za-z0-9_\\-\\.@\\+\\*]+";
+const UNIX_ABSOLUTE_FILE_PATH = new RegExp(`/(?:\\.?(?:${FILE_PATH_DIRS})|\\.(?:[A-Za-z0-9_\\-]+))(?:/${FILE_PATH_CHARS})*`);
+const UNIX_RELATIVE_FILE_PATH = new RegExp(`(?:\\./)?(?:${FILE_PATH_DIRS})(?:/${FILE_PATH_CHARS})+`);
 const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
 const ANY_CJK = new RegExp(`[${CJK}]`);
 const CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:]+)(?=[${CJK}${AN}])`, "g");
@@ -30,9 +33,9 @@ const AN_PERIOD_CJK = new RegExp(`([${AN}])(\\.)([${CJK}])`, "g");
 const AN_COLON_CJK = new RegExp(`([${AN}])(:)([${CJK}])`, "g");
 const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, "g");
 const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, "g");
-const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES_FULL}])`, "g");
-const QUOTE_CJK = new RegExp(`([${QUOTES_FULL}])([${CJK}])`, "g");
-const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES_FULL}]+)[ ]*(.+?)[ ]*([${QUOTES_FULL}]+)`, "g");
+const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES}])`, "g");
+const QUOTE_CJK = new RegExp(`([${QUOTES}])([${CJK}])`, "g");
+const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES}]+)[ ]*(.+?)[ ]*([${QUOTES}]+)`, "g");
 const QUOTE_AN = new RegExp(`([\u201D])([${AN}])`, "g");
 const CJK_QUOTE_AN = new RegExp(`([${CJK}])(")([${AN}])`, "g");
 const CJK_SINGLE_QUOTE_BUT_POSSESSIVE = new RegExp(`([${CJK}])('[^s])`, "g");
@@ -73,22 +76,22 @@ const S_A = new RegExp(`(%)([${A}])`, "g");
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 class PlaceholderReplacer {
   constructor(placeholder, startDelimiter, endDelimiter) {
-    __publicField$1(this, "placeholder");
     __publicField$1(this, "items", []);
     __publicField$1(this, "index", 0);
-    __publicField$1(this, "startDelimiter");
-    __publicField$1(this, "endDelimiter");
+    __publicField$1(this, "pattern");
     this.placeholder = placeholder;
     this.startDelimiter = startDelimiter;
     this.endDelimiter = endDelimiter;
+    const escapedStart = this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escapedEnd = this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    this.pattern = new RegExp(`${escapedStart}${this.placeholder}(\\d+)${escapedEnd}`, "g");
   }
   store(item) {
     this.items[this.index] = item;
     return `${this.startDelimiter}${this.placeholder}${this.index++}${this.endDelimiter}`;
   }
   restore(text) {
-    const pattern = new RegExp(`${this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${this.placeholder}(\\d+)${this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "g");
-    return text.replace(pattern, (_match, index) => {
+    return text.replace(this.pattern, (_match, index) => {
       return this.items[parseInt(index, 10)] || "";
     });
   }
@@ -226,19 +229,21 @@ class Pangu {
     newText = newText.replace(S_A, "$1 $2");
     newText = newText.replace(MIDDLE_DOT, "\u30FB");
     const fixBracketSpacing = (text2) => {
-      const processBracket = (pattern, openBracket, closeBracket) => {
+      const bracketPatterns = [
+        { pattern: /<([^<>]*)>/g, open: "<", close: ">" },
+        { pattern: /\(([^()]*)\)/g, open: "(", close: ")" },
+        { pattern: /\[([^\[\]]*)\]/g, open: "[", close: "]" },
+        { pattern: /\{([^{}]*)\}/g, open: "{", close: "}" }
+      ];
+      for (const { pattern, open, close } of bracketPatterns) {
         text2 = text2.replace(pattern, (_match, innerContent) => {
           if (!innerContent) {
-            return `${openBracket}${closeBracket}`;
+            return `${open}${close}`;
           }
           const trimmedContent = innerContent.replace(/^ +| +$/g, "");
-          return `${openBracket}${trimmedContent}${closeBracket}`;
+          return `${open}${trimmedContent}${close}`;
         });
-      };
-      processBracket(/<([^<>]*)>/g, "<", ">");
-      processBracket(/\(([^()]*)\)/g, "(", ")");
-      processBracket(/\[([^\[\]]*)\]/g, "[", "]");
-      processBracket(/\{([^{}]*)\}/g, "{", "}");
+      }
       return text2;
     };
     newText = fixBracketSpacing(newText);
@@ -327,17 +332,11 @@ class IdleQueue {
     }
   }
 }
-class BrowserPangu extends Pangu {
+const _BrowserPangu = class _BrowserPangu2 extends Pangu {
   constructor() {
     super();
     __publicField(this, "isAutoSpacingPageExecuted", false);
     __publicField(this, "idleQueue", new IdleQueue());
-    __publicField(this, "blockTags", /^(div|p|h1|h2|h3|h4|h5|h6)$/i);
-    __publicField(this, "ignoredTags", /^(code|pre|script|style|textarea|iframe|input)$/i);
-    __publicField(this, "presentationalTags", /^(b|code|del|em|i|s|strong|kbd)$/i);
-    __publicField(this, "spaceLikeTags", /^(br|hr|i|img|pangu)$/i);
-    __publicField(this, "spaceSensitiveTags", /^(a|del|pre|s|strike|u)$/i);
-    __publicField(this, "ignoredClass", "no-pangu-spacing");
     __publicField(this, "autoSpacingPageObserver", null);
     __publicField(this, "idleSpacingConfig", {
       enabled: true,
@@ -460,22 +459,22 @@ class BrowserPangu extends Pangu {
     return false;
   }
   hasIgnoredClass(node) {
-    if (node instanceof Element && node.classList.contains(this.ignoredClass)) {
+    if (node instanceof Element && node.classList.contains(_BrowserPangu2.ignoredClass)) {
       return true;
     }
-    if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(this.ignoredClass)) {
+    if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(_BrowserPangu2.ignoredClass)) {
       return true;
     }
     return false;
   }
   canIgnoreNode(node) {
     let currentNode = node;
-    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClass(currentNode))) {
+    if (currentNode && (this.isSpecificTag(currentNode, _BrowserPangu2.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClass(currentNode))) {
       return true;
     }
     while (currentNode.parentNode) {
       currentNode = currentNode.parentNode;
-      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+      if (currentNode && (this.isSpecificTag(currentNode, _BrowserPangu2.ignoredTags) || this.isContentEditable(currentNode))) {
         return true;
       }
     }
@@ -532,7 +531,7 @@ class BrowserPangu extends Pangu {
         }
       }
       if (nextTextNode) {
-        if (currentTextNode.nextSibling && this.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
+        if (currentTextNode.nextSibling && _BrowserPangu2.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
           nextTextNode = currentTextNode;
           continue;
         }
@@ -543,11 +542,11 @@ class BrowserPangu extends Pangu {
         const nextStartsWithSpace = nextTextNode.data.startsWith(" ");
         let hasWhitespaceBetween = false;
         let currentAncestor = currentTextNode;
-        while (currentAncestor.parentNode && this.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !this.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
+        while (currentAncestor.parentNode && this.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !_BrowserPangu2.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
           currentAncestor = currentAncestor.parentNode;
         }
         let nextAncestor = nextTextNode;
-        while (nextAncestor.parentNode && this.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !this.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
+        while (nextAncestor.parentNode && this.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !_BrowserPangu2.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
           nextAncestor = nextAncestor.parentNode;
         }
         let nodeBetween = currentAncestor.nextSibling;
@@ -571,24 +570,24 @@ class BrowserPangu extends Pangu {
         const skipSpacing = isQuote(currentLast) && isCJK(nextFirst) || isCJK(currentLast) && isQuote(nextFirst);
         if (testNewText !== testText && !skipSpacing) {
           let nextNode = nextTextNode;
-          while (nextNode.parentNode && !this.spaceSensitiveTags.test(nextNode.nodeName) && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
+          while (nextNode.parentNode && !_BrowserPangu2.spaceSensitiveTags.test(nextNode.nodeName) && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
             nextNode = nextNode.parentNode;
           }
           let currentNode = currentTextNode;
-          while (currentNode.parentNode && !this.spaceSensitiveTags.test(currentNode.nodeName) && this.isLastTextChild(currentNode.parentNode, currentNode)) {
+          while (currentNode.parentNode && !_BrowserPangu2.spaceSensitiveTags.test(currentNode.nodeName) && this.isLastTextChild(currentNode.parentNode, currentNode)) {
             currentNode = currentNode.parentNode;
           }
           if (currentNode.nextSibling) {
-            if (this.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
+            if (_BrowserPangu2.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
               nextTextNode = currentTextNode;
               continue;
             }
           }
-          if (!this.blockTags.test(currentNode.nodeName)) {
-            if (!this.spaceSensitiveTags.test(nextNode.nodeName)) {
-              if (!this.ignoredTags.test(nextNode.nodeName) && !this.blockTags.test(nextNode.nodeName)) {
+          if (!_BrowserPangu2.blockTags.test(currentNode.nodeName)) {
+            if (!_BrowserPangu2.spaceSensitiveTags.test(nextNode.nodeName)) {
+              if (!_BrowserPangu2.ignoredTags.test(nextNode.nodeName) && !_BrowserPangu2.blockTags.test(nextNode.nodeName)) {
                 if (nextTextNode.previousSibling) {
-                  if (!this.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
+                  if (!_BrowserPangu2.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
                     if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
                       if (!this.shouldSkipSpacingAfterNode(currentTextNode)) {
                         nextTextNode.data = ` ${nextTextNode.data}`;
@@ -605,7 +604,7 @@ class BrowserPangu extends Pangu {
                   }
                 }
               }
-            } else if (!this.spaceSensitiveTags.test(currentNode.nodeName)) {
+            } else if (!_BrowserPangu2.spaceSensitiveTags.test(currentNode.nodeName)) {
               if (currentTextNode instanceof Text && !currentTextNode.data.endsWith(" ")) {
                 if (!this.shouldSkipSpacingAfterNode(currentTextNode)) {
                   currentTextNode.data = `${currentTextNode.data} `;
@@ -617,7 +616,7 @@ class BrowserPangu extends Pangu {
                 panguSpace.innerHTML = " ";
                 if (nextNode.parentNode) {
                   if (nextNode.previousSibling) {
-                    if (!this.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
+                    if (!_BrowserPangu2.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
                       nextNode.parentNode.insertBefore(panguSpace, nextNode);
                     }
                   } else {
@@ -650,13 +649,13 @@ class BrowserPangu extends Pangu {
         let currentNode = node;
         while (currentNode) {
           if (currentNode instanceof Element) {
-            if (this.ignoredTags.test(currentNode.nodeName)) {
+            if (_BrowserPangu2.ignoredTags.test(currentNode.nodeName)) {
               return NodeFilter.FILTER_REJECT;
             }
             if (this.isContentEditable(currentNode)) {
               return NodeFilter.FILTER_REJECT;
             }
-            if (currentNode.classList.contains(this.ignoredClass)) {
+            if (currentNode.classList.contains(_BrowserPangu2.ignoredClass)) {
               return NodeFilter.FILTER_REJECT;
             }
           }
@@ -861,7 +860,14 @@ class BrowserPangu extends Pangu {
     }
     return false;
   }
-}
+};
+__publicField(_BrowserPangu, "blockTags", /^(div|p|h1|h2|h3|h4|h5|h6)$/i);
+__publicField(_BrowserPangu, "ignoredTags", /^(code|pre|script|style|textarea|iframe|input)$/i);
+__publicField(_BrowserPangu, "presentationalTags", /^(b|code|del|em|i|s|strong|kbd)$/i);
+__publicField(_BrowserPangu, "spaceLikeTags", /^(br|hr|i|img|pangu)$/i);
+__publicField(_BrowserPangu, "spaceSensitiveTags", /^(a|del|pre|s|strike|u)$/i);
+__publicField(_BrowserPangu, "ignoredClass", "no-pangu-spacing");
+let BrowserPangu = _BrowserPangu;
 const pangu = new BrowserPangu();
 const usage = `
 usage: pangu [-h] [-v] [-t] [-f] [-c] text_or_path

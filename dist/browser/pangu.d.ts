@@ -4,13 +4,6 @@ export interface AutoSpacingPageConfig {
     nodeDelayMs?: number;
     nodeMaxWaitMs?: number;
 }
-export interface IdleDeadline {
-    didTimeout: boolean;
-    timeRemaining(): number;
-}
-export interface IdleRequestCallback {
-    (deadline: IdleDeadline): void;
-}
 export interface IdleSpacingConfig {
     enabled: boolean;
     chunkSize: number;
@@ -39,14 +32,14 @@ declare class IdleQueue {
     private process;
 }
 export declare class BrowserPangu extends Pangu {
+    static readonly blockTags: RegExp;
+    static readonly ignoredTags: RegExp;
+    static readonly presentationalTags: RegExp;
+    static readonly spaceLikeTags: RegExp;
+    static readonly spaceSensitiveTags: RegExp;
+    static readonly ignoredClass = "no-pangu-spacing";
     isAutoSpacingPageExecuted: boolean;
     idleQueue: IdleQueue;
-    blockTags: RegExp;
-    ignoredTags: RegExp;
-    presentationalTags: RegExp;
-    spaceLikeTags: RegExp;
-    spaceSensitiveTags: RegExp;
-    ignoredClass: string;
     protected autoSpacingPageObserver: MutationObserver | null;
     protected idleSpacingConfig: IdleSpacingConfig;
     protected visibilityCheckConfig: VisibilityCheckConfig;
