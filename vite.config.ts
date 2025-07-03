@@ -6,7 +6,6 @@ import dts from 'vite-plugin-dts';
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const projectRoot = __dirname;
 
-
 // Custom plugin to handle multiple builds
 const multiBuildPlugin = () => {
   return {
@@ -42,7 +41,7 @@ const multiBuildPlugin = () => {
 
       // Build CommonJS for Node
       console.log('\nBuilding CommonJS modules...');
-      
+
       // Build node/index.cjs from the CommonJS source
       await build({
         configFile: false,
@@ -71,7 +70,7 @@ const multiBuildPlugin = () => {
           charset: 'ascii',
         },
       });
-      
+
       // Build node/cli.cjs
       await build({
         configFile: false,
@@ -144,9 +143,9 @@ export default defineConfig({
     lib: {
       entry: {
         'shared/index': resolve(projectRoot, 'src/shared/index.ts'),
-        'browser/pangu': resolve(projectRoot, 'src/browser/pangu.ts'),
         'node/index': resolve(projectRoot, 'src/node/index.ts'),
         'node/cli': resolve(projectRoot, 'src/node/cli.ts'),
+        'browser/pangu': resolve(projectRoot, 'src/browser/index.ts'),
       },
       formats: ['es'],
     },

@@ -1,4 +1,4 @@
-import pangu, { BrowserPangu } from './pangu';
+import pangu, { BrowserPangu } from './index';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (pangu as any).BrowserPangu = BrowserPangu;
