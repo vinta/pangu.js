@@ -33,7 +33,7 @@ const OPERATORS_NO_HYPHEN = '\\+\\*=&'; // For ANS_OPERATOR_ANS only
 const GRADE_OPERATORS = '\\+\\-\\*'; // For single letter grades
 
 // Quotes
-const QUOTES_FULL = '\`"\u05f4'; // Backtick, straight quote, Hebrew punctuation
+const QUOTES_FULL = '"\u05f4'; // straight quote, Hebrew punctuation (backtick handled separately)
 
 // Brackets - different sets!
 const LEFT_BRACKETS_BASIC = '\\(\\[\\{'; // For AN_LEFT_BRACKET
@@ -243,6 +243,21 @@ export class Pangu {
         });
 
         return htmlTagManager.store(processedTag);
+      });
+    }
+
+    // Handle backtick blocks - preserve content inside backticks
+    const backtickManager = new PlaceholderReplacer('BACKTICK_PLACEHOLDER_', '\uE040', '\uE041');
+    let hasBackticks = false;
+
+    if (newText.includes('`')) {
+      hasBackticks = true;
+      // Pattern to match content between backticks including the backticks
+      const BACKTICK_PATTERN = /`[^`]+`/g;
+      
+      // Store backtick blocks and replace with placeholders
+      newText = newText.replace(BACKTICK_PATTERN, (match) => {
+        return backtickManager.store(match);
       });
     }
 
@@ -462,6 +477,17 @@ export class Pangu {
     // Restore HTML tags from placeholders (only if HTML processing occurred)
     if (hasHtmlTags) {
       newText = htmlTagManager.restore(newText);
+    }
+
+    // Restore backtick blocks from placeholders (only if backtick processing occurred)
+    if (hasBackticks) {
+      newText = backtickManager.restore(newText);
+      
+      // Add spacing around backtick blocks after restoration
+      // Pattern: CJK followed directly by backtick block
+      newText = newText.replace(new RegExp(`([${CJK}])(\`[^\`]+\`)`, 'g'), '$1 $2');
+      // Pattern: Backtick block followed directly by CJK
+      newText = newText.replace(new RegExp(`(\`[^\`]+\`)([${CJK}])`, 'g'), '$1 $2');
     }
 
     // TODO:

@@ -12,7 +12,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   const OPERATORS_WITH_HYPHEN = "\\+\\-\\*=&";
   const OPERATORS_NO_HYPHEN = "\\+\\*=&";
   const GRADE_OPERATORS = "\\+\\-\\*";
-  const QUOTES_FULL = '`"\u05F4';
+  const QUOTES_FULL = '"\u05F4';
   const LEFT_BRACKETS_BASIC = "\\(\\[\\{";
   const RIGHT_BRACKETS_BASIC = "\\)\\]\\}";
   const LEFT_BRACKETS_EXTENDED = "\\(\\[\\{<>\u201C";
@@ -125,6 +125,15 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
             return `${attrName}="${processedValue}"`;
           });
           return htmlTagManager.store(processedTag);
+        });
+      }
+      const backtickManager = new PlaceholderReplacer("BACKTICK_PLACEHOLDER_", "\uE040", "\uE041");
+      let hasBackticks = false;
+      if (newText.includes("`")) {
+        hasBackticks = true;
+        const BACKTICK_PATTERN = /`[^`]+`/g;
+        newText = newText.replace(BACKTICK_PATTERN, (match) => {
+          return backtickManager.store(match);
         });
       }
       newText = newText.replace(DOTS_CJK, "$1 $2");
@@ -242,6 +251,11 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       newText = fixBracketSpacing(newText);
       if (hasHtmlTags) {
         newText = htmlTagManager.restore(newText);
+      }
+      if (hasBackticks) {
+        newText = backtickManager.restore(newText);
+        newText = newText.replace(new RegExp(`([${CJK}])(\`[^\`]+\`)`, "g"), "$1 $2");
+        newText = newText.replace(new RegExp(`(\`[^\`]+\`)([${CJK}])`, "g"), "$1 $2");
       }
       return newText;
     }
