@@ -1,7 +1,7 @@
 import { Pangu } from '../shared';
-import { IdleProcessor, IdleQueue, type IdleSpacingConfig } from './idle-processor';
-import { VisibilityDetector, type VisibilityCheckConfig } from './visibility-detector';
 import { DomUtils } from './dom-utils';
+import { IdleProcessor, type IdleQueue, type IdleSpacingConfig } from './idle-processor';
+import { VisibilityDetector, type VisibilityCheckConfig } from './visibility-detector';
 
 export interface AutoSpacingPageConfig {
   pageDelayMs?: number;
@@ -63,14 +63,7 @@ export class BrowserPangu extends Pangu {
     this.idleQueue = this.idleProcessor.queue;
   }
 
-  // Delegate config methods to the processors
-  public get idleSpacingConfig() {
-    return this.idleProcessor.config;
-  }
-
-  public get visibilityCheckConfig() {
-    return this.visibilityDetector.config;
-  }
+  // PUBLIC
 
   public autoSpacingPage({ pageDelayMs = 1000, nodeDelayMs = 500, nodeMaxWaitMs = 2000 }: AutoSpacingPageConfig = {}) {
     if (!(document.body instanceof Node)) {
@@ -171,34 +164,27 @@ export class BrowserPangu extends Pangu {
     this.isAutoSpacingPageExecuted = false;
   }
 
-  // Delegate DOM utility methods to DomUtils
-  protected isContentEditable(node: any) {
-    return DomUtils.isContentEditable(node);
+  public get idleSpacingConfig() {
+    return this.idleProcessor.config;
   }
 
-  protected isSpecificTag(node: Node, tagRegex: RegExp) {
-    return DomUtils.isSpecificTag(node, tagRegex);
+  public get visibilityCheckConfig() {
+    return this.visibilityDetector.config;
   }
 
-  protected isInsideSpecificTag(node: Node, tagRegex: RegExp, checkCurrent = false) {
-    return DomUtils.isInsideSpecificTag(node, tagRegex, checkCurrent);
+  public updateIdleSpacingConfig(config: Partial<IdleSpacingConfig>) {
+    this.idleProcessor.updateConfig(config);
   }
 
-  protected hasIgnoredClass(node: Node) {
-    return DomUtils.hasIgnoredClass(node);
+  public updateVisibilityCheckConfig(config: Partial<VisibilityCheckConfig>) {
+    this.visibilityDetector.updateConfig(config);
   }
 
-  protected canIgnoreNode(node: Node) {
-    return DomUtils.canIgnoreNode(node);
+  public isElementVisuallyHidden(element: Element) {
+    return this.visibilityDetector.isElementVisuallyHidden(element);
   }
 
-  protected isFirstTextChild(parentNode: Node, targetNode: Node) {
-    return DomUtils.isFirstTextChild(parentNode, targetNode);
-  }
-
-  protected isLastTextChild(parentNode: Node, targetNode: Node) {
-    return DomUtils.isLastTextChild(parentNode, targetNode);
-  }
+  // INTERNAL
 
   protected processTextNodes(textNodes: Node[]) {
     let currentTextNode: Node | null;
@@ -212,7 +198,7 @@ export class BrowserPangu extends Pangu {
       }
 
       // Skip nodes that should be ignored
-      if (this.canIgnoreNode(currentTextNode)) {
+      if (DomUtils.canIgnoreNode(currentTextNode)) {
         nextTextNode = currentTextNode;
         continue;
       }
@@ -261,13 +247,13 @@ export class BrowserPangu extends Pangu {
         // We need to check at different levels of the DOM tree
         // First, find the highest ancestor that contains only the current text node
         let currentAncestor = currentTextNode as Node;
-        while (currentAncestor.parentNode && this.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !DomUtils.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
+        while (currentAncestor.parentNode && DomUtils.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !DomUtils.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
           currentAncestor = currentAncestor.parentNode;
         }
 
         // Find the highest ancestor that contains only the next text node
         let nextAncestor = nextTextNode as Node;
-        while (nextAncestor.parentNode && this.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !DomUtils.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
+        while (nextAncestor.parentNode && DomUtils.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !DomUtils.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
           nextAncestor = nextAncestor.parentNode;
         }
 
@@ -300,12 +286,12 @@ export class BrowserPangu extends Pangu {
 
         if (testNewText !== testText && !skipSpacing) {
           let nextNode: Node = nextTextNode;
-          while (nextNode.parentNode && !DomUtils.spaceSensitiveTags.test(nextNode.nodeName) && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
+          while (nextNode.parentNode && !DomUtils.spaceSensitiveTags.test(nextNode.nodeName) && DomUtils.isFirstTextChild(nextNode.parentNode, nextNode)) {
             nextNode = nextNode.parentNode;
           }
 
           let currentNode: Node = currentTextNode;
-          while (currentNode.parentNode && !DomUtils.spaceSensitiveTags.test(currentNode.nodeName) && this.isLastTextChild(currentNode.parentNode, currentNode)) {
+          while (currentNode.parentNode && !DomUtils.spaceSensitiveTags.test(currentNode.nodeName) && DomUtils.isLastTextChild(currentNode.parentNode, currentNode)) {
             currentNode = currentNode.parentNode;
           }
 
@@ -323,16 +309,16 @@ export class BrowserPangu extends Pangu {
                   if (!DomUtils.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
                     if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
                       // Check visibility before adding space
-                      if (!this.shouldSkipSpacingAfterNode(currentTextNode)) {
+                      if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
                         nextTextNode.data = ` ${nextTextNode.data}`;
                       }
                     }
                   }
                 } else {
-                  if (!this.canIgnoreNode(nextTextNode)) {
+                  if (!DomUtils.canIgnoreNode(nextTextNode)) {
                     if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
                       // Check visibility before adding space
-                      if (!this.shouldSkipSpacingAfterNode(currentTextNode)) {
+                      if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
                         nextTextNode.data = ` ${nextTextNode.data}`;
                       }
                     }
@@ -342,13 +328,13 @@ export class BrowserPangu extends Pangu {
             } else if (!DomUtils.spaceSensitiveTags.test(currentNode.nodeName)) {
               if (currentTextNode instanceof Text && !currentTextNode.data.endsWith(' ')) {
                 // Check visibility before adding space
-                if (!this.shouldSkipSpacingAfterNode(currentTextNode)) {
+                if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
                   currentTextNode.data = `${currentTextNode.data} `;
                 }
               }
             } else {
               // Check visibility before inserting space element
-              if (!this.shouldSkipSpacingAfterNode(currentTextNode)) {
+              if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
                 const panguSpace = document.createElement('pangu');
                 panguSpace.innerHTML = ' ';
 
@@ -401,11 +387,7 @@ export class BrowserPangu extends Pangu {
   }
 
   protected processTextNodesWithIdleCallback(textNodes: Node[], onComplete?: () => void) {
-    this.idleProcessor.processInChunks(
-      textNodes,
-      (chunk) => this.processTextNodes(chunk),
-      onComplete
-    );
+    this.idleProcessor.processInChunks(textNodes, (chunk) => this.processTextNodes(chunk), onComplete);
   }
 
   protected waitForVideosAndSpacePage(pageDelayMs: number) {
@@ -570,36 +552,6 @@ export class BrowserPangu extends Pangu {
       childList: true,
       subtree: true, // Need subtree to observe text node changes inside title
     });
-  }
-
-  // Idle processing configuration methods
-
-  public updateIdleSpacingConfig(config: Partial<IdleSpacingConfig>) {
-    this.idleProcessor.updateConfig(config);
-  }
-
-  public getIdleSpacingConfig() {
-    return this.idleProcessor.getConfig();
-  }
-
-  // Visibility check configuration methods
-
-  public updateVisibilityCheckConfig(config: Partial<VisibilityCheckConfig>) {
-    this.visibilityDetector.updateConfig(config);
-  }
-
-  public getVisibilityCheckConfig() {
-    return this.visibilityDetector.getConfig();
-  }
-
-  // Visibility checking utility methods
-
-  public isElementVisuallyHidden(element: Element) {
-    return this.visibilityDetector.isElementVisuallyHidden(element);
-  }
-
-  protected shouldSkipSpacingAfterNode(node: Node) {
-    return this.visibilityDetector.shouldSkipSpacingAfterNode(node);
   }
 }
 
