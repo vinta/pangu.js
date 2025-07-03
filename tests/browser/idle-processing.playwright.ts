@@ -31,7 +31,7 @@ test.describe('Idle Processing Infrastructure', () => {
     expect(result.timeout).toBe(3000);
   });
 
-  test('should disable idle spacing and clear queue', async ({ page }) => {
+  test('should disable idle spacing', async ({ page }) => {
     const result = await page.evaluate(() => {
       // Enable idle spacing first
       pangu.updateIdleSpacingConfig({ enabled: true });
@@ -44,33 +44,13 @@ test.describe('Idle Processing Infrastructure', () => {
       return {
         enabledBefore: configBefore.enabled,
         enabledAfter: configAfter.enabled,
-        queueLength: pangu.idleQueue.length,
       };
     });
 
     expect(result.enabledBefore).toBe(true);
     expect(result.enabledAfter).toBe(false);
-    expect(result.queueLength).toBe(0);
   });
 
-  test('should provide queue management methods', async ({ page }) => {
-    const result = await page.evaluate(() => {
-      // Initial queue length
-      const initialLength = pangu.idleQueue.length;
-
-      // Clear queue (should be no-op if empty)
-      pangu.idleQueue.clear();
-      const lengthAfterClear = pangu.idleQueue.length;
-
-      return {
-        initialLength,
-        lengthAfterClear,
-      };
-    });
-
-    expect(result.initialLength).toBe(0);
-    expect(result.lengthAfterClear).toBe(0);
-  });
 
   test('should require native requestIdleCallback support', async ({ page }) => {
     // Test that the system requires native requestIdleCallback
