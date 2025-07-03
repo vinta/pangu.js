@@ -6,14 +6,6 @@ export interface AutoSpacingPageConfig {
   nodeMaxWaitMs?: number;
 }
 
-export interface IdleDeadline {
-  didTimeout: boolean;
-  timeRemaining(): number;
-}
-
-export interface IdleRequestCallback {
-  (deadline: IdleDeadline): void;
-}
 
 export interface IdleSpacingConfig {
   enabled: boolean;
@@ -123,14 +115,15 @@ class IdleQueue {
 }
 
 export class BrowserPangu extends Pangu {
+  public static readonly blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
+  public static readonly ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
+  public static readonly presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
+  public static readonly spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
+  public static readonly spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
+  public static readonly ignoredClass = 'no-pangu-spacing';
+
   public isAutoSpacingPageExecuted = false;
   public idleQueue = new IdleQueue();
-  public blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
-  public ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
-  public presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
-  public spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
-  public spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-  public ignoredClass = 'no-pangu-spacing';
 
   protected autoSpacingPageObserver: MutationObserver | null = null;
   protected idleSpacingConfig: IdleSpacingConfig = {
@@ -304,11 +297,11 @@ export class BrowserPangu extends Pangu {
 
   protected hasIgnoredClass(node: Node) {
     // Check the node itself if it's an element
-    if (node instanceof Element && node.classList.contains(this.ignoredClass)) {
+    if (node instanceof Element && node.classList.contains(BrowserPangu.ignoredClass)) {
       return true;
     }
     // Check the parent node (for text nodes)
-    if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(this.ignoredClass)) {
+    if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(BrowserPangu.ignoredClass)) {
       return true;
     }
     return false;
@@ -316,13 +309,13 @@ export class BrowserPangu extends Pangu {
 
   protected canIgnoreNode(node: Node) {
     let currentNode = node;
-    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClass(currentNode))) {
+    if (currentNode && (this.isSpecificTag(currentNode, BrowserPangu.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClass(currentNode))) {
       // We will skip processing any children of ignored elements, so don't need to check all ancestors
       return true;
     }
     while (currentNode.parentNode) {
       currentNode = currentNode.parentNode;
-      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+      if (currentNode && (this.isSpecificTag(currentNode, BrowserPangu.ignoredTags) || this.isContentEditable(currentNode))) {
         return true;
       }
     }
@@ -397,7 +390,7 @@ export class BrowserPangu extends Pangu {
 
       // Handle nested tag text processing
       if (nextTextNode) {
-        if (currentTextNode.nextSibling && this.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
+        if (currentTextNode.nextSibling && BrowserPangu.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
           nextTextNode = currentTextNode;
           continue;
         }
@@ -416,13 +409,13 @@ export class BrowserPangu extends Pangu {
         // We need to check at different levels of the DOM tree
         // First, find the highest ancestor that contains only the current text node
         let currentAncestor = currentTextNode as Node;
-        while (currentAncestor.parentNode && this.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !this.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
+        while (currentAncestor.parentNode && this.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !BrowserPangu.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
           currentAncestor = currentAncestor.parentNode;
         }
 
         // Find the highest ancestor that contains only the next text node
         let nextAncestor = nextTextNode as Node;
-        while (nextAncestor.parentNode && this.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !this.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
+        while (nextAncestor.parentNode && this.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !BrowserPangu.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
           nextAncestor = nextAncestor.parentNode;
         }
 
@@ -455,27 +448,27 @@ export class BrowserPangu extends Pangu {
 
         if (testNewText !== testText && !skipSpacing) {
           let nextNode: Node = nextTextNode;
-          while (nextNode.parentNode && !this.spaceSensitiveTags.test(nextNode.nodeName) && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
+          while (nextNode.parentNode && !BrowserPangu.spaceSensitiveTags.test(nextNode.nodeName) && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
             nextNode = nextNode.parentNode;
           }
 
           let currentNode: Node = currentTextNode;
-          while (currentNode.parentNode && !this.spaceSensitiveTags.test(currentNode.nodeName) && this.isLastTextChild(currentNode.parentNode, currentNode)) {
+          while (currentNode.parentNode && !BrowserPangu.spaceSensitiveTags.test(currentNode.nodeName) && this.isLastTextChild(currentNode.parentNode, currentNode)) {
             currentNode = currentNode.parentNode;
           }
 
           if (currentNode.nextSibling) {
-            if (this.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
+            if (BrowserPangu.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
               nextTextNode = currentTextNode;
               continue;
             }
           }
 
-          if (!this.blockTags.test(currentNode.nodeName)) {
-            if (!this.spaceSensitiveTags.test(nextNode.nodeName)) {
-              if (!this.ignoredTags.test(nextNode.nodeName) && !this.blockTags.test(nextNode.nodeName)) {
+          if (!BrowserPangu.blockTags.test(currentNode.nodeName)) {
+            if (!BrowserPangu.spaceSensitiveTags.test(nextNode.nodeName)) {
+              if (!BrowserPangu.ignoredTags.test(nextNode.nodeName) && !BrowserPangu.blockTags.test(nextNode.nodeName)) {
                 if (nextTextNode.previousSibling) {
-                  if (!this.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
+                  if (!BrowserPangu.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
                     if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
                       // Check visibility before adding space
                       if (!this.shouldSkipSpacingAfterNode(currentTextNode)) {
@@ -494,7 +487,7 @@ export class BrowserPangu extends Pangu {
                   }
                 }
               }
-            } else if (!this.spaceSensitiveTags.test(currentNode.nodeName)) {
+            } else if (!BrowserPangu.spaceSensitiveTags.test(currentNode.nodeName)) {
               if (currentTextNode instanceof Text && !currentTextNode.data.endsWith(' ')) {
                 // Check visibility before adding space
                 if (!this.shouldSkipSpacingAfterNode(currentTextNode)) {
@@ -509,7 +502,7 @@ export class BrowserPangu extends Pangu {
 
                 if (nextNode.parentNode) {
                   if (nextNode.previousSibling) {
-                    if (!this.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
+                    if (!BrowserPangu.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
                       nextNode.parentNode.insertBefore(panguSpace, nextNode);
                     }
                   } else {
@@ -554,7 +547,7 @@ export class BrowserPangu extends Pangu {
         while (currentNode) {
           if (currentNode instanceof Element) {
             // Check for ignored tags
-            if (this.ignoredTags.test(currentNode.nodeName)) {
+            if (BrowserPangu.ignoredTags.test(currentNode.nodeName)) {
               return NodeFilter.FILTER_REJECT;
             }
             // Check for contentEditable
@@ -562,7 +555,7 @@ export class BrowserPangu extends Pangu {
               return NodeFilter.FILTER_REJECT;
             }
             // Check for ignored class
-            if (currentNode.classList.contains(this.ignoredClass)) {
+            if (currentNode.classList.contains(BrowserPangu.ignoredClass)) {
               return NodeFilter.FILTER_REJECT;
             }
           }
