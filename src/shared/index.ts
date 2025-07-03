@@ -85,8 +85,7 @@ const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, 'g');
 // The symbol part does not include '
 const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES_FULL}])`, 'g');
 const QUOTE_CJK = new RegExp(`([${QUOTES_FULL}])([${CJK}])`, 'g');
-// Match same quote types: backtick with backtick, double with double, etc.
-const FIX_QUOTE_ANY_QUOTE = new RegExp(`(\`)[ ]*(.+?)[ ]*(\`)|(\")[ ]*(.+?)[ ]*(\")|(')[ ]*(.+?)[ ]*(')|(\u05f4)[ ]*(.+?)[ ]*(\u05f4)`, 'g');
+const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES_FULL}]+)[ ]*(.+?)[ ]*([${QUOTES_FULL}]+)`, 'g');
 
 // Handle curly quotes with alphanumeric characters
 // These patterns should only apply to curly quotes, not straight quotes
@@ -220,6 +219,12 @@ export class Pangu {
 
     let newText = text;
 
+    // Protect backtick content from quote processing but allow spacing around backticks
+    const backtickManager = new PlaceholderReplacer('BACKTICK_CONTENT_', '\uE004', '\uE005');
+    newText = newText.replace(/`([^`]+)`/g, (_match, content) => {
+      return `\`${backtickManager.store(content)}\``;
+    });
+
     // Initialize placeholder managers
     const htmlTagManager = new PlaceholderReplacer('HTML_TAG_PLACEHOLDER_', '\uE000', '\uE001');
     let hasHtmlTags = false;
@@ -267,23 +272,7 @@ export class Pangu {
 
     newText = newText.replace(CJK_QUOTE, '$1 $2');
     newText = newText.replace(QUOTE_CJK, '$1 $2');
-    // Fix quote spacing - match same quote types only
-    newText = newText.replace(FIX_QUOTE_ANY_QUOTE, (match, ...groups) => {
-      // groups[0-2]: backticks, groups[3-5]: double quotes, groups[6-8]: single quotes, groups[9-11]: u05f4
-      if (groups[0] && groups[2]) {
-        return `${groups[0]}${groups[1]}${groups[2]}`;
-      }
-      if (groups[3] && groups[5]) {
-        return `${groups[3]}${groups[4]}${groups[5]}`;
-      }
-      if (groups[6] && groups[8]) {
-        return `${groups[6]}${groups[7]}${groups[8]}`;
-      }
-      if (groups[9] && groups[11]) {
-        return `${groups[9]}${groups[10]}${groups[11]}`;
-      }
-      return match;
-    });
+    newText = newText.replace(FIX_QUOTE_ANY_QUOTE, '$1$2$3');
 
     // Handle quotes with alphanumeric - closing quotes followed by AN need space
     newText = newText.replace(QUOTE_AN, '$1 $2');
@@ -480,6 +469,9 @@ export class Pangu {
     if (hasHtmlTags) {
       newText = htmlTagManager.restore(newText);
     }
+
+    // Restore backtick content
+    newText = backtickManager.restore(newText);
 
     // TODO:
     // Final fix for HTML comments: ensure no space after <!--
