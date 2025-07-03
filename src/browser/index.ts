@@ -1,6 +1,6 @@
 import { Pangu } from '../shared';
 import { DomUtils } from './dom-utils';
-import { IdleProcessor, type IdleQueue, type IdleSpacingConfig } from './idle-processor';
+import { IdleProcessor, type IdleSpacingConfig } from './idle-processor';
 import { VisibilityDetector, type VisibilityCheckConfig } from './visibility-detector';
 
 export interface AutoSpacingPageConfig {
@@ -49,8 +49,7 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 }
 
 export class BrowserPangu extends Pangu {
-  public isAutoSpacingPageExecuted = false;
-  public idleQueue: IdleQueue;
+  private isAutoSpacingPageExecuted = false;
   private idleProcessor: IdleProcessor;
   private visibilityDetector: VisibilityDetector;
 
@@ -60,7 +59,6 @@ export class BrowserPangu extends Pangu {
     super();
     this.idleProcessor = new IdleProcessor();
     this.visibilityDetector = new VisibilityDetector();
-    this.idleQueue = this.idleProcessor.queue;
   }
 
   // PUBLIC
