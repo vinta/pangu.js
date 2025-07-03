@@ -7,11 +7,11 @@ export class DomUtils {
   static readonly ignoredClass = 'no-pangu-spacing';
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static isContentEditable(node: any): boolean {
+  static isContentEditable(node: any) {
     return node.isContentEditable || (node.getAttribute && node.getAttribute('g_editable') === 'true');
   }
 
-  static isSpecificTag(node: Node, tagRegex: RegExp): boolean {
+  static isSpecificTag(node: Node, tagRegex: RegExp) {
     return !!(node && node.nodeName && tagRegex.test(node.nodeName));
   }
 
@@ -31,11 +31,12 @@ export class DomUtils {
     return false;
   }
 
-  static hasIgnoredClass(node: Node): boolean {
+  static hasIgnoredClass(node: Node) {
     // Check the node itself if it's an element
     if (node instanceof Element && node.classList.contains(this.ignoredClass)) {
       return true;
     }
+
     // Check the parent node (for text nodes)
     if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(this.ignoredClass)) {
       return true;
@@ -43,7 +44,7 @@ export class DomUtils {
     return false;
   }
 
-  static canIgnoreNode(node: Node): boolean {
+  static canIgnoreNode(node: Node) {
     let currentNode = node;
     if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClass(currentNode))) {
       // We will skip processing any children of ignored elements, so don't need to check all ancestors
@@ -58,7 +59,7 @@ export class DomUtils {
     return false;
   }
 
-  static isFirstTextChild(parentNode: Node, targetNode: Node): boolean {
+  static isFirstTextChild(parentNode: Node, targetNode: Node) {
     const { childNodes } = parentNode;
 
     // Check if targetNode is the first child node (excluding comments) that has textContent
@@ -72,7 +73,7 @@ export class DomUtils {
     return false;
   }
 
-  static isLastTextChild(parentNode: Node, targetNode: Node): boolean {
+  static isLastTextChild(parentNode: Node, targetNode: Node) {
     const { childNodes } = parentNode;
 
     // Check if targetNode is the last child node (excluding comments) that has textContent
