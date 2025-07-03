@@ -125,12 +125,12 @@ export class BrowserPangu extends Pangu {
   public idleQueue = new IdleQueue();
 
   protected autoSpacingPageObserver: MutationObserver | null = null;
-  protected idleSpacingConfig: IdleSpacingConfig = {
+  public readonly idleSpacingConfig: IdleSpacingConfig = {
     enabled: true,
     chunkSize: 40, // Process 40 text nodes per idle cycle
     timeout: 2000, // 2 second timeout for idle processing
   };
-  protected visibilityCheckConfig: VisibilityCheckConfig = {
+  public readonly visibilityCheckConfig: VisibilityCheckConfig = {
     enabled: false,
     commonHiddenPatterns: {
       clipRect: true, // clip: rect(1px, 1px, 1px, 1px) patterns
@@ -140,10 +140,6 @@ export class BrowserPangu extends Pangu {
       heightWidth1px: true, // height: 1px; width: 1px
     },
   };
-
-  constructor() {
-    super();
-  }
 
   public autoSpacingPage({ pageDelayMs = 1000, nodeDelayMs = 500, nodeMaxWaitMs = 2000 }: AutoSpacingPageConfig = {}) {
     if (!(document.body instanceof Node)) {
@@ -770,10 +766,8 @@ export class BrowserPangu extends Pangu {
   // Idle processing configuration methods
 
   public updateIdleSpacingConfig(config: Partial<IdleSpacingConfig>) {
-    this.idleSpacingConfig = {
-      ...this.idleSpacingConfig,
-      ...config,
-    };
+    // Use Object.assign to mutate the existing readonly object
+    Object.assign(this.idleSpacingConfig, config);
   }
 
   public getIdleSpacingConfig() {
@@ -783,10 +777,13 @@ export class BrowserPangu extends Pangu {
   // Visibility check configuration methods
 
   public updateVisibilityCheckConfig(config: Partial<VisibilityCheckConfig>) {
-    this.visibilityCheckConfig = {
-      ...this.visibilityCheckConfig,
-      ...config,
-    };
+    // Use Object.assign to mutate the existing readonly object
+    Object.assign(this.visibilityCheckConfig, config);
+    
+    // Handle nested commonHiddenPatterns object if provided
+    if (config.commonHiddenPatterns) {
+      Object.assign(this.visibilityCheckConfig.commonHiddenPatterns, config.commonHiddenPatterns);
+    }
   }
 
   public getVisibilityCheckConfig() {
