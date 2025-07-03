@@ -50,16 +50,9 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 
 export class BrowserPangu extends Pangu {
   private isAutoSpacingPageExecuted = false;
-  private idleProcessor: IdleProcessor;
-  private visibilityDetector: VisibilityDetector;
-
+  private idleProcessor = new IdleProcessor();
+  private visibilityDetector = new VisibilityDetector();
   protected autoSpacingPageObserver: MutationObserver | null = null;
-
-  constructor() {
-    super();
-    this.idleProcessor = new IdleProcessor();
-    this.visibilityDetector = new VisibilityDetector();
-  }
 
   // PUBLIC
 
@@ -75,7 +68,6 @@ export class BrowserPangu extends Pangu {
     this.isAutoSpacingPageExecuted = true;
 
     this.waitForVideosAndSpacePage(pageDelayMs);
-
     this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
   }
 
