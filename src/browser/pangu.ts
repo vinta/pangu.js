@@ -299,7 +299,8 @@ export class BrowserPangu extends Pangu {
   protected isFirstTextChild(parentNode: Node, targetNode: Node) {
     const { childNodes } = parentNode;
 
-    // 只判斷第一個含有 text 的 node
+    // Check if targetNode is the first child node (excluding comments) that has textContent
+    // Note: textContent includes text from all descendants, so element nodes can match too
     for (let i = 0; i < childNodes.length; i++) {
       const childNode = childNodes[i];
       if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
@@ -312,7 +313,8 @@ export class BrowserPangu extends Pangu {
   protected isLastTextChild(parentNode: Node, targetNode: Node) {
     const { childNodes } = parentNode;
 
-    // 只判斷倒數第一個含有 text 的 node
+    // Check if targetNode is the last child node (excluding comments) that has textContent
+    // Note: textContent includes text from all descendants, so element nodes can match too
     for (let i = childNodes.length - 1; i > -1; i--) {
       const childNode = childNodes[i];
       if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
