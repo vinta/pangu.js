@@ -83,11 +83,6 @@ export class BrowserPangu extends Pangu {
   }
 
   public spacingNode(contextNode: Node) {
-    // TreeWalker doesn't support DocumentFragment properly
-    if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
-      return;
-    }
-
     // Only process nodes with actual content (excluding text nodes that contain only whitespace)
     const textNodes = DomUtils.collectTextNodes(contextNode, true);
 
@@ -390,11 +385,6 @@ export class BrowserPangu extends Pangu {
             // Collect all text nodes from all input nodes
             const allTextNodes: Node[] = [];
             for (const node of nodesToProcess) {
-              // TreeWalker doesn't support DocumentFragment properly
-              if (!(node instanceof Node) || node instanceof DocumentFragment) {
-                continue;
-              }
-
               const textNodes = DomUtils.collectTextNodes(node, true);
               allTextNodes.push(...textNodes);
             }
