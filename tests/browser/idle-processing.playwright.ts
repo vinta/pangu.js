@@ -87,7 +87,7 @@ test.describe('Idle Processing Infrastructure', () => {
       pangu.updateIdleSpacingConfig({ enabled: false });
 
       // Run normal spacing
-      pangu.spacingPageBody();
+      pangu.spacingNode(document.body);
 
       return {
         idleEnabled: pangu.idleSpacingConfig.enabled,

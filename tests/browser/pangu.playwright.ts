@@ -97,28 +97,32 @@ test.describe('BrowserPangu', () => {
     });
   });
 
-  test.describe('spacingElementById()', () => {
+  test.describe('spacingNode() with getElementById', () => {
     test('handle elements by ID', async ({ page }) => {
       const htmlContent = loadFixture('id-name.html');
       const expected = loadFixture('id-name.expected.html').trim();
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
-        pangu.spacingElementById('e1');
+        const element = document.getElementById('e1');
+        if (element) pangu.spacingNode(element);
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);
     });
   });
 
-  test.describe('spacingElementByClassName()', () => {
+  test.describe('spacingNode() with getElementsByClassName', () => {
     test('handle elements by class name (single element)', async ({ page }) => {
       const htmlContent = loadFixture('class-name-1.html');
       const expected = loadFixture('class-name-1.expected.html').trim();
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
-        pangu.spacingElementByClassName('e2');
+        const elements = document.getElementsByClassName('e2');
+        for (let i = 0; i < elements.length; i++) {
+          pangu.spacingNode(elements[i]);
+        }
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);
@@ -130,7 +134,10 @@ test.describe('BrowserPangu', () => {
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
-        pangu.spacingElementByClassName('e4');
+        const elements = document.getElementsByClassName('e4');
+        for (let i = 0; i < elements.length; i++) {
+          pangu.spacingNode(elements[i]);
+        }
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);
@@ -142,47 +149,54 @@ test.describe('BrowserPangu', () => {
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
-        pangu.spacingElementByClassName('e5');
+        const elements = document.getElementsByClassName('e5');
+        for (let i = 0; i < elements.length; i++) {
+          pangu.spacingNode(elements[i]);
+        }
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);
     });
   });
 
-  test.describe('spacingElementByTagName()', () => {
+  test.describe('spacingNode() with getElementsByTagName', () => {
     test('handle elements by tag name', async ({ page }) => {
       const htmlContent = loadFixture('tag-name.html');
       const expected = loadFixture('tag-name.expected.html').trim();
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
-        pangu.spacingElementByTagName('article');
+        const elements = document.getElementsByTagName('article');
+        for (let i = 0; i < elements.length; i++) {
+          pangu.spacingNode(elements[i]);
+        }
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);
     });
   });
 
-  test.describe('spacingPageTitle()', () => {
+  test.describe('spacingNode() with querySelector()', () => {
     test('handle page title', async ({ page }) => {
       await page.evaluate(() => {
         document.title = "Mr.龍島主道：「Let's Party!各位高明博雅君子！」";
-        pangu.spacingPageTitle();
+        const titleElement = document.querySelector('head > title');
+        if (titleElement) {
+          pangu.spacingNode(titleElement);
+        }
       });
 
       const title = await page.title();
       expect(title).toBe("Mr. 龍島主道：「Let's Party! 各位高明博雅君子！」");
     });
-  });
 
-  test.describe('spacingPageBody()', () => {
     test('handle page body', async ({ page }) => {
       const htmlContent = loadFixture('body.html');
       const expected = loadFixture('body.expected.html').trim();
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
-        pangu.spacingPageBody();
+        pangu.spacingNode(document.body);
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);
@@ -215,7 +229,7 @@ test.describe('BrowserPangu', () => {
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
-        pangu.spacingPageBody();
+        pangu.spacingNode(document.body);
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);
@@ -234,7 +248,7 @@ test.describe('BrowserPangu', () => {
     test('handle contenteditable elements by skipping them', async ({ page }) => {
       await page.setContent('<div contenteditable="true">abc漢字1</div>');
       await page.evaluate(() => {
-        pangu.spacingPageBody();
+        pangu.spacingNode(document.body);
       });
       const content = await page.content();
       expect(content).toContain('<div contenteditable="true">abc漢字1</div>');
@@ -421,7 +435,7 @@ test.describe('BrowserPangu', () => {
 
       // Apply spacing
       await page.evaluate(() => {
-        pangu.spacingPageBody();
+        pangu.spacingNode(document.body);
       });
 
       // Check that we don't add extra space inside the second span
@@ -470,7 +484,7 @@ test.describe('BrowserPangu', () => {
         await page.setContent(testCase.html);
 
         await page.evaluate(() => {
-          pangu.spacingPageBody();
+          pangu.spacingNode(document.body);
         });
 
         // Check that the second span content remains unchanged (no space added)
@@ -495,7 +509,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<div><span>測試</span><span>文字</span></div>');
 
       await page.evaluate(() => {
-        pangu.spacingPageBody();
+        pangu.spacingNode(document.body);
       });
 
       // Currently this doesn't work as expected - no space is added
@@ -512,7 +526,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<div>測試<span>文字</span></div>');
 
       await page.evaluate(() => {
-        pangu.spacingPageBody();
+        pangu.spacingNode(document.body);
       });
 
       const withSpaceResult = await page.evaluate(() => {
@@ -559,7 +573,7 @@ test.describe('BrowserPangu', () => {
 
       // Apply spacing
       await page.evaluate(() => {
-        pangu.spacingPageBody();
+        pangu.spacingNode(document.body);
       });
 
       // Check what the visible text looks like AFTER spacing
