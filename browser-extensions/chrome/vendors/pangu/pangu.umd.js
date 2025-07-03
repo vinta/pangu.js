@@ -34,7 +34,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, "g");
   const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES_FULL}])`, "g");
   const QUOTE_CJK = new RegExp(`([${QUOTES_FULL}])([${CJK}])`, "g");
-  const FIX_QUOTE_ANY_QUOTE = new RegExp(`(\`)[ ]*(.+?)[ ]*(\`)|(")[ ]*(.+?)[ ]*(")|(')[ ]*(.+?)[ ]*(')|(\u05F4)[ ]*(.+?)[ ]*(\u05F4)`, "g");
+  const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES_FULL}]+)[ ]*(.+?)[ ]*([${QUOTES_FULL}]+)`, "g");
   const QUOTE_AN = new RegExp(`([\u201D])([${AN}])`, "g");
   const CJK_QUOTE_AN = new RegExp(`([${CJK}])(")([${AN}])`, "g");
   const CJK_SINGLE_QUOTE_BUT_POSSESSIVE = new RegExp(`([${CJK}])('[^s])`, "g");
@@ -114,6 +114,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
       const self2 = this;
       let newText = text;
+      const backtickManager = new PlaceholderReplacer("BACKTICK_CONTENT_", "\uE004", "\uE005");
+      newText = newText.replace(/`([^`]+)`/g, (_match, content) => {
+        return `\`${backtickManager.store(content)}\``;
+      });
       const htmlTagManager = new PlaceholderReplacer("HTML_TAG_PLACEHOLDER_", "\uE000", "\uE001");
       let hasHtmlTags = false;
       if (newText.includes("<")) {
@@ -136,30 +140,9 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       newText = newText.replace(AN_PERIOD_CJK, "$1$2 $3");
       newText = newText.replace(AN_COLON_CJK, "$1$2 $3");
       newText = newText.replace(FIX_CJK_COLON_ANS, "$1\uFF1A$2");
-      newText = newText.replace(FIX_QUOTE_ANY_QUOTE, (match, ...groups) => {
-        if (groups[0] && groups[2]) {
-          return `${groups[0]}${groups[1]}${groups[2]}`;
-        }
-        if (groups[3] && groups[5]) {
-          return `${groups[3]}${groups[4]}${groups[5]}`;
-        }
-        if (groups[6] && groups[8]) {
-          return `${groups[6]}${groups[7]}${groups[8]}`;
-        }
-        if (groups[9] && groups[11]) {
-          return `${groups[9]}${groups[10]}${groups[11]}`;
-        }
-        return match;
-      });
-      const backtickContentManager = new PlaceholderReplacer("BACKTICK_CONTENT_PLACEHOLDER_", "\uE040", "\uE041");
-      const BACKTICK_WITH_CONTENT = /`([^`]+)`/g;
-      newText = newText.replace(BACKTICK_WITH_CONTENT, (_match, content) => {
-        const placeholder = backtickContentManager.store(content);
-        return `\`${placeholder}\``;
-      });
       newText = newText.replace(CJK_QUOTE, "$1 $2");
       newText = newText.replace(QUOTE_CJK, "$1 $2");
-      newText = backtickContentManager.restore(newText);
+      newText = newText.replace(FIX_QUOTE_ANY_QUOTE, "$1$2$3");
       newText = newText.replace(QUOTE_AN, "$1 $2");
       newText = newText.replace(CJK_QUOTE_AN, "$1$2 $3");
       newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
@@ -264,6 +247,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       if (hasHtmlTags) {
         newText = htmlTagManager.restore(newText);
       }
+      newText = backtickManager.restore(newText);
       return newText;
     }
     hasProperSpacing(text) {
