@@ -6,9 +6,8 @@ export class DomUtils {
   static readonly spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
   static readonly ignoredClass = 'no-pangu-spacing';
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static isContentEditable(node: any) {
-    return node.isContentEditable || (node.getAttribute && node.getAttribute('g_editable') === 'true');
+  static isContentEditable(node: Node) {
+    return node instanceof HTMLElement && (node.isContentEditable || node.getAttribute('g_editable') === 'true');
   }
 
   static isSpecificTag(node: Node, tagRegex: RegExp) {
@@ -25,34 +24,6 @@ export class DomUtils {
     while (currentNode.parentNode) {
       currentNode = currentNode.parentNode;
       if (this.isSpecificTag(currentNode, tagRegex)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  static hasIgnoredClass(node: Node) {
-    // Check the node itself if it's an element
-    if (node instanceof Element && node.classList.contains(this.ignoredClass)) {
-      return true;
-    }
-
-    // Check the parent node (for text nodes)
-    if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(this.ignoredClass)) {
-      return true;
-    }
-    return false;
-  }
-
-  static canIgnoreNode(node: Node) {
-    let currentNode = node;
-    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClass(currentNode))) {
-      // We will skip processing any children of ignored elements, so don't need to check all ancestors
-      return true;
-    }
-    while (currentNode.parentNode) {
-      currentNode = currentNode.parentNode;
-      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
         return true;
       }
     }
@@ -82,6 +53,34 @@ export class DomUtils {
       const childNode = childNodes[i];
       if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
         return childNode === targetNode;
+      }
+    }
+    return false;
+  }
+
+  static hasIgnoredClass(node: Node) {
+    // Check the node itself if it's an element
+    if (node instanceof Element && node.classList.contains(this.ignoredClass)) {
+      return true;
+    }
+
+    // Check the parent node (for text nodes)
+    if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(this.ignoredClass)) {
+      return true;
+    }
+    return false;
+  }
+
+  static canIgnoreNode(node: Node) {
+    let currentNode = node;
+    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClass(currentNode))) {
+      // We will skip processing any children of ignored elements, so don't need to check all ancestors
+      return true;
+    }
+    while (currentNode.parentNode) {
+      currentNode = currentNode.parentNode;
+      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+        return true;
       }
     }
     return false;
