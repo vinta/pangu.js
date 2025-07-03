@@ -64,7 +64,7 @@ test.describe('CSS Visibility Check', () => {
   test('should have visibility check configuration disabled by default', async ({ page }) => {
     const hasConfig = await page.evaluate(() => {
       // Check if visibility check config is available and disabled by default
-      const config = window.pangu.getVisibilityCheckConfig();
+      const config = window.pangu.visibilityCheckConfig;
       return config && config.enabled === false;
     });
 
@@ -119,15 +119,15 @@ test.describe('CSS Visibility Check', () => {
   test('should verify visibility check configuration state', async ({ page }) => {
     const result = await page.evaluate(() => {
       // Test initial state
-      const initialConfig = pangu.getVisibilityCheckConfig();
+      const initialConfig = { ...pangu.visibilityCheckConfig };
       
       // Update configuration
       pangu.updateVisibilityCheckConfig({ enabled: true });
-      const enabledConfig = pangu.getVisibilityCheckConfig();
+      const enabledConfig = { ...pangu.visibilityCheckConfig };
       
       // Disable again
       pangu.updateVisibilityCheckConfig({ enabled: false });
-      const disabledConfig = pangu.getVisibilityCheckConfig();
+      const disabledConfig = { ...pangu.visibilityCheckConfig };
       
       return {
         initial: initialConfig,

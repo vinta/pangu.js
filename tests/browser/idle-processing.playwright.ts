@@ -23,7 +23,7 @@ test.describe('Idle Processing Infrastructure', () => {
   test('should enable idle spacing with custom config', async ({ page }) => {
     const result = await page.evaluate(() => {
       pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 20, timeout: 3000 });
-      return pangu.getIdleSpacingConfig();
+      return pangu.idleSpacingConfig;
     });
 
     expect(result.enabled).toBe(true);
@@ -35,11 +35,11 @@ test.describe('Idle Processing Infrastructure', () => {
     const result = await page.evaluate(() => {
       // Enable idle spacing first
       pangu.updateIdleSpacingConfig({ enabled: true });
-      const configBefore = pangu.getIdleSpacingConfig();
+      const configBefore = { ...pangu.idleSpacingConfig };
 
       // Disable it
       pangu.updateIdleSpacingConfig({ enabled: false });
-      const configAfter = pangu.getIdleSpacingConfig();
+      const configAfter = { ...pangu.idleSpacingConfig };
 
       return {
         enabledBefore: configBefore.enabled,
@@ -80,7 +80,7 @@ test.describe('Idle Processing Infrastructure', () => {
 
       // Enable idle spacing to ensure infrastructure is working
       pangu.updateIdleSpacingConfig({ enabled: true });
-      const config = pangu.getIdleSpacingConfig();
+      const config = pangu.idleSpacingConfig;
 
       return {
         hasNativeSupport,
@@ -110,7 +110,7 @@ test.describe('Idle Processing Infrastructure', () => {
       pangu.spacingPageBody();
 
       return {
-        idleEnabled: pangu.getIdleSpacingConfig().enabled,
+        idleEnabled: pangu.idleSpacingConfig.enabled,
         bodyText: document.body.textContent,
       };
     });
@@ -178,7 +178,7 @@ test.describe('Idle Processing Infrastructure', () => {
         resolve({
           completionCalled,
           text,
-          idleEnabled: pangu.getIdleSpacingConfig().enabled,
+          idleEnabled: pangu.idleSpacingConfig.enabled,
         });
       });
     });
