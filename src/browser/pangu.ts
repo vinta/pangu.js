@@ -157,30 +157,46 @@ export class BrowserPangu extends Pangu {
 
     this.isAutoSpacingPageExecuted = true;
 
-    // FIXME
-    // Dirty hack for https://github.com/vinta/pangu.js/issues/117
+    // Wait for videos to load before spacing to avoid layout shifts
+    // See: https://github.com/vinta/pangu.js/issues/117
     const spacingPageOnce = once(() => {
       this.spacingPage();
     });
-    const videos = document.getElementsByTagName('video');
+
+    const videos = Array.from(document.getElementsByTagName('video'));
+    
     if (videos.length === 0) {
-      setTimeout(() => {
-        spacingPageOnce();
-      }, pageDelayMs);
+      // No videos, proceed with normal delay
+      setTimeout(spacingPageOnce, pageDelayMs);
     } else {
-      for (let i = 0; i < videos.length; i++) {
-        const video = videos[i];
-        if (video.readyState === 4) {
-          setTimeout(() => {
-            spacingPageOnce();
-          }, 3000);
-          break;
-        }
-        video.addEventListener('loadeddata', () => {
-          setTimeout(() => {
-            spacingPageOnce();
-          }, 4000);
+      // Check if all videos are already loaded
+      const allVideosLoaded = videos.every(video => video.readyState >= 3);
+      
+      if (allVideosLoaded) {
+        // All videos loaded, proceed with normal delay
+        setTimeout(spacingPageOnce, pageDelayMs);
+      } else {
+        // Wait for all videos to load
+        let loadedCount = 0;
+        const videoCount = videos.length;
+        
+        const checkAllLoaded = () => {
+          loadedCount++;
+          if (loadedCount >= videoCount) {
+            setTimeout(spacingPageOnce, pageDelayMs);
+          }
+        };
+        
+        videos.forEach(video => {
+          if (video.readyState >= 3) {
+            checkAllLoaded();
+          } else {
+            video.addEventListener('loadeddata', checkAllLoaded, { once: true });
+          }
         });
+        
+        // Fallback timeout in case videos never load
+        setTimeout(spacingPageOnce, pageDelayMs + 5000);
       }
     }
 
