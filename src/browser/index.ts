@@ -67,8 +67,7 @@ export class BrowserPangu extends Pangu {
 
     this.isAutoSpacingPageExecuted = true;
 
-    // TODO: add a callback, instead of hardcoded this.spacingPage()
-    this.waitForVideosAndSpacePage(pageDelayMs);
+    this.waitForVideosAndSpacePage(pageDelayMs, () => this.spacingPage());
     this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
   }
 
@@ -313,26 +312,23 @@ export class BrowserPangu extends Pangu {
     this.taskScheduler.processInChunks(textNodes, task, onComplete);
   }
 
-  // TODO: add a callback, instead of hardcoded this.spacingPage()
-  protected waitForVideosAndSpacePage(pageDelayMs: number) {
+  protected waitForVideosAndSpacePage(pageDelayMs: number, callback: () => void) {
     // Wait for videos to load before spacing to avoid layout shifts
     // See: https://github.com/vinta/pangu.js/issues/117
-    const spacingPageOnce = once(() => {
-      this.spacingPage();
-    });
+    const callbackOnce = once(callback);
 
     const videos = Array.from(document.getElementsByTagName('video'));
 
     if (videos.length === 0) {
       // No videos, proceed with normal delay
-      setTimeout(spacingPageOnce, pageDelayMs);
+      setTimeout(callbackOnce, pageDelayMs);
     } else {
       // Check if all videos are already loaded
       const allVideosLoaded = videos.every((video) => video.readyState >= 3);
 
       if (allVideosLoaded) {
         // All videos loaded, proceed with normal delay
-        setTimeout(spacingPageOnce, pageDelayMs);
+        setTimeout(callbackOnce, pageDelayMs);
       } else {
         // Wait for all videos to load
         let loadedCount = 0;
@@ -341,7 +337,7 @@ export class BrowserPangu extends Pangu {
         const checkAllLoaded = () => {
           loadedCount++;
           if (loadedCount >= videoCount) {
-            setTimeout(spacingPageOnce, pageDelayMs);
+            setTimeout(callbackOnce, pageDelayMs);
           }
         };
 
@@ -354,7 +350,7 @@ export class BrowserPangu extends Pangu {
         }
 
         // Fallback timeout in case videos never load
-        setTimeout(spacingPageOnce, pageDelayMs + 5000);
+        setTimeout(callbackOnce, pageDelayMs + 5000);
       }
     }
   }
