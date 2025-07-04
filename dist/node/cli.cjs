@@ -103,7 +103,7 @@ class PlaceholderReplacer {
 class Pangu {
   constructor() {
     __publicField$1(this, "version");
-    this.version = "7.0.0";
+    this.version = "7.1.0";
   }
   spacingText(text) {
     if (typeof text !== "string") {
