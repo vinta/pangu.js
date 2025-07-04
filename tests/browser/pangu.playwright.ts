@@ -1,8 +1,8 @@
+import './global';
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import './global';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,6 +16,7 @@ test.describe('BrowserPangu', () => {
   test.beforeEach(async ({ page }) => {
     await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
+
     // Disable idle spacing for synchronous tests
     await page.evaluate(() => {
       pangu.taskScheduler.config.enabled = false;
@@ -25,7 +26,7 @@ test.describe('BrowserPangu', () => {
   test.describe('autoSpacingPage()', () => {
     test('handle dynamic content with MutationObserver', async ({ page }) => {
       await page.evaluate(() => {
-        pangu.autoSpacingPage({});
+        pangu.autoSpacingPage();
       });
 
       await page.waitForTimeout(50);
@@ -97,7 +98,9 @@ test.describe('BrowserPangu', () => {
       await page.setContent(htmlContent);
       await page.evaluate(() => {
         const element = document.getElementById('e1');
-        if (element) {pangu.spacingNode(element);}
+        if (element) {
+          pangu.spacingNode(element);
+        }
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);
