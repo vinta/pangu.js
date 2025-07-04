@@ -1,4 +1,4 @@
-export interface VisibilityCheckConfig {
+export interface VisibilityDetectorConfig {
   enabled: boolean;
   commonHiddenPatterns: {
     clipRect: boolean;
@@ -10,7 +10,7 @@ export interface VisibilityCheckConfig {
 }
 
 export class VisibilityDetector {
-  public readonly config: VisibilityCheckConfig = {
+  public readonly config: VisibilityDetectorConfig = {
     enabled: false,
     commonHiddenPatterns: {
       clipRect: true, // clip: rect(1px, 1px, 1px, 1px) patterns
@@ -102,7 +102,7 @@ export class VisibilityDetector {
     return false;
   }
 
-  public updateConfig(config: Partial<VisibilityCheckConfig>) {
+  public updateConfig(config: Partial<VisibilityDetectorConfig>) {
     Object.assign(this.config, config);
 
     // Handle nested commonHiddenPatterns object if provided
