@@ -1,4 +1,4 @@
-export class DomUtils {
+export class DomWalker {
   static readonly blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
   static readonly ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
   static readonly presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;

@@ -1,5 +1,5 @@
 import { Pangu } from '../shared';
-import { DomUtils } from './dom-utils';
+import { DomWalker } from './dom-walker';
 import { TaskScheduler } from './task-scheduler';
 import { VisibilityDetector } from './visibility-detector';
 
@@ -85,7 +85,7 @@ export class BrowserPangu extends Pangu {
 
   public spacingNode(contextNode: Node) {
     // Only process nodes with actual content (excluding text nodes that contain only whitespace)
-    const textNodes = DomUtils.collectTextNodes(contextNode, true);
+    const textNodes = DomWalker.collectTextNodes(contextNode, true);
 
     // Choose processing method based on idle spacing configuration
     if (this.taskScheduler.config.enabled) {
@@ -128,7 +128,7 @@ export class BrowserPangu extends Pangu {
       }
 
       // Skip nodes that should be ignored
-      if (DomUtils.canIgnoreNode(currentTextNode)) {
+      if (DomWalker.canIgnoreNode(currentTextNode)) {
         nextTextNode = currentTextNode;
         continue;
       }
@@ -158,7 +158,7 @@ export class BrowserPangu extends Pangu {
 
       // Handle nested tag text processing
       if (nextTextNode) {
-        if (currentTextNode.nextSibling && DomUtils.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
+        if (currentTextNode.nextSibling && DomWalker.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
           nextTextNode = currentTextNode;
           continue;
         }
@@ -177,13 +177,13 @@ export class BrowserPangu extends Pangu {
         // We need to check at different levels of the DOM tree
         // First, find the highest ancestor that contains only the current text node
         let currentAncestor = currentTextNode as Node;
-        while (currentAncestor.parentNode && DomUtils.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !DomUtils.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
+        while (currentAncestor.parentNode && DomWalker.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !DomWalker.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
           currentAncestor = currentAncestor.parentNode;
         }
 
         // Find the highest ancestor that contains only the next text node
         let nextAncestor = nextTextNode as Node;
-        while (nextAncestor.parentNode && DomUtils.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !DomUtils.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
+        while (nextAncestor.parentNode && DomWalker.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !DomWalker.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
           nextAncestor = nextAncestor.parentNode;
         }
 
@@ -216,27 +216,27 @@ export class BrowserPangu extends Pangu {
 
         if (testNewText !== testText && !skipSpacing) {
           let nextNode: Node = nextTextNode;
-          while (nextNode.parentNode && !DomUtils.spaceSensitiveTags.test(nextNode.nodeName) && DomUtils.isFirstTextChild(nextNode.parentNode, nextNode)) {
+          while (nextNode.parentNode && !DomWalker.spaceSensitiveTags.test(nextNode.nodeName) && DomWalker.isFirstTextChild(nextNode.parentNode, nextNode)) {
             nextNode = nextNode.parentNode;
           }
 
           let currentNode: Node = currentTextNode;
-          while (currentNode.parentNode && !DomUtils.spaceSensitiveTags.test(currentNode.nodeName) && DomUtils.isLastTextChild(currentNode.parentNode, currentNode)) {
+          while (currentNode.parentNode && !DomWalker.spaceSensitiveTags.test(currentNode.nodeName) && DomWalker.isLastTextChild(currentNode.parentNode, currentNode)) {
             currentNode = currentNode.parentNode;
           }
 
           if (currentNode.nextSibling) {
-            if (DomUtils.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
+            if (DomWalker.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
               nextTextNode = currentTextNode;
               continue;
             }
           }
 
-          if (!DomUtils.blockTags.test(currentNode.nodeName)) {
-            if (!DomUtils.spaceSensitiveTags.test(nextNode.nodeName)) {
-              if (!DomUtils.ignoredTags.test(nextNode.nodeName) && !DomUtils.blockTags.test(nextNode.nodeName)) {
+          if (!DomWalker.blockTags.test(currentNode.nodeName)) {
+            if (!DomWalker.spaceSensitiveTags.test(nextNode.nodeName)) {
+              if (!DomWalker.ignoredTags.test(nextNode.nodeName) && !DomWalker.blockTags.test(nextNode.nodeName)) {
                 if (nextTextNode.previousSibling) {
-                  if (!DomUtils.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
+                  if (!DomWalker.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
                     if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
                       // Check visibility before adding space
                       if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
@@ -245,7 +245,7 @@ export class BrowserPangu extends Pangu {
                     }
                   }
                 } else {
-                  if (!DomUtils.canIgnoreNode(nextTextNode)) {
+                  if (!DomWalker.canIgnoreNode(nextTextNode)) {
                     if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
                       // Check visibility before adding space
                       if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
@@ -255,7 +255,7 @@ export class BrowserPangu extends Pangu {
                   }
                 }
               }
-            } else if (!DomUtils.spaceSensitiveTags.test(currentNode.nodeName)) {
+            } else if (!DomWalker.spaceSensitiveTags.test(currentNode.nodeName)) {
               if (currentTextNode instanceof Text && !currentTextNode.data.endsWith(' ')) {
                 // Check visibility before adding space
                 if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
@@ -270,7 +270,7 @@ export class BrowserPangu extends Pangu {
 
                 if (nextNode.parentNode) {
                   if (nextNode.previousSibling) {
-                    if (!DomUtils.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
+                    if (!DomWalker.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
                       nextNode.parentNode.insertBefore(panguSpace, nextNode);
                     }
                   } else {
@@ -374,7 +374,7 @@ export class BrowserPangu extends Pangu {
             // Collect all text nodes from all input nodes
             const allTextNodes: Node[] = [];
             for (const node of nodesToProcess) {
-              const textNodes = DomUtils.collectTextNodes(node, true);
+              const textNodes = DomWalker.collectTextNodes(node, true);
               allTextNodes.push(...textNodes);
             }
 
