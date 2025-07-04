@@ -67,6 +67,7 @@ export class BrowserPangu extends Pangu {
 
     this.isAutoSpacingPageExecuted = true;
 
+    // TODO: add a callback, instead of hardcoded this.spacingPage()
     this.waitForVideosAndSpacePage(pageDelayMs);
     this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
   }
@@ -126,6 +127,7 @@ export class BrowserPangu extends Pangu {
 
   // INTERNAL
 
+  // TODO: refactor this method - it's too large and handles too many responsibilities
   protected spacingTextNodes(textNodes: Node[]) {
     let currentTextNode: Node | null;
     let nextTextNode: Node | null = null;
@@ -311,6 +313,7 @@ export class BrowserPangu extends Pangu {
     this.taskScheduler.processInChunks(textNodes, task, onComplete);
   }
 
+  // TODO: add a callback, instead of hardcoded this.spacingPage()
   protected waitForVideosAndSpacePage(pageDelayMs: number) {
     // Wait for videos to load before spacing to avoid layout shifts
     // See: https://github.com/vinta/pangu.js/issues/117
