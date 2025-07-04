@@ -152,7 +152,7 @@ test.describe('TaskScheduler Enabled', () => {
       };
     });
 
-    expect(result.text?.trim()).toBe('最終 final 文本 text');
+    expect(result.text).toBe('最終 final 文本 text');
     expect(result.processingCount).toBe(1);
   });
 });

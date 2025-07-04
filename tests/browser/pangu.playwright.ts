@@ -17,7 +17,7 @@ test.describe('BrowserPangu', () => {
     await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
 
-    // Disable idle spacing for synchronous tests
+    // Disable taskScheduler for synchronous tests
     await page.evaluate(() => {
       pangu.taskScheduler.config.enabled = false;
     });
