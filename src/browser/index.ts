@@ -1,7 +1,7 @@
 import { Pangu } from '../shared';
 import { DomUtils } from './dom-utils';
-import { TaskScheduler, type TaskSchedulerConfig } from './idle-processor';
-import { VisibilityDetector, type VisibilityCheckConfig } from './visibility-detector';
+import { TaskScheduler } from './task-scheduler';
+import { VisibilityDetector } from './visibility-detector';
 
 export interface AutoSpacingPageConfig {
   pageDelayMs?: number;
@@ -51,8 +51,8 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 export class BrowserPangu extends Pangu {
   private isAutoSpacingPageExecuted = false;
   private autoSpacingPageObserver: MutationObserver | null = null;
-  private taskScheduler = new TaskScheduler();
-  private visibilityDetector = new VisibilityDetector();
+  public readonly taskScheduler = new TaskScheduler();
+  public readonly visibilityDetector = new VisibilityDetector();
 
   // PUBLIC
 
@@ -88,7 +88,7 @@ export class BrowserPangu extends Pangu {
     const textNodes = DomUtils.collectTextNodes(contextNode, true);
 
     // Choose processing method based on idle spacing configuration
-    if (this.taskSchedulerConfig.enabled) {
+    if (this.taskScheduler.config.enabled) {
       this.spacingTextNodesInQueue(textNodes);
     } else {
       // Process the collected text nodes using the shared logic (synchronous)
@@ -105,21 +105,9 @@ export class BrowserPangu extends Pangu {
     this.isAutoSpacingPageExecuted = false;
   }
 
-  public get taskSchedulerConfig() {
-    return this.taskScheduler.config;
-  }
-
-  public get visibilityCheckConfig() {
-    return this.visibilityDetector.config;
-  }
-
-  public updateTaskSchedulerConfig(config: Partial<TaskSchedulerConfig>) {
-    this.taskScheduler.updateConfig(config);
-  }
-
-  public updateVisibilityCheckConfig(config: Partial<VisibilityCheckConfig>) {
-    this.visibilityDetector.updateConfig(config);
-  }
+  // Access task scheduler and visibility detector directly:
+  // pangu.taskScheduler.config.enabled = false;
+  // pangu.visibilityDetector.updateConfig({ enabled: true });
 
   public isElementVisuallyHidden(element: Element) {
     return this.visibilityDetector.isElementVisuallyHidden(element);
@@ -127,7 +115,7 @@ export class BrowserPangu extends Pangu {
 
   // INTERNAL
 
-  // TODO: refactor this method - it's too large and handles too many responsibilities
+  // TODO: Refactor this method - it's too large and handles too many responsibilities
   protected spacingTextNodes(textNodes: Node[]) {
     let currentTextNode: Node | null;
     let nextTextNode: Node | null = null;
@@ -316,7 +304,6 @@ export class BrowserPangu extends Pangu {
   protected waitForVideosToLoad(delayMs: number, onLoaded: () => void) {
     // Wait for videos to load before spacing to avoid layout shifts
     // See: https://github.com/vinta/pangu.js/issues/117
-
     const videos = Array.from(document.getElementsByTagName('video'));
 
     if (videos.length === 0) {
@@ -378,7 +365,7 @@ export class BrowserPangu extends Pangu {
     const debouncedSpacingNode = debounce(
       () => {
         // NOTE: a single node could be very big which contains a lot of child nodes
-        if (this.taskSchedulerConfig.enabled) {
+        if (this.taskScheduler.config.enabled) {
           // Use idle processing for dynamic content
           const nodesToProcess = [...queue];
           queue.length = 0; // Clear the queue
