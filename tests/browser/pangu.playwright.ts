@@ -1,16 +1,8 @@
-import type { BrowserPangu } from '../../dist/browser/pangu';
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-declare global {
-  const pangu: BrowserPangu;
-  interface Window {
-    // @ts-expect-error - pangu is defined in the global scope
-    pangu: BrowserPangu;
-  }
-}
+import './global';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
