@@ -12,8 +12,8 @@ declare global {
 async function autoSpacingPage() {
   const pangu = window.pangu;
   if (pangu) {
-    pangu.updateIdleSpacingConfig({ enabled: true });
-    pangu.updateVisibilityCheckConfig({ enabled: true });
+    pangu.taskScheduler.config.enabled = true;
+    pangu.visibilityDetector.config.enabled = true;
     pangu.autoSpacingPage();
   }
 }
