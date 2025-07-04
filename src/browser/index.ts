@@ -88,10 +88,10 @@ export class BrowserPangu extends Pangu {
 
     // Choose processing method based on idle spacing configuration
     if (this.idleSpacingConfig.enabled) {
-      this.processTextNodesWithIdleCallback(textNodes);
+      this.spacingTextNodesInQueue(textNodes);
     } else {
       // Process the collected text nodes using the shared logic (synchronous)
-      this.processTextNodes(textNodes);
+      this.spacingTextNodes(textNodes);
     }
   }
 
@@ -126,7 +126,7 @@ export class BrowserPangu extends Pangu {
 
   // INTERNAL
 
-  protected processTextNodes(textNodes: Node[]) {
+  protected spacingTextNodes(textNodes: Node[]) {
     let currentTextNode: Node | null;
     let nextTextNode: Node | null = null;
 
@@ -304,9 +304,9 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  protected processTextNodesWithIdleCallback(textNodes: Node[], onComplete?: () => void) {
+  protected spacingTextNodesInQueue(textNodes: Node[], onComplete?: () => void) {
     // a task is a function which processes a chunk of textNodes using requestIdleCallback()
-    const task = (chunkedTextNodes: Node[]) => this.processTextNodes(chunkedTextNodes);
+    const task = (chunkedTextNodes: Node[]) => this.spacingTextNodes(chunkedTextNodes);
     this.taskScheduler.processInChunks(textNodes, task, onComplete);
   }
 
@@ -392,7 +392,7 @@ export class BrowserPangu extends Pangu {
             }
 
             // Process all collected text nodes with idle callback
-            this.processTextNodesWithIdleCallback(allTextNodes);
+            this.spacingTextNodesInQueue(allTextNodes);
           }
         } else {
           // Synchronous processing (original behavior)
