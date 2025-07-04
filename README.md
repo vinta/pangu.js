@@ -91,8 +91,8 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 
 Also on:
 
-- https://cdn.jsdelivr.net/npm/pangu@7.0.0/dist/browser/pangu.umd.js
-- https://unpkg.com/pangu@7.0.0/dist/browser/pangu.umd.js
+- https://cdn.jsdelivr.net/npm/pangu@7.1.0/dist/browser/pangu.umd.js
+- https://unpkg.com/pangu@7.1.0/dist/browser/pangu.umd.js
 
 ### Node.js
 

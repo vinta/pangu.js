@@ -1,77 +1,19 @@
-import type { BrowserPangu } from '../../dist/browser/pangu';
 import { test, expect } from '@playwright/test';
 
-declare global {
-  const pangu: BrowserPangu;
-  interface Window {
-    // @ts-expect-error - pangu is defined in the global scope
-    pangu: BrowserPangu;
-  }
-}
-
-test.describe('CSS Visibility Check', () => {
+test.describe('Visibility Detector Enabled', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('data:text/html,<html><head><title>Test</title></head><body><div id="content"></div></body></html>');
     await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
-    // Disable idle spacing for synchronous tests
+
+    // Disable taskScheduler for synchronous tests
     await page.evaluate(() => {
-      pangu.updateIdleSpacingConfig({ enabled: false });
+      pangu.taskScheduler.config.enabled = false;
     });
   });
 
-  test.skip('should demonstrate the problem with hidden elements (before fix)', async ({ page }) => {
-    const result = await page.evaluate(() => {
-      // Create the problematic HTML structure from the fixture
-      const content = document.getElementById('content')!;
-      content.innerHTML = `
-        <style>
-          .sr-only {
-            clip: rect(1px, 1px, 1px, 1px);
-            height: 1px;
-            overflow: hidden;
-            position: absolute;
-            white-space: nowrap;
-            width: 1px;
-          }
-        </style>
-        <div>
-          <span class="sr-only">Description:</span><span>一律轉整數，小數點太小會被某些交易所吃掉Transfer123USDC</span>
-        </div>
-      `;
-
-      // Process with default behavior (no visibility checking)
-      pangu.updateVisibilityCheckConfig({ enabled: false }); // Ensure it's disabled
-      pangu.spacingPage();
-
-      const hiddenSpan = content.querySelector('.sr-only')!;
-      const visibleSpan = content.querySelector('span:not(.sr-only)')!;
-
-      return {
-        hiddenText: hiddenSpan.textContent,
-        visibleText: visibleSpan.textContent,
-        // Check if there's unwanted space at start of visible text
-        startsWithSpace: visibleSpan.textContent?.startsWith(' ') || false,
-      };
-    });
-
-    // Current behavior - documents the existing problem
-    expect(result.hiddenText).toBe('Description:');
-    expect(result.visibleText).toBe(' 一律轉整數，小數點太小會被某些交易所吃掉 Transfer123USDC');
-    expect(result.startsWithSpace).toBe(true); // This is the problem - unwanted space
-  });
-
-  test('should have visibility check configuration disabled by default', async ({ page }) => {
-    const hasConfig = await page.evaluate(() => {
-      // Check if visibility check config is available and disabled by default
-      const config = window.pangu.getVisibilityCheckConfig();
-      return config && config.enabled === false;
-    });
-
-    expect(hasConfig).toBe(true);
-  });
-
-  test('should detect visually hidden elements with common patterns', async ({ page }) => {
+  test('should detects all CSS hiding patterns when enabled', async ({ page }) => {
+    await page.setContent('<div id="content"></div>');
+    
     const result = await page.evaluate(() => {
       const content = document.getElementById('content')!;
       content.innerHTML = `
@@ -93,7 +35,7 @@ test.describe('CSS Visibility Check', () => {
       `;
 
       // Enable visibility checking
-      pangu.updateVisibilityCheckConfig({ enabled: true });
+      pangu.visibilityDetector.config.enabled = true;
 
       // Test the helper method for visibility detection
       const spans = content.querySelectorAll('span');
@@ -116,32 +58,61 @@ test.describe('CSS Visibility Check', () => {
     ]);
   });
 
-  test('should verify visibility check configuration state', async ({ page }) => {
+  test('should return false for all elements when visibility detection is disabled', async ({ page }) => {
+    await page.setContent('<div id="content"></div>');
+    
     const result = await page.evaluate(() => {
-      // Test initial state
-      const initialConfig = pangu.getVisibilityCheckConfig();
-      
-      // Update configuration
-      pangu.updateVisibilityCheckConfig({ enabled: true });
-      const enabledConfig = pangu.getVisibilityCheckConfig();
-      
-      // Disable again
-      pangu.updateVisibilityCheckConfig({ enabled: false });
-      const disabledConfig = pangu.getVisibilityCheckConfig();
-      
+      const content = document.getElementById('content')!;
+      content.innerHTML = `
+        <style>
+          .sr-only {
+            clip: rect(1px, 1px, 1px, 1px);
+            height: 1px;
+            overflow: hidden;
+            position: absolute;
+            width: 1px;
+          }
+        </style>
+        <span class="sr-only">Description:</span><span>一律轉整數</span>
+      `;
+
+      const hiddenSpan = content.querySelector('.sr-only')!;
+      const visibleSpan = content.querySelector('span:not(.sr-only)')!;
+
+      // Test with visibility check disabled
+      pangu.visibilityDetector.config.enabled = false;
+      const hiddenCheckDisabled = pangu.isElementVisuallyHidden(hiddenSpan);
+      const visibleCheckDisabled = pangu.isElementVisuallyHidden(visibleSpan);
+
+      // Test with visibility check enabled
+      pangu.visibilityDetector.config.enabled = true;
+      const hiddenCheckEnabled = pangu.isElementVisuallyHidden(hiddenSpan);
+      const visibleCheckEnabled = pangu.isElementVisuallyHidden(visibleSpan);
+
       return {
-        initial: initialConfig,
-        enabled: enabledConfig,
-        disabled: disabledConfig,
+        disabled: {
+          hiddenIsHidden: hiddenCheckDisabled,
+          visibleIsHidden: visibleCheckDisabled,
+        },
+        enabled: {
+          hiddenIsHidden: hiddenCheckEnabled,
+          visibleIsHidden: visibleCheckEnabled,
+        },
       };
     });
 
-    expect(result.initial.enabled).toBe(false);
-    expect(result.enabled.enabled).toBe(true);
-    expect(result.disabled.enabled).toBe(false);
+    // When disabled, always returns false
+    expect(result.disabled.hiddenIsHidden).toBe(false);
+    expect(result.disabled.visibleIsHidden).toBe(false);
+
+    // When enabled, correctly detects visibility
+    expect(result.enabled.hiddenIsHidden).toBe(true);
+    expect(result.enabled.visibleIsHidden).toBe(false);
   });
 
-  test('should avoid spacing after hidden elements when visibility check enabled', async ({ page }) => {
+  test('should skip spacing between hidden element and CJK', async ({ page }) => {
+    await page.setContent('<div id="content"></div>');
+    
     const result = await page.evaluate(() => {
       const content = document.getElementById('content')!;
       content.innerHTML = `
@@ -160,7 +131,7 @@ test.describe('CSS Visibility Check', () => {
       `;
 
       // Enable visibility checking
-      pangu.updateVisibilityCheckConfig({ enabled: true });
+      pangu.visibilityDetector.config.enabled = true;
 
       // Process with visibility-aware spacing (synchronous)
       pangu.spacingPage();
@@ -181,7 +152,9 @@ test.describe('CSS Visibility Check', () => {
     expect(result.startsWithSpace).toBe(false); // No unwanted space
   });
 
-  test('should still add spacing between visible elements', async ({ page }) => {
+  test('should perform spacing between visible element and CJK', async ({ page }) => {
+    await page.setContent('<div id="content"></div>');
+    
     const result = await page.evaluate(() => {
       const content = document.getElementById('content')!;
       content.innerHTML = `
@@ -190,7 +163,7 @@ test.describe('CSS Visibility Check', () => {
         </div>
       `;
 
-      pangu.updateVisibilityCheckConfig({ enabled: true });
+      pangu.visibilityDetector.config.enabled = true;
 
       // Process with visibility checking enabled (synchronous)
       pangu.spacingPage();
@@ -210,57 +183,9 @@ test.describe('CSS Visibility Check', () => {
     expect(result.secondStartsWithSpace).toBe(true); // Space added between visible elements
   });
 
-  test('should properly handle direct isElementVisuallyHidden API', async ({ page }) => {
-    const result = await page.evaluate(() => {
-      const content = document.getElementById('content')!;
-      content.innerHTML = `
-        <style>
-          .sr-only { 
-            clip: rect(1px, 1px, 1px, 1px); 
-            height: 1px; 
-            overflow: hidden; 
-            position: absolute; 
-            width: 1px; 
-          }
-        </style>
-        <span class="sr-only">Description:</span><span>一律轉整數</span>
-      `;
-      
-      const hiddenSpan = content.querySelector('.sr-only')!;
-      const visibleSpan = content.querySelector('span:not(.sr-only)')!;
-      
-      // Test with visibility check disabled
-      pangu.updateVisibilityCheckConfig({ enabled: false });
-      const hiddenCheckDisabled = pangu.isElementVisuallyHidden(hiddenSpan);
-      const visibleCheckDisabled = pangu.isElementVisuallyHidden(visibleSpan);
-      
-      // Test with visibility check enabled
-      pangu.updateVisibilityCheckConfig({ enabled: true });
-      const hiddenCheckEnabled = pangu.isElementVisuallyHidden(hiddenSpan);
-      const visibleCheckEnabled = pangu.isElementVisuallyHidden(visibleSpan);
-      
-      return {
-        disabled: {
-          hiddenIsHidden: hiddenCheckDisabled,
-          visibleIsHidden: visibleCheckDisabled,
-        },
-        enabled: {
-          hiddenIsHidden: hiddenCheckEnabled,
-          visibleIsHidden: visibleCheckEnabled,
-        }
-      };
-    });
-
-    // When disabled, always returns false
-    expect(result.disabled.hiddenIsHidden).toBe(false);
-    expect(result.disabled.visibleIsHidden).toBe(false);
+  test('should perform spacing with complex nested hidden structures', async ({ page }) => {
+    await page.setContent('<div id="content"></div>');
     
-    // When enabled, correctly detects visibility
-    expect(result.enabled.hiddenIsHidden).toBe(true);
-    expect(result.enabled.visibleIsHidden).toBe(false);
-  });
-
-  test('should work with complex nested hidden structures', async ({ page }) => {
     const result = await page.evaluate(() => {
       const content = document.getElementById('content')!;
       content.innerHTML = `
@@ -280,7 +205,7 @@ test.describe('CSS Visibility Check', () => {
         </div>
       `;
 
-      pangu.updateVisibilityCheckConfig({ enabled: true });
+      pangu.visibilityDetector.config.enabled = true;
 
       // Process with visibility checking (synchronous)
       pangu.spacingPage();

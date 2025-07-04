@@ -28,12 +28,13 @@ const A = 'A-Za-z';
 const UPPER_AN = 'A-Z0-9'; // For FIX_CJK_COLON_ANS
 
 // Operators - note the different sets!
-const OPERATORS_WITH_HYPHEN = '\\+\\-\\*=&'; // For CJK patterns
-const OPERATORS_NO_HYPHEN = '\\+\\*=&'; // For ANS_OPERATOR_ANS only
+const OPERATORS_BASE = '\\+\\*=&';
+const OPERATORS_WITH_HYPHEN = `${OPERATORS_BASE}\\-`; // For CJK patterns
+const OPERATORS_NO_HYPHEN = OPERATORS_BASE; // For ANS_OPERATOR_ANS only
 const GRADE_OPERATORS = '\\+\\-\\*'; // For single letter grades
 
 // Quotes
-const QUOTES_FULL = '\`"\u05f4'; // Backtick, straight quote, Hebrew punctuation
+const QUOTES = '\`"\u05f4'; // Backtick, straight quote, Hebrew punctuation
 
 // Brackets - different sets!
 const LEFT_BRACKETS_BASIC = '\\(\\[\\{'; // For AN_LEFT_BRACKET
@@ -43,17 +44,20 @@ const RIGHT_BRACKETS_EXTENDED = '\\)\\]\\}<>\u201d'; // For RIGHT_BRACKET_CJK
 
 // ANS extended sets - CAREFUL: different symbols!
 const ANS_CJK_AFTER = `${A}\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf`; // Has @, no punctuation
-const ANS_BEFORE_CJK = `${A}\u0370-\u03ff0-9\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf`; // No punctuation symbols
+const ANS_BEFORE_CJK = `${A}\u0370-\u03ff0-9\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700—\u27bf`; // No @ symbol
 
+// File path components - common directories in Unix/project paths
 // prettier-ignore
+const FILE_PATH_DIRS = 'home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path|project|src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|your|\\.claude|\\.git|\\.vscode';
+const FILE_PATH_CHARS = '[A-Za-z0-9_\\-\\.@\\+\\*]+';
+
 // Unix absolute paths: system dirs + common project paths
 // Examples: /home, /usr/bin, /etc/nginx.conf, /.bashrc, /node_modules/@babel/core, /path/to/your/project
-const UNIX_ABSOLUTE_FILE_PATH = /\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path|project|src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|your)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+\*]+)*/;
+const UNIX_ABSOLUTE_FILE_PATH = new RegExp(`/(?:\\.?(?:${FILE_PATH_DIRS})|\\.(?:[A-Za-z0-9_\\-]+))(?:/${FILE_PATH_CHARS})*`);
 
-// prettier-ignore
 // Unix relative paths common in documentation and blog posts
 // Examples: src/main.py, dist/index.js, test/spec.js, ./.claude/CLAUDE.md, templates/*.html
-const UNIX_RELATIVE_FILE_PATH = /(?:\.\/)?(?:src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|node_modules|\.claude|\.git|\.vscode)(?:\/[A-Za-z0-9_\-\.@\+\*]+)+/;
+const UNIX_RELATIVE_FILE_PATH = new RegExp(`(?:\\./)?(?:${FILE_PATH_DIRS})(?:/${FILE_PATH_CHARS})+`);
 
 // Windows paths: C:\Users\name\, D:\Program Files\, C:\Windows\System32
 const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
@@ -83,9 +87,9 @@ const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, 'g');
 const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, 'g');
 
 // The symbol part does not include '
-const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES_FULL}])`, 'g');
-const QUOTE_CJK = new RegExp(`([${QUOTES_FULL}])([${CJK}])`, 'g');
-const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES_FULL}]+)[ ]*(.+?)[ ]*([${QUOTES_FULL}]+)`, 'g');
+const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES}])`, 'g');
+const QUOTE_CJK = new RegExp(`([${QUOTES}])([${CJK}])`, 'g');
+const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES}]+)[ ]*(.+?)[ ]*([${QUOTES}]+)`, 'g');
 
 // Handle curly quotes with alphanumeric characters
 // These patterns should only apply to curly quotes, not straight quotes
@@ -167,16 +171,18 @@ const S_A = new RegExp(`(%)([${A}])`, 'g');
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
 class PlaceholderReplacer {
-  private placeholder: string;
   private items: string[] = [];
-  private index: number = 0;
-  private startDelimiter: string;
-  private endDelimiter: string;
+  private index = 0;
+  private pattern: RegExp;
 
-  constructor(placeholder: string, startDelimiter: string, endDelimiter: string) {
-    this.placeholder = placeholder;
-    this.startDelimiter = startDelimiter;
-    this.endDelimiter = endDelimiter;
+  constructor(
+    private placeholder: string,
+    private startDelimiter: string,
+    private endDelimiter: string,
+  ) {
+    const escapedStart = this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escapedEnd = this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    this.pattern = new RegExp(`${escapedStart}${this.placeholder}(\\d+)${escapedEnd}`, 'g');
   }
 
   store(item: string) {
@@ -185,8 +191,7 @@ class PlaceholderReplacer {
   }
 
   restore(text: string) {
-    const pattern = new RegExp(`${this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}${this.placeholder}(\\d+)${this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g');
-    return text.replace(pattern, (_match, index) => {
+    return text.replace(this.pattern, (_match, index) => {
       return this.items[parseInt(index, 10)] || '';
     });
   }
@@ -201,7 +206,7 @@ export class Pangu {
   version: string;
 
   constructor() {
-    this.version = '7.0.0';
+    this.version = '7.1.0';
   }
 
   public spacingText(text: string) {
@@ -218,6 +223,12 @@ export class Pangu {
     const self = this;
 
     let newText = text;
+
+    // Protect backtick content from quote processing but allow spacing around backticks
+    const backtickManager = new PlaceholderReplacer('BACKTICK_CONTENT_', '\uE004', '\uE005');
+    newText = newText.replace(/`([^`]+)`/g, (_match, content) => {
+      return `\`${backtickManager.store(content)}\``;
+    });
 
     // Initialize placeholder managers
     const htmlTagManager = new PlaceholderReplacer('HTML_TAG_PLACEHOLDER_', '\uE000', '\uE001');
@@ -433,26 +444,24 @@ export class Pangu {
     // Fix spacing inside brackets according to the above rules:
     // Ensure no unwanted spaces immediately after opening or before closing brackets
     const fixBracketSpacing = (text: string) => {
-      // Process each bracket type
-      const processBracket = (pattern: RegExp, openBracket: string, closeBracket: string) => {
+      // Process all bracket types at once
+      const bracketPatterns = [
+        { pattern: /<([^<>]*)>/g, open: '<', close: '>' },
+        { pattern: /\(([^()]*)\)/g, open: '(', close: ')' },
+        { pattern: /\[([^\[\]]*)\]/g, open: '[', close: ']' },
+        { pattern: /\{([^{}]*)\}/g, open: '{', close: '}' },
+      ];
+
+      for (const { pattern, open, close } of bracketPatterns) {
         text = text.replace(pattern, (_match, innerContent) => {
           if (!innerContent) {
-            return `${openBracket}${closeBracket}`;
+            return `${open}${close}`;
           }
-
           // Remove spaces at the very beginning and end of content
           const trimmedContent = innerContent.replace(/^ +| +$/g, '');
-
-          return `${openBracket}${trimmedContent}${closeBracket}`;
+          return `${open}${trimmedContent}${close}`;
         });
-      };
-
-      // Only process < > as brackets if they're not HTML tags
-      // HTML tags have already been protected by placeholders
-      processBracket(/<([^<>]*)>/g, '<', '>');
-      processBracket(/\(([^()]*)\)/g, '(', ')');
-      processBracket(/\[([^\[\]]*)\]/g, '[', ']');
-      processBracket(/\{([^{}]*)\}/g, '{', '}');
+      }
 
       return text;
     };
@@ -463,6 +472,9 @@ export class Pangu {
     if (hasHtmlTags) {
       newText = htmlTagManager.restore(newText);
     }
+
+    // Restore backtick content
+    newText = backtickManager.restore(newText);
 
     // TODO:
     // Final fix for HTML comments: ensure no space after <!--
