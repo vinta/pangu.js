@@ -1,4 +1,4 @@
-export interface IdleSpacingConfig {
+export interface TaskSchedulerConfig {
   enabled: boolean;
   chunkSize: number;
   timeout: number;
@@ -57,7 +57,7 @@ export class TaskQueue {
  * ensuring smooth user experience even when processing large amounts of text.
  */
 export class TaskScheduler {
-  public readonly config: IdleSpacingConfig = {
+  public readonly config: TaskSchedulerConfig = {
     enabled: true,
     chunkSize: 40, // Process 40 text nodes per idle cycle
     timeout: 2000, // 2 second timeout for idle processing
@@ -105,7 +105,7 @@ export class TaskScheduler {
     this.taskQueue.clear();
   }
 
-  updateConfig(config: Partial<IdleSpacingConfig>) {
+  updateConfig(config: Partial<TaskSchedulerConfig>) {
     Object.assign(this.config, config);
   }
 }

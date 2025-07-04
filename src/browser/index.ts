@@ -1,6 +1,6 @@
 import { Pangu } from '../shared';
 import { DomUtils } from './dom-utils';
-import { TaskScheduler, type IdleSpacingConfig } from './idle-processor';
+import { TaskScheduler, type TaskSchedulerConfig } from './idle-processor';
 import { VisibilityDetector, type VisibilityCheckConfig } from './visibility-detector';
 
 export interface AutoSpacingPageConfig {
@@ -50,9 +50,9 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 
 export class BrowserPangu extends Pangu {
   private isAutoSpacingPageExecuted = false;
+  private autoSpacingPageObserver: MutationObserver | null = null;
   private taskScheduler = new TaskScheduler();
   private visibilityDetector = new VisibilityDetector();
-  protected autoSpacingPageObserver: MutationObserver | null = null;
 
   // PUBLIC
 
@@ -67,6 +67,7 @@ export class BrowserPangu extends Pangu {
 
     this.isAutoSpacingPageExecuted = true;
 
+    // prettier-ignore
     this.waitForVideosToLoad(pageDelayMs, once(() => this.spacingPage()));
     this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
   }
@@ -87,7 +88,7 @@ export class BrowserPangu extends Pangu {
     const textNodes = DomUtils.collectTextNodes(contextNode, true);
 
     // Choose processing method based on idle spacing configuration
-    if (this.idleSpacingConfig.enabled) {
+    if (this.taskSchedulerConfig.enabled) {
       this.spacingTextNodesInQueue(textNodes);
     } else {
       // Process the collected text nodes using the shared logic (synchronous)
@@ -104,7 +105,7 @@ export class BrowserPangu extends Pangu {
     this.isAutoSpacingPageExecuted = false;
   }
 
-  public get idleSpacingConfig() {
+  public get taskSchedulerConfig() {
     return this.taskScheduler.config;
   }
 
@@ -112,7 +113,7 @@ export class BrowserPangu extends Pangu {
     return this.visibilityDetector.config;
   }
 
-  public updateIdleSpacingConfig(config: Partial<IdleSpacingConfig>) {
+  public updateTaskSchedulerConfig(config: Partial<TaskSchedulerConfig>) {
     this.taskScheduler.updateConfig(config);
   }
 
@@ -377,7 +378,7 @@ export class BrowserPangu extends Pangu {
     const debouncedSpacingNode = debounce(
       () => {
         // NOTE: a single node could be very big which contains a lot of child nodes
-        if (this.idleSpacingConfig.enabled) {
+        if (this.taskSchedulerConfig.enabled) {
           // Use idle processing for dynamic content
           const nodesToProcess = [...queue];
           queue.length = 0; // Clear the queue
