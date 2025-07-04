@@ -1,6 +1,6 @@
 import { Pangu } from '../shared';
 import { DomUtils } from './dom-utils';
-import { IdleProcessor, type IdleSpacingConfig } from './idle-processor';
+import { TaskScheduler, type IdleSpacingConfig } from './idle-processor';
 import { VisibilityDetector, type VisibilityCheckConfig } from './visibility-detector';
 
 export interface AutoSpacingPageConfig {
@@ -50,7 +50,7 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 
 export class BrowserPangu extends Pangu {
   private isAutoSpacingPageExecuted = false;
-  private idleProcessor = new IdleProcessor();
+  private taskScheduler = new TaskScheduler();
   private visibilityDetector = new VisibilityDetector();
   protected autoSpacingPageObserver: MutationObserver | null = null;
 
@@ -105,7 +105,7 @@ export class BrowserPangu extends Pangu {
   }
 
   public get idleSpacingConfig() {
-    return this.idleProcessor.config;
+    return this.taskScheduler.config;
   }
 
   public get visibilityCheckConfig() {
@@ -113,7 +113,7 @@ export class BrowserPangu extends Pangu {
   }
 
   public updateIdleSpacingConfig(config: Partial<IdleSpacingConfig>) {
-    this.idleProcessor.updateConfig(config);
+    this.taskScheduler.updateConfig(config);
   }
 
   public updateVisibilityCheckConfig(config: Partial<VisibilityCheckConfig>) {
@@ -305,7 +305,9 @@ export class BrowserPangu extends Pangu {
   }
 
   protected processTextNodesWithIdleCallback(textNodes: Node[], onComplete?: () => void) {
-    this.idleProcessor.processInChunks(textNodes, (chunk) => this.processTextNodes(chunk), onComplete);
+    // a task is a function which processes a chunk of textNodes using requestIdleCallback()
+    const task = (chunkedTextNodes: Node[]) => this.processTextNodes(chunkedTextNodes);
+    this.taskScheduler.processInChunks(textNodes, task, onComplete);
   }
 
   protected waitForVideosAndSpacePage(pageDelayMs: number) {
