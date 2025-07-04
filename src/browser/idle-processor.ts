@@ -4,17 +4,13 @@ export interface IdleSpacingConfig {
   timeout: number;
 }
 
-export class IdleQueue {
+export class TaskQueue {
   private queue: (() => void)[] = [];
   private isProcessing = false;
   private onComplete?: () => void;
 
-  constructor() {
-    // No fallback - require native requestIdleCallback
-  }
-
-  add(work: () => void) {
-    this.queue.push(work);
+  add(task: () => void) {
+    this.queue.push(task);
     this.scheduleProcessing();
   }
 
@@ -40,8 +36,8 @@ export class IdleQueue {
 
   private process(deadline: IdleDeadline) {
     while (deadline.timeRemaining() > 0 && this.queue.length > 0) {
-      const work = this.queue.shift();
-      work?.();
+      const task = this.queue.shift();
+      task?.();
     }
 
     this.isProcessing = false;
@@ -49,34 +45,31 @@ export class IdleQueue {
     if (this.queue.length > 0) {
       this.scheduleProcessing();
     } else {
-      // All work completed, call completion callback
+      // All task completed, call completion callback
       this.onComplete?.();
     }
   }
 }
 
-export class IdleProcessor {
+/**
+ * Schedules and executes text spacing operations during browser idle time to avoid blocking the UI.
+ * Uses requestIdleCallback to process task in chunks when the browser has spare time,
+ * ensuring smooth user experience even when processing large amounts of text.
+ */
+export class TaskScheduler {
   public readonly config: IdleSpacingConfig = {
     enabled: true,
     chunkSize: 40, // Process 40 text nodes per idle cycle
     timeout: 2000, // 2 second timeout for idle processing
   };
 
-  private idleQueue = new IdleQueue();
+  private taskQueue = new TaskQueue();
 
   get queue() {
-    return this.idleQueue;
+    return this.taskQueue;
   }
 
-  updateConfig(config: Partial<IdleSpacingConfig>) {
-    Object.assign(this.config, config);
-  }
-
-  processInChunks<T>(
-    items: T[],
-    processor: (chunk: T[]) => void,
-    onComplete?: () => void
-  ) {
+  processInChunks<T>(items: T[], processor: (chunk: T[]) => void, onComplete?: () => void) {
     if (!this.config.enabled) {
       // Process synchronously if idle processing is disabled
       processor(items);
@@ -91,7 +84,7 @@ export class IdleProcessor {
 
     // Set up completion callback
     if (onComplete) {
-      this.idleQueue.setOnComplete(onComplete);
+      this.taskQueue.setOnComplete(onComplete);
     }
 
     // Split items into chunks
@@ -100,15 +93,19 @@ export class IdleProcessor {
       chunks.push(items.slice(i, i + this.config.chunkSize));
     }
 
-    // Add each chunk as a work item to the idle queue
+    // Add each chunk as a task item to the task queue
     for (const chunk of chunks) {
-      this.idleQueue.add(() => {
+      this.taskQueue.add(() => {
         processor(chunk);
       });
     }
   }
 
   clear() {
-    this.idleQueue.clear();
+    this.taskQueue.clear();
+  }
+
+  updateConfig(config: Partial<IdleSpacingConfig>) {
+    Object.assign(this.config, config);
   }
 }
