@@ -120,15 +120,15 @@ test.describe('CSS Visibility Check', () => {
     const result = await page.evaluate(() => {
       // Test initial state
       const initialConfig = { ...pangu.visibilityDetector.config };
-      
+
       // Update configuration
       pangu.visibilityDetector.config.enabled = true;
       const enabledConfig = { ...pangu.visibilityDetector.config };
-      
+
       // Disable again
       pangu.visibilityDetector.config.enabled = false;
       const disabledConfig = { ...pangu.visibilityDetector.config };
-      
+
       return {
         initial: initialConfig,
         enabled: enabledConfig,
@@ -215,30 +215,30 @@ test.describe('CSS Visibility Check', () => {
       const content = document.getElementById('content')!;
       content.innerHTML = `
         <style>
-          .sr-only { 
-            clip: rect(1px, 1px, 1px, 1px); 
-            height: 1px; 
-            overflow: hidden; 
-            position: absolute; 
-            width: 1px; 
+          .sr-only {
+            clip: rect(1px, 1px, 1px, 1px);
+            height: 1px;
+            overflow: hidden;
+            position: absolute;
+            width: 1px;
           }
         </style>
         <span class="sr-only">Description:</span><span>一律轉整數</span>
       `;
-      
+
       const hiddenSpan = content.querySelector('.sr-only')!;
       const visibleSpan = content.querySelector('span:not(.sr-only)')!;
-      
+
       // Test with visibility check disabled
       pangu.visibilityDetector.config.enabled = false;
       const hiddenCheckDisabled = pangu.isElementVisuallyHidden(hiddenSpan);
       const visibleCheckDisabled = pangu.isElementVisuallyHidden(visibleSpan);
-      
+
       // Test with visibility check enabled
       pangu.visibilityDetector.config.enabled = true;
       const hiddenCheckEnabled = pangu.isElementVisuallyHidden(hiddenSpan);
       const visibleCheckEnabled = pangu.isElementVisuallyHidden(visibleSpan);
-      
+
       return {
         disabled: {
           hiddenIsHidden: hiddenCheckDisabled,
@@ -247,14 +247,14 @@ test.describe('CSS Visibility Check', () => {
         enabled: {
           hiddenIsHidden: hiddenCheckEnabled,
           visibleIsHidden: visibleCheckEnabled,
-        }
+        },
       };
     });
 
     // When disabled, always returns false
     expect(result.disabled.hiddenIsHidden).toBe(false);
     expect(result.disabled.visibleIsHidden).toBe(false);
-    
+
     // When enabled, correctly detects visibility
     expect(result.enabled.hiddenIsHidden).toBe(true);
     expect(result.enabled.visibleIsHidden).toBe(false);
