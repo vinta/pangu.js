@@ -21,16 +21,7 @@ export class VisibilityDetector {
     },
   };
 
-  public updateConfig(config: Partial<VisibilityCheckConfig>) {
-    Object.assign(this.config, config);
-
-    // Handle nested commonHiddenPatterns object if provided
-    if (config.commonHiddenPatterns) {
-      Object.assign(this.config.commonHiddenPatterns, config.commonHiddenPatterns);
-    }
-  }
-
-  public isElementVisuallyHidden(element: Element): boolean {
+  public isElementVisuallyHidden(element: Element) {
     if (!this.config.enabled) {
       return false;
     }
@@ -109,5 +100,14 @@ export class VisibilityDetector {
     }
 
     return false;
+  }
+
+  public updateConfig(config: Partial<VisibilityCheckConfig>) {
+    Object.assign(this.config, config);
+
+    // Handle nested commonHiddenPatterns object if provided
+    if (config.commonHiddenPatterns) {
+      Object.assign(this.config.commonHiddenPatterns, config.commonHiddenPatterns);
+    }
   }
 }

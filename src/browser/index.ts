@@ -116,7 +116,7 @@ export class BrowserPangu extends Pangu {
   // INTERNAL
 
   // TODO: Refactor this method - it's too large and handles too many responsibilities
-  protected spacingTextNodes(textNodes: Node[]) {
+  private spacingTextNodes(textNodes: Node[]) {
     let currentTextNode: Node | null;
     let nextTextNode: Node | null = null;
 
@@ -294,14 +294,14 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  protected spacingTextNodesInQueue(textNodes: Node[], onComplete?: () => void) {
+  private spacingTextNodesInQueue(textNodes: Node[], onComplete?: () => void) {
     // A task is a function which performs spacing on a chunk of textNodes using requestIdleCallback(),
     // So it will only be executed during browser idle time
     const task = (chunkedTextNodes: Node[]) => this.spacingTextNodes(chunkedTextNodes);
     this.taskScheduler.processInChunks(textNodes, task, onComplete);
   }
 
-  protected waitForVideosToLoad(delayMs: number, onLoaded: () => void) {
+  private waitForVideosToLoad(delayMs: number, onLoaded: () => void) {
     // Wait for videos to load before spacing to avoid layout shifts
     // See: https://github.com/vinta/pangu.js/issues/117
     const videos = Array.from(document.getElementsByTagName('video'));
@@ -342,7 +342,7 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  protected setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number) {
+  private setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number) {
     // Disconnect any existing auto-spacing observer
     if (this.autoSpacingPageObserver) {
       this.autoSpacingPageObserver.disconnect();

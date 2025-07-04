@@ -1,92 +1,12 @@
 export class DomWalker {
-  static readonly blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
-  static readonly ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
-  static readonly presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
-  static readonly spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
-  static readonly spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-  static readonly ignoredClass = 'no-pangu-spacing';
+  public static readonly blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
+  public static readonly ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
+  public static readonly presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
+  public static readonly spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
+  public static readonly spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
+  public static readonly ignoredClass = 'no-pangu-spacing';
 
-  static isContentEditable(node: Node) {
-    return node instanceof HTMLElement && (node.isContentEditable || node.getAttribute('g_editable') === 'true');
-  }
-
-  static isSpecificTag(node: Node, tagRegex: RegExp) {
-    return !!(node && node.nodeName && tagRegex.test(node.nodeName));
-  }
-
-  static isInsideSpecificTag(node: Node, tagRegex: RegExp, checkCurrent = false): boolean {
-    let currentNode = node;
-    if (checkCurrent) {
-      if (this.isSpecificTag(currentNode, tagRegex)) {
-        return true;
-      }
-    }
-    while (currentNode.parentNode) {
-      currentNode = currentNode.parentNode;
-      if (this.isSpecificTag(currentNode, tagRegex)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  static isFirstTextChild(parentNode: Node, targetNode: Node) {
-    const { childNodes } = parentNode;
-
-    // Check if targetNode is the first child node (excluding comments) that has textContent
-    // Note: textContent includes text from all descendants, so element nodes can match too
-    for (let i = 0; i < childNodes.length; i++) {
-      const childNode = childNodes[i];
-      if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
-        return childNode === targetNode;
-      }
-    }
-    return false;
-  }
-
-  static isLastTextChild(parentNode: Node, targetNode: Node) {
-    const { childNodes } = parentNode;
-
-    // Check if targetNode is the last child node (excluding comments) that has textContent
-    // Note: textContent includes text from all descendants, so element nodes can match too
-    for (let i = childNodes.length - 1; i > -1; i--) {
-      const childNode = childNodes[i];
-      if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
-        return childNode === targetNode;
-      }
-    }
-    return false;
-  }
-
-  static hasIgnoredClass(node: Node) {
-    // Check the node itself if it's an element
-    if (node instanceof Element && node.classList.contains(this.ignoredClass)) {
-      return true;
-    }
-
-    // Check the parent node (for text nodes)
-    if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(this.ignoredClass)) {
-      return true;
-    }
-    return false;
-  }
-
-  static canIgnoreNode(node: Node) {
-    let currentNode = node;
-    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClass(currentNode))) {
-      // We will skip processing any children of ignored elements, so don't need to check all ancestors
-      return true;
-    }
-    while (currentNode.parentNode) {
-      currentNode = currentNode.parentNode;
-      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  static collectTextNodes(contextNode: Node, reverse = false): Text[] {
+  public static collectTextNodes(contextNode: Node, reverse = false) {
     const nodes: Text[] = [];
 
     // Handle edge cases
@@ -133,5 +53,69 @@ export class DomWalker {
 
     // Return in reverse order if requested
     return reverse ? nodes.reverse() : nodes;
+  }
+
+  public static canIgnoreNode(node: Node) {
+    let currentNode = node;
+    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClass(currentNode))) {
+      // We will skip processing any children of ignored elements, so don't need to check all ancestors
+      return true;
+    }
+    while (currentNode.parentNode) {
+      currentNode = currentNode.parentNode;
+      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public static isFirstTextChild(parentNode: Node, targetNode: Node) {
+    const { childNodes } = parentNode;
+
+    // Check if targetNode is the first child node (excluding comments) that has textContent
+    // Note: textContent includes text from all descendants, so element nodes can match too
+    for (let i = 0; i < childNodes.length; i++) {
+      const childNode = childNodes[i];
+      if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
+        return childNode === targetNode;
+      }
+    }
+    return false;
+  }
+
+  public static isLastTextChild(parentNode: Node, targetNode: Node) {
+    const { childNodes } = parentNode;
+
+    // Check if targetNode is the last child node (excluding comments) that has textContent
+    // Note: textContent includes text from all descendants, so element nodes can match too
+    for (let i = childNodes.length - 1; i > -1; i--) {
+      const childNode = childNodes[i];
+      if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
+        return childNode === targetNode;
+      }
+    }
+    return false;
+  }
+
+  private static isSpecificTag(node: Node, tagRegex: RegExp) {
+    return !!(node && node.nodeName && tagRegex.test(node.nodeName));
+  }
+
+  private static isContentEditable(node: Node) {
+    return node instanceof HTMLElement && (node.isContentEditable || node.getAttribute('g_editable') === 'true');
+  }
+
+  private static hasIgnoredClass(node: Node) {
+    // Check the node itself if it's an element
+    if (node instanceof Element && node.classList.contains(this.ignoredClass)) {
+      return true;
+    }
+
+    // Check the parent node (for text nodes)
+    if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(this.ignoredClass)) {
+      return true;
+    }
+    return false;
   }
 }
