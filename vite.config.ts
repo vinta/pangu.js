@@ -145,7 +145,7 @@ export default defineConfig({
         'shared/index': resolve(projectRoot, 'src/shared/index.ts'),
         'node/index': resolve(projectRoot, 'src/node/index.ts'),
         'node/cli': resolve(projectRoot, 'src/node/cli.ts'),
-        'browser/pangu': resolve(projectRoot, 'src/browser/index.ts'),
+        'browser/pangu': resolve(projectRoot, 'src/browser/pangu.ts'),
       },
       formats: ['es'],
     },
