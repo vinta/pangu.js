@@ -9,6 +9,10 @@ describe('Symbol %', () => {
     expect(pangu.spacingText('前面 % 後面')).toBe('前面 % 後面');
     expect(pangu.spacingText('前面100%後面')).toBe('前面 100% 後面');
 
+    // TODO:
+    // \uff05
+    expect(pangu.spacingText('１００％言論自由！')).toBe('１００％言論自由！');
+
     // prettier-ignore
     expect(pangu.spacingText('新八的構造成分有95%是眼鏡、3%是水、2%是垃圾'))
                        .toBe('新八的構造成分有 95% 是眼鏡、3% 是水、2% 是垃圾');
