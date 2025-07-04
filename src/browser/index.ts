@@ -67,7 +67,7 @@ export class BrowserPangu extends Pangu {
 
     this.isAutoSpacingPageExecuted = true;
 
-    this.waitForVideosToLoad(pageDelayMs, () => this.spacingPage());
+    this.waitForVideosToLoad(pageDelayMs, once(() => this.spacingPage()));
     this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
   }
 
@@ -315,20 +315,19 @@ export class BrowserPangu extends Pangu {
   protected waitForVideosToLoad(delayMs: number, onLoaded: () => void) {
     // Wait for videos to load before spacing to avoid layout shifts
     // See: https://github.com/vinta/pangu.js/issues/117
-    const onLoadedOnce = once(onLoaded);
 
     const videos = Array.from(document.getElementsByTagName('video'));
 
     if (videos.length === 0) {
       // No videos, proceed with normal delay
-      setTimeout(onLoadedOnce, delayMs);
+      setTimeout(onLoaded, delayMs);
     } else {
       // Check if all videos are already loaded
       const allVideosLoaded = videos.every((video) => video.readyState >= 3);
 
       if (allVideosLoaded) {
         // All videos loaded, proceed with normal delay
-        setTimeout(onLoadedOnce, delayMs);
+        setTimeout(onLoaded, delayMs);
       } else {
         // Wait for all videos to load
         let loadedCount = 0;
@@ -337,7 +336,7 @@ export class BrowserPangu extends Pangu {
         const checkAllLoaded = () => {
           loadedCount++;
           if (loadedCount >= videoCount) {
-            setTimeout(onLoadedOnce, delayMs);
+            setTimeout(onLoaded, delayMs);
           }
         };
 
@@ -350,7 +349,7 @@ export class BrowserPangu extends Pangu {
         }
 
         // Fallback timeout in case videos never load
-        setTimeout(onLoadedOnce, delayMs + 5000);
+        setTimeout(onLoaded, delayMs + 5000);
       }
     }
   }
