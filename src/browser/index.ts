@@ -305,7 +305,8 @@ export class BrowserPangu extends Pangu {
   }
 
   protected spacingTextNodesInQueue(textNodes: Node[], onComplete?: () => void) {
-    // a task is a function which processes a chunk of textNodes using requestIdleCallback()
+    // A task is a function which performs spacing on a chunk of textNodes using requestIdleCallback(),
+    // So it will only be executed during browser idle time
     const task = (chunkedTextNodes: Node[]) => this.spacingTextNodes(chunkedTextNodes);
     this.taskScheduler.processInChunks(textNodes, task, onComplete);
   }
