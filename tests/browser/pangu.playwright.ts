@@ -1,4 +1,3 @@
-import './global';
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';

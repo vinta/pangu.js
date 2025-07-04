@@ -1,4 +1,3 @@
-import './global';
 import { test, expect } from '@playwright/test';
 
 test.describe('Visibility Detector Enabled', () => {
@@ -13,6 +12,8 @@ test.describe('Visibility Detector Enabled', () => {
   });
 
   test('should detects all CSS hiding patterns when enabled', async ({ page }) => {
+    await page.setContent('<div id="content"></div>');
+    
     const result = await page.evaluate(() => {
       const content = document.getElementById('content')!;
       content.innerHTML = `
@@ -58,6 +59,8 @@ test.describe('Visibility Detector Enabled', () => {
   });
 
   test('should return false for all elements when visibility detection is disabled', async ({ page }) => {
+    await page.setContent('<div id="content"></div>');
+    
     const result = await page.evaluate(() => {
       const content = document.getElementById('content')!;
       content.innerHTML = `
@@ -108,6 +111,8 @@ test.describe('Visibility Detector Enabled', () => {
   });
 
   test('should skip spacing between hidden element and CJK', async ({ page }) => {
+    await page.setContent('<div id="content"></div>');
+    
     const result = await page.evaluate(() => {
       const content = document.getElementById('content')!;
       content.innerHTML = `
@@ -148,6 +153,8 @@ test.describe('Visibility Detector Enabled', () => {
   });
 
   test('should perform spacing between visible element and CJK', async ({ page }) => {
+    await page.setContent('<div id="content"></div>');
+    
     const result = await page.evaluate(() => {
       const content = document.getElementById('content')!;
       content.innerHTML = `
@@ -177,6 +184,8 @@ test.describe('Visibility Detector Enabled', () => {
   });
 
   test('should perform spacing with complex nested hidden structures', async ({ page }) => {
+    await page.setContent('<div id="content"></div>');
+    
     const result = await page.evaluate(() => {
       const content = document.getElementById('content')!;
       content.innerHTML = `

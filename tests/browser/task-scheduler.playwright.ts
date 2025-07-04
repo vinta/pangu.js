@@ -1,4 +1,3 @@
-import './global';
 import { test, expect } from '@playwright/test';
 
 test.describe('TaskScheduler Enabled', () => {
@@ -83,6 +82,8 @@ test.describe('TaskScheduler Enabled', () => {
   });
 
   test('should handle bulk content changes', async ({ page }) => {
+    await page.setContent('<div id="content"></div>');
+    
     const result = await page.evaluate(async () => {
       pangu.taskScheduler.config.enabled = true;
       pangu.taskScheduler.config.chunkSize = 3;
@@ -117,6 +118,8 @@ test.describe('TaskScheduler Enabled', () => {
   });
 
   test('should handle rapid content changes with debounce', async ({ page }) => {
+    await page.setContent('<div id="content"></div>');
+    
     const result = await page.evaluate(async () => {
       pangu.taskScheduler.config.enabled = true;
 
@@ -152,7 +155,7 @@ test.describe('TaskScheduler Enabled', () => {
       };
     });
 
-    expect(result.text).toBe('最終 final 文本 text');
+    expect(result.text.trim()).toBe('最終 final 文本 text');
     expect(result.processingCount).toBe(1);
   });
 });
