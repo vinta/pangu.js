@@ -22,8 +22,10 @@ test.describe('Idle Processing Infrastructure', () => {
 
   test('should enable idle spacing with custom config', async ({ page }) => {
     const result = await page.evaluate(() => {
-      pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 20, timeout: 3000 });
-      return pangu.idleSpacingConfig;
+      pangu.taskScheduler.config.enabled = true;
+      pangu.taskScheduler.config.chunkSize = 20;
+      pangu.taskScheduler.config.timeout = 3000;
+      return pangu.taskScheduler.config;
     });
 
     expect(result.enabled).toBe(true);
@@ -34,12 +36,12 @@ test.describe('Idle Processing Infrastructure', () => {
   test('should disable idle spacing', async ({ page }) => {
     const result = await page.evaluate(() => {
       // Enable idle spacing first
-      pangu.updateIdleSpacingConfig({ enabled: true });
-      const configBefore = { ...pangu.idleSpacingConfig };
+      pangu.taskScheduler.config.enabled = true;
+      const configBefore = { ...pangu.taskScheduler.config };
 
       // Disable it
-      pangu.updateIdleSpacingConfig({ enabled: false });
-      const configAfter = { ...pangu.idleSpacingConfig };
+      pangu.taskScheduler.config.enabled = false;
+      const configAfter = { ...pangu.taskScheduler.config };
 
       return {
         enabledBefore: configBefore.enabled,
@@ -59,8 +61,8 @@ test.describe('Idle Processing Infrastructure', () => {
       const hasNativeSupport = typeof window.requestIdleCallback === 'function';
 
       // Enable idle spacing to ensure infrastructure is working
-      pangu.updateIdleSpacingConfig({ enabled: true });
-      const config = pangu.idleSpacingConfig;
+      pangu.taskScheduler.config.enabled = true;
+      const config = pangu.taskScheduler.config;
 
       return {
         hasNativeSupport,
@@ -84,13 +86,13 @@ test.describe('Idle Processing Infrastructure', () => {
 
     const result = await page.evaluate(() => {
       // Ensure idle spacing is disabled (default state)
-      pangu.updateIdleSpacingConfig({ enabled: false });
+      pangu.taskScheduler.config.enabled = false;
 
       // Run normal spacing
       pangu.spacingNode(document.body);
 
       return {
-        idleEnabled: pangu.idleSpacingConfig.enabled,
+        idleEnabled: pangu.taskScheduler.config.enabled,
         bodyText: document.body.textContent,
       };
     });
@@ -114,7 +116,8 @@ test.describe('Idle Processing Infrastructure', () => {
 
     const result = await page.evaluate(() => {
       // Enable idle spacing with small chunk size to test chunking
-      pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 2 });
+      pangu.taskScheduler.config.enabled = true;
+      pangu.taskScheduler.config.chunkSize = 2;
 
       // Process the page with idle enabled
       pangu.spacingPage();
@@ -146,7 +149,7 @@ test.describe('Idle Processing Infrastructure', () => {
     const result = await page.evaluate(() => {
       return new Promise<{ completionCalled: boolean; text: string | null; idleEnabled: boolean }>((resolve) => {
         // Ensure idle spacing is disabled
-        pangu.updateIdleSpacingConfig({ enabled: false });
+        pangu.taskScheduler.config.enabled = false;
 
         let completionCalled = false;
 
@@ -158,7 +161,7 @@ test.describe('Idle Processing Infrastructure', () => {
         resolve({
           completionCalled,
           text,
-          idleEnabled: pangu.idleSpacingConfig.enabled,
+          idleEnabled: pangu.taskScheduler.config.enabled,
         });
       });
     });

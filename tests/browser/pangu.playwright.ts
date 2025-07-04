@@ -26,7 +26,7 @@ test.describe('BrowserPangu', () => {
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
     // Disable idle spacing for synchronous tests
     await page.evaluate(() => {
-      pangu.updateIdleSpacingConfig({ enabled: false });
+      pangu.taskScheduler.config.enabled = false;
     });
   });
 
@@ -105,7 +105,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent(htmlContent);
       await page.evaluate(() => {
         const element = document.getElementById('e1');
-        if (element) pangu.spacingNode(element);
+        if (element) {pangu.spacingNode(element);}
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);

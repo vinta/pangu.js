@@ -27,7 +27,8 @@ test.describe('MutationObserver Idle Processing', () => {
   test('should process dynamic content with idle processing when enabled', async ({ page }) => {
     const result = await page.evaluate(async () => {
       // Enable idle processing and auto-spacing
-      pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 2 });
+      pangu.taskScheduler.config.enabled = true;
+      pangu.taskScheduler.config.chunkSize = 2;
       pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 50, nodeMaxWaitMs: 100 });
       
       const content = document.getElementById('content')!;
@@ -49,7 +50,7 @@ test.describe('MutationObserver Idle Processing', () => {
   test('should process dynamic content synchronously when idle disabled', async ({ page }) => {
     const result = await page.evaluate(async () => {
       // Disable idle processing
-      pangu.updateIdleSpacingConfig({ enabled: false });
+      pangu.taskScheduler.config.enabled = false;
       pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 50, nodeMaxWaitMs: 100 });
       
       const content = document.getElementById('content')!;
@@ -70,7 +71,8 @@ test.describe('MutationObserver Idle Processing', () => {
 
   test('should handle bulk dynamic content additions', async ({ page }) => {
     const result = await page.evaluate(async () => {
-      pangu.updateIdleSpacingConfig({ enabled: true, chunkSize: 3 });
+      pangu.taskScheduler.config.enabled = true;
+      pangu.taskScheduler.config.chunkSize = 3;
       pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 50, nodeMaxWaitMs: 100 });
       
       const content = document.getElementById('content')!;
@@ -111,7 +113,7 @@ test.describe('MutationObserver Idle Processing', () => {
 
   test('should handle rapid content changes with debouncing', async ({ page }) => {
     const result = await page.evaluate(async () => {
-      pangu.updateIdleSpacingConfig({ enabled: true });
+      pangu.taskScheduler.config.enabled = true;
       pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 100, nodeMaxWaitMs: 200 });
       
       const content = document.getElementById('content')!;
