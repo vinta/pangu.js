@@ -2,12 +2,12 @@ const DEFAULT_SETTINGS = {
   spacing_mode: "spacing_when_load",
   filter_mode: "blacklist",
   blacklist: [
-    "https://calendar.google.com/*",
     "https://docs.google.com/*",
     "https://gist.github.com/*",
-    "https://github.com/*/blob/*",
-    "https://github.com/*/commit/*",
-    "https://github.com/*/pull/*",
+    "https://github.com/*/*/blob/*",
+    "https://github.com/*/*/commit/*",
+    "https://github.com/*/*/compare/*",
+    "https://github.com/*/*/pull/*",
     "https://github.com/vinta/pangu.js/issues*",
     "https://www.netflix.com/*"
   ],

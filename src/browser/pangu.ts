@@ -1,4 +1,7 @@
 import { Pangu } from '../shared';
+import { DomWalker } from './dom-walker';
+import { TaskScheduler } from './task-scheduler';
+import { VisibilityDetector } from './visibility-detector';
 
 export interface AutoSpacingPageConfig {
   pageDelayMs?: number;
@@ -45,30 +48,41 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
   };
 }
 
+// Main call flow from autoSpacingPage() to requestIdleCallback():
+//
+// 1. autoSpacingPage()
+// ↓
+// 2. spacingPage()
+// ↓
+// 3. spacingNode()
+//    - Collects text nodes via DomWalker.collectTextNodes()
+//    - Decision point: taskScheduler.config.enabled?
+//      ├─ YES → calls spacingTextNodesInQueue()
+//      └─ NO  → calls spacingTextNodes() directly (synchronous, no requestIdleCallback)
+// ↓
+// 4. spacingTextNodesInQueue() (only if taskScheduler enabled)
+//    - Decision point: visibilityDetector.config.enabled?
+//      ├─ YES (default: true) → Process all nodes in one batch
+//      │   └─ taskScheduler.queue.add(() => spacingTextNodes(allNodes))
+//      └─ NO → Process in chunks via taskScheduler.processInChunks()
+//          └─ Splits into chunks of 40 nodes
+// ↓
+// 5. TaskQueue.add() → scheduleProcessing() → requestIdleCallback()
+//    - Timeout: 5000ms
+//    - Processes tasks when browser is idle
+//    - Uses IdleDeadline to check remaining time
+//
+// Summary of paths to requestIdleCallback():
+// - taskScheduler.enabled=true + visibilityDetector.enabled=true → Single batch via requestIdleCallback
+// - taskScheduler.enabled=true + visibilityDetector.enabled=false → Multiple chunks via requestIdleCallback  
+// - taskScheduler.enabled=false → No requestIdleCallback (synchronous processing)
 export class BrowserPangu extends Pangu {
-  public isAutoSpacingPageExecuted: boolean;
-  protected autoSpacingPageObserver: MutationObserver | null;
+  private isAutoSpacingPageExecuted = false;
+  private autoSpacingPageObserver: MutationObserver | null = null;
+  public readonly taskScheduler = new TaskScheduler();
+  public readonly visibilityDetector = new VisibilityDetector();
 
-  public blockTags: RegExp;
-  public ignoredTags: RegExp;
-  public presentationalTags: RegExp;
-  public spaceLikeTags: RegExp;
-  public spaceSensitiveTags: RegExp;
-  public ignoredClass: string;
-
-  constructor() {
-    super();
-
-    this.isAutoSpacingPageExecuted = false;
-    this.autoSpacingPageObserver = null;
-
-    this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
-    this.ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
-    this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
-    this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
-    this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-    this.ignoredClass = 'no-pangu-spacing';
-  }
+  // PUBLIC
 
   public autoSpacingPage({ pageDelayMs = 1000, nodeDelayMs = 500, nodeMaxWaitMs = 2000 }: AutoSpacingPageConfig = {}) {
     if (!(document.body instanceof Node)) {
@@ -81,162 +95,75 @@ export class BrowserPangu extends Pangu {
 
     this.isAutoSpacingPageExecuted = true;
 
-    // FIXME
-    // Dirty hack for https://github.com/vinta/pangu.js/issues/117
-    const spacingPageOnce = once(() => {
-      this.spacingPage();
-    });
-    const videos = document.getElementsByTagName('video');
-    if (videos.length === 0) {
-      setTimeout(() => {
-        spacingPageOnce();
-      }, pageDelayMs);
-    } else {
-      for (let i = 0; i < videos.length; i++) {
-        const video = videos[i];
-        if (video.readyState === 4) {
-          setTimeout(() => {
-            spacingPageOnce();
-          }, 3000);
-          break;
-        }
-        video.addEventListener('loadeddata', () => {
-          setTimeout(() => {
-            spacingPageOnce();
-          }, 4000);
-        });
-      }
-    }
-
+    // prettier-ignore
+    this.waitForVideosToLoad(pageDelayMs, once(() => this.spacingPage()));
     this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
   }
 
   public spacingPage() {
-    this.spacingPageTitle();
-    this.spacingPageBody();
-  }
-
-  public spacingPageTitle() {
-    const xPathQuery = '/html/head/title/text()';
-    this.spacingNodeByXPath(xPathQuery, document);
-  }
-
-  public spacingPageBody() {
-    // // >> 任意位置的節點
-    // . >> 當前節點
-    // .. >> 父節點
-    // [] >> 條件
-    // text() >> 節點的文字內容，例如 hello 之於 <tag>hello</tag>
-    // https://www.w3schools.com/xml/xpath_syntax.asp
-    //
-    // [@contenteditable]
-    // 帶有 contenteditable 屬性的節點
-    //
-    // normalize-space(.)
-    // 當前節點的頭尾的空白字元都會被移除，大於兩個以上的空白字元會被置換成單一空白
-    // https://developer.mozilla.org/en-US/docs/Web/XPath/Functions/normalize-space
-    //
-    // name(..)
-    // 父節點的名稱
-    // https://developer.mozilla.org/en-US/docs/Web/XPath/Functions/name
-    //
-    // translate(string, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")
-    // 將 string 轉換成小寫，因為 XML 是 case-sensitive 的
-    // https://developer.mozilla.org/en-US/docs/Web/XPath/Functions/translate
-    //
-    // 1. 處理 <title>
-    // 2. 處理 <body> 底下的節點
-    // 3. 略過 contentEditable 的節點
-    // 4. 略過特定節點，例如 <script> 和 <style>
-    //
-    // 注意，以下的 query 只會取出各節點的 text 內容！
-    let xPathQuery = '/html/body//*/text()[normalize-space(.)]';
-    for (const tag of ['script', 'style', 'textarea']) {
-      // 理論上這幾個 tag 裡面不會包含其他 tag
-      // 所以可以直接用 .. 取父節點
-      // 例如 [translate(name(..), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz") != "script"]
-      xPathQuery = `${xPathQuery}[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
+    // Page title
+    const title = document.querySelector('head > title');
+    if (title) {
+      this.spacingNode(title);
     }
-    this.spacingNodeByXPath(xPathQuery, document);
+
+    // Page body
+    this.spacingNode(document.body);
   }
 
   public spacingNode(contextNode: Node) {
-    // Use .//text() to include all text nodes, not just those that are children of elements
-    // This handles cases like <div><span>中文</span>"<span>ABC</span></div> where the quote is a direct child of the div
-    //
-    // The normalize-space(.) predicate "filters out" text nodes that contain only whitespace
-    //
-    // Example HTML with CSS {white-space: pre-wrap}
-    //   <div>
-    //     "整天等"
-    //     "EAS"
-    //     "build"
-    //   </div>
-    //
-    // This creates these text nodes:
-    // 1. "整天等"     -> selected (has content)
-    // 2. "\n  "      -> filtered out (whitespace only)
-    // 3. "EAS"       -> selected (has content)
-    // 4. "\n  "      -> filtered out (whitespace only)
-    // 5. "build"     -> selected (has content)
-    //
-    // Without normalize-space, we'd process the whitespace nodes too, which would:
-    // - Impact performance (processing many empty nodes)
-    // - Add complexity (algorithm expects meaningful content)
-    //
-    // However, those filtered whitespace nodes still exist in the DOM and can render as spaces with CSS like {white-space: pre-wrap}.
-    // This is why spacingNodeByXPath includes logic to detect whitespace between selected text nodes.
-    const xPathQuery = './/text()[normalize-space(.)]';
-    this.spacingNodeByXPath(xPathQuery, contextNode);
+    // Only process nodes with actual content (excluding text nodes that contain only whitespace)
+    const textNodes = DomWalker.collectTextNodes(contextNode, true);
+
+    // Choose processing method based on idle spacing configuration
+    if (this.taskScheduler.config.enabled) {
+      this.spacingTextNodesInQueue(textNodes);
+    } else {
+      // Process the collected text nodes using the shared logic (synchronous)
+      this.spacingTextNodes(textNodes);
+    }
   }
 
-  public spacingElementById(idName: string) {
-    const xPathQuery = `id("${idName}")//text()`;
-    this.spacingNodeByXPath(xPathQuery, document);
-  }
-
-  public spacingElementByClassName(className: string) {
-    const xPathQuery = `//*[contains(concat(" ", normalize-space(@class), " "), "${className}")]//text()`;
-    this.spacingNodeByXPath(xPathQuery, document);
-  }
-
-  public spacingElementByTagName(tagName: string) {
-    const xPathQuery = `//${tagName}//text()`;
-    this.spacingNodeByXPath(xPathQuery, document);
-  }
-
-  // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
-  public spacingNodeByXPath(xPathQuery: string, contextNode: Node) {
-    // DocumentFragments don't support XPath queries
-    if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
-      return;
+  public stopAutoSpacingPage() {
+    if (this.autoSpacingPageObserver) {
+      this.autoSpacingPageObserver.disconnect();
+      this.autoSpacingPageObserver = null;
     }
 
-    // 因為 xPathQuery 會是用 text() 結尾，所以這些 nodes 會是 text 而不是 DOM element
-    // snapshotLength 要配合 XPathResult.ORDERED_NODE_SNAPSHOT_TYPE 使用
-    // https://developer.mozilla.org/en-US/docs/Web/API/Document/evaluate
-    // https://developer.mozilla.org/en-US/docs/Web/API/XPathResult
-    const textNodes = document.evaluate(xPathQuery, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+    this.isAutoSpacingPageExecuted = false;
+  }
 
+  public isElementVisuallyHidden(element: Element) {
+    return this.visibilityDetector.isElementVisuallyHidden(element);
+  }
+
+  // INTERNAL
+
+  // TODO: Refactor this method - it's too large and handles too many responsibilities
+  private spacingTextNodes(textNodes: Node[]) {
     let currentTextNode: Node | null;
     let nextTextNode: Node | null = null;
 
-    // 從最下面、最裡面的節點開始，所以是倒序的
-    for (let i = textNodes.snapshotLength - 1; i > -1; --i) {
-      currentTextNode = textNodes.snapshotItem(i);
+    // Process nodes in the order provided
+    for (let i = 0; i < textNodes.length; i++) {
+      currentTextNode = textNodes[i];
       if (!currentTextNode) {
         continue;
       }
 
-      // Skip presentational tag handling - it's causing issues with fragmented nodes
-      // The main spacing logic below handles most cases correctly
-
-      if (this.canIgnoreNode(currentTextNode)) {
+      // Skip nodes that should be ignored
+      if (DomWalker.canIgnoreNode(currentTextNode)) {
         nextTextNode = currentTextNode;
         continue;
       }
 
       if (currentTextNode instanceof Text) {
+        // Check if this text node starts with a space and comes after a hidden element
+        if (this.visibilityDetector.config.enabled && currentTextNode.data.startsWith(' ') && this.visibilityDetector.shouldSkipSpacingBeforeNode(currentTextNode)) {
+          // Remove the leading space that comes after a hidden element
+          currentTextNode.data = currentTextNode.data.substring(1);
+        }
+
         // Special handling for standalone quote nodes
         if (currentTextNode.data.length === 1 && /["\u201c\u201d]/.test(currentTextNode.data)) {
           // Check context to determine if space is needed before the quote
@@ -259,17 +186,13 @@ export class BrowserPangu extends Pangu {
         }
       }
 
-      // 處理嵌套的 <tag> 中的文字
+      // Handle nested tag text processing
       if (nextTextNode) {
-        // TODO
-        // 現在只是簡單地判斷相鄰的下一個 node 是不是 <br>
-        // 萬一遇上嵌套的標籤就不行了
-        if (currentTextNode.nextSibling && this.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
+        if (currentTextNode.nextSibling && DomWalker.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
           nextTextNode = currentTextNode;
           continue;
         }
 
-        // currentTextNode 的最後一個字 + nextTextNode 的第一個字
         if (!(currentTextNode instanceof Text) || !(nextTextNode instanceof Text)) {
           continue;
         }
@@ -278,10 +201,25 @@ export class BrowserPangu extends Pangu {
         const currentEndsWithSpace = currentTextNode.data.endsWith(' ');
         const nextStartsWithSpace = nextTextNode.data.startsWith(' ');
 
-        // Check if there's whitespace between the nodes (e.g., newlines that render as spaces with white-space: pre-wrap)
+        // Check if there's whitespace between the nodes
         let hasWhitespaceBetween = false;
-        let nodeBetween = currentTextNode.nextSibling;
-        while (nodeBetween && nodeBetween !== nextTextNode) {
+
+        // We need to check at different levels of the DOM tree
+        // First, find the highest ancestor that contains only the current text node
+        let currentAncestor = currentTextNode as Node;
+        while (currentAncestor.parentNode && DomWalker.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !DomWalker.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
+          currentAncestor = currentAncestor.parentNode;
+        }
+
+        // Find the highest ancestor that contains only the next text node
+        let nextAncestor = nextTextNode as Node;
+        while (nextAncestor.parentNode && DomWalker.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !DomWalker.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
+          nextAncestor = nextAncestor.parentNode;
+        }
+
+        // Check for whitespace between these ancestors
+        let nodeBetween = currentAncestor.nextSibling;
+        while (nodeBetween && nodeBetween !== nextAncestor) {
           if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
             hasWhitespaceBetween = true;
             break;
@@ -289,7 +227,7 @@ export class BrowserPangu extends Pangu {
           nodeBetween = nodeBetween.nextSibling;
         }
 
-        // If either node already has space at the boundary, or there's whitespace between nodes, skip processing
+        // Skip if proper spacing exists
         if (currentEndsWithSpace || nextStartsWithSpace || hasWhitespaceBetween) {
           nextTextNode = currentTextNode;
           continue;
@@ -298,82 +236,83 @@ export class BrowserPangu extends Pangu {
         const testText = currentTextNode.data.slice(-1) + nextTextNode.data.slice(0, 1);
         const testNewText = this.spacingText(testText);
 
-        // Special handling for quotes to prevent breaking quoted content
+        // Special handling for quotes
         const currentLast = currentTextNode.data.slice(-1);
         const nextFirst = nextTextNode.data.slice(0, 1);
         const isQuote = (char: string) => /["\u201c\u201d]/.test(char);
         const isCJK = (char: string) => /[\u4e00-\u9fff]/.test(char);
 
-        // Skip spacing in these cases:
-        // 1. Quote followed by CJK (e.g., "中)
-        // 2. CJK followed by quote (e.g., 容")
         const skipSpacing = (isQuote(currentLast) && isCJK(nextFirst)) || (isCJK(currentLast) && isQuote(nextFirst));
 
         if (testNewText !== testText && !skipSpacing) {
-          // 往上找 nextTextNode 的 parent node
-          // 直到遇到 spaceSensitiveTags
-          // 而且 nextTextNode 必須是第一個 text child
-          // 才能把空格加在 nextTextNode 的前面
           let nextNode: Node = nextTextNode;
-          while (nextNode.parentNode && !this.spaceSensitiveTags.test(nextNode.nodeName) && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
+          while (nextNode.parentNode && !DomWalker.spaceSensitiveTags.test(nextNode.nodeName) && DomWalker.isFirstTextChild(nextNode.parentNode, nextNode)) {
             nextNode = nextNode.parentNode;
           }
 
           let currentNode: Node = currentTextNode;
-          while (currentNode.parentNode && !this.spaceSensitiveTags.test(currentNode.nodeName) && this.isLastTextChild(currentNode.parentNode, currentNode)) {
+          while (currentNode.parentNode && !DomWalker.spaceSensitiveTags.test(currentNode.nodeName) && DomWalker.isLastTextChild(currentNode.parentNode, currentNode)) {
             currentNode = currentNode.parentNode;
           }
 
           if (currentNode.nextSibling) {
-            if (this.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
+            if (DomWalker.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
               nextTextNode = currentTextNode;
               continue;
             }
           }
 
-          if (!this.blockTags.test(currentNode.nodeName)) {
-            if (!this.spaceSensitiveTags.test(nextNode.nodeName)) {
-              if (!this.ignoredTags.test(nextNode.nodeName) && !this.blockTags.test(nextNode.nodeName)) {
+          if (!DomWalker.blockTags.test(currentNode.nodeName)) {
+            if (!DomWalker.spaceSensitiveTags.test(nextNode.nodeName)) {
+              if (!DomWalker.ignoredTags.test(nextNode.nodeName) && !DomWalker.blockTags.test(nextNode.nodeName)) {
                 if (nextTextNode.previousSibling) {
-                  if (!this.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
+                  if (!DomWalker.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
                     if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
-                      nextTextNode.data = ` ${nextTextNode.data}`;
+                      // Check visibility before adding space
+                      if (!this.visibilityDetector.shouldSkipSpacingBeforeNode(nextTextNode)) {
+                        nextTextNode.data = ` ${nextTextNode.data}`;
+                      }
                     }
                   }
                 } else {
-                  // dirty hack
-                  if (!this.canIgnoreNode(nextTextNode)) {
+                  if (!DomWalker.canIgnoreNode(nextTextNode)) {
                     if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
-                      nextTextNode.data = ` ${nextTextNode.data}`;
+                      // Check visibility before adding space
+                      if (!this.visibilityDetector.shouldSkipSpacingBeforeNode(nextTextNode)) {
+                        nextTextNode.data = ` ${nextTextNode.data}`;
+                      }
                     }
                   }
                 }
               }
-            } else if (!this.spaceSensitiveTags.test(currentNode.nodeName)) {
+            } else if (!DomWalker.spaceSensitiveTags.test(currentNode.nodeName)) {
               if (currentTextNode instanceof Text && !currentTextNode.data.endsWith(' ')) {
-                currentTextNode.data = `${currentTextNode.data} `;
+                // Check visibility before adding space
+                if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
+                  currentTextNode.data = `${currentTextNode.data} `;
+                }
               }
             } else {
-              const panguSpace = document.createElement('pangu');
-              panguSpace.innerHTML = ' ';
+              // Check visibility before inserting space element
+              if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
+                const panguSpace = document.createElement('pangu');
+                panguSpace.innerHTML = ' ';
 
-              // 避免一直被加空格
-              if (nextNode.parentNode) {
-                if (nextNode.previousSibling) {
-                  if (!this.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
+                if (nextNode.parentNode) {
+                  if (nextNode.previousSibling) {
+                    if (!DomWalker.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
+                      nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                    }
+                  } else {
                     nextNode.parentNode.insertBefore(panguSpace, nextNode);
                   }
-                } else {
-                  nextNode.parentNode.insertBefore(panguSpace, nextNode);
                 }
-              }
 
-              // TODO
-              // 主要是想要避免在元素（通常都是 <li>）的開頭加空格
-              // 這個做法有點蠢，但是不管還是先硬上
-              if (!panguSpace.previousElementSibling) {
-                if (panguSpace.parentNode) {
-                  panguSpace.parentNode.removeChild(panguSpace);
+                // Clean up orphaned space element
+                if (!panguSpace.previousElementSibling) {
+                  if (panguSpace.parentNode) {
+                    panguSpace.parentNode.removeChild(panguSpace);
+                  }
                 }
               }
             }
@@ -385,94 +324,73 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  public stopAutoSpacingPage() {
-    if (this.autoSpacingPageObserver) {
-      this.autoSpacingPageObserver.disconnect();
-      this.autoSpacingPageObserver = null;
+  private spacingTextNodesInQueue(textNodes: Node[], onComplete?: () => void) {
+    // When visibility detection is enabled, process all nodes together to maintain context between adjacent nodes
+    // This prevents incorrect spacing after hidden elements
+    if (this.visibilityDetector.config.enabled) {
+      // Still use idle callback for performance, but process all nodes in one batch
+      if (this.taskScheduler.config.enabled) {
+        this.taskScheduler.queue.add(() => {
+          this.spacingTextNodes(textNodes);
+        });
+        if (onComplete) {
+          this.taskScheduler.queue.setOnComplete(onComplete);
+        }
+      } else {
+        // Synchronous processing
+        this.spacingTextNodes(textNodes);
+        onComplete?.();
+      }
+      return;
     }
 
-    this.isAutoSpacingPageExecuted = false;
+    // Normal chunked processing when visibility detection is disabled
+    const task = (chunkedTextNodes: Node[]) => this.spacingTextNodes(chunkedTextNodes);
+    this.taskScheduler.processInChunks(textNodes, task, onComplete);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected isContentEditable(node: any) {
-    return node.isContentEditable || (node.getAttribute && node.getAttribute('g_editable') === 'true');
-  }
+  private waitForVideosToLoad(delayMs: number, onLoaded: () => void) {
+    // Wait for videos to load before spacing to avoid layout shifts
+    // See: https://github.com/vinta/pangu.js/issues/117
+    const videos = Array.from(document.getElementsByTagName('video'));
 
-  protected isSpecificTag(node: Node, tagRegex: RegExp) {
-    return node && node.nodeName && tagRegex.test(node.nodeName);
-  }
+    if (videos.length === 0) {
+      // No videos, proceed with normal delay
+      setTimeout(onLoaded, delayMs);
+    } else {
+      // Check if all videos are already loaded
+      const allVideosLoaded = videos.every((video) => video.readyState >= 3);
 
-  protected isInsideSpecificTag(node: Node, tagRegex: RegExp, checkCurrent = false) {
-    let currentNode = node;
-    if (checkCurrent) {
-      if (this.isSpecificTag(currentNode, tagRegex)) {
-        return true;
+      if (allVideosLoaded) {
+        // All videos loaded, proceed with normal delay
+        setTimeout(onLoaded, delayMs);
+      } else {
+        // Wait for all videos to load
+        let loadedCount = 0;
+        const videoCount = videos.length;
+
+        const checkAllLoaded = () => {
+          loadedCount++;
+          if (loadedCount >= videoCount) {
+            setTimeout(onLoaded, delayMs);
+          }
+        };
+
+        for (const video of videos) {
+          if (video.readyState >= 3) {
+            checkAllLoaded();
+          } else {
+            video.addEventListener('loadeddata', checkAllLoaded, { once: true });
+          }
+        }
+
+        // Fallback timeout in case videos never load
+        setTimeout(onLoaded, delayMs + 5000);
       }
     }
-    while (currentNode.parentNode) {
-      currentNode = currentNode.parentNode;
-      if (this.isSpecificTag(currentNode, tagRegex)) {
-        return true;
-      }
-    }
-    return false;
   }
 
-  protected hasIgnoredClass(node: Node) {
-    // Check the node itself if it's an element
-    if (node instanceof Element && node.classList.contains(this.ignoredClass)) {
-      return true;
-    }
-    // Check the parent node (for text nodes)
-    if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(this.ignoredClass)) {
-      return true;
-    }
-    return false;
-  }
-
-  protected canIgnoreNode(node: Node) {
-    let currentNode = node;
-    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClass(currentNode))) {
-      // We will skip processing any children of ignored elements, so don't need to check all ancestors
-      return true;
-    }
-    while (currentNode.parentNode) {
-      currentNode = currentNode.parentNode;
-      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  protected isFirstTextChild(parentNode: Node, targetNode: Node) {
-    const { childNodes } = parentNode;
-
-    // 只判斷第一個含有 text 的 node
-    for (let i = 0; i < childNodes.length; i++) {
-      const childNode = childNodes[i];
-      if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
-        return childNode === targetNode;
-      }
-    }
-    return false;
-  }
-
-  protected isLastTextChild(parentNode: Node, targetNode: Node) {
-    const { childNodes } = parentNode;
-
-    // 只判斷倒數第一個含有 text 的 node
-    for (let i = childNodes.length - 1; i > -1; i--) {
-      const childNode = childNodes[i];
-      if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
-        return childNode === targetNode;
-      }
-    }
-    return false;
-  }
-
-  protected setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number) {
+  private setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number) {
     // Disconnect any existing auto-spacing observer
     if (this.autoSpacingPageObserver) {
       this.autoSpacingPageObserver.disconnect();
@@ -483,7 +401,10 @@ export class BrowserPangu extends Pangu {
 
     const debouncedSpacingTitle = debounce(
       () => {
-        this.spacingPageTitle();
+        const titleElement = document.querySelector('head > title');
+        if (titleElement) {
+          this.spacingNode(titleElement);
+        }
       },
       nodeDelayMs,
       nodeMaxWaitMs,
@@ -492,10 +413,29 @@ export class BrowserPangu extends Pangu {
     const debouncedSpacingNode = debounce(
       () => {
         // NOTE: a single node could be very big which contains a lot of child nodes
-        while (queue.length) {
-          const node = queue.shift();
-          if (node) {
-            this.spacingNode(node);
+        if (this.taskScheduler.config.enabled) {
+          // Use idle processing for dynamic content
+          const nodesToProcess = [...queue];
+          queue.length = 0; // Clear the queue
+
+          if (nodesToProcess.length > 0) {
+            // Collect all text nodes from all input nodes
+            const allTextNodes: Node[] = [];
+            for (const node of nodesToProcess) {
+              const textNodes = DomWalker.collectTextNodes(node, true);
+              allTextNodes.push(...textNodes);
+            }
+
+            // Process all collected text nodes with idle callback
+            this.spacingTextNodesInQueue(allTextNodes);
+          }
+        } else {
+          // Synchronous processing (original behavior)
+          while (queue.length) {
+            const node = queue.shift();
+            if (node) {
+              this.spacingNode(node);
+            }
           }
         }
       },
@@ -552,18 +492,18 @@ export class BrowserPangu extends Pangu {
     // NOTE: A single MutationObserver can observe multiple targets simultaneously
     // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver/observe:
 
-    // Observe page content changes
-    this.autoSpacingPageObserver.observe(document.body, {
-      characterData: true,
-      childList: true,
-      subtree: true,
-    });
-
     // Observe page title changes
     this.autoSpacingPageObserver.observe(document.head, {
       characterData: true,
       childList: true,
       subtree: true, // Need subtree to observe text node changes inside title
+    });
+
+    // Observe page content changes
+    this.autoSpacingPageObserver.observe(document.body, {
+      characterData: true,
+      childList: true,
+      subtree: true,
     });
   }
 }

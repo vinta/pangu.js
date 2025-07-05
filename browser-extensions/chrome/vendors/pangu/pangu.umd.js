@@ -9,27 +9,35 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   const AN = "A-Za-z0-9";
   const A = "A-Za-z";
   const UPPER_AN = "A-Z0-9";
-  const OPERATORS_WITH_HYPHEN = "\\+\\-\\*=&";
-  const OPERATORS_NO_HYPHEN = "\\+\\*=&";
+  const OPERATORS_BASE = "\\+\\*=&";
+  const OPERATORS_WITH_HYPHEN = `${OPERATORS_BASE}\\-`;
+  const OPERATORS_NO_HYPHEN = OPERATORS_BASE;
   const GRADE_OPERATORS = "\\+\\-\\*";
-  const QUOTES_FULL = '`"\u05F4';
+  const QUOTES = '`"\u05F4';
   const LEFT_BRACKETS_BASIC = "\\(\\[\\{";
   const RIGHT_BRACKETS_BASIC = "\\)\\]\\}";
   const LEFT_BRACKETS_EXTENDED = "\\(\\[\\{<>\u201C";
   const RIGHT_BRACKETS_EXTENDED = "\\)\\]\\}<>\u201D";
   const ANS_CJK_AFTER = `${A}\u0370-\u03FF0-9@\\$%\\^&\\*\\-\\+\\\\=\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF`;
-  const ANS_BEFORE_CJK = `${A}\u0370-\u03FF0-9~\\$%\\^&\\*\\-\\+\\\\=!;:,\\.\\?\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF`;
-  const UNIX_ABSOLUTE_FILE_PATH = /\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path|project|src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|your)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+\*]+)*/;
-  const UNIX_RELATIVE_FILE_PATH = /(?:\.\/)?(?:src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|node_modules|\.claude|\.git|\.vscode)(?:\/[A-Za-z0-9_\-\.@\+\*]+)+/;
+  const ANS_BEFORE_CJK = `${A}\u0370-\u03FF0-9\\$%\\^&\\*\\-\\+\\\\=\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF`;
+  const FILE_PATH_DIRS = "home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path|project|src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|your|\\.claude|\\.git|\\.vscode";
+  const FILE_PATH_CHARS = "[A-Za-z0-9_\\-\\.@\\+\\*]+";
+  const UNIX_ABSOLUTE_FILE_PATH = new RegExp(`/(?:\\.?(?:${FILE_PATH_DIRS})|\\.(?:[A-Za-z0-9_\\-]+))(?:/${FILE_PATH_CHARS})*`);
+  const UNIX_RELATIVE_FILE_PATH = new RegExp(`(?:\\./)?(?:${FILE_PATH_DIRS})(?:/${FILE_PATH_CHARS})+`);
   const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
   const ANY_CJK = new RegExp(`[${CJK}]`);
-  const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK = new RegExp(`([${CJK}])[ ]*([\\:]+|\\.)[ ]*([${CJK}])`, "g");
-  const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS = new RegExp(`([${CJK}])[ ]*([~\\!;,\\?]+)[ ]*`, "g");
+  const CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:]+)(?=[${CJK}${AN}])`, "g");
+  const AN_PUNCTUATION_CJK = new RegExp(`([${AN}])([!;,\\?]+)([${CJK}])`, "g");
+  const CJK_TILDE = new RegExp(`([${CJK}])(~+)(?!=)(?=[${CJK}${AN}])`, "g");
+  const CJK_TILDE_EQUALS = new RegExp(`([${CJK}])(~=)`, "g");
+  const CJK_PERIOD = new RegExp(`([${CJK}])(\\.)(?![${AN}\\./])(?=[${CJK}${AN}])`, "g");
+  const AN_PERIOD_CJK = new RegExp(`([${AN}])(\\.)([${CJK}])`, "g");
+  const AN_COLON_CJK = new RegExp(`([${AN}])(:)([${CJK}])`, "g");
   const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, "g");
   const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, "g");
-  const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES_FULL}])`, "g");
-  const QUOTE_CJK = new RegExp(`([${QUOTES_FULL}])([${CJK}])`, "g");
-  const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES_FULL}]+)[ ]*(.+?)[ ]*([${QUOTES_FULL}]+)`, "g");
+  const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES}])`, "g");
+  const QUOTE_CJK = new RegExp(`([${QUOTES}])([${CJK}])`, "g");
+  const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES}]+)[ ]*(.+?)[ ]*([${QUOTES}]+)`, "g");
   const QUOTE_AN = new RegExp(`([\u201D])([${AN}])`, "g");
   const CJK_QUOTE_AN = new RegExp(`([${CJK}])(")([${AN}])`, "g");
   const CJK_SINGLE_QUOTE_BUT_POSSESSIVE = new RegExp(`([${CJK}])('[^s])`, "g");
@@ -70,22 +78,22 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
   class PlaceholderReplacer {
     constructor(placeholder, startDelimiter, endDelimiter) {
-      __publicField(this, "placeholder");
       __publicField(this, "items", []);
       __publicField(this, "index", 0);
-      __publicField(this, "startDelimiter");
-      __publicField(this, "endDelimiter");
+      __publicField(this, "pattern");
       this.placeholder = placeholder;
       this.startDelimiter = startDelimiter;
       this.endDelimiter = endDelimiter;
+      const escapedStart = this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const escapedEnd = this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      this.pattern = new RegExp(`${escapedStart}${this.placeholder}(\\d+)${escapedEnd}`, "g");
     }
     store(item) {
       this.items[this.index] = item;
       return `${this.startDelimiter}${this.placeholder}${this.index++}${this.endDelimiter}`;
     }
     restore(text) {
-      const pattern = new RegExp(`${this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${this.placeholder}(\\d+)${this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "g");
-      return text.replace(pattern, (_match, index) => {
+      return text.replace(this.pattern, (_match, index) => {
         return this.items[parseInt(index, 10)] || "";
       });
     }
@@ -97,7 +105,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   class Pangu {
     constructor() {
       __publicField(this, "version");
-      this.version = "6.1.3";
+      this.version = "7.2.0";
     }
     spacingText(text) {
       if (typeof text !== "string") {
@@ -109,6 +117,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
       const self2 = this;
       let newText = text;
+      const backtickManager = new PlaceholderReplacer("BACKTICK_CONTENT_", "\uE004", "\uE005");
+      newText = newText.replace(/`([^`]+)`/g, (_match, content) => {
+        return `\`${backtickManager.store(content)}\``;
+      });
       const htmlTagManager = new PlaceholderReplacer("HTML_TAG_PLACEHOLDER_", "\uE000", "\uE001");
       let hasHtmlTags = false;
       if (newText.includes("<")) {
@@ -122,24 +134,29 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           return htmlTagManager.store(processedTag);
         });
       }
-      newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK, (_match, leftCjk, symbols, rightCjk) => {
-        const fullwidthSymbols = self2.convertToFullwidth(symbols);
-        return `${leftCjk}${fullwidthSymbols}${rightCjk}`;
-      });
-      newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS, (_match, cjk, symbols) => {
-        const fullwidthSymbols = self2.convertToFullwidth(symbols);
-        return `${cjk}${fullwidthSymbols}`;
-      });
       newText = newText.replace(DOTS_CJK, "$1 $2");
+      newText = newText.replace(CJK_PUNCTUATION, "$1$2 ");
+      newText = newText.replace(AN_PUNCTUATION_CJK, "$1$2 $3");
+      newText = newText.replace(CJK_TILDE, "$1$2 ");
+      newText = newText.replace(CJK_TILDE_EQUALS, "$1 $2 ");
+      newText = newText.replace(CJK_PERIOD, "$1$2 ");
+      newText = newText.replace(AN_PERIOD_CJK, "$1$2 $3");
+      newText = newText.replace(AN_COLON_CJK, "$1$2 $3");
       newText = newText.replace(FIX_CJK_COLON_ANS, "$1\uFF1A$2");
       newText = newText.replace(CJK_QUOTE, "$1 $2");
       newText = newText.replace(QUOTE_CJK, "$1 $2");
       newText = newText.replace(FIX_QUOTE_ANY_QUOTE, "$1$2$3");
       newText = newText.replace(QUOTE_AN, "$1 $2");
       newText = newText.replace(CJK_QUOTE_AN, "$1$2 $3");
+      newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
+      const singleQuoteCJKManager = new PlaceholderReplacer("SINGLE_QUOTE_CJK_PLACEHOLDER_", "\uE030", "\uE031");
+      const SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, "g");
+      newText = newText.replace(SINGLE_QUOTE_PURE_CJK, (match) => {
+        return singleQuoteCJKManager.store(match);
+      });
       newText = newText.replace(CJK_SINGLE_QUOTE_BUT_POSSESSIVE, "$1 $2");
       newText = newText.replace(SINGLE_QUOTE_CJK, "$1 $2");
-      newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
+      newText = singleQuoteCJKManager.restore(newText);
       const textLength = newText.length;
       const slashCount = (newText.match(/\//g) || []).length;
       if (slashCount === 0) {
@@ -214,36 +231,309 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       newText = newText.replace(S_A, "$1 $2");
       newText = newText.replace(MIDDLE_DOT, "\u30FB");
       const fixBracketSpacing = (text2) => {
-        const processBracket = (pattern, openBracket, closeBracket) => {
+        const bracketPatterns = [
+          { pattern: /<([^<>]*)>/g, open: "<", close: ">" },
+          { pattern: /\(([^()]*)\)/g, open: "(", close: ")" },
+          { pattern: /\[([^\[\]]*)\]/g, open: "[", close: "]" },
+          { pattern: /\{([^{}]*)\}/g, open: "{", close: "}" }
+        ];
+        for (const { pattern, open, close } of bracketPatterns) {
           text2 = text2.replace(pattern, (_match, innerContent) => {
             if (!innerContent) {
-              return `${openBracket}${closeBracket}`;
+              return `${open}${close}`;
             }
             const trimmedContent = innerContent.replace(/^ +| +$/g, "");
-            return `${openBracket}${trimmedContent}${closeBracket}`;
+            return `${open}${trimmedContent}${close}`;
           });
-        };
-        processBracket(/<([^<>]*)>/g, "<", ">");
-        processBracket(/\(([^()]*)\)/g, "(", ")");
-        processBracket(/\[([^\[\]]*)\]/g, "[", "]");
-        processBracket(/\{([^{}]*)\}/g, "{", "}");
+        }
         return text2;
       };
       newText = fixBracketSpacing(newText);
       if (hasHtmlTags) {
         newText = htmlTagManager.restore(newText);
       }
+      newText = backtickManager.restore(newText);
       return newText;
-    }
-    // alias for spacingText()
-    spacing(text) {
-      return this.spacingText(text);
     }
     hasProperSpacing(text) {
       return this.spacingText(text) === text;
     }
-    convertToFullwidth(symbols) {
-      return symbols.replace(/~/g, "\uFF5E").replace(/!/g, "\uFF01").replace(/;/g, "\uFF1B").replace(/:/g, "\uFF1A").replace(/,/g, "\uFF0C").replace(/\./g, "\u3002").replace(/\?/g, "\uFF1F");
+  }
+  class DomWalker {
+    static collectTextNodes(contextNode, reverse = false) {
+      const nodes = [];
+      if (!contextNode || contextNode instanceof DocumentFragment) {
+        return nodes;
+      }
+      const walker = document.createTreeWalker(contextNode, NodeFilter.SHOW_TEXT, {
+        acceptNode: (node) => {
+          if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          let currentNode = node;
+          while (currentNode) {
+            if (currentNode instanceof Element) {
+              if (this.ignoredTags.test(currentNode.nodeName)) {
+                return NodeFilter.FILTER_REJECT;
+              }
+              if (this.isContentEditable(currentNode)) {
+                return NodeFilter.FILTER_REJECT;
+              }
+              if (currentNode.classList.contains(this.ignoredClass)) {
+                return NodeFilter.FILTER_REJECT;
+              }
+            }
+            currentNode = currentNode.parentNode;
+          }
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      });
+      while (walker.nextNode()) {
+        nodes.push(walker.currentNode);
+      }
+      return reverse ? nodes.reverse() : nodes;
+    }
+    static canIgnoreNode(node) {
+      let currentNode = node;
+      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClass(currentNode))) {
+        return true;
+      }
+      while (currentNode.parentNode) {
+        currentNode = currentNode.parentNode;
+        if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
+          return true;
+        }
+      }
+      return false;
+    }
+    static isFirstTextChild(parentNode, targetNode) {
+      const { childNodes } = parentNode;
+      for (let i = 0; i < childNodes.length; i++) {
+        const childNode = childNodes[i];
+        if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
+          return childNode === targetNode;
+        }
+      }
+      return false;
+    }
+    static isLastTextChild(parentNode, targetNode) {
+      const { childNodes } = parentNode;
+      for (let i = childNodes.length - 1; i > -1; i--) {
+        const childNode = childNodes[i];
+        if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
+          return childNode === targetNode;
+        }
+      }
+      return false;
+    }
+    static isSpecificTag(node, tagRegex) {
+      return !!(node && node.nodeName && tagRegex.test(node.nodeName));
+    }
+    static isContentEditable(node) {
+      return node instanceof HTMLElement && (node.isContentEditable || node.getAttribute("g_editable") === "true");
+    }
+    static hasIgnoredClass(node) {
+      if (node instanceof Element && node.classList.contains(this.ignoredClass)) {
+        return true;
+      }
+      if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(this.ignoredClass)) {
+        return true;
+      }
+      return false;
+    }
+  }
+  __publicField(DomWalker, "blockTags", /^(div|p|h1|h2|h3|h4|h5|h6)$/i);
+  __publicField(DomWalker, "ignoredTags", /^(code|pre|script|style|textarea|iframe|input)$/i);
+  __publicField(DomWalker, "presentationalTags", /^(b|code|del|em|i|s|strong|kbd)$/i);
+  __publicField(DomWalker, "spaceLikeTags", /^(br|hr|i|img|pangu)$/i);
+  __publicField(DomWalker, "spaceSensitiveTags", /^(a|del|pre|s|strike|u)$/i);
+  __publicField(DomWalker, "ignoredClass", "no-pangu-spacing");
+  class TaskQueue {
+    constructor() {
+      __publicField(this, "queue", []);
+      __publicField(this, "isProcessing", false);
+      __publicField(this, "onComplete");
+    }
+    add(task) {
+      this.queue.push(task);
+      this.scheduleProcessing();
+    }
+    clear() {
+      this.queue.length = 0;
+      this.onComplete = void 0;
+    }
+    setOnComplete(onComplete) {
+      this.onComplete = onComplete;
+    }
+    get length() {
+      return this.queue.length;
+    }
+    scheduleProcessing() {
+      if (!this.isProcessing && this.queue.length > 0) {
+        this.isProcessing = true;
+        requestIdleCallback((deadline) => this.process(deadline), { timeout: 5e3 });
+      }
+    }
+    process(deadline) {
+      var _a;
+      while (deadline.timeRemaining() > 0 && this.queue.length > 0) {
+        const task = this.queue.shift();
+        task == null ? void 0 : task();
+      }
+      this.isProcessing = false;
+      if (this.queue.length > 0) {
+        this.scheduleProcessing();
+      } else {
+        (_a = this.onComplete) == null ? void 0 : _a.call(this);
+      }
+    }
+  }
+  class TaskScheduler {
+    constructor() {
+      __publicField(this, "config", {
+        enabled: true,
+        chunkSize: 40,
+        // Process 40 text nodes per idle cycle
+        timeout: 2e3
+        // 2 second timeout for idle processing
+      });
+      __publicField(this, "taskQueue", new TaskQueue());
+    }
+    get queue() {
+      return this.taskQueue;
+    }
+    processInChunks(items, processor, onComplete) {
+      if (!this.config.enabled) {
+        processor(items);
+        onComplete == null ? void 0 : onComplete();
+        return;
+      }
+      if (items.length === 0) {
+        onComplete == null ? void 0 : onComplete();
+        return;
+      }
+      if (onComplete) {
+        this.taskQueue.setOnComplete(onComplete);
+      }
+      const chunks = [];
+      for (let i = 0; i < items.length; i += this.config.chunkSize) {
+        chunks.push(items.slice(i, i + this.config.chunkSize));
+      }
+      for (const chunk of chunks) {
+        this.taskQueue.add(() => {
+          processor(chunk);
+        });
+      }
+    }
+    clear() {
+      this.taskQueue.clear();
+    }
+    updateConfig(config) {
+      Object.assign(this.config, config);
+    }
+  }
+  class VisibilityDetector {
+    constructor() {
+      __publicField(this, "config", {
+        enabled: true,
+        commonHiddenPatterns: {
+          clipRect: true,
+          // clip: rect(1px, 1px, 1px, 1px) patterns
+          displayNone: true,
+          // display: none
+          visibilityHidden: true,
+          // visibility: hidden
+          opacityZero: true,
+          // opacity: 0
+          heightWidth1px: true
+          // height: 1px; width: 1px
+        }
+      });
+    }
+    isElementVisuallyHidden(element) {
+      if (!this.config.enabled) {
+        return false;
+      }
+      const style = getComputedStyle(element);
+      const patterns = this.config.commonHiddenPatterns;
+      if (patterns.displayNone && style.display === "none") {
+        return true;
+      }
+      if (patterns.visibilityHidden && style.visibility === "hidden") {
+        return true;
+      }
+      if (patterns.opacityZero && parseFloat(style.opacity) === 0) {
+        return true;
+      }
+      if (patterns.clipRect) {
+        const clip = style.clip;
+        if (clip && (clip.includes("rect(1px, 1px, 1px, 1px)") || clip.includes("rect(0px, 0px, 0px, 0px)") || clip.includes("rect(0, 0, 0, 0)"))) {
+          return true;
+        }
+      }
+      if (patterns.heightWidth1px) {
+        const height = parseInt(style.height, 10);
+        const width = parseInt(style.width, 10);
+        if (height === 1 && width === 1) {
+          const overflow = style.overflow;
+          const position = style.position;
+          if (overflow === "hidden" && position === "absolute") {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+    shouldSkipSpacingAfterNode(node) {
+      if (!this.config.enabled) {
+        return false;
+      }
+      let elementToCheck = null;
+      if (node instanceof Element) {
+        elementToCheck = node;
+      } else if (node.parentElement) {
+        elementToCheck = node.parentElement;
+      }
+      if (elementToCheck && this.isElementVisuallyHidden(elementToCheck)) {
+        return true;
+      }
+      let currentElement = elementToCheck == null ? void 0 : elementToCheck.parentElement;
+      while (currentElement) {
+        if (this.isElementVisuallyHidden(currentElement)) {
+          return true;
+        }
+        currentElement = currentElement.parentElement;
+      }
+      return false;
+    }
+    shouldSkipSpacingBeforeNode(node) {
+      if (!this.config.enabled) {
+        return false;
+      }
+      let previousNode = node.previousSibling;
+      if (!previousNode && node.parentElement) {
+        let parent = node.parentElement;
+        while (parent && !previousNode) {
+          previousNode = parent.previousSibling;
+          if (!previousNode) {
+            parent = parent.parentElement;
+          }
+        }
+      }
+      if (previousNode) {
+        if (previousNode instanceof Element && this.isElementVisuallyHidden(previousNode)) {
+          return true;
+        } else if (previousNode instanceof Text && previousNode.parentElement && this.isElementVisuallyHidden(previousNode.parentElement)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    updateConfig(config) {
+      Object.assign(this.config, config);
+      if (config.commonHiddenPatterns) {
+        Object.assign(this.config.commonHiddenPatterns, config.commonHiddenPatterns);
+      }
     }
   }
   function once(func) {
@@ -279,24 +569,13 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   }
   class BrowserPangu extends Pangu {
     constructor() {
-      super();
-      __publicField(this, "isAutoSpacingPageExecuted");
-      __publicField(this, "autoSpacingPageObserver");
-      __publicField(this, "blockTags");
-      __publicField(this, "ignoredTags");
-      __publicField(this, "presentationalTags");
-      __publicField(this, "spaceLikeTags");
-      __publicField(this, "spaceSensitiveTags");
-      __publicField(this, "ignoredClass");
-      this.isAutoSpacingPageExecuted = false;
-      this.autoSpacingPageObserver = null;
-      this.blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
-      this.ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
-      this.presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
-      this.spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
-      this.spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
-      this.ignoredClass = "no-pangu-spacing";
+      super(...arguments);
+      __publicField(this, "isAutoSpacingPageExecuted", false);
+      __publicField(this, "autoSpacingPageObserver", null);
+      __publicField(this, "taskScheduler", new TaskScheduler());
+      __publicField(this, "visibilityDetector", new VisibilityDetector());
     }
+    // PUBLIC
     autoSpacingPage({ pageDelayMs = 1e3, nodeDelayMs = 500, nodeMaxWaitMs = 2e3 } = {}) {
       if (!(document.body instanceof Node)) {
         return;
@@ -305,81 +584,52 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         return;
       }
       this.isAutoSpacingPageExecuted = true;
-      const spacingPageOnce = once(() => {
-        this.spacingPage();
-      });
-      const videos = document.getElementsByTagName("video");
-      if (videos.length === 0) {
-        setTimeout(() => {
-          spacingPageOnce();
-        }, pageDelayMs);
-      } else {
-        for (let i = 0; i < videos.length; i++) {
-          const video = videos[i];
-          if (video.readyState === 4) {
-            setTimeout(() => {
-              spacingPageOnce();
-            }, 3e3);
-            break;
-          }
-          video.addEventListener("loadeddata", () => {
-            setTimeout(() => {
-              spacingPageOnce();
-            }, 4e3);
-          });
-        }
-      }
+      this.waitForVideosToLoad(pageDelayMs, once(() => this.spacingPage()));
       this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
     }
     spacingPage() {
-      this.spacingPageTitle();
-      this.spacingPageBody();
-    }
-    spacingPageTitle() {
-      const xPathQuery = "/html/head/title/text()";
-      this.spacingNodeByXPath(xPathQuery, document);
-    }
-    spacingPageBody() {
-      let xPathQuery = "/html/body//*/text()[normalize-space(.)]";
-      for (const tag of ["script", "style", "textarea"]) {
-        xPathQuery = `${xPathQuery}[translate(name(..),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")!="${tag}"]`;
+      const title = document.querySelector("head > title");
+      if (title) {
+        this.spacingNode(title);
       }
-      this.spacingNodeByXPath(xPathQuery, document);
+      this.spacingNode(document.body);
     }
     spacingNode(contextNode) {
-      const xPathQuery = ".//text()[normalize-space(.)]";
-      this.spacingNodeByXPath(xPathQuery, contextNode);
-    }
-    spacingElementById(idName) {
-      const xPathQuery = `id("${idName}")//text()`;
-      this.spacingNodeByXPath(xPathQuery, document);
-    }
-    spacingElementByClassName(className) {
-      const xPathQuery = `//*[contains(concat(" ", normalize-space(@class), " "), "${className}")]//text()`;
-      this.spacingNodeByXPath(xPathQuery, document);
-    }
-    spacingElementByTagName(tagName) {
-      const xPathQuery = `//${tagName}//text()`;
-      this.spacingNodeByXPath(xPathQuery, document);
-    }
-    // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
-    spacingNodeByXPath(xPathQuery, contextNode) {
-      if (!(contextNode instanceof Node) || contextNode instanceof DocumentFragment) {
-        return;
+      const textNodes = DomWalker.collectTextNodes(contextNode, true);
+      if (this.taskScheduler.config.enabled) {
+        this.spacingTextNodesInQueue(textNodes);
+      } else {
+        this.spacingTextNodes(textNodes);
       }
-      const textNodes = document.evaluate(xPathQuery, contextNode, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+    }
+    stopAutoSpacingPage() {
+      if (this.autoSpacingPageObserver) {
+        this.autoSpacingPageObserver.disconnect();
+        this.autoSpacingPageObserver = null;
+      }
+      this.isAutoSpacingPageExecuted = false;
+    }
+    isElementVisuallyHidden(element) {
+      return this.visibilityDetector.isElementVisuallyHidden(element);
+    }
+    // INTERNAL
+    // TODO: Refactor this method - it's too large and handles too many responsibilities
+    spacingTextNodes(textNodes) {
       let currentTextNode;
       let nextTextNode = null;
-      for (let i = textNodes.snapshotLength - 1; i > -1; --i) {
-        currentTextNode = textNodes.snapshotItem(i);
+      for (let i = 0; i < textNodes.length; i++) {
+        currentTextNode = textNodes[i];
         if (!currentTextNode) {
           continue;
         }
-        if (this.canIgnoreNode(currentTextNode)) {
+        if (DomWalker.canIgnoreNode(currentTextNode)) {
           nextTextNode = currentTextNode;
           continue;
         }
         if (currentTextNode instanceof Text) {
+          if (this.visibilityDetector.config.enabled && currentTextNode.data.startsWith(" ") && this.visibilityDetector.shouldSkipSpacingBeforeNode(currentTextNode)) {
+            currentTextNode.data = currentTextNode.data.substring(1);
+          }
           if (currentTextNode.data.length === 1 && /["\u201c\u201d]/.test(currentTextNode.data)) {
             if (currentTextNode.previousSibling) {
               const prevNode = currentTextNode.previousSibling;
@@ -398,7 +648,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           }
         }
         if (nextTextNode) {
-          if (currentTextNode.nextSibling && this.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
+          if (currentTextNode.nextSibling && DomWalker.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
             nextTextNode = currentTextNode;
             continue;
           }
@@ -408,8 +658,16 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           const currentEndsWithSpace = currentTextNode.data.endsWith(" ");
           const nextStartsWithSpace = nextTextNode.data.startsWith(" ");
           let hasWhitespaceBetween = false;
-          let nodeBetween = currentTextNode.nextSibling;
-          while (nodeBetween && nodeBetween !== nextTextNode) {
+          let currentAncestor = currentTextNode;
+          while (currentAncestor.parentNode && DomWalker.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !DomWalker.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
+            currentAncestor = currentAncestor.parentNode;
+          }
+          let nextAncestor = nextTextNode;
+          while (nextAncestor.parentNode && DomWalker.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !DomWalker.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
+            nextAncestor = nextAncestor.parentNode;
+          }
+          let nodeBetween = currentAncestor.nextSibling;
+          while (nodeBetween && nodeBetween !== nextAncestor) {
             if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
               hasWhitespaceBetween = true;
               break;
@@ -429,55 +687,63 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
           const skipSpacing = isQuote(currentLast) && isCJK(nextFirst) || isCJK(currentLast) && isQuote(nextFirst);
           if (testNewText !== testText && !skipSpacing) {
             let nextNode = nextTextNode;
-            while (nextNode.parentNode && !this.spaceSensitiveTags.test(nextNode.nodeName) && this.isFirstTextChild(nextNode.parentNode, nextNode)) {
+            while (nextNode.parentNode && !DomWalker.spaceSensitiveTags.test(nextNode.nodeName) && DomWalker.isFirstTextChild(nextNode.parentNode, nextNode)) {
               nextNode = nextNode.parentNode;
             }
             let currentNode = currentTextNode;
-            while (currentNode.parentNode && !this.spaceSensitiveTags.test(currentNode.nodeName) && this.isLastTextChild(currentNode.parentNode, currentNode)) {
+            while (currentNode.parentNode && !DomWalker.spaceSensitiveTags.test(currentNode.nodeName) && DomWalker.isLastTextChild(currentNode.parentNode, currentNode)) {
               currentNode = currentNode.parentNode;
             }
             if (currentNode.nextSibling) {
-              if (this.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
+              if (DomWalker.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
                 nextTextNode = currentTextNode;
                 continue;
               }
             }
-            if (!this.blockTags.test(currentNode.nodeName)) {
-              if (!this.spaceSensitiveTags.test(nextNode.nodeName)) {
-                if (!this.ignoredTags.test(nextNode.nodeName) && !this.blockTags.test(nextNode.nodeName)) {
+            if (!DomWalker.blockTags.test(currentNode.nodeName)) {
+              if (!DomWalker.spaceSensitiveTags.test(nextNode.nodeName)) {
+                if (!DomWalker.ignoredTags.test(nextNode.nodeName) && !DomWalker.blockTags.test(nextNode.nodeName)) {
                   if (nextTextNode.previousSibling) {
-                    if (!this.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
+                    if (!DomWalker.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
                       if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
-                        nextTextNode.data = ` ${nextTextNode.data}`;
+                        if (!this.visibilityDetector.shouldSkipSpacingBeforeNode(nextTextNode)) {
+                          nextTextNode.data = ` ${nextTextNode.data}`;
+                        }
                       }
                     }
                   } else {
-                    if (!this.canIgnoreNode(nextTextNode)) {
+                    if (!DomWalker.canIgnoreNode(nextTextNode)) {
                       if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
-                        nextTextNode.data = ` ${nextTextNode.data}`;
+                        if (!this.visibilityDetector.shouldSkipSpacingBeforeNode(nextTextNode)) {
+                          nextTextNode.data = ` ${nextTextNode.data}`;
+                        }
                       }
                     }
                   }
                 }
-              } else if (!this.spaceSensitiveTags.test(currentNode.nodeName)) {
+              } else if (!DomWalker.spaceSensitiveTags.test(currentNode.nodeName)) {
                 if (currentTextNode instanceof Text && !currentTextNode.data.endsWith(" ")) {
-                  currentTextNode.data = `${currentTextNode.data} `;
+                  if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
+                    currentTextNode.data = `${currentTextNode.data} `;
+                  }
                 }
               } else {
-                const panguSpace = document.createElement("pangu");
-                panguSpace.innerHTML = " ";
-                if (nextNode.parentNode) {
-                  if (nextNode.previousSibling) {
-                    if (!this.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
+                if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
+                  const panguSpace = document.createElement("pangu");
+                  panguSpace.innerHTML = " ";
+                  if (nextNode.parentNode) {
+                    if (nextNode.previousSibling) {
+                      if (!DomWalker.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
+                        nextNode.parentNode.insertBefore(panguSpace, nextNode);
+                      }
+                    } else {
                       nextNode.parentNode.insertBefore(panguSpace, nextNode);
                     }
-                  } else {
-                    nextNode.parentNode.insertBefore(panguSpace, nextNode);
                   }
-                }
-                if (!panguSpace.previousElementSibling) {
-                  if (panguSpace.parentNode) {
-                    panguSpace.parentNode.removeChild(panguSpace);
+                  if (!panguSpace.previousElementSibling) {
+                    if (panguSpace.parentNode) {
+                      panguSpace.parentNode.removeChild(panguSpace);
+                    }
                   }
                 }
               }
@@ -487,76 +753,51 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         nextTextNode = currentTextNode;
       }
     }
-    stopAutoSpacingPage() {
-      if (this.autoSpacingPageObserver) {
-        this.autoSpacingPageObserver.disconnect();
-        this.autoSpacingPageObserver = null;
+    spacingTextNodesInQueue(textNodes, onComplete) {
+      if (this.visibilityDetector.config.enabled) {
+        if (this.taskScheduler.config.enabled) {
+          this.taskScheduler.queue.add(() => {
+            this.spacingTextNodes(textNodes);
+          });
+          if (onComplete) {
+            this.taskScheduler.queue.setOnComplete(onComplete);
+          }
+        } else {
+          this.spacingTextNodes(textNodes);
+          onComplete == null ? void 0 : onComplete();
+        }
+        return;
       }
-      this.isAutoSpacingPageExecuted = false;
+      const task = (chunkedTextNodes) => this.spacingTextNodes(chunkedTextNodes);
+      this.taskScheduler.processInChunks(textNodes, task, onComplete);
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    isContentEditable(node) {
-      return node.isContentEditable || node.getAttribute && node.getAttribute("g_editable") === "true";
-    }
-    isSpecificTag(node, tagRegex) {
-      return node && node.nodeName && tagRegex.test(node.nodeName);
-    }
-    isInsideSpecificTag(node, tagRegex, checkCurrent = false) {
-      let currentNode = node;
-      if (checkCurrent) {
-        if (this.isSpecificTag(currentNode, tagRegex)) {
-          return true;
+    waitForVideosToLoad(delayMs, onLoaded) {
+      const videos = Array.from(document.getElementsByTagName("video"));
+      if (videos.length === 0) {
+        setTimeout(onLoaded, delayMs);
+      } else {
+        const allVideosLoaded = videos.every((video) => video.readyState >= 3);
+        if (allVideosLoaded) {
+          setTimeout(onLoaded, delayMs);
+        } else {
+          let loadedCount = 0;
+          const videoCount = videos.length;
+          const checkAllLoaded = () => {
+            loadedCount++;
+            if (loadedCount >= videoCount) {
+              setTimeout(onLoaded, delayMs);
+            }
+          };
+          for (const video of videos) {
+            if (video.readyState >= 3) {
+              checkAllLoaded();
+            } else {
+              video.addEventListener("loadeddata", checkAllLoaded, { once: true });
+            }
+          }
+          setTimeout(onLoaded, delayMs + 5e3);
         }
       }
-      while (currentNode.parentNode) {
-        currentNode = currentNode.parentNode;
-        if (this.isSpecificTag(currentNode, tagRegex)) {
-          return true;
-        }
-      }
-      return false;
-    }
-    hasIgnoredClass(node) {
-      if (node instanceof Element && node.classList.contains(this.ignoredClass)) {
-        return true;
-      }
-      if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(this.ignoredClass)) {
-        return true;
-      }
-      return false;
-    }
-    canIgnoreNode(node) {
-      let currentNode = node;
-      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClass(currentNode))) {
-        return true;
-      }
-      while (currentNode.parentNode) {
-        currentNode = currentNode.parentNode;
-        if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
-          return true;
-        }
-      }
-      return false;
-    }
-    isFirstTextChild(parentNode, targetNode) {
-      const { childNodes } = parentNode;
-      for (let i = 0; i < childNodes.length; i++) {
-        const childNode = childNodes[i];
-        if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
-          return childNode === targetNode;
-        }
-      }
-      return false;
-    }
-    isLastTextChild(parentNode, targetNode) {
-      const { childNodes } = parentNode;
-      for (let i = childNodes.length - 1; i > -1; i--) {
-        const childNode = childNodes[i];
-        if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
-          return childNode === targetNode;
-        }
-      }
-      return false;
     }
     setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs) {
       if (this.autoSpacingPageObserver) {
@@ -566,17 +807,33 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       const queue = [];
       const debouncedSpacingTitle = debounce(
         () => {
-          this.spacingPageTitle();
+          const titleElement = document.querySelector("head > title");
+          if (titleElement) {
+            this.spacingNode(titleElement);
+          }
         },
         nodeDelayMs,
         nodeMaxWaitMs
       );
       const debouncedSpacingNode = debounce(
         () => {
-          while (queue.length) {
-            const node = queue.shift();
-            if (node) {
-              this.spacingNode(node);
+          if (this.taskScheduler.config.enabled) {
+            const nodesToProcess = [...queue];
+            queue.length = 0;
+            if (nodesToProcess.length > 0) {
+              const allTextNodes = [];
+              for (const node of nodesToProcess) {
+                const textNodes = DomWalker.collectTextNodes(node, true);
+                allTextNodes.push(...textNodes);
+              }
+              this.spacingTextNodesInQueue(allTextNodes);
+            }
+          } else {
+            while (queue.length) {
+              const node = queue.shift();
+              if (node) {
+                this.spacingNode(node);
+              }
             }
           }
         },
@@ -614,16 +871,16 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         }
         debouncedSpacingNode();
       });
-      this.autoSpacingPageObserver.observe(document.body, {
-        characterData: true,
-        childList: true,
-        subtree: true
-      });
       this.autoSpacingPageObserver.observe(document.head, {
         characterData: true,
         childList: true,
         subtree: true
         // Need subtree to observe text node changes inside title
+      });
+      this.autoSpacingPageObserver.observe(document.body, {
+        characterData: true,
+        childList: true,
+        subtree: true
       });
     }
   }

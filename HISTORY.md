@@ -1,5 +1,19 @@
 # History
 
+## v7.2.0 / 2025-07-05
+
+- 趁末日前更新一下，不然以後就沒機會了
+- 修正在 Google Calendar 會不小心在 CSS 隱藏元素與中文之間加空格的問題
+
+## v7.0.0 / 2025-07-02
+
+- 各位觀眾！Paranoid Text Spacing 演算法 v7 橫空出世！
+  - 會自動判斷某些元素是不是被 CSS 隱藏來決定要不要加空格
+  - 不會把半形的標點符號轉成全形了
+- 史詩級性能提升！
+  - 把 XPath 換成 [TreeWalker](https://developer.mozilla.org/en-US/docs/Web/API/TreeWalker)，快他媽 5 倍！
+  - 比較慢的操作都丟到 [requestIdleCallback()](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback)，內容太多的網站終於不卡了！
+
 ## v6.1.3 / 2025-07-01
 
 - 修正 Asana 的 comments 會被重複加空格的問題
@@ -10,12 +24,12 @@
 
 ## v6.1.0 / 2025-06-30
 
-- 各位強迫症患者，Paranoid Text Spacing 演算法 v6.1
+- 各位觀眾！Paranoid Text Spacing 演算法 v6.1
   - 好啦好啦，我要去玩死亡擱淺 2 了
 
 ## v6.0.0 / 2025-06-28
 
-- 各位強迫症患者，Paranoid Text Spacing 演算法 v6
+- 各位觀眾！Paranoid Text Spacing 演算法 v6
   - 特別處理了各種括號 `()` `[]` `{}` `<>` 和 `/` 的問題，仁至義盡了
 
 ## v5.3.2 / 2025-06-27
@@ -24,7 +38,7 @@
 
 ## v5.2.0 / 2025-06-26
 
-- 各位強迫症患者，Paranoid Text Spacing 演算法 v5
+- 各位觀眾！Paranoid Text Spacing 演算法 v5
 
 ## v5.1.1 / 2025-06-24
 
@@ -65,7 +79,7 @@
 
 ## v4.0.0 / 2019-01-27
 
-- 各位強迫症患者，Paranoid Text Spacing 演算法 v4
+- 各位觀眾！Paranoid Text Spacing 演算法 v4
 - 大幅地改進 Chrome extension 的效能，使用 `MutationObserver` 和 `debounce`
 - 忍痛拿掉「空格之神顯靈了」
 - 修正 `Pangu.spacingText()` 的 error callback

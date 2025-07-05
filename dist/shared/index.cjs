@@ -31,27 +31,35 @@ const CJK = "\u2E80-\u2EFF\u2F00-\u2FDF\u3040-\u309F\u30A0-\u30FA\u30FC-\u30FF\u
 const AN = "A-Za-z0-9";
 const A = "A-Za-z";
 const UPPER_AN = "A-Z0-9";
-const OPERATORS_WITH_HYPHEN = "\\+\\-\\*=&";
-const OPERATORS_NO_HYPHEN = "\\+\\*=&";
+const OPERATORS_BASE = "\\+\\*=&";
+const OPERATORS_WITH_HYPHEN = `${OPERATORS_BASE}\\-`;
+const OPERATORS_NO_HYPHEN = OPERATORS_BASE;
 const GRADE_OPERATORS = "\\+\\-\\*";
-const QUOTES_FULL = '`"\u05F4';
+const QUOTES = '`"\u05F4';
 const LEFT_BRACKETS_BASIC = "\\(\\[\\{";
 const RIGHT_BRACKETS_BASIC = "\\)\\]\\}";
 const LEFT_BRACKETS_EXTENDED = "\\(\\[\\{<>\u201C";
 const RIGHT_BRACKETS_EXTENDED = "\\)\\]\\}<>\u201D";
 const ANS_CJK_AFTER = `${A}\u0370-\u03FF0-9@\\$%\\^&\\*\\-\\+\\\\=\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF`;
-const ANS_BEFORE_CJK = `${A}\u0370-\u03FF0-9~\\$%\\^&\\*\\-\\+\\\\=!;:,\\.\\?\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF`;
-const UNIX_ABSOLUTE_FILE_PATH = /\/(?:\.?(?:home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path|project|src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|your)|\.(?:[A-Za-z0-9_\-]+))(?:\/[A-Za-z0-9_\-\.@\+\*]+)*/;
-const UNIX_RELATIVE_FILE_PATH = /(?:\.\/)?(?:src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|node_modules|\.claude|\.git|\.vscode)(?:\/[A-Za-z0-9_\-\.@\+\*]+)+/;
+const ANS_BEFORE_CJK = `${A}\u0370-\u03FF0-9\\$%\\^&\\*\\-\\+\\\\=\xA1-\xFF\u2150-\u218F\u2700\u2014\u27BF`;
+const FILE_PATH_DIRS = "home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path|project|src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|your|\\.claude|\\.git|\\.vscode";
+const FILE_PATH_CHARS = "[A-Za-z0-9_\\-\\.@\\+\\*]+";
+const UNIX_ABSOLUTE_FILE_PATH = new RegExp(`/(?:\\.?(?:${FILE_PATH_DIRS})|\\.(?:[A-Za-z0-9_\\-]+))(?:/${FILE_PATH_CHARS})*`);
+const UNIX_RELATIVE_FILE_PATH = new RegExp(`(?:\\./)?(?:${FILE_PATH_DIRS})(?:/${FILE_PATH_CHARS})+`);
 const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
 const ANY_CJK = new RegExp(`[${CJK}]`);
-const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK = new RegExp(`([${CJK}])[ ]*([\\:]+|\\.)[ ]*([${CJK}])`, "g");
-const CONVERT_TO_FULLWIDTH_CJK_SYMBOLS = new RegExp(`([${CJK}])[ ]*([~\\!;,\\?]+)[ ]*`, "g");
+const CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:]+)(?=[${CJK}${AN}])`, "g");
+const AN_PUNCTUATION_CJK = new RegExp(`([${AN}])([!;,\\?]+)([${CJK}])`, "g");
+const CJK_TILDE = new RegExp(`([${CJK}])(~+)(?!=)(?=[${CJK}${AN}])`, "g");
+const CJK_TILDE_EQUALS = new RegExp(`([${CJK}])(~=)`, "g");
+const CJK_PERIOD = new RegExp(`([${CJK}])(\\.)(?![${AN}\\./])(?=[${CJK}${AN}])`, "g");
+const AN_PERIOD_CJK = new RegExp(`([${AN}])(\\.)([${CJK}])`, "g");
+const AN_COLON_CJK = new RegExp(`([${AN}])(:)([${CJK}])`, "g");
 const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, "g");
 const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, "g");
-const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES_FULL}])`, "g");
-const QUOTE_CJK = new RegExp(`([${QUOTES_FULL}])([${CJK}])`, "g");
-const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES_FULL}]+)[ ]*(.+?)[ ]*([${QUOTES_FULL}]+)`, "g");
+const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES}])`, "g");
+const QUOTE_CJK = new RegExp(`([${QUOTES}])([${CJK}])`, "g");
+const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES}]+)[ ]*(.+?)[ ]*([${QUOTES}]+)`, "g");
 const QUOTE_AN = new RegExp(`([\u201D])([${AN}])`, "g");
 const CJK_QUOTE_AN = new RegExp(`([${CJK}])(")([${AN}])`, "g");
 const CJK_SINGLE_QUOTE_BUT_POSSESSIVE = new RegExp(`([${CJK}])('[^s])`, "g");
@@ -92,22 +100,22 @@ const S_A = new RegExp(`(%)([${A}])`, "g");
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 class PlaceholderReplacer {
   constructor(placeholder, startDelimiter, endDelimiter) {
-    __publicField(this, "placeholder");
     __publicField(this, "items", []);
     __publicField(this, "index", 0);
-    __publicField(this, "startDelimiter");
-    __publicField(this, "endDelimiter");
+    __publicField(this, "pattern");
     this.placeholder = placeholder;
     this.startDelimiter = startDelimiter;
     this.endDelimiter = endDelimiter;
+    const escapedStart = this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escapedEnd = this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    this.pattern = new RegExp(`${escapedStart}${this.placeholder}(\\d+)${escapedEnd}`, "g");
   }
   store(item) {
     this.items[this.index] = item;
     return `${this.startDelimiter}${this.placeholder}${this.index++}${this.endDelimiter}`;
   }
   restore(text) {
-    const pattern = new RegExp(`${this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}${this.placeholder}(\\d+)${this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "g");
-    return text.replace(pattern, (_match, index) => {
+    return text.replace(this.pattern, (_match, index) => {
       return this.items[parseInt(index, 10)] || "";
     });
   }
@@ -119,7 +127,7 @@ class PlaceholderReplacer {
 class Pangu {
   constructor() {
     __publicField(this, "version");
-    this.version = "6.1.3";
+    this.version = "7.2.0";
   }
   spacingText(text) {
     if (typeof text !== "string") {
@@ -131,6 +139,10 @@ class Pangu {
     }
     const self = this;
     let newText = text;
+    const backtickManager = new PlaceholderReplacer("BACKTICK_CONTENT_", "\uE004", "\uE005");
+    newText = newText.replace(/`([^`]+)`/g, (_match, content) => {
+      return `\`${backtickManager.store(content)}\``;
+    });
     const htmlTagManager = new PlaceholderReplacer("HTML_TAG_PLACEHOLDER_", "\uE000", "\uE001");
     let hasHtmlTags = false;
     if (newText.includes("<")) {
@@ -144,24 +156,29 @@ class Pangu {
         return htmlTagManager.store(processedTag);
       });
     }
-    newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS_CJK, (_match, leftCjk, symbols, rightCjk) => {
-      const fullwidthSymbols = self.convertToFullwidth(symbols);
-      return `${leftCjk}${fullwidthSymbols}${rightCjk}`;
-    });
-    newText = newText.replace(CONVERT_TO_FULLWIDTH_CJK_SYMBOLS, (_match, cjk, symbols) => {
-      const fullwidthSymbols = self.convertToFullwidth(symbols);
-      return `${cjk}${fullwidthSymbols}`;
-    });
     newText = newText.replace(DOTS_CJK, "$1 $2");
+    newText = newText.replace(CJK_PUNCTUATION, "$1$2 ");
+    newText = newText.replace(AN_PUNCTUATION_CJK, "$1$2 $3");
+    newText = newText.replace(CJK_TILDE, "$1$2 ");
+    newText = newText.replace(CJK_TILDE_EQUALS, "$1 $2 ");
+    newText = newText.replace(CJK_PERIOD, "$1$2 ");
+    newText = newText.replace(AN_PERIOD_CJK, "$1$2 $3");
+    newText = newText.replace(AN_COLON_CJK, "$1$2 $3");
     newText = newText.replace(FIX_CJK_COLON_ANS, "$1\uFF1A$2");
     newText = newText.replace(CJK_QUOTE, "$1 $2");
     newText = newText.replace(QUOTE_CJK, "$1 $2");
     newText = newText.replace(FIX_QUOTE_ANY_QUOTE, "$1$2$3");
     newText = newText.replace(QUOTE_AN, "$1 $2");
     newText = newText.replace(CJK_QUOTE_AN, "$1$2 $3");
+    newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
+    const singleQuoteCJKManager = new PlaceholderReplacer("SINGLE_QUOTE_CJK_PLACEHOLDER_", "\uE030", "\uE031");
+    const SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, "g");
+    newText = newText.replace(SINGLE_QUOTE_PURE_CJK, (match) => {
+      return singleQuoteCJKManager.store(match);
+    });
     newText = newText.replace(CJK_SINGLE_QUOTE_BUT_POSSESSIVE, "$1 $2");
     newText = newText.replace(SINGLE_QUOTE_CJK, "$1 $2");
-    newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
+    newText = singleQuoteCJKManager.restore(newText);
     const textLength = newText.length;
     const slashCount = (newText.match(/\//g) || []).length;
     if (slashCount === 0) {
@@ -236,36 +253,32 @@ class Pangu {
     newText = newText.replace(S_A, "$1 $2");
     newText = newText.replace(MIDDLE_DOT, "\u30FB");
     const fixBracketSpacing = (text2) => {
-      const processBracket = (pattern, openBracket, closeBracket) => {
+      const bracketPatterns = [
+        { pattern: /<([^<>]*)>/g, open: "<", close: ">" },
+        { pattern: /\(([^()]*)\)/g, open: "(", close: ")" },
+        { pattern: /\[([^\[\]]*)\]/g, open: "[", close: "]" },
+        { pattern: /\{([^{}]*)\}/g, open: "{", close: "}" }
+      ];
+      for (const { pattern, open, close } of bracketPatterns) {
         text2 = text2.replace(pattern, (_match, innerContent) => {
           if (!innerContent) {
-            return `${openBracket}${closeBracket}`;
+            return `${open}${close}`;
           }
           const trimmedContent = innerContent.replace(/^ +| +$/g, "");
-          return `${openBracket}${trimmedContent}${closeBracket}`;
+          return `${open}${trimmedContent}${close}`;
         });
-      };
-      processBracket(/<([^<>]*)>/g, "<", ">");
-      processBracket(/\(([^()]*)\)/g, "(", ")");
-      processBracket(/\[([^\[\]]*)\]/g, "[", "]");
-      processBracket(/\{([^{}]*)\}/g, "{", "}");
+      }
       return text2;
     };
     newText = fixBracketSpacing(newText);
     if (hasHtmlTags) {
       newText = htmlTagManager.restore(newText);
     }
+    newText = backtickManager.restore(newText);
     return newText;
-  }
-  // alias for spacingText()
-  spacing(text) {
-    return this.spacingText(text);
   }
   hasProperSpacing(text) {
     return this.spacingText(text) === text;
-  }
-  convertToFullwidth(symbols) {
-    return symbols.replace(/~/g, "\uFF5E").replace(/!/g, "\uFF01").replace(/;/g, "\uFF1B").replace(/:/g, "\uFF1A").replace(/,/g, "\uFF0C").replace(/\./g, "\u3002").replace(/\?/g, "\uFF1F");
   }
 }
 const pangu = new Pangu();

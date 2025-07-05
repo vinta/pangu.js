@@ -3,6 +3,8 @@
   async function autoSpacingPage() {
     const pangu = window.pangu;
     if (pangu) {
+      pangu.taskScheduler.config.enabled = true;
+      pangu.visibilityDetector.config.enabled = true;
       pangu.autoSpacingPage();
     }
   }

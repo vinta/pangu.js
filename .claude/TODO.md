@@ -19,15 +19,17 @@
 - [x] Pipe character `|`: Now correctly treated as separator (#194)
 - [x] Filesystem paths: Special characters in paths preserved (#209, #218, #219)
 
+### Paranoid Text Spacing Algorithm v7
+
+- [x] Migrated from `XPath` to `TreeWalker` API
+- [x] `MutationObserver` with idle processing for dynamic content
+- [x] CSS visibility check for hidden elements (sr-only, visually-hidden)
+
 ## In Progress
 
 No task in progress
 
 ## Upcoming Tasks
-
-### High Priority
-
-- [ ] Add CSS `text-autospace` instructions in options page (Reason: Native browser feature is faster)
 
 ### Medium Priority
 
@@ -41,12 +43,6 @@ No task in progress
 
 ### Low Priority
 
+- [ ] Add CSS `text-autospace` instructions in options page (Reason: Native browser feature is faster)
 - [ ] Handle HTML comment spacing: `<!-- content -->`
 - [ ] Fix issue #161 #216 - Comprehensive Markdown support
-
-## Researches
-
-- Survey `createTreeWalker()`
-  - https://developer.mozilla.org/en-US/docs/Web/API/Document/createTreeWalker
-- Survey `requestIdleCallback()`
-  - https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback
