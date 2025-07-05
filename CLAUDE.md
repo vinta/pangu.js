@@ -61,14 +61,19 @@ npm run pack-extension:chrome   # Package Chrome extension only (.zip)
 
 ```
 src/
-├── shared/            # Core text spacing logic (platform-agnostic)
-│   └── index.ts       # Main Pangu class with regex patterns
-├── browser/           # Browser-specific implementation
-│   ├── pangu.ts       # BrowserPangu class with DOM manipulation
-│   └── pangu.umd.ts   # UMD wrapper for browser builds
-└── node/              # Node.js implementation
-    ├── index.ts       # NodePangu class with file operations
-    └── cli.ts         # Command-line interface
+├── shared/                    # Core text spacing logic (platform-agnostic)
+│   └── index.ts               # Main Pangu class with regex patterns
+├── browser/                   # Browser-specific implementation
+│   ├── pangu.ts               # BrowserPangu class with DOM manipulation
+│   ├── pangu.umd.ts           # UMD wrapper for browser builds
+│   ├── dom-walker.ts          # DOM tree traversal utilities
+│   ├── task-scheduler.ts      # Idle-time task scheduling
+│   ├── visibility-detector.ts # CSS visibility detection
+│   └── banner.txt             # Build banner text
+└── node/                      # Node.js implementation
+    ├── index.ts               # NodePangu class with file operations
+    ├── index.cjs.ts           # CommonJS re-export wrapper
+    └── cli.ts                 # Command-line interface
 ```
 
 ### Build Output Structure
