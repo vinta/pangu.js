@@ -21,12 +21,9 @@
 
 ### Paranoid Text Spacing Algorithm v7
 
-### XPath to TreeWalker Migration with Idle Processing
-
 - [x] Migrated from `XPath` to `TreeWalker` API
 - [x] `MutationObserver` with idle processing for dynamic content
 - [x] CSS visibility check for hidden elements (sr-only, visually-hidden)
-- **Result**: 5.5x performance improvement + non-blocking processing
 
 ## In Progress
 

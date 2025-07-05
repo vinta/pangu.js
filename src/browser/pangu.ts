@@ -48,7 +48,7 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
   };
 }
 
-// Main call flow of autoSpacingPage():
+// Main call flow from autoSpacingPage() to requestIdleCallback():
 //
 // 1. autoSpacingPage()
 // ↓
@@ -56,12 +56,12 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 // ↓
 // 3. spacingNode()
 //    - Collects text nodes via DomWalker.collectTextNodes()
-//    - If taskScheduler.config.enabled
+//    - Decision point: taskScheduler.config.enabled?
 //      ├─ YES → calls spacingTextNodesInQueue()
 //      └─ NO  → calls spacingTextNodes() directly (synchronous, no requestIdleCallback)
 // ↓
 // 4. spacingTextNodesInQueue() (only if taskScheduler enabled)
-//    - If visibilityDetector.config.enabled
+//    - Decision point: visibilityDetector.config.enabled?
 //      ├─ YES (default: true) → Process all nodes in one batch
 //      │   └─ taskScheduler.queue.add(() => spacingTextNodes(allNodes))
 //      └─ NO → Process in chunks via taskScheduler.processInChunks()
@@ -74,7 +74,7 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 //
 // Summary of paths to requestIdleCallback():
 // - taskScheduler.enabled=true + visibilityDetector.enabled=true → Single batch via requestIdleCallback
-// - taskScheduler.enabled=true + visibilityDetector.enabled=false → Multiple chunks via requestIdleCallback
+// - taskScheduler.enabled=true + visibilityDetector.enabled=false → Multiple chunks via requestIdleCallback  
 // - taskScheduler.enabled=false → No requestIdleCallback (synchronous processing)
 export class BrowserPangu extends Pangu {
   private isAutoSpacingPageExecuted = false;
