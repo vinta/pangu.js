@@ -110,8 +110,8 @@ dist/                           # Library builds
   - `config.nodeMaxWaitMs` - Max wait time for node mutations (default: 2000ms)
 - `stopAutoSpacingPage()` - Stop auto-spacing
 - `isElementVisuallyHidden(element)` - Check if element is hidden by CSS
-- `taskScheduler.updateConfig(config)` - Configure task scheduling
-- `visibilityDetector.updateConfig(config)` - Configure visibility detection
+- `taskScheduler.config` - Task scheduling configuration (direct property access)
+- `visibilityDetector.config` - Visibility detection configuration (direct property access)
 
 ### Build System
 
