@@ -48,6 +48,34 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
   };
 }
 
+// Main call flow of autoSpacingPage():
+//
+// 1. autoSpacingPage()
+// ↓
+// 2. spacingPage()
+// ↓
+// 3. spacingNode()
+//    - Collects text nodes via DomWalker.collectTextNodes()
+//    - If taskScheduler.config.enabled
+//      ├─ YES → calls spacingTextNodesInQueue()
+//      └─ NO  → calls spacingTextNodes() directly (synchronous, no requestIdleCallback)
+// ↓
+// 4. spacingTextNodesInQueue() (only if taskScheduler enabled)
+//    - If visibilityDetector.config.enabled
+//      ├─ YES (default: true) → Process all nodes in one batch
+//      │   └─ taskScheduler.queue.add(() => spacingTextNodes(allNodes))
+//      └─ NO → Process in chunks via taskScheduler.processInChunks()
+//          └─ Splits into chunks of 40 nodes
+// ↓
+// 5. TaskQueue.add() → scheduleProcessing() → requestIdleCallback()
+//    - Timeout: 5000ms
+//    - Processes tasks when browser is idle
+//    - Uses IdleDeadline to check remaining time
+//
+// Summary of paths to requestIdleCallback():
+// - taskScheduler.enabled=true + visibilityDetector.enabled=true → Single batch via requestIdleCallback
+// - taskScheduler.enabled=true + visibilityDetector.enabled=false → Multiple chunks via requestIdleCallback
+// - taskScheduler.enabled=false → No requestIdleCallback (synchronous processing)
 export class BrowserPangu extends Pangu {
   private isAutoSpacingPageExecuted = false;
   private autoSpacingPageObserver: MutationObserver | null = null;
@@ -105,10 +133,6 @@ export class BrowserPangu extends Pangu {
     this.isAutoSpacingPageExecuted = false;
   }
 
-  // Access task scheduler and visibility detector directly:
-  // pangu.taskScheduler.config.enabled = false;
-  // pangu.visibilityDetector.updateConfig({ enabled: true });
-
   public isElementVisuallyHidden(element: Element) {
     return this.visibilityDetector.isElementVisuallyHidden(element);
   }
@@ -135,13 +159,11 @@ export class BrowserPangu extends Pangu {
 
       if (currentTextNode instanceof Text) {
         // Check if this text node starts with a space and comes after a hidden element
-        if (this.visibilityDetector.config.enabled && 
-            currentTextNode.data.startsWith(' ') && 
-            this.visibilityDetector.shouldSkipSpacingBeforeNode(currentTextNode)) {
+        if (this.visibilityDetector.config.enabled && currentTextNode.data.startsWith(' ') && this.visibilityDetector.shouldSkipSpacingBeforeNode(currentTextNode)) {
           // Remove the leading space that comes after a hidden element
           currentTextNode.data = currentTextNode.data.substring(1);
         }
-        
+
         // Special handling for standalone quote nodes
         if (currentTextNode.data.length === 1 && /["\u201c\u201d]/.test(currentTextNode.data)) {
           // Check context to determine if space is needed before the quote
@@ -303,8 +325,8 @@ export class BrowserPangu extends Pangu {
   }
 
   private spacingTextNodesInQueue(textNodes: Node[], onComplete?: () => void) {
-    // When visibility detection is enabled, process all nodes together to maintain context
-    // between adjacent nodes. This prevents incorrect spacing after hidden elements.
+    // When visibility detection is enabled, process all nodes together to maintain context between adjacent nodes
+    // This prevents incorrect spacing after hidden elements
     if (this.visibilityDetector.config.enabled) {
       // Still use idle callback for performance, but process all nodes in one batch
       if (this.taskScheduler.config.enabled) {
@@ -321,7 +343,7 @@ export class BrowserPangu extends Pangu {
       }
       return;
     }
-    
+
     // Normal chunked processing when visibility detection is disabled
     const task = (chunkedTextNodes: Node[]) => this.spacingTextNodes(chunkedTextNodes);
     this.taskScheduler.processInChunks(textNodes, task, onComplete);
