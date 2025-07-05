@@ -352,9 +352,6 @@ class BrowserPangu extends Pangu {
     }
     this.isAutoSpacingPageExecuted = false;
   }
-  // Access task scheduler and visibility detector directly:
-  // pangu.taskScheduler.config.enabled = false;
-  // pangu.visibilityDetector.updateConfig({ enabled: true });
   isElementVisuallyHidden(element) {
     return this.visibilityDetector.isElementVisuallyHidden(element);
   }
