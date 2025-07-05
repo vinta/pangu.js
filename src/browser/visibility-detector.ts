@@ -11,7 +11,7 @@ export interface VisibilityDetectorConfig {
 
 export class VisibilityDetector {
   public readonly config: VisibilityDetectorConfig = {
-    enabled: false,
+    enabled: true,
     commonHiddenPatterns: {
       clipRect: true, // clip: rect(1px, 1px, 1px, 1px) patterns
       displayNone: true, // display: none
@@ -97,6 +97,37 @@ export class VisibilityDetector {
         return true;
       }
       currentElement = currentElement.parentElement;
+    }
+
+    return false;
+  }
+
+  public shouldSkipSpacingBeforeNode(node: Node) {
+    if (!this.config.enabled) {
+      return false;
+    }
+
+    // Find the previous sibling that might be hidden
+    let previousNode = node.previousSibling;
+    
+    // Walk up the DOM tree to find the actual previous element
+    if (!previousNode && node.parentElement) {
+      let parent: Element | null = node.parentElement;
+      while (parent && !previousNode) {
+        previousNode = parent.previousSibling;
+        if (!previousNode) {
+          parent = parent.parentElement;
+        }
+      }
+    }
+
+    // Check if the previous node is hidden
+    if (previousNode) {
+      if (previousNode instanceof Element && this.isElementVisuallyHidden(previousNode)) {
+        return true;
+      } else if (previousNode instanceof Text && previousNode.parentElement && this.isElementVisuallyHidden(previousNode.parentElement)) {
+        return true;
+      }
     }
 
     return false;

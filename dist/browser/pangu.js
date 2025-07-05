@@ -178,7 +178,7 @@ class TaskScheduler {
 class VisibilityDetector {
   constructor() {
     __publicField(this, "config", {
-      enabled: false,
+      enabled: true,
       commonHiddenPatterns: {
         clipRect: true,
         // clip: rect(1px, 1px, 1px, 1px) patterns
@@ -246,6 +246,29 @@ class VisibilityDetector {
         return true;
       }
       currentElement = currentElement.parentElement;
+    }
+    return false;
+  }
+  shouldSkipSpacingBeforeNode(node) {
+    if (!this.config.enabled) {
+      return false;
+    }
+    let previousNode = node.previousSibling;
+    if (!previousNode && node.parentElement) {
+      let parent = node.parentElement;
+      while (parent && !previousNode) {
+        previousNode = parent.previousSibling;
+        if (!previousNode) {
+          parent = parent.parentElement;
+        }
+      }
+    }
+    if (previousNode) {
+      if (previousNode instanceof Element && this.isElementVisuallyHidden(previousNode)) {
+        return true;
+      } else if (previousNode instanceof Text && previousNode.parentElement && this.isElementVisuallyHidden(previousNode.parentElement)) {
+        return true;
+      }
     }
     return false;
   }
@@ -350,6 +373,9 @@ class BrowserPangu extends Pangu {
         continue;
       }
       if (currentTextNode instanceof Text) {
+        if (this.visibilityDetector.config.enabled && currentTextNode.data.startsWith(" ") && this.visibilityDetector.shouldSkipSpacingBeforeNode(currentTextNode)) {
+          currentTextNode.data = currentTextNode.data.substring(1);
+        }
         if (currentTextNode.data.length === 1 && /["\u201c\u201d]/.test(currentTextNode.data)) {
           if (currentTextNode.previousSibling) {
             const prevNode = currentTextNode.previousSibling;
@@ -426,7 +452,7 @@ class BrowserPangu extends Pangu {
                 if (nextTextNode.previousSibling) {
                   if (!DomWalker.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
                     if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
-                      if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
+                      if (!this.visibilityDetector.shouldSkipSpacingBeforeNode(nextTextNode)) {
                         nextTextNode.data = ` ${nextTextNode.data}`;
                       }
                     }
@@ -434,7 +460,7 @@ class BrowserPangu extends Pangu {
                 } else {
                   if (!DomWalker.canIgnoreNode(nextTextNode)) {
                     if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
-                      if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
+                      if (!this.visibilityDetector.shouldSkipSpacingBeforeNode(nextTextNode)) {
                         nextTextNode.data = ` ${nextTextNode.data}`;
                       }
                     }
@@ -474,6 +500,20 @@ class BrowserPangu extends Pangu {
     }
   }
   spacingTextNodesInQueue(textNodes, onComplete) {
+    if (this.visibilityDetector.config.enabled) {
+      if (this.taskScheduler.config.enabled) {
+        this.taskScheduler.queue.add(() => {
+          this.spacingTextNodes(textNodes);
+        });
+        if (onComplete) {
+          this.taskScheduler.queue.setOnComplete(onComplete);
+        }
+      } else {
+        this.spacingTextNodes(textNodes);
+        onComplete == null ? void 0 : onComplete();
+      }
+      return;
+    }
     const task = (chunkedTextNodes) => this.spacingTextNodes(chunkedTextNodes);
     this.taskScheduler.processInChunks(textNodes, task, onComplete);
   }
