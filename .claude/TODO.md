@@ -33,6 +33,7 @@ No task in progress
 
 ### Medium Priority
 
+- [ ] Change icon or badge to reflect the current `spacing_mode`
 - [ ] Fix issue #155 - DO NOT spacing URL
   - `https://xxxxx/不要加空格.html`
   - `https://%E5%A6%82`
