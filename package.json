@@ -78,7 +78,6 @@
   "dependencies": {},
   "devDependencies": {
     "@playwright/test": "1.53.0",
-    "@trivago/prettier-plugin-sort-imports": "5.2.2",
     "@types/chrome": "0.0.326",
     "@types/node": "24.0.2",
     "eslint": "9.29.0",
