@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-async function autoSpacingPage() {
+function autoSpacingPage() {
   const pangu = window.pangu;
   if (pangu) {
     pangu.taskScheduler.config.enabled = true;
