@@ -1,8 +1,8 @@
-import globals from "globals";
-
 import eslint from '@eslint/js';
+import eslintConfigPrettier from 'eslint-config-prettier/flat';
+import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+import globals from 'globals';
 import tseslint from 'typescript-eslint';
-// import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 
 export default tseslint.config(
   {
@@ -17,22 +17,15 @@ export default tseslint.config(
   },
   {
     name: 'TypeScript files',
-    files: [
-      '**/*.ts',
-    ],
-    extends: [
-      eslint.configs.recommended,
-      tseslint.configs.strict,
-    ],
+    files: ['**/*.ts'],
     languageOptions: {
-      globals: {
-          ...globals.node,
-          ...globals.commonjs,
-          ...globals.amd,
-      },
       parserOptions: {
         project: './tsconfig.json',
       },
+    },
+    extends: [eslint.configs.recommended, tseslint.configs.strict],
+    plugins: {
+      unicorn: eslintPluginUnicorn,
     },
     rules: {
       '@typescript-eslint/consistent-type-imports': [
@@ -53,35 +46,33 @@ export default tseslint.config(
           varsIgnorePattern: '^_',
         },
       ],
+      'unicorn/no-array-for-each': 'error',
+      'unicorn/prefer-node-protocol': 'error',
     },
   },
   {
     name: 'JavaScript files',
-    files: [
-      '**/*.js',
-      '**/*.mjs',
-      '**/*.cjs',
-    ],
-    extends: [
-      eslint.configs.recommended,
-    ],
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
     languageOptions: {
       globals: {
-          ...globals.node,
+        ...globals.node,
       },
     },
-    // rules: {
-    //   'unicorn/prefer-module': 'off',
-    // }
+    extends: [eslint.configs.recommended],
+    plugins: {
+      unicorn: eslintPluginUnicorn,
+    },
+    rules: {
+      'unicorn/prefer-node-protocol': 'error',
+      'unicorn/no-array-for-each': 'error',
+    },
   },
+  // Disable ESLint rules that conflict with Prettier
+  eslintConfigPrettier,
   {
     name: 'Global rules overrides',
     rules: {
       curly: ['error', 'all'],
-      // 'unicorn/no-array-for-each': 'error',
-      // 'unicorn/prefer-global-this': 'off',
-      // 'unicorn/prefer-node-protocol': 'error',
-      // 'unicorn/prevent-abbreviations': 'off',
     },
   },
 );

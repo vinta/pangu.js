@@ -1,5 +1,5 @@
 import { translatePage } from './utils/i18n';
-import { getCachedSettings, DEFAULT_SETTINGS } from './utils/settings';
+import { DEFAULT_SETTINGS, getCachedSettings } from './utils/settings';
 import { playSound } from './utils/sounds';
 import { isValidMatchPattern } from './utils/urls';
 
@@ -27,7 +27,11 @@ class OptionsController {
           await this.renderSpacingMode();
         }
 
-        if (changedKeys.includes('filter_mode') || changedKeys.includes('blacklist') || changedKeys.includes('whitelist')) {
+        if (
+          changedKeys.includes('filter_mode') ||
+          changedKeys.includes('blacklist') ||
+          changedKeys.includes('whitelist')
+        ) {
           await this.renderFilterMode();
         }
 
@@ -233,7 +237,6 @@ class OptionsController {
     const checkbox = document.getElementById('mute-checkbox') as HTMLInputElement;
     checkbox.checked = settings.is_mute_sound_effects;
   }
-
 
   private async toggleSpacingMode() {
     const settings = await getCachedSettings();

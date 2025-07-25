@@ -1,7 +1,7 @@
 import { translatePage } from './utils/i18n';
 import { getCachedSettings } from './utils/settings';
 import { playSound, stopSound } from './utils/sounds';
-import type { PingMessage, ManualSpacingMessage, ContentScriptResponse, MessageFromContentScript } from './utils/types';
+import type { ContentScriptResponse, ManualSpacingMessage, MessageFromContentScript, PingMessage } from './utils/types';
 
 class PopupController {
   private currentTabId: number | undefined;
@@ -178,7 +178,10 @@ class PopupController {
 
       // Apply spacing
       const message: ManualSpacingMessage = { action: 'MANUAL_SPACING' };
-      const response = await chrome.tabs.sendMessage<ManualSpacingMessage, ContentScriptResponse>(this.currentTabId, message);
+      const response = await chrome.tabs.sendMessage<ManualSpacingMessage, ContentScriptResponse>(
+        this.currentTabId,
+        message,
+      );
 
       if (response && response.success) {
         await this.showSuccessMessage(() => {
@@ -263,7 +266,12 @@ class PopupController {
     await playSound('YeahBaby');
   }
 
-  private showMessage(text: string, type: 'info' | 'error' | 'success' = 'info', hideMessageDelayMs: number, callback?: () => void) {
+  private showMessage(
+    text: string,
+    type: 'info' | 'error' | 'success' = 'info',
+    hideMessageDelayMs: number,
+    callback?: () => void,
+  ) {
     const notificationElement = document.getElementById('notification');
     const notificationMessage = document.getElementById('notification-message');
 

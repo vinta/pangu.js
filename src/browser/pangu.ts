@@ -168,7 +168,11 @@ export class BrowserPangu extends Pangu {
 
       if (currentTextNode instanceof Text) {
         // Check if this text node starts with a space and comes after a hidden element
-        if (this.visibilityDetector.config.enabled && currentTextNode.data.startsWith(' ') && this.visibilityDetector.shouldSkipSpacingBeforeNode(currentTextNode)) {
+        if (
+          this.visibilityDetector.config.enabled &&
+          currentTextNode.data.startsWith(' ') &&
+          this.visibilityDetector.shouldSkipSpacingBeforeNode(currentTextNode)
+        ) {
           // Remove the leading space that comes after a hidden element
           currentTextNode.data = currentTextNode.data.substring(1);
         }
@@ -216,20 +220,32 @@ export class BrowserPangu extends Pangu {
         // We need to check at different levels of the DOM tree
         // First, find the highest ancestor that contains only the current text node
         let currentAncestor = currentTextNode as Node;
-        while (currentAncestor.parentNode && isLastTextChild(currentAncestor.parentNode, currentAncestor) && !spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
+        while (
+          currentAncestor.parentNode &&
+          isLastTextChild(currentAncestor.parentNode, currentAncestor) &&
+          !spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)
+        ) {
           currentAncestor = currentAncestor.parentNode;
         }
 
         // Find the highest ancestor that contains only the next text node
         let nextAncestor = nextTextNode as Node;
-        while (nextAncestor.parentNode && isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
+        while (
+          nextAncestor.parentNode &&
+          isFirstTextChild(nextAncestor.parentNode, nextAncestor) &&
+          !spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)
+        ) {
           nextAncestor = nextAncestor.parentNode;
         }
 
         // Check for whitespace between these ancestors
         let nodeBetween = currentAncestor.nextSibling;
         while (nodeBetween && nodeBetween !== nextAncestor) {
-          if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
+          if (
+            nodeBetween.nodeType === Node.TEXT_NODE &&
+            nodeBetween.textContent &&
+            /\s/.test(nodeBetween.textContent)
+          ) {
             hasWhitespaceBetween = true;
             break;
           }
@@ -255,12 +271,20 @@ export class BrowserPangu extends Pangu {
 
         if (testNewText !== testText && !skipSpacing) {
           let nextNode: Node = nextTextNode;
-          while (nextNode.parentNode && !spaceSensitiveTags.test(nextNode.nodeName) && isFirstTextChild(nextNode.parentNode, nextNode)) {
+          while (
+            nextNode.parentNode &&
+            !spaceSensitiveTags.test(nextNode.nodeName) &&
+            isFirstTextChild(nextNode.parentNode, nextNode)
+          ) {
             nextNode = nextNode.parentNode;
           }
 
           let currentNode: Node = currentTextNode;
-          while (currentNode.parentNode && !spaceSensitiveTags.test(currentNode.nodeName) && isLastTextChild(currentNode.parentNode, currentNode)) {
+          while (
+            currentNode.parentNode &&
+            !spaceSensitiveTags.test(currentNode.nodeName) &&
+            isLastTextChild(currentNode.parentNode, currentNode)
+          ) {
             currentNode = currentNode.parentNode;
           }
 

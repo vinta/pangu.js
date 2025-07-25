@@ -77,7 +77,10 @@ export function collectTextNodes(contextNode: Node, reverse = false) {
 
 export function canIgnoreNode(node: Node) {
   let currentNode = node;
-  if (currentNode && (isSpecificTag(currentNode, ignoredTags) || isContentEditable(currentNode) || hasIgnoredClass(currentNode))) {
+  if (
+    currentNode &&
+    (isSpecificTag(currentNode, ignoredTags) || isContentEditable(currentNode) || hasIgnoredClass(currentNode))
+  ) {
     // We will skip processing any children of ignored elements, so don't need to check all ancestors
     return true;
   }
