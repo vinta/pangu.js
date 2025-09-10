@@ -88,7 +88,7 @@
     "prettier": "3.5.3",
     "typescript": "5.8.3",
     "typescript-eslint": "8.34.1",
-    "vite": "6.3.5",
+    "vite": "6.3.6",
     "vite-plugin-dts": "4.5.4",
     "vitest": "3.2.3"
   },
