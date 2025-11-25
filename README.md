@@ -63,9 +63,10 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
   const text = pangu.spacingText('當你凝視著bug，bug也凝視著你');
   // text = '當你凝視著 bug，bug 也凝視著你'
 
-  pangu.spacingElementById('main');
-  pangu.spacingElementByClassName('comment');
-  pangu.spacingElementByTagName('p');
+  // Process specific elements using spacingNode()
+  pangu.spacingNode(document.getElementById('main'));
+  document.querySelectorAll('.comment').forEach(el => pangu.spacingNode(el));
+  document.querySelectorAll('p').forEach(el => pangu.spacingNode(el));
 
   document.addEventListener('DOMContentLoaded', () => {
     // listen to any DOM change and automatically perform spacing via MutationObserver()
@@ -83,9 +84,10 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
   const text = pangu.spacingText('這個人老是在寫程式，是不是有bin啊？');
   // text = '這個人老是在寫程式，是不是有 bin 啊？'
 
-  pangu.spacingElementById('main');
-  pangu.spacingElementByClassName('comment');
-  pangu.spacingElementByTagName('p');
+  // Process specific elements using spacingNode()
+  pangu.spacingNode(document.getElementById('main'));
+  document.querySelectorAll('.comment').forEach(el => pangu.spacingNode(el));
+  document.querySelectorAll('p').forEach(el => pangu.spacingNode(el));
 </script>
 ```
 
