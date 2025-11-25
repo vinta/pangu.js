@@ -34,7 +34,7 @@ const OPERATORS_NO_HYPHEN = OPERATORS_BASE; // For ANS_OPERATOR_ANS only
 const GRADE_OPERATORS = '\\+\\-\\*'; // For single letter grades
 
 // Quotes
-const QUOTES = '\`"\u05f4'; // Backtick, straight quote, Hebrew punctuation
+const QUOTES = '`"\u05f4'; // Backtick, straight quote, Hebrew punctuation
 
 // Brackets - different sets!
 const LEFT_BRACKETS_BASIC = '\\(\\[\\{'; // For AN_LEFT_BRACKET
@@ -60,7 +60,7 @@ const UNIX_ABSOLUTE_FILE_PATH = new RegExp(`/(?:\\.?(?:${FILE_PATH_DIRS})|\\.(?:
 const UNIX_RELATIVE_FILE_PATH = new RegExp(`(?:\\./)?(?:${FILE_PATH_DIRS})(?:/${FILE_PATH_CHARS})+`);
 
 // Windows paths: C:\Users\name\, D:\Program Files\, C:\Windows\System32
-const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
+const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-. ]+\\?)+/;
 
 const ANY_CJK = new RegExp(`[${CJK}]`);
 
@@ -448,7 +448,7 @@ export class Pangu {
       const bracketPatterns = [
         { pattern: /<([^<>]*)>/g, open: '<', close: '>' },
         { pattern: /\(([^()]*)\)/g, open: '(', close: ')' },
-        { pattern: /\[([^\[\]]*)\]/g, open: '[', close: ']' },
+        { pattern: /\[([^[\]]*)\]/g, open: '[', close: ']' },
         { pattern: /\{([^{}]*)\}/g, open: '{', close: '}' },
       ];
 
