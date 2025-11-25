@@ -1,38 +1,33 @@
-import prettierConfig from 'eslint-config-prettier';
-import unicorn from 'eslint-plugin-unicorn';
+import eslint from '@eslint/js';
+import eslintConfigPrettier from 'eslint-config-prettier/flat';
+import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    // Global ignores
-    ignores: ['node_modules/', 'dist/', 'browser-extensions/chrome/dist/', 'browser-extensions/chrome/vendors/'],
+    name: 'Global ignores',
+    ignores: [
+      '.claude/',
+      'browser-extensions/chrome/dist/',
+      'browser-extensions/chrome/vendors/',
+      'dist/',
+      'node_modules/',
+    ],
   },
   {
-    // TypeScript files
-    files: ['src/**/*.ts', 'browser-extensions/chrome/src/**/*.ts', 'tests/**/*.ts'],
-    extends: [...tseslint.configs.recommended],
+    name: 'TypeScript files',
+    files: ['**/*.ts'],
     languageOptions: {
-      parser: tseslint.parser,
       parserOptions: {
         project: './tsconfig.json',
       },
     },
+    extends: [eslint.configs.recommended, tseslint.configs.strict],
     plugins: {
-      unicorn,
+      unicorn: eslintPluginUnicorn,
     },
     rules: {
-      'unicorn/prefer-node-protocol': 'error',
-      'unicorn/no-array-for-each': 'error',
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-non-null-assertion': 'off',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-        },
-      ],
       '@typescript-eslint/consistent-type-imports': [
         'error',
         {
@@ -40,23 +35,42 @@ export default tseslint.config(
           fixStyle: 'separate-type-imports',
         },
       ],
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
+      'unicorn/no-array-for-each': 'error',
+      'unicorn/prefer-node-protocol': 'error',
     },
   },
   {
-    // JavaScript files
+    name: 'JavaScript files',
     files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    extends: [eslint.configs.recommended],
     plugins: {
-      unicorn,
+      unicorn: eslintPluginUnicorn,
     },
     rules: {
       'unicorn/prefer-node-protocol': 'error',
       'unicorn/no-array-for-each': 'error',
     },
   },
-  // Apply prettier config last to disable formatting rules
-  prettierConfig,
-  // Override the above configs
+  // Disable ESLint rules that conflict with Prettier
+  eslintConfigPrettier,
   {
+    name: 'Global rules overrides',
     rules: {
       curly: ['error', 'all'],
     },
