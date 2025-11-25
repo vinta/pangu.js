@@ -9,12 +9,8 @@
     "noEmit": false,
     "declaration": true,
     "declarationMap": false,
-    "sourceMap": true,
-    "types": ["node"]
+    "sourceMap": true
   },
-  "include": [
-    "./**/*.ts",
-    "../shared/**/*.ts"
-  ],
+  "include": ["./**/*.ts", "../shared/**/*.ts"],
   "exclude": ["**/*.test.ts", "**/*.spec.ts"]
 }
