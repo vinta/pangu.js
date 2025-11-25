@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineConfig, build } from 'vite';
+import { build, defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
