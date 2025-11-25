@@ -303,18 +303,18 @@ test.describe('Visibility Detector Enabled', () => {
 
     // This test simulates what happens when content is dynamically added after autoSpacingPage is started
     await page.setContent('<div id="content"></div>');
-    
+
     const results = await page.evaluate(async () => {
       const content = document.getElementById('content')!;
-      
+
       // Start autoSpacingPage FIRST, then add content
       pangu.visibilityDetector.config.enabled = true;
       pangu.taskScheduler.config.enabled = true;
       pangu.autoSpacingPage({ pageDelayMs: 10, nodeDelayMs: 10, nodeMaxWaitMs: 50 });
-      
+
       // Wait for autoSpacing to initialize
       await new Promise(resolve => setTimeout(resolve, 50));
-      
+
       // NOW add the content (simulating dynamic content loading)
       content.innerHTML = `
         <style>
@@ -333,17 +333,17 @@ test.describe('Visibility Detector Enabled', () => {
 
     更新文件說明計算邏輯
     <a href="https://www.google.com/url?q=https://docs.google.com/document/d/1234567890abcdef&amp;sa=D&amp;source=calendar&amp;usd=2&amp;usg=AOvVaw3-Pr87YEfleSmMDeSfJLfl" target="_blank">https://docs.google.com/document/d/1234567890abcdef</a>
-    
+
     修改單元測試確保通過
-    
+
     發布新版本到測試環境</span></div>
       `;
-      
+
       // Wait for MutationObserver to process the changes
       await new Promise(resolve => setTimeout(resolve, 200));
-      
+
       const result = content.querySelector('span:not(.XuJrye)')!.textContent;
-      
+
       return {
         text: result,
         startsWithSpace: result?.startsWith(' ') || false,
@@ -351,11 +351,11 @@ test.describe('Visibility Detector Enabled', () => {
         first10Chars: result?.substring(0, 10)
       };
     });
-    
+
     console.log('Result starts with space:', results.startsWithSpace);
     console.log('First char:', JSON.stringify(results.firstChar));
     console.log('First 10 chars:', JSON.stringify(results.first10Chars));
-    
+
     // Should NOT start with space
     expect(results.startsWithSpace).toBe(false);
   });
@@ -365,14 +365,14 @@ test.describe('Visibility Detector Enabled', () => {
     test.skip(!hasSupport, 'requestIdleCallback is not supported');
 
     await page.setContent('<div id="content"></div>');
-    
+
     const results = await page.evaluate(async () => {
       const content = document.getElementById('content')!;
-      
+
       // Test both cases with autoSpacingPage
       pangu.visibilityDetector.config.enabled = true;
       pangu.taskScheduler.config.enabled = true;
-      
+
       // Case 2: Complex content with links (testing this first)
       content.innerHTML = `
         <style>
@@ -391,18 +391,18 @@ test.describe('Visibility Detector Enabled', () => {
 
     更新文件說明計算邏輯
     <a href="https://www.google.com/url?q=https://docs.google.com/document/d/1234567890abcdef&amp;sa=D&amp;source=calendar&amp;usd=2&amp;usg=AOvVaw3-Pr87YEfleSmMDeSfJLfl" target="_blank">https://docs.google.com/document/d/1234567890abcdef</a>
-    
+
     修改單元測試確保通過
-    
+
     發布新版本到測試環境</span></div>
       `;
-      
+
       // Use autoSpacingPage instead of spacingPage
       pangu.autoSpacingPage({ pageDelayMs: 10, nodeDelayMs: 10, nodeMaxWaitMs: 50 });
       await new Promise(resolve => setTimeout(resolve, 200)); // Wait longer for autoSpacingPage
-      
+
       const result = content.querySelector('span:not(.XuJrye)')!.textContent;
-      
+
       return {
         text: result,
         startsWithSpace: result?.startsWith(' ') || false,
@@ -410,11 +410,11 @@ test.describe('Visibility Detector Enabled', () => {
         first10Chars: result?.substring(0, 10)
       };
     });
-    
+
     console.log('Result starts with space:', results.startsWithSpace);
     console.log('First char:', JSON.stringify(results.firstChar));
     console.log('First 10 chars:', JSON.stringify(results.first10Chars));
-    
+
     // Should NOT start with space
     expect(results.startsWithSpace).toBe(false);
   });
@@ -424,14 +424,14 @@ test.describe('Visibility Detector Enabled', () => {
     test.skip(!hasSupport, 'requestIdleCallback is not supported');
 
     await page.setContent('<div id="content"></div>');
-    
+
     const results = await page.evaluate(async () => {
       const content = document.getElementById('content')!;
-      
+
       // Test both cases
       pangu.visibilityDetector.config.enabled = true;
       pangu.taskScheduler.config.enabled = true;
-      
+
       // Helper to collect text nodes
       const collectTextNodes = (element: Element) => {
         const walker = document.createTreeWalker(
@@ -446,7 +446,7 @@ test.describe('Visibility Detector Enabled', () => {
             }
           }
         );
-        
+
         const nodes: { text: string; parentTag: string; parentClass: string }[] = [];
         while (walker.nextNode()) {
           const node = walker.currentNode;
@@ -459,7 +459,7 @@ test.describe('Visibility Detector Enabled', () => {
         }
         return nodes;
       };
-      
+
       // Case 1: Simple content
       content.innerHTML = `
         <style>
@@ -477,15 +477,15 @@ test.describe('Visibility Detector Enabled', () => {
         <div class="toUqff vfzv" id="xDetDlgDesc"><span class="XuJrye">Description:</span><span jsaction="rcuQ6b:g0mjXe" jscontroller="BlntMb">一律轉整數，避免浮點數計算誤差
     記得更新測試案例的預期結果</span></div>
       `;
-      
+
       const case1NodesBefore = collectTextNodes(content);
-      
+
       pangu.spacingPage();
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       const case1Result = content.querySelector('span:not(.XuJrye)')!.textContent;
       const case1NodesAfter = collectTextNodes(content);
-      
+
       // Case 2: Complex content with links
       content.innerHTML = `
         <style>
@@ -504,20 +504,20 @@ test.describe('Visibility Detector Enabled', () => {
 
     更新文件說明計算邏輯
     <a href="https://www.google.com/url?q=https://docs.google.com/document/d/1234567890abcdef&amp;sa=D&amp;source=calendar&amp;usd=2&amp;usg=AOvVaw3-Pr87YEfleSmMDeSfJLfl" target="_blank">https://docs.google.com/document/d/1234567890abcdef</a>
-    
+
     修改單元測試確保通過
-    
+
     發布新版本到測試環境</span></div>
       `;
-      
+
       const case2NodesBefore = collectTextNodes(content);
-      
+
       pangu.spacingPage();
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       const case2Result = content.querySelector('span:not(.XuJrye)')!.textContent;
       const case2NodesAfter = collectTextNodes(content);
-      
+
       return {
         case1: {
           text: case1Result,
@@ -535,15 +535,15 @@ test.describe('Visibility Detector Enabled', () => {
         }
       };
     });
-    
+
     console.log('Case 1 starts with space:', results.case1.startsWithSpace, 'First char:', JSON.stringify(results.case1.firstChar));
     console.log('Case 1 nodes before:', results.case1.nodesBefore);
     console.log('Case 1 nodes after:', results.case1.nodesAfter);
-    
+
     console.log('Case 2 starts with space:', results.case2.startsWithSpace, 'First char:', JSON.stringify(results.case2.firstChar));
     console.log('Case 2 nodes before:', results.case2.nodesBefore);
     console.log('Case 2 nodes after:', results.case2.nodesAfter);
-    
+
     // Both should NOT start with space
     expect(results.case1.startsWithSpace).toBe(false);
     expect(results.case2.startsWithSpace).toBe(false);
@@ -554,7 +554,7 @@ test.describe('Visibility Detector Enabled', () => {
     test.skip(!hasSupport, 'requestIdleCallback is not supported');
 
     await page.setContent('<div id="content"></div>');
-    
+
     const results = await page.evaluate(async () => {
       const content = document.getElementById('content')!;
       // Reproduce the exact HTML structure from the screenshot
@@ -579,11 +579,11 @@ test.describe('Visibility Detector Enabled', () => {
       // Test 1: Synchronous mode (should work correctly)
       pangu.visibilityDetector.config.enabled = true;
       pangu.taskScheduler.config.enabled = false;
-      
+
       pangu.spacingPage();
-      
+
       const syncResult = content.querySelector('span:not(.XuJrye)')!.textContent;
-      
+
       // Reset content for async test
       content.innerHTML = `
         <style>
@@ -602,18 +602,18 @@ test.describe('Visibility Detector Enabled', () => {
           <span class="XuJrye">Description:</span><span jsaction="rcuQ6b:g0mjXe" jscontroller="BlntMb">一律轉整數，避免浮點數計算誤差 記得更新測試案例的預期結果</span>
         </div>
       `;
-      
+
       // Test 2: Async mode with taskScheduler (currently has the bug)
       pangu.taskScheduler.config.enabled = true;
       pangu.taskScheduler.config.chunkSize = 2;
-      
+
       pangu.spacingPage();
-      
+
       // Wait for async processing
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       const asyncResult = content.querySelector('span:not(.XuJrye)')!.textContent;
-      
+
       return {
         syncResult,
         asyncResult,
@@ -621,11 +621,11 @@ test.describe('Visibility Detector Enabled', () => {
         asyncStartsWithSpace: asyncResult?.startsWith(' ') || false,
       };
     });
-    
+
     // Both should NOT start with space since previous element is hidden
     expect(results.syncStartsWithSpace).toBe(false);
     expect(results.asyncStartsWithSpace).toBe(false);
-    
+
     // Check the actual content
     expect(results.syncResult).toBe('一律轉整數，避免浮點數計算誤差 記得更新測試案例的預期結果');
     expect(results.asyncResult).toBe('一律轉整數，避免浮點數計算誤差 記得更新測試案例的預期結果');
@@ -633,7 +633,7 @@ test.describe('Visibility Detector Enabled', () => {
 
   test('should handle different clip rect formats', async ({ page }) => {
     await page.setContent('<div id="content"></div>');
-    
+
     const result = await page.evaluate(() => {
       const content = document.getElementById('content')!;
       content.innerHTML = `
@@ -648,11 +648,11 @@ test.describe('Visibility Detector Enabled', () => {
       `;
 
       pangu.visibilityDetector.config.enabled = true;
-      
+
       const hidden1 = content.querySelector('.hidden1')!;
       const hidden2 = content.querySelector('.hidden2')!;
       const hidden3 = content.querySelector('.hidden3')!;
-      
+
       return {
         hidden1: {
           clip: getComputedStyle(hidden1).clip,
@@ -668,9 +668,9 @@ test.describe('Visibility Detector Enabled', () => {
         }
       };
     });
-    
+
     console.log('Clip rect formats:', JSON.stringify(result, null, 2));
-    
+
     // All should be detected as hidden
     expect(result.hidden1.isHidden).toBe(true);
     expect(result.hidden2.isHidden).toBe(true);
@@ -682,7 +682,7 @@ test.describe('Visibility Detector Enabled', () => {
     test.skip(!hasSupport, 'requestIdleCallback is not supported');
 
     await page.setContent('<div id="content"></div>');
-    
+
     const debugInfo = await page.evaluate(async () => {
       const content = document.getElementById('content')!;
       content.innerHTML = `
@@ -722,6 +722,7 @@ test.describe('Visibility Detector Enabled', () => {
         }
       );
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const textNodes: { text: string; parentClass: string | null; isHidden: boolean; computedStyle?: any }[] = [];
       while (walker.nextNode()) {
         const node = walker.currentNode;
@@ -747,23 +748,23 @@ test.describe('Visibility Detector Enabled', () => {
 
       // Process the page
       pangu.spacingPage();
-      
+
       // Wait for async processing
       await new Promise(resolve => setTimeout(resolve, 200));
-      
+
       // Get the final result
       const visibleSpan = content.querySelector('span:not(.XuJrye)')!;
       const finalText = visibleSpan.textContent;
-      
+
       return {
         textNodes,
         finalText,
         startsWithSpace: finalText?.startsWith(' ') || false
       };
     });
-    
+
     console.log('Debug info:', JSON.stringify(debugInfo, null, 2));
-    
+
     // The visible text should not start with space
     expect(debugInfo.startsWithSpace).toBe(false);
     expect(debugInfo.finalText).toBe('一律轉整數');
