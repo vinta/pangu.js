@@ -1,5 +1,5 @@
 import type { BrowserPangu } from '../../../src/browser/pangu';
-import type { MessageToContentScript, ContentScriptResponse, ContentScriptLoadedMessage } from './utils/types';
+import type { ContentScriptLoadedMessage, ContentScriptResponse, MessageToContentScript } from './utils/types';
 
 // Extend the global Window interface to include the pangu object
 // The pangu object is injected by pangu.umd.js which loads before this script
@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-async function autoSpacingPage() {
+function autoSpacingPage() {
   const pangu = window.pangu;
   if (pangu) {
     pangu.taskScheduler.config.enabled = true;
