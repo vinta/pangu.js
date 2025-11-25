@@ -25,5 +25,4 @@ export declare class TaskScheduler {
     get queue(): TaskQueue;
     processInChunks<T>(items: T[], processor: (chunk: T[]) => void, onComplete?: () => void): void;
     clear(): void;
-    updateConfig(config: Partial<TaskSchedulerConfig>): void;
 }

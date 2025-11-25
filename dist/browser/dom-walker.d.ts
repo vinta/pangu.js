@@ -1,15 +1,10 @@
-export declare class DomWalker {
-    static readonly blockTags: RegExp;
-    static readonly ignoredTags: RegExp;
-    static readonly presentationalTags: RegExp;
-    static readonly spaceLikeTags: RegExp;
-    static readonly spaceSensitiveTags: RegExp;
-    static readonly ignoredClass = "no-pangu-spacing";
-    static collectTextNodes(contextNode: Node, reverse?: boolean): Text[];
-    static canIgnoreNode(node: Node): boolean;
-    static isFirstTextChild(parentNode: Node, targetNode: Node): boolean;
-    static isLastTextChild(parentNode: Node, targetNode: Node): boolean;
-    private static isSpecificTag;
-    private static isContentEditable;
-    private static hasIgnoredClass;
-}
+export declare const blockTags: RegExp;
+export declare const ignoredTags: RegExp;
+export declare const presentationalTags: RegExp;
+export declare const spaceLikeTags: RegExp;
+export declare const spaceSensitiveTags: RegExp;
+export declare const ignoredClass = "no-pangu-spacing";
+export declare function collectTextNodes(contextNode: Node, reverse?: boolean): Text[];
+export declare function canIgnoreNode(node: Node): boolean;
+export declare function isFirstTextChild(parentNode: Node, targetNode: Node): boolean;
+export declare function isLastTextChild(parentNode: Node, targetNode: Node): boolean;

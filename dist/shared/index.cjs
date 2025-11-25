@@ -46,7 +46,7 @@ const FILE_PATH_DIRS = "home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|
 const FILE_PATH_CHARS = "[A-Za-z0-9_\\-\\.@\\+\\*]+";
 const UNIX_ABSOLUTE_FILE_PATH = new RegExp(`/(?:\\.?(?:${FILE_PATH_DIRS})|\\.(?:[A-Za-z0-9_\\-]+))(?:/${FILE_PATH_CHARS})*`);
 const UNIX_RELATIVE_FILE_PATH = new RegExp(`(?:\\./)?(?:${FILE_PATH_DIRS})(?:/${FILE_PATH_CHARS})+`);
-const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
+const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-. ]+\\?)+/;
 const ANY_CJK = new RegExp(`[${CJK}]`);
 const CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:]+)(?=[${CJK}${AN}])`, "g");
 const AN_PUNCTUATION_CJK = new RegExp(`([${AN}])([!;,\\?]+)([${CJK}])`, "g");
@@ -256,7 +256,7 @@ class Pangu {
       const bracketPatterns = [
         { pattern: /<([^<>]*)>/g, open: "<", close: ">" },
         { pattern: /\(([^()]*)\)/g, open: "(", close: ")" },
-        { pattern: /\[([^\[\]]*)\]/g, open: "[", close: "]" },
+        { pattern: /\[([^[\]]*)\]/g, open: "[", close: "]" },
         { pattern: /\{([^{}]*)\}/g, open: "{", close: "}" }
       ];
       for (const { pattern, open, close } of bracketPatterns) {

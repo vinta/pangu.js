@@ -140,7 +140,10 @@ class PopupController {
         });
       }
       const message = { action: "MANUAL_SPACING" };
-      const response = await chrome.tabs.sendMessage(this.currentTabId, message);
+      const response = await chrome.tabs.sendMessage(
+        this.currentTabId,
+        message
+      );
       if (response && response.success) {
         await this.showSuccessMessage(() => {
           button.disabled = false;

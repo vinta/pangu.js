@@ -32,7 +32,7 @@ async function playSound(name) {
     audio.addEventListener("ended", () => {
       currentAudio = null;
     });
-    audio.play().catch((e) => console.log("Sound play failed:", e));
+    audio.play().catch((error) => console.log("Sound play failed:", error));
   }
 }
 function stopSound() {

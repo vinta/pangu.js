@@ -1,7 +1,7 @@
 "use strict";
 const { Pangu } = require("../shared/index.cjs");
 const { readFileSync } = require("node:fs");
-const { readFile } = require("node:fs/promises");
+const { readFile } = require("node:fs");
 class NodePangu extends Pangu {
   async spacingFile(path) {
     const data = await readFile(path, "utf8");
