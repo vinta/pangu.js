@@ -57,6 +57,7 @@ export class TaskQueue {
  * ensuring smooth user experience even when processing large amounts of text.
  */
 export class TaskScheduler {
+  // readonly means this.config cannot be reassigned, but its properties can be changed
   public readonly config: TaskSchedulerConfig = {
     enabled: true,
     chunkSize: 40, // Process 40 text nodes per idle cycle
@@ -103,9 +104,5 @@ export class TaskScheduler {
 
   clear() {
     this.taskQueue.clear();
-  }
-
-  updateConfig(config: Partial<TaskSchedulerConfig>) {
-    Object.assign(this.config, config);
   }
 }

@@ -48,7 +48,12 @@ export class VisibilityDetector {
     if (patterns.clipRect) {
       const clip = style.clip;
       // Common patterns: rect(1px, 1px, 1px, 1px) or rect(0, 0, 0, 0)
-      if (clip && (clip.includes('rect(1px, 1px, 1px, 1px)') || clip.includes('rect(0px, 0px, 0px, 0px)') || clip.includes('rect(0, 0, 0, 0)'))) {
+      if (
+        clip &&
+        (clip.includes('rect(1px, 1px, 1px, 1px)') ||
+          clip.includes('rect(0px, 0px, 0px, 0px)') ||
+          clip.includes('rect(0, 0, 0, 0)'))
+      ) {
         return true;
       }
     }
@@ -109,7 +114,7 @@ export class VisibilityDetector {
 
     // Find the previous sibling that might be hidden
     let previousNode = node.previousSibling;
-    
+
     // Walk up the DOM tree to find the actual previous element
     if (!previousNode && node.parentElement) {
       let parent: Element | null = node.parentElement;
@@ -125,20 +130,15 @@ export class VisibilityDetector {
     if (previousNode) {
       if (previousNode instanceof Element && this.isElementVisuallyHidden(previousNode)) {
         return true;
-      } else if (previousNode instanceof Text && previousNode.parentElement && this.isElementVisuallyHidden(previousNode.parentElement)) {
+      } else if (
+        previousNode instanceof Text &&
+        previousNode.parentElement &&
+        this.isElementVisuallyHidden(previousNode.parentElement)
+      ) {
         return true;
       }
     }
 
     return false;
-  }
-
-  public updateConfig(config: Partial<VisibilityDetectorConfig>) {
-    Object.assign(this.config, config);
-
-    // Handle nested commonHiddenPatterns object if provided
-    if (config.commonHiddenPatterns) {
-      Object.assign(this.config.commonHiddenPatterns, config.commonHiddenPatterns);
-    }
   }
 }
