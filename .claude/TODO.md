@@ -31,8 +31,14 @@ No task in progress
 
 ## Upcoming Tasks
 
+### High Priority
+
+- [ ] New feature: 為什麼你們就是不能拼對大小寫呢？
+
 ### Medium Priority
 
+- [ ] Change icon or badge to reflect the current `spacing_mode`
+- [ ] CSS Visibility detector with `chrome.declarativeContent.PageStateMatcher({css: [".hide"]})`?
 - [ ] Fix issue #155 - DO NOT spacing URL
   - `https://xxxxx/不要加空格.html`
   - `https://%E5%A6%82`
