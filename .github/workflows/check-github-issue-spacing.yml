@@ -2,7 +2,7 @@ name: Check GitHub Issue Spacing
 
 on:
   issues:
-    types: [opened, edited]
+    types: [opened]
 
 permissions:
   contents: read
@@ -15,9 +15,9 @@ jobs:
       issues: write
 
     steps:
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: "lts/*"
+          node-version: 'lts/*'
 
       - name: Install pangu.js
         run: npm install -g pangu
@@ -32,26 +32,32 @@ jobs:
           if pangu --check "$ISSUE_TITLE"; then
             echo "has_proper_spacing=true" >> $GITHUB_OUTPUT
           else
+            CORRECTED_TITLE=$(pangu -t "$ISSUE_TITLE")
             echo "has_proper_spacing=false" >> $GITHUB_OUTPUT
+            echo "corrected_title=$CORRECTED_TITLE" >> $GITHUB_OUTPUT
           fi
 
       - name: Comment and close if not proper spacing
         if: steps.check.outputs.has_proper_spacing == 'false'
         uses: actions/github-script@v7
+        env:
+          CORRECTED_TITLE: ${{ steps.check.outputs.corrected_title }}
         with:
           script: |
+            const correctedTitle = process.env.CORRECTED_TITLE;
+
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: `Hi @${context.payload.issue.user.login},\n\nYou're reporting a text spacing glitch to a software specifically crafted for text spacing, and you can't even manage to write an Issue Title with proper spacing? Security! Security!`
+              body: `Hi @${context.payload.issue.user.login},\n\nYou're reporting a text spacing glitch to a software specifically crafted for text spacing, and you can't even manage to write an Issue Title with proper spacing? Security! Security!\n\nPlease update your title to: ${correctedTitle}`
             });
 
             await github.rest.issues.addLabels({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              labels: ['not-proper-spacing']
+              labels: ['not proper spacing']
             });
 
             await github.rest.issues.update({
