@@ -23,6 +23,9 @@ npm run build              # Build all targets (library + extension)
 npm run build:lib          # Build library (shared, browser, node)
 npm run build:extension    # Build Chrome extension TypeScript files
 npm run clean              # Clean all build artifacts
+npm run watch              # Watch both library and extension files
+npm run watch:lib          # Watch library files for changes
+npm run watch:extension    # Watch extension files (uses nodemon)
 ```
 
 ### Testing
@@ -58,14 +61,19 @@ npm run pack-extension:chrome   # Package Chrome extension only (.zip)
 
 ```
 src/
-├── shared/            # Core text spacing logic (platform-agnostic)
-│   └── index.ts       # Main Pangu class with regex patterns
-├── browser/           # Browser-specific implementation
-│   ├── pangu.ts       # BrowserPangu class with DOM manipulation
-│   └── pangu.umd.ts   # UMD wrapper for browser builds
-└── node/              # Node.js implementation
-    ├── index.ts       # NodePangu class with file operations
-    └── cli.ts         # Command-line interface
+├── shared/                    # Core text spacing logic (platform-agnostic)
+│   └── index.ts               # Main Pangu class with regex patterns
+├── browser/                   # Browser-specific implementation
+│   ├── pangu.ts               # BrowserPangu class with DOM manipulation
+│   ├── pangu.umd.ts           # UMD wrapper for browser builds
+│   ├── dom-walker.ts          # DOM tree traversal utilities
+│   ├── task-scheduler.ts      # Idle-time task scheduling
+│   ├── visibility-detector.ts # CSS visibility detection
+│   └── banner.txt             # Build banner text
+└── node/                      # Node.js implementation
+    ├── index.ts               # NodePangu class with file operations
+    ├── index.cjs.ts           # CommonJS re-export wrapper
+    └── cli.ts                 # Command-line interface
 ```
 
 ### Build Output Structure
@@ -87,53 +95,28 @@ dist/                           # Library builds
 
 ### Core API
 
-**All Platforms:**
+**All Platforms (Shared):**
 
 - `spacingText(text)` - Process text strings (main method)
-- `spacing(text)` - Alias for spacingText() for backward compatibility
 - `hasProperSpacing(text)` - Check if text already has proper spacing
 
-**Browser-specific:**
+**Node.js-specific (NodePangu):**
 
-- `spacingNode(node)` - Process DOM nodes
-- `spacingElementById(id)` - Process element by ID
-- `spacingElementByClassName(className)` - Process elements by class
-- `spacingElementByTagName(tagName)` - Process elements by tag
-- `spacingPageTitle()` - Process page title
-- `spacingPageBody()` - Process page body
-- `spacingPage()` - Process entire page
-- `autoSpacingPage(config?)` - Auto-spacing with MutationObserver
-- `stopAutoSpacingPage()` - Stop auto-spacing
-- `updateIdleSpacingConfig(config)` - Configure idle processing behavior
-- `getIdleSpacingConfig()` - Get current idle processing config
-- `updateVisibilityCheckConfig(config)` - Configure visibility checking
-- `getVisibilityCheckConfig()` - Get current visibility check config
-- `isElementVisuallyHidden(element)` - Check if element is hidden by CSS
-
-**Node.js-specific:**
-
-- `spacingFile(path)` - Process files asynchronously
+- `spacingFile(path)` - Process files asynchronously (returns Promise)
 - `spacingFileSync(path)` - Process files synchronously
 
-### Import Patterns
+**Browser-specific (BrowserPangu):**
 
-```javascript
-// Browser ESM
-import { pangu, BrowserPangu } from 'pangu';
-pangu.spacingText('你好world');
-
-// Browser UMD (script tag)
-window.pangu.spacingText('你好world');
-window.pangu.BrowserPangu; // Class constructor
-
-// Node.js ESM
-import { pangu, NodePangu } from 'pangu';
-await pangu.spacingFile('input.txt');
-
-// Node.js CommonJS
-const { pangu, NodePangu } = require('pangu');
-pangu.spacingFileSync('input.txt');
-```
+- `spacingPage()` - Process entire page (title + body)
+- `spacingNode(node)` - Process specific DOM node and its descendants
+- `autoSpacingPage(config?)` - Auto-spacing with MutationObserver
+  - `config.pageDelayMs` - Delay before initial page spacing (default: 1000ms)
+  - `config.nodeDelayMs` - Delay before spacing new nodes (default: 500ms)
+  - `config.nodeMaxWaitMs` - Max wait time for node mutations (default: 2000ms)
+- `stopAutoSpacingPage()` - Stop auto-spacing
+- `isElementVisuallyHidden(element)` - Check if element is hidden by CSS
+- `taskScheduler.config` - Task scheduling configuration (direct property access)
+- `visibilityDetector.config` - Visibility detection configuration (direct property access)
 
 ### Build System
 
@@ -141,14 +124,16 @@ pangu.spacingFileSync('input.txt');
 - **TypeScript**: Configured with separate tsconfig files for browser/node
 - **Output Formats**: ESM, CommonJS, and UMD
 - **Source Maps**: Generated for all builds
-- **Type Definitions**: Auto-generated .d.ts files
+- **Type Definitions**: Auto-generated .d.ts files with vite-plugin-dts
+- **Watch Mode**: Concurrent watch for library and extension development
 
 ### Testing Strategy
 
-- **Unit Tests**: Vitest for shared/node code
-- **Browser Tests**: Playwright for cross-browser testing
+- **Unit Tests**: Vitest 3.x for shared/node code
+- **Browser Tests**: Playwright 1.53.x for cross-browser testing
 - **Test Fixtures**: Located in `fixtures/`
 - **Coverage**: 106 tests covering various Unicode blocks
+- **Test Structure**: Separate test directories for shared, node, and browser code
 
 ### Chrome Extension
 
@@ -168,7 +153,7 @@ pangu.spacingFileSync('input.txt');
 - **Content Script**: `content-script.ts` - Injected into web pages for auto-spacing
 - **Popup**: `popup.ts` - Extension popup UI
 - **Options**: `options.ts` - Settings page
-- **Utils**: `utils/` - Shared utilities
+- **Utils**: `utils/` - Shared utilities including type definitions
 
 #### Settings Structure
 
@@ -196,7 +181,7 @@ interface IdleSpacingConfig {
 
 ```typescript
 interface VisibilityCheckConfig {
-  enabled: boolean; // Default: false
+  enabled: boolean; // Default: true in VisibilityDetector, false in BrowserPangu
   commonHiddenPatterns: {
     clipRect: boolean; // clip: rect(1px, 1px, 1px, 1px)
     displayNone: boolean; // display: none
@@ -207,12 +192,23 @@ interface VisibilityCheckConfig {
 }
 ```
 
+#### Task Scheduler Configuration
+
+```typescript
+interface TaskSchedulerConfig {
+  enabled: boolean; // Whether to use task scheduling
+  chunkSize: number; // Number of tasks to process per chunk
+  timeout: number; // Timeout between chunks in milliseconds
+}
+```
+
 ## Development Guidelines
 
 ### Code Style
 
 - Follow existing patterns in the codebase
-- ESLint with unicorn/prefer-node-protocol enabled
+- ESLint 9.x with unicorn/prefer-node-protocol enabled
+- Prettier 3.x with @trivago/prettier-plugin-sort-imports
 - Maintain zero runtime dependencies
 - Keep regex patterns readable with comments
 - Always use `node:` prefix for Node.js built-in modules
@@ -224,6 +220,8 @@ interface VisibilityCheckConfig {
 - Browser DOM processing: Uses TreeWalker API for 5.5x performance improvement
 - Idle processing: Uses requestIdleCallback() for non-blocking operations
 - Visibility detection: Detects CSS-hidden elements to avoid unnecessary spacing
+- Task scheduling: `src/browser/task-scheduler.ts` - Manages task queue for async processing
+- Visibility detector: `src/browser/visibility-detector.ts` - Checks element visibility
 
 ### Performance Optimizations v7
 
