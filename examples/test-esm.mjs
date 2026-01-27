@@ -1,6 +1,5 @@
 // Test both ESM and CommonJS imports
-import pangu from 'pangu';
-import { NodePangu } from 'pangu';
+import pangu, { NodePangu } from 'pangu';
 
 console.log('=== Testing ESM Imports ===\n');
 

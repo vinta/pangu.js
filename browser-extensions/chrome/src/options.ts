@@ -1,10 +1,10 @@
 import { translatePage } from './utils/i18n';
-import { getCachedSettings, DEFAULT_SETTINGS } from './utils/settings';
+import { DEFAULT_SETTINGS, getCachedSettings } from './utils/settings';
 import { playSound } from './utils/sounds';
 import { isValidMatchPattern } from './utils/urls';
 
 class OptionsController {
-  private editingUrls: Map<number, string> = new Map();
+  private editingUrls = new Map<number, string>();
   private addUrlInput: HTMLInputElement | null = null;
 
   constructor() {
@@ -22,15 +22,19 @@ class OptionsController {
       if (areaName === 'sync') {
         // Only re-render the parts that actually changed
         const changedKeys = Object.keys(changes);
-        
+
         if (changedKeys.includes('spacing_mode')) {
           await this.renderSpacingMode();
         }
-        
-        if (changedKeys.includes('filter_mode') || changedKeys.includes('blacklist') || changedKeys.includes('whitelist')) {
+
+        if (
+          changedKeys.includes('filter_mode') ||
+          changedKeys.includes('blacklist') ||
+          changedKeys.includes('whitelist')
+        ) {
           await this.renderFilterMode();
         }
-        
+
         if (changedKeys.includes('is_mute_sound_effects')) {
           await this.renderMuteCheckbox();
         }
@@ -233,7 +237,6 @@ class OptionsController {
     const checkbox = document.getElementById('mute-checkbox') as HTMLInputElement;
     checkbox.checked = settings.is_mute_sound_effects;
   }
-
 
   private async toggleSpacingMode() {
     const settings = await getCachedSettings();
