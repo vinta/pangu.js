@@ -1,8 +1,9 @@
 # 為什麼你們就是不能加個空格呢？
 
-[![](https://data.jsdelivr.com/v1/package/npm/pangu/badge)](https://www.jsdelivr.com/package/npm/pangu)
-[![](https://img.shields.io/npm/v/pangu.svg?style=flat-square)](https://www.npmjs.com/package/pangu)
-[![](https://img.shields.io/badge/made%20with-%e2%9d%a4-ff69b4.svg?style=flat-square)](https://vinta.ws/code/)
+[![jsDelivr Hits](https://img.shields.io/jsdelivr/npm/hm/pangu?style=for-the-badge)](https://www.jsdelivr.com/package/npm/pangu)
+[![npm Downloads](https://img.shields.io/npm/dm/pangu?style=for-the-badge&label=npm)](https://www.npmjs.com/package/pangu)
+[![npm Version](https://img.shields.io/npm/v/pangu?style=for-the-badge)](https://www.npmjs.com/package/pangu)
+[![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/paphcfdffjnbcgkokihcdjliihicmbpd?style=for-the-badge)](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 
 如果你跟我一樣，每次看到網頁上的中文字和英文、數字、符號擠在一塊，就會坐立難安，忍不住想在它們之間加個空格。這個 Google Chrome 外掛正是你在網路世界走跳所需要的東西，它會自動替你在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。
 
@@ -65,8 +66,8 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 
   // Process specific elements using spacingNode()
   pangu.spacingNode(document.getElementById('main'));
-  document.querySelectorAll('.comment').forEach(el => pangu.spacingNode(el));
-  document.querySelectorAll('p').forEach(el => pangu.spacingNode(el));
+  document.querySelectorAll('.comment').forEach((el) => pangu.spacingNode(el));
+  document.querySelectorAll('p').forEach((el) => pangu.spacingNode(el));
 
   document.addEventListener('DOMContentLoaded', () => {
     // listen to any DOM change and automatically perform spacing via MutationObserver()
@@ -86,8 +87,8 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 
   // Process specific elements using spacingNode()
   pangu.spacingNode(document.getElementById('main'));
-  document.querySelectorAll('.comment').forEach(el => pangu.spacingNode(el));
-  document.querySelectorAll('p').forEach(el => pangu.spacingNode(el));
+  document.querySelectorAll('.comment').forEach((el) => pangu.spacingNode(el));
+  document.querySelectorAll('p').forEach((el) => pangu.spacingNode(el));
 </script>
 ```
 
