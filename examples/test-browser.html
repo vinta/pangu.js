@@ -1,70 +1,70 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pangu.js Browser Example</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        .example {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        button {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 5px;
-        }
-        button:hover {
-            background: #0056b3;
-        }
-        #result {
-            margin-top: 20px;
-            padding: 15px;
-            background: #e8f4fd;
-            border-radius: 5px;
-            white-space: pre-wrap;
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      .example {
+        background: #f5f5f5;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      #result {
+        margin-top: 20px;
+        padding: 15px;
+        background: #e8f4fd;
+        border-radius: 5px;
+        white-space: pre-wrap;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>pangu.js Browser Example</h1>
 
-    <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
-        <strong>Note:</strong> To run this example with ES modules support, start the web server:
-        <pre style="background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 3px;">npm run server</pre>
-        Then open <a href="http://localhost:8080">http://localhost:8080</a> in your browser.
+    <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin-bottom: 20px; border-radius: 5px">
+      <strong>Note:</strong> To run this example with ES modules support, start the web server:
+      <pre style="background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 3px">npm run server</pre>
+      Then open <a href="http://localhost:8080">http://localhost:8080</a> in your browser.
     </div>
 
     <div class="example">
-        <h2>UMD Version (Script Tag)</h2>
-        <p id="demo1">測試文字：當你凝視著bug，bug也凝視著你</p>
-        <button onclick="spacingDemo1()">Run</button>
+      <h2>UMD Version (Script Tag)</h2>
+      <p id="demo1">測試文字：當你凝視著bug，bug也凝視著你</p>
+      <button onclick="spacingDemo1()">Run</button>
     </div>
 
     <div class="example">
-        <h2>ESM Version (ES Modules)</h2>
-        <p id="demo2">另一個測試：使用JavaScript開發Web應用程式</p>
-        <button id="esmButton">Run</button>
+      <h2>ESM Version (ES Modules)</h2>
+      <p id="demo2">另一個測試：使用JavaScript開發Web應用程式</p>
+      <button id="esmButton">Run</button>
     </div>
 
     <div class="example">
-        <h2>Auto-spacing Entire Page</h2>
-        <p>這段文字包含English和中文mixed在一起，還有numbers123。</p>
-        <p>pangu.js會自動在CJK字元和half-width characters之間加入空白。</p>
-        <button onclick="autoSpacingPage()">Run</button>
+      <h2>Auto-spacing Entire Page</h2>
+      <p>這段文字包含English和中文mixed在一起，還有numbers123。</p>
+      <p>pangu.js會自動在CJK字元和half-width characters之間加入空白。</p>
+      <button onclick="autoSpacingPage()">Run</button>
     </div>
 
     <div id="result"></div>
@@ -72,33 +72,33 @@
     <!-- UMD Version -->
     <script src="node_modules/pangu/dist/browser/pangu.umd.js"></script>
     <script>
-        function spacingDemo1() {
-            const elem = document.getElementById('demo1');
-            const original = elem.textContent;
-            pangu.spacingElementById('demo1');
-            const result = document.getElementById('result');
-            result.textContent = `UMD Version Result:\nOriginal: ${original}\nProcessed: ${elem.textContent}`;
-        }
+      function spacingDemo1() {
+        const elem = document.getElementById('demo1');
+        const original = elem.textContent;
+        pangu.spacingElementById('demo1');
+        const result = document.getElementById('result');
+        result.textContent = `UMD Version Result:\nOriginal: ${original}\nProcessed: ${elem.textContent}`;
+      }
 
-        function autoSpacingPage() {
-            pangu.autoSpacingPage();
-            document.getElementById('result').textContent = 'Auto-spacing enabled! Try editing the text on the page.';
-        }
+      function autoSpacingPage() {
+        pangu.autoSpacingPage();
+        document.getElementById('result').textContent = 'Auto-spacing enabled! Try editing the text on the page.';
+      }
     </script>
 
     <!-- ESM Version -->
     <script type="module">
-        import { pangu } from './node_modules/pangu/dist/browser/pangu.js';
+      import { pangu } from './node_modules/pangu/dist/browser/pangu.js';
 
-        document.getElementById('esmButton').addEventListener('click', () => {
-            const elem = document.getElementById('demo2');
-            const original = elem.textContent;
-            const spaced = pangu.spacingText(original);
-            elem.textContent = spaced;
+      document.getElementById('esmButton').addEventListener('click', () => {
+        const elem = document.getElementById('demo2');
+        const original = elem.textContent;
+        const spaced = pangu.spacingText(original);
+        elem.textContent = spaced;
 
-            const result = document.getElementById('result');
-            result.textContent = `ESM Version Result:\nOriginal: ${original}\nProcessed: ${spaced}`;
-        });
+        const result = document.getElementById('result');
+        result.textContent = `ESM Version Result:\nOriginal: ${original}\nProcessed: ${spaced}`;
+      });
     </script>
-</body>
+  </body>
 </html>

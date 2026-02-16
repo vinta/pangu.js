@@ -23,7 +23,7 @@ export async function playSound(name: SoundName) {
       currentAudio = null;
     });
 
-    audio.play().catch((e) => console.log('Sound play failed:', e));
+    audio.play().catch((error) => console.log('Sound play failed:', error));
   }
 }
 
