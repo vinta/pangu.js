@@ -15,7 +15,6 @@ concurrency:
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
-    environment: publish
 
     permissions:
       id-token: write # for npm provenance
@@ -26,7 +25,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "lts/*"
+          node-version: "24"
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
 
@@ -57,10 +56,6 @@ jobs:
 
       - name: Dry run publish
         run: npm publish --dry-run
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
