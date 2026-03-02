@@ -27,7 +27,8 @@
     "type": "module"
   },
   "permissions": ["activeTab", "scripting", "storage"],
-  "host_permissions": ["http://*/*", "https://*/*", "file:///*/*"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "homepage_url": "https://github.com/vinta/pangu.js",
   "minimum_chrome_version": "95",
   "offline_enabled": true
 }
