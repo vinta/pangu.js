@@ -1,9 +1,5 @@
 # CLAUDE.md
 
-Extends: @~/.claude/CLAUDE.md (mandatory base instructions)
-
-Everything in the base instructions MUST be followed strictly.
-
 ## Project Overview
 
 `pangu.js` is a text spacing library that automatically inserts whitespace between CJK (Chinese, Japanese, Korean) characters and half-width characters (alphabetical letters, numerical digits, and symbols) for better readability.
@@ -130,9 +126,9 @@ dist/                           # Library builds
 ### Testing Strategy
 
 - **Unit Tests**: Vitest 3.x for shared/node code
-- **Browser Tests**: Playwright 1.53.x for cross-browser testing
+- **Browser Tests**: Playwright 1.x for cross-browser testing
 - **Test Fixtures**: Located in `fixtures/`
-- **Coverage**: 106 tests covering various Unicode blocks
+- **Coverage**: ~225 tests (75 vitest + 150 Playwright across 3 browsers)
 - **Test Structure**: Separate test directories for shared, node, and browser code
 
 ### Chrome Extension
@@ -164,41 +160,6 @@ interface Settings {
   blacklist: string[];
   whitelist: string[];
   is_mute_sound_effects: boolean;
-}
-```
-
-#### Idle Processing Configuration
-
-```typescript
-interface IdleSpacingConfig {
-  enabled: boolean; // Default: true
-  chunkSize: number; // Default: 40 (text nodes per cycle)
-  timeout: number; // Default: 2000ms
-}
-```
-
-#### Visibility Check Configuration
-
-```typescript
-interface VisibilityCheckConfig {
-  enabled: boolean; // Default: true in VisibilityDetector, false in BrowserPangu
-  commonHiddenPatterns: {
-    clipRect: boolean; // clip: rect(1px, 1px, 1px, 1px)
-    displayNone: boolean; // display: none
-    visibilityHidden: boolean; // visibility: hidden
-    opacityZero: boolean; // opacity: 0
-    heightWidth1px: boolean; // height: 1px; width: 1px
-  };
-}
-```
-
-#### Task Scheduler Configuration
-
-```typescript
-interface TaskSchedulerConfig {
-  enabled: boolean; // Whether to use task scheduling
-  chunkSize: number; // Number of tasks to process per chunk
-  timeout: number; // Timeout between chunks in milliseconds
 }
 ```
 
@@ -258,11 +219,6 @@ interface TaskSchedulerConfig {
   - Processes text within HTML attributes while preserving tag structure
   - Protects HTML tags from being altered by spacing rules
 
-- **Performance Enhancements**:
-  - 5.5x faster with TreeWalker API replacing XPath
-  - Non-blocking processing with requestIdleCallback()
-  - CSS visibility detection to skip hidden elements
-
 ## Future Improvements
 
-See @.claude/TODO.md for planned improvements and technical debt.
+See @TODO.md for planned improvements and technical debt.

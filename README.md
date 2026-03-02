@@ -145,7 +145,7 @@ You need to install [Node.js](https://vinta.ws/code/install-node-js-via-nvm.html
 ```bash
 $ git clone https://github.com/vinta/pangu.js.git && cd pangu.js
 $ npm install                          # install dependencies
-$ npx playwright install --with-deps   # install browsers for testing
+$ npx playwright install --with-deps   # install headless browsers for testing
 $ npm run test                         # run all tests (unit + browser)
 ```
 
