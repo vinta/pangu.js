@@ -70,6 +70,24 @@ src/
     ├── index.ts               # NodePangu class with file operations
     ├── index.cjs.ts           # CommonJS re-export wrapper
     └── cli.ts                 # Command-line interface
+
+browser-extensions/
+└── chrome/                    # Chrome extension (Manifest V3)
+    ├── manifest.json          # Extension manifest
+    ├── _locales/zh_TW/        # i18n messages (Traditional Chinese)
+    ├── src/                   # Extension TypeScript source
+    │   ├── service-worker.ts  # Background: settings init, content script registration
+    │   ├── content-script.ts  # Injected into pages for auto-spacing
+    │   ├── popup.ts           # Popup UI controller
+    │   ├── options.ts         # Options page controller
+    │   └── utils/             # Types, settings, URL validation, i18n, sounds
+    ├── dist/                  # Compiled JS from src/
+    ├── vendors/pangu/         # Vendored pangu.umd.js (copied during build)
+    ├── pages/                 # popup.html, options.html
+    ├── stylesheets/           # CSS for popup and options
+    ├── icons/                 # Extension icons (16-128px PNG + SVG)
+    ├── images/                # Store listing assets (screenshots, promo tiles)
+    └── sounds/                # Sound effects for spacing feedback
 ```
 
 ### Build Output Structure
