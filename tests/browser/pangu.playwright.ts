@@ -531,6 +531,108 @@ test.describe('BrowserPangu', () => {
       expect(withSpaceResult).toBe('測試 文字');
     });
 
+    test('should not insert <pangu> elements in CSS Grid containers', async ({ page }) => {
+      const htmlContent = loadFixture('css-grid.html');
+      const expected = loadFixture('css-grid.expected.html').trim();
+
+      await page.setContent(htmlContent);
+      await page.evaluate(() => {
+        const element = document.getElementById('grid-container')!;
+        pangu.spacingNode(element);
+      });
+      const actual = await page.evaluate(() => document.body.innerHTML.trim());
+      expect(actual).toBe(expected);
+
+      // Verify no <pangu> elements were inserted
+      const panguCount = await page.evaluate(() => document.querySelectorAll('pangu').length);
+      expect(panguCount).toBe(0);
+    });
+
+    test('should not insert <pangu> elements in CSS Flexbox containers', async ({ page }) => {
+      const htmlContent = loadFixture('css-flex.html');
+      const expected = loadFixture('css-flex.expected.html').trim();
+
+      await page.setContent(htmlContent);
+      await page.evaluate(() => {
+        const element = document.getElementById('flex-container')!;
+        pangu.spacingNode(element);
+      });
+      const actual = await page.evaluate(() => document.body.innerHTML.trim());
+      expect(actual).toBe(expected);
+
+      // Verify no <pangu> elements were inserted
+      const panguCount = await page.evaluate(() => document.querySelectorAll('pangu').length);
+      expect(panguCount).toBe(0);
+    });
+
+    test('should not insert <pangu> elements in inline-grid and inline-flex containers', async ({ page }) => {
+      await page.setContent(`
+        <div id="inline-grid" style="display: inline-grid; grid-template-columns: 1fr 1fr;">
+          <a href="#">abc</a><a href="#">漢字</a>
+        </div>
+        <div id="inline-flex" style="display: inline-flex;">
+          <a href="#">abc</a><a href="#">漢字</a>
+        </div>
+      `);
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.body);
+      });
+
+      const panguCount = await page.evaluate(() => document.querySelectorAll('pangu').length);
+      expect(panguCount).toBe(0);
+    });
+
+    test('should still insert <pangu> elements in normal flow containers', async ({ page }) => {
+      // Baseline: <pangu> insertion still works for non-grid/flex parents
+      await page.setContent('<div id="normal"><p><a href="#">abc</a><a href="#">漢字</a></p></div>');
+
+      await page.evaluate(() => {
+        const element = document.getElementById('normal')!;
+        pangu.spacingNode(element);
+      });
+
+      const panguCount = await page.evaluate(() => document.querySelectorAll('pangu').length);
+      expect(panguCount).toBe(1);
+
+      const html = await page.evaluate(() => document.querySelector('p')!.innerHTML);
+      expect(html).toBe('<a href="#">abc</a><pangu> </pangu><a href="#">漢字</a>');
+    });
+
+    test('should not insert <pangu> in grid with CJK card content (real-world case)', async ({ page }) => {
+      // Simulates the AgentPub directory page layout from the bug report
+      await page.setContent(`
+        <div id="card-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+          <a href="/a/1" style="display: block; padding: 20px; border: 1px solid #ccc;">
+            <h2>Pocketshark</h2>
+            <p>小而鋒利，住在機器裡的鯊魚</p>
+          </a><a href="/a/2" style="display: block; padding: 20px; border: 1px solid #ccc;">
+            <h2>Reader</h2>
+            <p>content in, content out</p>
+          </a><a href="/a/3" style="display: block; padding: 20px; border: 1px solid #ccc;">
+            <h2>OCISLY</h2>
+            <p>Of Course I Still Love You</p>
+          </a>
+        </div>
+      `);
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.body);
+      });
+
+      // No <pangu> should be inserted between grid items
+      const panguCount = await page.evaluate(() => document.getElementById('card-grid')!.querySelectorAll(':scope > pangu').length);
+      expect(panguCount).toBe(0);
+
+      // Grid should still have exactly 3 direct child elements (the cards)
+      const childCount = await page.evaluate(() => document.getElementById('card-grid')!.children.length);
+      expect(childCount).toBe(3);
+
+      // Text inside cards should still get spacing
+      const cardText = await page.evaluate(() => document.querySelector('#card-grid a p')!.textContent);
+      expect(cardText).toBe('小而鋒利，住在機器裡的鯊魚');
+    });
+
     test('handle visually hidden adjacent elements', async ({ page }) => {
       // Test case from fixtures/hidden-adjacent-node.html
       // Updated HTML without leading space
