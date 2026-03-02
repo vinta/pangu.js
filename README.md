@@ -94,8 +94,8 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 
 Also on:
 
-- https://cdn.jsdelivr.net/npm/pangu@7.2.0/dist/browser/pangu.umd.js
-- https://unpkg.com/pangu@7.2.0/dist/browser/pangu.umd.js
+- https://cdn.jsdelivr.net/npm/pangu@7.2.1/dist/browser/pangu.umd.js
+- https://unpkg.com/pangu@7.2.1/dist/browser/pangu.umd.js
 
 ### Node.js
 
@@ -144,8 +144,9 @@ You need to install [Node.js](https://vinta.ws/code/install-node-js-via-nvm.html
 
 ```bash
 $ git clone https://github.com/vinta/pangu.js.git && cd pangu.js
-$ npm install
-$ npm run test
+$ npm install                          # install dependencies
+$ npx playwright install --with-deps   # install headless browsers for testing
+$ npm run test                         # run all tests (unit + browser)
 ```
 
 ## License

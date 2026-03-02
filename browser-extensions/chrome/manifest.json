@@ -3,7 +3,7 @@
   "name": "__MSG_extension_name__",
   "description": "__MSG_extension_description__",
   "short_name": "__MSG_god_of_spacing__",
-  "version": "7.2.0",
+  "version": "7.2.1",
   "author": "Vinta",
   "default_locale": "zh_TW",
   "icons": {
@@ -27,7 +27,8 @@
     "type": "module"
   },
   "permissions": ["activeTab", "scripting", "storage"],
-  "host_permissions": ["http://*/*", "https://*/*", "file:///*/*"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "homepage_url": "https://github.com/vinta/pangu.js",
   "minimum_chrome_version": "95",
   "offline_enabled": true
 }

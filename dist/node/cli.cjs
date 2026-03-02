@@ -103,7 +103,7 @@ class PlaceholderReplacer {
 class Pangu {
   constructor() {
     __publicField$1(this, "version");
-    this.version = "7.2.0";
+    this.version = "7.2.1";
   }
   spacingText(text) {
     if (typeof text !== "string") {
@@ -615,6 +615,14 @@ class BrowserPangu extends Pangu {
     return this.visibilityDetector.isElementVisuallyHidden(element);
   }
   // INTERNAL
+  isGridOrFlexContainer(node) {
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return false;
+    }
+    const style = window.getComputedStyle(node);
+    const display = style.display;
+    return display === "grid" || display === "inline-grid" || display === "flex" || display === "inline-flex";
+  }
   // TODO: Refactor this method - it's too large and handles too many responsibilities
   spacingTextNodes(textNodes) {
     let currentTextNode;
@@ -731,6 +739,10 @@ class BrowserPangu extends Pangu {
               }
             } else {
               if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
+                if (nextNode.parentNode && this.isGridOrFlexContainer(nextNode.parentNode)) {
+                  nextTextNode = currentTextNode;
+                  continue;
+                }
                 const panguSpace = document.createElement("pangu");
                 panguSpace.innerHTML = " ";
                 if (nextNode.parentNode) {

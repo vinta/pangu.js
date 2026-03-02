@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { pangu } from "./index.js";
+import pangu from "./index.js";
 const usage = `
 usage: pangu [-h] [-v] [-t] [-f] [-c] text_or_path
 

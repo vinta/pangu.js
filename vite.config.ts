@@ -1,7 +1,6 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, build } from 'vite';
-import dts from 'vite-plugin-dts';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const projectRoot = __dirname;
@@ -164,16 +163,6 @@ export default defineConfig({
     charset: 'ascii',
   },
   plugins: [
-    dts({
-      include: ['src/**/*.ts'],
-      outDir: 'dist',
-      rollupTypes: false,
-      insertTypesEntry: false,
-      compilerOptions: {
-        declaration: true,
-        declarationMap: false,
-      },
-    }),
     multiBuildPlugin(),
   ],
 });

@@ -11,7 +11,7 @@
     "formatting",
     "readability"
   ],
-  "version": "7.2.0",
+  "version": "7.2.1",
   "author": {
     "name": "Vinta Chen",
     "email": "vinta.chen@gmail.com",
@@ -60,7 +60,8 @@
   "scripts": {
     "clean": "rm -rf browser-extensions/chrome/dist/ dist/ playwright-report/ test-results/",
     "build": "npm run clean && npm run build:lib && npm run build:extension",
-    "build:lib": "vite build",
+    "build:lib": "vite build && npm run build:types",
+    "build:types": "tsc -p src/browser/tsconfig.json --emitDeclarationOnly --declarationDir dist && tsc -p src/node/tsconfig.json --emitDeclarationOnly --declarationDir dist",
     "build:extension": "cp -f dist/browser/pangu.umd.js browser-extensions/chrome/vendors/pangu/ && vite build --config browser-extensions/vite.config.extension.ts",
     "watch": "npm run watch:lib & npm run watch:extension",
     "watch:lib": "vite build --watch",
@@ -87,9 +88,8 @@
     "nodemon": "3.1.10",
     "prettier": "3.5.3",
     "typescript": "5.8.3",
-    "typescript-eslint": "8.34.1",
+    "typescript-eslint": "8.56.1",
     "vite": "6.4.1",
-    "vite-plugin-dts": "4.5.4",
     "vitest": "3.2.3"
   },
   "engines": {

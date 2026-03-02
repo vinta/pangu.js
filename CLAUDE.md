@@ -1,9 +1,5 @@
 # CLAUDE.md
 
-Extends: @~/.claude/CLAUDE.md (mandatory base instructions)
-
-Everything in the base instructions MUST be followed strictly.
-
 ## Project Overview
 
 `pangu.js` is a text spacing library that automatically inserts whitespace between CJK (Chinese, Japanese, Korean) characters and half-width characters (alphabetical letters, numerical digits, and symbols) for better readability.
@@ -74,6 +70,24 @@ src/
     ├── index.ts               # NodePangu class with file operations
     ├── index.cjs.ts           # CommonJS re-export wrapper
     └── cli.ts                 # Command-line interface
+
+browser-extensions/
+└── chrome/                    # Chrome extension (Manifest V3)
+    ├── manifest.json          # Extension manifest
+    ├── _locales/zh_TW/        # i18n messages (Traditional Chinese)
+    ├── src/                   # Extension TypeScript source
+    │   ├── service-worker.ts  # Background: settings init, content script registration
+    │   ├── content-script.ts  # Injected into pages for auto-spacing
+    │   ├── popup.ts           # Popup UI controller
+    │   ├── options.ts         # Options page controller
+    │   └── utils/             # Types, settings, URL validation, i18n, sounds
+    ├── dist/                  # Compiled JS from src/
+    ├── vendors/pangu/         # Vendored pangu.umd.js (copied during build)
+    ├── pages/                 # popup.html, options.html
+    ├── stylesheets/           # CSS for popup and options
+    ├── icons/                 # Extension icons (16-128px PNG + SVG)
+    ├── images/                # Store listing assets (screenshots, promo tiles)
+    └── sounds/                # Sound effects for spacing feedback
 ```
 
 ### Build Output Structure
@@ -130,9 +144,9 @@ dist/                           # Library builds
 ### Testing Strategy
 
 - **Unit Tests**: Vitest 3.x for shared/node code
-- **Browser Tests**: Playwright 1.53.x for cross-browser testing
+- **Browser Tests**: Playwright 1.x for cross-browser testing
 - **Test Fixtures**: Located in `fixtures/`
-- **Coverage**: 106 tests covering various Unicode blocks
+- **Coverage**: ~225 tests (75 vitest + 150 Playwright across 3 browsers)
 - **Test Structure**: Separate test directories for shared, node, and browser code
 
 ### Chrome Extension
@@ -167,41 +181,6 @@ interface Settings {
 }
 ```
 
-#### Idle Processing Configuration
-
-```typescript
-interface IdleSpacingConfig {
-  enabled: boolean; // Default: true
-  chunkSize: number; // Default: 40 (text nodes per cycle)
-  timeout: number; // Default: 2000ms
-}
-```
-
-#### Visibility Check Configuration
-
-```typescript
-interface VisibilityCheckConfig {
-  enabled: boolean; // Default: true in VisibilityDetector, false in BrowserPangu
-  commonHiddenPatterns: {
-    clipRect: boolean; // clip: rect(1px, 1px, 1px, 1px)
-    displayNone: boolean; // display: none
-    visibilityHidden: boolean; // visibility: hidden
-    opacityZero: boolean; // opacity: 0
-    heightWidth1px: boolean; // height: 1px; width: 1px
-  };
-}
-```
-
-#### Task Scheduler Configuration
-
-```typescript
-interface TaskSchedulerConfig {
-  enabled: boolean; // Whether to use task scheduling
-  chunkSize: number; // Number of tasks to process per chunk
-  timeout: number; // Timeout between chunks in milliseconds
-}
-```
-
 ## Development Guidelines
 
 ### Code Style
@@ -212,6 +191,7 @@ interface TaskSchedulerConfig {
 - Maintain zero runtime dependencies
 - Keep regex patterns readable with comments
 - Always use `node:` prefix for Node.js built-in modules
+- Always pin exact dependency versions in `package.json` (no `^` or `~` prefixes)
 
 ### Implementation Details
 
@@ -258,11 +238,6 @@ interface TaskSchedulerConfig {
   - Processes text within HTML attributes while preserving tag structure
   - Protects HTML tags from being altered by spacing rules
 
-- **Performance Enhancements**:
-  - 5.5x faster with TreeWalker API replacing XPath
-  - Non-blocking processing with requestIdleCallback()
-  - CSS visibility detection to skip hidden elements
-
 ## Future Improvements
 
-See @.claude/TODO.md for planned improvements and technical debt.
+See @TODO.md for planned improvements and technical debt.
