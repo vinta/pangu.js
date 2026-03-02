@@ -51,6 +51,8 @@ npm run pack-extension          # Package browser extensions
 npm run pack-extension:chrome   # Package Chrome extension only (.zip)
 ```
 
+**npm publishing**: Done via GitHub Actions (`.github/workflows/publish.yml`), triggered by pushing a `v*` tag. Uses npm Trusted Publishing (OIDC) — no tokens needed. Do NOT run `npm publish` locally.
+
 ## Code Architecture
 
 ### Directory Structure
