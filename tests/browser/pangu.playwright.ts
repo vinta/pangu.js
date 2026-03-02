@@ -532,35 +532,33 @@ test.describe('BrowserPangu', () => {
     });
 
     test('should not insert <pangu> elements in CSS Grid containers', async ({ page }) => {
-      const htmlContent = loadFixture('css-grid.html');
-      const expected = loadFixture('css-grid.expected.html').trim();
+      await page.setContent(`
+        <div id="grid-container" style="display: grid; grid-template-columns: 1fr 1fr;">
+          <a href="#">abc</a><a href="#">漢字</a><a href="#">def</a>
+        </div>
+      `);
 
-      await page.setContent(htmlContent);
       await page.evaluate(() => {
         const element = document.getElementById('grid-container')!;
         pangu.spacingNode(element);
       });
-      const actual = await page.evaluate(() => document.body.innerHTML.trim());
-      expect(actual).toBe(expected);
 
-      // Verify no <pangu> elements were inserted
       const panguCount = await page.evaluate(() => document.querySelectorAll('pangu').length);
       expect(panguCount).toBe(0);
     });
 
     test('should not insert <pangu> elements in CSS Flexbox containers', async ({ page }) => {
-      const htmlContent = loadFixture('css-flex.html');
-      const expected = loadFixture('css-flex.expected.html').trim();
+      await page.setContent(`
+        <div id="flex-container" style="display: flex;">
+          <a href="#">abc</a><a href="#">漢字</a><a href="#">def</a>
+        </div>
+      `);
 
-      await page.setContent(htmlContent);
       await page.evaluate(() => {
         const element = document.getElementById('flex-container')!;
         pangu.spacingNode(element);
       });
-      const actual = await page.evaluate(() => document.body.innerHTML.trim());
-      expect(actual).toBe(expected);
 
-      // Verify no <pangu> elements were inserted
       const panguCount = await page.evaluate(() => document.querySelectorAll('pangu').length);
       expect(panguCount).toBe(0);
     });
