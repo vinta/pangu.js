@@ -74,7 +74,7 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 //
 // Summary of paths to requestIdleCallback():
 // - taskScheduler.enabled=true + visibilityDetector.enabled=true → Single batch via requestIdleCallback
-// - taskScheduler.enabled=true + visibilityDetector.enabled=false → Multiple chunks via requestIdleCallback  
+// - taskScheduler.enabled=true + visibilityDetector.enabled=false → Multiple chunks via requestIdleCallback
 // - taskScheduler.enabled=false → No requestIdleCallback (synchronous processing)
 export class BrowserPangu extends Pangu {
   private isAutoSpacingPageExecuted = false;
@@ -138,6 +138,15 @@ export class BrowserPangu extends Pangu {
   }
 
   // INTERNAL
+
+  private isGridOrFlexContainer(node: Node): boolean {
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return false;
+    }
+    const style = window.getComputedStyle(node as Element);
+    const display = style.display;
+    return display === 'grid' || display === 'inline-grid' || display === 'flex' || display === 'inline-flex';
+  }
 
   // TODO: Refactor this method - it's too large and handles too many responsibilities
   private spacingTextNodes(textNodes: Node[]) {
@@ -295,6 +304,13 @@ export class BrowserPangu extends Pangu {
             } else {
               // Check visibility before inserting space element
               if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
+                // Skip <pangu> element insertion in Grid/Flexbox containers
+                // because the element becomes a layout item and breaks the layout
+                if (nextNode.parentNode && this.isGridOrFlexContainer(nextNode.parentNode)) {
+                  nextTextNode = currentTextNode;
+                  continue;
+                }
+
                 const panguSpace = document.createElement('pangu');
                 panguSpace.innerHTML = ' ';
 
