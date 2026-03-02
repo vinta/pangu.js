@@ -357,7 +357,9 @@ class BrowserPangu extends Pangu {
   }
   // INTERNAL
   isGridOrFlexContainer(node) {
-    if (node.nodeType !== Node.ELEMENT_NODE) return false;
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      return false;
+    }
     const style = window.getComputedStyle(node);
     const display = style.display;
     return display === "grid" || display === "inline-grid" || display === "flex" || display === "inline-flex";
