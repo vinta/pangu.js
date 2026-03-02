@@ -173,6 +173,7 @@ interface Settings {
 - Maintain zero runtime dependencies
 - Keep regex patterns readable with comments
 - Always use `node:` prefix for Node.js built-in modules
+- Always pin exact dependency versions in `package.json` (no `^` or `~` prefixes)
 
 ### Implementation Details
 
