@@ -1,6 +1,3 @@
-var __defProp = Object.defineProperty;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 const CJK = "\u2E80-\u2EFF\u2F00-\u2FDF\u3040-\u309F\u30A0-\u30FA\u30FC-\u30FF\u3100-\u312F\u3200-\u32FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF";
 const AN = "A-Za-z0-9";
 const A = "A-Za-z";
@@ -74,9 +71,6 @@ const S_A = new RegExp(`(%)([${A}])`, "g");
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 class PlaceholderReplacer {
   constructor(placeholder, startDelimiter, endDelimiter) {
-    __publicField(this, "items", []);
-    __publicField(this, "index", 0);
-    __publicField(this, "pattern");
     this.placeholder = placeholder;
     this.startDelimiter = startDelimiter;
     this.endDelimiter = endDelimiter;
@@ -84,6 +78,9 @@ class PlaceholderReplacer {
     const escapedEnd = this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     this.pattern = new RegExp(`${escapedStart}${this.placeholder}(\\d+)${escapedEnd}`, "g");
   }
+  items = [];
+  index = 0;
+  pattern;
   store(item) {
     this.items[this.index] = item;
     return `${this.startDelimiter}${this.placeholder}${this.index++}${this.endDelimiter}`;
@@ -99,8 +96,8 @@ class PlaceholderReplacer {
   }
 }
 class Pangu {
+  version;
   constructor() {
-    __publicField(this, "version");
     this.version = "7.2.1";
   }
   spacingText(text) {

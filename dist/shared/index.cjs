@@ -1,24 +1,21 @@
 "use strict";
 var __defProp = Object.defineProperty;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-var __defProp2 = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __export = (target, all) => {
   for (var name in all)
-    __defProp2(target, name, { get: all[name], enumerable: true });
+    __defProp(target, name, { get: all[name], enumerable: true });
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
     for (let key of __getOwnPropNames(from))
       if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
   }
   return to;
 };
-var __toCommonJS = (mod) => __copyProps(__defProp2({}, "__esModule", { value: true }), mod);
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var shared_exports = {};
 __export(shared_exports, {
   ANY_CJK: () => ANY_CJK,
@@ -100,9 +97,6 @@ const S_A = new RegExp(`(%)([${A}])`, "g");
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 class PlaceholderReplacer {
   constructor(placeholder, startDelimiter, endDelimiter) {
-    __publicField(this, "items", []);
-    __publicField(this, "index", 0);
-    __publicField(this, "pattern");
     this.placeholder = placeholder;
     this.startDelimiter = startDelimiter;
     this.endDelimiter = endDelimiter;
@@ -110,6 +104,9 @@ class PlaceholderReplacer {
     const escapedEnd = this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     this.pattern = new RegExp(`${escapedStart}${this.placeholder}(\\d+)${escapedEnd}`, "g");
   }
+  items = [];
+  index = 0;
+  pattern;
   store(item) {
     this.items[this.index] = item;
     return `${this.startDelimiter}${this.placeholder}${this.index++}${this.endDelimiter}`;
@@ -125,8 +122,8 @@ class PlaceholderReplacer {
   }
 }
 class Pangu {
+  version;
   constructor() {
-    __publicField(this, "version");
     this.version = "7.2.1";
   }
   spacingText(text) {

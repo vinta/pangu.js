@@ -78,19 +78,19 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@playwright/test": "1.56.1",
-    "@trivago/prettier-plugin-sort-imports": "5.2.2",
-    "@types/chrome": "0.0.326",
-    "@types/node": "24.0.2",
+    "@playwright/test": "1.58.2",
+    "@trivago/prettier-plugin-sort-imports": "6.0.2",
+    "@types/chrome": "0.1.37",
+    "@types/node": "25.3.3",
     "eslint": "10.0.2",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-unicorn": "63.0.0",
     "nodemon": "3.1.14",
-    "prettier": "3.5.3",
-    "typescript": "5.8.3",
+    "prettier": "3.8.1",
+    "typescript": "5.9.3",
     "typescript-eslint": "8.56.1",
-    "vite": "6.4.1",
-    "vitest": "3.2.3"
+    "vite": "7.3.1",
+    "vitest": "4.0.18"
   },
   "engines": {
     "node": ">=18.0.0"

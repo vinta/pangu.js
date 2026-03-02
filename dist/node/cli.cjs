@@ -1,8 +1,5 @@
 #!/usr/bin/env node
 "use strict";
-var __defProp$1 = Object.defineProperty;
-var __defNormalProp$1 = (obj, key, value) => key in obj ? __defProp$1(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField$1 = (obj, key, value) => __defNormalProp$1(obj, typeof key !== "symbol" ? key + "" : key, value);
 const CJK = "\u2E80-\u2EFF\u2F00-\u2FDF\u3040-\u309F\u30A0-\u30FA\u30FC-\u30FF\u3100-\u312F\u3200-\u32FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF";
 const AN = "A-Za-z0-9";
 const A = "A-Za-z";
@@ -76,9 +73,6 @@ const S_A = new RegExp(`(%)([${A}])`, "g");
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 class PlaceholderReplacer {
   constructor(placeholder, startDelimiter, endDelimiter) {
-    __publicField$1(this, "items", []);
-    __publicField$1(this, "index", 0);
-    __publicField$1(this, "pattern");
     this.placeholder = placeholder;
     this.startDelimiter = startDelimiter;
     this.endDelimiter = endDelimiter;
@@ -86,6 +80,9 @@ class PlaceholderReplacer {
     const escapedEnd = this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     this.pattern = new RegExp(`${escapedStart}${this.placeholder}(\\d+)${escapedEnd}`, "g");
   }
+  items = [];
+  index = 0;
+  pattern;
   store(item) {
     this.items[this.index] = item;
     return `${this.startDelimiter}${this.placeholder}${this.index++}${this.endDelimiter}`;
@@ -101,8 +98,8 @@ class PlaceholderReplacer {
   }
 }
 class Pangu {
+  version;
   constructor() {
-    __publicField$1(this, "version");
     this.version = "7.2.1";
   }
   spacingText(text) {
@@ -257,11 +254,13 @@ class Pangu {
     return this.spacingText(text) === text;
   }
 }
-new Pangu();
-var __defProp = Object.defineProperty;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 class DomWalker {
+  static blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
+  static ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
+  static presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
+  static spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
+  static spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
+  static ignoredClass = "no-pangu-spacing";
   static collectTextNodes(contextNode, reverse = false) {
     const nodes = [];
     if (!contextNode || contextNode instanceof DocumentFragment) {
@@ -344,18 +343,10 @@ class DomWalker {
     return false;
   }
 }
-__publicField(DomWalker, "blockTags", /^(div|p|h1|h2|h3|h4|h5|h6)$/i);
-__publicField(DomWalker, "ignoredTags", /^(code|pre|script|style|textarea|iframe|input)$/i);
-__publicField(DomWalker, "presentationalTags", /^(b|code|del|em|i|s|strong|kbd)$/i);
-__publicField(DomWalker, "spaceLikeTags", /^(br|hr|i|img|pangu)$/i);
-__publicField(DomWalker, "spaceSensitiveTags", /^(a|del|pre|s|strike|u)$/i);
-__publicField(DomWalker, "ignoredClass", "no-pangu-spacing");
 class TaskQueue {
-  constructor() {
-    __publicField(this, "queue", []);
-    __publicField(this, "isProcessing", false);
-    __publicField(this, "onComplete");
-  }
+  queue = [];
+  isProcessing = false;
+  onComplete;
   add(task) {
     this.queue.push(task);
     this.scheduleProcessing();
@@ -377,41 +368,38 @@ class TaskQueue {
     }
   }
   process(deadline) {
-    var _a;
     while (deadline.timeRemaining() > 0 && this.queue.length > 0) {
       const task = this.queue.shift();
-      task == null ? void 0 : task();
+      task?.();
     }
     this.isProcessing = false;
     if (this.queue.length > 0) {
       this.scheduleProcessing();
     } else {
-      (_a = this.onComplete) == null ? void 0 : _a.call(this);
+      this.onComplete?.();
     }
   }
 }
 class TaskScheduler {
-  constructor() {
-    __publicField(this, "config", {
-      enabled: true,
-      chunkSize: 40,
-      // Process 40 text nodes per idle cycle
-      timeout: 2e3
-      // 2 second timeout for idle processing
-    });
-    __publicField(this, "taskQueue", new TaskQueue());
-  }
+  config = {
+    enabled: true,
+    chunkSize: 40,
+    // Process 40 text nodes per idle cycle
+    timeout: 2e3
+    // 2 second timeout for idle processing
+  };
+  taskQueue = new TaskQueue();
   get queue() {
     return this.taskQueue;
   }
   processInChunks(items, processor, onComplete) {
     if (!this.config.enabled) {
       processor(items);
-      onComplete == null ? void 0 : onComplete();
+      onComplete?.();
       return;
     }
     if (items.length === 0) {
-      onComplete == null ? void 0 : onComplete();
+      onComplete?.();
       return;
     }
     if (onComplete) {
@@ -435,23 +423,21 @@ class TaskScheduler {
   }
 }
 class VisibilityDetector {
-  constructor() {
-    __publicField(this, "config", {
-      enabled: true,
-      commonHiddenPatterns: {
-        clipRect: true,
-        // clip: rect(1px, 1px, 1px, 1px) patterns
-        displayNone: true,
-        // display: none
-        visibilityHidden: true,
-        // visibility: hidden
-        opacityZero: true,
-        // opacity: 0
-        heightWidth1px: true
-        // height: 1px; width: 1px
-      }
-    });
-  }
+  config = {
+    enabled: true,
+    commonHiddenPatterns: {
+      clipRect: true,
+      // clip: rect(1px, 1px, 1px, 1px) patterns
+      displayNone: true,
+      // display: none
+      visibilityHidden: true,
+      // visibility: hidden
+      opacityZero: true,
+      // opacity: 0
+      heightWidth1px: true
+      // height: 1px; width: 1px
+    }
+  };
   isElementVisuallyHidden(element) {
     if (!this.config.enabled) {
       return false;
@@ -499,7 +485,7 @@ class VisibilityDetector {
     if (elementToCheck && this.isElementVisuallyHidden(elementToCheck)) {
       return true;
     }
-    let currentElement = elementToCheck == null ? void 0 : elementToCheck.parentElement;
+    let currentElement = elementToCheck?.parentElement;
     while (currentElement) {
       if (this.isElementVisuallyHidden(currentElement)) {
         return true;
@@ -570,13 +556,10 @@ function debounce(func, delay, mustRunDelay = Infinity) {
   };
 }
 class BrowserPangu extends Pangu {
-  constructor() {
-    super(...arguments);
-    __publicField(this, "isAutoSpacingPageExecuted", false);
-    __publicField(this, "autoSpacingPageObserver", null);
-    __publicField(this, "taskScheduler", new TaskScheduler());
-    __publicField(this, "visibilityDetector", new VisibilityDetector());
-  }
+  isAutoSpacingPageExecuted = false;
+  autoSpacingPageObserver = null;
+  taskScheduler = new TaskScheduler();
+  visibilityDetector = new VisibilityDetector();
   // PUBLIC
   autoSpacingPage({ pageDelayMs = 1e3, nodeDelayMs = 500, nodeMaxWaitMs = 2e3 } = {}) {
     if (!(document.body instanceof Node)) {
@@ -778,7 +761,7 @@ class BrowserPangu extends Pangu {
         }
       } else {
         this.spacingTextNodes(textNodes);
-        onComplete == null ? void 0 : onComplete();
+        onComplete?.();
       }
       return;
     }
@@ -855,10 +838,9 @@ class BrowserPangu extends Pangu {
       nodeMaxWaitMs
     );
     this.autoSpacingPageObserver = new MutationObserver((mutations) => {
-      var _a;
       let titleChanged = false;
       for (const mutation of mutations) {
-        if (((_a = mutation.target.parentNode) == null ? void 0 : _a.nodeName) === "TITLE" || mutation.target.nodeName === "TITLE") {
+        if (mutation.target.parentNode?.nodeName === "TITLE" || mutation.target.nodeName === "TITLE") {
           titleChanged = true;
           continue;
         }
