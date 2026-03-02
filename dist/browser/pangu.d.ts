@@ -16,6 +16,7 @@ export declare class BrowserPangu extends Pangu {
     spacingNode(contextNode: Node): void;
     stopAutoSpacingPage(): void;
     isElementVisuallyHidden(element: Element): boolean;
+    private isGridOrFlexContainer;
     private spacingTextNodes;
     private spacingTextNodesInQueue;
     private waitForVideosToLoad;

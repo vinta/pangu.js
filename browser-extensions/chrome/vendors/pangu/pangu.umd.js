@@ -613,6 +613,12 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       return this.visibilityDetector.isElementVisuallyHidden(element);
     }
     // INTERNAL
+    isGridOrFlexContainer(node) {
+      if (node.nodeType !== Node.ELEMENT_NODE) return false;
+      const style = window.getComputedStyle(node);
+      const display = style.display;
+      return display === "grid" || display === "inline-grid" || display === "flex" || display === "inline-flex";
+    }
     // TODO: Refactor this method - it's too large and handles too many responsibilities
     spacingTextNodes(textNodes) {
       let currentTextNode;
@@ -729,6 +735,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
                 }
               } else {
                 if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
+                  if (nextNode.parentNode && this.isGridOrFlexContainer(nextNode.parentNode)) {
+                    nextTextNode = currentTextNode;
+                    continue;
+                  }
                   const panguSpace = document.createElement("pangu");
                   panguSpace.innerHTML = " ";
                   if (nextNode.parentNode) {
