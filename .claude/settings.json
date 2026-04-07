@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/ensure-build.sh",
+            "timeout": 60,
+            "statusMessage": "Building..."
+          }
+        ]
+      }
+    ]
+  }
+}
