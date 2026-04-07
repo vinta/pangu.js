@@ -1,5 +1,10 @@
 # History
 
+## v7.2.1 / 2026-03-02
+
+- 修正在 CSS Grid 和 Flexbox 容器裡插入 `<pangu>` 元素會破壞排版的問題
+- 移除 Chrome extension 的 `file://` host permission
+
 ## v7.2.0 / 2025-07-05
 
 - 趁末日前更新一下，不然以後就沒機會了
