@@ -263,10 +263,11 @@ class VisibilityDetector {
     return false;
   }
   updateConfig(config) {
-    Object.assign(this.config, config);
     if (config.commonHiddenPatterns) {
       Object.assign(this.config.commonHiddenPatterns, config.commonHiddenPatterns);
     }
+    const { commonHiddenPatterns: _, ...rest } = config;
+    Object.assign(this.config, rest);
   }
 }
 function once(func) {
@@ -360,10 +361,6 @@ class BrowserPangu extends Pangu {
       if (!currentTextNode) {
         continue;
       }
-      if (DomWalker.canIgnoreNode(currentTextNode)) {
-        nextTextNode = currentTextNode;
-        continue;
-      }
       if (currentTextNode instanceof Text) {
         if (this.visibilityDetector.config.enabled && currentTextNode.data.startsWith(" ") && this.visibilityDetector.shouldSkipSpacingBeforeNode(currentTextNode)) {
           currentTextNode.data = currentTextNode.data.substring(1);
@@ -449,13 +446,9 @@ class BrowserPangu extends Pangu {
                       }
                     }
                   }
-                } else {
-                  if (!DomWalker.canIgnoreNode(nextTextNode)) {
-                    if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
-                      if (!this.visibilityDetector.shouldSkipSpacingBeforeNode(nextTextNode)) {
-                        nextTextNode.data = ` ${nextTextNode.data}`;
-                      }
-                    }
+                } else if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
+                  if (!this.visibilityDetector.shouldSkipSpacingBeforeNode(nextTextNode)) {
+                    nextTextNode.data = ` ${nextTextNode.data}`;
                   }
                 }
               }

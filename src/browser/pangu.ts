@@ -160,12 +160,6 @@ export class BrowserPangu extends Pangu {
         continue;
       }
 
-      // Skip nodes that should be ignored
-      if (DomWalker.canIgnoreNode(currentTextNode)) {
-        nextTextNode = currentTextNode;
-        continue;
-      }
-
       if (currentTextNode instanceof Text) {
         // Check if this text node starts with a space and comes after a hidden element
         if (this.visibilityDetector.config.enabled && currentTextNode.data.startsWith(' ') && this.visibilityDetector.shouldSkipSpacingBeforeNode(currentTextNode)) {
@@ -283,14 +277,10 @@ export class BrowserPangu extends Pangu {
                       }
                     }
                   }
-                } else {
-                  if (!DomWalker.canIgnoreNode(nextTextNode)) {
-                    if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
-                      // Check visibility before adding space
-                      if (!this.visibilityDetector.shouldSkipSpacingBeforeNode(nextTextNode)) {
-                        nextTextNode.data = ` ${nextTextNode.data}`;
-                      }
-                    }
+                } else if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
+                  // Check visibility before adding space
+                  if (!this.visibilityDetector.shouldSkipSpacingBeforeNode(nextTextNode)) {
+                    nextTextNode.data = ` ${nextTextNode.data}`;
                   }
                 }
               }
