@@ -134,11 +134,10 @@ export class VisibilityDetector {
   }
 
   public updateConfig(config: Partial<VisibilityDetectorConfig>) {
-    Object.assign(this.config, config);
-
-    // Handle nested commonHiddenPatterns object if provided
     if (config.commonHiddenPatterns) {
       Object.assign(this.config.commonHiddenPatterns, config.commonHiddenPatterns);
     }
+    const { commonHiddenPatterns: _, ...rest } = config;
+    Object.assign(this.config, rest);
   }
 }
