@@ -248,6 +248,41 @@ test.describe('BrowserPangu', () => {
       expect(content).toContain('<div contenteditable="true">abc漢字1</div>');
     });
 
+    test('skip spacing inside elements with no-pangu-spacing class', async ({ page }) => {
+      await page.setContent('<p>漢字<span class="no-pangu-spacing">abc漢字1</span>漢字</p>');
+      await page.evaluate(() => {
+        pangu.spacingNode(document.body);
+      });
+      const result = await page.evaluate(() => document.querySelector('p')!.innerHTML);
+      // Text inside no-pangu-spacing should be untouched, but outer text nodes should still get spacing
+      expect(result).toContain('no-pangu-spacing">abc漢字1</span>');
+    });
+
+    test('skip spacing inside ignored tags like code and pre', async ({ page }) => {
+      // code tag is in ignoredTags - text inside should not be spaced
+      await page.setContent('<p>漢字<code>abc漢字1</code>漢字</p>');
+      await page.evaluate(() => {
+        pangu.spacingNode(document.body);
+      });
+      const result = await page.evaluate(() => document.querySelector('p')!.innerHTML);
+      expect(result).toContain('<code>abc漢字1</code>');
+    });
+
+    test('skip spacing inside nested ignored containers', async ({ page }) => {
+      // Text inside nested ignored tags (code inside pre) should not be spaced
+      // This validates that the TreeWalker filter is sufficient without canIgnoreNode
+      await page.setContent('<div>漢字abc<pre><code>漢字def</code></pre>漢字ghi</div>');
+      await page.evaluate(() => {
+        pangu.spacingNode(document.body);
+      });
+      const result = await page.evaluate(() => document.querySelector('div')!.innerHTML);
+      // Text outside ignored containers gets spaced
+      expect(result).toContain('漢字 abc');
+      expect(result).toContain('漢字 ghi');
+      // Text inside <pre><code> must stay untouched
+      expect(result).toContain('<pre><code>漢字def</code></pre>');
+    });
+
     test('handle input field values by preserving them', async ({ page }) => {
       const htmlContent = loadFixture('input-fields.html');
 
