@@ -690,16 +690,6 @@ test.describe('BrowserPangu', () => {
 
       await page.setContent(htmlContent);
 
-      // First, let's check what the visible text looks like to the user BEFORE spacing
-      const _visibleTextBefore = await page.evaluate(() => {
-        const div = document.getElementById('xDetDlgDesc');
-        // Get only the visible text (not including hidden elements)
-        const visibleSpan = div?.querySelector('span:not(.XuJrye)');
-        return visibleSpan?.textContent || '';
-      });
-
-      // console.log('Visible text before:', _visibleTextBefore.substring(0, 20));
-
       // Apply spacing
       await page.evaluate(() => {
         pangu.spacingNode(document.body);
