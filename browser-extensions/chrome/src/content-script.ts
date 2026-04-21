@@ -1,13 +1,7 @@
-import type { BrowserPangu } from '../../../src/browser/pangu';
 import type { MessageToContentScript, ContentScriptResponse, ContentScriptLoadedMessage } from './utils/types';
 
-// Extend the global Window interface to include the pangu object
+// `Window.pangu` is declared globally in src/browser/pangu.umd.ts
 // The pangu object is injected by pangu.umd.js which loads before this script
-declare global {
-  interface Window {
-    pangu: BrowserPangu;
-  }
-}
 
 async function autoSpacingPage() {
   const pangu = window.pangu;
