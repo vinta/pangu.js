@@ -68,6 +68,7 @@ test.describe('BrowserPangu', () => {
       expect(result).toBe('聽說桐島 rm -rf /* 了');
     });
 
+    // FIXME: spacing around ASCII `"` adjacent to CJK is off
     test.skip('handle element node 3', async ({ page }) => {
       await page.setContent(`<p id="test">Rev. (Reverend；牧師的尊稱)
     這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用：&quot;We
@@ -82,8 +83,8 @@ test.describe('BrowserPangu', () => {
       });
       expect(result).toBe(`Rev. (Reverend；牧師的尊稱)
     這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We
-    invited the Rev. Alan Darling." 或 "We  invited the Rev. Mr.
-    Darling."，而非" We invited the Rev. Darling." 我們也不可以說 
+    invited the Rev. Alan Darling." 或 "We  invited the Rev. Mr.
+    Darling."，而非 "We invited the Rev. Darling." 我們也不可以說
     "We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的
     rev. 是 review 的縮寫，算是雙關語)`);
     });
@@ -215,9 +216,9 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
+    // NOTE: Known limitation with XPath-based approach for adjacent sibling elements
+    // Current behavior doesn't add space between <span> and <a> elements
     test.skip('handle YouTube formatted strings with hashtags', async ({ page }) => {
-      // Skip: Known limitation with XPath-based approach for adjacent sibling elements
-      // Current behavior doesn't add space between <span> and <a> elements
       const htmlContent = loadFixture('youtube-format-string.html');
       const expected = loadFixture('youtube-format-string.expected.html').trim();
 
@@ -402,9 +403,9 @@ test.describe('BrowserPangu', () => {
       expect(afterText).toBe('整天等 EAS build 就飽了啊，每次 build 都要跑十幾二十分鐘');
     });
 
+    // NOTE: The fix for preventing double spaces in already-spaced text (like Asana) makes this specific case not work
+    // This is an acceptable trade-off since real-world cases like Asana typically have spaces at fragment boundaries
     test.skip('handle mixed fragmented nodes correctly (edge case: consecutive text nodes without spaces)', async ({ page }) => {
-      // The fix for preventing double spaces in already-spaced text (like Asana) makes this specific case not work.
-      // This is an acceptable trade-off since real-world cases like Asana typically have spaces at fragment boundaries.
       await page.setContent('<div id="test"></div>');
 
       await page.evaluate(() => {
@@ -487,12 +488,11 @@ test.describe('BrowserPangu', () => {
       expect(fullText).toBe('1,228 個跟隨中');
     });
 
+    // NOTE: Skip: Known limitation with current whitespace detection algorithm
+    // The case where text nodes are not wrapped in spans (測試<span>文字</span>)
+    // doesn't get spacing because the algorithm focuses on preventing double spaces
+    // This is an acceptable trade-off for real-world cases like Twitter/Asana
     test.skip('handle various whitespace types between span elements', async ({ page }) => {
-      // Skip: Known limitation with current whitespace detection algorithm
-      // The case where text nodes are not wrapped in spans (測試<span>文字</span>)
-      // doesn't get spacing because the algorithm focuses on preventing double spaces
-      // This is an acceptable trade-off for real-world cases like Twitter/Asana
-
       // Test case 1: When there IS whitespace between spans, don't add extra space
       const whitespaceTestCases = [
         { name: 'single space', html: '<div><span>測試</span> <span>文字</span></div>' },
