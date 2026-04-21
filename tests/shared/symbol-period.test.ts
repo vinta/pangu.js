@@ -32,6 +32,8 @@ describe('Symbol . 只加右空格', () => {
     // prettier-ignore
     expect(pangu.spacingText("Mr.龍島主道:「Let's Party!各位高明博雅君子!"))
                        .toBe("Mr. 龍島主道:「Let's Party! 各位高明博雅君子!");
+
+    expect(pangu.spacingText('世.界.，草.班.与千.早.爱.音.')).toBe('世. 界.，草. 班. 与千. 早. 爱. 音.');
   });
 
   it('handle . symbol as file path', () => {
