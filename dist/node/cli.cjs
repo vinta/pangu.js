@@ -1,5 +1,31 @@
 #!/usr/bin/env node
 "use strict";
+class PlaceholderReplacer {
+  constructor(placeholder, startDelimiter, endDelimiter) {
+    this.placeholder = placeholder;
+    this.startDelimiter = startDelimiter;
+    this.endDelimiter = endDelimiter;
+    const escapedStart = this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const escapedEnd = this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    this.pattern = new RegExp(`${escapedStart}${this.placeholder}(\\d+)${escapedEnd}`, "g");
+  }
+  items = [];
+  index = 0;
+  pattern;
+  store(item) {
+    this.items[this.index] = item;
+    return `${this.startDelimiter}${this.placeholder}${this.index++}${this.endDelimiter}`;
+  }
+  restore(text) {
+    return text.replace(this.pattern, (_match, index) => {
+      return this.items[parseInt(index, 10)] || "";
+    });
+  }
+  reset() {
+    this.items = [];
+    this.index = 0;
+  }
+}
 const CJK = "\u2E80-\u2EFF\u2F00-\u2FDF\u3040-\u309F\u30A0-\u30FA\u30FC-\u30FF\u3100-\u312F\u3200-\u32FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF";
 const AN = "A-Za-z0-9";
 const A = "A-Za-z";
@@ -71,32 +97,11 @@ const CJK_ANS = new RegExp(`([${CJK}])([${ANS_CJK_AFTER}])`, "g");
 const ANS_CJK = new RegExp(`([${ANS_BEFORE_CJK}])([${CJK}])`, "g");
 const S_A = new RegExp(`(%)([${A}])`, "g");
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
-class PlaceholderReplacer {
-  constructor(placeholder, startDelimiter, endDelimiter) {
-    this.placeholder = placeholder;
-    this.startDelimiter = startDelimiter;
-    this.endDelimiter = endDelimiter;
-    const escapedStart = this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const escapedEnd = this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    this.pattern = new RegExp(`${escapedStart}${this.placeholder}(\\d+)${escapedEnd}`, "g");
-  }
-  items = [];
-  index = 0;
-  pattern;
-  store(item) {
-    this.items[this.index] = item;
-    return `${this.startDelimiter}${this.placeholder}${this.index++}${this.endDelimiter}`;
-  }
-  restore(text) {
-    return text.replace(this.pattern, (_match, index) => {
-      return this.items[parseInt(index, 10)] || "";
-    });
-  }
-  reset() {
-    this.items = [];
-    this.index = 0;
-  }
-}
+const COMPOUND_WORD_PATTERN = /\b(?:[A-Za-z0-9]*[a-z][A-Za-z0-9]*-[A-Za-z0-9]+|[A-Za-z0-9]+-[A-Za-z0-9]*[a-z][A-Za-z0-9]*|[A-Za-z]+-[0-9]+|[A-Za-z]+[0-9]+-[A-Za-z0-9]+)(?:-[A-Za-z0-9]+)*\b/g;
+const HTML_TAG_PATTERN = /<\/?[a-zA-Z][a-zA-Z0-9]*(?:\s+[^>]*)?>/g;
+const SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, "g");
+const BACKTICK_PATTERN = /`([^`]+)`/g;
+const HTML_ATTR_PATTERN = /(\w+)="([^"]*)"/g;
 class Pangu {
   version;
   constructor() {
@@ -110,78 +115,106 @@ class Pangu {
     if (text.length <= 1 || !ANY_CJK.test(text)) {
       return text;
     }
-    const self = this;
     let newText = text;
     const backtickManager = new PlaceholderReplacer("BACKTICK_CONTENT_", "\uE004", "\uE005");
-    newText = newText.replace(/`([^`]+)`/g, (_match, content) => {
+    newText = newText.replace(BACKTICK_PATTERN, (_match, content) => {
       return `\`${backtickManager.store(content)}\``;
     });
     const htmlTagManager = new PlaceholderReplacer("HTML_TAG_PLACEHOLDER_", "\uE000", "\uE001");
     let hasHtmlTags = false;
     if (newText.includes("<")) {
       hasHtmlTags = true;
-      const HTML_TAG_PATTERN = /<\/?[a-zA-Z][a-zA-Z0-9]*(?:\s+[^>]*)?>/g;
       newText = newText.replace(HTML_TAG_PATTERN, (match) => {
-        const processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName, attrValue) => {
-          const processedValue = self.spacingText(attrValue);
+        const processedTag = match.replace(HTML_ATTR_PATTERN, (_attrMatch, attrName, attrValue) => {
+          const processedValue = this.spacingText(attrValue);
           return `${attrName}="${processedValue}"`;
         });
         return htmlTagManager.store(processedTag);
       });
     }
-    newText = newText.replace(DOTS_CJK, "$1 $2");
-    newText = newText.replace(CJK_PUNCTUATION, "$1$2 ");
-    newText = newText.replace(AN_PUNCTUATION_CJK, "$1$2 $3");
-    newText = newText.replace(CJK_TILDE, "$1$2 ");
-    newText = newText.replace(CJK_TILDE_EQUALS, "$1 $2 ");
-    newText = newText.replace(CJK_PERIOD, "$1$2 ");
-    newText = newText.replace(AN_PERIOD_CJK, "$1$2 $3");
-    newText = newText.replace(AN_COLON_CJK, "$1$2 $3");
-    newText = newText.replace(FIX_CJK_COLON_ANS, "$1\uFF1A$2");
-    newText = newText.replace(CJK_QUOTE, "$1 $2");
-    newText = newText.replace(QUOTE_CJK, "$1 $2");
-    newText = newText.replace(FIX_QUOTE_ANY_QUOTE, "$1$2$3");
-    newText = newText.replace(QUOTE_AN, "$1 $2");
-    newText = newText.replace(CJK_QUOTE_AN, "$1$2 $3");
-    newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
+    newText = this.applyPunctuationSpacing(newText);
     const singleQuoteCJKManager = new PlaceholderReplacer("SINGLE_QUOTE_CJK_PLACEHOLDER_", "\uE030", "\uE031");
-    const SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, "g");
-    newText = newText.replace(SINGLE_QUOTE_PURE_CJK, (match) => {
-      return singleQuoteCJKManager.store(match);
-    });
-    newText = newText.replace(CJK_SINGLE_QUOTE_BUT_POSSESSIVE, "$1 $2");
-    newText = newText.replace(SINGLE_QUOTE_CJK, "$1 $2");
-    newText = singleQuoteCJKManager.restore(newText);
-    const textLength = newText.length;
+    newText = this.applyQuoteSpacing(newText, singleQuoteCJKManager);
     const slashCount = (newText.match(/\//g) || []).length;
-    if (slashCount === 0) {
-      if (textLength >= 5) {
-        newText = newText.replace(HASH_ANS_CJK_HASH, "$1 $2$3$4 $5");
-      }
-      newText = newText.replace(CJK_HASH, "$1 $2");
-      newText = newText.replace(HASH_CJK, "$1 $3");
-    } else if (slashCount <= 1) {
-      if (textLength >= 5) {
-        newText = newText.replace(HASH_ANS_CJK_HASH, "$1 $2$3$4 $5");
-      }
-      newText = newText.replace(CJK_HASH, "$1 $2");
-      newText = newText.replace(HASH_CJK, "$1 $3");
-    } else {
-      if (textLength >= 5) {
-        newText = newText.replace(HASH_ANS_CJK_HASH, "$1 $2$3$4 $5");
-      }
-      newText = newText.replace(new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`), "$1$2 $3");
-    }
+    newText = this.applyHashSpacing(newText, slashCount);
     const compoundWordManager = new PlaceholderReplacer("COMPOUND_WORD_PLACEHOLDER_", "\uE010", "\uE011");
-    const COMPOUND_WORD_PATTERN = /\b(?:[A-Za-z0-9]*[a-z][A-Za-z0-9]*-[A-Za-z0-9]+|[A-Za-z0-9]+-[A-Za-z0-9]*[a-z][A-Za-z0-9]*|[A-Za-z]+-[0-9]+|[A-Za-z]+[0-9]+-[A-Za-z0-9]+)(?:-[A-Za-z0-9]+)*\b/g;
     newText = newText.replace(COMPOUND_WORD_PATTERN, (match) => {
       return compoundWordManager.store(match);
     });
-    newText = newText.replace(SINGLE_LETTER_GRADE_CJK, "$1$2 $3");
-    newText = newText.replace(CJK_OPERATOR_ANS, "$1 $2 $3");
-    newText = newText.replace(ANS_OPERATOR_CJK, "$1 $2 $3");
-    newText = newText.replace(ANS_OPERATOR_ANS, "$1 $2 $3");
-    newText = newText.replace(ANS_HYPHEN_ANS_NOT_COMPOUND, (match, ...groups) => {
+    newText = this.applyOperatorSpacing(newText);
+    newText = this.applyComparisonOperatorSpacing(newText);
+    newText = this.applyFilePathSpacing(newText);
+    newText = this.applySlashSpacing(newText, slashCount);
+    newText = compoundWordManager.restore(newText);
+    newText = this.applyBracketSpacing(newText);
+    newText = newText.replace(CJK_ANS, "$1 $2");
+    newText = newText.replace(ANS_CJK, "$1 $2");
+    newText = newText.replace(S_A, "$1 $2");
+    newText = newText.replace(MIDDLE_DOT, "\u30FB");
+    newText = this.fixBracketInnerSpacing(newText);
+    if (hasHtmlTags) {
+      newText = htmlTagManager.restore(newText);
+    }
+    newText = backtickManager.restore(newText);
+    return newText;
+  }
+  hasProperSpacing(text) {
+    return this.spacingText(text) === text;
+  }
+  // ─── Private spacing step methods ─────────────────────────────────────────────
+  applyPunctuationSpacing(text) {
+    let result = text;
+    result = result.replace(DOTS_CJK, "$1 $2");
+    result = result.replace(CJK_PUNCTUATION, "$1$2 ");
+    result = result.replace(AN_PUNCTUATION_CJK, "$1$2 $3");
+    result = result.replace(CJK_TILDE, "$1$2 ");
+    result = result.replace(CJK_TILDE_EQUALS, "$1 $2 ");
+    result = result.replace(CJK_PERIOD, "$1$2 ");
+    result = result.replace(AN_PERIOD_CJK, "$1$2 $3");
+    result = result.replace(AN_COLON_CJK, "$1$2 $3");
+    result = result.replace(FIX_CJK_COLON_ANS, "$1\uFF1A$2");
+    return result;
+  }
+  applyQuoteSpacing(text, singleQuoteCJKManager) {
+    let result = text;
+    result = result.replace(CJK_QUOTE, "$1 $2");
+    result = result.replace(QUOTE_CJK, "$1 $2");
+    result = result.replace(FIX_QUOTE_ANY_QUOTE, "$1$2$3");
+    result = result.replace(QUOTE_AN, "$1 $2");
+    result = result.replace(CJK_QUOTE_AN, "$1$2 $3");
+    result = result.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
+    result = result.replace(SINGLE_QUOTE_PURE_CJK, (match) => {
+      return singleQuoteCJKManager.store(match);
+    });
+    result = result.replace(CJK_SINGLE_QUOTE_BUT_POSSESSIVE, "$1 $2");
+    result = result.replace(SINGLE_QUOTE_CJK, "$1 $2");
+    result = singleQuoteCJKManager.restore(result);
+    return result;
+  }
+  applyHashSpacing(text, slashCount) {
+    let result = text;
+    const textLength = result.length;
+    if (slashCount <= 1) {
+      if (textLength >= 5) {
+        result = result.replace(HASH_ANS_CJK_HASH, "$1 $2$3$4 $5");
+      }
+      result = result.replace(CJK_HASH, "$1 $2");
+      result = result.replace(HASH_CJK, "$1 $3");
+    } else {
+      if (textLength >= 5) {
+        result = result.replace(HASH_ANS_CJK_HASH, "$1 $2$3$4 $5");
+      }
+      result = result.replace(new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`), "$1$2 $3");
+    }
+    return result;
+  }
+  applyOperatorSpacing(text) {
+    let result = text;
+    result = result.replace(SINGLE_LETTER_GRADE_CJK, "$1$2 $3");
+    result = result.replace(CJK_OPERATOR_ANS, "$1 $2 $3");
+    result = result.replace(ANS_OPERATOR_CJK, "$1 $2 $3");
+    result = result.replace(ANS_OPERATOR_ANS, "$1 $2 $3");
+    result = result.replace(ANS_HYPHEN_ANS_NOT_COMPOUND, (match, ...groups) => {
       if (groups[0] && groups[1] && groups[2]) {
         return `${groups[0]} ${groups[1]} ${groups[2]}`;
       } else if (groups[3] && groups[4] && groups[5]) {
@@ -191,67 +224,71 @@ class Pangu {
       }
       return match;
     });
-    newText = newText.replace(CJK_LESS_THAN, "$1 $2 $3");
-    newText = newText.replace(LESS_THAN_CJK, "$1 $2 $3");
-    newText = newText.replace(ANS_LESS_THAN_ANS, "$1 $2 $3");
-    newText = newText.replace(CJK_GREATER_THAN, "$1 $2 $3");
-    newText = newText.replace(GREATER_THAN_CJK, "$1 $2 $3");
-    newText = newText.replace(ANS_GREATER_THAN_ANS, "$1 $2 $3");
-    newText = newText.replace(CJK_UNIX_ABSOLUTE_FILE_PATH, "$1 $2");
-    newText = newText.replace(CJK_UNIX_RELATIVE_FILE_PATH, "$1 $2");
-    newText = newText.replace(CJK_WINDOWS_PATH, "$1 $2");
-    newText = newText.replace(UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK, "$1 $2");
-    newText = newText.replace(UNIX_RELATIVE_FILE_PATH_SLASH_CJK, "$1 $2");
+    return result;
+  }
+  applyComparisonOperatorSpacing(text) {
+    let result = text;
+    result = result.replace(CJK_LESS_THAN, "$1 $2 $3");
+    result = result.replace(LESS_THAN_CJK, "$1 $2 $3");
+    result = result.replace(ANS_LESS_THAN_ANS, "$1 $2 $3");
+    result = result.replace(CJK_GREATER_THAN, "$1 $2 $3");
+    result = result.replace(GREATER_THAN_CJK, "$1 $2 $3");
+    result = result.replace(ANS_GREATER_THAN_ANS, "$1 $2 $3");
+    return result;
+  }
+  applyFilePathSpacing(text) {
+    let result = text;
+    result = result.replace(CJK_UNIX_ABSOLUTE_FILE_PATH, "$1 $2");
+    result = result.replace(CJK_UNIX_RELATIVE_FILE_PATH, "$1 $2");
+    result = result.replace(CJK_WINDOWS_PATH, "$1 $2");
+    result = result.replace(UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK, "$1 $2");
+    result = result.replace(UNIX_RELATIVE_FILE_PATH_SLASH_CJK, "$1 $2");
+    return result;
+  }
+  applySlashSpacing(text, slashCount) {
+    let result = text;
     if (slashCount === 1) {
       const filePathManager = new PlaceholderReplacer("FILE_PATH_PLACEHOLDER_", "\uE020", "\uE021");
       const allFilePathPattern = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}|${UNIX_RELATIVE_FILE_PATH.source})`, "g");
-      newText = newText.replace(allFilePathPattern, (match) => {
+      result = result.replace(allFilePathPattern, (match) => {
         return filePathManager.store(match);
       });
-      newText = newText.replace(CJK_SLASH_CJK, "$1 $2 $3");
-      newText = newText.replace(CJK_SLASH_ANS, "$1 $2 $3");
-      newText = newText.replace(ANS_SLASH_CJK, "$1 $2 $3");
-      newText = newText.replace(ANS_SLASH_ANS, "$1 $2 $3");
-      newText = filePathManager.restore(newText);
+      result = result.replace(CJK_SLASH_CJK, "$1 $2 $3");
+      result = result.replace(CJK_SLASH_ANS, "$1 $2 $3");
+      result = result.replace(ANS_SLASH_CJK, "$1 $2 $3");
+      result = result.replace(ANS_SLASH_ANS, "$1 $2 $3");
+      result = filePathManager.restore(result);
     }
-    newText = compoundWordManager.restore(newText);
-    newText = newText.replace(CJK_LEFT_BRACKET, "$1 $2");
-    newText = newText.replace(RIGHT_BRACKET_CJK, "$1 $2");
-    newText = newText.replace(ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET, "$1 $2$3$4");
-    newText = newText.replace(LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK, "$1$2$3 $4");
-    newText = newText.replace(AN_LEFT_BRACKET, "$1 $2");
-    newText = newText.replace(RIGHT_BRACKET_AN, "$1 $2");
-    newText = newText.replace(CJK_ANS, "$1 $2");
-    newText = newText.replace(ANS_CJK, "$1 $2");
-    newText = newText.replace(S_A, "$1 $2");
-    newText = newText.replace(MIDDLE_DOT, "\u30FB");
-    const fixBracketSpacing = (text2) => {
-      const bracketPatterns = [
-        { pattern: /<([^<>]*)>/g, open: "<", close: ">" },
-        { pattern: /\(([^()]*)\)/g, open: "(", close: ")" },
-        { pattern: /\[([^\[\]]*)\]/g, open: "[", close: "]" },
-        { pattern: /\{([^{}]*)\}/g, open: "{", close: "}" }
-      ];
-      for (const { pattern, open, close } of bracketPatterns) {
-        text2 = text2.replace(pattern, (_match, innerContent) => {
-          if (!innerContent) {
-            return `${open}${close}`;
-          }
-          const trimmedContent = innerContent.replace(/^ +| +$/g, "");
-          return `${open}${trimmedContent}${close}`;
-        });
-      }
-      return text2;
-    };
-    newText = fixBracketSpacing(newText);
-    if (hasHtmlTags) {
-      newText = htmlTagManager.restore(newText);
-    }
-    newText = backtickManager.restore(newText);
-    return newText;
+    return result;
   }
-  hasProperSpacing(text) {
-    return this.spacingText(text) === text;
+  applyBracketSpacing(text) {
+    let result = text;
+    result = result.replace(CJK_LEFT_BRACKET, "$1 $2");
+    result = result.replace(RIGHT_BRACKET_CJK, "$1 $2");
+    result = result.replace(ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET, "$1 $2$3$4");
+    result = result.replace(LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK, "$1$2$3 $4");
+    result = result.replace(AN_LEFT_BRACKET, "$1 $2");
+    result = result.replace(RIGHT_BRACKET_AN, "$1 $2");
+    return result;
+  }
+  fixBracketInnerSpacing(text) {
+    let result = text;
+    const bracketPatterns = [
+      { pattern: /<([^<>]*)>/g, open: "<", close: ">" },
+      { pattern: /\(([^()]*)\)/g, open: "(", close: ")" },
+      { pattern: /\[([^\[\]]*)\]/g, open: "[", close: "]" },
+      { pattern: /\{([^{}]*)\}/g, open: "{", close: "}" }
+    ];
+    for (const { pattern, open, close } of bracketPatterns) {
+      result = result.replace(pattern, (_match, innerContent) => {
+        if (!innerContent) {
+          return `${open}${close}`;
+        }
+        const trimmedContent = innerContent.replace(/^ +| +$/g, "");
+        return `${open}${trimmedContent}${close}`;
+      });
+    }
+    return result;
   }
 }
 class DomWalker {
