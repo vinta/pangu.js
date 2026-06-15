@@ -15,24 +15,21 @@ const multiBuildPlugin = () => {
           emptyOutDir: false,
           sourcemap: false,
           minify: false,
+          target: 'chrome95',
           lib: {
             entry: resolve(__dirname, 'chrome/src/content-script.ts'),
             formats: ['iife'],
             name: 'PanguContentScript',
             fileName: () => 'content-script.js',
           },
-          rollupOptions: {
+          rolldownOptions: {
             output: {
-              inlineDynamicImports: true,
+              codeSplitting: false,
             },
           },
         },
         resolve: {
           extensions: ['.ts', '.json'],
-        },
-        esbuild: {
-          target: 'chrome95',
-          charset: 'ascii',
         },
       });
     },
@@ -43,7 +40,7 @@ export default defineConfig({
   build: {
     outDir: resolve(__dirname, 'chrome/dist'),
     emptyOutDir: true,
-    rollupOptions: {
+    rolldownOptions: {
       // Only specify entry points that Chrome loads directly
       // Vite will automatically handle shared dependencies:
       // - Modules used by multiple entries → assets folder with hashed names
@@ -57,7 +54,6 @@ export default defineConfig({
         entryFileNames: '[name].js',
         chunkFileNames: 'utils/[name].js',
         format: 'es',
-        inlineDynamicImports: false,
         assetFileNames: '[name].[ext]',
       },
     },
