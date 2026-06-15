@@ -25,6 +25,7 @@ const externalNodeSharedCjsPlugin = () => {
 const multiBuildPlugin = () => {
   return {
     name: 'multi-build',
+    apply: 'build' as const,
     closeBundle: async () => {
       // Build CommonJS for shared module first
       console.log('\nBuilding CommonJS shared module...');
@@ -134,7 +135,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
-    emptyOutDir: false,
+    emptyOutDir: true,
     minify: false,
     target: 'es2022',
     lib: {
