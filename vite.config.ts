@@ -5,6 +5,22 @@ import { defineConfig, build } from 'vite';
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const projectRoot = __dirname;
 
+const externalNodeSharedCjsPlugin = () => {
+  return {
+    name: 'external-node-shared-cjs',
+    resolveId: (source: string) => {
+      if (source === '../shared/index.cjs') {
+        return {
+          id: source,
+          external: true,
+        };
+      }
+
+      return null;
+    },
+  };
+};
+
 // Custom plugin to handle multiple builds
 const multiBuildPlugin = () => {
   return {
@@ -19,22 +35,17 @@ const multiBuildPlugin = () => {
           emptyOutDir: false,
           sourcemap: true,
           minify: false,
+          target: 'es2022',
           lib: {
             entry: resolve(projectRoot, 'src/shared/index.ts'),
             formats: ['cjs'],
             fileName: () => 'shared/index.cjs',
           },
-          rollupOptions: {
+          rolldownOptions: {
             output: {
               exports: 'named',
-              interop: 'auto',
             },
           },
-        },
-        esbuild: {
-          target: 'es2022',
-          format: 'cjs',
-          charset: 'ascii',
         },
       });
 
@@ -49,24 +60,18 @@ const multiBuildPlugin = () => {
           emptyOutDir: false,
           sourcemap: true,
           minify: false,
+          target: 'es2022',
           lib: {
             entry: resolve(projectRoot, 'src/node/index.cjs.ts'),
             formats: ['cjs'],
             fileName: () => 'node/index.cjs',
           },
-          rollupOptions: {
-            output: {
-              interop: 'auto',
-            },
+          rolldownOptions: {
+            plugins: [externalNodeSharedCjsPlugin()],
             external: (id) => {
               return id.startsWith('node:') || ['fs', 'path', 'process'].includes(id);
             },
           },
-        },
-        esbuild: {
-          target: 'es2022',
-          format: 'cjs',
-          charset: 'ascii',
         },
       });
 
@@ -78,25 +83,20 @@ const multiBuildPlugin = () => {
           emptyOutDir: false,
           sourcemap: true,
           minify: false,
+          target: 'es2022',
           lib: {
             entry: resolve(projectRoot, 'dist/node/cli.js'),
             formats: ['cjs'],
             fileName: () => 'node/cli.cjs',
           },
-          rollupOptions: {
+          rolldownOptions: {
             output: {
               exports: 'named',
-              interop: 'auto',
             },
             external: (id) => {
               return id.startsWith('node:') || ['fs', 'path', 'process'].includes(id);
             },
           },
-        },
-        esbuild: {
-          target: 'es2022',
-          format: 'cjs',
-          charset: 'ascii',
         },
       });
 
@@ -109,13 +109,14 @@ const multiBuildPlugin = () => {
           emptyOutDir: false,
           sourcemap: true,
           minify: false,
+          target: 'es2022',
           lib: {
             entry: resolve(projectRoot, 'src/browser/pangu.umd.ts'),
             name: 'pangu',
             formats: ['umd'],
             fileName: () => 'browser/pangu.umd.js',
           },
-          rollupOptions: {
+          rolldownOptions: {
             output: {
               name: 'pangu',
             },
@@ -123,10 +124,6 @@ const multiBuildPlugin = () => {
               return id.startsWith('node:');
             },
           },
-        },
-        esbuild: {
-          target: 'es2022',
-          charset: 'ascii',
         },
       });
     },
@@ -139,6 +136,7 @@ export default defineConfig({
     sourcemap: true,
     emptyOutDir: false,
     minify: false,
+    target: 'es2022',
     lib: {
       entry: {
         'shared/index': resolve(projectRoot, 'src/shared/index.ts'),
@@ -148,7 +146,7 @@ export default defineConfig({
       },
       formats: ['es'],
     },
-    rollupOptions: {
+    rolldownOptions: {
       external: (id) => {
         return id.startsWith('node:') || ['fs', 'path', 'process'].includes(id);
       },
@@ -157,10 +155,6 @@ export default defineConfig({
         entryFileNames: '[name].js',
       },
     },
-  },
-  esbuild: {
-    target: 'es2022',
-    charset: 'ascii',
   },
   plugins: [
     multiBuildPlugin(),
