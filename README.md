@@ -45,6 +45,7 @@
   - [pangu.rb](https://github.com/dlackty/pangu.rb)
   - [pangu.rs](https://github.com/airt/pangu.rs)
   - [pangu.swift](https://github.com/X140Yu/pangu.Swift)
+  - [pangu.skill](https://github.com/shihyuho/pangu.skill)
 
 ## Usage
 
