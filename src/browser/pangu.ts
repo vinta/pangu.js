@@ -1,4 +1,5 @@
 import { Pangu } from '../shared';
+import { decideBoundarySpacing, decideTextRunSpacing } from './boundary-spacing';
 import { DomWalker } from './dom-walker';
 import { TaskScheduler } from './task-scheduler';
 import { VisibilityDetector } from './visibility-detector';
@@ -19,6 +20,10 @@ function once<T extends (...args: any[]) => any>(func: T) {
     executed = true;
     return func(...args);
   };
+}
+
+function isSpaceLikeSibling(node: Node | null) {
+  return !!node && DomWalker.spaceLikeTags.test(node.nodeName);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -148,7 +153,6 @@ export class BrowserPangu extends Pangu {
     return display === 'grid' || display === 'inline-grid' || display === 'flex' || display === 'inline-flex';
   }
 
-  // TODO: Refactor this method - it's too large and handles too many responsibilities
   private spacingTextNodes(textNodes: Node[]) {
     let currentTextNode: Node | null;
     let nextTextNode: Node | null = null;
@@ -161,173 +165,157 @@ export class BrowserPangu extends Pangu {
       }
 
       if (currentTextNode instanceof Text) {
-        // Check if this text node starts with a space and comes after a hidden element
-        if (this.visibilityDetector.config.enabled && currentTextNode.data.startsWith(' ') && this.visibilityDetector.shouldSkipSpacingBeforeNode(currentTextNode)) {
-          // Remove the leading space that comes after a hidden element
-          currentTextNode.data = currentTextNode.data.substring(1);
-        }
-
-        // Special handling for standalone quote nodes
-        if (currentTextNode.data.length === 1 && /["\u201c\u201d]/.test(currentTextNode.data)) {
-          // Check context to determine if space is needed before the quote
-          if (currentTextNode.previousSibling) {
-            const prevNode = currentTextNode.previousSibling;
-            if (prevNode.nodeType === Node.ELEMENT_NODE && prevNode.textContent) {
-              const lastChar = prevNode.textContent.slice(-1);
-              // If previous element ends with CJK, add space before quote
-              if (/[\u4e00-\u9fff]/.test(lastChar)) {
-                currentTextNode.data = ` ${currentTextNode.data}`;
-              }
-            }
-          }
-        } else {
-          // Normal text processing
-          const newText = this.spacingText(currentTextNode.data);
-          if (currentTextNode.data !== newText) {
-            currentTextNode.data = newText;
-          }
-        }
+        this.applyTextRunSpacing(currentTextNode);
       }
 
       // Handle nested tag text processing
       if (nextTextNode) {
-        if (currentTextNode.nextSibling && DomWalker.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
-          nextTextNode = currentTextNode;
-          continue;
-        }
-
         if (!(currentTextNode instanceof Text) || !(nextTextNode instanceof Text)) {
           continue;
         }
 
-        // Check if there's already proper spacing between nodes
-        const currentEndsWithSpace = currentTextNode.data.endsWith(' ');
-        const nextStartsWithSpace = nextTextNode.data.startsWith(' ');
+        const currentBoundaryNode = this.findCurrentBoundaryNode(currentTextNode);
+        const nextBoundaryNode = this.findNextBoundaryNode(nextTextNode);
 
-        // Check if there's whitespace between the nodes
-        let hasWhitespaceBetween = false;
+        const verdict = decideBoundarySpacing({
+          currentLast: currentTextNode.data.slice(-1),
+          nextFirst: nextTextNode.data.slice(0, 1),
+          currentEndsWithSpace: currentTextNode.data.endsWith(' '),
+          nextStartsWithSpace: nextTextNode.data.startsWith(' '),
+          whitespaceBetween: this.hasWhitespaceBetween(currentTextNode, nextTextNode),
+          spaceLikeSiblingAfterCurrent: isSpaceLikeSibling(currentTextNode.nextSibling),
+          spaceLikeSiblingAfterCurrentBoundary: isSpaceLikeSibling(currentBoundaryNode.nextSibling),
+          spaceLikeSiblingBeforeNext: isSpaceLikeSibling(nextTextNode.previousSibling),
+          spaceLikeSiblingBeforeNextBoundary: isSpaceLikeSibling(nextBoundaryNode.previousSibling),
+          currentBoundaryIsBlock: DomWalker.blockTags.test(currentBoundaryNode.nodeName),
+          currentBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(currentBoundaryNode.nodeName),
+          nextBoundaryIsBlock: DomWalker.blockTags.test(nextBoundaryNode.nodeName),
+          nextBoundaryIsIgnored: DomWalker.ignoredTags.test(nextBoundaryNode.nodeName),
+          nextBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(nextBoundaryNode.nodeName),
+          hiddenBoundaryBefore: this.isHiddenBoundaryBefore(nextTextNode),
+          hiddenBoundaryAfter: this.isHiddenBoundaryAfter(currentTextNode),
+          inGridOrFlexContainer: !!nextBoundaryNode.parentNode && this.isGridOrFlexContainer(nextBoundaryNode.parentNode),
+        });
 
-        // We need to check at different levels of the DOM tree
-        // First, find the highest ancestor that contains only the current text node
-        let currentAncestor = currentTextNode as Node;
-        while (currentAncestor.parentNode && DomWalker.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !DomWalker.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
-          currentAncestor = currentAncestor.parentNode;
-        }
-
-        // Find the highest ancestor that contains only the next text node
-        let nextAncestor = nextTextNode as Node;
-        while (nextAncestor.parentNode && DomWalker.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !DomWalker.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
-          nextAncestor = nextAncestor.parentNode;
-        }
-
-        // Check for whitespace between these ancestors
-        let nodeBetween = currentAncestor.nextSibling;
-        while (nodeBetween && nodeBetween !== nextAncestor) {
-          if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
-            hasWhitespaceBetween = true;
+        switch (verdict) {
+          case 'prepend-next':
+            nextTextNode.data = ` ${nextTextNode.data}`;
             break;
-          }
-          nodeBetween = nodeBetween.nextSibling;
-        }
-
-        // Skip if proper spacing exists
-        if (currentEndsWithSpace || nextStartsWithSpace || hasWhitespaceBetween) {
-          nextTextNode = currentTextNode;
-          continue;
-        }
-
-        const testText = currentTextNode.data.slice(-1) + nextTextNode.data.slice(0, 1);
-        const testNewText = this.spacingText(testText);
-
-        // Special handling for quotes
-        const currentLast = currentTextNode.data.slice(-1);
-        const nextFirst = nextTextNode.data.slice(0, 1);
-        const isQuote = (char: string) => /["\u201c\u201d]/.test(char);
-        const isCJK = (char: string) => /[\u4e00-\u9fff]/.test(char);
-
-        const skipSpacing = (isQuote(currentLast) && isCJK(nextFirst)) || (isCJK(currentLast) && isQuote(nextFirst));
-
-        if (testNewText !== testText && !skipSpacing) {
-          let nextNode: Node = nextTextNode;
-          while (nextNode.parentNode && !DomWalker.spaceSensitiveTags.test(nextNode.nodeName) && DomWalker.isFirstTextChild(nextNode.parentNode, nextNode)) {
-            nextNode = nextNode.parentNode;
-          }
-
-          let currentNode: Node = currentTextNode;
-          while (currentNode.parentNode && !DomWalker.spaceSensitiveTags.test(currentNode.nodeName) && DomWalker.isLastTextChild(currentNode.parentNode, currentNode)) {
-            currentNode = currentNode.parentNode;
-          }
-
-          if (currentNode.nextSibling) {
-            if (DomWalker.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
-              nextTextNode = currentTextNode;
-              continue;
-            }
-          }
-
-          if (!DomWalker.blockTags.test(currentNode.nodeName)) {
-            if (!DomWalker.spaceSensitiveTags.test(nextNode.nodeName)) {
-              if (!DomWalker.ignoredTags.test(nextNode.nodeName) && !DomWalker.blockTags.test(nextNode.nodeName)) {
-                if (nextTextNode.previousSibling) {
-                  if (!DomWalker.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
-                    if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
-                      // Check visibility before adding space
-                      if (!this.visibilityDetector.shouldSkipSpacingBeforeNode(nextTextNode)) {
-                        nextTextNode.data = ` ${nextTextNode.data}`;
-                      }
-                    }
-                  }
-                } else if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(' ')) {
-                  // Check visibility before adding space
-                  if (!this.visibilityDetector.shouldSkipSpacingBeforeNode(nextTextNode)) {
-                    nextTextNode.data = ` ${nextTextNode.data}`;
-                  }
-                }
-              }
-            } else if (!DomWalker.spaceSensitiveTags.test(currentNode.nodeName)) {
-              if (currentTextNode instanceof Text && !currentTextNode.data.endsWith(' ')) {
-                // Check visibility before adding space
-                if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
-                  currentTextNode.data = `${currentTextNode.data} `;
-                }
-              }
-            } else {
-              // Check visibility before inserting space element
-              if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
-                // Skip <pangu> element insertion in Grid/Flexbox containers
-                // because the element becomes a layout item and breaks the layout
-                if (nextNode.parentNode && this.isGridOrFlexContainer(nextNode.parentNode)) {
-                  nextTextNode = currentTextNode;
-                  continue;
-                }
-
-                const panguSpace = document.createElement('pangu');
-                panguSpace.innerHTML = ' ';
-
-                if (nextNode.parentNode) {
-                  if (nextNode.previousSibling) {
-                    if (!DomWalker.spaceLikeTags.test(nextNode.previousSibling.nodeName)) {
-                      nextNode.parentNode.insertBefore(panguSpace, nextNode);
-                    }
-                  } else {
-                    nextNode.parentNode.insertBefore(panguSpace, nextNode);
-                  }
-                }
-
-                // Clean up orphaned space element
-                if (!panguSpace.previousElementSibling) {
-                  if (panguSpace.parentNode) {
-                    panguSpace.parentNode.removeChild(panguSpace);
-                  }
-                }
-              }
-            }
-          }
+          case 'append-current':
+            currentTextNode.data = `${currentTextNode.data} `;
+            break;
+          case 'insert-element':
+            this.insertPanguElement(nextBoundaryNode);
+            break;
+          case 'none':
+            break;
         }
       }
 
       nextTextNode = currentTextNode;
     }
+  }
+
+  private applyTextRunSpacing(textNode: Text) {
+    const verdicts = decideTextRunSpacing({
+      text: textNode.data,
+      previousElementLastChar: this.findPreviousElementLastChar(textNode),
+      hiddenBoundaryBefore: this.isHiddenBoundaryBefore(textNode),
+    });
+
+    for (const verdict of verdicts) {
+      switch (verdict) {
+        case 'trim-leading-space':
+          textNode.data = textNode.data.substring(1);
+          break;
+        case 'prepend-space':
+          textNode.data = ` ${textNode.data}`;
+          break;
+        case 'apply-text-spacing': {
+          const newText = this.spacingText(textNode.data);
+          if (textNode.data !== newText) {
+            textNode.data = newText;
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  private insertPanguElement(nextBoundaryNode: Node) {
+    const panguSpace = document.createElement('pangu');
+    panguSpace.innerHTML = ' ';
+
+    if (nextBoundaryNode.parentNode) {
+      nextBoundaryNode.parentNode.insertBefore(panguSpace, nextBoundaryNode);
+    }
+
+    // Clean up orphaned space element
+    if (!panguSpace.previousElementSibling) {
+      if (panguSpace.parentNode) {
+        panguSpace.parentNode.removeChild(panguSpace);
+      }
+    }
+  }
+
+  // The highest ancestor that the current text node ends
+  private findCurrentBoundaryNode(currentTextNode: Node) {
+    let currentNode: Node = currentTextNode;
+    while (currentNode.parentNode && !DomWalker.spaceSensitiveTags.test(currentNode.nodeName) && DomWalker.isLastTextChild(currentNode.parentNode, currentNode)) {
+      currentNode = currentNode.parentNode;
+    }
+    return currentNode;
+  }
+
+  // The highest ancestor that the next text node starts
+  private findNextBoundaryNode(nextTextNode: Node) {
+    let nextNode: Node = nextTextNode;
+    while (nextNode.parentNode && !DomWalker.spaceSensitiveTags.test(nextNode.nodeName) && DomWalker.isFirstTextChild(nextNode.parentNode, nextNode)) {
+      nextNode = nextNode.parentNode;
+    }
+    return nextNode;
+  }
+
+  private findPreviousElementLastChar(textNode: Node) {
+    const previousNode = textNode.previousSibling;
+    if (previousNode && previousNode.nodeType === Node.ELEMENT_NODE && previousNode.textContent) {
+      return previousNode.textContent.slice(-1);
+    }
+    return null;
+  }
+
+  private hasWhitespaceBetween(currentTextNode: Node, nextTextNode: Node) {
+    // We need to check at different levels of the DOM tree
+    // First, find the highest ancestor that contains only the current text node
+    let currentAncestor: Node = currentTextNode;
+    while (currentAncestor.parentNode && DomWalker.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !DomWalker.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
+      currentAncestor = currentAncestor.parentNode;
+    }
+
+    // Find the highest ancestor that contains only the next text node
+    let nextAncestor: Node = nextTextNode;
+    while (nextAncestor.parentNode && DomWalker.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !DomWalker.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
+      nextAncestor = nextAncestor.parentNode;
+    }
+
+    // Check for whitespace between these ancestors
+    let nodeBetween = currentAncestor.nextSibling;
+    while (nodeBetween && nodeBetween !== nextAncestor) {
+      if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
+        return true;
+      }
+      nodeBetween = nodeBetween.nextSibling;
+    }
+
+    return false;
+  }
+
+  private isHiddenBoundaryBefore(node: Node) {
+    return this.visibilityDetector.config.enabled && this.visibilityDetector.shouldSkipSpacingBeforeNode(node);
+  }
+
+  private isHiddenBoundaryAfter(node: Node) {
+    return this.visibilityDetector.config.enabled && this.visibilityDetector.shouldSkipSpacingAfterNode(node);
   }
 
   private spacingTextNodesInQueue(textNodes: Node[], onComplete?: () => void) {

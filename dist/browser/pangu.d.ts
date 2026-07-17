@@ -18,6 +18,14 @@ export declare class BrowserPangu extends Pangu {
     isElementVisuallyHidden(element: Element): boolean;
     private isGridOrFlexContainer;
     private spacingTextNodes;
+    private applyTextRunSpacing;
+    private insertPanguElement;
+    private findCurrentBoundaryNode;
+    private findNextBoundaryNode;
+    private findPreviousElementLastChar;
+    private hasWhitespaceBetween;
+    private isHiddenBoundaryBefore;
+    private isHiddenBoundaryAfter;
     private spacingTextNodesInQueue;
     private waitForVideosToLoad;
     private setupAutoSpacingPageObserver;
