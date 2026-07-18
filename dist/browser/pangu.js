@@ -4,6 +4,7 @@ var QUOTE = /["\u201c\u201d]/;
 function decideBoundarySpacing(context) {
 	if (context.spaceLikeSiblingAfterCurrent) return "none";
 	if (context.currentEndsWithSpace || context.nextStartsWithSpace || context.whitespaceBetween) return "none";
+	if (context.contentBetween) return "none";
 	if (!needsBoundarySpace(context.currentLast, context.nextFirst)) return "none";
 	if (context.spaceLikeSiblingAfterCurrentBoundary || context.currentBoundaryIsBlock) return "none";
 	if (!context.nextBoundaryIsSpaceSensitive) {
@@ -56,17 +57,18 @@ var DomWalker = class {
 			if (!node.nodeValue || !/\S/.test(node.nodeValue)) return NodeFilter.FILTER_REJECT;
 			let currentNode = node;
 			while (currentNode) {
-				if (currentNode instanceof Element) {
-					if (this.ignoredTags.test(currentNode.nodeName)) return NodeFilter.FILTER_REJECT;
-					if (this.isContentEditable(currentNode)) return NodeFilter.FILTER_REJECT;
-					if (currentNode.classList.contains(this.ignoredClass)) return NodeFilter.FILTER_REJECT;
-				}
+				if (currentNode instanceof Element && this.isIgnoredElement(currentNode)) return NodeFilter.FILTER_REJECT;
 				currentNode = currentNode.parentNode;
 			}
 			return NodeFilter.FILTER_ACCEPT;
 		} });
 		while (walker.nextNode()) nodes.push(walker.currentNode);
 		return reverse ? nodes.reverse() : nodes;
+	}
+	static findBoundaryNode(textNode, edge) {
+		let node = textNode;
+		while (node.parentNode && !this.spaceSensitiveTags.test(node.nodeName) && (edge === "first" ? this.isFirstTextChild(node.parentNode, node) : this.isLastTextChild(node.parentNode, node))) node = node.parentNode;
+		return node;
 	}
 	static isFirstTextChild(parentNode, targetNode) {
 		const { childNodes } = parentNode;
@@ -83,6 +85,9 @@ var DomWalker = class {
 			if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) return childNode === targetNode;
 		}
 		return false;
+	}
+	static isIgnoredElement(element) {
+		return this.ignoredTags.test(element.nodeName) || this.isContentEditable(element) || element.classList.contains(this.ignoredClass);
 	}
 	static isContentEditable(node) {
 		return node instanceof HTMLElement && (node.isContentEditable || node.getAttribute("g_editable") === "true");
@@ -116,70 +121,40 @@ var TaskQueue = class {
 	}
 };
 /**
-* Schedules and executes text spacing operations during browser idle time to avoid blocking the UI.
-* Uses requestIdleCallback to process task in chunks when the browser has spare time,
+* Runs queued text spacing work during browser idle time to avoid blocking the UI.
+* Tasks execute via requestIdleCallback when the browser has spare time,
 * ensuring smooth user experience even when processing large amounts of text.
 */
 var TaskScheduler = class {
 	config = {
 		enabled: true,
-		chunkSize: 40,
 		timeout: 2e3
 	};
 	taskQueue = new TaskQueue();
 	get queue() {
 		return this.taskQueue;
 	}
-	processInChunks(items, processor) {
-		if (!this.config.enabled) {
-			processor(items);
-			return;
-		}
-		if (items.length === 0) return;
-		const chunks = [];
-		for (let i = 0; i < items.length; i += this.config.chunkSize) chunks.push(items.slice(i, i + this.config.chunkSize));
-		for (const chunk of chunks) this.taskQueue.add(() => {
-			processor(chunk);
-		});
-	}
 };
 //#endregion
 //#region src/browser/visibility-detector.ts
 var VisibilityDetector = class {
-	config = {
-		enabled: true,
-		commonHiddenPatterns: {
-			clipRect: true,
-			displayNone: true,
-			visibilityHidden: true,
-			opacityZero: true,
-			heightWidth1px: true
-		}
-	};
 	isElementVisuallyHidden(element) {
-		if (!this.config.enabled) return false;
 		const style = getComputedStyle(element);
-		const patterns = this.config.commonHiddenPatterns;
-		if (patterns.displayNone && style.display === "none") return true;
-		if (patterns.visibilityHidden && style.visibility === "hidden") return true;
-		if (patterns.opacityZero && parseFloat(style.opacity) === 0) return true;
-		if (patterns.clipRect) {
-			const clip = style.clip;
-			if (clip && (clip.includes("rect(1px, 1px, 1px, 1px)") || clip.includes("rect(0px, 0px, 0px, 0px)") || clip.includes("rect(0, 0, 0, 0)"))) return true;
-		}
-		if (patterns.heightWidth1px) {
-			const height = parseInt(style.height, 10);
-			const width = parseInt(style.width, 10);
-			if (height === 1 && width === 1) {
-				const overflow = style.overflow;
-				const position = style.position;
-				if (overflow === "hidden" && position === "absolute") return true;
-			}
+		if (style.display === "none") return true;
+		if (style.visibility === "hidden") return true;
+		if (parseFloat(style.opacity) === 0) return true;
+		const clip = style.clip;
+		if (clip && (clip.includes("rect(1px, 1px, 1px, 1px)") || clip.includes("rect(0px, 0px, 0px, 0px)") || clip.includes("rect(0, 0, 0, 0)"))) return true;
+		const height = parseInt(style.height, 10);
+		const width = parseInt(style.width, 10);
+		if (height === 1 && width === 1) {
+			const overflow = style.overflow;
+			const position = style.position;
+			if (overflow === "hidden" && position === "absolute") return true;
 		}
 		return false;
 	}
 	shouldSkipSpacingAfterNode(node) {
-		if (!this.config.enabled) return false;
 		let elementToCheck = null;
 		if (node instanceof Element) elementToCheck = node;
 		else if (node.parentElement) elementToCheck = node.parentElement;
@@ -192,7 +167,6 @@ var VisibilityDetector = class {
 		return false;
 	}
 	shouldSkipSpacingBeforeNode(node) {
-		if (!this.config.enabled) return false;
 		let previousNode = node.previousSibling;
 		if (!previousNode && node.parentElement) {
 			let parent = node.parentElement;
@@ -217,9 +191,6 @@ function once(func) {
 		executed = true;
 		return func(...args);
 	};
-}
-function isSpaceLikeSibling(node) {
-	return !!node && DomWalker.spaceLikeTags.test(node.nodeName);
 }
 function debounce(func, delay, mustRunDelay = Infinity) {
 	let timer = null;
@@ -255,8 +226,7 @@ var BrowserPangu = class extends Pangu {
 	}
 	spacingNode(contextNode) {
 		const textNodes = DomWalker.collectTextNodes(contextNode, true);
-		if (this.taskScheduler.config.enabled) this.spacingTextNodesInQueue(textNodes);
-		else this.spacingTextNodes(textNodes);
+		this.schedule(textNodes);
 	}
 	stopAutoSpacingPage() {
 		if (this.autoSpacingPageObserver) {
@@ -267,6 +237,9 @@ var BrowserPangu = class extends Pangu {
 	}
 	isElementVisuallyHidden(element) {
 		return this.visibilityDetector.isElementVisuallyHidden(element);
+	}
+	isSpaceLikeSibling(node) {
+		return !!node && DomWalker.spaceLikeTags.test(node.nodeName);
 	}
 	isGridOrFlexContainer(node) {
 		if (node.nodeType !== Node.ELEMENT_NODE) return false;
@@ -282,8 +255,9 @@ var BrowserPangu = class extends Pangu {
 			if (currentTextNode instanceof Text) this.applyTextRunSpacing(currentTextNode);
 			if (nextTextNode) {
 				if (!(currentTextNode instanceof Text) || !(nextTextNode instanceof Text)) continue;
-				const currentBoundaryNode = this.findCurrentBoundaryNode(currentTextNode);
-				const nextBoundaryNode = this.findNextBoundaryNode(nextTextNode);
+				const currentBoundaryNode = DomWalker.findBoundaryNode(currentTextNode, "last");
+				const nextBoundaryNode = DomWalker.findBoundaryNode(nextTextNode, "first");
+				const { whitespaceBetween, contentBetween } = this.scanBetweenTextRuns(currentBoundaryNode, nextBoundaryNode);
 				const currentRun = currentTextNode;
 				const nextRun = nextTextNode;
 				switch (decideBoundarySpacing({
@@ -291,11 +265,12 @@ var BrowserPangu = class extends Pangu {
 					nextFirst: nextTextNode.data.slice(0, 1),
 					currentEndsWithSpace: currentTextNode.data.endsWith(" "),
 					nextStartsWithSpace: nextTextNode.data.startsWith(" "),
-					whitespaceBetween: this.hasWhitespaceBetween(currentTextNode, nextTextNode),
-					spaceLikeSiblingAfterCurrent: isSpaceLikeSibling(currentTextNode.nextSibling),
-					spaceLikeSiblingAfterCurrentBoundary: isSpaceLikeSibling(currentBoundaryNode.nextSibling),
-					spaceLikeSiblingBeforeNext: isSpaceLikeSibling(nextTextNode.previousSibling),
-					spaceLikeSiblingBeforeNextBoundary: isSpaceLikeSibling(nextBoundaryNode.previousSibling),
+					whitespaceBetween,
+					contentBetween,
+					spaceLikeSiblingAfterCurrent: this.isSpaceLikeSibling(currentTextNode.nextSibling),
+					spaceLikeSiblingAfterCurrentBoundary: this.isSpaceLikeSibling(currentBoundaryNode.nextSibling),
+					spaceLikeSiblingBeforeNext: this.isSpaceLikeSibling(nextTextNode.previousSibling),
+					spaceLikeSiblingBeforeNextBoundary: this.isSpaceLikeSibling(nextBoundaryNode.previousSibling),
 					currentBoundaryIsBlock: DomWalker.blockTags.test(currentBoundaryNode.nodeName),
 					currentBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(currentBoundaryNode.nodeName),
 					nextBoundaryIsBlock: DomWalker.blockTags.test(nextBoundaryNode.nodeName),
@@ -348,49 +323,58 @@ var BrowserPangu = class extends Pangu {
 			if (panguSpace.parentNode) panguSpace.parentNode.removeChild(panguSpace);
 		}
 	}
-	findCurrentBoundaryNode(currentTextNode) {
-		let currentNode = currentTextNode;
-		while (currentNode.parentNode && !DomWalker.spaceSensitiveTags.test(currentNode.nodeName) && DomWalker.isLastTextChild(currentNode.parentNode, currentNode)) currentNode = currentNode.parentNode;
-		return currentNode;
-	}
-	findNextBoundaryNode(nextTextNode) {
-		let nextNode = nextTextNode;
-		while (nextNode.parentNode && !DomWalker.spaceSensitiveTags.test(nextNode.nodeName) && DomWalker.isFirstTextChild(nextNode.parentNode, nextNode)) nextNode = nextNode.parentNode;
-		return nextNode;
-	}
 	findPreviousElementLastChar(textNode) {
 		const previousNode = textNode.previousSibling;
 		if (previousNode && previousNode.nodeType === Node.ELEMENT_NODE && previousNode.textContent) return previousNode.textContent.slice(-1);
 		return null;
 	}
-	hasWhitespaceBetween(currentTextNode, nextTextNode) {
-		let currentAncestor = currentTextNode;
-		while (currentAncestor.parentNode && DomWalker.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !DomWalker.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) currentAncestor = currentAncestor.parentNode;
-		let nextAncestor = nextTextNode;
-		while (nextAncestor.parentNode && DomWalker.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !DomWalker.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) nextAncestor = nextAncestor.parentNode;
-		let nodeBetween = currentAncestor.nextSibling;
-		while (nodeBetween && nodeBetween !== nextAncestor) {
-			if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) return true;
-			nodeBetween = nodeBetween.nextSibling;
+	scanBetweenTextRuns(currentBoundaryNode, nextBoundaryNode) {
+		let whitespaceBetween = false;
+		let contentBetween = false;
+		const scan = (node) => {
+			if (node.nodeType === Node.TEXT_NODE && node.textContent) {
+				if (/\s/.test(node.textContent)) whitespaceBetween = true;
+				if (/\S/.test(node.textContent)) contentBetween = true;
+			} else if (node instanceof Element && !DomWalker.isIgnoredElement(node)) for (let child = node.firstChild; child; child = child.nextSibling) scan(child);
+		};
+		let containerOfNext = null;
+		let node = currentBoundaryNode;
+		while (node && !containerOfNext) {
+			let sibling = node.nextSibling;
+			while (sibling && !sibling.contains(nextBoundaryNode)) {
+				scan(sibling);
+				sibling = sibling.nextSibling;
+			}
+			containerOfNext = sibling;
+			node = node.parentNode;
 		}
-		return false;
+		while (containerOfNext && containerOfNext !== nextBoundaryNode) {
+			let child = containerOfNext.firstChild;
+			while (child && !child.contains(nextBoundaryNode)) {
+				scan(child);
+				child = child.nextSibling;
+			}
+			containerOfNext = child;
+		}
+		return {
+			whitespaceBetween,
+			contentBetween
+		};
 	}
 	isHiddenBoundaryBefore(node) {
-		return this.visibilityDetector.config.enabled && this.visibilityDetector.shouldSkipSpacingBeforeNode(node);
+		return this.visibilityDetector.shouldSkipSpacingBeforeNode(node);
 	}
 	isHiddenBoundaryAfter(node) {
-		return this.visibilityDetector.config.enabled && this.visibilityDetector.shouldSkipSpacingAfterNode(node);
+		return this.visibilityDetector.shouldSkipSpacingAfterNode(node);
 	}
-	spacingTextNodesInQueue(textNodes) {
-		if (this.visibilityDetector.config.enabled) {
-			if (this.taskScheduler.config.enabled) this.taskScheduler.queue.add(() => {
-				this.spacingTextNodes(textNodes);
-			});
-			else this.spacingTextNodes(textNodes);
+	schedule(textNodes) {
+		if (!this.taskScheduler.config.enabled || typeof requestIdleCallback !== "function") {
+			this.spacingTextNodes(textNodes);
 			return;
 		}
-		const task = (chunkedTextNodes) => this.spacingTextNodes(chunkedTextNodes);
-		this.taskScheduler.processInChunks(textNodes, task);
+		this.taskScheduler.queue.add(() => {
+			this.spacingTextNodes(textNodes);
+		});
 	}
 	waitForVideosToLoad(delayMs, onLoaded) {
 		const videos = Array.from(document.getElementsByTagName("video"));
@@ -419,21 +403,21 @@ var BrowserPangu = class extends Pangu {
 			if (titleElement) this.spacingNode(titleElement);
 		}, nodeDelayMs, nodeMaxWaitMs);
 		const debouncedSpacingNode = debounce(() => {
-			if (this.taskScheduler.config.enabled) {
-				const nodesToProcess = [...queue];
-				queue.length = 0;
-				if (nodesToProcess.length > 0) {
-					const allTextNodes = [];
-					for (const node of nodesToProcess) {
-						const textNodes = DomWalker.collectTextNodes(node, true);
-						allTextNodes.push(...textNodes);
-					}
-					this.spacingTextNodesInQueue(allTextNodes);
-				}
-			} else while (queue.length) {
-				const node = queue.shift();
-				if (node) this.spacingNode(node);
+			const nodesToProcess = [...queue];
+			queue.length = 0;
+			if (nodesToProcess.length === 0) return;
+			nodesToProcess.sort((a, b) => {
+				if (a === b) return 0;
+				return a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+			});
+			const seenTextNodes = /* @__PURE__ */ new Set();
+			const allTextNodes = [];
+			for (const node of nodesToProcess) for (const textNode of DomWalker.collectTextNodes(node)) if (!seenTextNodes.has(textNode)) {
+				seenTextNodes.add(textNode);
+				allTextNodes.push(textNode);
 			}
+			allTextNodes.reverse();
+			this.schedule(allTextNodes);
 		}, nodeDelayMs, nodeMaxWaitMs);
 		this.autoSpacingPageObserver = new MutationObserver((mutations) => {
 			let titleChanged = false;

@@ -22,3 +22,7 @@ _Avoid_: pair spacing, adjacent-node spacing
 **Pangu element**:
 A marker element injected to render a space at a boundary where neither adjacent text run may be modified.
 _Avoid_: space element
+
+## Agent Skill Overrides
+
+**improve-codebase-architecture**: write the Architecture Review HTML report to `./tmp/architecture-review-<timestamp>.html` (repo root) instead of the OS temp directory, so it survives a reboot. `/tmp/` is already gitignored via `~/.gitignore_global`; no further ignore rule needed.

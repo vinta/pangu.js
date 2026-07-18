@@ -6,6 +6,7 @@ export interface BoundarySpacingContext {
     currentEndsWithSpace: boolean;
     nextStartsWithSpace: boolean;
     whitespaceBetween: boolean;
+    contentBetween: boolean;
     spaceLikeSiblingAfterCurrent: boolean;
     spaceLikeSiblingAfterCurrentBoundary: boolean;
     spaceLikeSiblingBeforeNext: boolean;

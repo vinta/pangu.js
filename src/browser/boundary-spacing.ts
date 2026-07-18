@@ -14,6 +14,11 @@ export interface BoundarySpacingContext {
   currentEndsWithSpace: boolean;
   nextStartsWithSpace: boolean;
   whitespaceBetween: boolean;
+  // Collectable text sits between the runs, so they are not adjacent and no
+  // boundary exists (e.g. an unqueued sibling between two separately mutated
+  // nodes). Content the engine never collects (ignored tags like <code>) does
+  // not count, so spacing across those islands is preserved
+  contentBetween: boolean;
   spaceLikeSiblingAfterCurrent: boolean;
   spaceLikeSiblingAfterCurrentBoundary: boolean;
   spaceLikeSiblingBeforeNext: boolean;
@@ -44,6 +49,10 @@ export function decideBoundarySpacing(context: BoundarySpacingContext) {
   }
 
   if (context.currentEndsWithSpace || context.nextStartsWithSpace || context.whitespaceBetween) {
+    return 'none';
+  }
+
+  if (context.contentBetween) {
     return 'none';
   }
 

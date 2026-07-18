@@ -43,6 +43,91 @@ test.describe('BrowserPangu', () => {
       const result = await page.evaluate(() => document.getElementById('test-div')!.textContent);
       expect(result).toBe('小明在開發軟體時總是嚴格地遵循各項協定與標準，直到他看了 ISO 3166-1');
     });
+
+    test('handle boundary between sibling nodes added in one mutation batch', async ({ page }) => {
+      await page.setContent('<div id="container"></div>');
+
+      await page.evaluate(() => {
+        pangu.autoSpacingPage();
+      });
+
+      await page.waitForTimeout(50);
+
+      // Two separately queued siblings whose boundary needs a space
+      await page.evaluate(() => {
+        const container = document.getElementById('container')!;
+        const span1 = document.createElement('span');
+        span1.textContent = '中文';
+        const span2 = document.createElement('span');
+        span2.textContent = 'abc';
+        container.appendChild(span1);
+        container.appendChild(span2);
+      });
+
+      await page.waitForTimeout(600);
+
+      const result = await page.evaluate(() => document.getElementById('container')!.textContent);
+      expect(result).toBe('中文 abc');
+    });
+
+    test('not space across an unchanged sibling between nodes added in one mutation batch', async ({ page }) => {
+      await page.setContent('<div id="container"><span id="existing">X</span></div>');
+
+      // Large pageDelayMs keeps the initial page sweep out of the assertion window,
+      // so only the MutationObserver drain acts
+      await page.evaluate(() => {
+        pangu.autoSpacingPage({ pageDelayMs: 60000 });
+      });
+
+      await page.waitForTimeout(50);
+
+      // The two queued spans sandwich an untouched sibling, so their text runs are not adjacent
+      await page.evaluate(() => {
+        const container = document.getElementById('container')!;
+        const existing = document.getElementById('existing')!;
+        const first = document.createElement('span');
+        first.textContent = '甲';
+        const last = document.createElement('span');
+        last.textContent = 'abc';
+        container.insertBefore(first, existing);
+        container.appendChild(last);
+      });
+
+      await page.waitForTimeout(600);
+
+      // No space may appear between X and abc. The missing space in 甲X is a known
+      // pre-existing gap: boundaries against unqueued neighbors are never re-evaluated
+      const result = await page.evaluate(() => document.getElementById('container')!.textContent);
+      expect(result).toBe('甲Xabc');
+    });
+
+    test('not add a space across an unchanged whitespace wrapper between nodes added in one mutation batch', async ({ page }) => {
+      await page.setContent('<div id="container"><span id="existing"> </span></div>');
+
+      // Large pageDelayMs keeps the initial page sweep out of the assertion window
+      await page.evaluate(() => {
+        pangu.autoSpacingPage({ pageDelayMs: 60000 });
+      });
+
+      await page.waitForTimeout(50);
+
+      // The two queued spans sandwich a wrapper whose whitespace already separates them
+      await page.evaluate(() => {
+        const container = document.getElementById('container')!;
+        const existing = document.getElementById('existing')!;
+        const first = document.createElement('span');
+        first.textContent = '甲';
+        const last = document.createElement('span');
+        last.textContent = 'abc';
+        container.insertBefore(first, existing);
+        container.appendChild(last);
+      });
+
+      await page.waitForTimeout(600);
+
+      const result = await page.evaluate(() => document.getElementById('container')!.textContent);
+      expect(result).toBe('甲 abc');
+    });
   });
 
   test.describe('spacingNode()', () => {
@@ -627,6 +712,89 @@ test.describe('BrowserPangu', () => {
       expect(html).toBe('<a href="#">abc</a><pangu> </pangu><a href="#">漢字</a>');
     });
 
+    test('should space across a nested link when trailing whitespace sits past the boundary', async ({ page }) => {
+      // The whitespace after </span> is beyond the boundary between 字 and x,
+      // so it must not veto the missing space
+      await page.setContent('<p id="test">字<span><a href="#">x</a></span> tail</p>');
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test')!);
+      });
+
+      const result = await page.evaluate(() => document.getElementById('test')!.textContent);
+      expect(result).toBe('字 x tail');
+    });
+
+    test('should not add a redundant space when real whitespace separates a link from the next run', async ({ page }) => {
+      await page.setContent('<p id="test"><a href="#">字</a> <b>x</b></p>');
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test')!);
+      });
+
+      const html = await page.evaluate(() => document.getElementById('test')!.innerHTML);
+      expect(html).toBe('<a href="#">字</a> <b>x</b>');
+    });
+
+    test('should not add a redundant space when whitespace separates a wrapped link from the next run', async ({ page }) => {
+      // The boundary climb stops on <a>, so the scan has to exit the wrapping
+      // <span> to see the whitespace-only text node
+      await page.setContent('<p id="test"><span><a href="#">字</a></span>\n<b>x</b></p>');
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test')!);
+      });
+
+      const result = await page.evaluate(() => document.querySelector('#test b')!.textContent);
+      expect(result).toBe('x');
+    });
+
+    test('should space across a wrapped link when no whitespace separates the runs', async ({ page }) => {
+      await page.setContent('<p id="test"><span><a href="#">字</a></span>x</p>');
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test')!);
+      });
+
+      const result = await page.evaluate(() => document.getElementById('test')!.textContent);
+      expect(result).toBe('字 x');
+    });
+
+    test('should not add a space when a whitespace-only wrapper separates the runs', async ({ page }) => {
+      // The wrapper renders a space, so the runs are already separated
+      await page.setContent('<p id="test">甲<span> </span>abc</p>');
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test')!);
+      });
+
+      const html = await page.evaluate(() => document.getElementById('test')!.innerHTML);
+      expect(html).toBe('甲<span> </span>abc');
+    });
+
+    test('should see whitespace wrapped in nested elements between the runs', async ({ page }) => {
+      await page.setContent('<p id="test">字<span><em> </em></span>x</p>');
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test')!);
+      });
+
+      const html = await page.evaluate(() => document.getElementById('test')!.innerHTML);
+      expect(html).toBe('字<span><em> </em></span>x');
+    });
+
+    test('should keep adding a space across an ignored island with inner whitespace', async ({ page }) => {
+      // Whitespace inside <code> is invisible to the scan, the island stays transparent
+      await page.setContent('<p id="test">字<code>a b</code>x</p>');
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test')!);
+      });
+
+      const html = await page.evaluate(() => document.getElementById('test')!.innerHTML);
+      expect(html).toBe('字<code>a b</code> x');
+    });
+
     test('should not insert <pangu> in grid with CJK card content (real-world case)', async ({ page }) => {
       // Simulates the AgentPub directory page layout from the bug report
       await page.setContent(`
@@ -697,11 +865,8 @@ test.describe('BrowserPangu', () => {
         return visibleSpan?.textContent || '';
       });
 
-      // console.log('Visible text after:', visibleTextAfter.substring(0, 20));
-
       // Check if a space was added at the beginning
       const hasLeadingSpace = visibleTextAfter.startsWith(' ');
-      // console.log('Has leading space after pangu.js:', hasLeadingSpace);
 
       // With visibility check enabled, pangu.js now detects that the first span
       // is visually hidden and should NOT add space between hidden and visible elements

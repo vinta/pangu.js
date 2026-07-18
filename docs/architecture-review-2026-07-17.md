@@ -31,13 +31,17 @@ They already disagree today: `popup.ts:205` accepts `file://` as valid while the
 
 Deepening: one eligibility module answering "is this URL eligible" for the popup and emitting the content-script registration for the service worker, with Chrome match-pattern semantics encoded once. Vitest-testable, URLPattern is global in Node 24. `urlpattern.playwright.ts` retires.
 
-## 4. Shrink BrowserPangu's interface (deferred)
+## 4. Shrink BrowserPangu's interface (phase 1 shipped in #290, phase 2 deferred)
 
 The interface exposes its internal composition. Callers steer spacing by mutating nested config two levels deep (`pangu.taskScheduler.config.enabled`), the two knobs create three execution paths documented by a 28-line comment (`pangu.ts:51-78`), and that comment has already drifted: it promises visibility-on always batches through requestIdleCallback, but `pangu.ts:338` re-checks the scheduler flag and can fall through to synchronous. The sync-or-async decision is re-read at four sites (`pangu.ts:119,336,338,422` plus `task-scheduler.ts:73`).
 
 The author already designed this once: commit `b641e4b` added a 278-line proposal replacing the config flags with explicit sync and async methods, estimated to remove ~250 lines of branching, later deleted unimplemented. Recover with `git show b641e4b`.
 
 Note: `taskScheduler.config` and `visibilityDetector.config` are documented public npm surface, so this is a major-version change.
+
+Outcome (phase 1, 2026-07-18): the scheduling decision now lives behind one private `schedule()` seam (structural `8801602`, behavioral `5bcad19`, spec #290). The observer drain is mode-blind: sync mode gained cross-node boundary spacing, and the merged runs are now sorted into reverse document order with per-run dedupe, which also fixed wrong-direction pair evaluation in the default queued mode for append-style batches. `processInChunks`, the unreachable sync fallback, the doubled visibility guards, and the 28-line call-flow comment are gone. The config knobs stay public surface; replacing them with explicit sync/async methods remains the major-gated phase 2. Phase 2 (#291) is parked until `requestIdleCallback` is supported by default in all major browsers: the enabled knob is the escape hatch for Safari, which only supports it behind a preference flag, and the idle queue calls it bare.
+
+Addendum (2026-07-18, v8 branch `refactor/simplify-codebase`): two statements above went stale. `visibilityDetector.config` left the public surface entirely, removed in `c4a52b7` together with the chunked scheduling path it selected (recorded in HISTORY.md under v8.0.0, after `358f68e` first fixed the chunk-seam gap #292). And `taskScheduler.config.enabled` is no longer Safari's escape hatch: `69bf9b8` falls back to synchronous spacing automatically when `requestIdleCallback` is unavailable. #291 stays parked, with its stale assumptions recorded on the issue.
 
 ## Dead surface inventory (verified, zero callers)
 

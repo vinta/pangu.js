@@ -22,10 +22,6 @@ function once<T extends (...args: any[]) => any>(func: T) {
   };
 }
 
-function isSpaceLikeSibling(node: Node | null) {
-  return !!node && DomWalker.spaceLikeTags.test(node.nodeName);
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mustRunDelay: number = Infinity) {
   let timer: number | null = null;
@@ -53,34 +49,46 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
   };
 }
 
-// Main call flow from autoSpacingPage() to requestIdleCallback():
+// Main call flows from autoSpacingPage() to requestIdleCallback():
 //
-// 1. autoSpacingPage()
+// Entry A: initial page sweep                 Entry B: dynamic content (MutationObserver)
+//
+// 1a. autoSpacingPage()                       1b. autoSpacingPage()
+//     ↓ waitForVideosToLoad(pageDelayMs)          ↓ setupAutoSpacingPageObserver()
+// 2a. spacingPage()                           2b. observer fires on characterData/childList
+//     ├─ spacingNode(<head><title>)               ↓ push affected nodes onto queue
+//     └─ spacingNode(document.body)               ↓ debounce(nodeDelayMs, max nodeMaxWaitMs)
+//     ↓                                       3b. sort queued nodes into document order,
+// 3a. spacingNode(node)                           dedupe, merge all their text runs via
+//     - DomWalker.collectTextNodes(node, true)    DomWalker.collectTextNodes(), reverse
+//       (reverse document order, skips             ↓
+//       whitespace-only and ignored tags)         (title changes take their own debounce
+//     ↓                                            → spacingNode(<title>))
+//     └──────────────────┬────────────────────────┘
+//                        ↓
+// 4. schedule(textNodes)
+//    - Decision point: taskScheduler.config.enabled && requestIdleCallback supported?
+//      ├─ NO  → spacingTextNodes(textNodes)   (synchronous, no requestIdleCallback)
+//      └─ YES (default) → taskScheduler.queue.add(() => spacingTextNodes(textNodes))
+//                         (always ONE task holding the whole list, never chunked)
 // ↓
-// 2. spacingPage()
+// 5. TaskQueue.add() → scheduleProcessing() → requestIdleCallback(process, { timeout: 5000 })
+//    - process(deadline): pops and runs queued tasks while deadline.timeRemaining() > 0
+//    - if tasks remain when the slice ends, re-arms requestIdleCallback for the rest
 // ↓
-// 3. spacingNode()
-//    - Collects text nodes via DomWalker.collectTextNodes()
-//    - Decision point: taskScheduler.config.enabled?
-//      ├─ YES → calls spacingTextNodesInQueue()
-//      └─ NO  → calls spacingTextNodes() directly (synchronous, no requestIdleCallback)
-// ↓
-// 4. spacingTextNodesInQueue() (only if taskScheduler enabled)
-//    - Decision point: visibilityDetector.config.enabled?
-//      ├─ YES (default: true) → Process all nodes in one batch
-//      │   └─ taskScheduler.queue.add(() => spacingTextNodes(allNodes))
-//      └─ NO → Process in chunks via taskScheduler.processInChunks()
-//          └─ Splits into chunks of 40 nodes
-// ↓
-// 5. TaskQueue.add() → scheduleProcessing() → requestIdleCallback()
-//    - Timeout: 5000ms
-//    - Processes tasks when browser is idle
-//    - Uses IdleDeadline to check remaining time
+// 6. spacingTextNodes(textNodes)
+//    - per text run: decideTextRunSpacing() → trim-leading-space / prepend-space /
+//      apply-text-spacing (spacingText)
+//    - per adjacent run pair: decideBoundarySpacing() → prepend-next / append-current /
+//      insert <pangu> element / none
+//    - visibility detection happens here: always on, consulted lazily per boundary
+//      (hiddenBoundaryBefore / hiddenBoundaryAfter), not a scheduling decision
 //
 // Summary of paths to requestIdleCallback():
-// - taskScheduler.enabled=true + visibilityDetector.enabled=true → Single batch via requestIdleCallback
-// - taskScheduler.enabled=true + visibilityDetector.enabled=false → Multiple chunks via requestIdleCallback
-// - taskScheduler.enabled=false → No requestIdleCallback (synchronous processing)
+// - taskScheduler.enabled=true + requestIdleCallback available → one batch task per
+//   schedule() call, drained in idle slices
+// - taskScheduler.enabled=false, or no requestIdleCallback (stock Safari) → never
+//   (fully synchronous processing)
 export class BrowserPangu extends Pangu {
   private isAutoSpacingPageExecuted = false;
   private autoSpacingPageObserver: MutationObserver | null = null;
@@ -119,14 +127,7 @@ export class BrowserPangu extends Pangu {
   public spacingNode(contextNode: Node) {
     // Only process nodes with actual content (excluding text nodes that contain only whitespace)
     const textNodes = DomWalker.collectTextNodes(contextNode, true);
-
-    // Choose processing method based on idle spacing configuration
-    if (this.taskScheduler.config.enabled) {
-      this.spacingTextNodesInQueue(textNodes);
-    } else {
-      // Process the collected text nodes using the shared logic (synchronous)
-      this.spacingTextNodes(textNodes);
-    }
+    this.schedule(textNodes);
   }
 
   public stopAutoSpacingPage() {
@@ -143,6 +144,10 @@ export class BrowserPangu extends Pangu {
   }
 
   // INTERNAL
+
+  private isSpaceLikeSibling(node: Node | null) {
+    return !!node && DomWalker.spaceLikeTags.test(node.nodeName);
+  }
 
   private isGridOrFlexContainer(node: Node): boolean {
     if (node.nodeType !== Node.ELEMENT_NODE) {
@@ -174,8 +179,9 @@ export class BrowserPangu extends Pangu {
           continue;
         }
 
-        const currentBoundaryNode = this.findCurrentBoundaryNode(currentTextNode);
-        const nextBoundaryNode = this.findNextBoundaryNode(nextTextNode);
+        const currentBoundaryNode = DomWalker.findBoundaryNode(currentTextNode, 'last');
+        const nextBoundaryNode = DomWalker.findBoundaryNode(nextTextNode, 'first');
+        const { whitespaceBetween, contentBetween } = this.scanBetweenTextRuns(currentBoundaryNode, nextBoundaryNode);
 
         // Stable bindings for the lazy facts: the loop variables are reassigned across iterations
         const currentRun = currentTextNode;
@@ -186,11 +192,12 @@ export class BrowserPangu extends Pangu {
           nextFirst: nextTextNode.data.slice(0, 1),
           currentEndsWithSpace: currentTextNode.data.endsWith(' '),
           nextStartsWithSpace: nextTextNode.data.startsWith(' '),
-          whitespaceBetween: this.hasWhitespaceBetween(currentTextNode, nextTextNode),
-          spaceLikeSiblingAfterCurrent: isSpaceLikeSibling(currentTextNode.nextSibling),
-          spaceLikeSiblingAfterCurrentBoundary: isSpaceLikeSibling(currentBoundaryNode.nextSibling),
-          spaceLikeSiblingBeforeNext: isSpaceLikeSibling(nextTextNode.previousSibling),
-          spaceLikeSiblingBeforeNextBoundary: isSpaceLikeSibling(nextBoundaryNode.previousSibling),
+          whitespaceBetween,
+          contentBetween,
+          spaceLikeSiblingAfterCurrent: this.isSpaceLikeSibling(currentTextNode.nextSibling),
+          spaceLikeSiblingAfterCurrentBoundary: this.isSpaceLikeSibling(currentBoundaryNode.nextSibling),
+          spaceLikeSiblingBeforeNext: this.isSpaceLikeSibling(nextTextNode.previousSibling),
+          spaceLikeSiblingBeforeNextBoundary: this.isSpaceLikeSibling(nextBoundaryNode.previousSibling),
           currentBoundaryIsBlock: DomWalker.blockTags.test(currentBoundaryNode.nodeName),
           currentBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(currentBoundaryNode.nodeName),
           nextBoundaryIsBlock: DomWalker.blockTags.test(nextBoundaryNode.nodeName),
@@ -262,24 +269,6 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  // The highest ancestor that the current text node ends
-  private findCurrentBoundaryNode(currentTextNode: Node) {
-    let currentNode: Node = currentTextNode;
-    while (currentNode.parentNode && !DomWalker.spaceSensitiveTags.test(currentNode.nodeName) && DomWalker.isLastTextChild(currentNode.parentNode, currentNode)) {
-      currentNode = currentNode.parentNode;
-    }
-    return currentNode;
-  }
-
-  // The highest ancestor that the next text node starts
-  private findNextBoundaryNode(nextTextNode: Node) {
-    let nextNode: Node = nextTextNode;
-    while (nextNode.parentNode && !DomWalker.spaceSensitiveTags.test(nextNode.nodeName) && DomWalker.isFirstTextChild(nextNode.parentNode, nextNode)) {
-      nextNode = nextNode.parentNode;
-    }
-    return nextNode;
-  }
-
   private findPreviousElementLastChar(textNode: Node) {
     const previousNode = textNode.previousSibling;
     if (previousNode && previousNode.nodeType === Node.ELEMENT_NODE && previousNode.textContent) {
@@ -288,59 +277,82 @@ export class BrowserPangu extends Pangu {
     return null;
   }
 
-  private hasWhitespaceBetween(currentTextNode: Node, nextTextNode: Node) {
-    // We need to check at different levels of the DOM tree
-    // First, find the highest ancestor that contains only the current text node
-    let currentAncestor: Node = currentTextNode;
-    while (currentAncestor.parentNode && DomWalker.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !DomWalker.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
-      currentAncestor = currentAncestor.parentNode;
-    }
+  private scanBetweenTextRuns(currentBoundaryNode: Node, nextBoundaryNode: Node) {
+    // Scan the document-order gap between the two boundary nodes. Whitespace
+    // text means the runs are already separated. Collectable text (checked
+    // through the same DomWalker rules that build the runs, so ignored islands
+    // like <code> do not count) means the runs are not adjacent at all
+    let whitespaceBetween = false;
+    let contentBetween = false;
 
-    // Find the highest ancestor that contains only the next text node
-    let nextAncestor: Node = nextTextNode;
-    while (nextAncestor.parentNode && DomWalker.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !DomWalker.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
-      nextAncestor = nextAncestor.parentNode;
-    }
-
-    // Check for whitespace between these ancestors
-    let nodeBetween = currentAncestor.nextSibling;
-    while (nodeBetween && nodeBetween !== nextAncestor) {
-      if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
-        return true;
+    const scan = (node: Node) => {
+      if (node.nodeType === Node.TEXT_NODE && node.textContent) {
+        if (/\s/.test(node.textContent)) {
+          whitespaceBetween = true;
+        }
+        if (/\S/.test(node.textContent)) {
+          contentBetween = true;
+        }
+      } else if (node instanceof Element && !DomWalker.isIgnoredElement(node)) {
+        // Descend so wrapped whitespace counts too. Ignored islands like <code>
+        // stay invisible, matching how the runs themselves are collected
+        for (let child = node.firstChild; child; child = child.nextSibling) {
+          scan(child);
+        }
       }
-      nodeBetween = nodeBetween.nextSibling;
+    };
+
+    // Climb from the current boundary, scanning the following siblings at each
+    // level until one is or holds the next boundary. The climb never escapes
+    // the common ancestor because the next boundary is found below it first
+    let containerOfNext: Node | null = null;
+    let node: Node | null = currentBoundaryNode;
+    while (node && !containerOfNext) {
+      let sibling = node.nextSibling;
+      while (sibling && !sibling.contains(nextBoundaryNode)) {
+        scan(sibling);
+        sibling = sibling.nextSibling;
+      }
+      containerOfNext = sibling;
+      node = node.parentNode;
     }
 
-    return false;
+    // Descend to the next boundary, scanning the children before its path at
+    // each level. Nothing past the boundary is ever visited
+    while (containerOfNext && containerOfNext !== nextBoundaryNode) {
+      let child: Node | null = containerOfNext.firstChild;
+      while (child && !child.contains(nextBoundaryNode)) {
+        scan(child);
+        child = child.nextSibling;
+      }
+      containerOfNext = child;
+    }
+
+    return { whitespaceBetween, contentBetween };
   }
 
   private isHiddenBoundaryBefore(node: Node) {
-    return this.visibilityDetector.config.enabled && this.visibilityDetector.shouldSkipSpacingBeforeNode(node);
+    return this.visibilityDetector.shouldSkipSpacingBeforeNode(node);
   }
 
   private isHiddenBoundaryAfter(node: Node) {
-    return this.visibilityDetector.config.enabled && this.visibilityDetector.shouldSkipSpacingAfterNode(node);
+    return this.visibilityDetector.shouldSkipSpacingAfterNode(node);
   }
 
-  private spacingTextNodesInQueue(textNodes: Node[]) {
-    // When visibility detection is enabled, process all nodes together to maintain context between adjacent nodes
-    // This prevents incorrect spacing after hidden elements
-    if (this.visibilityDetector.config.enabled) {
-      // Still use idle callback for performance, but process all nodes in one batch
-      if (this.taskScheduler.config.enabled) {
-        this.taskScheduler.queue.add(() => {
-          this.spacingTextNodes(textNodes);
-        });
-      } else {
-        // Synchronous processing
-        this.spacingTextNodes(textNodes);
-      }
+  // The single seam that decides how spacing work is executed: synchronously
+  // or as one idle-time batch. Boundary spacing needs adjacent-run context, so
+  // the node list is never split across calls
+  private schedule(textNodes: Node[]) {
+    // Stock Safari ships requestIdleCallback behind a preference flag, so fall
+    // back to synchronous spacing instead of throwing in TaskQueue
+    if (!this.taskScheduler.config.enabled || typeof requestIdleCallback !== 'function') {
+      this.spacingTextNodes(textNodes);
       return;
     }
 
-    // Normal chunked processing when visibility detection is disabled
-    const task = (chunkedTextNodes: Node[]) => this.spacingTextNodes(chunkedTextNodes);
-    this.taskScheduler.processInChunks(textNodes, task);
+    this.taskScheduler.queue.add(() => {
+      this.spacingTextNodes(textNodes);
+    });
   }
 
   private waitForVideosToLoad(delayMs: number, onLoaded: () => void) {
@@ -407,31 +419,37 @@ export class BrowserPangu extends Pangu {
     const debouncedSpacingNode = debounce(
       () => {
         // NOTE: a single node could be very big which contains a lot of child nodes
-        if (this.taskScheduler.config.enabled) {
-          // Use idle processing for dynamic content
-          const nodesToProcess = [...queue];
-          queue.length = 0; // Clear the queue
+        const nodesToProcess = [...queue];
+        queue.length = 0; // Clear the queue
 
-          if (nodesToProcess.length > 0) {
-            // Collect all text nodes from all input nodes
-            const allTextNodes: Node[] = [];
-            for (const node of nodesToProcess) {
-              const textNodes = DomWalker.collectTextNodes(node, true);
-              allTextNodes.push(...textNodes);
-            }
+        if (nodesToProcess.length === 0) {
+          return;
+        }
 
-            // Process all collected text nodes with idle callback
-            this.spacingTextNodesInQueue(allTextNodes);
+        // Merge all queued nodes' text runs into one reverse-document-order pass,
+        // so boundary spacing sees pairs that span separately queued nodes.
+        // Sort into document order first (mutation order is not document order)
+        // and drop duplicate runs (a parent and its child can both be queued)
+        nodesToProcess.sort((a, b) => {
+          if (a === b) {
+            return 0;
           }
-        } else {
-          // Synchronous processing (original behavior)
-          while (queue.length) {
-            const node = queue.shift();
-            if (node) {
-              this.spacingNode(node);
+          return a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+        });
+
+        const seenTextNodes = new Set<Node>();
+        const allTextNodes: Node[] = [];
+        for (const node of nodesToProcess) {
+          for (const textNode of DomWalker.collectTextNodes(node)) {
+            if (!seenTextNodes.has(textNode)) {
+              seenTextNodes.add(textNode);
+              allTextNodes.push(textNode);
             }
           }
         }
+        allTextNodes.reverse();
+
+        this.schedule(allTextNodes);
       },
       nodeDelayMs,
       nodeMaxWaitMs,

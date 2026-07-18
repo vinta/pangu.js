@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('TaskScheduler Enabled', () => {
+  // Keep this guard even though spacing falls back to sync without requestIdleCallback:
+  // this suite tests the idle-callback scheduling path itself, which does not exist on
+  // WebKit (stock Safari ships requestIdleCallback behind a preference flag). Without the
+  // guard, these tests would silently exercise the sync fallback instead of the scheduler.
+  // The fallback path is covered on all browsers by the 'TaskScheduler Fallback' suite below.
   test.beforeEach(async ({ page }) => {
     const hasSupport = await page.evaluate(() => typeof window.requestIdleCallback === 'function');
     test.skip(!hasSupport, 'requestIdleCallback is not supported');
@@ -14,13 +19,11 @@ test.describe('TaskScheduler Enabled', () => {
   test('should be able to enable taskScheduler', async ({ page }) => {
     const result = await page.evaluate(() => {
       pangu.taskScheduler.config.enabled = true;
-      pangu.taskScheduler.config.chunkSize = 20;
       pangu.taskScheduler.config.timeout = 3000;
       return pangu.taskScheduler.config;
     });
 
     expect(result.enabled).toBe(true);
-    expect(result.chunkSize).toBe(20);
     expect(result.timeout).toBe(3000);
   });
 
@@ -37,7 +40,6 @@ test.describe('TaskScheduler Enabled', () => {
 
     const result = await page.evaluate(() => {
       pangu.taskScheduler.config.enabled = true;
-      pangu.taskScheduler.config.chunkSize = 2;
 
       pangu.spacingPage();
 
@@ -61,7 +63,6 @@ test.describe('TaskScheduler Enabled', () => {
   test('should process dynamic content asynchronously', async ({ page }) => {
     await page.evaluate(async () => {
       pangu.taskScheduler.config.enabled = true;
-      pangu.taskScheduler.config.chunkSize = 2;
       pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 50, nodeMaxWaitMs: 100 });
     });
 
@@ -86,7 +87,6 @@ test.describe('TaskScheduler Enabled', () => {
     
     const result = await page.evaluate(async () => {
       pangu.taskScheduler.config.enabled = true;
-      pangu.taskScheduler.config.chunkSize = 3;
       pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 50, nodeMaxWaitMs: 100 });
 
       const content = document.getElementById('content')!;
@@ -157,5 +157,103 @@ test.describe('TaskScheduler Enabled', () => {
 
     expect(result.text.trim()).toBe('最終 final 文本 text');
     expect(result.processingCount).toBe(1);
+  });
+
+  test('should apply boundary spacing between all adjacent runs when processing asynchronously', async ({ page }) => {
+    await page.setContent('<div id="content"><span>中文</span><span>abc</span><span>漢字</span><span>def</span></div>');
+
+    const result = await page.evaluate(async () => {
+      pangu.taskScheduler.config.enabled = true;
+
+      pangu.spacingNode(document.getElementById('content')!);
+
+      // Wait for idle processing
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      return document.getElementById('content')!.textContent;
+    });
+
+    expect(result).toBe('中文 abc 漢字 def');
+  });
+
+  test('should not space across an unchanged sibling between nodes added in one mutation batch', async ({ page }) => {
+    await page.setContent('<div id="container"><span id="existing">X</span></div>');
+
+    const result = await page.evaluate(async () => {
+      pangu.taskScheduler.config.enabled = true;
+
+      // Large pageDelayMs keeps the initial page sweep out of the assertion window
+      pangu.autoSpacingPage({ pageDelayMs: 60000, nodeDelayMs: 100, nodeMaxWaitMs: 200 });
+
+      // The two queued spans sandwich an untouched sibling, so their text runs are not adjacent
+      const container = document.getElementById('container')!;
+      const existing = document.getElementById('existing')!;
+      const first = document.createElement('span');
+      first.textContent = '甲';
+      const last = document.createElement('span');
+      last.textContent = 'abc';
+      container.insertBefore(first, existing);
+      container.appendChild(last);
+
+      // Wait for debounced processing and idle callbacks
+      await new Promise((resolve) => setTimeout(resolve, 400));
+
+      return container.textContent;
+    });
+
+    // No space may appear between X and abc; the missing space in 甲X is a pre-existing gap
+    expect(result).toBe('甲Xabc');
+  });
+
+  test('should not add a space across an unchanged whitespace wrapper between nodes added in one mutation batch', async ({ page }) => {
+    await page.setContent('<div id="container"><span id="existing"> </span></div>');
+
+    const result = await page.evaluate(async () => {
+      pangu.taskScheduler.config.enabled = true;
+
+      // Large pageDelayMs keeps the initial page sweep out of the assertion window
+      pangu.autoSpacingPage({ pageDelayMs: 60000, nodeDelayMs: 100, nodeMaxWaitMs: 200 });
+
+      // The two queued spans sandwich a wrapper whose whitespace already separates them
+      const container = document.getElementById('container')!;
+      const existing = document.getElementById('existing')!;
+      const first = document.createElement('span');
+      first.textContent = '甲';
+      const last = document.createElement('span');
+      last.textContent = 'abc';
+      container.insertBefore(first, existing);
+      container.appendChild(last);
+
+      // Wait for debounced processing and idle callbacks
+      await new Promise((resolve) => setTimeout(resolve, 400));
+
+      return container.textContent;
+    });
+
+    expect(result).toBe('甲 abc');
+  });
+});
+
+test.describe('TaskScheduler Fallback', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
+    await page.waitForFunction(() => typeof window.pangu !== 'undefined');
+  });
+
+  test('should fall back to synchronous spacing when requestIdleCallback is unavailable', async ({ page }) => {
+    await page.setContent('<div id="content"><span>中文</span><span>abc</span></div>');
+
+    const result = await page.evaluate(() => {
+      // Simulate stock Safari, where requestIdleCallback sits behind a preference flag
+      Object.defineProperty(window, 'requestIdleCallback', { value: undefined, configurable: true });
+      pangu.taskScheduler.config.enabled = true;
+
+      pangu.spacingNode(document.getElementById('content')!);
+
+      // No waiting: spacing must have completed synchronously
+      return document.getElementById('content')!.textContent;
+    });
+
+    expect(result).toBe('中文 abc');
   });
 });
