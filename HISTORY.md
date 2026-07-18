@@ -26,6 +26,7 @@
 - 史詩級性能提升！
   - 把 XPath 換成 [TreeWalker](https://developer.mozilla.org/en-US/docs/Web/API/TreeWalker)，快他媽 5 倍！
   - 比較慢的操作都丟到 [requestIdleCallback()](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback)，內容太多的網站終於不卡了！
+    - Chrome/Firefox 都有支援 `requestIdleCallback()`，但是 Safari 不支援
 
 ## v6.1.3 / 2025-07-01
 

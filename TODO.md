@@ -38,6 +38,7 @@ No task in progress
 ### Medium Priority
 
 - [ ] Architecture deepening candidates (extension settings module, spacing eligibility policy, BrowserPangu interface) - see docs/architecture-review-2026-07-17.md
+- [ ] Re-visit #291 (explicit sync/async methods, remove `taskScheduler.config.enabled`) when all major browsers support `requestIdleCallback()` by default - Safari only has it behind a preference flag ([MDN](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback))
 - [ ] Change icon or badge to reflect the current `spacing_mode`
 - [ ] CSS Visibility detector with `chrome.declarativeContent.PageStateMatcher({css: [".hide"]})`?
 - [ ] Fix issue #155 - DO NOT spacing URL
