@@ -1,5 +1,9 @@
 # History
 
+## v7.3.0 / 2026-xx-xx
+
+- TODO
+
 ## v7.2.1 / 2026-03-02
 
 - 修正在 CSS Grid 和 Flexbox 容器裡插入 `<pangu>` 元素會破壞排版的問題

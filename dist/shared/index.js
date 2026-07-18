@@ -103,7 +103,7 @@ var PlaceholderReplacer = class {
 var Pangu = class {
 	version;
 	constructor() {
-		this.version = "7.2.1";
+		this.version = "7.3.0";
 	}
 	spacingText(text) {
 		if (typeof text !== "string") {
