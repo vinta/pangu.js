@@ -23,6 +23,22 @@ _Avoid_: pair spacing, adjacent-node spacing
 A marker element injected to render a space at a boundary where neither adjacent text run may be modified.
 _Avoid_: space element
 
+## Paranoid Text Spacing Algorithm
+
+The algorithm behind text spacing. Source of truth: `src/shared/index.ts`, exhaustive examples: `tests/shared/index.test.ts`.
+
+**Symbol handling**:
+Operators (`=` `+` `-` `*` `/` `<` `>` `&` `^`) get spaces when CJK is adjacent. Separators (`_` `|`) never do. A single `/` acts as an operator, repeated `/` reads as a file path and stays unspaced.
+
+**Pattern preservation**:
+Compound words (`state-of-the-art`, `GPT-5`, `claude-4-opus`), programming terms (`C++`, `A+`, `i++`, `D-`, `C#`, `F#`), and file paths (`/usr/bin`, `src/main.py`, `C:\Users\`) keep their internal shape. A letter grade before CJK becomes `A+ `, not `A + `.
+
+**Punctuation**:
+Half-width punctuation is never converted to full-width. Multiple consecutive punctuation marks are preserved.
+
+**HTML**:
+Tags are protected from spacing rules. Text inside attributes is processed.
+
 ## Agent Skill Overrides
 
 **improve-codebase-architecture**: write the Architecture Review HTML report to `./tmp/architecture-review-<timestamp>.html` (repo root) instead of the OS temp directory, so it survives a reboot. `/tmp/` is already gitignored via `~/.gitignore_global`; no further ignore rule needed.

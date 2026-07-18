@@ -2,242 +2,44 @@
 
 ## Project Overview
 
-`pangu.js` is a text spacing library that automatically inserts whitespace between CJK (Chinese, Japanese, Korean) characters and half-width characters (alphabetical letters, numerical digits, and symbols) for better readability.
-
-- Language: TypeScript (migrated from JavaScript)
-- Dependencies: Zero runtime dependencies
-- Build targets:
-  1. npm package - JavaScript library for Node.js and browser use (ESM/CommonJS/UMD)
-  2. Chrome extension (Manifest V3) - Automatically adds spacing to web pages
+`pangu.js` is a text spacing library that automatically inserts whitespace between CJK (Chinese, Japanese, Korean) characters and half-width characters (alphabetical letters, numerical digits, and symbols) for better readability. It ships two build targets: an npm package (ESM/CommonJS/UMD) for Node.js and browsers, and a Chrome extension (Manifest V3).
 
 ## Common Development Commands
-
-### Building
 
 ```bash
 npm run build              # Build all targets (library + extension)
 npm run build:lib          # Build library (shared, browser, node)
-npm run build:extension    # Build Chrome extension TypeScript files
-npm run clean              # Clean all build artifacts
-npm run watch              # Watch both library and extension files
-npm run watch:lib          # Watch library files for changes
-npm run watch:extension    # Watch extension files (uses nodemon)
-```
+npm run build:extension    # Build Chrome extension (needs dist/ from build:lib, copies pangu.umd.js into vendors/)
 
-### Testing
-
-```bash
+# Every test script runs a full build first
 npm run test               # Run all tests (vitest + playwright)
 npm run test:shared        # Test core/shared logic
 npm run test:node          # Test Node.js-specific code
 npm run test:browser       # Test browser code (uses Playwright)
-```
 
-### Linting
+npm run lint
+npm run lint:fix
 
-```bash
-npm run lint               # Run ESLint on src/ and scripts/
-npm run lint:fix           # Run ESLint with auto-fix
-```
-
-### Publishing & Packaging
-
-```bash
-# Version management
 npm run publish-package 1.2.3   # Bump version, update docs, build, commit, and tag
-
-# Extension packaging
-npm run pack-extension          # Package browser extensions
-npm run pack-extension:chrome   # Package Chrome extension only (.zip)
 ```
 
 **npm publishing**: Done via GitHub Actions (`.github/workflows/publish.yml`), triggered by pushing a `v*` tag. Uses npm Trusted Publishing (OIDC) — no tokens needed. Do NOT run `npm publish` locally.
 
-## Code Architecture
+## Where Things Live
 
-### Directory Structure
-
-```
-src/
-├── shared/                    # Core text spacing logic (platform-agnostic)
-│   └── index.ts               # Main Pangu class with regex patterns
-├── browser/                   # Browser-specific implementation
-│   ├── pangu.ts               # BrowserPangu class with DOM manipulation
-│   ├── pangu.umd.ts           # UMD wrapper for browser builds
-│   ├── dom-walker.ts          # DOM tree traversal utilities
-│   ├── task-scheduler.ts      # Idle-time task scheduling
-│   ├── visibility-detector.ts # CSS visibility detection
-│   └── banner.txt             # Build banner text
-└── node/                      # Node.js implementation
-    ├── index.ts               # NodePangu class with file operations
-    ├── index.cjs.ts           # CommonJS re-export wrapper
-    └── cli.ts                 # Command-line interface
-
-browser-extensions/
-└── chrome/                    # Chrome extension (Manifest V3)
-    ├── manifest.json          # Extension manifest
-    ├── _locales/zh_TW/        # i18n messages (Traditional Chinese)
-    ├── src/                   # Extension TypeScript source
-    │   ├── service-worker.ts  # Background: settings init, content script registration
-    │   ├── content-script.ts  # Injected into pages for auto-spacing
-    │   ├── popup.ts           # Popup UI controller
-    │   ├── options.ts         # Options page controller
-    │   └── utils/             # Types, settings, URL validation, i18n, sounds
-    ├── dist/                  # Compiled JS from src/
-    ├── vendors/pangu/         # Vendored pangu.umd.js (copied during build)
-    ├── pages/                 # popup.html, options.html
-    ├── stylesheets/           # CSS for popup and options
-    ├── icons/                 # Extension icons (16-128px PNG + SVG)
-    ├── images/                # Store listing assets (screenshots, promo tiles)
-    └── sounds/                # Sound effects for spacing feedback
-```
-
-### Build Output Structure
-
-```
-dist/                           # Library builds
-├── shared/                     # Core module
-│   ├── index.js                # ESM module
-│   └── index.cjs               # CommonJS module
-├── browser/                    # Browser builds
-│   ├── pangu.js                # ESM bundle
-│   └── pangu.umd.js            # UMD bundle (window.pangu)
-└── node/                       # Node.js builds
-    ├── index.js                # ESM module
-    ├── index.cjs               # CommonJS module
-    ├── cli.js                  # CLI executable (ESM)
-    └── cli.cjs                 # CLI executable (CommonJS)
-```
-
-### Core API
-
-**All Platforms (Shared):**
-
-- `spacingText(text)` - Process text strings (main method)
-- `hasProperSpacing(text)` - Check if text already has proper spacing
-
-**Node.js-specific (NodePangu):**
-
-- `spacingFile(path)` - Process files asynchronously (returns Promise)
-- `spacingFileSync(path)` - Process files synchronously
-
-**Browser-specific (BrowserPangu):**
-
-- `spacingPage()` - Process entire page (title + body)
-- `spacingNode(node)` - Process specific DOM node and its descendants
-- `autoSpacingPage(config?)` - Auto-spacing with MutationObserver
-  - `config.pageDelayMs` - Delay before initial page spacing (default: 1000ms)
-  - `config.nodeDelayMs` - Delay before spacing new nodes (default: 500ms)
-  - `config.nodeMaxWaitMs` - Max wait time for node mutations (default: 2000ms)
-- `stopAutoSpacingPage()` - Stop auto-spacing
-- `isElementVisuallyHidden(element)` - Check if element is hidden by CSS
-- `taskScheduler.config` - Task scheduling configuration (direct property access)
-
-### Build System
-
-- **Build Tool**: Vite 6.x with TypeScript
-- **TypeScript**: Configured with separate tsconfig files for browser/node
-- **Output Formats**: ESM, CommonJS, and UMD
-- **Source Maps**: Generated for all builds
-- **Type Definitions**: Auto-generated .d.ts files with vite-plugin-dts
-- **Watch Mode**: Concurrent watch for library and extension development
-
-### Testing Strategy
-
-- **Unit Tests**: Vitest 3.x for shared/node code
-- **Browser Tests**: Playwright 1.x for cross-browser testing
-- **Test Fixtures**: Located in `fixtures/`
-- **Coverage**: ~290 tests (138 vitest + 152 Playwright across 3 browsers)
-- **Test Structure**: Separate test directories for shared, node, and browser code
-
-### Chrome Extension
-
-- **Manifest Version**: V3 (modern Chrome extension format)
-- **Location**: `browser-extensions/chrome/`
-- **Source**: TypeScript files in `browser-extensions/chrome/src/`
-- **Build Output**: `browser-extensions/chrome/dist/`
-- **Build Command**: `npm run build:extension`
-- **Permissions**: Uses `activeTab` instead of broad `tabs` permission
-- **Content Scripts**: Dynamically registered based on user settings
-- **Match Patterns**: Uses Chrome's match pattern format for blacklist/whitelist
-- **UI Framework**: Pure TypeScript
-
-### Chrome Extension Architecture
-
-- **Service Worker**: `service-worker.ts` - Handles background tasks and content script registration
-- **Content Script**: `content-script.ts` - Injected into web pages for auto-spacing
-- **Popup**: `popup.ts` - Extension popup UI
-- **Options**: `options.ts` - Settings page
-- **Utils**: `utils/` - Shared utilities including type definitions
-
-#### Settings Structure
-
-```typescript
-interface Settings {
-  spacing_mode: 'spacing_when_load' | 'spacing_when_click';
-  filter_mode: 'blacklist' | 'whitelist';
-  blacklist: string[];
-  whitelist: string[];
-  is_mute_sound_effects: boolean;
-}
-```
+- Core spacing logic (regex patterns): `src/shared/index.ts`, core test cases: `tests/shared/index.test.ts`
+- Browser DOM layer: `src/browser/`
+- Node.js API and CLI: `src/node/`
+- Chrome extension: `browser-extensions/chrome/src/`
 
 ## Development Guidelines
 
-### Code Style
-
-- Follow existing patterns in the codebase
-- ESLint 9.x with unicorn/prefer-node-protocol enabled
-- Prettier 3.x with @trivago/prettier-plugin-sort-imports
 - Maintain zero runtime dependencies
-- Keep regex patterns readable with comments
-- Always use `node:` prefix for Node.js built-in modules
 - Always pin exact dependency versions in `package.json` (no `^` or `~` prefixes)
-
-### Implementation Details
-
-- Core spacing logic: `src/shared/index.ts`
-- Core test cases: `tests/shared/index.test.ts`
-- Browser DOM processing: Uses TreeWalker API for 5.5x performance improvement
-- Idle processing: Uses requestIdleCallback() for non-blocking operations
-- Visibility detection: Detects CSS-hidden elements to avoid unnecessary spacing
-- Task scheduling: `src/browser/task-scheduler.ts` - Manages task queue for async processing
-- Visibility detector: `src/browser/visibility-detector.ts` - Checks element visibility
-
-### Performance Optimizations v7
-
-- **TreeWalker Migration**: Replaced XPath with TreeWalker API for ~5.5x performance gain
-- **Idle Processing**: Heavy operations use requestIdleCallback() to prevent blocking
-- **Visibility Checks**: Skip spacing for CSS-hidden elements (always on)
-- **Debounced MutationObserver**: Batches DOM mutations for efficient processing
-
-### Paranoid Text Spacing Algorithm v7
-
-**Core Features:**
-
-- **Context-Aware Symbol Handling**:
-  - Operators (`= + - * / < > & ^`): Always add spaces when CJK is present
-  - Separators (`_ |`): Never add spaces regardless of context
-  - Dual-behavior slash `/`: Single occurrence = operator (add spaces), multiple = file path separator (no spaces)
-
-- **Smart Pattern Recognition**:
-  - Preserves compound words: `state-of-the-art`, `GPT-5`, `claude-4-opus`
-  - Handles programming terms correctly: `C++`, `A+`, `i++`, `D-`, `C#`, `F#`
-  - Protects file paths: Unix (`/usr/bin`, `src/main.py`) and Windows (`C:\Users\`)
-  - Special handling for grades: `A+` before CJK becomes `A+ ` not `A + `
-
-- **Improved Punctuation**:
-  - No longer converts half-width punctuation to full-width
-  - Smart handling of quotes, brackets, and special characters
-  - Preserves multiple consecutive punctuation marks
-
-- **HTML Support**:
-  - Processes text within HTML attributes while preserving tag structure
-  - Protects HTML tags from being altered by spacing rules
 
 ## Future Improvements
 
-See @TODO.md for planned improvements and technical debt.
+See `TODO.md` for planned improvements and technical debt.
 
 ## Agent Skills
 
