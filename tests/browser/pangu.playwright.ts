@@ -339,7 +339,9 @@ test.describe('BrowserPangu', () => {
 
     // FIXME: Spaces belong around an inline <code> element between CJK (#97).
     // The presentationalTags rule that once did this was retired in 50cfcf3;
-    // reviving it belongs to Markdown support (#161 #216)
+    // reviving it belongs to Markdown support (#161 #216). Re-verified 2026-07-18:
+    // boundary spacing never sees ignored-tag islands (their text is not collected),
+    // so this needs the verdict model to space both sides of an island
     test.skip('handle spacing around inline code elements', async ({ page }) => {
       await page.setContent('<p>中文<code>English</code>中文</p>');
       await page.evaluate(() => {
@@ -483,9 +485,7 @@ test.describe('BrowserPangu', () => {
       expect(afterText).toBe('整天等 EAS build 就飽了啊，每次 build 都要跑十幾二十分鐘');
     });
 
-    // NOTE: The fix for preventing double spaces in already-spaced text (like Asana) makes this specific case not work
-    // This is an acceptable trade-off since real-world cases like Asana typically have spaces at fragment boundaries
-    test.skip('handle mixed fragmented nodes correctly (edge case: consecutive text nodes without spaces)', async ({ page }) => {
+    test('handle mixed fragmented nodes correctly (edge case: consecutive text nodes without spaces)', async ({ page }) => {
       await page.setContent('<div id="test"></div>');
 
       await page.evaluate(() => {
@@ -505,9 +505,11 @@ test.describe('BrowserPangu', () => {
 
       const result = await page.evaluate(() => document.getElementById('test')!.textContent);
 
-      // Should add spaces where needed but not double up
+      // CJK-to-half-width fragment boundaries get spaces, without doubling up.
+      // "EAS" + "build" stays joined: a boundary between two half-width text
+      // nodes is not a word boundary the algorithm can know about
       expect(result).not.toContain('  ');
-      expect(result).toBe('整天等 EAS build 就飽了啊，每次 build 都要跑十幾二十分鐘');
+      expect(result).toBe('整天等 EASbuild 就飽了啊，每次 build 都要跑十幾二十分鐘');
     });
 
     test('handle spacing edge cases correctly', async ({ page }) => {
@@ -568,11 +570,7 @@ test.describe('BrowserPangu', () => {
       expect(fullText).toBe('1,228 個跟隨中');
     });
 
-    // NOTE: Skip: Known limitation with current whitespace detection algorithm
-    // The case where text nodes are not wrapped in spans (測試<span>文字</span>)
-    // doesn't get spacing because the algorithm focuses on preventing double spaces
-    // This is an acceptable trade-off for real-world cases like Twitter/Asana
-    test.skip('handle various whitespace types between span elements', async ({ page }) => {
+    test('handle various whitespace types between span elements', async ({ page }) => {
       // Test case 1: When there IS whitespace between spans, don't add extra space
       const whitespaceTestCases = [
         { name: 'single space', html: '<div><span>測試</span> <span>文字</span></div>' },
@@ -612,38 +610,45 @@ test.describe('BrowserPangu', () => {
         expect(fullText).toBe('測試 文字');
       }
 
-      // Test case 2: The limitation of current approach
-      // When there is NO whitespace between spans and text nodes are the only children,
-      // the current algorithm doesn't add space because it can't find a suitable location
+      // Test case 2: Adjacent CJK spans need no space, so none is added
       await page.setContent('<div><span>測試</span><span>文字</span></div>');
 
       await page.evaluate(() => {
         pangu.spacingNode(document.body);
       });
 
-      // Currently this doesn't work as expected - no space is added
-      const noSpaceResult = await page.evaluate(() => {
+      const cjkOnlyResult = await page.evaluate(() => {
         return document.body.textContent?.trim();
       });
 
-      // This is a known limitation - when spans are directly adjacent with no whitespace
-      // and each contains only a text node, the algorithm doesn't know where to insert space
-      expect(noSpaceResult).toBe('測試文字'); // Currently no space is added
+      expect(cjkOnlyResult).toBe('測試文字');
 
-      // However, if we have a different structure where text nodes can have siblings,
-      // or there's some whitespace, it works correctly
-      await page.setContent('<div>測試<span>文字</span></div>');
+      // Test case 3: Directly adjacent spans with no whitespace get a space
+      // when CJK meets half-width across the boundary
+      await page.setContent('<div><span>測試</span><span>English</span></div>');
 
       await page.evaluate(() => {
         pangu.spacingNode(document.body);
       });
 
-      const withSpaceResult = await page.evaluate(() => {
+      const adjacentSpansResult = await page.evaluate(() => {
         return document.body.textContent?.trim();
       });
 
-      // This case works because the first text node is not wrapped in a span
-      expect(withSpaceResult).toBe('測試 文字');
+      expect(adjacentSpansResult).toBe('測試 English');
+
+      // Test case 4: A bare text node directly followed by a span
+      await page.setContent('<div>測試<span>English</span></div>');
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.body);
+      });
+
+      const bareTextResult = await page.evaluate(() => {
+        return document.body.textContent?.trim();
+      });
+
+      expect(bareTextResult).toBe('測試 English');
     });
 
     test('should not insert <pangu> elements in CSS Grid containers', async ({ page }) => {

@@ -230,7 +230,7 @@ test.describe('Visibility Detector', () => {
     expect(result.nestedStartsWithSpace).toBe(false);
   });
 
-  test.skip('should reproduce Google Calendar with autoSpacingPage - with MutationObserver', async ({ page }) => {
+  test('should reproduce Google Calendar with autoSpacingPage - with MutationObserver', async ({ page }) => {
     // This test simulates what happens when content is dynamically added after autoSpacingPage is started
     await page.setContent('<div id="content"></div>');
 
