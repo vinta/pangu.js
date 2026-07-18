@@ -5,27 +5,27 @@ const pangu = new Pangu();
 
 describe('Other Symbols', () => {
   // \u2026
-  it('handle … symbol 只加右空格', () => {
+  it('handle … symbol, only add space on the right', () => {
     expect(pangu.spacingText('前面…後面')).toBe('前面… 後面');
     expect(pangu.spacingText('前面……後面')).toBe('前面…… 後面');
   });
 
   // \u00b7
-  it('handle · symbol 取代', () => {
+  it('handle · symbol, replace with ・', () => {
     expect(pangu.spacingText('前面·後面')).toBe('前面・後面');
     expect(pangu.spacingText('喬治·R·R·馬丁')).toBe('喬治・R・R・馬丁');
     expect(pangu.spacingText('M·奈特·沙马兰')).toBe('M・奈特・沙马兰');
   });
 
   // \u2022
-  it('handle • symbol 取代', () => {
+  it('handle • symbol, replace with ・', () => {
     expect(pangu.spacingText('前面•後面')).toBe('前面・後面');
     expect(pangu.spacingText('喬治•R•R•馬丁')).toBe('喬治・R・R・馬丁');
     expect(pangu.spacingText('M•奈特•沙马兰')).toBe('M・奈特・沙马兰');
   });
 
   // \u2027
-  it('handle ‧ symbol 取代', () => {
+  it('handle ‧ symbol, replace with ・', () => {
     expect(pangu.spacingText('前面‧後面')).toBe('前面・後面');
     expect(pangu.spacingText('喬治‧R‧R‧馬丁')).toBe('喬治・R・R・馬丁');
     expect(pangu.spacingText('M‧奈特‧沙马兰')).toBe('M・奈特・沙马兰');

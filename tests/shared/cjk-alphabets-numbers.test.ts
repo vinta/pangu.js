@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 
 const pangu = new Pangu();
 
-describe('CJK A N 兩邊都加空格', () => {
+describe('CJK A N add space on both sides', () => {
   it('should handle short text', () => {
     expect(pangu.spacingText('中a')).toBe('中 a');
     expect(pangu.spacingText('a中')).toBe('a 中');
