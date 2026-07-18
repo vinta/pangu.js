@@ -19,6 +19,7 @@ var FILE_PATH_CHARS = "[A-Za-z0-9_\\-\\.@\\+\\*]+";
 var UNIX_ABSOLUTE_FILE_PATH = new RegExp(`/(?:\\.?(?:${FILE_PATH_DIRS})|\\.(?:[A-Za-z0-9_\\-]+))(?:/${FILE_PATH_CHARS})*`);
 var UNIX_RELATIVE_FILE_PATH = new RegExp(`(?:\\./)?(?:${FILE_PATH_DIRS})(?:/${FILE_PATH_CHARS})+`);
 var WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
+var ANY_UNIX_FILE_PATH = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}|${UNIX_RELATIVE_FILE_PATH.source})`, "g");
 var ANY_CJK = new RegExp(`[${CJK}]`);
 var CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:]+)(?=[${CJK}${AN}])`, "g");
 var AN_PUNCTUATION_CJK = new RegExp(`([${AN}])([!;,\\?]+)([${CJK}])`, "g");
@@ -37,9 +38,11 @@ var CJK_QUOTE_AN = new RegExp(`([${CJK}])(")([${AN}])`, "g");
 var CJK_SINGLE_QUOTE_BUT_POSSESSIVE = new RegExp(`([${CJK}])('[^s])`, "g");
 var SINGLE_QUOTE_CJK = new RegExp(`(')([${CJK}])`, "g");
 var FIX_POSSESSIVE_SINGLE_QUOTE = new RegExp(`([${AN}${CJK}])( )('s)`, "g");
+var SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, "g");
 var HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, "g");
 var CJK_HASH = new RegExp(`([${CJK}])(#([^ ]))`, "g");
 var HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, "g");
+var CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
 var CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS_WITH_HYPHEN}])([${AN}])`, "g");
 var ANS_OPERATOR_CJK = new RegExp(`([${AN}])([${OPERATORS_WITH_HYPHEN}])([${CJK}])`, "g");
 var ANS_OPERATOR_ANS = new RegExp(`([${AN}])([${OPERATORS_NO_HYPHEN}])([${AN}])`, "g");
@@ -71,6 +74,35 @@ var ANS_CJK = new RegExp(`([${ANS_BEFORE_CJK}])([${CJK}])`, "g");
 var S_A = new RegExp(`(%)([${A}])`, "g");
 var MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 var SOLITARY_NBSP = /(?<=\S)[ ]*\u00a0[ ]*(?=\S)/g;
+var BRACKET_PATTERNS = [
+	{
+		pattern: /<([^<>]*)>/g,
+		open: "<",
+		close: ">"
+	},
+	{
+		pattern: /\(([^()]*)\)/g,
+		open: "(",
+		close: ")"
+	},
+	{
+		pattern: /\[([^\[\]]*)\]/g,
+		open: "[",
+		close: "]"
+	},
+	{
+		pattern: /\{([^{}]*)\}/g,
+		open: "{",
+		close: "}"
+	}
+];
+var fixBracketSpacing = (text) => {
+	for (const { pattern, open, close } of BRACKET_PATTERNS) text = text.replace(pattern, (_match, innerContent) => {
+		if (!innerContent) return `${open}${close}`;
+		return `${open}${innerContent.replace(/^ +| +$/g, "")}${close}`;
+	});
+	return text;
+};
 var PlaceholderReplacer = class {
 	placeholder;
 	startDelimiter;
@@ -95,10 +127,6 @@ var PlaceholderReplacer = class {
 			return this.items[parseInt(index, 10)] || "";
 		});
 	}
-	reset() {
-		this.items = [];
-		this.index = 0;
-	}
 };
 var Pangu = class {
 	version;
@@ -111,7 +139,6 @@ var Pangu = class {
 			return text;
 		}
 		if (text.length <= 1 || !ANY_CJK.test(text)) return text;
-		const self = this;
 		let newText = text;
 		const backtickManager = new PlaceholderReplacer("BACKTICK_CONTENT_", "", "");
 		newText = newText.replace(/`([^`]+)`/g, (_match, content) => {
@@ -123,7 +150,7 @@ var Pangu = class {
 			hasHtmlTags = true;
 			newText = newText.replace(/<\/?[a-zA-Z][a-zA-Z0-9]*(?:\s+[^>]*)?>/g, (match) => {
 				const processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName, attrValue) => {
-					return `${attrName}="${self.spacingText(attrValue)}"`;
+					return `${attrName}="${this.spacingText(attrValue)}"`;
 				});
 				return htmlTagManager.store(processedTag);
 			});
@@ -145,27 +172,18 @@ var Pangu = class {
 		newText = newText.replace(CJK_QUOTE_AN, "$1$2 $3");
 		newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
 		const singleQuoteCJKManager = new PlaceholderReplacer("SINGLE_QUOTE_CJK_PLACEHOLDER_", "", "");
-		const SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, "g");
 		newText = newText.replace(SINGLE_QUOTE_PURE_CJK, (match) => {
 			return singleQuoteCJKManager.store(match);
 		});
 		newText = newText.replace(CJK_SINGLE_QUOTE_BUT_POSSESSIVE, "$1 $2");
 		newText = newText.replace(SINGLE_QUOTE_CJK, "$1 $2");
 		newText = singleQuoteCJKManager.restore(newText);
-		const textLength = newText.length;
 		const slashCount = (newText.match(/\//g) || []).length;
-		if (slashCount === 0) {
-			if (textLength >= 5) newText = newText.replace(HASH_ANS_CJK_HASH, "$1 $2$3$4 $5");
+		if (newText.length >= 5) newText = newText.replace(HASH_ANS_CJK_HASH, "$1 $2$3$4 $5");
+		if (slashCount <= 1) {
 			newText = newText.replace(CJK_HASH, "$1 $2");
 			newText = newText.replace(HASH_CJK, "$1 $3");
-		} else if (slashCount <= 1) {
-			if (textLength >= 5) newText = newText.replace(HASH_ANS_CJK_HASH, "$1 $2$3$4 $5");
-			newText = newText.replace(CJK_HASH, "$1 $2");
-			newText = newText.replace(HASH_CJK, "$1 $3");
-		} else {
-			if (textLength >= 5) newText = newText.replace(HASH_ANS_CJK_HASH, "$1 $2$3$4 $5");
-			newText = newText.replace(new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`), "$1$2 $3");
-		}
+		} else newText = newText.replace(CJK_FINAL_HASHTAG, "$1$2 $3");
 		const compoundWordManager = new PlaceholderReplacer("COMPOUND_WORD_PLACEHOLDER_", "", "");
 		newText = newText.replace(/\b(?:[A-Za-z0-9]*[a-z][A-Za-z0-9]*-[A-Za-z0-9]+|[A-Za-z0-9]+-[A-Za-z0-9]*[a-z][A-Za-z0-9]*|[A-Za-z]+-[0-9]+|[A-Za-z]+[0-9]+-[A-Za-z0-9]+)(?:-[A-Za-z0-9]+)*\b/g, (match) => {
 			return compoundWordManager.store(match);
@@ -193,8 +211,7 @@ var Pangu = class {
 		newText = newText.replace(UNIX_RELATIVE_FILE_PATH_SLASH_CJK, "$1 $2");
 		if (slashCount === 1) {
 			const filePathManager = new PlaceholderReplacer("FILE_PATH_PLACEHOLDER_", "", "");
-			const allFilePathPattern = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}|${UNIX_RELATIVE_FILE_PATH.source})`, "g");
-			newText = newText.replace(allFilePathPattern, (match) => {
+			newText = newText.replace(ANY_UNIX_FILE_PATH, (match) => {
 				return filePathManager.store(match);
 			});
 			newText = newText.replace(CJK_SLASH_CJK, "$1 $2 $3");
@@ -214,34 +231,6 @@ var Pangu = class {
 		newText = newText.replace(ANS_CJK, "$1 $2");
 		newText = newText.replace(S_A, "$1 $2");
 		newText = newText.replace(MIDDLE_DOT, "・");
-		const fixBracketSpacing = (text) => {
-			for (const { pattern, open, close } of [
-				{
-					pattern: /<([^<>]*)>/g,
-					open: "<",
-					close: ">"
-				},
-				{
-					pattern: /\(([^()]*)\)/g,
-					open: "(",
-					close: ")"
-				},
-				{
-					pattern: /\[([^\[\]]*)\]/g,
-					open: "[",
-					close: "]"
-				},
-				{
-					pattern: /\{([^{}]*)\}/g,
-					open: "{",
-					close: "}"
-				}
-			]) text = text.replace(pattern, (_match, innerContent) => {
-				if (!innerContent) return `${open}${close}`;
-				return `${open}${innerContent.replace(/^ +| +$/g, "")}${close}`;
-			});
-			return text;
-		};
 		newText = fixBracketSpacing(newText);
 		if (hasHtmlTags) newText = htmlTagManager.restore(newText);
 		newText = backtickManager.restore(newText);

@@ -62,6 +62,9 @@ const UNIX_RELATIVE_FILE_PATH = new RegExp(`(?:\\./)?(?:${FILE_PATH_DIRS})(?:/${
 // Windows paths: C:\Users\name\, D:\Program Files\, C:\Windows\System32
 const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
 
+// Union of Unix path patterns, used to protect file paths during single-slash operator processing
+const ANY_UNIX_FILE_PATH = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}|${UNIX_RELATIVE_FILE_PATH.source})`, 'g');
+
 const ANY_CJK = new RegExp(`[${CJK}]`);
 
 // Handle punctuation after CJK - add space but don't convert to full-width
@@ -103,10 +106,14 @@ const CJK_QUOTE_AN = new RegExp(`([${CJK}])(")([${AN}])`, 'g');
 const CJK_SINGLE_QUOTE_BUT_POSSESSIVE = new RegExp(`([${CJK}])('[^s])`, 'g');
 const SINGLE_QUOTE_CJK = new RegExp(`(')([${CJK}])`, 'g');
 const FIX_POSSESSIVE_SINGLE_QUOTE = new RegExp(`([${AN}${CJK}])( )('s)`, 'g');
+// Pattern to match single quotes around pure CJK text (no spaces, no other characters)
+const SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, 'g');
 
 const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, 'g');
 const CJK_HASH = new RegExp(`([${CJK}])(#([^ ]))`, 'g');
 const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, 'g');
+// In file path context (multiple slashes), only a final hashtag not preceded by a slash gets a space
+const CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
 
 // The symbol part only includes + - * = & (excluding | / < >)
 const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS_WITH_HYPHEN}])([${AN}])`, 'g');
@@ -175,6 +182,35 @@ const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 // \u00a0 is not \S so the guards also keep string-edge NBSPs and longer whitespace runs intact
 const SOLITARY_NBSP = /(?<=\S)[ ]*\u00a0[ ]*(?=\S)/g;
 
+// Brackets: <fcontentl> (fcontentl) [fcontentl] {fcontentl}
+// f: the first character inside the brackets
+// l: the last character inside the brackets
+// content: the content inside the brackets but exclude the first and last characters
+// DO NOT change the first and last characters inside brackets AT ALL
+// ONLY spacing the content between them
+const BRACKET_PATTERNS = [
+  { pattern: /<([^<>]*)>/g, open: '<', close: '>' },
+  { pattern: /\(([^()]*)\)/g, open: '(', close: ')' },
+  { pattern: /\[([^\[\]]*)\]/g, open: '[', close: ']' },
+  { pattern: /\{([^{}]*)\}/g, open: '{', close: '}' },
+];
+
+// Fix spacing inside brackets according to the above rules:
+// Ensure no unwanted spaces immediately after opening or before closing brackets
+const fixBracketSpacing = (text: string) => {
+  for (const { pattern, open, close } of BRACKET_PATTERNS) {
+    text = text.replace(pattern, (_match, innerContent) => {
+      if (!innerContent) {
+        return `${open}${close}`;
+      }
+      // Remove spaces at the very beginning and end of content
+      const trimmedContent = innerContent.replace(/^ +| +$/g, '');
+      return `${open}${trimmedContent}${close}`;
+    });
+  }
+  return text;
+};
+
 class PlaceholderReplacer {
   private items: string[] = [];
   private index = 0;
@@ -200,11 +236,6 @@ class PlaceholderReplacer {
       return this.items[parseInt(index, 10)] || '';
     });
   }
-
-  reset() {
-    this.items = [];
-    this.index = 0;
-  }
 }
 
 export class Pangu {
@@ -223,9 +254,6 @@ export class Pangu {
     if (text.length <= 1 || !ANY_CJK.test(text)) {
       return text;
     }
-
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
 
     let newText = text;
 
@@ -254,7 +282,7 @@ export class Pangu {
         // Process attribute values inside the tag
         const processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName, attrValue) => {
           // Process the attribute value with spacing
-          const processedValue = self.spacingText(attrValue);
+          const processedValue = this.spacingText(attrValue);
           return `${attrName}="${processedValue}"`;
         });
 
@@ -301,9 +329,6 @@ export class Pangu {
     // Process single quotes around pure CJK text differently from mixed content
     const singleQuoteCJKManager = new PlaceholderReplacer('SINGLE_QUOTE_CJK_PLACEHOLDER_', '\uE030', '\uE031');
 
-    // Pattern to match single quotes around pure CJK text (no spaces, no other characters)
-    const SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, 'g');
-
     // Protect pure CJK content in single quotes
     newText = newText.replace(SINGLE_QUOTE_PURE_CJK, (match) => {
       return singleQuoteCJKManager.store(match);
@@ -316,37 +341,21 @@ export class Pangu {
     // Restore protected pure CJK content
     newText = singleQuoteCJKManager.restore(newText);
 
-    // Early return for complex patterns that need longer text
-    const textLength = newText.length;
-
     // Check slash count early to determine hashtag behavior
     const slashCount = (newText.match(/\//g) || []).length;
 
-    // Early return for slash processing if no slashes present
-    if (slashCount === 0) {
-      // Apply normal hashtag spacing without slash considerations
-      // HASH_ANS_CJK_HASH pattern needs at least 5 characters
-      if (textLength >= 5) {
-        newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
-      }
-      newText = newText.replace(CJK_HASH, '$1 $2');
-      newText = newText.replace(HASH_CJK, '$1 $3');
-    } else if (slashCount <= 1) {
+    // HASH_ANS_CJK_HASH pattern needs at least 5 characters
+    if (newText.length >= 5) {
+      newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
+    }
+    if (slashCount <= 1) {
       // Single or no slash - apply normal hashtag spacing
-      // HASH_ANS_CJK_HASH pattern needs at least 5 characters
-      if (textLength >= 5) {
-        newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
-      }
       newText = newText.replace(CJK_HASH, '$1 $2');
       newText = newText.replace(HASH_CJK, '$1 $3');
     } else {
       // Multiple slashes - skip hashtag processing to preserve path structure
       // But add space before final hashtag if it's not preceded by a slash
-      // HASH_ANS_CJK_HASH pattern needs at least 5 characters
-      if (textLength >= 5) {
-        newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
-      }
-      newText = newText.replace(new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`), '$1$2 $3');
+      newText = newText.replace(CJK_FINAL_HASHTAG, '$1$2 $3');
     }
 
     // Protect compound words from operator spacing
@@ -408,8 +417,7 @@ export class Pangu {
       const filePathManager = new PlaceholderReplacer('FILE_PATH_PLACEHOLDER_', '\uE020', '\uE021');
 
       // Store all file paths and replace with placeholders
-      const allFilePathPattern = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}|${UNIX_RELATIVE_FILE_PATH.source})`, 'g');
-      newText = newText.replace(allFilePathPattern, (match) => {
+      newText = newText.replace(ANY_UNIX_FILE_PATH, (match) => {
         return filePathManager.store(match);
       });
 
@@ -441,38 +449,6 @@ export class Pangu {
     newText = newText.replace(S_A, '$1 $2');
 
     newText = newText.replace(MIDDLE_DOT, '・');
-
-    // Brackets: <fcontentl> (fcontentl) [fcontentl] {fcontentl}
-    // f: the first character inside the brackets
-    // l: the last character inside the brackets
-    // content: the content inside the brackets but exclude the first and last characters
-    // DO NOT change the first and last characters inside brackets AT ALL
-    // ONLY spacing the content between them
-
-    // Fix spacing inside brackets according to the above rules:
-    // Ensure no unwanted spaces immediately after opening or before closing brackets
-    const fixBracketSpacing = (text: string) => {
-      // Process all bracket types at once
-      const bracketPatterns = [
-        { pattern: /<([^<>]*)>/g, open: '<', close: '>' },
-        { pattern: /\(([^()]*)\)/g, open: '(', close: ')' },
-        { pattern: /\[([^\[\]]*)\]/g, open: '[', close: ']' },
-        { pattern: /\{([^{}]*)\}/g, open: '{', close: '}' },
-      ];
-
-      for (const { pattern, open, close } of bracketPatterns) {
-        text = text.replace(pattern, (_match, innerContent) => {
-          if (!innerContent) {
-            return `${open}${close}`;
-          }
-          // Remove spaces at the very beginning and end of content
-          const trimmedContent = innerContent.replace(/^ +| +$/g, '');
-          return `${open}${trimmedContent}${close}`;
-        });
-      }
-
-      return text;
-    };
 
     newText = fixBracketSpacing(newText);
 
