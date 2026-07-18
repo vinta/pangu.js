@@ -322,7 +322,7 @@ export class BrowserPangu extends Pangu {
     return this.visibilityDetector.config.enabled && this.visibilityDetector.shouldSkipSpacingAfterNode(node);
   }
 
-  private spacingTextNodesInQueue(textNodes: Node[], onComplete?: () => void) {
+  private spacingTextNodesInQueue(textNodes: Node[]) {
     // When visibility detection is enabled, process all nodes together to maintain context between adjacent nodes
     // This prevents incorrect spacing after hidden elements
     if (this.visibilityDetector.config.enabled) {
@@ -331,20 +331,16 @@ export class BrowserPangu extends Pangu {
         this.taskScheduler.queue.add(() => {
           this.spacingTextNodes(textNodes);
         });
-        if (onComplete) {
-          this.taskScheduler.queue.setOnComplete(onComplete);
-        }
       } else {
         // Synchronous processing
         this.spacingTextNodes(textNodes);
-        onComplete?.();
       }
       return;
     }
 
     // Normal chunked processing when visibility detection is disabled
     const task = (chunkedTextNodes: Node[]) => this.spacingTextNodes(chunkedTextNodes);
-    this.taskScheduler.processInChunks(textNodes, task, onComplete);
+    this.taskScheduler.processInChunks(textNodes, task);
   }
 
   private waitForVideosToLoad(delayMs: number, onLoaded: () => void) {

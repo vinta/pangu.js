@@ -1,7 +1,6 @@
 export class DomWalker {
   public static readonly blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
   public static readonly ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
-  public static readonly presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
   public static readonly spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
   public static readonly spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
   public static readonly ignoredClass = 'no-pangu-spacing';
@@ -21,7 +20,7 @@ export class DomWalker {
           return NodeFilter.FILTER_REJECT;
         }
 
-        // Skip nodes that should be ignored (same as canIgnoreNode check)
+        // Skip nodes that should be ignored
         // We need to check the node itself and its ancestors
         let currentNode = node;
         while (currentNode) {
@@ -55,21 +54,6 @@ export class DomWalker {
     return reverse ? nodes.reverse() : nodes;
   }
 
-  public static canIgnoreNode(node: Node) {
-    let currentNode = node;
-    if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClass(currentNode))) {
-      // We will skip processing any children of ignored elements, so don't need to check all ancestors
-      return true;
-    }
-    while (currentNode.parentNode) {
-      currentNode = currentNode.parentNode;
-      if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   public static isFirstTextChild(parentNode: Node, targetNode: Node) {
     const { childNodes } = parentNode;
 
@@ -98,24 +82,7 @@ export class DomWalker {
     return false;
   }
 
-  private static isSpecificTag(node: Node, tagRegex: RegExp) {
-    return !!(node && node.nodeName && tagRegex.test(node.nodeName));
-  }
-
   private static isContentEditable(node: Node) {
     return node instanceof HTMLElement && (node.isContentEditable || node.getAttribute('g_editable') === 'true');
-  }
-
-  private static hasIgnoredClass(node: Node) {
-    // Check the node itself if it's an element
-    if (node instanceof Element && node.classList.contains(this.ignoredClass)) {
-      return true;
-    }
-
-    // Check the parent node (for text nodes)
-    if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(this.ignoredClass)) {
-      return true;
-    }
-    return false;
   }
 }

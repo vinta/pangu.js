@@ -49,6 +49,8 @@ Note: `taskScheduler.config` and `visibilityDetector.config` are documented publ
 - `stopAutoSpacingPage` has no in-repo caller (it is documented public npm surface, keep unless a major version prunes it)
 - `content-script.ts:9-10` sets both config knobs to values that are already the defaults
 
+Outcome: everything above except `stopAutoSpacingPage` was removed on `refactor/remove-dead-surface`. `TaskQueue.clear` stays: the queue is reachable via the public `taskScheduler.queue` getter.
+
 ## Other verified facts
 
 - `NodePangu` is implemented twice: `src/node/index.ts:6-15` and verbatim in `src/node/index.cjs.ts:8-17` to avoid a circular import. A change to one silently strands CJS consumers.

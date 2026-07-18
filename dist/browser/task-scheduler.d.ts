@@ -6,10 +6,8 @@ export interface TaskSchedulerConfig {
 export declare class TaskQueue {
     private queue;
     private isProcessing;
-    private onComplete?;
     add(task: () => void): void;
     clear(): void;
-    setOnComplete(onComplete?: () => void): void;
     get length(): number;
     private scheduleProcessing;
     private process;
@@ -23,7 +21,5 @@ export declare class TaskScheduler {
     readonly config: TaskSchedulerConfig;
     private taskQueue;
     get queue(): TaskQueue;
-    processInChunks<T>(items: T[], processor: (chunk: T[]) => void, onComplete?: () => void): void;
-    clear(): void;
-    updateConfig(config: Partial<TaskSchedulerConfig>): void;
+    processInChunks<T>(items: T[], processor: (chunk: T[]) => void): void;
 }

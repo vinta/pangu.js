@@ -46,7 +46,6 @@ function isStandaloneQuote(text) {
 var DomWalker = class {
 	static blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
 	static ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
-	static presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
 	static spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
 	static spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
 	static ignoredClass = "no-pangu-spacing";
@@ -69,15 +68,6 @@ var DomWalker = class {
 		while (walker.nextNode()) nodes.push(walker.currentNode);
 		return reverse ? nodes.reverse() : nodes;
 	}
-	static canIgnoreNode(node) {
-		let currentNode = node;
-		if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClass(currentNode))) return true;
-		while (currentNode.parentNode) {
-			currentNode = currentNode.parentNode;
-			if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) return true;
-		}
-		return false;
-	}
 	static isFirstTextChild(parentNode, targetNode) {
 		const { childNodes } = parentNode;
 		for (let i = 0; i < childNodes.length; i++) {
@@ -94,16 +84,8 @@ var DomWalker = class {
 		}
 		return false;
 	}
-	static isSpecificTag(node, tagRegex) {
-		return !!(node && node.nodeName && tagRegex.test(node.nodeName));
-	}
 	static isContentEditable(node) {
 		return node instanceof HTMLElement && (node.isContentEditable || node.getAttribute("g_editable") === "true");
-	}
-	static hasIgnoredClass(node) {
-		if (node instanceof Element && node.classList.contains(this.ignoredClass)) return true;
-		if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(this.ignoredClass)) return true;
-		return false;
 	}
 };
 //#endregion
@@ -111,17 +93,12 @@ var DomWalker = class {
 var TaskQueue = class {
 	queue = [];
 	isProcessing = false;
-	onComplete;
 	add(task) {
 		this.queue.push(task);
 		this.scheduleProcessing();
 	}
 	clear() {
 		this.queue.length = 0;
-		this.onComplete = void 0;
-	}
-	setOnComplete(onComplete) {
-		this.onComplete = onComplete;
 	}
 	get length() {
 		return this.queue.length;
@@ -136,7 +113,6 @@ var TaskQueue = class {
 		while (deadline.timeRemaining() > 0 && this.queue.length > 0) this.queue.shift()?.();
 		this.isProcessing = false;
 		if (this.queue.length > 0) this.scheduleProcessing();
-		else this.onComplete?.();
 	}
 };
 /**
@@ -154,28 +130,17 @@ var TaskScheduler = class {
 	get queue() {
 		return this.taskQueue;
 	}
-	processInChunks(items, processor, onComplete) {
+	processInChunks(items, processor) {
 		if (!this.config.enabled) {
 			processor(items);
-			onComplete?.();
 			return;
 		}
-		if (items.length === 0) {
-			onComplete?.();
-			return;
-		}
-		if (onComplete) this.taskQueue.setOnComplete(onComplete);
+		if (items.length === 0) return;
 		const chunks = [];
 		for (let i = 0; i < items.length; i += this.config.chunkSize) chunks.push(items.slice(i, i + this.config.chunkSize));
 		for (const chunk of chunks) this.taskQueue.add(() => {
 			processor(chunk);
 		});
-	}
-	clear() {
-		this.taskQueue.clear();
-	}
-	updateConfig(config) {
-		Object.assign(this.config, config);
 	}
 };
 //#endregion
@@ -241,11 +206,6 @@ var VisibilityDetector = class {
 			else if (previousNode instanceof Text && previousNode.parentElement && this.isElementVisuallyHidden(previousNode.parentElement)) return true;
 		}
 		return false;
-	}
-	updateConfig(config) {
-		if (config.commonHiddenPatterns) Object.assign(this.config.commonHiddenPatterns, config.commonHiddenPatterns);
-		const { commonHiddenPatterns: _, ...rest } = config;
-		Object.assign(this.config, rest);
 	}
 };
 //#endregion
@@ -421,21 +381,16 @@ var BrowserPangu = class extends Pangu {
 	isHiddenBoundaryAfter(node) {
 		return this.visibilityDetector.config.enabled && this.visibilityDetector.shouldSkipSpacingAfterNode(node);
 	}
-	spacingTextNodesInQueue(textNodes, onComplete) {
+	spacingTextNodesInQueue(textNodes) {
 		if (this.visibilityDetector.config.enabled) {
-			if (this.taskScheduler.config.enabled) {
-				this.taskScheduler.queue.add(() => {
-					this.spacingTextNodes(textNodes);
-				});
-				if (onComplete) this.taskScheduler.queue.setOnComplete(onComplete);
-			} else {
+			if (this.taskScheduler.config.enabled) this.taskScheduler.queue.add(() => {
 				this.spacingTextNodes(textNodes);
-				onComplete?.();
-			}
+			});
+			else this.spacingTextNodes(textNodes);
 			return;
 		}
 		const task = (chunkedTextNodes) => this.spacingTextNodes(chunkedTextNodes);
-		this.taskScheduler.processInChunks(textNodes, task, onComplete);
+		this.taskScheduler.processInChunks(textNodes, task);
 	}
 	waitForVideosToLoad(delayMs, onLoaded) {
 		const videos = Array.from(document.getElementsByTagName("video"));

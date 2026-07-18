@@ -7,7 +7,6 @@ export interface TaskSchedulerConfig {
 export class TaskQueue {
   private queue: (() => void)[] = [];
   private isProcessing = false;
-  private onComplete?: () => void;
 
   add(task: () => void) {
     this.queue.push(task);
@@ -16,11 +15,6 @@ export class TaskQueue {
 
   clear() {
     this.queue.length = 0;
-    this.onComplete = undefined;
-  }
-
-  setOnComplete(onComplete?: () => void) {
-    this.onComplete = onComplete;
   }
 
   get length() {
@@ -44,9 +38,6 @@ export class TaskQueue {
 
     if (this.queue.length > 0) {
       this.scheduleProcessing();
-    } else {
-      // All task completed, call completion callback
-      this.onComplete?.();
     }
   }
 }
@@ -69,22 +60,15 @@ export class TaskScheduler {
     return this.taskQueue;
   }
 
-  processInChunks<T>(items: T[], processor: (chunk: T[]) => void, onComplete?: () => void) {
+  processInChunks<T>(items: T[], processor: (chunk: T[]) => void) {
     if (!this.config.enabled) {
       // Process synchronously if idle processing is disabled
       processor(items);
-      onComplete?.();
       return;
     }
 
     if (items.length === 0) {
-      onComplete?.();
       return;
-    }
-
-    // Set up completion callback
-    if (onComplete) {
-      this.taskQueue.setOnComplete(onComplete);
     }
 
     // Split items into chunks
@@ -99,13 +83,5 @@ export class TaskScheduler {
         processor(chunk);
       });
     }
-  }
-
-  clear() {
-    this.taskQueue.clear();
-  }
-
-  updateConfig(config: Partial<TaskSchedulerConfig>) {
-    Object.assign(this.config, config);
   }
 }
