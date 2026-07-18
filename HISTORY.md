@@ -9,6 +9,7 @@
 - 把 boundary spacing 的判斷邏輯抽成獨立模組
 - 把 sync / async 排程的判斷邏輯集中到同一個內部進入點，公開的 `taskScheduler.config` 和 `visibilityDetector.config` 用法不變
 - 移除幾個文件上沒有的 methods：`taskScheduler.updateConfig()`、`taskScheduler.clear()`、`taskScheduler.queue.setOnComplete()`、`taskScheduler.processInChunks()`、`visibilityDetector.updateConfig()`，設定請直接改 `.config`
+- 移除 `visibilityDetector.config.commonHiddenPatterns` 的五個子開關，隱藏元素的判斷規則不變，現在只由 `enabled` 控制
 - 把 Node.js v18 從 CI 拿掉
 
 ## v7.2.1 / 2026-03-02

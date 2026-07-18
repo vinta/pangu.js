@@ -1,12 +1,5 @@
 export interface VisibilityDetectorConfig {
     enabled: boolean;
-    commonHiddenPatterns: {
-        clipRect: boolean;
-        displayNone: boolean;
-        visibilityHidden: boolean;
-        opacityZero: boolean;
-        heightWidth1px: boolean;
-    };
 }
 export declare class VisibilityDetector {
     readonly config: VisibilityDetectorConfig;

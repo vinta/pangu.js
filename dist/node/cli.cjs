@@ -374,35 +374,21 @@ var TaskScheduler = class {
 	}
 };
 var VisibilityDetector = class {
-	config = {
-		enabled: true,
-		commonHiddenPatterns: {
-			clipRect: true,
-			displayNone: true,
-			visibilityHidden: true,
-			opacityZero: true,
-			heightWidth1px: true
-		}
-	};
+	config = { enabled: true };
 	isElementVisuallyHidden(element) {
 		if (!this.config.enabled) return false;
 		const style = getComputedStyle(element);
-		const patterns = this.config.commonHiddenPatterns;
-		if (patterns.displayNone && style.display === "none") return true;
-		if (patterns.visibilityHidden && style.visibility === "hidden") return true;
-		if (patterns.opacityZero && parseFloat(style.opacity) === 0) return true;
-		if (patterns.clipRect) {
-			const clip = style.clip;
-			if (clip && (clip.includes("rect(1px, 1px, 1px, 1px)") || clip.includes("rect(0px, 0px, 0px, 0px)") || clip.includes("rect(0, 0, 0, 0)"))) return true;
-		}
-		if (patterns.heightWidth1px) {
-			const height = parseInt(style.height, 10);
-			const width = parseInt(style.width, 10);
-			if (height === 1 && width === 1) {
-				const overflow = style.overflow;
-				const position = style.position;
-				if (overflow === "hidden" && position === "absolute") return true;
-			}
+		if (style.display === "none") return true;
+		if (style.visibility === "hidden") return true;
+		if (parseFloat(style.opacity) === 0) return true;
+		const clip = style.clip;
+		if (clip && (clip.includes("rect(1px, 1px, 1px, 1px)") || clip.includes("rect(0px, 0px, 0px, 0px)") || clip.includes("rect(0, 0, 0, 0)"))) return true;
+		const height = parseInt(style.height, 10);
+		const width = parseInt(style.width, 10);
+		if (height === 1 && width === 1) {
+			const overflow = style.overflow;
+			const position = style.position;
+			if (overflow === "hidden" && position === "absolute") return true;
 		}
 		return false;
 	}

@@ -1,24 +1,10 @@
 export interface VisibilityDetectorConfig {
   enabled: boolean;
-  commonHiddenPatterns: {
-    clipRect: boolean;
-    displayNone: boolean;
-    visibilityHidden: boolean;
-    opacityZero: boolean;
-    heightWidth1px: boolean;
-  };
 }
 
 export class VisibilityDetector {
   public readonly config: VisibilityDetectorConfig = {
     enabled: true,
-    commonHiddenPatterns: {
-      clipRect: true, // clip: rect(1px, 1px, 1px, 1px) patterns
-      displayNone: true, // display: none
-      visibilityHidden: true, // visibility: hidden
-      opacityZero: true, // opacity: 0
-      heightWidth1px: true, // height: 1px; width: 1px
-    },
   };
 
   public isElementVisuallyHidden(element: Element) {
@@ -27,45 +13,40 @@ export class VisibilityDetector {
     }
 
     const style = getComputedStyle(element);
-    const patterns = this.config.commonHiddenPatterns;
 
     // Check display: none
-    if (patterns.displayNone && style.display === 'none') {
+    if (style.display === 'none') {
       return true;
     }
 
     // Check visibility: hidden
-    if (patterns.visibilityHidden && style.visibility === 'hidden') {
+    if (style.visibility === 'hidden') {
       return true;
     }
 
     // Check opacity: 0
-    if (patterns.opacityZero && parseFloat(style.opacity) === 0) {
+    if (parseFloat(style.opacity) === 0) {
       return true;
     }
 
     // Check clip: rect patterns (screen reader only content)
-    if (patterns.clipRect) {
-      const clip = style.clip;
-      // Common patterns: rect(1px, 1px, 1px, 1px) or rect(0, 0, 0, 0)
-      if (clip && (clip.includes('rect(1px, 1px, 1px, 1px)') || clip.includes('rect(0px, 0px, 0px, 0px)') || clip.includes('rect(0, 0, 0, 0)'))) {
-        return true;
-      }
+    // Common patterns: rect(1px, 1px, 1px, 1px) or rect(0, 0, 0, 0)
+    const clip = style.clip;
+    if (clip && (clip.includes('rect(1px, 1px, 1px, 1px)') || clip.includes('rect(0px, 0px, 0px, 0px)') || clip.includes('rect(0, 0, 0, 0)'))) {
+      return true;
     }
 
     // Check height: 1px; width: 1px patterns
-    if (patterns.heightWidth1px) {
-      const height = parseInt(style.height, 10);
-      const width = parseInt(style.width, 10);
+    const height = parseInt(style.height, 10);
+    const width = parseInt(style.width, 10);
 
-      if (height === 1 && width === 1) {
-        // Additional checks for common screen reader patterns
-        const overflow = style.overflow;
-        const position = style.position;
+    if (height === 1 && width === 1) {
+      // Additional checks for common screen reader patterns
+      const overflow = style.overflow;
+      const position = style.position;
 
-        if (overflow === 'hidden' && position === 'absolute') {
-          return true;
-        }
+      if (overflow === 'hidden' && position === 'absolute') {
+        return true;
       }
     }
 
