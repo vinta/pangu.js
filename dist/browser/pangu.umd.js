@@ -586,7 +586,7 @@
 				if (node.nodeType === Node.TEXT_NODE && node.textContent) {
 					if (/\s/.test(node.textContent)) whitespaceBetween = true;
 					if (/\S/.test(node.textContent)) contentBetween = true;
-				} else if (node.nodeType === Node.ELEMENT_NODE && DomWalker.collectTextNodes(node).length > 0) contentBetween = true;
+				} else if (node instanceof Element && !DomWalker.isIgnoredElement(node)) for (let child = node.firstChild; child; child = child.nextSibling) scan(child);
 			};
 			let containerOfNext = null;
 			let node = currentBoundaryNode;

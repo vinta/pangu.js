@@ -253,8 +253,12 @@ export class BrowserPangu extends Pangu {
         if (/\S/.test(node.textContent)) {
           contentBetween = true;
         }
-      } else if (node.nodeType === Node.ELEMENT_NODE && DomWalker.collectTextNodes(node).length > 0) {
-        contentBetween = true;
+      } else if (node instanceof Element && !DomWalker.isIgnoredElement(node)) {
+        // Descend so wrapped whitespace counts too. Ignored islands like <code>
+        // stay invisible, matching how the runs themselves are collected
+        for (let child = node.firstChild; child; child = child.nextSibling) {
+          scan(child);
+        }
       }
     };
 

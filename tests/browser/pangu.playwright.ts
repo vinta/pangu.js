@@ -100,6 +100,34 @@ test.describe('BrowserPangu', () => {
       const result = await page.evaluate(() => document.getElementById('container')!.textContent);
       expect(result).toBe('甲Xabc');
     });
+
+    test('not add a space across an unchanged whitespace wrapper between nodes added in one mutation batch', async ({ page }) => {
+      await page.setContent('<div id="container"><span id="existing"> </span></div>');
+
+      // Large pageDelayMs keeps the initial page sweep out of the assertion window
+      await page.evaluate(() => {
+        pangu.autoSpacingPage({ pageDelayMs: 60000 });
+      });
+
+      await page.waitForTimeout(50);
+
+      // The two queued spans sandwich a wrapper whose whitespace already separates them
+      await page.evaluate(() => {
+        const container = document.getElementById('container')!;
+        const existing = document.getElementById('existing')!;
+        const first = document.createElement('span');
+        first.textContent = '甲';
+        const last = document.createElement('span');
+        last.textContent = 'abc';
+        container.insertBefore(first, existing);
+        container.appendChild(last);
+      });
+
+      await page.waitForTimeout(600);
+
+      const result = await page.evaluate(() => document.getElementById('container')!.textContent);
+      expect(result).toBe('甲 abc');
+    });
   });
 
   test.describe('spacingNode()', () => {
@@ -730,6 +758,41 @@ test.describe('BrowserPangu', () => {
 
       const result = await page.evaluate(() => document.getElementById('test')!.textContent);
       expect(result).toBe('字 x');
+    });
+
+    test('should not add a space when a whitespace-only wrapper separates the runs', async ({ page }) => {
+      // The wrapper renders a space, so the runs are already separated
+      await page.setContent('<p id="test">甲<span> </span>abc</p>');
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test')!);
+      });
+
+      const html = await page.evaluate(() => document.getElementById('test')!.innerHTML);
+      expect(html).toBe('甲<span> </span>abc');
+    });
+
+    test('should see whitespace wrapped in nested elements between the runs', async ({ page }) => {
+      await page.setContent('<p id="test">字<span><em> </em></span>x</p>');
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test')!);
+      });
+
+      const html = await page.evaluate(() => document.getElementById('test')!.innerHTML);
+      expect(html).toBe('字<span><em> </em></span>x');
+    });
+
+    test('should keep adding a space across an ignored island with inner whitespace', async ({ page }) => {
+      // Whitespace inside <code> is invisible to the scan, the island stays transparent
+      await page.setContent('<p id="test">字<code>a b</code>x</p>');
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test')!);
+      });
+
+      const html = await page.evaluate(() => document.getElementById('test')!.innerHTML);
+      expect(html).toBe('字<code>a b</code> x');
     });
 
     test('should not insert <pangu> in grid with CJK card content (real-world case)', async ({ page }) => {
