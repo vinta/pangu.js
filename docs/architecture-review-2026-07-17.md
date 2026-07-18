@@ -41,6 +41,8 @@ Note: `taskScheduler.config` and `visibilityDetector.config` are documented publ
 
 Outcome (phase 1, 2026-07-18): the scheduling decision now lives behind one private `schedule()` seam (structural `8801602`, behavioral `5bcad19`, spec #290). The observer drain is mode-blind: sync mode gained cross-node boundary spacing, and the merged runs are now sorted into reverse document order with per-run dedupe, which also fixed wrong-direction pair evaluation in the default queued mode for append-style batches. `processInChunks`, the unreachable sync fallback, the doubled visibility guards, and the 28-line call-flow comment are gone. The config knobs stay public surface; replacing them with explicit sync/async methods remains the major-gated phase 2. Phase 2 (#291) is parked until `requestIdleCallback` is supported by default in all major browsers: the enabled knob is the escape hatch for Safari, which only supports it behind a preference flag, and the idle queue calls it bare.
 
+Addendum (2026-07-18, v8 branch `refactor/simplify-codebase`): two statements above went stale. `visibilityDetector.config` left the public surface entirely, removed in `c4a52b7` together with the chunked scheduling path it selected (recorded in HISTORY.md under v8.0.0, after `358f68e` first fixed the chunk-seam gap #292). And `taskScheduler.config.enabled` is no longer Safari's escape hatch: `69bf9b8` falls back to synchronous spacing automatically when `requestIdleCallback` is unavailable. #291 stays parked, with its stale assumptions recorded on the issue.
+
 ## Dead surface inventory (verified, zero callers)
 
 - `DomWalker.canIgnoreNode` (`dom-walker.ts:58-71`), its rules live duplicated in the TreeWalker filter at `dom-walker.ts:24-43`
