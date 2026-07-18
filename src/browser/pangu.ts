@@ -139,9 +139,11 @@ export class BrowserPangu extends Pangu {
           continue;
         }
 
-        const currentBoundaryNode = this.findCurrentBoundaryNode(currentTextNode);
-        const nextBoundaryNode = this.findNextBoundaryNode(nextTextNode);
-        const { whitespaceBetween, contentBetween } = this.scanBetweenTextRuns(currentTextNode, nextTextNode);
+        const currentBoundaryNode = DomWalker.findBoundaryNode(currentTextNode, 'last');
+        const nextBoundaryNode = DomWalker.findBoundaryNode(nextTextNode, 'first');
+        const currentAncestor = DomWalker.findScanAncestor(currentTextNode, 'last');
+        const nextAncestor = DomWalker.findScanAncestor(nextTextNode, 'first');
+        const { whitespaceBetween, contentBetween } = this.scanBetweenTextRuns(currentAncestor, nextAncestor, nextTextNode);
 
         // Stable bindings for the lazy facts: the loop variables are reassigned across iterations
         const currentRun = currentTextNode;
@@ -229,24 +231,6 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  // The highest ancestor that the current text node ends
-  private findCurrentBoundaryNode(currentTextNode: Node) {
-    let currentNode: Node = currentTextNode;
-    while (currentNode.parentNode && !DomWalker.spaceSensitiveTags.test(currentNode.nodeName) && DomWalker.isLastTextChild(currentNode.parentNode, currentNode)) {
-      currentNode = currentNode.parentNode;
-    }
-    return currentNode;
-  }
-
-  // The highest ancestor that the next text node starts
-  private findNextBoundaryNode(nextTextNode: Node) {
-    let nextNode: Node = nextTextNode;
-    while (nextNode.parentNode && !DomWalker.spaceSensitiveTags.test(nextNode.nodeName) && DomWalker.isFirstTextChild(nextNode.parentNode, nextNode)) {
-      nextNode = nextNode.parentNode;
-    }
-    return nextNode;
-  }
-
   private findPreviousElementLastChar(textNode: Node) {
     const previousNode = textNode.previousSibling;
     if (previousNode && previousNode.nodeType === Node.ELEMENT_NODE && previousNode.textContent) {
@@ -255,20 +239,7 @@ export class BrowserPangu extends Pangu {
     return null;
   }
 
-  private scanBetweenTextRuns(currentTextNode: Node, nextTextNode: Node) {
-    // We need to check at different levels of the DOM tree
-    // First, find the highest ancestor that contains only the current text node
-    let currentAncestor: Node = currentTextNode;
-    while (currentAncestor.parentNode && DomWalker.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !DomWalker.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) {
-      currentAncestor = currentAncestor.parentNode;
-    }
-
-    // Find the highest ancestor that contains only the next text node
-    let nextAncestor: Node = nextTextNode;
-    while (nextAncestor.parentNode && DomWalker.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !DomWalker.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) {
-      nextAncestor = nextAncestor.parentNode;
-    }
-
+  private scanBetweenTextRuns(currentAncestor: Node, nextAncestor: Node, nextTextNode: Node) {
     // Scan the siblings between the two ancestors. Whitespace text means the runs
     // are already separated. Collectable text (checked through the same DomWalker
     // rules that build the runs, so ignored islands like <code> do not count)

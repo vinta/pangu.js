@@ -20,8 +20,6 @@ export declare class BrowserPangu extends Pangu {
     private spacingTextNodes;
     private applyTextRunSpacing;
     private insertPanguElement;
-    private findCurrentBoundaryNode;
-    private findNextBoundaryNode;
     private findPreviousElementLastChar;
     private scanBetweenTextRuns;
     private isHiddenBoundaryBefore;

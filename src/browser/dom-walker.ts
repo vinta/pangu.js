@@ -54,6 +54,28 @@ export class DomWalker {
     return reverse ? nodes.reverse() : nodes;
   }
 
+  // The highest ancestor that starts (edge 'first') or ends (edge 'last') with the
+  // given text node. Stops ON a space-sensitive element, so the returned boundary
+  // node can be the <a> itself
+  public static findBoundaryNode(textNode: Node, edge: 'first' | 'last') {
+    let node: Node = textNode;
+    while (node.parentNode && !this.spaceSensitiveTags.test(node.nodeName) && (edge === 'first' ? this.isFirstTextChild(node.parentNode, node) : this.isLastTextChild(node.parentNode, node))) {
+      node = node.parentNode;
+    }
+    return node;
+  }
+
+  // Same climb with the between-runs scan's historical stop rule: stops BELOW a
+  // space-sensitive parent, so the returned ancestor never exits the <a>. The
+  // divergence from findBoundaryNode is compensated inside scanBetweenTextRuns
+  public static findScanAncestor(textNode: Node, edge: 'first' | 'last') {
+    let node: Node = textNode;
+    while (node.parentNode && (edge === 'first' ? this.isFirstTextChild(node.parentNode, node) : this.isLastTextChild(node.parentNode, node)) && !this.spaceSensitiveTags.test(node.parentNode.nodeName)) {
+      node = node.parentNode;
+    }
+    return node;
+  }
+
   public static isFirstTextChild(parentNode: Node, targetNode: Node) {
     const { childNodes } = parentNode;
 

@@ -315,6 +315,16 @@
 			while (walker.nextNode()) nodes.push(walker.currentNode);
 			return reverse ? nodes.reverse() : nodes;
 		}
+		static findBoundaryNode(textNode, edge) {
+			let node = textNode;
+			while (node.parentNode && !this.spaceSensitiveTags.test(node.nodeName) && (edge === "first" ? this.isFirstTextChild(node.parentNode, node) : this.isLastTextChild(node.parentNode, node))) node = node.parentNode;
+			return node;
+		}
+		static findScanAncestor(textNode, edge) {
+			let node = textNode;
+			while (node.parentNode && (edge === "first" ? this.isFirstTextChild(node.parentNode, node) : this.isLastTextChild(node.parentNode, node)) && !this.spaceSensitiveTags.test(node.parentNode.nodeName)) node = node.parentNode;
+			return node;
+		}
 		static isFirstTextChild(parentNode, targetNode) {
 			const { childNodes } = parentNode;
 			for (let i = 0; i < childNodes.length; i++) {
@@ -502,9 +512,11 @@
 				if (currentTextNode instanceof Text) this.applyTextRunSpacing(currentTextNode);
 				if (nextTextNode) {
 					if (!(currentTextNode instanceof Text) || !(nextTextNode instanceof Text)) continue;
-					const currentBoundaryNode = this.findCurrentBoundaryNode(currentTextNode);
-					const nextBoundaryNode = this.findNextBoundaryNode(nextTextNode);
-					const { whitespaceBetween, contentBetween } = this.scanBetweenTextRuns(currentTextNode, nextTextNode);
+					const currentBoundaryNode = DomWalker.findBoundaryNode(currentTextNode, "last");
+					const nextBoundaryNode = DomWalker.findBoundaryNode(nextTextNode, "first");
+					const currentAncestor = DomWalker.findScanAncestor(currentTextNode, "last");
+					const nextAncestor = DomWalker.findScanAncestor(nextTextNode, "first");
+					const { whitespaceBetween, contentBetween } = this.scanBetweenTextRuns(currentAncestor, nextAncestor, nextTextNode);
 					const currentRun = currentTextNode;
 					const nextRun = nextTextNode;
 					switch (decideBoundarySpacing({
@@ -570,26 +582,12 @@
 				if (panguSpace.parentNode) panguSpace.parentNode.removeChild(panguSpace);
 			}
 		}
-		findCurrentBoundaryNode(currentTextNode) {
-			let currentNode = currentTextNode;
-			while (currentNode.parentNode && !DomWalker.spaceSensitiveTags.test(currentNode.nodeName) && DomWalker.isLastTextChild(currentNode.parentNode, currentNode)) currentNode = currentNode.parentNode;
-			return currentNode;
-		}
-		findNextBoundaryNode(nextTextNode) {
-			let nextNode = nextTextNode;
-			while (nextNode.parentNode && !DomWalker.spaceSensitiveTags.test(nextNode.nodeName) && DomWalker.isFirstTextChild(nextNode.parentNode, nextNode)) nextNode = nextNode.parentNode;
-			return nextNode;
-		}
 		findPreviousElementLastChar(textNode) {
 			const previousNode = textNode.previousSibling;
 			if (previousNode && previousNode.nodeType === Node.ELEMENT_NODE && previousNode.textContent) return previousNode.textContent.slice(-1);
 			return null;
 		}
-		scanBetweenTextRuns(currentTextNode, nextTextNode) {
-			let currentAncestor = currentTextNode;
-			while (currentAncestor.parentNode && DomWalker.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !DomWalker.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) currentAncestor = currentAncestor.parentNode;
-			let nextAncestor = nextTextNode;
-			while (nextAncestor.parentNode && DomWalker.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !DomWalker.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) nextAncestor = nextAncestor.parentNode;
+		scanBetweenTextRuns(currentAncestor, nextAncestor, nextTextNode) {
 			let whitespaceBetween = false;
 			let contentBetween = false;
 			let containerOfNext = null;
