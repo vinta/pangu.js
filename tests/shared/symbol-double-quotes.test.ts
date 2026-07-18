@@ -18,6 +18,11 @@ describe('Symbol " "', () => {
     expect(pangu.spacingText('我們也不可以說"We invited the reverend to dinner."')).toBe('我們也不可以說 "We invited the reverend to dinner."');
     expect(pangu.spacingText('"We invited the Rev. Darling."我們也不可以說')).toBe('"We invited the Rev. Darling." 我們也不可以說');
     expect(pangu.spacingText('它應該這樣使用："We invited"')).toBe('它應該這樣使用："We invited"');
+
+    // Full paragraph with multiple quoted segments and solitary &nbsp; (\u00a0)
+    // prettier-ignore
+    expect(pangu.spacingText('Rev. (Reverend；牧師的尊稱)這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We invited the Rev. Alan Darling." 或\u00a0 "We\u00a0invited the Rev. Mr. Darling."，而非"We invited the Rev. Darling."我們也不可以說"We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 rev. 是 review 的縮寫，算是雙關語)'))
+                       .toBe('Rev. (Reverend；牧師的尊稱) 這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We invited the Rev. Alan Darling." 或 "We invited the Rev. Mr. Darling."，而非 "We invited the Rev. Darling." 我們也不可以說 "We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 rev. 是 review 的縮寫，算是雙關語)');
   });
 
   // Straight quotes cannot distinguish opening from closing, so quotes are paired

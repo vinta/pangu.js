@@ -102,6 +102,9 @@ describe('Symbol /', () => {
     // Paths ending with slash before CJK
     expect(pangu.spacingText('目錄/usr/bin/包含執行檔')).toBe('目錄 /usr/bin/ 包含執行檔');
     expect(pangu.spacingText('資料夾/etc/nginx/存放設定')).toBe('資料夾 /etc/nginx/ 存放設定');
+
+    // Glob pattern
+    expect(pangu.spacingText('聽說桐島rm -rf /*了')).toBe('聽說桐島 rm -rf /* 了');
   });
 
   it('handle / symbol as Unix relative file path', () => {
