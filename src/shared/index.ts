@@ -170,6 +170,11 @@ const S_A = new RegExp(`(%)([${A}])`, 'g');
 
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
+// A run of spaces holding exactly one NBSP (\u00a0), bounded by non-whitespace, becomes one space
+// Runs of 2+ NBSPs are deliberate formatting (e.g. paragraph indentation) and are preserved
+// \u00a0 is not \S so the guards also keep string-edge NBSPs and longer whitespace runs intact
+const SOLITARY_NBSP = /(?<=\S)[ ]*\u00a0[ ]*(?=\S)/g;
+
 class PlaceholderReplacer {
   private items: string[] = [];
   private index = 0;
@@ -256,6 +261,9 @@ export class Pangu {
         return htmlTagManager.store(processedTag);
       });
     }
+
+    // Normalize a solitary NBSP amid prose to a regular space before any spacing rules run
+    newText = newText.replace(SOLITARY_NBSP, ' ');
 
     // Handle multiple dots first (before single period)
     newText = newText.replace(DOTS_CJK, '$1 $2');
