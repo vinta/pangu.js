@@ -37,6 +37,7 @@ No task in progress
 
 ### Medium Priority
 
+- [ ] Architecture deepening candidates (extension settings module, spacing eligibility policy, BrowserPangu interface) - see docs/architecture-review-2026-07-17.md
 - [ ] Change icon or badge to reflect the current `spacing_mode`
 - [ ] CSS Visibility detector with `chrome.declarativeContent.PageStateMatcher({css: [".hide"]})`?
 - [ ] Fix issue #155 - DO NOT spacing URL

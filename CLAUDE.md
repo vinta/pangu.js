@@ -176,7 +176,7 @@ dist/                           # Library builds
 ```typescript
 interface Settings {
   spacing_mode: 'spacing_when_load' | 'spacing_when_click';
-  spacing_rule: 'blacklist' | 'whitelist';
+  filter_mode: 'blacklist' | 'whitelist';
   blacklist: string[];
   whitelist: string[];
   is_mute_sound_effects: boolean;
@@ -209,7 +209,7 @@ interface Settings {
 
 - **TreeWalker Migration**: Replaced XPath with TreeWalker API for ~5.5x performance gain
 - **Idle Processing**: Heavy operations use requestIdleCallback() to prevent blocking
-- **Visibility Checks**: Skip spacing for CSS-hidden elements (disabled by default)
+- **Visibility Checks**: Skip spacing for CSS-hidden elements (enabled by default)
 - **Debounced MutationObserver**: Batches DOM mutations for efficient processing
 
 ### Paranoid Text Spacing Algorithm v7

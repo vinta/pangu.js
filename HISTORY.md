@@ -1,5 +1,13 @@
 # History
 
+## v7.3.0 / 2026-xx-xx
+
+- 修正引號緊鄰日文假名時，空格規則跟漢字不一致的問題
+- 修正單獨出現的 `&nbsp;` 會造成空格判斷錯誤的問題，現在會先把它當成一般的半形空格
+- 把 boundary spacing 的判斷邏輯抽成獨立模組
+- 移除幾個文件上沒有的 methods：`taskScheduler.updateConfig()`、`taskScheduler.clear()`、`taskScheduler.queue.setOnComplete()`、`taskScheduler.processInChunks()` 的 `onComplete` 參數、`visibilityDetector.updateConfig()`，設定請直接改 `.config`
+- 把 Node.js v18 從 CI 拿掉
+
 ## v7.2.1 / 2026-03-02
 
 - 修正在 CSS Grid 和 Flexbox 容器裡插入 `<pangu>` 元素會破壞排版的問題

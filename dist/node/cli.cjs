@@ -72,6 +72,7 @@ var CJK_ANS = new RegExp(`([${CJK}])([${ANS_CJK_AFTER}])`, "g");
 var ANS_CJK = new RegExp(`([${ANS_BEFORE_CJK}])([${CJK}])`, "g");
 var S_A = new RegExp(`(%)([${A}])`, "g");
 var MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
+var SOLITARY_NBSP = /(?<=\S)[ ]*\u00a0[ ]*(?=\S)/g;
 var PlaceholderReplacer = class {
 	placeholder;
 	startDelimiter;
@@ -104,7 +105,7 @@ var PlaceholderReplacer = class {
 var Pangu = class {
 	version;
 	constructor() {
-		this.version = "7.2.1";
+		this.version = "7.3.0";
 	}
 	spacingText(text) {
 		if (typeof text !== "string") {
@@ -129,6 +130,7 @@ var Pangu = class {
 				return htmlTagManager.store(processedTag);
 			});
 		}
+		newText = newText.replace(SOLITARY_NBSP, " ");
 		newText = newText.replace(DOTS_CJK, "$1 $2");
 		newText = newText.replace(CJK_PUNCTUATION, "$1$2 ");
 		newText = newText.replace(AN_PUNCTUATION_CJK, "$1$2 $3");
@@ -251,13 +253,53 @@ var Pangu = class {
 		return this.spacingText(text) === text;
 	}
 };
-new Pangu();
+var pangu$1 = new Pangu();
 //#endregion
 //#region dist/browser/pangu.js
+var QUOTE = /["\u201c\u201d]/;
+function decideBoundarySpacing(context) {
+	if (context.spaceLikeSiblingAfterCurrent) return "none";
+	if (context.currentEndsWithSpace || context.nextStartsWithSpace || context.whitespaceBetween) return "none";
+	if (!needsBoundarySpace(context.currentLast, context.nextFirst)) return "none";
+	if (context.spaceLikeSiblingAfterCurrentBoundary || context.currentBoundaryIsBlock) return "none";
+	if (!context.nextBoundaryIsSpaceSensitive) {
+		if (context.nextBoundaryIsIgnored || context.nextBoundaryIsBlock || context.spaceLikeSiblingBeforeNext || context.hiddenBoundaryBefore()) return "none";
+		return "prepend-next";
+	}
+	if (!context.currentBoundaryIsSpaceSensitive) {
+		if (context.hiddenBoundaryAfter()) return "none";
+		return "append-current";
+	}
+	if (context.spaceLikeSiblingBeforeNextBoundary || context.hiddenBoundaryAfter()) return "none";
+	if (context.inGridOrFlexContainer()) return "none";
+	return "insert-element";
+}
+function decideTextRunSpacing(context) {
+	const verdicts = [];
+	let { text } = context;
+	if (text.startsWith(" ") && context.hiddenBoundaryBefore()) {
+		verdicts.push("trim-leading-space");
+		text = text.substring(1);
+	}
+	if (isStandaloneQuote(text)) {
+		if (context.previousElementLastChar !== null && ANY_CJK.test(context.previousElementLastChar)) verdicts.push("prepend-space");
+	} else verdicts.push("apply-text-spacing");
+	return verdicts;
+}
+function needsBoundarySpace(currentLast, nextFirst) {
+	const pair = `${currentLast}${nextFirst}`;
+	if (pangu$1.spacingText(pair) === pair) return false;
+	return !isQuoteNextToCjk(currentLast, nextFirst);
+}
+function isQuoteNextToCjk(currentLast, nextFirst) {
+	return QUOTE.test(currentLast) && ANY_CJK.test(nextFirst) || ANY_CJK.test(currentLast) && QUOTE.test(nextFirst);
+}
+function isStandaloneQuote(text) {
+	return text.length === 1 && QUOTE.test(text);
+}
 var DomWalker = class {
 	static blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
 	static ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
-	static presentationalTags = /^(b|code|del|em|i|s|strong|kbd)$/i;
 	static spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
 	static spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
 	static ignoredClass = "no-pangu-spacing";
@@ -280,15 +322,6 @@ var DomWalker = class {
 		while (walker.nextNode()) nodes.push(walker.currentNode);
 		return reverse ? nodes.reverse() : nodes;
 	}
-	static canIgnoreNode(node) {
-		let currentNode = node;
-		if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode) || this.hasIgnoredClass(currentNode))) return true;
-		while (currentNode.parentNode) {
-			currentNode = currentNode.parentNode;
-			if (currentNode && (this.isSpecificTag(currentNode, this.ignoredTags) || this.isContentEditable(currentNode))) return true;
-		}
-		return false;
-	}
 	static isFirstTextChild(parentNode, targetNode) {
 		const { childNodes } = parentNode;
 		for (let i = 0; i < childNodes.length; i++) {
@@ -305,32 +338,19 @@ var DomWalker = class {
 		}
 		return false;
 	}
-	static isSpecificTag(node, tagRegex) {
-		return !!(node && node.nodeName && tagRegex.test(node.nodeName));
-	}
 	static isContentEditable(node) {
 		return node instanceof HTMLElement && (node.isContentEditable || node.getAttribute("g_editable") === "true");
-	}
-	static hasIgnoredClass(node) {
-		if (node instanceof Element && node.classList.contains(this.ignoredClass)) return true;
-		if (node.parentNode && node.parentNode instanceof Element && node.parentNode.classList.contains(this.ignoredClass)) return true;
-		return false;
 	}
 };
 var TaskQueue = class {
 	queue = [];
 	isProcessing = false;
-	onComplete;
 	add(task) {
 		this.queue.push(task);
 		this.scheduleProcessing();
 	}
 	clear() {
 		this.queue.length = 0;
-		this.onComplete = void 0;
-	}
-	setOnComplete(onComplete) {
-		this.onComplete = onComplete;
 	}
 	get length() {
 		return this.queue.length;
@@ -345,7 +365,6 @@ var TaskQueue = class {
 		while (deadline.timeRemaining() > 0 && this.queue.length > 0) this.queue.shift()?.();
 		this.isProcessing = false;
 		if (this.queue.length > 0) this.scheduleProcessing();
-		else this.onComplete?.();
 	}
 };
 /**
@@ -363,28 +382,17 @@ var TaskScheduler = class {
 	get queue() {
 		return this.taskQueue;
 	}
-	processInChunks(items, processor, onComplete) {
+	processInChunks(items, processor) {
 		if (!this.config.enabled) {
 			processor(items);
-			onComplete?.();
 			return;
 		}
-		if (items.length === 0) {
-			onComplete?.();
-			return;
-		}
-		if (onComplete) this.taskQueue.setOnComplete(onComplete);
+		if (items.length === 0) return;
 		const chunks = [];
 		for (let i = 0; i < items.length; i += this.config.chunkSize) chunks.push(items.slice(i, i + this.config.chunkSize));
 		for (const chunk of chunks) this.taskQueue.add(() => {
 			processor(chunk);
 		});
-	}
-	clear() {
-		this.taskQueue.clear();
-	}
-	updateConfig(config) {
-		Object.assign(this.config, config);
 	}
 };
 var VisibilityDetector = class {
@@ -449,11 +457,6 @@ var VisibilityDetector = class {
 		}
 		return false;
 	}
-	updateConfig(config) {
-		if (config.commonHiddenPatterns) Object.assign(this.config.commonHiddenPatterns, config.commonHiddenPatterns);
-		const { commonHiddenPatterns: _, ...rest } = config;
-		Object.assign(this.config, rest);
-	}
 };
 function once(func) {
 	let executed = false;
@@ -462,6 +465,9 @@ function once(func) {
 		executed = true;
 		return func(...args);
 	};
+}
+function isSpaceLikeSibling(node) {
+	return !!node && DomWalker.spaceLikeTags.test(node.nodeName);
 }
 function debounce(func, delay, mustRunDelay = Infinity) {
 	let timer = null;
@@ -521,116 +527,118 @@ var BrowserPangu = class extends Pangu {
 		for (let i = 0; i < textNodes.length; i++) {
 			currentTextNode = textNodes[i];
 			if (!currentTextNode) continue;
-			if (currentTextNode instanceof Text) {
-				if (this.visibilityDetector.config.enabled && currentTextNode.data.startsWith(" ") && this.visibilityDetector.shouldSkipSpacingBeforeNode(currentTextNode)) currentTextNode.data = currentTextNode.data.substring(1);
-				if (currentTextNode.data.length === 1 && /["\u201c\u201d]/.test(currentTextNode.data)) {
-					if (currentTextNode.previousSibling) {
-						const prevNode = currentTextNode.previousSibling;
-						if (prevNode.nodeType === Node.ELEMENT_NODE && prevNode.textContent) {
-							const lastChar = prevNode.textContent.slice(-1);
-							if (/[\u4e00-\u9fff]/.test(lastChar)) currentTextNode.data = ` ${currentTextNode.data}`;
-						}
-					}
-				} else {
-					const newText = this.spacingText(currentTextNode.data);
-					if (currentTextNode.data !== newText) currentTextNode.data = newText;
-				}
-			}
+			if (currentTextNode instanceof Text) this.applyTextRunSpacing(currentTextNode);
 			if (nextTextNode) {
-				if (currentTextNode.nextSibling && DomWalker.spaceLikeTags.test(currentTextNode.nextSibling.nodeName)) {
-					nextTextNode = currentTextNode;
-					continue;
-				}
 				if (!(currentTextNode instanceof Text) || !(nextTextNode instanceof Text)) continue;
-				const currentEndsWithSpace = currentTextNode.data.endsWith(" ");
-				const nextStartsWithSpace = nextTextNode.data.startsWith(" ");
-				let hasWhitespaceBetween = false;
-				let currentAncestor = currentTextNode;
-				while (currentAncestor.parentNode && DomWalker.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !DomWalker.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) currentAncestor = currentAncestor.parentNode;
-				let nextAncestor = nextTextNode;
-				while (nextAncestor.parentNode && DomWalker.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !DomWalker.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) nextAncestor = nextAncestor.parentNode;
-				let nodeBetween = currentAncestor.nextSibling;
-				while (nodeBetween && nodeBetween !== nextAncestor) {
-					if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
-						hasWhitespaceBetween = true;
+				const currentBoundaryNode = this.findCurrentBoundaryNode(currentTextNode);
+				const nextBoundaryNode = this.findNextBoundaryNode(nextTextNode);
+				const currentRun = currentTextNode;
+				const nextRun = nextTextNode;
+				switch (decideBoundarySpacing({
+					currentLast: currentTextNode.data.slice(-1),
+					nextFirst: nextTextNode.data.slice(0, 1),
+					currentEndsWithSpace: currentTextNode.data.endsWith(" "),
+					nextStartsWithSpace: nextTextNode.data.startsWith(" "),
+					whitespaceBetween: this.hasWhitespaceBetween(currentTextNode, nextTextNode),
+					spaceLikeSiblingAfterCurrent: isSpaceLikeSibling(currentTextNode.nextSibling),
+					spaceLikeSiblingAfterCurrentBoundary: isSpaceLikeSibling(currentBoundaryNode.nextSibling),
+					spaceLikeSiblingBeforeNext: isSpaceLikeSibling(nextTextNode.previousSibling),
+					spaceLikeSiblingBeforeNextBoundary: isSpaceLikeSibling(nextBoundaryNode.previousSibling),
+					currentBoundaryIsBlock: DomWalker.blockTags.test(currentBoundaryNode.nodeName),
+					currentBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(currentBoundaryNode.nodeName),
+					nextBoundaryIsBlock: DomWalker.blockTags.test(nextBoundaryNode.nodeName),
+					nextBoundaryIsIgnored: DomWalker.ignoredTags.test(nextBoundaryNode.nodeName),
+					nextBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(nextBoundaryNode.nodeName),
+					hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(nextRun),
+					hiddenBoundaryAfter: () => this.isHiddenBoundaryAfter(currentRun),
+					inGridOrFlexContainer: () => !!nextBoundaryNode.parentNode && this.isGridOrFlexContainer(nextBoundaryNode.parentNode)
+				})) {
+					case "prepend-next":
+						nextTextNode.data = ` ${nextTextNode.data}`;
 						break;
-					}
-					nodeBetween = nodeBetween.nextSibling;
-				}
-				if (currentEndsWithSpace || nextStartsWithSpace || hasWhitespaceBetween) {
-					nextTextNode = currentTextNode;
-					continue;
-				}
-				const testText = currentTextNode.data.slice(-1) + nextTextNode.data.slice(0, 1);
-				const testNewText = this.spacingText(testText);
-				const currentLast = currentTextNode.data.slice(-1);
-				const nextFirst = nextTextNode.data.slice(0, 1);
-				const isQuote = (char) => /["\u201c\u201d]/.test(char);
-				const isCJK = (char) => /[\u4e00-\u9fff]/.test(char);
-				const skipSpacing = isQuote(currentLast) && isCJK(nextFirst) || isCJK(currentLast) && isQuote(nextFirst);
-				if (testNewText !== testText && !skipSpacing) {
-					let nextNode = nextTextNode;
-					while (nextNode.parentNode && !DomWalker.spaceSensitiveTags.test(nextNode.nodeName) && DomWalker.isFirstTextChild(nextNode.parentNode, nextNode)) nextNode = nextNode.parentNode;
-					let currentNode = currentTextNode;
-					while (currentNode.parentNode && !DomWalker.spaceSensitiveTags.test(currentNode.nodeName) && DomWalker.isLastTextChild(currentNode.parentNode, currentNode)) currentNode = currentNode.parentNode;
-					if (currentNode.nextSibling) {
-						if (DomWalker.spaceLikeTags.test(currentNode.nextSibling.nodeName)) {
-							nextTextNode = currentTextNode;
-							continue;
-						}
-					}
-					if (!DomWalker.blockTags.test(currentNode.nodeName)) {
-						if (!DomWalker.spaceSensitiveTags.test(nextNode.nodeName)) {
-							if (!DomWalker.ignoredTags.test(nextNode.nodeName) && !DomWalker.blockTags.test(nextNode.nodeName)) {
-								if (nextTextNode.previousSibling) {
-									if (!DomWalker.spaceLikeTags.test(nextTextNode.previousSibling.nodeName)) {
-										if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
-											if (!this.visibilityDetector.shouldSkipSpacingBeforeNode(nextTextNode)) nextTextNode.data = ` ${nextTextNode.data}`;
-										}
-									}
-								} else if (nextTextNode instanceof Text && !nextTextNode.data.startsWith(" ")) {
-									if (!this.visibilityDetector.shouldSkipSpacingBeforeNode(nextTextNode)) nextTextNode.data = ` ${nextTextNode.data}`;
-								}
-							}
-						} else if (!DomWalker.spaceSensitiveTags.test(currentNode.nodeName)) {
-							if (currentTextNode instanceof Text && !currentTextNode.data.endsWith(" ")) {
-								if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) currentTextNode.data = `${currentTextNode.data} `;
-							}
-						} else if (!this.visibilityDetector.shouldSkipSpacingAfterNode(currentTextNode)) {
-							if (nextNode.parentNode && this.isGridOrFlexContainer(nextNode.parentNode)) {
-								nextTextNode = currentTextNode;
-								continue;
-							}
-							const panguSpace = document.createElement("pangu");
-							panguSpace.innerHTML = " ";
-							if (nextNode.parentNode) if (nextNode.previousSibling) {
-								if (!DomWalker.spaceLikeTags.test(nextNode.previousSibling.nodeName)) nextNode.parentNode.insertBefore(panguSpace, nextNode);
-							} else nextNode.parentNode.insertBefore(panguSpace, nextNode);
-							if (!panguSpace.previousElementSibling) {
-								if (panguSpace.parentNode) panguSpace.parentNode.removeChild(panguSpace);
-							}
-						}
-					}
+					case "append-current":
+						currentTextNode.data = `${currentTextNode.data} `;
+						break;
+					case "insert-element":
+						this.insertPanguElement(nextBoundaryNode);
+						break;
+					case "none": break;
 				}
 			}
 			nextTextNode = currentTextNode;
 		}
 	}
-	spacingTextNodesInQueue(textNodes, onComplete) {
-		if (this.visibilityDetector.config.enabled) {
-			if (this.taskScheduler.config.enabled) {
-				this.taskScheduler.queue.add(() => {
-					this.spacingTextNodes(textNodes);
-				});
-				if (onComplete) this.taskScheduler.queue.setOnComplete(onComplete);
-			} else {
-				this.spacingTextNodes(textNodes);
-				onComplete?.();
+	applyTextRunSpacing(textNode) {
+		const verdicts = decideTextRunSpacing({
+			text: textNode.data,
+			previousElementLastChar: this.findPreviousElementLastChar(textNode),
+			hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(textNode)
+		});
+		for (const verdict of verdicts) switch (verdict) {
+			case "trim-leading-space":
+				textNode.data = textNode.data.substring(1);
+				break;
+			case "prepend-space":
+				textNode.data = ` ${textNode.data}`;
+				break;
+			case "apply-text-spacing": {
+				const newText = this.spacingText(textNode.data);
+				if (textNode.data !== newText) textNode.data = newText;
+				break;
 			}
+		}
+	}
+	insertPanguElement(nextBoundaryNode) {
+		const panguSpace = document.createElement("pangu");
+		panguSpace.innerHTML = " ";
+		if (nextBoundaryNode.parentNode) nextBoundaryNode.parentNode.insertBefore(panguSpace, nextBoundaryNode);
+		if (!panguSpace.previousElementSibling) {
+			if (panguSpace.parentNode) panguSpace.parentNode.removeChild(panguSpace);
+		}
+	}
+	findCurrentBoundaryNode(currentTextNode) {
+		let currentNode = currentTextNode;
+		while (currentNode.parentNode && !DomWalker.spaceSensitiveTags.test(currentNode.nodeName) && DomWalker.isLastTextChild(currentNode.parentNode, currentNode)) currentNode = currentNode.parentNode;
+		return currentNode;
+	}
+	findNextBoundaryNode(nextTextNode) {
+		let nextNode = nextTextNode;
+		while (nextNode.parentNode && !DomWalker.spaceSensitiveTags.test(nextNode.nodeName) && DomWalker.isFirstTextChild(nextNode.parentNode, nextNode)) nextNode = nextNode.parentNode;
+		return nextNode;
+	}
+	findPreviousElementLastChar(textNode) {
+		const previousNode = textNode.previousSibling;
+		if (previousNode && previousNode.nodeType === Node.ELEMENT_NODE && previousNode.textContent) return previousNode.textContent.slice(-1);
+		return null;
+	}
+	hasWhitespaceBetween(currentTextNode, nextTextNode) {
+		let currentAncestor = currentTextNode;
+		while (currentAncestor.parentNode && DomWalker.isLastTextChild(currentAncestor.parentNode, currentAncestor) && !DomWalker.spaceSensitiveTags.test(currentAncestor.parentNode.nodeName)) currentAncestor = currentAncestor.parentNode;
+		let nextAncestor = nextTextNode;
+		while (nextAncestor.parentNode && DomWalker.isFirstTextChild(nextAncestor.parentNode, nextAncestor) && !DomWalker.spaceSensitiveTags.test(nextAncestor.parentNode.nodeName)) nextAncestor = nextAncestor.parentNode;
+		let nodeBetween = currentAncestor.nextSibling;
+		while (nodeBetween && nodeBetween !== nextAncestor) {
+			if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) return true;
+			nodeBetween = nodeBetween.nextSibling;
+		}
+		return false;
+	}
+	isHiddenBoundaryBefore(node) {
+		return this.visibilityDetector.config.enabled && this.visibilityDetector.shouldSkipSpacingBeforeNode(node);
+	}
+	isHiddenBoundaryAfter(node) {
+		return this.visibilityDetector.config.enabled && this.visibilityDetector.shouldSkipSpacingAfterNode(node);
+	}
+	spacingTextNodesInQueue(textNodes) {
+		if (this.visibilityDetector.config.enabled) {
+			if (this.taskScheduler.config.enabled) this.taskScheduler.queue.add(() => {
+				this.spacingTextNodes(textNodes);
+			});
+			else this.spacingTextNodes(textNodes);
 			return;
 		}
 		const task = (chunkedTextNodes) => this.spacingTextNodes(chunkedTextNodes);
-		this.taskScheduler.processInChunks(textNodes, task, onComplete);
+		this.taskScheduler.processInChunks(textNodes, task);
 	}
 	waitForVideosToLoad(delayMs, onLoaded) {
 		const videos = Array.from(document.getElementsByTagName("video"));

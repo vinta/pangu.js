@@ -2,11 +2,7 @@
 	//#region browser-extensions/chrome/src/content-script.ts
 	async function autoSpacingPage() {
 		const pangu = window.pangu;
-		if (pangu) {
-			pangu.taskScheduler.config.enabled = true;
-			pangu.visibilityDetector.config.enabled = true;
-			pangu.autoSpacingPage();
-		}
+		if (pangu) pangu.autoSpacingPage();
 	}
 	function spacingPage() {
 		const pangu = window.pangu;

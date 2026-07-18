@@ -38,6 +38,11 @@ describe('Symbol -', () => {
     expect(pangu.spacingText('OpenAI的GPT-5模型')).toBe('OpenAI 的 GPT-5 模型');
     expect(pangu.spacingText('Google的gemini-2.5-pro模型')).toBe('Google 的 gemini-2.5-pro 模型');
 
+    // CLI flags
+    // prettier-ignore
+    expect(pangu.spacingText('你可以使用uname -m指令來檢查你的Linux作業系統是32位元或是[敏感词已被屏蔽]位元'))
+                       .toBe('你可以使用 uname -m 指令來檢查你的 Linux 作業系統是 32 位元或是 [敏感词已被屏蔽] 位元');
+
     expect(pangu.spacingText('得到一個D-的結果')).toBe('得到一個 D- 的結果');
     expect(pangu.spacingText('得到一個D--的結果')).toBe('得到一個 D-- 的結果');
 

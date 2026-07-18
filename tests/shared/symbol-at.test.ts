@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 
 const pangu = new Pangu();
 
-describe('Symbol @ 只加左空格', () => {
+describe('Symbol @ only add space on the left', () => {
   it('handle @ symbol as at', () => {
     expect(pangu.spacingText('請@vinta吃大便')).toBe('請 @vinta 吃大便');
     expect(pangu.spacingText('請@vinta_chen吃大便')).toBe('請 @vinta_chen 吃大便');

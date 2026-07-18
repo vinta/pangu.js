@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 
 const pangu = new Pangu();
 
-describe('Symbol # 只加左空格', () => {
+describe('Symbol # only add space on the left', () => {
   it('handle # symbol as hashtag', () => {
     expect(pangu.spacingText('前面#後面')).toBe('前面 #後面');
     expect(pangu.spacingText('前面#H2G2後面')).toBe('前面 #H2G2 後面');

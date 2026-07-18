@@ -5,7 +5,7 @@ const pangu = new Pangu();
 
 describe('Symbol :', () => {
   // When the symbol appears only 1 time in one line
-  it('handle : symbol as colon 只加右空格', () => {
+  it('handle : symbol as colon, only add space on the right', () => {
     expect(pangu.spacingText('前面:後面')).toBe('前面: 後面');
 
     // DO NOT change if already spacing

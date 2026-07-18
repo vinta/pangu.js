@@ -74,6 +74,7 @@ var CJK_ANS = new RegExp(`([${CJK}])([${ANS_CJK_AFTER}])`, "g");
 var ANS_CJK = new RegExp(`([${ANS_BEFORE_CJK}])([${CJK}])`, "g");
 var S_A = new RegExp(`(%)([${A}])`, "g");
 var MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
+var SOLITARY_NBSP = /(?<=\S)[ ]*\u00a0[ ]*(?=\S)/g;
 var PlaceholderReplacer = class {
 	placeholder;
 	startDelimiter;
@@ -106,7 +107,7 @@ var PlaceholderReplacer = class {
 var Pangu = class {
 	version;
 	constructor() {
-		this.version = "7.2.1";
+		this.version = "7.3.0";
 	}
 	spacingText(text) {
 		if (typeof text !== "string") {
@@ -131,6 +132,7 @@ var Pangu = class {
 				return htmlTagManager.store(processedTag);
 			});
 		}
+		newText = newText.replace(SOLITARY_NBSP, " ");
 		newText = newText.replace(DOTS_CJK, "$1 $2");
 		newText = newText.replace(CJK_PUNCTUATION, "$1$2 ");
 		newText = newText.replace(AN_PUNCTUATION_CJK, "$1$2 $3");

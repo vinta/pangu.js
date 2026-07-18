@@ -132,12 +132,4 @@ export class VisibilityDetector {
 
     return false;
   }
-
-  public updateConfig(config: Partial<VisibilityDetectorConfig>) {
-    if (config.commonHiddenPatterns) {
-      Object.assign(this.config.commonHiddenPatterns, config.commonHiddenPatterns);
-    }
-    const { commonHiddenPatterns: _, ...rest } = config;
-    Object.assign(this.config, rest);
-  }
 }
