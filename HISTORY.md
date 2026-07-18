@@ -9,9 +9,11 @@
 - 修正連結被其他元素包住、後面又接著其他文字時，連結前後漏加空格的問題
 - 兩段文字中間本來就有空白時，不會再多加一個空格，之前隔著 `<a>` 這類元素、或空白被包在 `<span>` 這類元素裡時會看不到那個空白
 - 把 boundary spacing 的判斷邏輯抽成獨立模組
-- 把 sync / async 排程的判斷邏輯集中到同一個內部進入點，公開的 `taskScheduler.config` 和 `visibilityDetector.config` 用法不變
+- 把 sync / async 排程的判斷邏輯集中到同一個內部進入點
 - 移除幾個文件上沒有的 methods：`taskScheduler.updateConfig()`、`taskScheduler.clear()`、`taskScheduler.queue.setOnComplete()`、`taskScheduler.processInChunks()`、`visibilityDetector.updateConfig()`，設定請直接改 `.config`
-- 移除 `visibilityDetector.config.commonHiddenPatterns` 的五個子開關，隱藏元素的判斷規則不變，現在只由 `enabled` 控制
+- 移除整個 `visibilityDetector.config`（包括 `enabled` 和 `commonHiddenPatterns` 的五個子開關），隱藏元素偵測現在永遠開啟，判斷規則不變
+- 移除 `taskScheduler.config.chunkSize`，非同步排程不再把文字節點分塊處理，修正分塊交界處會漏加空格的問題（#292）
+- 瀏覽器不支援 `requestIdleCallback` 時（例如預設狀態的 Safari），現在會自動改用同步處理，不用再手動把 `taskScheduler.config.enabled` 關掉
 - 把 Node.js v18 從 CI 拿掉
 
 ## v7.2.1 / 2026-03-02
