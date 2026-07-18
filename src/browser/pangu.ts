@@ -49,6 +49,44 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
   };
 }
 
+// Main call flows from autoSpacingPage() to requestIdleCallback():
+//
+// Entry A: initial page sweep                 Entry B: dynamic content (MutationObserver)
+//
+// 1a. autoSpacingPage()                       1b. autoSpacingPage()
+//     ↓ waitForVideosToLoad(pageDelayMs)          ↓ setupAutoSpacingPageObserver()
+// 2a. spacingPage()                           2b. observer fires on characterData/childList
+//     ├─ spacingNode(<head><title>)               ↓ push affected nodes onto queue
+//     └─ spacingNode(document.body)               ↓ debounce(nodeDelayMs, max nodeMaxWaitMs)
+//     ↓                                       3b. sort queued nodes into document order,
+// 3a. spacingNode(node)                           dedupe, merge all their text runs via
+//     - DomWalker.collectTextNodes(node, true)    DomWalker.collectTextNodes(), reverse
+//       (reverse document order, skips             ↓
+//       whitespace-only and ignored tags)         (title changes take their own debounce
+//     ↓                                            → spacingNode(<title>))
+//     └──────────────────┬────────────────────────┘
+//                        ↓
+// 4. schedule(textNodes)
+//    - Decision point: taskScheduler.config.enabled?
+//      ├─ NO  → spacingTextNodes(textNodes)   (synchronous, no requestIdleCallback)
+//      └─ YES (default) → taskScheduler.queue.add(() => spacingTextNodes(textNodes))
+//                         (always ONE task holding the whole list, never chunked)
+// ↓
+// 5. TaskQueue.add() → scheduleProcessing() → requestIdleCallback(process, { timeout: 5000 })
+//    - process(deadline): pops and runs queued tasks while deadline.timeRemaining() > 0
+//    - if tasks remain when the slice ends, re-arms requestIdleCallback for the rest
+// ↓
+// 6. spacingTextNodes(textNodes)
+//    - per text run: decideTextRunSpacing() → trim-leading-space / prepend-space /
+//      apply-text-spacing (spacingText)
+//    - per adjacent run pair: decideBoundarySpacing() → prepend-next / append-current /
+//      insert <pangu> element / none
+//    - visibility detection happens here: always on, consulted lazily per boundary
+//      (hiddenBoundaryBefore / hiddenBoundaryAfter), not a scheduling decision
+//
+// Summary of paths to requestIdleCallback():
+// - taskScheduler.enabled=true  → one batch task per schedule() call, drained in idle slices
+// - taskScheduler.enabled=false → never (fully synchronous processing)
 export class BrowserPangu extends Pangu {
   private isAutoSpacingPageExecuted = false;
   private autoSpacingPageObserver: MutationObserver | null = null;
