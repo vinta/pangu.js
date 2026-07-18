@@ -26,7 +26,7 @@ export declare class BrowserPangu extends Pangu {
     private hasWhitespaceBetween;
     private isHiddenBoundaryBefore;
     private isHiddenBoundaryAfter;
-    private spacingTextNodesInQueue;
+    private schedule;
     private waitForVideosToLoad;
     private setupAutoSpacingPageObserver;
 }

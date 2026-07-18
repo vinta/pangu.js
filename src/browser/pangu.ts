@@ -53,34 +53,6 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
   };
 }
 
-// Main call flow from autoSpacingPage() to requestIdleCallback():
-//
-// 1. autoSpacingPage()
-// ↓
-// 2. spacingPage()
-// ↓
-// 3. spacingNode()
-//    - Collects text nodes via DomWalker.collectTextNodes()
-//    - Decision point: taskScheduler.config.enabled?
-//      ├─ YES → calls spacingTextNodesInQueue()
-//      └─ NO  → calls spacingTextNodes() directly (synchronous, no requestIdleCallback)
-// ↓
-// 4. spacingTextNodesInQueue() (only if taskScheduler enabled)
-//    - Decision point: visibilityDetector.config.enabled?
-//      ├─ YES (default: true) → Process all nodes in one batch
-//      │   └─ taskScheduler.queue.add(() => spacingTextNodes(allNodes))
-//      └─ NO → Process in chunks via taskScheduler.processInChunks()
-//          └─ Splits into chunks of 40 nodes
-// ↓
-// 5. TaskQueue.add() → scheduleProcessing() → requestIdleCallback()
-//    - Timeout: 5000ms
-//    - Processes tasks when browser is idle
-//    - Uses IdleDeadline to check remaining time
-//
-// Summary of paths to requestIdleCallback():
-// - taskScheduler.enabled=true + visibilityDetector.enabled=true → Single batch via requestIdleCallback
-// - taskScheduler.enabled=true + visibilityDetector.enabled=false → Multiple chunks via requestIdleCallback
-// - taskScheduler.enabled=false → No requestIdleCallback (synchronous processing)
 export class BrowserPangu extends Pangu {
   private isAutoSpacingPageExecuted = false;
   private autoSpacingPageObserver: MutationObserver | null = null;
@@ -119,14 +91,7 @@ export class BrowserPangu extends Pangu {
   public spacingNode(contextNode: Node) {
     // Only process nodes with actual content (excluding text nodes that contain only whitespace)
     const textNodes = DomWalker.collectTextNodes(contextNode, true);
-
-    // Choose processing method based on idle spacing configuration
-    if (this.taskScheduler.config.enabled) {
-      this.spacingTextNodesInQueue(textNodes);
-    } else {
-      // Process the collected text nodes using the shared logic (synchronous)
-      this.spacingTextNodes(textNodes);
-    }
+    this.schedule(textNodes);
   }
 
   public stopAutoSpacingPage() {
@@ -315,32 +280,36 @@ export class BrowserPangu extends Pangu {
   }
 
   private isHiddenBoundaryBefore(node: Node) {
-    return this.visibilityDetector.config.enabled && this.visibilityDetector.shouldSkipSpacingBeforeNode(node);
+    return this.visibilityDetector.shouldSkipSpacingBeforeNode(node);
   }
 
   private isHiddenBoundaryAfter(node: Node) {
-    return this.visibilityDetector.config.enabled && this.visibilityDetector.shouldSkipSpacingAfterNode(node);
+    return this.visibilityDetector.shouldSkipSpacingAfterNode(node);
   }
 
-  private spacingTextNodesInQueue(textNodes: Node[]) {
-    // When visibility detection is enabled, process all nodes together to maintain context between adjacent nodes
-    // This prevents incorrect spacing after hidden elements
-    if (this.visibilityDetector.config.enabled) {
-      // Still use idle callback for performance, but process all nodes in one batch
-      if (this.taskScheduler.config.enabled) {
-        this.taskScheduler.queue.add(() => {
-          this.spacingTextNodes(textNodes);
-        });
-      } else {
-        // Synchronous processing
-        this.spacingTextNodes(textNodes);
-      }
+  // The single seam that decides how spacing work is executed: synchronously,
+  // as one idle-time batch, or in idle-time chunks. Visibility detection needs
+  // adjacent-run context, so it always batches instead of chunking
+  private schedule(textNodes: Node[]) {
+    if (!this.taskScheduler.config.enabled) {
+      this.spacingTextNodes(textNodes);
       return;
     }
 
-    // Normal chunked processing when visibility detection is disabled
-    const task = (chunkedTextNodes: Node[]) => this.spacingTextNodes(chunkedTextNodes);
-    this.taskScheduler.processInChunks(textNodes, task);
+    if (this.visibilityDetector.config.enabled) {
+      this.taskScheduler.queue.add(() => {
+        this.spacingTextNodes(textNodes);
+      });
+      return;
+    }
+
+    const { chunkSize } = this.taskScheduler.config;
+    for (let i = 0; i < textNodes.length; i += chunkSize) {
+      const chunk = textNodes.slice(i, i + chunkSize);
+      this.taskScheduler.queue.add(() => {
+        this.spacingTextNodes(chunk);
+      });
+    }
   }
 
   private waitForVideosToLoad(delayMs: number, onLoaded: () => void) {
@@ -421,7 +390,7 @@ export class BrowserPangu extends Pangu {
             }
 
             // Process all collected text nodes with idle callback
-            this.spacingTextNodesInQueue(allTextNodes);
+            this.schedule(allTextNodes);
           }
         } else {
           // Synchronous processing (original behavior)

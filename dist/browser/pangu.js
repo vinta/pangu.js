@@ -116,8 +116,8 @@ var TaskQueue = class {
 	}
 };
 /**
-* Schedules and executes text spacing operations during browser idle time to avoid blocking the UI.
-* Uses requestIdleCallback to process task in chunks when the browser has spare time,
+* Runs queued text spacing work during browser idle time to avoid blocking the UI.
+* Tasks execute via requestIdleCallback when the browser has spare time,
 * ensuring smooth user experience even when processing large amounts of text.
 */
 var TaskScheduler = class {
@@ -129,18 +129,6 @@ var TaskScheduler = class {
 	taskQueue = new TaskQueue();
 	get queue() {
 		return this.taskQueue;
-	}
-	processInChunks(items, processor) {
-		if (!this.config.enabled) {
-			processor(items);
-			return;
-		}
-		if (items.length === 0) return;
-		const chunks = [];
-		for (let i = 0; i < items.length; i += this.config.chunkSize) chunks.push(items.slice(i, i + this.config.chunkSize));
-		for (const chunk of chunks) this.taskQueue.add(() => {
-			processor(chunk);
-		});
 	}
 };
 //#endregion
@@ -255,8 +243,7 @@ var BrowserPangu = class extends Pangu {
 	}
 	spacingNode(contextNode) {
 		const textNodes = DomWalker.collectTextNodes(contextNode, true);
-		if (this.taskScheduler.config.enabled) this.spacingTextNodesInQueue(textNodes);
-		else this.spacingTextNodes(textNodes);
+		this.schedule(textNodes);
 	}
 	stopAutoSpacingPage() {
 		if (this.autoSpacingPageObserver) {
@@ -376,21 +363,29 @@ var BrowserPangu = class extends Pangu {
 		return false;
 	}
 	isHiddenBoundaryBefore(node) {
-		return this.visibilityDetector.config.enabled && this.visibilityDetector.shouldSkipSpacingBeforeNode(node);
+		return this.visibilityDetector.shouldSkipSpacingBeforeNode(node);
 	}
 	isHiddenBoundaryAfter(node) {
-		return this.visibilityDetector.config.enabled && this.visibilityDetector.shouldSkipSpacingAfterNode(node);
+		return this.visibilityDetector.shouldSkipSpacingAfterNode(node);
 	}
-	spacingTextNodesInQueue(textNodes) {
-		if (this.visibilityDetector.config.enabled) {
-			if (this.taskScheduler.config.enabled) this.taskScheduler.queue.add(() => {
-				this.spacingTextNodes(textNodes);
-			});
-			else this.spacingTextNodes(textNodes);
+	schedule(textNodes) {
+		if (!this.taskScheduler.config.enabled) {
+			this.spacingTextNodes(textNodes);
 			return;
 		}
-		const task = (chunkedTextNodes) => this.spacingTextNodes(chunkedTextNodes);
-		this.taskScheduler.processInChunks(textNodes, task);
+		if (this.visibilityDetector.config.enabled) {
+			this.taskScheduler.queue.add(() => {
+				this.spacingTextNodes(textNodes);
+			});
+			return;
+		}
+		const { chunkSize } = this.taskScheduler.config;
+		for (let i = 0; i < textNodes.length; i += chunkSize) {
+			const chunk = textNodes.slice(i, i + chunkSize);
+			this.taskScheduler.queue.add(() => {
+				this.spacingTextNodes(chunk);
+			});
+		}
 	}
 	waitForVideosToLoad(delayMs, onLoaded) {
 		const videos = Array.from(document.getElementsByTagName("video"));
@@ -428,7 +423,7 @@ var BrowserPangu = class extends Pangu {
 						const textNodes = DomWalker.collectTextNodes(node, true);
 						allTextNodes.push(...textNodes);
 					}
-					this.spacingTextNodesInQueue(allTextNodes);
+					this.schedule(allTextNodes);
 				}
 			} else while (queue.length) {
 				const node = queue.shift();

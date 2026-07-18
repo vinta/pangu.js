@@ -43,8 +43,8 @@ export class TaskQueue {
 }
 
 /**
- * Schedules and executes text spacing operations during browser idle time to avoid blocking the UI.
- * Uses requestIdleCallback to process task in chunks when the browser has spare time,
+ * Runs queued text spacing work during browser idle time to avoid blocking the UI.
+ * Tasks execute via requestIdleCallback when the browser has spare time,
  * ensuring smooth user experience even when processing large amounts of text.
  */
 export class TaskScheduler {
@@ -58,30 +58,5 @@ export class TaskScheduler {
 
   get queue() {
     return this.taskQueue;
-  }
-
-  processInChunks<T>(items: T[], processor: (chunk: T[]) => void) {
-    if (!this.config.enabled) {
-      // Process synchronously if idle processing is disabled
-      processor(items);
-      return;
-    }
-
-    if (items.length === 0) {
-      return;
-    }
-
-    // Split items into chunks
-    const chunks: T[][] = [];
-    for (let i = 0; i < items.length; i += this.config.chunkSize) {
-      chunks.push(items.slice(i, i + this.config.chunkSize));
-    }
-
-    // Add each chunk as a task item to the task queue
-    for (const chunk of chunks) {
-      this.taskQueue.add(() => {
-        processor(chunk);
-      });
-    }
   }
 }
