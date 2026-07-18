@@ -132,7 +132,6 @@ dist/                           # Library builds
 - `stopAutoSpacingPage()` - Stop auto-spacing
 - `isElementVisuallyHidden(element)` - Check if element is hidden by CSS
 - `taskScheduler.config` - Task scheduling configuration (direct property access)
-- `visibilityDetector.config` - Visibility detection configuration (direct property access)
 
 ### Build System
 
@@ -209,7 +208,7 @@ interface Settings {
 
 - **TreeWalker Migration**: Replaced XPath with TreeWalker API for ~5.5x performance gain
 - **Idle Processing**: Heavy operations use requestIdleCallback() to prevent blocking
-- **Visibility Checks**: Skip spacing for CSS-hidden elements (enabled by default)
+- **Visibility Checks**: Skip spacing for CSS-hidden elements (always on)
 - **Debounced MutationObserver**: Batches DOM mutations for efficient processing
 
 ### Paranoid Text Spacing Algorithm v7

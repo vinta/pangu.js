@@ -1,6 +1,5 @@
 export interface TaskSchedulerConfig {
   enabled: boolean;
-  chunkSize: number;
   timeout: number;
 }
 
@@ -50,7 +49,6 @@ export class TaskQueue {
 export class TaskScheduler {
   public readonly config: TaskSchedulerConfig = {
     enabled: true,
-    chunkSize: 40, // Process 40 text nodes per idle cycle
     timeout: 2000, // 2 second timeout for idle processing
   };
 

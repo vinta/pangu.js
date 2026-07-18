@@ -369,7 +369,6 @@ var TaskQueue = class {
 var TaskScheduler = class {
 	config = {
 		enabled: true,
-		chunkSize: 40,
 		timeout: 2e3
 	};
 	taskQueue = new TaskQueue();
@@ -378,9 +377,7 @@ var TaskScheduler = class {
 	}
 };
 var VisibilityDetector = class {
-	config = { enabled: true };
 	isElementVisuallyHidden(element) {
-		if (!this.config.enabled) return false;
 		const style = getComputedStyle(element);
 		if (style.display === "none") return true;
 		if (style.visibility === "hidden") return true;
@@ -397,7 +394,6 @@ var VisibilityDetector = class {
 		return false;
 	}
 	shouldSkipSpacingAfterNode(node) {
-		if (!this.config.enabled) return false;
 		let elementToCheck = null;
 		if (node instanceof Element) elementToCheck = node;
 		else if (node.parentElement) elementToCheck = node.parentElement;
@@ -410,7 +406,6 @@ var VisibilityDetector = class {
 		return false;
 	}
 	shouldSkipSpacingBeforeNode(node) {
-		if (!this.config.enabled) return false;
 		let previousNode = node.previousSibling;
 		if (!previousNode && node.parentElement) {
 			let parent = node.parentElement;
@@ -488,9 +483,9 @@ var BrowserPangu = class extends Pangu {
 		const display = window.getComputedStyle(node).display;
 		return display === "grid" || display === "inline-grid" || display === "flex" || display === "inline-flex";
 	}
-	spacingTextNodes(textNodes, previousChunkLastNode = null) {
+	spacingTextNodes(textNodes) {
 		let currentTextNode;
-		let nextTextNode = previousChunkLastNode;
+		let nextTextNode = null;
 		for (let i = 0; i < textNodes.length; i++) {
 			currentTextNode = textNodes[i];
 			if (!currentTextNode) continue;
@@ -614,20 +609,9 @@ var BrowserPangu = class extends Pangu {
 			this.spacingTextNodes(textNodes);
 			return;
 		}
-		if (this.visibilityDetector.config.enabled) {
-			this.taskScheduler.queue.add(() => {
-				this.spacingTextNodes(textNodes);
-			});
-			return;
-		}
-		const { chunkSize } = this.taskScheduler.config;
-		for (let i = 0; i < textNodes.length; i += chunkSize) {
-			const chunk = textNodes.slice(i, i + chunkSize);
-			const previousChunkLastNode = i > 0 ? textNodes[i - 1] : null;
-			this.taskScheduler.queue.add(() => {
-				this.spacingTextNodes(chunk, previousChunkLastNode);
-			});
-		}
+		this.taskScheduler.queue.add(() => {
+			this.spacingTextNodes(textNodes);
+		});
 	}
 	waitForVideosToLoad(delayMs, onLoaded) {
 		const videos = Array.from(document.getElementsByTagName("video"));

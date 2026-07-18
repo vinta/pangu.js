@@ -118,12 +118,9 @@ export class BrowserPangu extends Pangu {
     return display === 'grid' || display === 'inline-grid' || display === 'flex' || display === 'inline-flex';
   }
 
-  private spacingTextNodes(textNodes: Node[], previousChunkLastNode: Node | null = null) {
+  private spacingTextNodes(textNodes: Node[]) {
     let currentTextNode: Node | null;
-    // Boundary pairs are only evaluated within one call, so a chunked caller
-    // seeds the trailing context with the previous chunk's last node (already
-    // processed) to keep the pair that straddles the seam evaluated
-    let nextTextNode: Node | null = previousChunkLastNode;
+    let nextTextNode: Node | null = null;
 
     // Process nodes in the order provided
     for (let i = 0; i < textNodes.length; i++) {
@@ -302,30 +299,18 @@ export class BrowserPangu extends Pangu {
     return this.visibilityDetector.shouldSkipSpacingAfterNode(node);
   }
 
-  // The single seam that decides how spacing work is executed: synchronously,
-  // as one idle-time batch, or in idle-time chunks. Visibility detection needs
-  // adjacent-run context, so it always batches instead of chunking
+  // The single seam that decides how spacing work is executed: synchronously
+  // or as one idle-time batch. Boundary spacing needs adjacent-run context, so
+  // the node list is never split across calls
   private schedule(textNodes: Node[]) {
     if (!this.taskScheduler.config.enabled) {
       this.spacingTextNodes(textNodes);
       return;
     }
 
-    if (this.visibilityDetector.config.enabled) {
-      this.taskScheduler.queue.add(() => {
-        this.spacingTextNodes(textNodes);
-      });
-      return;
-    }
-
-    const { chunkSize } = this.taskScheduler.config;
-    for (let i = 0; i < textNodes.length; i += chunkSize) {
-      const chunk = textNodes.slice(i, i + chunkSize);
-      const previousChunkLastNode = i > 0 ? textNodes[i - 1] : null;
-      this.taskScheduler.queue.add(() => {
-        this.spacingTextNodes(chunk, previousChunkLastNode);
-      });
-    }
+    this.taskScheduler.queue.add(() => {
+      this.spacingTextNodes(textNodes);
+    });
   }
 
   private waitForVideosToLoad(delayMs: number, onLoaded: () => void) {

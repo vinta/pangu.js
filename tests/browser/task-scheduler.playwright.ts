@@ -14,13 +14,11 @@ test.describe('TaskScheduler Enabled', () => {
   test('should be able to enable taskScheduler', async ({ page }) => {
     const result = await page.evaluate(() => {
       pangu.taskScheduler.config.enabled = true;
-      pangu.taskScheduler.config.chunkSize = 20;
       pangu.taskScheduler.config.timeout = 3000;
       return pangu.taskScheduler.config;
     });
 
     expect(result.enabled).toBe(true);
-    expect(result.chunkSize).toBe(20);
     expect(result.timeout).toBe(3000);
   });
 
@@ -37,7 +35,6 @@ test.describe('TaskScheduler Enabled', () => {
 
     const result = await page.evaluate(() => {
       pangu.taskScheduler.config.enabled = true;
-      pangu.taskScheduler.config.chunkSize = 2;
 
       pangu.spacingPage();
 
@@ -61,7 +58,6 @@ test.describe('TaskScheduler Enabled', () => {
   test('should process dynamic content asynchronously', async ({ page }) => {
     await page.evaluate(async () => {
       pangu.taskScheduler.config.enabled = true;
-      pangu.taskScheduler.config.chunkSize = 2;
       pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 50, nodeMaxWaitMs: 100 });
     });
 
@@ -86,7 +82,6 @@ test.describe('TaskScheduler Enabled', () => {
     
     const result = await page.evaluate(async () => {
       pangu.taskScheduler.config.enabled = true;
-      pangu.taskScheduler.config.chunkSize = 3;
       pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 50, nodeMaxWaitMs: 100 });
 
       const content = document.getElementById('content')!;
@@ -159,14 +154,11 @@ test.describe('TaskScheduler Enabled', () => {
     expect(result.processingCount).toBe(1);
   });
 
-  test('should apply boundary spacing across chunk seams when visibility detection is disabled', async ({ page }) => {
-    // Four adjacent runs with chunkSize 2: the abc|漢字 pair straddles the chunk seam
+  test('should apply boundary spacing between all adjacent runs when processing asynchronously', async ({ page }) => {
     await page.setContent('<div id="content"><span>中文</span><span>abc</span><span>漢字</span><span>def</span></div>');
 
     const result = await page.evaluate(async () => {
       pangu.taskScheduler.config.enabled = true;
-      pangu.taskScheduler.config.chunkSize = 2;
-      pangu.visibilityDetector.config.enabled = false;
 
       pangu.spacingNode(document.getElementById('content')!);
 

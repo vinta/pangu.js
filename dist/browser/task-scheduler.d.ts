@@ -1,6 +1,5 @@
 export interface TaskSchedulerConfig {
     enabled: boolean;
-    chunkSize: number;
     timeout: number;
 }
 export declare class TaskQueue {

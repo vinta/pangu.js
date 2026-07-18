@@ -34,9 +34,6 @@ test.describe('Visibility Detector Enabled', () => {
         </div>
       `;
 
-      // Enable visibility checking
-      pangu.visibilityDetector.config.enabled = true;
-
       // Test the helper method for visibility detection
       const spans = content.querySelectorAll('span');
       const visibilityResults = Array.from(spans).map((span) => ({
@@ -58,58 +55,6 @@ test.describe('Visibility Detector Enabled', () => {
     ]);
   });
 
-  test('should return false for all elements when visibility detection is disabled', async ({ page }) => {
-    await page.setContent('<div id="content"></div>');
-
-    const result = await page.evaluate(() => {
-      const content = document.getElementById('content')!;
-      content.innerHTML = `
-        <style>
-          .sr-only {
-            clip: rect(1px, 1px, 1px, 1px);
-            height: 1px;
-            overflow: hidden;
-            position: absolute;
-            width: 1px;
-          }
-        </style>
-        <span class="sr-only">Description:</span><span>一律轉整數</span>
-      `;
-
-      const hiddenSpan = content.querySelector('.sr-only')!;
-      const visibleSpan = content.querySelector('span:not(.sr-only)')!;
-
-      // Test with visibility check disabled
-      pangu.visibilityDetector.config.enabled = false;
-      const hiddenCheckDisabled = pangu.isElementVisuallyHidden(hiddenSpan);
-      const visibleCheckDisabled = pangu.isElementVisuallyHidden(visibleSpan);
-
-      // Test with visibility check enabled
-      pangu.visibilityDetector.config.enabled = true;
-      const hiddenCheckEnabled = pangu.isElementVisuallyHidden(hiddenSpan);
-      const visibleCheckEnabled = pangu.isElementVisuallyHidden(visibleSpan);
-
-      return {
-        disabled: {
-          hiddenIsHidden: hiddenCheckDisabled,
-          visibleIsHidden: visibleCheckDisabled,
-        },
-        enabled: {
-          hiddenIsHidden: hiddenCheckEnabled,
-          visibleIsHidden: visibleCheckEnabled,
-        },
-      };
-    });
-
-    // When disabled, always returns false
-    expect(result.disabled.hiddenIsHidden).toBe(false);
-    expect(result.disabled.visibleIsHidden).toBe(false);
-
-    // When enabled, correctly detects visibility
-    expect(result.enabled.hiddenIsHidden).toBe(true);
-    expect(result.enabled.visibleIsHidden).toBe(false);
-  });
-
   test('should skip spacing between hidden element and CJK', async ({ page }) => {
     await page.setContent('<div id="content"></div>');
 
@@ -129,9 +74,6 @@ test.describe('Visibility Detector Enabled', () => {
           <span class="sr-only">Description:</span><span>測試visibility check功能</span>
         </div>
       `;
-
-      // Enable visibility checking
-      pangu.visibilityDetector.config.enabled = true;
 
       // Process with visibility-aware spacing (synchronous)
       pangu.spacingPage();
@@ -175,10 +117,8 @@ test.describe('Visibility Detector Enabled', () => {
         </div>
       `;
 
-      // Enable both visibility detector and task scheduler
-      pangu.visibilityDetector.config.enabled = true;
+      // Enable task scheduler
       pangu.taskScheduler.config.enabled = true;
-      // pangu.taskScheduler.config.chunkSize = 2; // Small chunk size to test async processing
 
       // Process with both visibility checking and async task scheduling
       // Use minimal delays for testing
@@ -221,8 +161,6 @@ test.describe('Visibility Detector Enabled', () => {
         </div>
       `;
 
-      pangu.visibilityDetector.config.enabled = true;
-
       // Process with visibility checking enabled (synchronous)
       pangu.spacingPage();
 
@@ -262,8 +200,6 @@ test.describe('Visibility Detector Enabled', () => {
           </div>
         </div>
       `;
-
-      pangu.visibilityDetector.config.enabled = true;
 
       // Process with visibility checking (synchronous)
       pangu.spacingPage();
@@ -308,7 +244,6 @@ test.describe('Visibility Detector Enabled', () => {
       const content = document.getElementById('content')!;
 
       // Start autoSpacingPage FIRST, then add content
-      pangu.visibilityDetector.config.enabled = true;
       pangu.taskScheduler.config.enabled = true;
       pangu.autoSpacingPage({ pageDelayMs: 10, nodeDelayMs: 10, nodeMaxWaitMs: 50 });
 
@@ -370,7 +305,6 @@ test.describe('Visibility Detector Enabled', () => {
       const content = document.getElementById('content')!;
 
       // Test both cases with autoSpacingPage
-      pangu.visibilityDetector.config.enabled = true;
       pangu.taskScheduler.config.enabled = true;
 
       // Case 2: Complex content with links (testing this first)
@@ -429,7 +363,6 @@ test.describe('Visibility Detector Enabled', () => {
       const content = document.getElementById('content')!;
 
       // Test both cases
-      pangu.visibilityDetector.config.enabled = true;
       pangu.taskScheduler.config.enabled = true;
 
       // Helper to collect text nodes
@@ -573,7 +506,6 @@ test.describe('Visibility Detector Enabled', () => {
       `;
 
       // Test 1: Synchronous mode (should work correctly)
-      pangu.visibilityDetector.config.enabled = true;
       pangu.taskScheduler.config.enabled = false;
 
       pangu.spacingPage();
@@ -601,7 +533,6 @@ test.describe('Visibility Detector Enabled', () => {
 
       // Test 2: Async mode with taskScheduler (currently has the bug)
       pangu.taskScheduler.config.enabled = true;
-      pangu.taskScheduler.config.chunkSize = 2;
 
       pangu.spacingPage();
 
@@ -642,8 +573,6 @@ test.describe('Visibility Detector Enabled', () => {
         <div class="hidden2">Hidden 2</div>
         <div class="hidden3">Hidden 3</div>
       `;
-
-      pangu.visibilityDetector.config.enabled = true;
 
       const hidden1 = content.querySelector('.hidden1')!;
       const hidden2 = content.querySelector('.hidden2')!;
@@ -699,10 +628,7 @@ test.describe('Visibility Detector Enabled', () => {
         </div>
       `;
 
-      // Enable visibility detection FIRST
-      pangu.visibilityDetector.config.enabled = true;
       pangu.taskScheduler.config.enabled = true;
-      pangu.taskScheduler.config.chunkSize = 1; // Process one at a time to see the order
 
       // Collect text nodes manually to debug
       const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {

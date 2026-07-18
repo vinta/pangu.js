@@ -1,17 +1,5 @@
-export interface VisibilityDetectorConfig {
-  enabled: boolean;
-}
-
 export class VisibilityDetector {
-  public readonly config: VisibilityDetectorConfig = {
-    enabled: true,
-  };
-
   public isElementVisuallyHidden(element: Element) {
-    if (!this.config.enabled) {
-      return false;
-    }
-
     const style = getComputedStyle(element);
 
     // Check display: none
@@ -54,10 +42,6 @@ export class VisibilityDetector {
   }
 
   public shouldSkipSpacingAfterNode(node: Node) {
-    if (!this.config.enabled) {
-      return false;
-    }
-
     // Check if the node or its parent element is visually hidden
     let elementToCheck: Element | null = null;
 
@@ -84,10 +68,6 @@ export class VisibilityDetector {
   }
 
   public shouldSkipSpacingBeforeNode(node: Node) {
-    if (!this.config.enabled) {
-      return false;
-    }
-
     // Find the previous sibling that might be hidden
     let previousNode = node.previousSibling;
     
