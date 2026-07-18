@@ -1,8 +1,8 @@
 # Architecture review (2026-07-17)
 
-Deepening candidates from a hot-spot-scoped review of the codebase, using the vocabulary in `CONTEXT.md` (boundary spacing, text spacing, pangu element) and the deep-module terms module, interface, seam, adapter, locality, leverage. Candidate 1 is being implemented now. Candidates 2 to 4 are recorded here to revisit later. Every file:line and zero-caller claim below was verified against the repo on the review date.
+Deepening candidates from a hot-spot-scoped review of the codebase, using the vocabulary in `CONTEXT.md` (boundary spacing, text spacing, pangu element) and the deep-module terms module, interface, seam, adapter, locality, leverage. Candidate 1 shipped in PR #289. Candidates 2 to 4 are recorded here to revisit later. Every file:line and zero-caller claim below was verified against the repo on the review date.
 
-## 1. Boundary spacing module (in progress)
+## 1. Boundary spacing module (shipped in #289)
 
 Extract the pair-spacing verdict out of `BrowserPangu.spacingTextNodes` (`src/browser/pangu.ts:152-331`), where pure spacing decisions are interleaved with DOM mutation for 180 lines and reachable only through Playwright.
 
@@ -12,6 +12,8 @@ Decisions already made:
 - Context is flat facts. The module runs the two-character `spacingText` probe itself and owns the visibility veto rules. Tree climbing and tag regexes stay adapter-side in `DomWalker`.
 - Strict two-step: commit 1 is purely structural and preserves the hand-rolled narrow regexes bit-for-bit (`/[一-鿿]/` at `pangu.ts:178,246` misses kana). Commit 2 swaps in shared's CJK class and revisits the skipped FIXME at `tests/browser/pangu.playwright.ts:71`.
 - Vitest tests for this module import from `src/` as an internal-seam exception to ADR-0001.
+
+Outcome: landed as `src/browser/boundary-spacing.ts` (structural `ab9c586`, behavioral `9739551`). The skipped quote-spacing FIXME turned out to need a text spacing fix, not the class swap: a solitary NBSP normalization (`88ab44c`, #287) unblocked it. The extraction also gave the previously dead `ANY_CJK` export its first importer, removing it from the dead surface inventory below.
 
 ## 2. Extension settings module (deferred)
 
@@ -44,7 +46,6 @@ Note: `taskScheduler.config` and `visibilityDetector.config` are documented publ
 - `TaskScheduler.updateConfig` and `VisibilityDetector.updateConfig`, every live caller mutates `.config` directly
 - `TaskScheduler.clear`
 - The `onComplete` plumbing through `spacingTextNodesInQueue` into `TaskQueue`, no caller ever passes one
-- `ANY_CJK` export from `src/shared/index.ts:495`, zero importers while `pangu.ts` hand-rolls a narrower CJK regex
 - `stopAutoSpacingPage` has no in-repo caller (it is documented public npm surface, keep unless a major version prunes it)
 - `content-script.ts:9-10` sets both config knobs to values that are already the defaults
 
