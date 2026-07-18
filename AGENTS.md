@@ -11,7 +11,6 @@
 - Build outputs: ESM, CommonJS, and UMD library bundles under `dist/`.
 - Browser extension: Chrome Manifest V3 extension under `browser-extensions/chrome/`.
 - Generated files: `dist/`, `browser-extensions/chrome/dist/` and `browser-extensions/chrome/vendors/pangu/` are build or test output; avoid hand-editing them unless the task explicitly targets generated artifacts.
-- Main planning backlog: `TODO.md`.
 
 ## Important Paths
 
@@ -78,9 +77,7 @@
 
 ## External Tool Documentation
 
-- When you need current information about tools used in this project, use the `find-docs` skill first for library or framework docs.
-- For services, browser APIs, publishing flows, or topics not well covered by Context7, use the official URLs below with web browsing or `WebFetch` if that tool is available.
-- Do one targeted lookup first, then continue only when a required fact is still missing.
+When you need information about tools used in this project, use the `find-docs` skill or `WebFetch`.
 
 ### Context7 Library IDs
 
@@ -100,7 +97,7 @@ Pre-resolved IDs for the `find-docs` skill. Pass directly to `ctx7 docs`, skippi
 
 ### Documentation Links
 
-Use these official URLs for services, browser APIs, and topics that are not listed in the Context7 table above:
+For topics not well covered by Context7, use `WebFetch` on these URLs:
 
 - Chrome Extensions
   - https://developer.chrome.com/docs/extensions/

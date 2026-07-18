@@ -7,15 +7,14 @@
 ## Common Development Commands
 
 ```bash
-npm run build              # Build all targets (library + extension)
-npm run build:lib          # Build library (shared, browser, node)
-npm run build:extension    # Build Chrome extension (needs dist/ from build:lib, copies pangu.umd.js into vendors/)
+npm run build                   # Build all targets (library + extension)
+npm run build:lib               # Build library (shared, browser, node)
+npm run build:extension         # Build Chrome extension (needs dist/ from build:lib, copies pangu.umd.js into vendors/)
 
-# Every test script runs a full build first
-npm run test               # Run all tests (vitest + playwright)
-npm run test:shared        # Test core/shared logic
-npm run test:node          # Test Node.js-specific code
-npm run test:browser       # Test browser code (uses Playwright)
+npm run test                    # Run all tests (vitest + playwright)
+npm run test:shared             # Test core/shared logic
+npm run test:node               # Test Node.js-specific code
+npm run test:browser            # Test browser code (uses Playwright)
 
 npm run lint
 npm run lint:fix
@@ -27,19 +26,35 @@ npm run publish-package 1.2.3   # Bump version, update docs, build, commit, and 
 
 ## Where Things Live
 
-- Core spacing logic (regex patterns): `src/shared/index.ts`, core test cases: `tests/shared/index.test.ts`
+- Core spacing logic (regex patterns): `src/shared/index.ts`
 - Browser DOM layer: `src/browser/`
 - Node.js API and CLI: `src/node/`
-- Chrome extension: `browser-extensions/chrome/src/`
+- Chrome extension: `browser-extensions/chrome/`
+- Test cases: `tests/`
 
 ## Development Guidelines
 
 - Maintain zero runtime dependencies
-- Always pin exact dependency versions in `package.json` (no `^` or `~` prefixes)
 
-## Future Improvements
+## External Tool Documentation
 
-See `TODO.md` for planned improvements and technical debt.
+When you need information about tools used in this project, use the `find-docs` skill or `WebFetch`.
+
+### Context7 Library IDs
+
+Pre-resolved IDs for the `find-docs` skill. Pass directly to `ctx7 docs`, skipping the `ctx7 library` step:
+
+| Tool                                    | `libraryId`                             |
+| --------------------------------------- | --------------------------------------- |
+| ESLint                                  | `/eslint/eslint`                        |
+| eslint-plugin-unicorn                   | `/sindresorhus/eslint-plugin-unicorn`   |
+| typescript-eslint                       | `/typescript-eslint/typescript-eslint`  |
+| nodemon                                 | `/remy/nodemon`                         |
+| Playwright                              | `/microsoft/playwright`                 |
+| Prettier                                | `/prettier/prettier`                    |
+| `@trivago/prettier-plugin-sort-imports` | `/trivago/prettier-plugin-sort-imports` |
+| Vite                                    | `/vitejs/vite`                          |
+| Vitest                                  | `/vitest-dev/vitest`                    |
 
 ## Agent Skills
 
