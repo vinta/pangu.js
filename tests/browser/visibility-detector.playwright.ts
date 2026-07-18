@@ -722,7 +722,7 @@ test.describe('Visibility Detector Enabled', () => {
         }
       );
 
-      const textNodes: { text: string; parentClass: string | null; isHidden: boolean; computedStyle?: any }[] = [];
+      const textNodes: { text: string; parentClass: string | null; isHidden: boolean; computedStyle?: Pick<CSSStyleDeclaration, 'clip' | 'position' | 'width' | 'height' | 'overflow'> | null }[] = [];
       while (walker.nextNode()) {
         const node = walker.currentNode;
         const parent = node.parentElement;
