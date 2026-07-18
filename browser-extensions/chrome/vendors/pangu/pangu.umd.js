@@ -251,7 +251,7 @@
 		if (context.spaceLikeSiblingAfterCurrent) return "none";
 		if (context.currentEndsWithSpace || context.nextStartsWithSpace || context.whitespaceBetween) return "none";
 		if (context.contentBetween) return "none";
-		if (!needsBoundarySpace(context.currentLast, context.nextFirst)) return "none";
+		if (!needsBoundarySpace(context.currentTail, context.nextHead)) return "none";
 		if (context.spaceLikeSiblingAfterCurrentBoundary || context.currentBoundaryIsBlock) return "none";
 		if (!context.nextBoundaryIsSpaceSensitive) {
 			if (context.nextBoundaryIsIgnored || context.nextBoundaryIsBlock || context.spaceLikeSiblingBeforeNext || context.hiddenBoundaryBefore()) return "none";
@@ -277,10 +277,10 @@
 		} else verdicts.push("apply-text-spacing");
 		return verdicts;
 	}
-	function needsBoundarySpace(currentLast, nextFirst) {
-		const pair = `${currentLast}${nextFirst}`;
-		if (pangu$1.spacingText(pair) === pair) return false;
-		return !isQuoteNextToCjk(currentLast, nextFirst);
+	function needsBoundarySpace(currentTail, nextHead) {
+		const spacedTail = pangu$1.spacingText(currentTail);
+		if (!pangu$1.spacingText(`${currentTail}${nextHead}`).startsWith(`${spacedTail} `)) return false;
+		return !isQuoteNextToCjk(currentTail.slice(-1), nextHead.charAt(0));
 	}
 	function isQuoteNextToCjk(currentLast, nextFirst) {
 		return QUOTE.test(currentLast) && ANY_CJK.test(nextFirst) || ANY_CJK.test(currentLast) && QUOTE.test(nextFirst);
@@ -507,8 +507,8 @@
 					const currentRun = currentTextNode;
 					const nextRun = nextTextNode;
 					switch (decideBoundarySpacing({
-						currentLast: currentTextNode.data.slice(-1),
-						nextFirst: nextTextNode.data.slice(0, 1),
+						currentTail: currentTextNode.data.slice(-2),
+						nextHead: nextTextNode.data.slice(0, 2),
 						currentEndsWithSpace: currentTextNode.data.endsWith(" "),
 						nextStartsWithSpace: nextTextNode.data.startsWith(" "),
 						whitespaceBetween,

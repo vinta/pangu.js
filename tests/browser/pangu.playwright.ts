@@ -284,9 +284,9 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
-    // NOTE: Known limitation with XPath-based approach for adjacent sibling elements
-    // Current behavior doesn't add space between <span> and <a> elements
-    test.skip('handle YouTube formatted strings with hashtags', async ({ page }) => {
+    // Real YouTube DOM: the title's <span>, hashtag <a>, and trailing <span> are
+    // directly adjacent siblings with no whitespace between them
+    test('handle YouTube formatted strings with hashtags', async ({ page }) => {
       const htmlContent = loadFixture('youtube-format-string.html');
       const expected = loadFixture('youtube-format-string.expected.html').trim();
 

@@ -9,8 +9,10 @@ export type BoundarySpacingVerdict = 'none' | 'prepend-next' | 'append-current' 
 export type TextRunSpacingVerdict = 'trim-leading-space' | 'prepend-space' | 'apply-text-spacing';
 
 export interface BoundarySpacingContext {
-  currentLast: string;
-  nextFirst: string;
+  // Up to two characters from each side of the junction: some rules need the
+  // second character to fire (a hashtag is CJK + # + more text)
+  currentTail: string;
+  nextHead: string;
   currentEndsWithSpace: boolean;
   nextStartsWithSpace: boolean;
   whitespaceBetween: boolean;
@@ -56,7 +58,7 @@ export function decideBoundarySpacing(context: BoundarySpacingContext) {
     return 'none';
   }
 
-  if (!needsBoundarySpace(context.currentLast, context.nextFirst)) {
+  if (!needsBoundarySpace(context.currentTail, context.nextHead)) {
     return 'none';
   }
 
@@ -112,13 +114,17 @@ export function decideTextRunSpacing(context: TextRunSpacingContext) {
   return verdicts;
 }
 
-function needsBoundarySpace(currentLast: string, nextFirst: string) {
-  const pair = `${currentLast}${nextFirst}`;
-  if (pangu.spacingText(pair) === pair) {
+function needsBoundarySpace(currentTail: string, nextHead: string) {
+  // A space belongs at the junction when the engine, given the joined context,
+  // inserts one right after the tail. Comparing against the spaced tail keeps
+  // inner spacing of the tail itself from being mistaken for a junction space
+  const spacedTail = pangu.spacingText(currentTail);
+  const joined = pangu.spacingText(`${currentTail}${nextHead}`);
+  if (!joined.startsWith(`${spacedTail} `)) {
     return false;
   }
 
-  return !isQuoteNextToCjk(currentLast, nextFirst);
+  return !isQuoteNextToCjk(currentTail.slice(-1), nextHead.charAt(0));
 }
 
 function isQuoteNextToCjk(currentLast: string, nextFirst: string) {

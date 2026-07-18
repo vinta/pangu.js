@@ -1,8 +1,8 @@
 export type BoundarySpacingVerdict = 'none' | 'prepend-next' | 'append-current' | 'insert-element';
 export type TextRunSpacingVerdict = 'trim-leading-space' | 'prepend-space' | 'apply-text-spacing';
 export interface BoundarySpacingContext {
-    currentLast: string;
-    nextFirst: string;
+    currentTail: string;
+    nextHead: string;
     currentEndsWithSpace: boolean;
     nextStartsWithSpace: boolean;
     whitespaceBetween: boolean;

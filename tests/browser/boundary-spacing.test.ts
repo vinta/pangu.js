@@ -4,8 +4,8 @@ import { describe, it, expect } from 'vitest';
 
 // A boundary that the spacing engine wants a space at, with every veto turned off
 const spacingBoundary: BoundarySpacingContext = {
-  currentLast: '中',
-  nextFirst: 'a',
+  currentTail: '中',
+  nextHead: 'a',
   currentEndsWithSpace: false,
   nextStartsWithSpace: false,
   whitespaceBetween: false,
@@ -93,13 +93,19 @@ describe('decideBoundarySpacing()', () => {
   });
 
   const probeCases: BoundaryCase[] = [
-    { name: 'CJK then half-width', context: { currentLast: '中', nextFirst: 'a' }, verdict: 'prepend-next' },
-    { name: 'half-width then CJK', context: { currentLast: 'a', nextFirst: '中' }, verdict: 'prepend-next' },
-    { name: 'kana then half-width', context: { currentLast: 'の', nextFirst: 'a' }, verdict: 'prepend-next' },
-    { name: 'CJK then CJK', context: { currentLast: '中', nextFirst: '文' }, verdict: 'none' },
-    { name: 'half-width then half-width', context: { currentLast: 'a', nextFirst: 'b' }, verdict: 'none' },
+    { name: 'CJK then half-width', context: { currentTail: '中', nextHead: 'a' }, verdict: 'prepend-next' },
+    { name: 'half-width then CJK', context: { currentTail: 'a', nextHead: '中' }, verdict: 'prepend-next' },
+    { name: 'kana then half-width', context: { currentTail: 'の', nextHead: 'a' }, verdict: 'prepend-next' },
+    { name: 'CJK then CJK', context: { currentTail: '中', nextHead: '文' }, verdict: 'none' },
+    { name: 'half-width then half-width', context: { currentTail: 'a', nextHead: 'b' }, verdict: 'none' },
     // Hangul is outside the CJK class of shared, so the probe reports no spacing
-    { name: 'hangul then half-width', context: { currentLast: '한', nextFirst: 'a' }, verdict: 'none' },
+    { name: 'hangul then half-width', context: { currentTail: '한', nextHead: 'a' }, verdict: 'none' },
+    // The hashtag rules need a second character of context on each side:
+    // a hashtag only exists as CJK + # + more text (or text + # + CJK)
+    { name: 'CJK then a hashtag', context: { currentTail: '伟大', nextHead: '#番' }, verdict: 'prepend-next' },
+    { name: 'a hashtag end then CJK', context: { currentTail: 'g#', nextHead: '中文' }, verdict: 'prepend-next' },
+    // A junction space is detected even when the sampled context gets inner spacing too
+    { name: 'inner-spaced context around the junction', context: { currentTail: '中A', nextHead: '文x' }, verdict: 'prepend-next' },
   ];
 
   it.each(probeCases)('probes the spacing engine with $name', ({ context, verdict }) => {
@@ -107,12 +113,12 @@ describe('decideBoundarySpacing()', () => {
   });
 
   const quoteCases: BoundaryCase[] = [
-    { name: 'a straight quote before CJK', context: { currentLast: '"', nextFirst: '中' }, verdict: 'none' },
-    { name: 'CJK before a straight quote', context: { currentLast: '中', nextFirst: '"' }, verdict: 'none' },
-    { name: 'a curly quote before CJK', context: { currentLast: '“', nextFirst: '中' }, verdict: 'none' },
-    { name: 'CJK before a curly quote', context: { currentLast: '中', nextFirst: '”' }, verdict: 'none' },
-    { name: 'kana before a straight quote', context: { currentLast: 'の', nextFirst: '"' }, verdict: 'none' },
-    { name: 'a straight quote before kana', context: { currentLast: '"', nextFirst: 'の' }, verdict: 'none' },
+    { name: 'a straight quote before CJK', context: { currentTail: '"', nextHead: '中' }, verdict: 'none' },
+    { name: 'CJK before a straight quote', context: { currentTail: '中', nextHead: '"' }, verdict: 'none' },
+    { name: 'a curly quote before CJK', context: { currentTail: '“', nextHead: '中' }, verdict: 'none' },
+    { name: 'CJK before a curly quote', context: { currentTail: '中', nextHead: '”' }, verdict: 'none' },
+    { name: 'kana before a straight quote', context: { currentTail: 'の', nextHead: '"' }, verdict: 'none' },
+    { name: 'a straight quote before kana', context: { currentTail: '"', nextHead: 'の' }, verdict: 'none' },
   ];
 
   it.each(quoteCases)('skips spacing for $name', ({ context, verdict }) => {
@@ -206,7 +212,7 @@ describe('layout-dependent facts are consulted lazily', () => {
   });
 
   it('consults no layout fact when the probe reports no spacing', () => {
-    expect(decideBoundarySpacing(boundaryContext({ ...layoutFactsUnavailable, currentLast: '中', nextFirst: '文' }))).toBe('none');
+    expect(decideBoundarySpacing(boundaryContext({ ...layoutFactsUnavailable, currentTail: '中', nextHead: '文' }))).toBe('none');
   });
 
   it('consults no layout fact when the current boundary is a block', () => {
