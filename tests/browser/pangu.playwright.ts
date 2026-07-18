@@ -43,6 +43,32 @@ test.describe('BrowserPangu', () => {
       const result = await page.evaluate(() => document.getElementById('test-div')!.textContent);
       expect(result).toBe('小明在開發軟體時總是嚴格地遵循各項協定與標準，直到他看了 ISO 3166-1');
     });
+
+    test('handle boundary between sibling nodes added in one mutation batch', async ({ page }) => {
+      await page.setContent('<div id="container"></div>');
+
+      await page.evaluate(() => {
+        pangu.autoSpacingPage();
+      });
+
+      await page.waitForTimeout(50);
+
+      // Two separately queued siblings whose boundary needs a space
+      await page.evaluate(() => {
+        const container = document.getElementById('container')!;
+        const span1 = document.createElement('span');
+        span1.textContent = '中文';
+        const span2 = document.createElement('span');
+        span2.textContent = 'abc';
+        container.appendChild(span1);
+        container.appendChild(span2);
+      });
+
+      await page.waitForTimeout(600);
+
+      const result = await page.evaluate(() => document.getElementById('container')!.textContent);
+      expect(result).toBe('中文 abc');
+    });
   });
 
   test.describe('spacingNode()', () => {

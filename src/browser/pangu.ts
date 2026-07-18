@@ -376,31 +376,37 @@ export class BrowserPangu extends Pangu {
     const debouncedSpacingNode = debounce(
       () => {
         // NOTE: a single node could be very big which contains a lot of child nodes
-        if (this.taskScheduler.config.enabled) {
-          // Use idle processing for dynamic content
-          const nodesToProcess = [...queue];
-          queue.length = 0; // Clear the queue
+        const nodesToProcess = [...queue];
+        queue.length = 0; // Clear the queue
 
-          if (nodesToProcess.length > 0) {
-            // Collect all text nodes from all input nodes
-            const allTextNodes: Node[] = [];
-            for (const node of nodesToProcess) {
-              const textNodes = DomWalker.collectTextNodes(node, true);
-              allTextNodes.push(...textNodes);
-            }
+        if (nodesToProcess.length === 0) {
+          return;
+        }
 
-            // Process all collected text nodes with idle callback
-            this.schedule(allTextNodes);
+        // Merge all queued nodes' text runs into one reverse-document-order pass,
+        // so boundary spacing sees pairs that span separately queued nodes.
+        // Sort into document order first (mutation order is not document order)
+        // and drop duplicate runs (a parent and its child can both be queued)
+        nodesToProcess.sort((a, b) => {
+          if (a === b) {
+            return 0;
           }
-        } else {
-          // Synchronous processing (original behavior)
-          while (queue.length) {
-            const node = queue.shift();
-            if (node) {
-              this.spacingNode(node);
+          return a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+        });
+
+        const seenTextNodes = new Set<Node>();
+        const allTextNodes: Node[] = [];
+        for (const node of nodesToProcess) {
+          for (const textNode of DomWalker.collectTextNodes(node)) {
+            if (!seenTextNodes.has(textNode)) {
+              seenTextNodes.add(textNode);
+              allTextNodes.push(textNode);
             }
           }
         }
+        allTextNodes.reverse();
+
+        this.schedule(allTextNodes);
       },
       nodeDelayMs,
       nodeMaxWaitMs,

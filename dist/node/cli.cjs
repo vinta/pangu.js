@@ -662,21 +662,21 @@ var BrowserPangu = class extends Pangu {
 			if (titleElement) this.spacingNode(titleElement);
 		}, nodeDelayMs, nodeMaxWaitMs);
 		const debouncedSpacingNode = debounce(() => {
-			if (this.taskScheduler.config.enabled) {
-				const nodesToProcess = [...queue];
-				queue.length = 0;
-				if (nodesToProcess.length > 0) {
-					const allTextNodes = [];
-					for (const node of nodesToProcess) {
-						const textNodes = DomWalker.collectTextNodes(node, true);
-						allTextNodes.push(...textNodes);
-					}
-					this.schedule(allTextNodes);
-				}
-			} else while (queue.length) {
-				const node = queue.shift();
-				if (node) this.spacingNode(node);
+			const nodesToProcess = [...queue];
+			queue.length = 0;
+			if (nodesToProcess.length === 0) return;
+			nodesToProcess.sort((a, b) => {
+				if (a === b) return 0;
+				return a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+			});
+			const seenTextNodes = /* @__PURE__ */ new Set();
+			const allTextNodes = [];
+			for (const node of nodesToProcess) for (const textNode of DomWalker.collectTextNodes(node)) if (!seenTextNodes.has(textNode)) {
+				seenTextNodes.add(textNode);
+				allTextNodes.push(textNode);
 			}
+			allTextNodes.reverse();
+			this.schedule(allTextNodes);
 		}, nodeDelayMs, nodeMaxWaitMs);
 		this.autoSpacingPageObserver = new MutationObserver((mutations) => {
 			let titleChanged = false;
