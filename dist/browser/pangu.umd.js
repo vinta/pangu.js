@@ -106,7 +106,7 @@
 	var Pangu = class {
 		version;
 		constructor() {
-			this.version = "7.3.0";
+			this.version = "8.0.0";
 		}
 		spacingText(text) {
 			if (typeof text !== "string") {

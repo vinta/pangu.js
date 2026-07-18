@@ -1,11 +1,14 @@
 # History
 
-## v7.3.0 / 2026-xx-xx
+## v8.0.0 / 2026-xx-xx
 
 - 修正引號緊鄰日文假名時，空格規則跟漢字不一致的問題
 - 修正單獨出現的 `&nbsp;` 會造成空格判斷錯誤的問題，現在會先把它當成一般的半形空格
+- 同一批動態新增的相鄰節點之間現在會正確加空格，之前 MutationObserver 會用錯誤的順序判斷這種跨節點的邊界，同步模式（`taskScheduler.config.enabled = false`）則完全不會處理
+- 兩個變動的節點中間如果隔著沒變動的內容，不會再把它們誤判成相鄰節點而加錯空格
 - 把 boundary spacing 的判斷邏輯抽成獨立模組
-- 移除幾個文件上沒有的 methods：`taskScheduler.updateConfig()`、`taskScheduler.clear()`、`taskScheduler.queue.setOnComplete()`、`taskScheduler.processInChunks()` 的 `onComplete` 參數、`visibilityDetector.updateConfig()`，設定請直接改 `.config`
+- 把 sync / async 排程的判斷邏輯集中到同一個內部進入點，公開的 `taskScheduler.config` 和 `visibilityDetector.config` 用法不變
+- 移除幾個文件上沒有的 methods：`taskScheduler.updateConfig()`、`taskScheduler.clear()`、`taskScheduler.queue.setOnComplete()`、`taskScheduler.processInChunks()`、`visibilityDetector.updateConfig()`，設定請直接改 `.config`
 - 把 Node.js v18 從 CI 拿掉
 
 ## v7.2.1 / 2026-03-02
