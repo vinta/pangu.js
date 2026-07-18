@@ -255,7 +255,6 @@
 	var pangu$1 = new Pangu();
 	//#endregion
 	//#region src/browser/boundary-spacing.ts
-	var CJK_IDEOGRAPH = /[\u4e00-\u9fff]/;
 	var QUOTE = /["\u201c\u201d]/;
 	function decideBoundarySpacing(context) {
 		if (context.spaceLikeSiblingAfterCurrent) return "none";
@@ -282,7 +281,7 @@
 			text = text.substring(1);
 		}
 		if (isStandaloneQuote(text)) {
-			if (context.previousElementLastChar !== null && CJK_IDEOGRAPH.test(context.previousElementLastChar)) verdicts.push("prepend-space");
+			if (context.previousElementLastChar !== null && ANY_CJK.test(context.previousElementLastChar)) verdicts.push("prepend-space");
 		} else verdicts.push("apply-text-spacing");
 		return verdicts;
 	}
@@ -292,7 +291,7 @@
 		return !isQuoteNextToCjk(currentLast, nextFirst);
 	}
 	function isQuoteNextToCjk(currentLast, nextFirst) {
-		return QUOTE.test(currentLast) && CJK_IDEOGRAPH.test(nextFirst) || CJK_IDEOGRAPH.test(currentLast) && QUOTE.test(nextFirst);
+		return QUOTE.test(currentLast) && ANY_CJK.test(nextFirst) || ANY_CJK.test(currentLast) && QUOTE.test(nextFirst);
 	}
 	function isStandaloneQuote(text) {
 		return text.length === 1 && QUOTE.test(text);

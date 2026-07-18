@@ -101,20 +101,11 @@ describe('decideBoundarySpacing()', () => {
     { name: 'CJK before a straight quote', context: { currentLast: '中', nextFirst: '"' }, verdict: 'none' },
     { name: 'a curly quote before CJK', context: { currentLast: '“', nextFirst: '中' }, verdict: 'none' },
     { name: 'CJK before a curly quote', context: { currentLast: '中', nextFirst: '”' }, verdict: 'none' },
+    { name: 'kana before a straight quote', context: { currentLast: 'の', nextFirst: '"' }, verdict: 'none' },
+    { name: 'a straight quote before kana', context: { currentLast: '"', nextFirst: 'の' }, verdict: 'none' },
   ];
 
   it.each(quoteCases)('skips spacing for $name', ({ context, verdict }) => {
-    expect(decideBoundarySpacing(boundaryContext(context))).toBe(verdict);
-  });
-
-  // Pins a known quirk: the quote check only counts CJK Unified Ideographs as CJK, so kana next to a
-  // quote gets spaced while an ideograph in the same position does not. Scheduled for a behavioral follow-up
-  const kanaQuoteCases: BoundaryCase[] = [
-    { name: 'kana before a straight quote', context: { currentLast: 'の', nextFirst: '"' }, verdict: 'prepend-next' },
-    { name: 'a straight quote before kana', context: { currentLast: '"', nextFirst: 'の' }, verdict: 'prepend-next' },
-  ];
-
-  it.each(kanaQuoteCases)('does not skip spacing for $name', ({ context, verdict }) => {
     expect(decideBoundarySpacing(boundaryContext(context))).toBe(verdict);
   });
 
@@ -159,6 +150,7 @@ describe('decideTextRunSpacing()', () => {
     { name: 'a straight quote after CJK', context: { text: '"', previousElementLastChar: '中' }, verdicts: ['prepend-space'] },
     { name: 'a left curly quote after CJK', context: { text: '“', previousElementLastChar: '中' }, verdicts: ['prepend-space'] },
     { name: 'a right curly quote after CJK', context: { text: '”', previousElementLastChar: '中' }, verdicts: ['prepend-space'] },
+    { name: 'a straight quote after kana', context: { text: '"', previousElementLastChar: 'の' }, verdicts: ['prepend-space'] },
   ];
 
   it.each(standaloneQuoteCases)('prepends a space to $name', ({ context, verdicts }) => {
@@ -172,12 +164,6 @@ describe('decideTextRunSpacing()', () => {
 
   it.each(quoteSkipCases)('leaves a standalone quote alone when $name', ({ context, verdicts }) => {
     expect(decideTextRunSpacing(textRunContext(context))).toEqual(verdicts);
-  });
-
-  // Pins a known quirk: the standalone quote rule only counts CJK Unified Ideographs as CJK, so a kana
-  // before the quote gets no space. Scheduled for a behavioral follow-up
-  it('leaves a standalone quote alone when the previous element ends with kana', () => {
-    expect(decideTextRunSpacing(textRunContext({ text: '"', previousElementLastChar: 'の' }))).toEqual([]);
   });
 
   const textSpacingCases: TextRunCase[] = [

@@ -1,8 +1,5 @@
-import { pangu } from '../shared';
+import { ANY_CJK, pangu } from '../shared';
 
-// Narrower than the CJK class of shared: only CJK Unified Ideographs count as CJK next to a quote,
-// so kana and the other CJK blocks do not
-const CJK_IDEOGRAPH = /[\u4e00-\u9fff]/;
 const QUOTE = /["\u201c\u201d]/;
 
 // Where the space goes at the boundary between two adjacent text runs
@@ -92,7 +89,7 @@ export function decideTextRunSpacing(context: TextRunSpacingContext) {
   }
 
   if (isStandaloneQuote(text)) {
-    if (context.previousElementLastChar !== null && CJK_IDEOGRAPH.test(context.previousElementLastChar)) {
+    if (context.previousElementLastChar !== null && ANY_CJK.test(context.previousElementLastChar)) {
       verdicts.push('prepend-space');
     }
   } else {
@@ -112,7 +109,7 @@ function needsBoundarySpace(currentLast: string, nextFirst: string) {
 }
 
 function isQuoteNextToCjk(currentLast: string, nextFirst: string) {
-  return (QUOTE.test(currentLast) && CJK_IDEOGRAPH.test(nextFirst)) || (CJK_IDEOGRAPH.test(currentLast) && QUOTE.test(nextFirst));
+  return (QUOTE.test(currentLast) && ANY_CJK.test(nextFirst)) || (ANY_CJK.test(currentLast) && QUOTE.test(nextFirst));
 }
 
 function isStandaloneQuote(text: string) {
