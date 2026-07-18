@@ -148,7 +148,7 @@ dist/                           # Library builds
 - **Unit Tests**: Vitest 3.x for shared/node code
 - **Browser Tests**: Playwright 1.x for cross-browser testing
 - **Test Fixtures**: Located in `fixtures/`
-- **Coverage**: ~225 tests (75 vitest + 150 Playwright across 3 browsers)
+- **Coverage**: ~290 tests (138 vitest + 152 Playwright across 3 browsers)
 - **Test Structure**: Separate test directories for shared, node, and browser code
 
 ### Chrome Extension
