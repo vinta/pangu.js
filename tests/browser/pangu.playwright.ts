@@ -69,6 +69,37 @@ test.describe('BrowserPangu', () => {
       const result = await page.evaluate(() => document.getElementById('container')!.textContent);
       expect(result).toBe('中文 abc');
     });
+
+    test('not space across an unchanged sibling between nodes added in one mutation batch', async ({ page }) => {
+      await page.setContent('<div id="container"><span id="existing">X</span></div>');
+
+      // Large pageDelayMs keeps the initial page sweep out of the assertion window,
+      // so only the MutationObserver drain acts
+      await page.evaluate(() => {
+        pangu.autoSpacingPage({ pageDelayMs: 60000 });
+      });
+
+      await page.waitForTimeout(50);
+
+      // The two queued spans sandwich an untouched sibling, so their text runs are not adjacent
+      await page.evaluate(() => {
+        const container = document.getElementById('container')!;
+        const existing = document.getElementById('existing')!;
+        const first = document.createElement('span');
+        first.textContent = '甲';
+        const last = document.createElement('span');
+        last.textContent = 'abc';
+        container.insertBefore(first, existing);
+        container.appendChild(last);
+      });
+
+      await page.waitForTimeout(600);
+
+      // No space may appear between X and abc. The missing space in 甲X is a known
+      // pre-existing gap: boundaries against unqueued neighbors are never re-evaluated
+      const result = await page.evaluate(() => document.getElementById('container')!.textContent);
+      expect(result).toBe('甲Xabc');
+    });
   });
 
   test.describe('spacingNode()', () => {

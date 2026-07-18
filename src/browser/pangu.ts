@@ -141,6 +141,7 @@ export class BrowserPangu extends Pangu {
 
         const currentBoundaryNode = this.findCurrentBoundaryNode(currentTextNode);
         const nextBoundaryNode = this.findNextBoundaryNode(nextTextNode);
+        const { whitespaceBetween, contentBetween } = this.scanBetweenTextRuns(currentTextNode, nextTextNode);
 
         // Stable bindings for the lazy facts: the loop variables are reassigned across iterations
         const currentRun = currentTextNode;
@@ -151,7 +152,8 @@ export class BrowserPangu extends Pangu {
           nextFirst: nextTextNode.data.slice(0, 1),
           currentEndsWithSpace: currentTextNode.data.endsWith(' '),
           nextStartsWithSpace: nextTextNode.data.startsWith(' '),
-          whitespaceBetween: this.hasWhitespaceBetween(currentTextNode, nextTextNode),
+          whitespaceBetween,
+          contentBetween,
           spaceLikeSiblingAfterCurrent: isSpaceLikeSibling(currentTextNode.nextSibling),
           spaceLikeSiblingAfterCurrentBoundary: isSpaceLikeSibling(currentBoundaryNode.nextSibling),
           spaceLikeSiblingBeforeNext: isSpaceLikeSibling(nextTextNode.previousSibling),
@@ -253,7 +255,7 @@ export class BrowserPangu extends Pangu {
     return null;
   }
 
-  private hasWhitespaceBetween(currentTextNode: Node, nextTextNode: Node) {
+  private scanBetweenTextRuns(currentTextNode: Node, nextTextNode: Node) {
     // We need to check at different levels of the DOM tree
     // First, find the highest ancestor that contains only the current text node
     let currentAncestor: Node = currentTextNode;
@@ -267,16 +269,42 @@ export class BrowserPangu extends Pangu {
       nextAncestor = nextAncestor.parentNode;
     }
 
-    // Check for whitespace between these ancestors
+    // Scan the siblings between the two ancestors. Whitespace text means the runs
+    // are already separated. Collectable text (checked through the same DomWalker
+    // rules that build the runs, so ignored islands like <code> do not count)
+    // means the runs are not adjacent at all.
+    // The next run's climb can stop below a space-sensitive container (e.g. <a>),
+    // so a scanned sibling may be the element holding the next run itself: only
+    // collectable text before that run counts, and siblings after that container
+    // are past the boundary entirely
+    let whitespaceBetween = false;
+    let contentBetween = false;
+    let containerOfNext: Node | null = null;
     let nodeBetween = currentAncestor.nextSibling;
     while (nodeBetween && nodeBetween !== nextAncestor) {
       if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
-        return true;
+        whitespaceBetween = true;
+      }
+      if (!containerOfNext) {
+        if (nodeBetween.contains(nextAncestor)) {
+          containerOfNext = nodeBetween;
+        } else if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\S/.test(nodeBetween.textContent)) {
+          contentBetween = true;
+        } else if (nodeBetween.nodeType === Node.ELEMENT_NODE && DomWalker.collectTextNodes(nodeBetween).length > 0) {
+          contentBetween = true;
+        }
       }
       nodeBetween = nodeBetween.nextSibling;
     }
 
-    return false;
+    if (containerOfNext && !contentBetween) {
+      const collected = DomWalker.collectTextNodes(containerOfNext);
+      if (collected.length > 0 && collected[0] !== nextTextNode) {
+        contentBetween = true;
+      }
+    }
+
+    return { whitespaceBetween, contentBetween };
   }
 
   private isHiddenBoundaryBefore(node: Node) {

@@ -23,7 +23,7 @@ export declare class BrowserPangu extends Pangu {
     private findCurrentBoundaryNode;
     private findNextBoundaryNode;
     private findPreviousElementLastChar;
-    private hasWhitespaceBetween;
+    private scanBetweenTextRuns;
     private isHiddenBoundaryBefore;
     private isHiddenBoundaryAfter;
     private schedule;

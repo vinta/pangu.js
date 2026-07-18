@@ -158,4 +158,33 @@ test.describe('TaskScheduler Enabled', () => {
     expect(result.text.trim()).toBe('最終 final 文本 text');
     expect(result.processingCount).toBe(1);
   });
+
+  test('should not space across an unchanged sibling between nodes added in one mutation batch', async ({ page }) => {
+    await page.setContent('<div id="container"><span id="existing">X</span></div>');
+
+    const result = await page.evaluate(async () => {
+      pangu.taskScheduler.config.enabled = true;
+
+      // Large pageDelayMs keeps the initial page sweep out of the assertion window
+      pangu.autoSpacingPage({ pageDelayMs: 60000, nodeDelayMs: 100, nodeMaxWaitMs: 200 });
+
+      // The two queued spans sandwich an untouched sibling, so their text runs are not adjacent
+      const container = document.getElementById('container')!;
+      const existing = document.getElementById('existing')!;
+      const first = document.createElement('span');
+      first.textContent = '甲';
+      const last = document.createElement('span');
+      last.textContent = 'abc';
+      container.insertBefore(first, existing);
+      container.appendChild(last);
+
+      // Wait for debounced processing and idle callbacks
+      await new Promise((resolve) => setTimeout(resolve, 400));
+
+      return container.textContent;
+    });
+
+    // No space may appear between X and abc; the missing space in 甲X is a pre-existing gap
+    expect(result).toBe('甲Xabc');
+  });
 });
