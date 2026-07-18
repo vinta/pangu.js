@@ -865,11 +865,8 @@ test.describe('BrowserPangu', () => {
         return visibleSpan?.textContent || '';
       });
 
-      // console.log('Visible text after:', visibleTextAfter.substring(0, 20));
-
       // Check if a space was added at the beginning
       const hasLeadingSpace = visibleTextAfter.startsWith(' ');
-      // console.log('Has leading space after pangu.js:', hasLeadingSpace);
 
       // With visibility check enabled, pangu.js now detects that the first span
       // is visually hidden and should NOT add space between hidden and visible elements

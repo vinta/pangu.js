@@ -282,14 +282,8 @@ test.describe('Visibility Detector Enabled', () => {
       return {
         text: result,
         startsWithSpace: result?.startsWith(' ') || false,
-        firstChar: result?.charAt(0),
-        first10Chars: result?.substring(0, 10),
       };
     });
-
-    console.log('Result starts with space:', results.startsWithSpace);
-    console.log('First char:', JSON.stringify(results.firstChar));
-    console.log('First 10 chars:', JSON.stringify(results.first10Chars));
 
     // Should NOT start with space
     expect(results.startsWithSpace).toBe(false);
@@ -340,14 +334,8 @@ test.describe('Visibility Detector Enabled', () => {
       return {
         text: result,
         startsWithSpace: result?.startsWith(' ') || false,
-        firstChar: result?.charAt(0),
-        first10Chars: result?.substring(0, 10),
       };
     });
-
-    console.log('Result starts with space:', results.startsWithSpace);
-    console.log('First char:', JSON.stringify(results.firstChar));
-    console.log('First 10 chars:', JSON.stringify(results.first10Chars));
 
     // Should NOT start with space
     expect(results.startsWithSpace).toBe(false);
@@ -364,30 +352,6 @@ test.describe('Visibility Detector Enabled', () => {
 
       // Test both cases
       pangu.taskScheduler.config.enabled = true;
-
-      // Helper to collect text nodes
-      const collectTextNodes = (element: Element) => {
-        const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
-          acceptNode: (node) => {
-            if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
-              return NodeFilter.FILTER_REJECT;
-            }
-            return NodeFilter.FILTER_ACCEPT;
-          },
-        });
-
-        const nodes: { text: string; parentTag: string; parentClass: string }[] = [];
-        while (walker.nextNode()) {
-          const node = walker.currentNode;
-          const parent = node.parentElement;
-          nodes.push({
-            text: node.textContent || '',
-            parentTag: parent?.tagName || '',
-            parentClass: parent?.className || '',
-          });
-        }
-        return nodes;
-      };
 
       // Case 1: Simple content
       content.innerHTML = `
@@ -407,13 +371,10 @@ test.describe('Visibility Detector Enabled', () => {
     記得更新測試案例的預期結果</span></div>
       `;
 
-      const case1NodesBefore = collectTextNodes(content);
-
       pangu.spacingPage();
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const case1Result = content.querySelector('span:not(.XuJrye)')!.textContent;
-      const case1NodesAfter = collectTextNodes(content);
 
       // Case 2: Complex content with links
       content.innerHTML = `
@@ -439,39 +400,22 @@ test.describe('Visibility Detector Enabled', () => {
     發布新版本到測試環境</span></div>
       `;
 
-      const case2NodesBefore = collectTextNodes(content);
-
       pangu.spacingPage();
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const case2Result = content.querySelector('span:not(.XuJrye)')!.textContent;
-      const case2NodesAfter = collectTextNodes(content);
 
       return {
         case1: {
           text: case1Result,
           startsWithSpace: case1Result?.startsWith(' ') || false,
-          firstChar: case1Result?.charAt(0),
-          nodesBefore: case1NodesBefore,
-          nodesAfter: case1NodesAfter,
         },
         case2: {
           text: case2Result,
           startsWithSpace: case2Result?.startsWith(' ') || false,
-          firstChar: case2Result?.charAt(0),
-          nodesBefore: case2NodesBefore,
-          nodesAfter: case2NodesAfter,
         },
       };
     });
-
-    console.log('Case 1 starts with space:', results.case1.startsWithSpace, 'First char:', JSON.stringify(results.case1.firstChar));
-    console.log('Case 1 nodes before:', results.case1.nodesBefore);
-    console.log('Case 1 nodes after:', results.case1.nodesAfter);
-
-    console.log('Case 2 starts with space:', results.case2.startsWithSpace, 'First char:', JSON.stringify(results.case2.firstChar));
-    console.log('Case 2 nodes before:', results.case2.nodesBefore);
-    console.log('Case 2 nodes after:', results.case2.nodesAfter);
 
     // Both should NOT start with space
     expect(results.case1.startsWithSpace).toBe(false);
@@ -579,27 +523,16 @@ test.describe('Visibility Detector Enabled', () => {
       const hidden3 = content.querySelector('.hidden3')!;
 
       return {
-        hidden1: {
-          clip: getComputedStyle(hidden1).clip,
-          isHidden: pangu.visibilityDetector.isElementVisuallyHidden(hidden1),
-        },
-        hidden2: {
-          clip: getComputedStyle(hidden2).clip,
-          isHidden: pangu.visibilityDetector.isElementVisuallyHidden(hidden2),
-        },
-        hidden3: {
-          clip: getComputedStyle(hidden3).clip,
-          isHidden: pangu.visibilityDetector.isElementVisuallyHidden(hidden3),
-        },
+        hidden1: pangu.visibilityDetector.isElementVisuallyHidden(hidden1),
+        hidden2: pangu.visibilityDetector.isElementVisuallyHidden(hidden2),
+        hidden3: pangu.visibilityDetector.isElementVisuallyHidden(hidden3),
       };
     });
 
-    console.log('Clip rect formats:', JSON.stringify(result, null, 2));
-
     // All should be detected as hidden
-    expect(result.hidden1.isHidden).toBe(true);
-    expect(result.hidden2.isHidden).toBe(true);
-    expect(result.hidden3.isHidden).toBe(true);
+    expect(result.hidden1).toBe(true);
+    expect(result.hidden2).toBe(true);
+    expect(result.hidden3).toBe(true);
   });
 
   test('should debug text node processing order with visibility detection', async ({ page }) => {
@@ -630,39 +563,6 @@ test.describe('Visibility Detector Enabled', () => {
 
       pangu.taskScheduler.config.enabled = true;
 
-      // Collect text nodes manually to debug
-      const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
-        acceptNode: (node) => {
-          if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
-            return NodeFilter.FILTER_REJECT;
-          }
-          return NodeFilter.FILTER_ACCEPT;
-        },
-      });
-
-      const textNodes: { text: string; parentClass: string | null; isHidden: boolean; computedStyle?: Pick<CSSStyleDeclaration, 'clip' | 'position' | 'width' | 'height' | 'overflow'> | null }[] = [];
-      while (walker.nextNode()) {
-        const node = walker.currentNode;
-        const parent = node.parentElement;
-        let computedStyle = null;
-        if (parent && parent.className === 'XuJrye') {
-          const style = getComputedStyle(parent);
-          computedStyle = {
-            clip: style.clip,
-            position: style.position,
-            width: style.width,
-            height: style.height,
-            overflow: style.overflow,
-          };
-        }
-        textNodes.push({
-          text: node.textContent || '',
-          parentClass: parent?.className || null,
-          isHidden: parent ? pangu.visibilityDetector.isElementVisuallyHidden(parent) : false,
-          computedStyle,
-        });
-      }
-
       // Process the page
       pangu.spacingPage();
 
@@ -674,13 +574,10 @@ test.describe('Visibility Detector Enabled', () => {
       const finalText = visibleSpan.textContent;
 
       return {
-        textNodes,
         finalText,
         startsWithSpace: finalText?.startsWith(' ') || false,
       };
     });
-
-    console.log('Debug info:', JSON.stringify(debugInfo, null, 2));
 
     // The visible text should not start with space
     expect(debugInfo.startsWithSpace).toBe(false);
