@@ -24,19 +24,8 @@ export class DomWalker {
         // We need to check the node itself and its ancestors
         let currentNode = node;
         while (currentNode) {
-          if (currentNode instanceof Element) {
-            // Check for ignored tags
-            if (this.ignoredTags.test(currentNode.nodeName)) {
-              return NodeFilter.FILTER_REJECT;
-            }
-            // Check for contentEditable
-            if (this.isContentEditable(currentNode)) {
-              return NodeFilter.FILTER_REJECT;
-            }
-            // Check for ignored class
-            if (currentNode.classList.contains(this.ignoredClass)) {
-              return NodeFilter.FILTER_REJECT;
-            }
+          if (currentNode instanceof Element && this.isIgnoredElement(currentNode)) {
+            return NodeFilter.FILTER_REJECT;
           }
           currentNode = currentNode.parentNode as Node;
         }
@@ -91,6 +80,10 @@ export class DomWalker {
       }
     }
     return false;
+  }
+
+  public static isIgnoredElement(element: Element) {
+    return this.ignoredTags.test(element.nodeName) || this.isContentEditable(element) || element.classList.contains(this.ignoredClass);
   }
 
   private static isContentEditable(node: Node) {

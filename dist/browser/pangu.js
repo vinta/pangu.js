@@ -57,11 +57,7 @@ var DomWalker = class {
 			if (!node.nodeValue || !/\S/.test(node.nodeValue)) return NodeFilter.FILTER_REJECT;
 			let currentNode = node;
 			while (currentNode) {
-				if (currentNode instanceof Element) {
-					if (this.ignoredTags.test(currentNode.nodeName)) return NodeFilter.FILTER_REJECT;
-					if (this.isContentEditable(currentNode)) return NodeFilter.FILTER_REJECT;
-					if (currentNode.classList.contains(this.ignoredClass)) return NodeFilter.FILTER_REJECT;
-				}
+				if (currentNode instanceof Element && this.isIgnoredElement(currentNode)) return NodeFilter.FILTER_REJECT;
 				currentNode = currentNode.parentNode;
 			}
 			return NodeFilter.FILTER_ACCEPT;
@@ -89,6 +85,9 @@ var DomWalker = class {
 			if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) return childNode === targetNode;
 		}
 		return false;
+	}
+	static isIgnoredElement(element) {
+		return this.ignoredTags.test(element.nodeName) || this.isContentEditable(element) || element.classList.contains(this.ignoredClass);
 	}
 	static isContentEditable(node) {
 		return node instanceof HTMLElement && (node.isContentEditable || node.getAttribute("g_editable") === "true");

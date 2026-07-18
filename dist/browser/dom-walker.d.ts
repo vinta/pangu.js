@@ -8,5 +8,6 @@ export declare class DomWalker {
     static findBoundaryNode(textNode: Node, edge: 'first' | 'last'): Node;
     static isFirstTextChild(parentNode: Node, targetNode: Node): boolean;
     static isLastTextChild(parentNode: Node, targetNode: Node): boolean;
+    static isIgnoredElement(element: Element): boolean;
     private static isContentEditable;
 }
