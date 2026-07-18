@@ -614,7 +614,7 @@
 			return this.visibilityDetector.shouldSkipSpacingAfterNode(node);
 		}
 		schedule(textNodes) {
-			if (!this.taskScheduler.config.enabled) {
+			if (!this.taskScheduler.config.enabled || typeof requestIdleCallback !== "function") {
 				this.spacingTextNodes(textNodes);
 				return;
 			}

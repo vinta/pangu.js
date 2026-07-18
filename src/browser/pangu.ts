@@ -67,7 +67,7 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 //     └──────────────────┬────────────────────────┘
 //                        ↓
 // 4. schedule(textNodes)
-//    - Decision point: taskScheduler.config.enabled?
+//    - Decision point: taskScheduler.config.enabled && requestIdleCallback supported?
 //      ├─ NO  → spacingTextNodes(textNodes)   (synchronous, no requestIdleCallback)
 //      └─ YES (default) → taskScheduler.queue.add(() => spacingTextNodes(textNodes))
 //                         (always ONE task holding the whole list, never chunked)
@@ -85,8 +85,10 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 //      (hiddenBoundaryBefore / hiddenBoundaryAfter), not a scheduling decision
 //
 // Summary of paths to requestIdleCallback():
-// - taskScheduler.enabled=true  → one batch task per schedule() call, drained in idle slices
-// - taskScheduler.enabled=false → never (fully synchronous processing)
+// - taskScheduler.enabled=true + requestIdleCallback available → one batch task per
+//   schedule() call, drained in idle slices
+// - taskScheduler.enabled=false, or no requestIdleCallback (stock Safari) → never
+//   (fully synchronous processing)
 export class BrowserPangu extends Pangu {
   private isAutoSpacingPageExecuted = false;
   private autoSpacingPageObserver: MutationObserver | null = null;
@@ -341,7 +343,9 @@ export class BrowserPangu extends Pangu {
   // or as one idle-time batch. Boundary spacing needs adjacent-run context, so
   // the node list is never split across calls
   private schedule(textNodes: Node[]) {
-    if (!this.taskScheduler.config.enabled) {
+    // Stock Safari ships requestIdleCallback behind a preference flag, so fall
+    // back to synchronous spacing instead of throwing in TaskQueue
+    if (!this.taskScheduler.config.enabled || typeof requestIdleCallback !== 'function') {
       this.spacingTextNodes(textNodes);
       return;
     }

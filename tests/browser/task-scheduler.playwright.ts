@@ -228,3 +228,27 @@ test.describe('TaskScheduler Enabled', () => {
     expect(result).toBe('甲 abc');
   });
 });
+
+test.describe('TaskScheduler Fallback', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
+    await page.waitForFunction(() => typeof window.pangu !== 'undefined');
+  });
+
+  test('should fall back to synchronous spacing when requestIdleCallback is unavailable', async ({ page }) => {
+    await page.setContent('<div id="content"><span>中文</span><span>abc</span></div>');
+
+    const result = await page.evaluate(() => {
+      // Simulate stock Safari, where requestIdleCallback sits behind a preference flag
+      Object.defineProperty(window, 'requestIdleCallback', { value: undefined, configurable: true });
+      pangu.taskScheduler.config.enabled = true;
+
+      pangu.spacingNode(document.getElementById('content')!);
+
+      // No waiting: spacing must have completed synchronously
+      return document.getElementById('content')!.textContent;
+    });
+
+    expect(result).toBe('中文 abc');
+  });
+});
