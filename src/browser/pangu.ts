@@ -177,6 +177,10 @@ export class BrowserPangu extends Pangu {
         const currentBoundaryNode = this.findCurrentBoundaryNode(currentTextNode);
         const nextBoundaryNode = this.findNextBoundaryNode(nextTextNode);
 
+        // Stable bindings for the lazy facts: the loop variables are reassigned across iterations
+        const currentRun = currentTextNode;
+        const nextRun = nextTextNode;
+
         const verdict = decideBoundarySpacing({
           currentLast: currentTextNode.data.slice(-1),
           nextFirst: nextTextNode.data.slice(0, 1),
@@ -192,9 +196,9 @@ export class BrowserPangu extends Pangu {
           nextBoundaryIsBlock: DomWalker.blockTags.test(nextBoundaryNode.nodeName),
           nextBoundaryIsIgnored: DomWalker.ignoredTags.test(nextBoundaryNode.nodeName),
           nextBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(nextBoundaryNode.nodeName),
-          hiddenBoundaryBefore: this.isHiddenBoundaryBefore(nextTextNode),
-          hiddenBoundaryAfter: this.isHiddenBoundaryAfter(currentTextNode),
-          inGridOrFlexContainer: !!nextBoundaryNode.parentNode && this.isGridOrFlexContainer(nextBoundaryNode.parentNode),
+          hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(nextRun),
+          hiddenBoundaryAfter: () => this.isHiddenBoundaryAfter(currentRun),
+          inGridOrFlexContainer: () => !!nextBoundaryNode.parentNode && this.isGridOrFlexContainer(nextBoundaryNode.parentNode),
         });
 
         switch (verdict) {
@@ -220,7 +224,7 @@ export class BrowserPangu extends Pangu {
     const verdicts = decideTextRunSpacing({
       text: textNode.data,
       previousElementLastChar: this.findPreviousElementLastChar(textNode),
-      hiddenBoundaryBefore: this.isHiddenBoundaryBefore(textNode),
+      hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(textNode),
     });
 
     for (const verdict of verdicts) {

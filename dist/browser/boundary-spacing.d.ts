@@ -15,14 +15,14 @@ export interface BoundarySpacingContext {
     nextBoundaryIsBlock: boolean;
     nextBoundaryIsIgnored: boolean;
     nextBoundaryIsSpaceSensitive: boolean;
-    hiddenBoundaryBefore: boolean;
-    hiddenBoundaryAfter: boolean;
-    inGridOrFlexContainer: boolean;
+    hiddenBoundaryBefore: () => boolean;
+    hiddenBoundaryAfter: () => boolean;
+    inGridOrFlexContainer: () => boolean;
 }
 export interface TextRunSpacingContext {
     text: string;
     previousElementLastChar: string | null;
-    hiddenBoundaryBefore: boolean;
+    hiddenBoundaryBefore: () => boolean;
 }
 export declare function decideBoundarySpacing(context: BoundarySpacingContext): "none" | "prepend-next" | "append-current" | "insert-element";
 export declare function decideTextRunSpacing(context: TextRunSpacingContext): TextRunSpacingVerdict[];

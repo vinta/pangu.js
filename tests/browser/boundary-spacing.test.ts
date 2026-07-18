@@ -18,10 +18,17 @@ const spacingBoundary: BoundarySpacingContext = {
   nextBoundaryIsBlock: false,
   nextBoundaryIsIgnored: false,
   nextBoundaryIsSpaceSensitive: false,
-  hiddenBoundaryBefore: false,
-  hiddenBoundaryAfter: false,
-  inGridOrFlexContainer: false,
+  hiddenBoundaryBefore: () => false,
+  hiddenBoundaryAfter: () => false,
+  inGridOrFlexContainer: () => false,
 };
+
+// A layout-dependent fact that the verdict must not need on this path
+function neverConsulted(name: string): () => boolean {
+  return () => {
+    throw new Error(`${name} must not be consulted`);
+  };
+}
 
 // The next boundary is space-sensitive, so the space goes onto the current text run
 const appendCurrentBoundary: Partial<BoundarySpacingContext> = { nextBoundaryIsSpaceSensitive: true };
@@ -32,7 +39,7 @@ const insertElementBoundary: Partial<BoundarySpacingContext> = { nextBoundaryIsS
 const textRun: TextRunSpacingContext = {
   text: '中文abc',
   previousElementLastChar: null,
-  hiddenBoundaryBefore: false,
+  hiddenBoundaryBefore: () => false,
 };
 
 interface BoundaryCase {
@@ -110,12 +117,12 @@ describe('decideBoundarySpacing()', () => {
   });
 
   const visibilityCases: BoundaryCase[] = [
-    { name: 'a hidden boundary before vetoes prepend-next', context: { hiddenBoundaryBefore: true }, verdict: 'none' },
-    { name: 'a hidden boundary after vetoes append-current', context: { ...appendCurrentBoundary, hiddenBoundaryAfter: true }, verdict: 'none' },
-    { name: 'a hidden boundary after vetoes insert-element', context: { ...insertElementBoundary, hiddenBoundaryAfter: true }, verdict: 'none' },
-    { name: 'a hidden boundary after leaves prepend-next alone', context: { hiddenBoundaryAfter: true }, verdict: 'prepend-next' },
-    { name: 'a hidden boundary before leaves append-current alone', context: { ...appendCurrentBoundary, hiddenBoundaryBefore: true }, verdict: 'append-current' },
-    { name: 'a hidden boundary before leaves insert-element alone', context: { ...insertElementBoundary, hiddenBoundaryBefore: true }, verdict: 'insert-element' },
+    { name: 'a hidden boundary before vetoes prepend-next', context: { hiddenBoundaryBefore: () => true }, verdict: 'none' },
+    { name: 'a hidden boundary after vetoes append-current', context: { ...appendCurrentBoundary, hiddenBoundaryAfter: () => true }, verdict: 'none' },
+    { name: 'a hidden boundary after vetoes insert-element', context: { ...insertElementBoundary, hiddenBoundaryAfter: () => true }, verdict: 'none' },
+    { name: 'a hidden boundary after leaves prepend-next alone', context: { hiddenBoundaryAfter: () => true }, verdict: 'prepend-next' },
+    { name: 'a hidden boundary before leaves append-current alone', context: { ...appendCurrentBoundary, hiddenBoundaryBefore: () => true }, verdict: 'append-current' },
+    { name: 'a hidden boundary before leaves insert-element alone', context: { ...insertElementBoundary, hiddenBoundaryBefore: () => true }, verdict: 'insert-element' },
   ];
 
   it.each(visibilityCases)('$name', ({ context, verdict }) => {
@@ -123,10 +130,10 @@ describe('decideBoundarySpacing()', () => {
   });
 
   const insertElementCases: BoundaryCase[] = [
-    { name: 'a Grid/Flexbox container downgrades insert-element', context: { ...insertElementBoundary, inGridOrFlexContainer: true }, verdict: 'none' },
+    { name: 'a Grid/Flexbox container downgrades insert-element', context: { ...insertElementBoundary, inGridOrFlexContainer: () => true }, verdict: 'none' },
     { name: 'a space-like sibling before the next boundary downgrades insert-element', context: { ...insertElementBoundary, spaceLikeSiblingBeforeNextBoundary: true }, verdict: 'none' },
-    { name: 'a Grid/Flexbox container leaves prepend-next alone', context: { inGridOrFlexContainer: true }, verdict: 'prepend-next' },
-    { name: 'a Grid/Flexbox container leaves append-current alone', context: { ...appendCurrentBoundary, inGridOrFlexContainer: true }, verdict: 'append-current' },
+    { name: 'a Grid/Flexbox container leaves prepend-next alone', context: { inGridOrFlexContainer: () => true }, verdict: 'prepend-next' },
+    { name: 'a Grid/Flexbox container leaves append-current alone', context: { ...appendCurrentBoundary, inGridOrFlexContainer: () => true }, verdict: 'append-current' },
     { name: 'a space-like sibling before the next boundary leaves prepend-next alone', context: { spaceLikeSiblingBeforeNextBoundary: true }, verdict: 'prepend-next' },
   ];
 
@@ -137,9 +144,9 @@ describe('decideBoundarySpacing()', () => {
 
 describe('decideTextRunSpacing()', () => {
   const trimCases: TextRunCase[] = [
-    { name: 'trims a leading space that comes after a hidden element', context: { text: ' 中文abc', hiddenBoundaryBefore: true }, verdicts: ['trim-leading-space', 'apply-text-spacing'] },
-    { name: 'keeps a leading space that comes after a visible element', context: { text: ' 中文abc', hiddenBoundaryBefore: false }, verdicts: ['apply-text-spacing'] },
-    { name: 'has nothing to trim after a hidden element', context: { text: '中文abc', hiddenBoundaryBefore: true }, verdicts: ['apply-text-spacing'] },
+    { name: 'trims a leading space that comes after a hidden element', context: { text: ' 中文abc', hiddenBoundaryBefore: () => true }, verdicts: ['trim-leading-space', 'apply-text-spacing'] },
+    { name: 'keeps a leading space that comes after a visible element', context: { text: ' 中文abc', hiddenBoundaryBefore: () => false }, verdicts: ['apply-text-spacing'] },
+    { name: 'has nothing to trim after a hidden element', context: { text: '中文abc', hiddenBoundaryBefore: () => true }, verdicts: ['apply-text-spacing'] },
   ];
 
   it.each(trimCases)('$name', ({ context, verdicts }) => {
@@ -176,10 +183,44 @@ describe('decideTextRunSpacing()', () => {
   });
 
   it('trims a leading space before deciding that the rest is a standalone quote', () => {
-    expect(decideTextRunSpacing(textRunContext({ text: ' "', previousElementLastChar: '中', hiddenBoundaryBefore: true }))).toEqual(['trim-leading-space', 'prepend-space']);
+    expect(decideTextRunSpacing(textRunContext({ text: ' "', previousElementLastChar: '中', hiddenBoundaryBefore: () => true }))).toEqual(['trim-leading-space', 'prepend-space']);
   });
 
   it('treats an untrimmed leading space as part of the text run', () => {
-    expect(decideTextRunSpacing(textRunContext({ text: ' "', previousElementLastChar: '中', hiddenBoundaryBefore: false }))).toEqual(['apply-text-spacing']);
+    expect(decideTextRunSpacing(textRunContext({ text: ' "', previousElementLastChar: '中', hiddenBoundaryBefore: () => false }))).toEqual(['apply-text-spacing']);
+  });
+});
+
+describe('layout-dependent facts are consulted lazily', () => {
+  const layoutFactsUnavailable: Partial<BoundarySpacingContext> = {
+    hiddenBoundaryBefore: neverConsulted('hiddenBoundaryBefore'),
+    hiddenBoundaryAfter: neverConsulted('hiddenBoundaryAfter'),
+    inGridOrFlexContainer: neverConsulted('inGridOrFlexContainer'),
+  };
+
+  it('consults no layout fact when the text runs are already spaced', () => {
+    expect(decideBoundarySpacing(boundaryContext({ ...layoutFactsUnavailable, currentEndsWithSpace: true }))).toBe('none');
+  });
+
+  it('consults no layout fact when the probe reports no spacing', () => {
+    expect(decideBoundarySpacing(boundaryContext({ ...layoutFactsUnavailable, currentLast: '中', nextFirst: '文' }))).toBe('none');
+  });
+
+  it('consults no layout fact when the current boundary is a block', () => {
+    expect(decideBoundarySpacing(boundaryContext({ ...layoutFactsUnavailable, currentBoundaryIsBlock: true }))).toBe('none');
+  });
+
+  it('leaves hidden-after and grid/flex unconsulted on the prepend-next path', () => {
+    const context = boundaryContext({ hiddenBoundaryAfter: neverConsulted('hiddenBoundaryAfter'), inGridOrFlexContainer: neverConsulted('inGridOrFlexContainer') });
+    expect(decideBoundarySpacing(context)).toBe('prepend-next');
+  });
+
+  it('leaves hidden-before and grid/flex unconsulted on the append-current path', () => {
+    const context = boundaryContext({ ...appendCurrentBoundary, hiddenBoundaryBefore: neverConsulted('hiddenBoundaryBefore'), inGridOrFlexContainer: neverConsulted('inGridOrFlexContainer') });
+    expect(decideBoundarySpacing(context)).toBe('append-current');
+  });
+
+  it('leaves the hidden boundary unconsulted for a text run with no leading space', () => {
+    expect(decideTextRunSpacing(textRunContext({ hiddenBoundaryBefore: neverConsulted('hiddenBoundaryBefore') }))).toEqual(['apply-text-spacing']);
   });
 });

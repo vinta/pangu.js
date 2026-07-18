@@ -7,21 +7,21 @@ function decideBoundarySpacing(context) {
 	if (!needsBoundarySpace(context.currentLast, context.nextFirst)) return "none";
 	if (context.spaceLikeSiblingAfterCurrentBoundary || context.currentBoundaryIsBlock) return "none";
 	if (!context.nextBoundaryIsSpaceSensitive) {
-		if (context.nextBoundaryIsIgnored || context.nextBoundaryIsBlock || context.spaceLikeSiblingBeforeNext || context.hiddenBoundaryBefore) return "none";
+		if (context.nextBoundaryIsIgnored || context.nextBoundaryIsBlock || context.spaceLikeSiblingBeforeNext || context.hiddenBoundaryBefore()) return "none";
 		return "prepend-next";
 	}
 	if (!context.currentBoundaryIsSpaceSensitive) {
-		if (context.hiddenBoundaryAfter) return "none";
+		if (context.hiddenBoundaryAfter()) return "none";
 		return "append-current";
 	}
-	if (context.hiddenBoundaryAfter || context.spaceLikeSiblingBeforeNextBoundary) return "none";
-	if (context.inGridOrFlexContainer) return "none";
+	if (context.spaceLikeSiblingBeforeNextBoundary || context.hiddenBoundaryAfter()) return "none";
+	if (context.inGridOrFlexContainer()) return "none";
 	return "insert-element";
 }
 function decideTextRunSpacing(context) {
 	const verdicts = [];
 	let { text } = context;
-	if (context.hiddenBoundaryBefore && text.startsWith(" ")) {
+	if (text.startsWith(" ") && context.hiddenBoundaryBefore()) {
 		verdicts.push("trim-leading-space");
 		text = text.substring(1);
 	}
@@ -324,6 +324,8 @@ var BrowserPangu = class extends Pangu {
 				if (!(currentTextNode instanceof Text) || !(nextTextNode instanceof Text)) continue;
 				const currentBoundaryNode = this.findCurrentBoundaryNode(currentTextNode);
 				const nextBoundaryNode = this.findNextBoundaryNode(nextTextNode);
+				const currentRun = currentTextNode;
+				const nextRun = nextTextNode;
 				switch (decideBoundarySpacing({
 					currentLast: currentTextNode.data.slice(-1),
 					nextFirst: nextTextNode.data.slice(0, 1),
@@ -339,9 +341,9 @@ var BrowserPangu = class extends Pangu {
 					nextBoundaryIsBlock: DomWalker.blockTags.test(nextBoundaryNode.nodeName),
 					nextBoundaryIsIgnored: DomWalker.ignoredTags.test(nextBoundaryNode.nodeName),
 					nextBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(nextBoundaryNode.nodeName),
-					hiddenBoundaryBefore: this.isHiddenBoundaryBefore(nextTextNode),
-					hiddenBoundaryAfter: this.isHiddenBoundaryAfter(currentTextNode),
-					inGridOrFlexContainer: !!nextBoundaryNode.parentNode && this.isGridOrFlexContainer(nextBoundaryNode.parentNode)
+					hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(nextRun),
+					hiddenBoundaryAfter: () => this.isHiddenBoundaryAfter(currentRun),
+					inGridOrFlexContainer: () => !!nextBoundaryNode.parentNode && this.isGridOrFlexContainer(nextBoundaryNode.parentNode)
 				})) {
 					case "prepend-next":
 						nextTextNode.data = ` ${nextTextNode.data}`;
@@ -362,7 +364,7 @@ var BrowserPangu = class extends Pangu {
 		const verdicts = decideTextRunSpacing({
 			text: textNode.data,
 			previousElementLastChar: this.findPreviousElementLastChar(textNode),
-			hiddenBoundaryBefore: this.isHiddenBoundaryBefore(textNode)
+			hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(textNode)
 		});
 		for (const verdict of verdicts) switch (verdict) {
 			case "trim-leading-space":

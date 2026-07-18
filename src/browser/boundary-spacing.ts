@@ -23,15 +23,19 @@ export interface BoundarySpacingContext {
   nextBoundaryIsBlock: boolean;
   nextBoundaryIsIgnored: boolean;
   nextBoundaryIsSpaceSensitive: boolean;
-  hiddenBoundaryBefore: boolean;
-  hiddenBoundaryAfter: boolean;
-  inGridOrFlexContainer: boolean;
+  // These facts read computed styles, so they are supplied lazily and only
+  // consulted for boundaries that survive the cheap checks
+  hiddenBoundaryBefore: () => boolean;
+  hiddenBoundaryAfter: () => boolean;
+  inGridOrFlexContainer: () => boolean;
 }
 
 export interface TextRunSpacingContext {
   text: string;
   previousElementLastChar: string | null;
-  hiddenBoundaryBefore: boolean;
+  // Reads computed styles, so it is supplied lazily and only consulted when
+  // the text run starts with a space
+  hiddenBoundaryBefore: () => boolean;
 }
 
 export function decideBoundarySpacing(context: BoundarySpacingContext) {
@@ -52,26 +56,26 @@ export function decideBoundarySpacing(context: BoundarySpacingContext) {
   }
 
   if (!context.nextBoundaryIsSpaceSensitive) {
-    if (context.nextBoundaryIsIgnored || context.nextBoundaryIsBlock || context.spaceLikeSiblingBeforeNext || context.hiddenBoundaryBefore) {
+    if (context.nextBoundaryIsIgnored || context.nextBoundaryIsBlock || context.spaceLikeSiblingBeforeNext || context.hiddenBoundaryBefore()) {
       return 'none';
     }
     return 'prepend-next';
   }
 
   if (!context.currentBoundaryIsSpaceSensitive) {
-    if (context.hiddenBoundaryAfter) {
+    if (context.hiddenBoundaryAfter()) {
       return 'none';
     }
     return 'append-current';
   }
 
-  if (context.hiddenBoundaryAfter || context.spaceLikeSiblingBeforeNextBoundary) {
+  if (context.spaceLikeSiblingBeforeNextBoundary || context.hiddenBoundaryAfter()) {
     return 'none';
   }
 
   // Skip <pangu> element insertion in Grid/Flexbox containers
   // because the element becomes a layout item and breaks the layout
-  if (context.inGridOrFlexContainer) {
+  if (context.inGridOrFlexContainer()) {
     return 'none';
   }
 
@@ -83,7 +87,7 @@ export function decideTextRunSpacing(context: TextRunSpacingContext) {
 
   // The standalone quote rule reads the text left by the trim rule
   let { text } = context;
-  if (context.hiddenBoundaryBefore && text.startsWith(' ')) {
+  if (text.startsWith(' ') && context.hiddenBoundaryBefore()) {
     verdicts.push('trim-leading-space');
     text = text.substring(1);
   }
