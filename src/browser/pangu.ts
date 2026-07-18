@@ -22,10 +22,6 @@ function once<T extends (...args: any[]) => any>(func: T) {
   };
 }
 
-function isSpaceLikeSibling(node: Node | null) {
-  return !!node && DomWalker.spaceLikeTags.test(node.nodeName);
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mustRunDelay: number = Infinity) {
   let timer: number | null = null;
@@ -109,6 +105,10 @@ export class BrowserPangu extends Pangu {
 
   // INTERNAL
 
+  private isSpaceLikeSibling(node: Node | null) {
+    return !!node && DomWalker.spaceLikeTags.test(node.nodeName);
+  }
+
   private isGridOrFlexContainer(node: Node): boolean {
     if (node.nodeType !== Node.ELEMENT_NODE) {
       return false;
@@ -154,10 +154,10 @@ export class BrowserPangu extends Pangu {
           nextStartsWithSpace: nextTextNode.data.startsWith(' '),
           whitespaceBetween,
           contentBetween,
-          spaceLikeSiblingAfterCurrent: isSpaceLikeSibling(currentTextNode.nextSibling),
-          spaceLikeSiblingAfterCurrentBoundary: isSpaceLikeSibling(currentBoundaryNode.nextSibling),
-          spaceLikeSiblingBeforeNext: isSpaceLikeSibling(nextTextNode.previousSibling),
-          spaceLikeSiblingBeforeNextBoundary: isSpaceLikeSibling(nextBoundaryNode.previousSibling),
+          spaceLikeSiblingAfterCurrent: this.isSpaceLikeSibling(currentTextNode.nextSibling),
+          spaceLikeSiblingAfterCurrentBoundary: this.isSpaceLikeSibling(currentBoundaryNode.nextSibling),
+          spaceLikeSiblingBeforeNext: this.isSpaceLikeSibling(nextTextNode.previousSibling),
+          spaceLikeSiblingBeforeNextBoundary: this.isSpaceLikeSibling(nextBoundaryNode.previousSibling),
           currentBoundaryIsBlock: DomWalker.blockTags.test(currentBoundaryNode.nodeName),
           currentBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(currentBoundaryNode.nodeName),
           nextBoundaryIsBlock: DomWalker.blockTags.test(nextBoundaryNode.nodeName),

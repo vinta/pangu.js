@@ -198,9 +198,6 @@ function once(func) {
 		return func(...args);
 	};
 }
-function isSpaceLikeSibling(node) {
-	return !!node && DomWalker.spaceLikeTags.test(node.nodeName);
-}
 function debounce(func, delay, mustRunDelay = Infinity) {
 	let timer = null;
 	let startTime = null;
@@ -247,6 +244,9 @@ var BrowserPangu = class extends Pangu {
 	isElementVisuallyHidden(element) {
 		return this.visibilityDetector.isElementVisuallyHidden(element);
 	}
+	isSpaceLikeSibling(node) {
+		return !!node && DomWalker.spaceLikeTags.test(node.nodeName);
+	}
 	isGridOrFlexContainer(node) {
 		if (node.nodeType !== Node.ELEMENT_NODE) return false;
 		const display = window.getComputedStyle(node).display;
@@ -273,10 +273,10 @@ var BrowserPangu = class extends Pangu {
 					nextStartsWithSpace: nextTextNode.data.startsWith(" "),
 					whitespaceBetween,
 					contentBetween,
-					spaceLikeSiblingAfterCurrent: isSpaceLikeSibling(currentTextNode.nextSibling),
-					spaceLikeSiblingAfterCurrentBoundary: isSpaceLikeSibling(currentBoundaryNode.nextSibling),
-					spaceLikeSiblingBeforeNext: isSpaceLikeSibling(nextTextNode.previousSibling),
-					spaceLikeSiblingBeforeNextBoundary: isSpaceLikeSibling(nextBoundaryNode.previousSibling),
+					spaceLikeSiblingAfterCurrent: this.isSpaceLikeSibling(currentTextNode.nextSibling),
+					spaceLikeSiblingAfterCurrentBoundary: this.isSpaceLikeSibling(currentBoundaryNode.nextSibling),
+					spaceLikeSiblingBeforeNext: this.isSpaceLikeSibling(nextTextNode.previousSibling),
+					spaceLikeSiblingBeforeNextBoundary: this.isSpaceLikeSibling(nextBoundaryNode.previousSibling),
 					currentBoundaryIsBlock: DomWalker.blockTags.test(currentBoundaryNode.nodeName),
 					currentBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(currentBoundaryNode.nodeName),
 					nextBoundaryIsBlock: DomWalker.blockTags.test(nextBoundaryNode.nodeName),
