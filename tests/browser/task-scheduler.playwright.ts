@@ -159,6 +159,26 @@ test.describe('TaskScheduler Enabled', () => {
     expect(result.processingCount).toBe(1);
   });
 
+  test('should apply boundary spacing across chunk seams when visibility detection is disabled', async ({ page }) => {
+    // Four adjacent runs with chunkSize 2: the abc|漢字 pair straddles the chunk seam
+    await page.setContent('<div id="content"><span>中文</span><span>abc</span><span>漢字</span><span>def</span></div>');
+
+    const result = await page.evaluate(async () => {
+      pangu.taskScheduler.config.enabled = true;
+      pangu.taskScheduler.config.chunkSize = 2;
+      pangu.visibilityDetector.config.enabled = false;
+
+      pangu.spacingNode(document.getElementById('content')!);
+
+      // Wait for idle processing
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      return document.getElementById('content')!.textContent;
+    });
+
+    expect(result).toBe('中文 abc 漢字 def');
+  });
+
   test('should not space across an unchanged sibling between nodes added in one mutation batch', async ({ page }) => {
     await page.setContent('<div id="container"><span id="existing">X</span></div>');
 

@@ -488,9 +488,9 @@ var BrowserPangu = class extends Pangu {
 		const display = window.getComputedStyle(node).display;
 		return display === "grid" || display === "inline-grid" || display === "flex" || display === "inline-flex";
 	}
-	spacingTextNodes(textNodes) {
+	spacingTextNodes(textNodes, previousChunkLastNode = null) {
 		let currentTextNode;
-		let nextTextNode = null;
+		let nextTextNode = previousChunkLastNode;
 		for (let i = 0; i < textNodes.length; i++) {
 			currentTextNode = textNodes[i];
 			if (!currentTextNode) continue;
@@ -623,8 +623,9 @@ var BrowserPangu = class extends Pangu {
 		const { chunkSize } = this.taskScheduler.config;
 		for (let i = 0; i < textNodes.length; i += chunkSize) {
 			const chunk = textNodes.slice(i, i + chunkSize);
+			const previousChunkLastNode = i > 0 ? textNodes[i - 1] : null;
 			this.taskScheduler.queue.add(() => {
-				this.spacingTextNodes(chunk);
+				this.spacingTextNodes(chunk, previousChunkLastNode);
 			});
 		}
 	}

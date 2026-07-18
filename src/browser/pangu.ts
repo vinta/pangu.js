@@ -118,9 +118,12 @@ export class BrowserPangu extends Pangu {
     return display === 'grid' || display === 'inline-grid' || display === 'flex' || display === 'inline-flex';
   }
 
-  private spacingTextNodes(textNodes: Node[]) {
+  private spacingTextNodes(textNodes: Node[], previousChunkLastNode: Node | null = null) {
     let currentTextNode: Node | null;
-    let nextTextNode: Node | null = null;
+    // Boundary pairs are only evaluated within one call, so a chunked caller
+    // seeds the trailing context with the previous chunk's last node (already
+    // processed) to keep the pair that straddles the seam evaluated
+    let nextTextNode: Node | null = previousChunkLastNode;
 
     // Process nodes in the order provided
     for (let i = 0; i < textNodes.length; i++) {
@@ -318,8 +321,9 @@ export class BrowserPangu extends Pangu {
     const { chunkSize } = this.taskScheduler.config;
     for (let i = 0; i < textNodes.length; i += chunkSize) {
       const chunk = textNodes.slice(i, i + chunkSize);
+      const previousChunkLastNode = i > 0 ? textNodes[i - 1] : null;
       this.taskScheduler.queue.add(() => {
-        this.spacingTextNodes(chunk);
+        this.spacingTextNodes(chunk, previousChunkLastNode);
       });
     }
   }
