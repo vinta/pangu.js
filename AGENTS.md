@@ -112,3 +112,17 @@ Use these official URLs for services, browser APIs, and topics that are not list
   - https://developer.chrome.com/docs/extensions/reference/api/scripting
 - Chrome Extension Storage API
   - https://developer.chrome.com/docs/extensions/reference/api/storage
+
+## Agent Skills
+
+### Issue Tracker
+
+Issues are tracked on GitHub (github.com/vinta/pangu.js) via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage Labels
+
+Default five-role vocabulary (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix). See `docs/agents/triage-labels.md`.
+
+### Domain Docs
+
+Single-context layout — `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.

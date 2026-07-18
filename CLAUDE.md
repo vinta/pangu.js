@@ -217,29 +217,39 @@ interface Settings {
 **Core Features:**
 
 - **Context-Aware Symbol Handling**:
-
   - Operators (`= + - * / < > & ^`): Always add spaces when CJK is present
   - Separators (`_ |`): Never add spaces regardless of context
   - Dual-behavior slash `/`: Single occurrence = operator (add spaces), multiple = file path separator (no spaces)
 
 - **Smart Pattern Recognition**:
-
   - Preserves compound words: `state-of-the-art`, `GPT-5`, `claude-4-opus`
   - Handles programming terms correctly: `C++`, `A+`, `i++`, `D-`, `C#`, `F#`
   - Protects file paths: Unix (`/usr/bin`, `src/main.py`) and Windows (`C:\Users\`)
   - Special handling for grades: `A+` before CJK becomes `A+ ` not `A + `
 
 - **Improved Punctuation**:
-
   - No longer converts half-width punctuation to full-width
   - Smart handling of quotes, brackets, and special characters
   - Preserves multiple consecutive punctuation marks
 
 - **HTML Support**:
-
   - Processes text within HTML attributes while preserving tag structure
   - Protects HTML tags from being altered by spacing rules
 
 ## Future Improvements
 
 See @TODO.md for planned improvements and technical debt.
+
+## Agent Skills
+
+### Issue Tracker
+
+Issues are tracked on GitHub (github.com/vinta/pangu.js) via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage Labels
+
+Default five-role vocabulary (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix). See `docs/agents/triage-labels.md`.
+
+### Domain Docs
+
+Single-context layout — `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
