@@ -141,9 +141,7 @@ export class BrowserPangu extends Pangu {
 
         const currentBoundaryNode = DomWalker.findBoundaryNode(currentTextNode, 'last');
         const nextBoundaryNode = DomWalker.findBoundaryNode(nextTextNode, 'first');
-        const currentAncestor = DomWalker.findScanAncestor(currentTextNode, 'last');
-        const nextAncestor = DomWalker.findScanAncestor(nextTextNode, 'first');
-        const { whitespaceBetween, contentBetween } = this.scanBetweenTextRuns(currentAncestor, nextAncestor, nextTextNode);
+        const { whitespaceBetween, contentBetween } = this.scanBetweenTextRuns(currentBoundaryNode, nextBoundaryNode);
 
         // Stable bindings for the lazy facts: the loop variables are reassigned across iterations
         const currentRun = currentTextNode;
@@ -239,40 +237,51 @@ export class BrowserPangu extends Pangu {
     return null;
   }
 
-  private scanBetweenTextRuns(currentAncestor: Node, nextAncestor: Node, nextTextNode: Node) {
-    // Scan the siblings between the two ancestors. Whitespace text means the runs
-    // are already separated. Collectable text (checked through the same DomWalker
-    // rules that build the runs, so ignored islands like <code> do not count)
-    // means the runs are not adjacent at all.
-    // The next run's climb can stop below a space-sensitive container (e.g. <a>),
-    // so a scanned sibling may be the element holding the next run itself: only
-    // collectable text before that run counts, and siblings after that container
-    // are past the boundary entirely
+  private scanBetweenTextRuns(currentBoundaryNode: Node, nextBoundaryNode: Node) {
+    // Scan the document-order gap between the two boundary nodes. Whitespace
+    // text means the runs are already separated. Collectable text (checked
+    // through the same DomWalker rules that build the runs, so ignored islands
+    // like <code> do not count) means the runs are not adjacent at all
     let whitespaceBetween = false;
     let contentBetween = false;
-    let containerOfNext: Node | null = null;
-    let nodeBetween = currentAncestor.nextSibling;
-    while (nodeBetween && nodeBetween !== nextAncestor) {
-      if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) {
-        whitespaceBetween = true;
-      }
-      if (!containerOfNext) {
-        if (nodeBetween.contains(nextAncestor)) {
-          containerOfNext = nodeBetween;
-        } else if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\S/.test(nodeBetween.textContent)) {
-          contentBetween = true;
-        } else if (nodeBetween.nodeType === Node.ELEMENT_NODE && DomWalker.collectTextNodes(nodeBetween).length > 0) {
+
+    const scan = (node: Node) => {
+      if (node.nodeType === Node.TEXT_NODE && node.textContent) {
+        if (/\s/.test(node.textContent)) {
+          whitespaceBetween = true;
+        }
+        if (/\S/.test(node.textContent)) {
           contentBetween = true;
         }
-      }
-      nodeBetween = nodeBetween.nextSibling;
-    }
-
-    if (containerOfNext && !contentBetween) {
-      const collected = DomWalker.collectTextNodes(containerOfNext);
-      if (collected.length > 0 && collected[0] !== nextTextNode) {
+      } else if (node.nodeType === Node.ELEMENT_NODE && DomWalker.collectTextNodes(node).length > 0) {
         contentBetween = true;
       }
+    };
+
+    // Climb from the current boundary, scanning the following siblings at each
+    // level until one is or holds the next boundary. The climb never escapes
+    // the common ancestor because the next boundary is found below it first
+    let containerOfNext: Node | null = null;
+    let node: Node | null = currentBoundaryNode;
+    while (node && !containerOfNext) {
+      let sibling = node.nextSibling;
+      while (sibling && !sibling.contains(nextBoundaryNode)) {
+        scan(sibling);
+        sibling = sibling.nextSibling;
+      }
+      containerOfNext = sibling;
+      node = node.parentNode;
+    }
+
+    // Descend to the next boundary, scanning the children before its path at
+    // each level. Nothing past the boundary is ever visited
+    while (containerOfNext && containerOfNext !== nextBoundaryNode) {
+      let child: Node | null = containerOfNext.firstChild;
+      while (child && !child.contains(nextBoundaryNode)) {
+        scan(child);
+        child = child.nextSibling;
+      }
+      containerOfNext = child;
     }
 
     return { whitespaceBetween, contentBetween };

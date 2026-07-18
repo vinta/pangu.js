@@ -684,6 +684,54 @@ test.describe('BrowserPangu', () => {
       expect(html).toBe('<a href="#">abc</a><pangu> </pangu><a href="#">漢字</a>');
     });
 
+    test('should space across a nested link when trailing whitespace sits past the boundary', async ({ page }) => {
+      // The whitespace after </span> is beyond the boundary between 字 and x,
+      // so it must not veto the missing space
+      await page.setContent('<p id="test">字<span><a href="#">x</a></span> tail</p>');
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test')!);
+      });
+
+      const result = await page.evaluate(() => document.getElementById('test')!.textContent);
+      expect(result).toBe('字 x tail');
+    });
+
+    test('should not add a redundant space when real whitespace separates a link from the next run', async ({ page }) => {
+      await page.setContent('<p id="test"><a href="#">字</a> <b>x</b></p>');
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test')!);
+      });
+
+      const html = await page.evaluate(() => document.getElementById('test')!.innerHTML);
+      expect(html).toBe('<a href="#">字</a> <b>x</b>');
+    });
+
+    test('should not add a redundant space when whitespace separates a wrapped link from the next run', async ({ page }) => {
+      // The boundary climb stops on <a>, so the scan has to exit the wrapping
+      // <span> to see the whitespace-only text node
+      await page.setContent('<p id="test"><span><a href="#">字</a></span>\n<b>x</b></p>');
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test')!);
+      });
+
+      const result = await page.evaluate(() => document.querySelector('#test b')!.textContent);
+      expect(result).toBe('x');
+    });
+
+    test('should space across a wrapped link when no whitespace separates the runs', async ({ page }) => {
+      await page.setContent('<p id="test"><span><a href="#">字</a></span>x</p>');
+
+      await page.evaluate(() => {
+        pangu.spacingNode(document.getElementById('test')!);
+      });
+
+      const result = await page.evaluate(() => document.getElementById('test')!.textContent);
+      expect(result).toBe('字 x');
+    });
+
     test('should not insert <pangu> in grid with CJK card content (real-world case)', async ({ page }) => {
       // Simulates the AgentPub directory page layout from the bug report
       await page.setContent(`

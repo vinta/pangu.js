@@ -6,6 +6,8 @@
 - 修正單獨出現的 `&nbsp;` 會造成空格判斷錯誤的問題，現在會先把它當成一般的半形空格
 - 同一批動態新增的相鄰節點之間現在會正確加空格，之前 MutationObserver 會用錯誤的順序判斷這種跨節點的邊界，同步模式（`taskScheduler.config.enabled = false`）則完全不會處理
 - 兩個變動的節點中間如果隔著沒變動的內容，不會再把它們誤判成相鄰節點而加錯空格
+- 修正連結被其他元素包住、後面又接著其他文字時，連結前後漏加空格的問題
+- 兩段文字中間本來就有空白時，不會再多加一個空格，之前隔著 `<a>` 這類元素時會看不到那個空白
 - 把 boundary spacing 的判斷邏輯抽成獨立模組
 - 把 sync / async 排程的判斷邏輯集中到同一個內部進入點，公開的 `taskScheduler.config` 和 `visibilityDetector.config` 用法不變
 - 移除幾個文件上沒有的 methods：`taskScheduler.updateConfig()`、`taskScheduler.clear()`、`taskScheduler.queue.setOnComplete()`、`taskScheduler.processInChunks()`、`visibilityDetector.updateConfig()`，設定請直接改 `.config`

@@ -317,11 +317,6 @@ var DomWalker = class {
 		while (node.parentNode && !this.spaceSensitiveTags.test(node.nodeName) && (edge === "first" ? this.isFirstTextChild(node.parentNode, node) : this.isLastTextChild(node.parentNode, node))) node = node.parentNode;
 		return node;
 	}
-	static findScanAncestor(textNode, edge) {
-		let node = textNode;
-		while (node.parentNode && (edge === "first" ? this.isFirstTextChild(node.parentNode, node) : this.isLastTextChild(node.parentNode, node)) && !this.spaceSensitiveTags.test(node.parentNode.nodeName)) node = node.parentNode;
-		return node;
-	}
 	static isFirstTextChild(parentNode, targetNode) {
 		const { childNodes } = parentNode;
 		for (let i = 0; i < childNodes.length; i++) {
@@ -505,9 +500,7 @@ var BrowserPangu = class extends Pangu {
 				if (!(currentTextNode instanceof Text) || !(nextTextNode instanceof Text)) continue;
 				const currentBoundaryNode = DomWalker.findBoundaryNode(currentTextNode, "last");
 				const nextBoundaryNode = DomWalker.findBoundaryNode(nextTextNode, "first");
-				const currentAncestor = DomWalker.findScanAncestor(currentTextNode, "last");
-				const nextAncestor = DomWalker.findScanAncestor(nextTextNode, "first");
-				const { whitespaceBetween, contentBetween } = this.scanBetweenTextRuns(currentAncestor, nextAncestor, nextTextNode);
+				const { whitespaceBetween, contentBetween } = this.scanBetweenTextRuns(currentBoundaryNode, nextBoundaryNode);
 				const currentRun = currentTextNode;
 				const nextRun = nextTextNode;
 				switch (decideBoundarySpacing({
@@ -578,23 +571,33 @@ var BrowserPangu = class extends Pangu {
 		if (previousNode && previousNode.nodeType === Node.ELEMENT_NODE && previousNode.textContent) return previousNode.textContent.slice(-1);
 		return null;
 	}
-	scanBetweenTextRuns(currentAncestor, nextAncestor, nextTextNode) {
+	scanBetweenTextRuns(currentBoundaryNode, nextBoundaryNode) {
 		let whitespaceBetween = false;
 		let contentBetween = false;
+		const scan = (node) => {
+			if (node.nodeType === Node.TEXT_NODE && node.textContent) {
+				if (/\s/.test(node.textContent)) whitespaceBetween = true;
+				if (/\S/.test(node.textContent)) contentBetween = true;
+			} else if (node.nodeType === Node.ELEMENT_NODE && DomWalker.collectTextNodes(node).length > 0) contentBetween = true;
+		};
 		let containerOfNext = null;
-		let nodeBetween = currentAncestor.nextSibling;
-		while (nodeBetween && nodeBetween !== nextAncestor) {
-			if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\s/.test(nodeBetween.textContent)) whitespaceBetween = true;
-			if (!containerOfNext) {
-				if (nodeBetween.contains(nextAncestor)) containerOfNext = nodeBetween;
-				else if (nodeBetween.nodeType === Node.TEXT_NODE && nodeBetween.textContent && /\S/.test(nodeBetween.textContent)) contentBetween = true;
-				else if (nodeBetween.nodeType === Node.ELEMENT_NODE && DomWalker.collectTextNodes(nodeBetween).length > 0) contentBetween = true;
+		let node = currentBoundaryNode;
+		while (node && !containerOfNext) {
+			let sibling = node.nextSibling;
+			while (sibling && !sibling.contains(nextBoundaryNode)) {
+				scan(sibling);
+				sibling = sibling.nextSibling;
 			}
-			nodeBetween = nodeBetween.nextSibling;
+			containerOfNext = sibling;
+			node = node.parentNode;
 		}
-		if (containerOfNext && !contentBetween) {
-			const collected = DomWalker.collectTextNodes(containerOfNext);
-			if (collected.length > 0 && collected[0] !== nextTextNode) contentBetween = true;
+		while (containerOfNext && containerOfNext !== nextBoundaryNode) {
+			let child = containerOfNext.firstChild;
+			while (child && !child.contains(nextBoundaryNode)) {
+				scan(child);
+				child = child.nextSibling;
+			}
+			containerOfNext = child;
 		}
 		return {
 			whitespaceBetween,
