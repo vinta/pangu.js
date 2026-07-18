@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Visibility Detector Enabled', () => {
+test.describe('Visibility Detector', () => {
   test.beforeEach(async ({ page }) => {
     await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
