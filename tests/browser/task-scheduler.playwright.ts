@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('TaskScheduler Enabled', () => {
+  // Keep this guard even though spacing falls back to sync without requestIdleCallback:
+  // this suite tests the idle-callback scheduling path itself, which does not exist on
+  // WebKit (stock Safari ships requestIdleCallback behind a preference flag). Without the
+  // guard, these tests would silently exercise the sync fallback instead of the scheduler.
+  // The fallback path is covered on all browsers by the 'TaskScheduler Fallback' suite below.
   test.beforeEach(async ({ page }) => {
     const hasSupport = await page.evaluate(() => typeof window.requestIdleCallback === 'function');
     test.skip(!hasSupport, 'requestIdleCallback is not supported');

@@ -95,9 +95,6 @@ test.describe('Visibility Detector', () => {
   });
 
   test('should skip spacing between hidden element and CJK with taskScheduler enabled', async ({ page }) => {
-    const hasSupport = await page.evaluate(() => typeof window.requestIdleCallback === 'function');
-    test.skip(!hasSupport, 'requestIdleCallback is not supported');
-
     await page.setContent('<div id="content"></div>');
 
     const result = await page.evaluate(() => {
@@ -234,9 +231,6 @@ test.describe('Visibility Detector', () => {
   });
 
   test.skip('should reproduce Google Calendar with autoSpacingPage - with MutationObserver', async ({ page }) => {
-    const hasSupport = await page.evaluate(() => typeof window.requestIdleCallback === 'function');
-    test.skip(!hasSupport, 'requestIdleCallback is not supported');
-
     // This test simulates what happens when content is dynamically added after autoSpacingPage is started
     await page.setContent('<div id="content"></div>');
 
@@ -290,9 +284,6 @@ test.describe('Visibility Detector', () => {
   });
 
   test('should reproduce Google Calendar with autoSpacingPage', async ({ page }) => {
-    const hasSupport = await page.evaluate(() => typeof window.requestIdleCallback === 'function');
-    test.skip(!hasSupport, 'requestIdleCallback is not supported');
-
     await page.setContent('<div id="content"></div>');
 
     const results = await page.evaluate(async () => {
@@ -342,9 +333,6 @@ test.describe('Visibility Detector', () => {
   });
 
   test('should reproduce Google Calendar case differences', async ({ page }) => {
-    const hasSupport = await page.evaluate(() => typeof window.requestIdleCallback === 'function');
-    test.skip(!hasSupport, 'requestIdleCallback is not supported');
-
     await page.setContent('<div id="content"></div>');
 
     const results = await page.evaluate(async () => {
@@ -423,6 +411,9 @@ test.describe('Visibility Detector', () => {
   });
 
   test('should handle Google Calendar-like hidden description pattern correctly', async ({ page }) => {
+    // Keep this guard even though spacing falls back to sync without requestIdleCallback:
+    // this test compares sync mode against async (idle-callback) mode, and on WebKit both
+    // halves would run the same sync path, making the comparison vacuous.
     const hasSupport = await page.evaluate(() => typeof window.requestIdleCallback === 'function');
     test.skip(!hasSupport, 'requestIdleCallback is not supported');
 
@@ -536,9 +527,6 @@ test.describe('Visibility Detector', () => {
   });
 
   test('should debug text node processing order with visibility detection', async ({ page }) => {
-    const hasSupport = await page.evaluate(() => typeof window.requestIdleCallback === 'function');
-    test.skip(!hasSupport, 'requestIdleCallback is not supported');
-
     await page.setContent('<div id="content"></div>');
 
     const debugInfo = await page.evaluate(async () => {
