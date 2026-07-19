@@ -30,12 +30,12 @@ The algorithm behind text spacing. Source of truth: `src/shared/index.ts`, exhau
 **Symbol handling**:
 Operators (`=` `+` `-` `*` `/` `<` `>` `&` `^`) get spaces when CJK is adjacent. Separators (`_` `|`) never do.
 
-**Slash token**:
-Half-width characters joined tight by a slash (`A/B`, `26/30`, `vinta/hal-9000`). Never split, and spaced from adjacent CJK as one unit.
-_Avoid_: slash operand pair
+**Joiner token**:
+Half-width characters joined tight by a slash or ampersand (`A/B`, `26/30`, `vinta/hal-9000`, `S&P`, `Q&A`). Never split, and spaced from adjacent CJK as one unit. Ampersands need no per-line reading; slashes follow slash reading.
+_Avoid_: slash token, slash operand pair, &-token
 
 **Slash reading**:
-Decided per line, never across lines. A slash with half-width characters on both sides forms a slash token. A line's only slash acts as an operator when CJK touches it. Repeated slashes on a line read as a file path or a list and stay unspaced.
+Decided per line, never across lines. A slash with half-width characters on both sides forms a joiner token. A line's only slash acts as an operator when CJK touches it. Repeated slashes on a line read as a file path or a list and stay unspaced.
 
 **No CJK contact, no change**:
 The invariant behind every symbol rule. A run of half-width text that touches no CJK is never modified, no matter what appears elsewhere in the line or text.
