@@ -153,6 +153,11 @@ const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([${LEFT_BRACKETS_EXTENDED}])`, '
 const RIGHT_BRACKET_CJK = new RegExp(`([${RIGHT_BRACKETS_EXTENDED}])([${CJK}])`, 'g');
 const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([${AN}${CJK}])[ ]*([\u201c])([${AN}${CJK}\\-_ ]+)([\u201d])`, 'g');
 const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([\u201c])([${AN}${CJK}\\-_ ]+)([\u201d])[ ]*([${AN}${CJK}])`, 'g');
+// Some input habits type both quotes of a pair as closing curly quotes (\u201d), e.g. \u7537\u4e3b\u201d\u89c1\u8def\u4e0d\u8d70\u201d
+// A \u201d only opens a \u201d\u2026\u201d pair when no unclosed \u201c precedes it on the line (the lookbehind), otherwise it
+// closes that \u201c. Runs after RIGHT_BRACKET_CJK, so the [ ]* after the opener strips the space that rule
+// just added inside the pair
+const ANS_CJK_RIGHT_QUOTE_ANY_RIGHT_QUOTE = new RegExp(`([${AN}${CJK}])[ ]*(?<![\u201c][^\u201c\u201d\n]*)([\u201d])[ ]*([${AN}${CJK}\\-_ ]+?)[ ]*([\u201d])`, 'g');
 
 const AN_LEFT_BRACKET = new RegExp(`([${AN}])(?<!\\.[${AN}]*)([${LEFT_BRACKETS_BASIC}])`, 'g');
 const RIGHT_BRACKET_AN = new RegExp(`([${RIGHT_BRACKETS_BASIC}])([${AN}])`, 'g');
@@ -448,6 +453,7 @@ export class Pangu {
     newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
     newText = newText.replace(ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET, '$1 $2$3$4');
     newText = newText.replace(LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK, '$1$2$3 $4');
+    newText = newText.replace(ANS_CJK_RIGHT_QUOTE_ANY_RIGHT_QUOTE, '$1 $2$3$4');
 
     newText = newText.replace(AN_LEFT_BRACKET, '$1 $2');
     newText = newText.replace(RIGHT_BRACKET_AN, '$1 $2');
