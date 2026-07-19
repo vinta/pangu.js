@@ -233,6 +233,85 @@ test.describe('TaskScheduler Enabled', () => {
     expect(result).toBe('甲 abc');
   });
 
+  test('should re-space an externally reverted text node before the next paint', async ({ page }) => {
+    await page.setContent('<div id="content">測試中文abc混合內容123</div>');
+
+    const result = await page.evaluate(async () => {
+      pangu.taskScheduler.config.enabled = true;
+
+      // Huge nodeDelayMs keeps the debounced queue path out of the assertion window:
+      // only the pre-paint fast path can space anything below
+      pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 60000, nodeMaxWaitMs: 120000 });
+
+      // Wait for the initial sweep's idle processing
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      const content = document.getElementById('content')!;
+      const spacedOnce = content.textContent;
+
+      // Byte-exact external revert, like a framework re-render restoring the original text
+      content.firstChild!.nodeValue = '測試中文abc混合內容123';
+
+      const atNextPaint = await new Promise<string | null>((resolve) => requestAnimationFrame(() => resolve(content.textContent)));
+      return { spacedOnce, atNextPaint };
+    });
+
+    expect(result.spacedOnce).toBe('測試中文 abc 混合內容 123');
+    expect(result.atNextPaint).toBe('測試中文 abc 混合內容 123');
+  });
+
+  test('should re-space content that replaces already-spaced content before the next paint', async ({ page }) => {
+    await page.setContent('<div id="container"><div id="old">測試中文abc混合內容123</div></div>');
+
+    const result = await page.evaluate(async () => {
+      pangu.taskScheduler.config.enabled = true;
+
+      // Huge nodeDelayMs keeps the debounced queue path out of the assertion window
+      pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 60000, nodeMaxWaitMs: 120000 });
+
+      // Wait for the initial sweep's idle processing
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // A re-render that swaps the spaced subtree for a fresh unspaced one
+      const container = document.getElementById('container')!;
+      const fresh = document.createElement('div');
+      fresh.textContent = '測試中文abc混合內容123';
+      container.replaceChild(fresh, document.getElementById('old')!);
+
+      const atNextPaint = await new Promise<string | null>((resolve) => requestAnimationFrame(() => resolve(fresh.textContent)));
+      return { atNextPaint };
+    });
+
+    expect(result.atNextPaint).toBe('測試中文 abc 混合內容 123');
+  });
+
+  test('should converge after a pre-paint re-space without write loops', async ({ page }) => {
+    await page.setContent('<div id="content">測試中文abc混合內容123</div>');
+
+    const result = await page.evaluate(async () => {
+      pangu.taskScheduler.config.enabled = true;
+
+      pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 60000, nodeMaxWaitMs: 120000 });
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      const content = document.getElementById('content')!;
+
+      // Count every characterData mutation after the revert: a write loop would keep producing them
+      let characterDataCount = 0;
+      new MutationObserver((mutations) => {
+        characterDataCount += mutations.filter((mutation) => mutation.type === 'characterData').length;
+      }).observe(content, { characterData: true, subtree: true });
+
+      content.firstChild!.nodeValue = '測試中文abc混合內容123';
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      return { finalText: content.textContent, characterDataCount };
+    });
+
+    expect(result.finalText).toBe('測試中文 abc 混合內容 123');
+    expect(result.characterDataCount).toBeLessThanOrEqual(4);
+  });
+
   test('should keep processing queued tasks after a task throws', async ({ page }) => {
     await page.setContent('<div id="content"><span>中文</span><span>abc</span></div>');
 

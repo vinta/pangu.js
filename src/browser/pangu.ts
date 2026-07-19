@@ -90,8 +90,15 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 // - taskScheduler.enabled=false, or no requestIdleCallback (stock Safari) → never
 //   (fully synchronous processing)
 export class BrowserPangu extends Pangu {
+  // Pre-paint re-space stays bounded: subtrees with more text runs than this fall back to the queue
+  private static readonly maxSyncTextNodes = 256;
+
   private isAutoSpacingPageExecuted = false;
   private autoSpacingPageObserver: MutationObserver | null = null;
+  // Last data pangu wrote per text node: distinguishes pangu's own mutation records
+  // (data still equals the entry, drop them) from external rewrites of spaced content
+  // (data differs, re-space before the next paint)
+  private readonly lastWrittenData = new WeakMap<Text, string>();
   public readonly taskScheduler = new TaskScheduler();
   public readonly visibilityDetector = new VisibilityDetector();
 
@@ -214,9 +221,11 @@ export class BrowserPangu extends Pangu {
         switch (verdict) {
           case 'prepend-next':
             nextTextNode.data = ` ${nextTextNode.data}`;
+            this.lastWrittenData.set(nextTextNode, nextTextNode.data);
             break;
           case 'append-current':
             currentTextNode.data = `${currentTextNode.data} `;
+            this.lastWrittenData.set(currentTextNode, currentTextNode.data);
             break;
           case 'insert-element':
             this.insertPanguElement(nextBoundaryNode);
@@ -241,19 +250,47 @@ export class BrowserPangu extends Pangu {
       switch (verdict) {
         case 'trim-leading-space':
           textNode.data = textNode.data.substring(1);
+          this.lastWrittenData.set(textNode, textNode.data);
           break;
         case 'prepend-space':
           textNode.data = ` ${textNode.data}`;
+          this.lastWrittenData.set(textNode, textNode.data);
           break;
         case 'apply-text-spacing': {
           const newText = this.spacingText(textNode.data);
           if (textNode.data !== newText) {
             textNode.data = newText;
+            this.lastWrittenData.set(textNode, textNode.data);
           }
           break;
         }
       }
     }
+  }
+
+  // Same processing as the queued paths, but synchronous, for pre-paint re-spacing
+  // inside the MutationObserver callback. Returns false when the subtree exceeds
+  // maxTextNodes, so the caller can fall back to the debounced queue
+  private spacingNodeSync(contextNode: Node, maxTextNodes: number) {
+    const textNodes = DomWalker.collectTextNodes(contextNode, true);
+    if (textNodes.length > maxTextNodes) {
+      return false;
+    }
+    this.spacingTextNodes(textNodes);
+    return true;
+  }
+
+  private hasSpacedTextInSubtree(node: Node) {
+    if (node instanceof Text) {
+      return this.lastWrittenData.has(node);
+    }
+    const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      if (this.lastWrittenData.has(walker.currentNode as Text)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private insertPanguElement(nextBoundaryNode: Node) {
@@ -462,6 +499,22 @@ export class BrowserPangu extends Pangu {
     this.autoSpacingPageObserver = new MutationObserver((mutations) => {
       let titleChanged = false;
 
+      // When this batch removed content pangu already spaced, the page is re-rendering
+      // over processed DOM (e.g. a framework's second render pass): added subtrees are
+      // then re-spaced synchronously below, before the browser paints the reverted text
+      let removedSpacedContent = false;
+      for (const mutation of mutations) {
+        for (const node of mutation.removedNodes) {
+          if (this.hasSpacedTextInSubtree(node)) {
+            removedSpacedContent = true;
+            break;
+          }
+        }
+        if (removedSpacedContent) {
+          break;
+        }
+      }
+
       // Element: https://developer.mozilla.org/en-US/docs/Web/API/Element
       // Text: https://developer.mozilla.org/en-US/docs/Web/API/Text
       for (const mutation of mutations) {
@@ -473,25 +526,45 @@ export class BrowserPangu extends Pangu {
 
         // Queue parent elements for spacing processing
         switch (mutation.type) {
-          case 'characterData':
+          case 'characterData': {
             // Text content changed (e.g., textContent = '新文字new text')
             const { target: node } = mutation;
-            if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
+            if (node instanceof Text && node.parentNode) {
+              const lastWritten = this.lastWrittenData.get(node);
+              if (lastWritten !== undefined) {
+                if (node.data === lastWritten) {
+                  // pangu's own write: nothing to reprocess
+                  break;
+                }
+                // External rewrite of a node pangu already spaced is a revert:
+                // re-space it before the next paint so the revert never renders
+                if (this.spacingNodeSync(node.parentNode, BrowserPangu.maxSyncTextNodes)) {
+                  break;
+                }
+              }
               // <p>Hello 世界</p>
               // "Hello 世界" is the text node, <p> is the parent element
               queue.push(node.parentNode); // Queue parent element, not text node
             }
             break;
-          case 'childList':
+          }
+          case 'childList': {
             // New nodes added to DOM (e.g., innerHTML change, appendChild)
             for (const node of mutation.addedNodes) {
               if (node.nodeType === Node.ELEMENT_NODE) {
+                if (removedSpacedContent && this.spacingNodeSync(node, BrowserPangu.maxSyncTextNodes)) {
+                  continue;
+                }
                 queue.push(node); // Element added, process its text content
               } else if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
+                if (removedSpacedContent && this.spacingNodeSync(node.parentNode, BrowserPangu.maxSyncTextNodes)) {
+                  continue;
+                }
                 queue.push(node.parentNode); // Text node added, process its parent
               }
             }
             break;
+          }
           default:
             break;
         }
