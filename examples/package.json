@@ -5,7 +5,8 @@
   "scripts": {
     "test:commonjs": "node test-commonjs.js",
     "test:esm": "node test-esm.mjs",
-    "test": "npm run test:commonjs && npm run test:esm",
+    "test:cli": "node test-cli.js",
+    "test": "npm run test:commonjs && npm run test:esm && npm run test:cli",
     "server": "node server.js"
   },
   "dependencies": {
