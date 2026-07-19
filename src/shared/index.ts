@@ -212,6 +212,10 @@ const fixBracketSpacing = (text: string) => {
 };
 
 class PlaceholderReplacer {
+  // Instances are created per spacingText() call with a handful of fixed
+  // configs, so compiled patterns are shared across instances
+  private static patternCache = new Map<string, RegExp>();
+
   private items: string[] = [];
   private index = 0;
   private pattern: RegExp;
@@ -221,9 +225,15 @@ class PlaceholderReplacer {
     private startDelimiter: string,
     private endDelimiter: string,
   ) {
-    const escapedStart = this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const escapedEnd = this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    this.pattern = new RegExp(`${escapedStart}${this.placeholder}(\\d+)${escapedEnd}`, 'g');
+    const cacheKey = `${startDelimiter}${placeholder}${endDelimiter}`;
+    let pattern = PlaceholderReplacer.patternCache.get(cacheKey);
+    if (!pattern) {
+      const escapedStart = this.startDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const escapedEnd = this.endDelimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      pattern = new RegExp(`${escapedStart}${this.placeholder}(\\d+)${escapedEnd}`, 'g');
+      PlaceholderReplacer.patternCache.set(cacheKey, pattern);
+    }
+    this.pattern = pattern;
   }
 
   store(item: string) {
@@ -232,6 +242,9 @@ class PlaceholderReplacer {
   }
 
   restore(text: string) {
+    if (this.index === 0) {
+      return text;
+    }
     return text.replace(this.pattern, (_match, index) => {
       return this.items[parseInt(index, 10)] || '';
     });
