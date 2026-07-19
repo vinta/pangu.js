@@ -28,7 +28,17 @@ _Avoid_: space element
 The algorithm behind text spacing. Source of truth: `src/shared/index.ts`, exhaustive examples: `tests/shared/index.test.ts`.
 
 **Symbol handling**:
-Operators (`=` `+` `-` `*` `/` `<` `>` `&` `^`) get spaces when CJK is adjacent. Separators (`_` `|`) never do. A single `/` acts as an operator, repeated `/` reads as a file path and stays unspaced.
+Operators (`=` `+` `-` `*` `/` `<` `>` `&` `^`) get spaces when CJK is adjacent. Separators (`_` `|`) never do.
+
+**Slash token**:
+Half-width characters joined tight by a slash (`A/B`, `26/30`, `vinta/hal-9000`). Never split, and spaced from adjacent CJK as one unit.
+_Avoid_: slash operand pair
+
+**Slash reading**:
+Decided per line, never across lines. A slash with half-width characters on both sides forms a slash token. A line's only slash acts as an operator when CJK touches it. Repeated slashes on a line read as a file path or a list and stay unspaced.
+
+**No CJK contact, no change**:
+The invariant behind every symbol rule. A run of half-width text that touches no CJK is never modified, no matter what appears elsewhere in the line or text.
 
 **Pattern preservation**:
 Compound words (`state-of-the-art`, `GPT-5`, `claude-4-opus`), programming terms (`C++`, `A+`, `i++`, `D-`, `C#`, `F#`), and file paths (`/usr/bin`, `src/main.py`, `C:\Users\`) keep their internal shape. A letter grade before CJK becomes `A+ `, not `A + `.
