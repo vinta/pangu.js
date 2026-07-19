@@ -159,6 +159,9 @@ export class BrowserPangu extends Pangu {
   }
 
   private spacingTextNodes(textNodes: Node[]) {
+    // Visibility verdicts are memoized per batch; styles may change between batches
+    this.visibilityDetector.clearCache();
+
     let currentTextNode: Node | null;
     let nextTextNode: Node | null = null;
 

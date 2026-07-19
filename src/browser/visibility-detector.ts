@@ -1,4 +1,13 @@
 export class VisibilityDetector {
+  // Verdicts repeat heavily within one spacing batch: every boundary re-checks
+  // the same ancestor chain (p → body → html). Scoped to a batch via clearCache()
+  // because page styles can change between batches
+  private verdictCache = new WeakMap<Element, boolean>();
+
+  public clearCache() {
+    this.verdictCache = new WeakMap();
+  }
+
   public isElementVisuallyHidden(element: Element) {
     const style = getComputedStyle(element);
 
@@ -24,16 +33,14 @@ export class VisibilityDetector {
       return true;
     }
 
-    // Check height: 1px; width: 1px patterns
-    const height = parseInt(style.height, 10);
-    const width = parseInt(style.width, 10);
+    // Check height: 1px; width: 1px patterns (screen reader only content).
+    // height/width are layout-dependent, so reading them forces a reflow on a
+    // dirty tree — gate them behind the style-only overflow/position checks
+    if (style.overflow === 'hidden' && style.position === 'absolute') {
+      const height = parseInt(style.height, 10);
+      const width = parseInt(style.width, 10);
 
-    if (height === 1 && width === 1) {
-      // Additional checks for common screen reader patterns
-      const overflow = style.overflow;
-      const position = style.position;
-
-      if (overflow === 'hidden' && position === 'absolute') {
+      if (height === 1 && width === 1) {
         return true;
       }
     }
@@ -51,14 +58,14 @@ export class VisibilityDetector {
       elementToCheck = node.parentElement;
     }
 
-    if (elementToCheck && this.isElementVisuallyHidden(elementToCheck)) {
+    if (elementToCheck && this.isElementVisuallyHiddenCached(elementToCheck)) {
       return true;
     }
 
     // Check if any ancestor is visually hidden
     let currentElement = elementToCheck?.parentElement;
     while (currentElement) {
-      if (this.isElementVisuallyHidden(currentElement)) {
+      if (this.isElementVisuallyHiddenCached(currentElement)) {
         return true;
       }
       currentElement = currentElement.parentElement;
@@ -70,7 +77,7 @@ export class VisibilityDetector {
   public shouldSkipSpacingBeforeNode(node: Node) {
     // Find the previous sibling that might be hidden
     let previousNode = node.previousSibling;
-    
+
     // Walk up the DOM tree to find the actual previous element
     if (!previousNode && node.parentElement) {
       let parent: Element | null = node.parentElement;
@@ -84,13 +91,23 @@ export class VisibilityDetector {
 
     // Check if the previous node is hidden
     if (previousNode) {
-      if (previousNode instanceof Element && this.isElementVisuallyHidden(previousNode)) {
+      if (previousNode instanceof Element && this.isElementVisuallyHiddenCached(previousNode)) {
         return true;
-      } else if (previousNode instanceof Text && previousNode.parentElement && this.isElementVisuallyHidden(previousNode.parentElement)) {
+      } else if (previousNode instanceof Text && previousNode.parentElement && this.isElementVisuallyHiddenCached(previousNode.parentElement)) {
         return true;
       }
     }
 
     return false;
+  }
+
+  private isElementVisuallyHiddenCached(element: Element) {
+    const cached = this.verdictCache.get(element);
+    if (cached !== undefined) {
+      return cached;
+    }
+    const verdict = this.isElementVisuallyHidden(element);
+    this.verdictCache.set(element, verdict);
+    return verdict;
   }
 }
