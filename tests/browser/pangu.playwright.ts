@@ -795,6 +795,25 @@ test.describe('BrowserPangu', () => {
       expect(html).toBe('字<code>a b</code> x');
     });
 
+    // FIXME: The space belongs between "Content warning:" and 低, but needsBoundarySpace()
+    // only sees the two-character pair ":低", while AN_COLON_CJK needs the alphanumeric
+    // character before the colon to fire
+    test.skip('should space across an inline boundary when the colon rule needs context beyond the pair (real-world case)', async ({ page }) => {
+      await page.setContent(`<div class="content">
+        <p><strong>Content warning:</strong>低能量预警</p><hr><p>最近几天莫名其妙陷入了一种非常down的情绪之中。可能是因为工作，也可能是因为家庭、孩子，干什么都提不起兴趣，身体乏力，不知道什么时候才能走出来。</p>
+      </div>`);
+
+      await page.evaluate(() => {
+        pangu.spacingPage();
+      });
+
+      const paragraphs = await page.evaluate(() => Array.from(document.querySelectorAll('p'), (p) => p.textContent));
+      expect(paragraphs[0]).toBe('Content warning: 低能量预警');
+
+      // Already correctly spaced text must stay untouched
+      expect(paragraphs[1]).toBe('最近几天莫名其妙陷入了一种非常 down 的情绪之中。可能是因为工作，也可能是因为家庭、孩子，干什么都提不起兴趣，身体乏力，不知道什么时候才能走出来。');
+    });
+
     test('should not insert <pangu> in grid with CJK card content (real-world case)', async ({ page }) => {
       // Simulates the AgentPub directory page layout from the bug report
       await page.setContent(`
