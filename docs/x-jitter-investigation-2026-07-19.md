@@ -1,0 +1,29 @@
+# X article jitter investigation (2026-07-19)
+
+Live investigation of the reported spacing flicker on X (Twitter) long-form Article pages: text renders unspaced (t0), pangu spaces it (t1), X reverts it byte-exact to the original (t2), pangu re-spaces it and it stays stable (t3). Test target: `https://x.com/king1818888/status/2077294360543334620`, a Draft.js-style article rendered as 97 `<span data-text="true">` paragraphs. Method: Claude in Chrome driving a logged-in tab with instrumentation installed before X renders — a MutationObserver over `documentElement` (characterData + childList with old values, 250ms activity buckets), main-world setter patches on `CharacterData.data` / `Node.nodeValue` / `Node.textContent` capturing stack traces, and a 200ms DOM state poll. Extension content scripts run in the isolated world, so a page write with a captured stack is X's code and a mutation with no setter hit is pangu's. Vocabulary: `CONTEXT.md` (text spacing, boundary spacing).
+
+## Timeline on warm direct loads (two runs)
+
+At document `readyState === "complete"` (~520ms) the article body does not exist yet. X writes each paragraph once via `Element.textContent` from its React vendor bundle (`vendor.6f0bbb5a.js`, stack captured), then attaches the subtree: render at 2842ms / 1883ms in the two runs. pangu's initial sweep wrote spaces at 4671ms / 3691ms — about 1.7 to 1.8s of visibly unspaced text. Composition of that lag: content script at `document_idle`, plus `pageDelayMs` 1000, plus 0.5 to 1.2s of `requestIdleCallback` queue latency on X's busy main thread. Warm loads made no article GraphQL fetch at all (data ships embedded), rendered exactly once, and produced no revert in either run.
+
+## The revert is the SPA path's second render
+
+On SPA navigation into the article (profile → Articles tab → article), Vinta observed the full cycle live with the tab visible: rendered unspaced, spaced, reverted byte-exact, re-spaced, stable. The byte-exact revert is X re-rendering the same source text over the pangu-spaced DOM, and pangu's observer re-spaces it after the `nodeDelayMs` 500 debounce plus idle latency (the re-space path is verified: a simulated byte-exact characterData revert gets re-spaced in the local Playwright repro below). In a hidden tab the same SPA navigation renders the article exactly once and no revert ever appears — X defers the second render phase until the page is visible. The cold-load double render (network fetch then rich hydration) remains plausible for direct-load sightings but was not reproduced warm.
+
+## Hidden tabs never get spaced
+
+Chrome does not dispatch `requestIdleCallback` in hidden or occluded pages, not even with the `timeout` option (measured live: a 1500ms-timeout callback did not fire within 5s while `document.visibilityState === "hidden"`). With `taskScheduler.enabled`, every spacing write runs through rIC, so a page loaded in a background tab stays unspaced until first viewed, then spaces itself in front of the reader. Every cmd-clicked link is a guaranteed visible unspaced-to-spaced pop. This also invalidates any timing measurement taken in a backgrounded automation tab — mid-investigation, a hidden automation tab produced a false "SPA content never gets spaced" alarm, including frozen probes that only flushed when CDP screenshots forced frames.
+
+## Pipeline health
+
+A local Playwright harness loading the exact extension bundle (`browser-extensions/chrome/vendors/pangu/pangu.umd.js`) with an instrumented TaskQueue confirmed every path healthy in a visible page: initial sweep, post-sweep element-subtree insert, plain div insert, and byte-exact characterData revert re-space. The 2026-07-19 perf commits (`d29bda2`, `5af6163`, `e2a75ce`) are not implicated.
+
+Code reading during the investigation surfaced one real defect, fixed in `b937963`: a throwing task in `TaskQueue.process()` skipped the `isProcessing` reset, permanently wedging the queue — all future spacing on the page silently dead. Regression test: `tests/browser/task-scheduler.playwright.ts` ("should keep processing queued tasks after a task throws").
+
+## Deferred fixes (revisit if `b937963` alone is not enough)
+
+Per Vinta's call: ship the TaskQueue hardening first, keep these on record.
+
+1. **Adaptive quiet-period start.** Begin the first sweep ~500ms after the DOM goes quiet instead of a fixed `pageDelayMs`, capped at 4 to 5s. Prevents sweeping mid-hydration (the t1-before-t2 setup for the revert) and helps cold loads. Honest expectation from the measurements: on warm X loads it lands within ~0.5s of today's timing and does not remove the t0 pop, because the pop is bounded by X's late render plus idle latency. Roughly 20 lines in `autoSpacingPage`, reusing the existing observer. Needs Playwright regression tests alongside `tests/browser/task-scheduler.playwright.ts`.
+2. **`debounce` startTime reset** (`src/browser/pangu.ts:26`). `startTime` only resets on the mustRunDelay branch, so after the first flush any call arriving `nodeMaxWaitMs` after the previous sync flush executes the flush synchronously inside the MutationObserver callback — sort and collect work on the hot path instead of a debounced timer. Fix: reset `startTime` when the timer fires.
+3. **Sweep on `visibilitychange`.** When a hidden page becomes visible, trigger a sweep (or rely on the queued tasks now able to run, plus force a flush) so background-opened tabs are spaced before the reader looks. Addresses the guaranteed pop from the hidden-tab finding.
