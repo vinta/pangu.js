@@ -3,6 +3,11 @@
 browser-extensions/paranoid-auto-spacing.zip
 node_modules/
 
+# Build output
+/dist/
+browser-extensions/chrome/dist/
+browser-extensions/chrome/vendors/pangu/
+
 # Test results
 test-results/
 playwright-report/

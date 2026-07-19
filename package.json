@@ -58,6 +58,7 @@
     "HISTORY.md"
   ],
   "scripts": {
+    "prepare": "npm run build:lib",
     "clean": "rm -rf browser-extensions/chrome/dist/ dist/ playwright-report/ test-results/",
     "build": "npm run clean && npm run build:lib && npm run build:extension",
     "build:lib": "vite build && npm run build:types",
