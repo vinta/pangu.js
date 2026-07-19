@@ -1,6 +1,6 @@
 # History
 
-## v8.0.0 / 2026-xx-xx
+## v8.0.0 / 2026-07-19
 
 - 各位觀眾！Paranoid Text Spacing 演算法 v8！
   - 修正有些網頁加空格會抖動的問題
