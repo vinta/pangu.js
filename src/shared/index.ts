@@ -30,7 +30,7 @@ const UPPER_AN = 'A-Z0-9'; // For FIX_CJK_COLON_ANS
 // Operators - note the different sets!
 const OPERATORS_BASE = '\\+\\*=&';
 const OPERATORS_WITH_HYPHEN = `${OPERATORS_BASE}\\-`; // For CJK patterns
-const OPERATORS_NO_HYPHEN = OPERATORS_BASE; // For ANS_OPERATOR_ANS only
+const OPERATORS_NO_HYPHEN = '\\+\\*='; // For ANS_OPERATOR_ANS only; no & - it joins half-width chars into a token (S&P, Q&A)
 const GRADE_OPERATORS = '\\+\\-\\*'; // For single letter grades
 
 // Quotes
@@ -116,7 +116,7 @@ const CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
 const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS_WITH_HYPHEN}])([${AN}])`, 'g');
 const ANS_OPERATOR_CJK = new RegExp(`([${AN}])([${OPERATORS_WITH_HYPHEN}])([${CJK}])`, 'g');
 // Handle operators between alphanumeric characters when CJK is present in text
-// Note: This pattern excludes hyphens entirely (only + * = &) to avoid conflicts with compound words
+// Note: This pattern excludes hyphens entirely (only + * =) to avoid conflicts with compound words
 const ANS_OPERATOR_ANS = new RegExp(`([${AN}])([${OPERATORS_NO_HYPHEN}])([${AN}])`, 'g');
 
 // Hyphens that should be treated as operators (with spaces) rather than word connectors
