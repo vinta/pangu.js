@@ -28,15 +28,19 @@ export class TaskQueue {
   }
 
   private process(deadline: IdleDeadline) {
-    while (deadline.timeRemaining() > 0 && this.queue.length > 0) {
-      const task = this.queue.shift();
-      task?.();
-    }
+    try {
+      while (deadline.timeRemaining() > 0 && this.queue.length > 0) {
+        const task = this.queue.shift();
+        task?.();
+      }
+    } finally {
+      // A throwing task must not leave isProcessing stuck at true, or every
+      // future add() would silently never schedule processing again
+      this.isProcessing = false;
 
-    this.isProcessing = false;
-
-    if (this.queue.length > 0) {
-      this.scheduleProcessing();
+      if (this.queue.length > 0) {
+        this.scheduleProcessing();
+      }
     }
   }
 }

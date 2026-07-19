@@ -232,6 +232,27 @@ test.describe('TaskScheduler Enabled', () => {
 
     expect(result).toBe('甲 abc');
   });
+
+  test('should keep processing queued tasks after a task throws', async ({ page }) => {
+    await page.setContent('<div id="content"><span>中文</span><span>abc</span></div>');
+
+    const result = await page.evaluate(async () => {
+      pangu.taskScheduler.config.enabled = true;
+
+      // A throwing task must not wedge the queue for tasks queued after it
+      pangu.taskScheduler.queue.add(() => {
+        throw new Error('boom');
+      });
+      pangu.spacingNode(document.getElementById('content')!);
+
+      // Wait for idle processing
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      return document.getElementById('content')!.textContent;
+    });
+
+    expect(result).toBe('中文 abc');
+  });
 });
 
 test.describe('TaskScheduler Fallback', () => {
