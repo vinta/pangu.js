@@ -9,7 +9,10 @@ export type BoundarySpacingVerdict = 'none' | 'prepend-next' | 'append-current' 
 export type TextRunSpacingVerdict = 'trim-leading-space' | 'prepend-space' | 'apply-text-spacing';
 
 export interface BoundarySpacingContext {
-  currentLast: string;
+  // Up to three trailing characters of the current text run, not just the last
+  // one: rules like AN_COLON_CJK only fire with the characters before the
+  // junction in view
+  currentTail: string;
   nextFirst: string;
   currentEndsWithSpace: boolean;
   nextStartsWithSpace: boolean;
@@ -56,7 +59,7 @@ export function decideBoundarySpacing(context: BoundarySpacingContext) {
     return 'none';
   }
 
-  if (!needsBoundarySpace(context.currentLast, context.nextFirst)) {
+  if (!needsBoundarySpace(context.currentTail, context.nextFirst)) {
     return 'none';
   }
 
@@ -112,25 +115,27 @@ export function decideTextRunSpacing(context: TextRunSpacingContext) {
   return verdicts;
 }
 
-// needsBoundarySpace is pure and a page repeats the same few character pairs at
-// every boundary, so verdicts are memoized. The cap only guards pathological
-// pages with unbounded unique pairs
-const pairVerdictCache = new Map<string, boolean>();
-const PAIR_VERDICT_CACHE_MAX = 4096;
+// needsBoundarySpace is pure and a page repeats the same few junction windows
+// at every boundary, so verdicts are memoized. The cap only guards pathological
+// pages with unbounded unique windows
+const junctionVerdictCache = new Map<string, boolean>();
+const JUNCTION_VERDICT_CACHE_MAX = 4096;
 
-function needsBoundarySpace(currentLast: string, nextFirst: string) {
-  const pair = `${currentLast}${nextFirst}`;
-  const cached = pairVerdictCache.get(pair);
+function needsBoundarySpace(currentTail: string, nextFirst: string) {
+  const junction = `${currentTail}${nextFirst}`;
+  const cached = junctionVerdictCache.get(junction);
   if (cached !== undefined) {
     return cached;
   }
 
-  const verdict = pangu.spacingText(pair) !== pair && !isQuoteNextToCjk(currentLast, nextFirst);
+  // Only a space right at the junction counts: a space that spacingText puts
+  // anywhere else belongs inside the tail, not at the boundary
+  const verdict = pangu.spacingText(junction).endsWith(` ${nextFirst}`) && !isQuoteNextToCjk(currentTail.slice(-1), nextFirst);
 
-  if (pairVerdictCache.size >= PAIR_VERDICT_CACHE_MAX) {
-    pairVerdictCache.clear();
+  if (junctionVerdictCache.size >= JUNCTION_VERDICT_CACHE_MAX) {
+    junctionVerdictCache.clear();
   }
-  pairVerdictCache.set(pair, verdict);
+  junctionVerdictCache.set(junction, verdict);
   return verdict;
 }
 

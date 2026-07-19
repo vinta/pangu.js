@@ -795,10 +795,9 @@ test.describe('BrowserPangu', () => {
       expect(html).toBe('字<code>a b</code> x');
     });
 
-    // FIXME: The space belongs between "Content warning:" and 低, but needsBoundarySpace()
-    // only sees the two-character pair ":低", while AN_COLON_CJK needs the alphanumeric
-    // character before the colon to fire
-    test.skip('should space across an inline boundary when the colon rule needs context beyond the pair (real-world case)', async ({ page }) => {
+    test('should space across an inline boundary when the colon rule needs context beyond the pair (real-world case)', async ({ page }) => {
+      // The space belongs between "Content warning:" and 低, but AN_COLON_CJK only
+      // fires with the alphanumeric character before the colon in view
       await page.setContent(`<div class="content">
         <p><strong>Content warning:</strong>低能量预警</p><hr><p>最近几天莫名其妙陷入了一种非常down的情绪之中。可能是因为工作，也可能是因为家庭、孩子，干什么都提不起兴趣，身体乏力，不知道什么时候才能走出来。</p>
       </div>`);

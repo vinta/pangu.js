@@ -198,7 +198,7 @@ export class BrowserPangu extends Pangu {
         const nextRun = nextTextNode;
 
         const verdict = decideBoundarySpacing({
-          currentLast: currentTextNode.data.slice(-1),
+          currentTail: currentTextNode.data.slice(-3),
           nextFirst: nextTextNode.data.slice(0, 1),
           currentEndsWithSpace: currentTextNode.data.endsWith(' '),
           nextStartsWithSpace: nextTextNode.data.startsWith(' '),
