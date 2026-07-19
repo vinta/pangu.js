@@ -112,13 +112,26 @@ export function decideTextRunSpacing(context: TextRunSpacingContext) {
   return verdicts;
 }
 
+// needsBoundarySpace is pure and a page repeats the same few character pairs at
+// every boundary, so verdicts are memoized. The cap only guards pathological
+// pages with unbounded unique pairs
+const pairVerdictCache = new Map<string, boolean>();
+const PAIR_VERDICT_CACHE_MAX = 4096;
+
 function needsBoundarySpace(currentLast: string, nextFirst: string) {
   const pair = `${currentLast}${nextFirst}`;
-  if (pangu.spacingText(pair) === pair) {
-    return false;
+  const cached = pairVerdictCache.get(pair);
+  if (cached !== undefined) {
+    return cached;
   }
 
-  return !isQuoteNextToCjk(currentLast, nextFirst);
+  const verdict = pangu.spacingText(pair) !== pair && !isQuoteNextToCjk(currentLast, nextFirst);
+
+  if (pairVerdictCache.size >= PAIR_VERDICT_CACHE_MAX) {
+    pairVerdictCache.clear();
+  }
+  pairVerdictCache.set(pair, verdict);
+  return verdict;
 }
 
 function isQuoteNextToCjk(currentLast: string, nextFirst: string) {
