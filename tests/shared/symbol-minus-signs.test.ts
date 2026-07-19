@@ -49,7 +49,7 @@ describe('Symbol -', () => {
     // prettier-ignore
     expect(pangu.spacingText('长者的智慧和复杂的维斯特洛- 文章')).toBe('长者的智慧和复杂的维斯特洛 - 文章');
 
-    // TODO: TDB
+    // FIXME
     // expect(pangu.spacingText('陳上進--Vinta')).toBe('陳上進 -- Vinta');
     // expect(pangu.spacingText('陳上進---Vinta')).toBe('陳上進 --- Vinta');
   });

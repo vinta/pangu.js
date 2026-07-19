@@ -25,7 +25,7 @@ describe('Symbol |', () => {
     // expect(pangu.spacingText('Mollie | Vinta | 貓咪')).toBe('Mollie | Vinta | 貓咪');
     // expect(pangu.spacingText('Mollie | 陳上進 | 貓咪')).toBe('Mollie | 陳上進 | 貓咪');
 
-    // TODO:
+    // FIXME
     // expect(pangu.spacingText('得到一個A|B的結果')).toBe('得到一個A|B的結果');
   });
 });

@@ -17,7 +17,7 @@ describe('Symbol # only add space on the left', () => {
   });
 
   it('handle # # symbols as Weibo-like hashtags', () => {
-    // TODO:
+    // FIXME
     // expect(pangu.spacingText('前面#H2G2#後面')).toBe('前面 #H2G2# 後面');
     // expect(pangu.spacingText('前面#銀河閃電霹靂車指南#後面')).toBe('前面 #銀河閃電霹靂車指南# 後面');
   });

@@ -29,7 +29,7 @@ describe('Symbol _', () => {
     // expect(pangu.spacingText('Mollie _ Vinta _ 貓咪')).toBe('Mollie _ Vinta _ 貓咪');
     // expect(pangu.spacingText('Mollie _ 陳上進 _ 貓咪')).toBe('Mollie _ 陳上進 _ 貓咪');
 
-    // TODO:
-    // expect(pangu.spacingText('得到一個A_B的結果')).toBe('得到一個A_B的結果');
+    // FIXME
+    // expect(pangu.spacingText('得到一個A_B的結果')).toBe('得到一個 A_B 的結果');
   });
 });

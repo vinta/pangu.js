@@ -18,13 +18,13 @@ describe('Symbol :', () => {
     expect(pangu.spacingText('前面:I have no idea後面')).toBe('前面: I have no idea 後面');
     expect(pangu.spacingText('前面: I have no idea後面')).toBe('前面: I have no idea 後面');
 
-    // TODO:
+    // FIXME
     // expect(pangu.spacingText('前面:)後面')).toBe('前面 :) 後面');
   });
 
   // When the symbol appears 2+ times or more in one line
   it('handle : symbol as separator', () => {
-    // TODO:
+    // FIXME
     // expect(pangu.spacingText('前面:後面:再後面')).toBe('前面:後面:再後面');
     // expect(pangu.spacingText('前面:後面:再後面:更後面')).toBe('前面:後面:再後面:更後面');
     // expect(pangu.spacingText('前面:後面:再後面:更後面:超後面')).toBe('前面:後面:再後面:更後面:超後面');
