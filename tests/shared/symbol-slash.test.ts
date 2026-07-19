@@ -10,9 +10,9 @@ describe('Symbol /', () => {
     expect(pangu.spacingText('Vinta/Mollie')).toBe('Vinta/Mollie'); // If no CJK, DO NOT change
     expect(pangu.spacingText('Mollie/陳上進')).toBe('Mollie / 陳上進');
     expect(pangu.spacingText('陳上進/Mollie')).toBe('陳上進 / Mollie');
-    expect(pangu.spacingText('得到一個A/B的結果')).toBe('得到一個 A / B 的結果');
-
-    expect(pangu.spacingText('吃apple / banana')).toBe('吃 apple / banana');
+    expect(pangu.spacingText('得到一個A/B的結果')).toBe('得到一個 A/B 的結果');
+    expect(pangu.spacingText('打東東26/30')).toBe('打東東 26/30');
+    expect(pangu.spacingText('打東東1/denominator')).toBe('打東東 1/denominator');
 
     // DO NOT change if already spacing
     expect(pangu.spacingText('前面 / 後面')).toBe('前面 / 後面');
@@ -21,6 +21,7 @@ describe('Symbol /', () => {
     expect(pangu.spacingText('陳上進 / Mollie')).toBe('陳上進 / Mollie');
     expect(pangu.spacingText('得到一個 A / B 的結果')).toBe('得到一個 A / B 的結果');
     expect(pangu.spacingText('好人 / bad guy')).toBe('好人 / bad guy');
+    expect(pangu.spacingText('吃apple / banana')).toBe('吃 apple / banana');
   });
 
   // When the symbol appears 2+ times or more in one line
@@ -113,6 +114,7 @@ describe('Symbol /', () => {
     expect(pangu.spacingText('構建dist/index.js完成')).toBe('構建 dist/index.js 完成');
     expect(pangu.spacingText('運行test/spec.js測試')).toBe('運行 test/spec.js 測試');
     expect(pangu.spacingText('編輯docs/README.md文檔')).toBe('編輯 docs/README.md 文檔');
+    expect(pangu.spacingText('安装指令：npx skills add vinta/hal-9000')).toBe('安装指令：npx skills add vinta/hal-9000');
 
     // Project directories
     expect(pangu.spacingText('查看templates/base.html模板')).toBe('查看 templates/base.html 模板');
