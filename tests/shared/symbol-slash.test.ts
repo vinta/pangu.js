@@ -4,15 +4,11 @@ import { describe, it, expect } from 'vitest';
 const pangu = new Pangu();
 
 describe('Symbol /', () => {
-  // When the symbol appears only 1 time or shows up with other operators in one line
-  it('handle / symbol as operator, ALWAYS spacing', () => {
+  // When CJK touches the only slash in one line
+  it('handle / symbol as operator', () => {
     expect(pangu.spacingText('前面/後面')).toBe('前面 / 後面');
-    expect(pangu.spacingText('Vinta/Mollie')).toBe('Vinta/Mollie'); // If no CJK, DO NOT change
     expect(pangu.spacingText('Mollie/陳上進')).toBe('Mollie / 陳上進');
     expect(pangu.spacingText('陳上進/Mollie')).toBe('陳上進 / Mollie');
-    expect(pangu.spacingText('得到一個A/B的結果')).toBe('得到一個 A/B 的結果');
-    expect(pangu.spacingText('打東東26/30')).toBe('打東東 26/30');
-    expect(pangu.spacingText('打東東1/denominator')).toBe('打東東 1/denominator');
 
     // DO NOT change if already spacing
     expect(pangu.spacingText('前面 / 後面')).toBe('前面 / 後面');
@@ -22,6 +18,23 @@ describe('Symbol /', () => {
     expect(pangu.spacingText('得到一個 A / B 的結果')).toBe('得到一個 A / B 的結果');
     expect(pangu.spacingText('好人 / bad guy')).toBe('好人 / bad guy');
     expect(pangu.spacingText('吃apple / banana')).toBe('吃 apple / banana');
+  });
+
+  // A slash with half-width characters on both sides binds them into one token,
+  // spaced from CJK as a unit and never split
+  it('handle / symbol as slash token', () => {
+    expect(pangu.spacingText('Vinta/Mollie')).toBe('Vinta/Mollie'); // If no CJK, DO NOT change
+    expect(pangu.spacingText('得到一個A/B的結果')).toBe('得到一個 A/B 的結果');
+    expect(pangu.spacingText('他要做A/B測試')).toBe('他要做 A/B 測試');
+    expect(pangu.spacingText('打東東26/30')).toBe('打東東 26/30');
+    expect(pangu.spacingText('打東東1/denominator')).toBe('打東東 1/denominator');
+    expect(pangu.spacingText('吃apple/banana')).toBe('吃 apple/banana');
+  });
+
+  // Slash reading never crosses lines: each line counts its own slashes
+  it('handle / symbol per line', () => {
+    expect(pangu.spacingText('我/你\n他/她')).toBe('我 / 你\n他 / 她');
+    expect(pangu.spacingText('歡迎光臨/再見\n參考 https://example.com/docs')).toBe('歡迎光臨 / 再見\n參考 https://example.com/docs');
   });
 
   // When the symbol appears 2+ times or more in one line

@@ -62,9 +62,6 @@ const UNIX_RELATIVE_FILE_PATH = new RegExp(`(?:\\./)?(?:${FILE_PATH_DIRS})(?:/${
 // Windows paths: C:\Users\name\, D:\Program Files\, C:\Windows\System32
 const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
 
-// Union of Unix path patterns, used to protect file paths during single-slash operator processing
-const ANY_UNIX_FILE_PATH = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}|${UNIX_RELATIVE_FILE_PATH.source})`, 'g');
-
 const ANY_CJK = new RegExp(`[${CJK}]`);
 
 // Handle punctuation after CJK - add space but don't convert to full-width
@@ -135,7 +132,6 @@ const ANS_HYPHEN_ANS_NOT_COMPOUND = new RegExp(`([A-Za-z])(-(?![a-z]))([A-Za-z0-
 const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
 const CJK_SLASH_ANS = new RegExp(`([${CJK}])([/])([${AN}])`, 'g');
 const ANS_SLASH_CJK = new RegExp(`([${AN}])([/])([${CJK}])`, 'g');
-const ANS_SLASH_ANS = new RegExp(`([${AN}])([/])([${AN}])`, 'g');
 
 // Special handling for single letter grades/ratings (A+, B-, C*) before CJK
 // These should have space after the operator, not before
@@ -354,22 +350,26 @@ export class Pangu {
     // Restore protected pure CJK content
     newText = singleQuoteCJKManager.restore(newText);
 
-    // Check slash count early to determine hashtag behavior
-    const slashCount = (newText.match(/\//g) || []).length;
-
     // HASH_ANS_CJK_HASH pattern needs at least 5 characters
     if (newText.length >= 5) {
       newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
     }
-    if (slashCount <= 1) {
-      // Single or no slash - apply normal hashtag spacing
-      newText = newText.replace(CJK_HASH, '$1 $2');
-      newText = newText.replace(HASH_CJK, '$1 $3');
-    } else {
-      // Multiple slashes - skip hashtag processing to preserve path structure
-      // But add space before final hashtag if it's not preceded by a slash
-      newText = newText.replace(CJK_FINAL_HASHTAG, '$1$2 $3');
-    }
+    // Slash reading is per line, so each line's slash count decides its own hashtag behavior
+    newText = newText
+      .split('\n')
+      .map((line) => {
+        if ((line.match(/\//g) || []).length <= 1) {
+          // Single or no slash - apply normal hashtag spacing
+          line = line.replace(CJK_HASH, '$1 $2');
+          line = line.replace(HASH_CJK, '$1 $3');
+        } else {
+          // Multiple slashes - skip hashtag processing to preserve path structure
+          // But add space before final hashtag if it's not preceded by a slash
+          line = line.replace(CJK_FINAL_HASHTAG, '$1$2 $3');
+        }
+        return line;
+      })
+      .join('\n');
 
     // Protect compound words from operator spacing
     const compoundWordManager = new PlaceholderReplacer('COMPOUND_WORD_PLACEHOLDER_', '\uE010', '\uE011');
@@ -423,27 +423,23 @@ export class Pangu {
     newText = newText.replace(UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK, '$1 $2');
     newText = newText.replace(UNIX_RELATIVE_FILE_PATH_SLASH_CJK, '$1 $2');
 
-    // Context-aware slash handling: single slash = operator, multiple slashes = separator
-    // But exclude slashes that are part of file paths by protecting them first
-    if (slashCount === 1) {
-      // Temporarily protect file paths from slash operator processing
-      const filePathManager = new PlaceholderReplacer('FILE_PATH_PLACEHOLDER_', '\uE020', '\uE021');
-
-      // Store all file paths and replace with placeholders
-      newText = newText.replace(ANY_UNIX_FILE_PATH, (match) => {
-        return filePathManager.store(match);
-      });
-
-      // Now apply slash operator spacing
-      newText = newText.replace(CJK_SLASH_CJK, '$1 $2 $3');
-      newText = newText.replace(CJK_SLASH_ANS, '$1 $2 $3');
-      newText = newText.replace(ANS_SLASH_CJK, '$1 $2 $3');
-      newText = newText.replace(ANS_SLASH_ANS, '$1 $2 $3');
-
-      // Restore file paths
-      newText = filePathManager.restore(newText);
-    }
-    // If multiple slashes, treat as separator - do nothing (no spaces)
+    // Slash reading is per line: the line's only slash acts as an operator when CJK
+    // touches it. A slash between half-width characters is a slash token and binds
+    // tight, so no rule fires on it and file paths need no protection here (their
+    // CJK edges were already spaced by the path rules above). Repeated slashes read
+    // as a file path or a list - do nothing (no spaces)
+    newText = newText
+      .split('\n')
+      .map((line) => {
+        if ((line.match(/\//g) || []).length !== 1) {
+          return line;
+        }
+        line = line.replace(CJK_SLASH_CJK, '$1 $2 $3');
+        line = line.replace(CJK_SLASH_ANS, '$1 $2 $3');
+        line = line.replace(ANS_SLASH_CJK, '$1 $2 $3');
+        return line;
+      })
+      .join('\n');
 
     // Restore compound words from placeholders
     newText = compoundWordManager.restore(newText);

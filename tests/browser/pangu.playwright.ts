@@ -813,32 +813,18 @@ test.describe('BrowserPangu', () => {
       expect(paragraphs[1]).toBe('最近几天莫名其妙陷入了一种非常 down 的情绪之中。可能是因为工作，也可能是因为家庭、孩子，干什么都提不起兴趣，身体乏力，不知道什么时候才能走出来。');
     });
 
-    // FIXME: The slash-operator heuristic counts slashes across the whole text, so
-    // the single slash in emilkowalski/skill gets operator spacing (ANS_SLASH_ANS)
-    // even though its line is pure ASCII with no CJK at all
     test('should keep a pure-ASCII command line intact inside a multiline tweet (real-world case)', async ({ page }) => {
       // From an X tweet: 设计Skill needs a space, the already-spaced parts and the
       // newlines must survive, and the install command must stay copy-pasteable
-      await page.setContent(`<div dir="auto" lang="zh" class="css-146c3p1 r-bcqeeo r-1ttztb7 r-qvutc0 r-37j5jr r-1inkyih r-16dba41 r-bnwqim r-135wba7" id="id__wr0fmlnbjh" data-testid="tweetText" style="color: rgb(15, 20, 25);">
-        <span class="css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3">如果只能推荐一个去 AI 味设计Skill。
+      const htmlContent = loadFixture('tweet-text.html');
+      const expected = loadFixture('tweet-text.expected.html').trim();
 
-        那必须是大神 emil 的作品，而且动效超赞。
-
-        安装指令：
-        npx skills add emilkowalski/skill</span>
-      </div>`);
-
+      await page.setContent(htmlContent);
       await page.evaluate(() => {
         pangu.spacingPage();
       });
-
-      const result = await page.evaluate(() => document.querySelector('[data-testid="tweetText"]')!.textContent);
-      expect(result).toBe(`如果只能推荐一个去 AI 味设计 Skill。
-
-那必须是大神 emil 的作品，而且动效超赞。
-
-安装指令：
-npx skills add emilkowalski/skill`);
+      const actual = await page.evaluate(() => document.body.innerHTML.trim());
+      expect(actual).toBe(expected);
     });
 
     test('should not insert <pangu> in grid with CJK card content (real-world case)', async ({ page }) => {
