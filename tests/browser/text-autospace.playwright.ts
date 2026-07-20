@@ -8,7 +8,8 @@ test.describe('text-autospace stylesheet', () => {
   test.beforeEach(async ({ page }) => {
     await page.setContent('<div id="content"></div>');
 
-    // The contract only matters on Chromium (the extension's target); Firefox and WebKit may lag
+    // All three bundled engines support text-autospace as of mid-2026, so this guard
+    // only matters on older engine builds, where tests skip instead of fail
     const hasSupport = await page.evaluate(() => CSS.supports('text-autospace', 'normal'));
     test.skip(!hasSupport, 'text-autospace is not supported');
 
