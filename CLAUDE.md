@@ -48,9 +48,11 @@ Pre-resolved IDs for the `find-docs` skill. Pass directly to `ctx7 docs`, skippi
 
 | Tool                                    | `libraryId`                             |
 | --------------------------------------- | --------------------------------------- |
+| Chrome Extensions                       | `/websites/developer_chrome_extensions` |
 | ESLint                                  | `/eslint/eslint`                        |
 | eslint-plugin-unicorn                   | `/sindresorhus/eslint-plugin-unicorn`   |
 | typescript-eslint                       | `/typescript-eslint/typescript-eslint`  |
+| MDN Web Docs                            | `/mdn/content`                          |
 | nodemon                                 | `/remy/nodemon`                         |
 | Playwright                              | `/microsoft/playwright`                 |
 | Prettier                                | `/prettier/prettier`                    |
