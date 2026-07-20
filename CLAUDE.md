@@ -40,7 +40,7 @@ npm run publish-package 1.2.3   # Bump version across files (incl. README), buil
 
 ## External Tool Documentation
 
-When you need information about tools used in this project, use the `find-docs` skill or `WebFetch`.
+Invoke the `find-docs` skill BEFORE writing code that touches a dependency's API or config, not only when the user asks about a tool. Do not answer from training data, even for familiar APIs.
 
 ### Context7 Library IDs
 
