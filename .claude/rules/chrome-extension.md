@@ -1,6 +1,6 @@
 ---
 paths:
-  - "browser-extensions/chrome/**"
+  - 'browser-extensions/chrome/**'
 ---
 
 # Chrome Extension
@@ -21,3 +21,11 @@ paths:
   - https://developer.chrome.com/docs/extensions/reference/api/scripting
 - Chrome Extension Storage API
   - https://developer.chrome.com/docs/extensions/reference/api/storage
+- Chrome Extension i18n API
+  - https://developer.chrome.com/docs/extensions/reference/api/i18n
+- Chrome Extension Runtime API
+  - https://developer.chrome.com/docs/extensions/reference/api/runtime
+- Chrome Extension Tabs API
+  - https://developer.chrome.com/docs/extensions/reference/api/tabs
+- `text-autospace` CSS property
+  - https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/text-autospace

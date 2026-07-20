@@ -4,6 +4,7 @@ import type { Settings } from './utils/types';
 import { isValidMatchPattern } from './utils/urls';
 
 const SCRIPT_ID = 'paranoid-auto-spacing';
+const TEXT_AUTOSPACE_SCRIPT_ID = 'text-autospace';
 
 async function initializeSettings() {
   const syncedSettings = await chrome.storage.sync.get();
@@ -49,6 +50,19 @@ async function registerContentScripts() {
   await unregisterAllContentScripts();
 
   const settings = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
+  const contentScripts: chrome.scripting.RegisteredContentScript[] = [];
+
+  if (settings.is_enable_text_autospace) {
+    // Visual-only native autospacing, deliberately not gated by spacing_mode,
+    // filter_mode, blacklist, or whitelist (see docs/adr/0002)
+    contentScripts.push({
+      id: TEXT_AUTOSPACE_SCRIPT_ID,
+      css: ['dist/content-script.css'],
+      matches: ['http://*/*', 'https://*/*'],
+      allFrames: true,
+    });
+  }
+
   if (settings.spacing_mode === 'spacing_when_load') {
     const contentScript: chrome.scripting.RegisteredContentScript = {
       id: SCRIPT_ID,
@@ -66,17 +80,21 @@ async function registerContentScripts() {
       contentScript.matches = validWhitelist;
     }
 
-    try {
-      await chrome.scripting.registerContentScripts([contentScript]);
-    } catch (error) {
-      if (error instanceof Error && error.message.includes('Duplicate script ID')) {
-        console.warn('Script already registered, skipping:', SCRIPT_ID);
-      } else {
-        console.error('Error registering content scripts:', error);
-      }
+    contentScripts.push(contentScript);
+  }
+
+  if (contentScripts.length === 0) {
+    return;
+  }
+
+  try {
+    await chrome.scripting.registerContentScripts(contentScripts);
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('Duplicate script ID')) {
+      console.warn('Scripts already registered, skipping');
+    } else {
+      console.error('Error registering content scripts:', error);
     }
-  } else {
-    await unregisterAllContentScripts();
   }
 }
 
@@ -94,7 +112,7 @@ chrome.runtime.onStartup.addListener(async () => {
 chrome.storage.onChanged.addListener(async (changes, areaName) => {
   // Re-register content scripts when relevant settings change
   if (areaName === 'sync') {
-    const relevantKeys: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist'];
+    const relevantKeys: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist', 'is_enable_text_autospace'];
     const hasRelevantChanges = Object.keys(changes).some((key) => relevantKeys.includes(key as keyof Settings));
 
     if (hasRelevantChanges) {

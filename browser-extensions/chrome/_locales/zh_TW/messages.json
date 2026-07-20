@@ -140,5 +140,17 @@
   "label_is_mute_sound_effects": {
     "message": "太吵了，靜音",
     "description": ""
+  },
+  "label_is_enable_text_autospace": {
+    "message": "瀏覽器原生間距（text-autospace）",
+    "description": ""
+  },
+  "text_autospace_description": {
+    "message": "讓瀏覽器直接渲染中文和英文、數字之間的間距。純視覺效果，不會插入任何字元，複製的文字不受影響。會套用到所有網站，無視黑名單和白名單。間距比真正的空格窄。需要 Chrome 140 以上。",
+    "description": ""
+  },
+  "text_autospace_not_supported": {
+    "message": "你的瀏覽器不支援這個功能，需要 Chrome 140 以上",
+    "description": ""
   }
 }

@@ -34,6 +34,10 @@ class OptionsController {
         if (changedKeys.includes('is_mute_sound_effects')) {
           await this.renderMuteCheckbox();
         }
+
+        if (changedKeys.includes('is_enable_text_autospace')) {
+          await this.renderTextAutospaceCheckbox();
+        }
       }
     });
 
@@ -67,6 +71,9 @@ class OptionsController {
       if (target.id === 'mute-checkbox') {
         const muteCheckbox = target as HTMLInputElement;
         chrome.storage.sync.set({ is_mute_sound_effects: muteCheckbox.checked });
+      } else if (target.id === 'text-autospace-checkbox') {
+        const textAutospaceCheckbox = target as HTMLInputElement;
+        chrome.storage.sync.set({ is_enable_text_autospace: textAutospaceCheckbox.checked });
       }
     });
   }
@@ -96,6 +103,7 @@ class OptionsController {
     await this.renderSpacingMode();
     await this.renderFilterMode();
     await this.renderMuteCheckbox();
+    await this.renderTextAutospaceCheckbox();
   }
 
   private async renderSpacingMode() {
@@ -232,6 +240,16 @@ class OptionsController {
     const settings = await getCachedSettings();
     const checkbox = document.getElementById('mute-checkbox') as HTMLInputElement;
     checkbox.checked = settings.is_mute_sound_effects;
+  }
+
+  private async renderTextAutospaceCheckbox() {
+    const settings = await getCachedSettings();
+    const checkbox = document.getElementById('text-autospace-checkbox') as HTMLInputElement;
+    checkbox.checked = settings.is_enable_text_autospace;
+
+    // Keep the toggle usable even without local support: the setting still syncs to other devices
+    const notSupportedMessage = document.getElementById('text-autospace-not-supported-msg') as HTMLElement;
+    notSupportedMessage.style.display = CSS.supports('text-autospace', 'normal') ? 'none' : 'block';
   }
 
 

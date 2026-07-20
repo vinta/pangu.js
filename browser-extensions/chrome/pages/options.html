@@ -98,6 +98,17 @@
                 <span class="toggle-label" data-i18n="label_is_mute_sound_effects">太吵了，靜音</span>
               </label>
             </div>
+            <div class="options-toggle-section">
+              <label class="toggle">
+                <input type="checkbox" class="toggle-input" id="text-autospace-checkbox" />
+                <span class="toggle-switch"></span>
+                <span class="toggle-label" data-i18n="label_is_enable_text_autospace">瀏覽器原生間距（text-autospace）</span>
+              </label>
+              <p class="form-help-text" data-i18n="text_autospace_description">
+                讓瀏覽器直接渲染中文和英文、數字之間的間距。純視覺效果，不會插入任何字元，複製的文字不受影響。會套用到所有網站，無視黑名單和白名單。間距比真正的空格窄。需要 Chrome 140 以上。
+              </p>
+              <p class="form-help-text" id="text-autospace-not-supported-msg" style="display: none" data-i18n="text_autospace_not_supported">你的瀏覽器不支援這個功能，需要 Chrome 140 以上</p>
+            </div>
             </div>
           </div>
         </div>
