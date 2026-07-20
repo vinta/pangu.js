@@ -99,21 +99,6 @@ Pre-resolved IDs for the `find-docs` skill. Pass directly to `ctx7 docs`, skippi
 | Vite                                    | `/vitejs/vite`                          |
 | Vitest                                  | `/vitest-dev/vitest`                    |
 
-### Documentation Links
-
-For topics not well covered by Context7, use `WebFetch` on these URLs:
-
-- Chrome Extensions
-  - https://developer.chrome.com/docs/extensions/
-- Chrome Extension Manifest
-  - https://developer.chrome.com/docs/extensions/reference/manifest/
-- Chrome Extension Match Patterns
-  - https://developer.chrome.com/docs/extensions/develop/concepts/match-patterns
-- Chrome Extension Scripting API
-  - https://developer.chrome.com/docs/extensions/reference/api/scripting
-- Chrome Extension Storage API
-  - https://developer.chrome.com/docs/extensions/reference/api/storage
-
 ## Agent Skills
 
 ### Issue Tracker
