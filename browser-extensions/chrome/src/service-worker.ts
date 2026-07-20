@@ -46,16 +46,29 @@ async function unregisterAllContentScripts() {
   }
 }
 
+// One call per script: registerContentScripts() is all-or-nothing across its array,
+// so a user-supplied pattern that Chrome rejects must not take down the other script
+async function registerContentScript(contentScript: chrome.scripting.RegisteredContentScript) {
+  try {
+    await chrome.scripting.registerContentScripts([contentScript]);
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('Duplicate script ID')) {
+      console.warn('Script already registered, skipping:', contentScript.id);
+    } else {
+      console.error(`Error registering content script ${contentScript.id}:`, error);
+    }
+  }
+}
+
 async function registerContentScripts() {
   await unregisterAllContentScripts();
 
   const settings = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
-  const contentScripts: chrome.scripting.RegisteredContentScript[] = [];
 
   if (settings.is_enable_text_autospace) {
     // Visual-only native autospacing, deliberately not gated by spacing_mode,
     // filter_mode, blacklist, or whitelist (see docs/adr/0002)
-    contentScripts.push({
+    await registerContentScript({
       id: TEXT_AUTOSPACE_SCRIPT_ID,
       css: ['dist/content-script.css'],
       matches: ['http://*/*', 'https://*/*'],
@@ -80,21 +93,7 @@ async function registerContentScripts() {
       contentScript.matches = validWhitelist;
     }
 
-    contentScripts.push(contentScript);
-  }
-
-  if (contentScripts.length === 0) {
-    return;
-  }
-
-  try {
-    await chrome.scripting.registerContentScripts(contentScripts);
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('Duplicate script ID')) {
-      console.warn('Scripts already registered, skipping');
-    } else {
-      console.error('Error registering content scripts:', error);
-    }
+    await registerContentScript(contentScript);
   }
 }
 
