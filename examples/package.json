@@ -10,6 +10,6 @@
     "server": "node server.js"
   },
   "dependencies": {
-    "pangu": "8.0.0"
+    "pangu": "8.1.0"
   }
 }
