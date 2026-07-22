@@ -19,3 +19,4 @@ Alternatives rejected:
 - A protected word wins everywhere, including bundle contexts where its plus semantically reads as a separator: `MOD 影劇館+ (300M/300M)` keeps the plus attached to the brand.
 - Slash reading is untouched: repeated slashes stay tight and a protected word sits flush against a following slash (`影劇館+/全選/自選 20`).
 - The list is maintained by hand and starts at exactly two entries. Growing it is a per-entry judgement, not a policy change.
+- The machinery only supports entries made of CJK and `+`: only `+` is masked, entries are re-exposed to the general rules after restore, and overlapping entries are not ordered. A word needing any other preserved symbol or shape (`同學-`, `AC/DC`, `ANTHROP\C`, mixed-script internals like `MOD影劇館+` as one entry) is unsupported today. Generalize the masking and ordering when a real entry earns it, and the new entry's red test is the signal.

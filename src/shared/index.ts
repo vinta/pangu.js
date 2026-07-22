@@ -144,7 +144,9 @@ const PLUS_SEPARATOR = /(?<=[^\s+])\+(?=[^\s+])/g;
 // opaque \uE020...\uE021 placeholder storing its + pre-masked as \uE022; it is
 // restored with the mask still on so no later rule re-reads the +, and the mask
 // is spaced from a following CJK, AN, or left bracket like a word edge (it stays
-// flush against a slash), then unmasked at the end
+// flush against a slash), then unmasked at the end.
+// Entries must be CJK runs with + only: the mask covers just +, so a word needing
+// any other preserved symbol or shape is unsupported, see ADR 0006 before adding
 const PROTECTED_WORDS = ['公視+', '影劇館+'];
 const PROTECTED_WORDS_PATTERN = new RegExp(PROTECTED_WORDS.map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
 const PROTECTED_WORD_PLUS_MASK_BEFORE_WORD = new RegExp(`(\uE022)(?=[${CJK}${AN}${LEFT_BRACKETS_BASIC}])`, 'g');
