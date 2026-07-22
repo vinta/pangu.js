@@ -35,6 +35,7 @@ npm run publish-package 1.2.3   # Bump version across files (incl. README), buil
 ## Development Guidelines
 
 - Maintain zero runtime dependencies
+- When tweaking spacing rules, if the simpler rule is blocked only by rare test cases (typo-shaped input, degenerate shapes, nothing a real user reported), challenge me to drop those cases in favor of the simpler rule instead of complicating the rule to preserve them. Show the candidate rule and exactly which expectations it breaks, then recommend dropping. Comment dropped cases out in place with `// Rare cases (basically a typo), ignore`, and record reversals of documented contracts as an ADR (precedent: ADR 0007, which dropped `前面 ,後面` preservation to unlock one unanchored punctuation rule). This licenses dropping rare-case contracts, not pruning tests in general.
 
 ## External Tool Documentation
 

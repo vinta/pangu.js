@@ -56,6 +56,7 @@
 - Use `node:` prefixes for Node.js built-in modules.
 - Keep regex-heavy spacing logic readable and add comments only where they explain non-obvious matching intent or constraints.
 - Do not invent new spacing rules, extension settings, validation layers, or compatibility shims unless the behavior is implemented and tested.
+- When tweaking spacing rules, if the simpler rule is blocked only by rare test cases (typo-shaped input, degenerate shapes, nothing a real user reported), challenge the user to drop those cases in favor of the simpler rule instead of complicating the rule to preserve them. Show the candidate rule and exactly which expectations it breaks, then recommend dropping. Comment dropped cases out in place with `// Rare cases (basically a typo), ignore`, and record reversals of documented contracts as an ADR (precedent: ADR 0007). This licenses dropping rare-case contracts, not pruning tests in general.
 - Avoid hard-wrapping Markdown prose; keep paragraphs and list items on single logical lines unless a format requires manual line breaks.
 
 ## Verification
