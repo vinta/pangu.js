@@ -861,6 +861,31 @@ test.describe('BrowserPangu', () => {
       expect(cardText).toBe('小而鋒利，住在機器裡的鯊魚');
     });
 
+    test('should add a U+00A0 between flush flex items in a search filter label (real-world case)', async ({ page }) => {
+      // From a PChome 24h search filter: the count div renders flush against
+      // the text div inside a row flex label, so the boundary space can only
+      // come from a non-collapsible U+00A0 text node between the two divs
+      const htmlContent = loadFixture('search-filter-label.html');
+      // The leading prettier-ignore pragma parses into <head>, so it never
+      // shows up in the serialized <body>
+      const expected = loadFixture('search-filter-label.expected.html').replace('<!-- prettier-ignore -->', '').trim();
+
+      await page.setContent(htmlContent);
+      await page.addStyleTag({ content: '.c-inputLabel--searchFilter { display: flex; align-items: center; }' });
+      await page.evaluate(() => {
+        pangu.spacingPage();
+      });
+      const actual = await page.evaluate(() => document.body.innerHTML.trim());
+      expect(actual).toBe(expected);
+
+      // A second pass must see the U+00A0 as existing whitespace and change nothing
+      await page.evaluate(() => {
+        pangu.spacingPage();
+      });
+      const secondPass = await page.evaluate(() => document.body.innerHTML.trim());
+      expect(secondPass).toBe(expected);
+    });
+
     test('handle visually hidden adjacent elements', async ({ page }) => {
       // Test case from fixtures/hidden-adjacent-node.html
       // Updated HTML without leading space

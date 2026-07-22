@@ -22,6 +22,7 @@ const spacingBoundary: BoundarySpacingContext = {
   hiddenBoundaryBefore: () => false,
   hiddenBoundaryAfter: () => false,
   inGridOrFlexContainer: () => false,
+  flexRowFlushBoundary: () => false,
 };
 
 // A layout-dependent fact that the verdict must not need on this path
@@ -149,6 +150,22 @@ describe('decideBoundarySpacing()', () => {
   ];
 
   it.each(insertElementCases)('$name', ({ context, verdict }) => {
+    expect(decideBoundarySpacing(boundaryContext(context))).toBe(verdict);
+  });
+
+  // Block or blockified boundaries collapse any written U+0020, so a flush row
+  // flex parent upgrades them to a U+00A0 text node between the items
+  const flushFlexRowCases: BoundaryCase[] = [
+    { name: 'a flush flex row upgrades a current block boundary to insert-nbsp-text', context: { currentBoundaryIsBlock: true, flexRowFlushBoundary: () => true }, verdict: 'insert-nbsp-text' },
+    { name: 'a flush flex row upgrades a next block boundary to insert-nbsp-text', context: { nextBoundaryIsBlock: true, flexRowFlushBoundary: () => true }, verdict: 'insert-nbsp-text' },
+    { name: 'a flush flex row upgrades insert-element to insert-nbsp-text', context: { ...insertElementBoundary, inGridOrFlexContainer: () => true, flexRowFlushBoundary: () => true }, verdict: 'insert-nbsp-text' },
+    { name: 'a block boundary without a flush flex row still does nothing', context: { nextBoundaryIsBlock: true, flexRowFlushBoundary: () => false }, verdict: 'none' },
+    { name: 'a space-like sibling before the next run vetoes before the flush check runs', context: { currentBoundaryIsBlock: true, spaceLikeSiblingBeforeNext: true, flexRowFlushBoundary: neverConsulted('flexRowFlushBoundary') }, verdict: 'none' },
+    { name: 'a space-like sibling before the next boundary vetoes before the flush check runs', context: { nextBoundaryIsBlock: true, spaceLikeSiblingBeforeNextBoundary: true, flexRowFlushBoundary: neverConsulted('flexRowFlushBoundary') }, verdict: 'none' },
+    { name: 'an ignored next boundary vetoes before the flush check runs', context: { currentBoundaryIsBlock: true, nextBoundaryIsIgnored: true, flexRowFlushBoundary: neverConsulted('flexRowFlushBoundary') }, verdict: 'none' },
+  ];
+
+  it.each(flushFlexRowCases)('$name', ({ context, verdict }) => {
     expect(decideBoundarySpacing(boundaryContext(context))).toBe(verdict);
   });
 });
