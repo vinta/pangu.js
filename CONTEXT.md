@@ -57,7 +57,7 @@ A literal string from a fixed list (`公視+`, `影劇館+`), never modified ins
 _Avoid_: atom, lexicon, whitelist
 
 **Punctuation**:
-Half-width punctuation is not converted to full-width, with two exceptions: a colon in direct CJK contact right before a parenthesis becomes `：`, and middle dots (`·` `•` `‧`) normalize to `・`. Multiple consecutive punctuation marks are preserved.
+Half-width punctuation is not converted to full-width, with two exceptions: a colon in direct CJK contact right before a parenthesis becomes `：`, and middle dots (`·` `•` `‧`) normalize to `・`. Multiple consecutive punctuation marks are preserved. A `!` `;` `,` or `?` run directly touching CJK on its right always gets a trailing space regardless of what precedes it (`(30個月),月繳`, `50%,以上`), so a stray space typed before the mark is rewritten rather than preserved.
 
 **HTML**:
 Tags are protected from spacing rules. Text inside attributes is processed. The exception is a tag mention, which is spaced.
