@@ -165,6 +165,48 @@ export class BrowserPangu extends Pangu {
     return display === 'grid' || display === 'inline-grid' || display === 'flex' || display === 'inline-flex';
   }
 
+  // True only when both boundary nodes are children of the same row flex
+  // parent whose own layout provides no separation (no gap, no distributed
+  // justify-content) AND their rendered boxes measurably touch on one line.
+  // Measuring keeps false positives out: any site-provided separation (margin,
+  // gap, wrapping) shows up as a rect gap and vetoes the insertion
+  private isFlexRowFlushBoundary(currentBoundaryNode: Node, nextBoundaryNode: Node): boolean {
+    const parent = currentBoundaryNode.parentNode;
+    if (!parent || parent !== nextBoundaryNode.parentNode || !(parent instanceof Element)) {
+      return false;
+    }
+
+    const style = window.getComputedStyle(parent);
+    if ((style.display !== 'flex' && style.display !== 'inline-flex') || style.flexDirection !== 'row') {
+      return false;
+    }
+    if (style.justifyContent.includes('space-')) {
+      return false;
+    }
+    const columnGap = Number.parseFloat(style.columnGap); // 'normal' parses to NaN
+    if (columnGap > 0) {
+      return false;
+    }
+
+    const currentRect = this.boundingRectOf(currentBoundaryNode);
+    const nextRect = this.boundingRectOf(nextBoundaryNode);
+    if (currentRect.width === 0 || currentRect.height === 0 || nextRect.width === 0 || nextRect.height === 0) {
+      return false;
+    }
+    const horizontalGap = nextRect.left - currentRect.right;
+    const verticalOverlap = Math.min(currentRect.bottom, nextRect.bottom) - Math.max(currentRect.top, nextRect.top);
+    return horizontalGap > -1 && horizontalGap < 1 && verticalOverlap > 0;
+  }
+
+  private boundingRectOf(node: Node) {
+    if (node instanceof Element) {
+      return node.getBoundingClientRect();
+    }
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    return range.getBoundingClientRect();
+  }
+
   private spacingTextNodes(textNodes: Node[]) {
     // Visibility verdicts are memoized per batch; styles may change between batches
     this.visibilityDetector.clearCache();
@@ -216,6 +258,7 @@ export class BrowserPangu extends Pangu {
           hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(nextRun),
           hiddenBoundaryAfter: () => this.isHiddenBoundaryAfter(currentRun),
           inGridOrFlexContainer: () => !!nextBoundaryNode.parentNode && this.isGridOrFlexContainer(nextBoundaryNode.parentNode),
+          flexRowFlushBoundary: () => this.isFlexRowFlushBoundary(currentBoundaryNode, nextBoundaryNode),
         });
 
         switch (verdict) {
@@ -229,6 +272,9 @@ export class BrowserPangu extends Pangu {
             break;
           case 'insert-element':
             this.insertPanguElement(nextBoundaryNode);
+            break;
+          case 'insert-nbsp-text':
+            this.insertNbspTextNode(nextBoundaryNode);
             break;
           case 'none':
             break;
@@ -307,6 +353,13 @@ export class BrowserPangu extends Pangu {
         panguSpace.parentNode.removeChild(panguSpace);
       }
     }
+  }
+
+  private insertNbspTextNode(nextBoundaryNode: Node) {
+    // A text node is invisible to CSS selectors and element traversal, and a
+    // U+00A0 matches \s in JavaScript, so re-runs classify it as existing
+    // whitespace between the runs and the insertion stays idempotent
+    nextBoundaryNode.parentNode?.insertBefore(document.createTextNode('\u00A0'), nextBoundaryNode);
   }
 
   private findPreviousElementLastChar(textNode: Node) {

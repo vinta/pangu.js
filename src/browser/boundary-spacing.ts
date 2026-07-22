@@ -3,7 +3,7 @@ import { ANY_CJK, pangu } from '../shared';
 const QUOTE = /["\u201c\u201d]/;
 
 // Where the space goes at the boundary between two adjacent text runs
-export type BoundarySpacingVerdict = 'none' | 'prepend-next' | 'append-current' | 'insert-element';
+export type BoundarySpacingVerdict = 'none' | 'prepend-next' | 'append-current' | 'insert-element' | 'insert-nbsp-text';
 
 // What a single text run needs before its boundaries are considered
 export type TextRunSpacingVerdict = 'trim-leading-space' | 'prepend-space' | 'apply-text-spacing';
@@ -36,6 +36,10 @@ export interface BoundarySpacingContext {
   hiddenBoundaryBefore: () => boolean;
   hiddenBoundaryAfter: () => boolean;
   inGridOrFlexContainer: () => boolean;
+  // The boundary nodes are siblings rendered flush on one line by a row flex
+  // parent, so only a non-collapsible U+00A0 between them can show a space.
+  // Reads computed styles and forces layout, so it is consulted last
+  flexRowFlushBoundary: () => boolean;
 }
 
 export interface TextRunSpacingContext {
@@ -63,12 +67,24 @@ export function decideBoundarySpacing(context: BoundarySpacingContext) {
     return 'none';
   }
 
-  if (context.spaceLikeSiblingAfterCurrentBoundary || context.currentBoundaryIsBlock) {
+  if (context.spaceLikeSiblingAfterCurrentBoundary) {
     return 'none';
   }
 
+  // Block boundaries normally stack vertically and take no boundary space, but
+  // a row flex parent can lay them out flush on one line, where the space can
+  // only come from a non-collapsible U+00A0 text node between the items. The
+  // flush check verifies flex-ness itself, so the hot prepend/append paths
+  // below never pay a computed-style read
+  if (context.currentBoundaryIsBlock || context.nextBoundaryIsBlock) {
+    if (context.nextBoundaryIsIgnored || context.spaceLikeSiblingBeforeNext || context.spaceLikeSiblingBeforeNextBoundary) {
+      return 'none';
+    }
+    return context.flexRowFlushBoundary() ? 'insert-nbsp-text' : 'none';
+  }
+
   if (!context.nextBoundaryIsSpaceSensitive) {
-    if (context.nextBoundaryIsIgnored || context.nextBoundaryIsBlock || context.spaceLikeSiblingBeforeNext || context.hiddenBoundaryBefore()) {
+    if (context.nextBoundaryIsIgnored || context.spaceLikeSiblingBeforeNext || context.hiddenBoundaryBefore()) {
       return 'none';
     }
     return 'prepend-next';
@@ -85,10 +101,11 @@ export function decideBoundarySpacing(context: BoundarySpacingContext) {
     return 'none';
   }
 
-  // Skip <pangu> element insertion in Grid/Flexbox containers
-  // because the element becomes a layout item and breaks the layout
+  // Skip <pangu> element insertion in Grid/Flexbox containers because the
+  // element becomes a layout item and breaks the layout. A flush flex row can
+  // carry a U+00A0 text node instead, which no CSS selector can observe
   if (context.inGridOrFlexContainer()) {
-    return 'none';
+    return context.flexRowFlushBoundary() ? 'insert-nbsp-text' : 'none';
   }
 
   return 'insert-element';
