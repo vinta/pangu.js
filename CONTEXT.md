@@ -28,7 +28,7 @@ _Avoid_: space element
 The algorithm behind text spacing. Source of truth: `src/shared/index.ts`, exhaustive examples: `tests/shared/index.test.ts`.
 
 **Symbol handling**:
-Operators (`=` `+` `-` `*` `/` `<` `>` `&` `^`) get spaces when CJK is adjacent. Separators (`_` `|`) never do.
+Symbols split by how they read between half-width characters. Text-gated operators (`=` `+` `*` `<` `>`) get spaces between half-width characters whenever CJK appears anywhere in the text. Contact-gated symbols (`-` `&`) act as operators only in direct contact with CJK. `/` follows slash reading. Separators (`_` `|`) never get spaces.
 
 **Joiner token**:
 Half-width characters joined tight by a slash or ampersand (`A/B`, `26/30`, `vinta/hal-9000`, `S&P`, `Q&A`). Never split, and spaced from adjacent CJK as one unit. Ampersands need no per-line reading; slashes follow slash reading.
@@ -36,6 +36,9 @@ _Avoid_: slash token, slash operand pair, &-token
 
 **Slash reading**:
 Decided per line, never across lines. A slash with half-width characters on both sides forms a joiner token. A line's only slash acts as an operator when CJK touches it. Repeated slashes on a line read as a file path or a list and stay unspaced.
+
+**Hyphen reading**:
+A hyphen between two half-width characters is a word connector (`A-B`, `HSIAO-MING`, `state-of-the-art`, `5-A`) and never gets spaces, because `-` commonly reads as hyphen or dash rather than minus. Only a hyphen in direct contact with CJK reads as an operator (`前面-後面`, `陳上進-Vinta`).
 
 **No CJK contact, no change**:
 The invariant behind every symbol rule. A run of half-width text that touches no CJK is never modified, no matter what appears elsewhere in the line or text.
