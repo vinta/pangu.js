@@ -29,7 +29,8 @@ const UPPER_AN = 'A-Z0-9'; // For FIX_CJK_COLON_ANS
 
 // Operators - note the different sets!
 const OPERATORS_BASE = '\\+\\*=&';
-const OPERATORS_WITH_HYPHEN = `${OPERATORS_BASE}\\-`; // For CJK patterns
+const OPERATORS_WITH_HYPHEN = `${OPERATORS_BASE}\\-`; // For CJK_OPERATOR_ANS
+const OPERATORS_NO_PLUS = '\\*=&\\-'; // For ANS_OPERATOR_CJK only; no + - it attaches to the preceding half-width run as a suffix (Disney+, 18+)
 const GRADE_OPERATORS = '\\+\\-\\*'; // For single letter grades
 
 // Quotes
@@ -116,7 +117,7 @@ const CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
 // characters binds them into a joiner token (A+B, a=1, S&P) and never gets spaces,
 // so there is deliberately no between-half-width rule here
 const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS_WITH_HYPHEN}])([${AN}])`, 'g');
-const ANS_OPERATOR_CJK = new RegExp(`([${AN}])([${OPERATORS_WITH_HYPHEN}])([${CJK}])`, 'g');
+const ANS_OPERATOR_CJK = new RegExp(`([${AN}])([${OPERATORS_NO_PLUS}])([${CJK}])`, 'g');
 
 // Slash patterns for operator vs separator behavior
 const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
@@ -129,11 +130,13 @@ const ANS_SLASH_CJK = new RegExp(`([${AN}])([/])([${CJK}])`, 'g');
 const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([${A}])([${GRADE_OPERATORS}])([${CJK}])`, 'g');
 
 // Affix readings attach a symbol to its half-width side at a CJK boundary, overriding the operator reading
-// Sign: + or - attaches to following digits (打 +886, 氣溫是 -5 度)
+// Sign: + or - attaches to following digits (+886, -5)
 const CJK_SIGN_DIGIT = new RegExp(`([${CJK}])([\\+\\-])([0-9])`, 'g');
-// Flag: - attaches to a following single lowercase letter (參數要加 -m 的旗標)
-// [a-z] keeps a capitalized word on the operator reading (陳上進 - Vinta) and the trailing \b keeps a longer lowercase word there too (蘋果-apple)
+// Flag: - attaches to a following single lowercase letter (-m)
+// [a-z] keeps a capitalized word on the operator reading and the trailing \b keeps a longer lowercase word there too
 const CJK_HYPHEN_FLAG = new RegExp(`([${CJK}])(\\-)([a-z])\\b`, 'g');
+// Suffix: + attaches to a preceding half-width run (Disney+, 18+)
+const AN_PLUS_CJK = new RegExp(`([${AN}])(\\+)([${CJK}])`, 'g');
 
 // Special handling for < and > as comparison operators (not brackets)
 const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([${AN}])`, 'g');
@@ -390,6 +393,7 @@ export class Pangu {
     // Affix readings run before the operator rules so the symbol stays attached to its half-width side
     newText = newText.replace(CJK_SIGN_DIGIT, '$1 $2$3');
     newText = newText.replace(CJK_HYPHEN_FLAG, '$1 $2$3');
+    newText = newText.replace(AN_PLUS_CJK, '$1$2 $3');
 
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');

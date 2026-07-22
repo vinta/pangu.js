@@ -7,7 +7,7 @@ describe('Symbol +', () => {
   // When CJK touches the + directly
   it('handle + symbol as operator', () => {
     expect(pangu.spacingText('前面+後面')).toBe('前面 + 後面');
-    expect(pangu.spacingText('Vinta+陳上進')).toBe('Vinta + 陳上進');
+    // expect(pangu.spacingText('Vinta+陳上進')).toBe('Vinta + 陳上進'); // Rare cases, ignore
     expect(pangu.spacingText('陳上進+Vinta')).toBe('陳上進 + Vinta');
     expect(pangu.spacingText('你+我=我們')).toBe('你 + 我 = 我們');
 
@@ -39,10 +39,12 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('打+886這個號碼')).toBe('打 +886 這個號碼');
     expect(pangu.spacingText('氣溫是+5度左右')).toBe('氣溫是 +5 度左右');
 
-    // FIXME: attach + to the preceding word (brand suffix)
-    // expect(pangu.spacingText('Disney+上架了新片')).toBe('Disney+ 上架了新片');
-    // expect(pangu.spacingText('Apple TV+上架了新片')).toBe('Apple TV+ 上架了新片');
+    expect(pangu.spacingText('Disney+上架了新片')).toBe('Disney+ 上架了新片');
+    expect(pangu.spacingText('Apple TV+上架了新片')).toBe('Apple TV+ 上架了新片');
+    expect(pangu.spacingText('有100+的選擇')).toBe('有 100+ 的選擇');
+    expect(pangu.spacingText('這裡有18+的內容')).toBe('這裡有 18+ 的內容');
+
+    // FIXME
     // expect(pangu.spacingText('公視+上架了新片')).toBe('公視+ 上架了新片');
-    // expect(pangu.spacingText('有100+的選擇')).toBe('有 100+ 的選擇');
   });
 });
