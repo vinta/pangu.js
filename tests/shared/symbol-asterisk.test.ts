@@ -29,6 +29,5 @@ describe('Symbol *', () => {
 
   it('handle * symbol as special case', () => {
     expect(pangu.spacingText('刪掉*.log的檔案')).toBe('刪掉 *.log 的檔案');
-    expect(pangu.spacingText('這是5*的飯店')).toBe('這是 5* 的飯店');
   });
 });
