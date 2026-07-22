@@ -124,6 +124,10 @@ const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
 const CJK_SLASH_ANS = new RegExp(`([${CJK}])([/])([${AN}])`, 'g');
 const ANS_SLASH_CJK = new RegExp(`([${AN}])([/])([${CJK}])`, 'g');
 
+// Pipe patterns for separator vs joiner-token behavior, decided per line
+const PIPE_CJK_CONTACT = new RegExp(`[${CJK}]\\||\\|[${CJK}]`);
+const PIPE_SEPARATOR = /([^\s|])[ ]*(\|+)[ ]*(?=[^\s|])/g;
+
 // Special handling for single letter grades/ratings (A+, B-, C*) before CJK
 // These should have space after the operator, not before
 // Use word boundary to ensure it's a single letter, not part of a longer word
@@ -428,6 +432,19 @@ export class Pangu {
         line = line.replace(CJK_SLASH_ANS, '$1 $2 $3');
         line = line.replace(ANS_SLASH_CJK, '$1 $2 $3');
         return line;
+      })
+      .join('\n');
+
+    // Pipe reading is per line: a pipe in direct CJK contact makes every pipe on the
+    // line a separator with spaces on both sides (作詞 | 林夕, concatenated page titles).
+    // A line whose pipes touch no CJK keeps them tight as joiner tokens (x|y, ps aux|grep node)
+    newText = newText
+      .split('\n')
+      .map((line) => {
+        if (!PIPE_CJK_CONTACT.test(line)) {
+          return line;
+        }
+        return line.replace(PIPE_SEPARATOR, '$1 $2 ');
       })
       .join('\n');
 
