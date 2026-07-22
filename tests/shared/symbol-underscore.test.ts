@@ -14,6 +14,7 @@ describe('Symbol _', () => {
     expect(pangu.spacingText('陳上進_Mollie_貓咪')).toBe('陳上進_Mollie_貓咪');
     expect(pangu.spacingText('Mollie_Vinta_貓咪')).toBe('Mollie_Vinta_貓咪');
     expect(pangu.spacingText('Mollie_陳上進_貓咪')).toBe('Mollie_陳上進_貓咪');
+    expect(pangu.spacingText('得到一個A_B的結果')).toBe('得到一個 A_B 的結果');
 
     // prettier-ignore
     expect(pangu.spacingText('為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip'))
@@ -28,8 +29,5 @@ describe('Symbol _', () => {
     // expect(pangu.spacingText('陳上進 _ Mollie _ 貓咪')).toBe('陳上進 _ Mollie _ 貓咪');
     // expect(pangu.spacingText('Mollie _ Vinta _ 貓咪')).toBe('Mollie _ Vinta _ 貓咪');
     // expect(pangu.spacingText('Mollie _ 陳上進 _ 貓咪')).toBe('Mollie _ 陳上進 _ 貓咪');
-
-    // FIXME
-    // expect(pangu.spacingText('得到一個A_B的結果')).toBe('得到一個 A_B 的結果');
   });
 });

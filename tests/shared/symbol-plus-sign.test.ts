@@ -40,7 +40,9 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('氣溫是+5度左右')).toBe('氣溫是 +5 度左右');
 
     // FIXME: attach + to the preceding word (brand suffix)
-    // (needs a rule that keeps Vinta+陳上進 as operator)
     // expect(pangu.spacingText('Disney+上架了新片')).toBe('Disney+ 上架了新片');
+    // expect(pangu.spacingText('Apple TV+上架了新片')).toBe('Apple TV+ 上架了新片');
+    // expect(pangu.spacingText('公視+上架了新片')).toBe('公視+ 上架了新片');
+    // expect(pangu.spacingText('有100+的選擇')).toBe('有 100+ 的選擇');
   });
 });

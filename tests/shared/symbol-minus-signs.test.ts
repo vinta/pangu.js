@@ -67,6 +67,9 @@ describe('Symbol -', () => {
     expect(pangu.spacingText('氣溫是-5度左右')).toBe('氣溫是 -5 度左右');
     expect(pangu.spacingText('參數要加-m的旗標')).toBe('參數要加 -m 的旗標');
 
+    // FIXME: a year range should read the hyphen as an operator, not as a sign attached to the second year
+    // expect(pangu.spacingText('2016年-2018年')).toBe('2016 年 - 2018 年');
+
     // FIXME
     // expect(pangu.spacingText('陳上進--Vinta')).toBe('陳上進 -- Vinta');
     // expect(pangu.spacingText('陳上進---Vinta')).toBe('陳上進 --- Vinta');
