@@ -31,13 +31,13 @@ Done when, for any symbol context, you can answer covered or uncovered.
 
 Plan one line per uncovered context. A gap earns one line, a covered context earns none. Gap families that keep paying:
 
-| Family | Examples |
-| --- | --- |
-| Fullwidth/halfwidth lookalikes | `｜` vs `\|` vs `│` vs `丨`, `％` vs `%`, `／`, `－` |
-| Symbol runs | `SPF50+/PA++++`, `1+1=$50`, `C++`, `......` |
-| Brand and model traps | `85度C`, `YouBike 2.0E`, `EMU3000`, `Disney+` |
-| Marks glued to CJK | `®` `°C` `★` `×` vs `X`, `@handle`, `#話題#`, `vs.`, `~` |
-| Structure | `【】《》「」[]`, `9／21`, `11:00`, `NT$24,280`, `70,000~150,000元` |
+| Family                         | Examples                                                            |
+| ------------------------------ | ------------------------------------------------------------------- |
+| Fullwidth/halfwidth lookalikes | `｜` vs `\|` vs `│` vs `丨`, `％` vs `%`, `／`, `－`                |
+| Symbol runs                    | `SPF50+/PA++++`, `1+1=$50`, `C++`, `......`                         |
+| Brand and model traps          | `85度C`, `YouBike 2.0E`, `EMU3000`, `Disney+`                       |
+| Marks glued to CJK             | `®` `°C` `★` `×` vs `X`, `@handle`, `#話題#`, `vs.`, `~`            |
+| Structure                      | `【】《》「」[]`, `9／21`, `11:00`, `NT$24,280`, `70,000~150,000元` |
 
 Done when every planned line has claimed a gap no other line claims.
 
