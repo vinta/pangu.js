@@ -25,26 +25,26 @@ _Avoid_: space element
 
 ## Paranoid Text Spacing Algorithm
 
-The algorithm behind text spacing. Source of truth: `src/shared/index.ts`, exhaustive examples: `tests/shared/index.test.ts`.
+The algorithm behind text spacing. Source of truth: `src/shared/index.ts`, exhaustive examples: the per-symbol files in `tests/shared/`.
 
 **Symbol handling**:
-Symbols split by how they read between half-width characters. Text-gated operators (`=` `+` `*` `<` `>`) get spaces between half-width characters whenever CJK appears anywhere in the text. Contact-gated symbols (`-` `&`) act as operators only in direct contact with CJK. `/` follows slash reading. Separators (`_` `|`) never get spaces.
+A symbol between two half-width characters binds them into a joiner token and never gets spaces. A symbol in direct contact with CJK reads as an operator and gets spaces, unless an affix reading attaches it to its half-width side. `/` additionally follows slash reading. Separators (`_` `|`) never get spaces.
 
 **Joiner token**:
-Half-width characters joined tight by a slash or ampersand (`A/B`, `26/30`, `vinta/hal-9000`, `S&P`, `Q&A`). Never split, and spaced from adjacent CJK as one unit. Ampersands need no per-line reading; slashes follow slash reading.
+Half-width characters joined tight by any symbol (`A/B`, `26/30`, `vinta/hal-9000`, `S&P`, `Q&A`, `A+B`, `5+5`, `foo=bar&baz=1`, `A<B`, `HSIAO-MING`). Never split, and spaced from adjacent CJK as one unit. Slashes additionally follow slash reading.
 _Avoid_: slash token, slash operand pair, &-token
 
 **Slash reading**:
 Decided per line, never across lines. A slash with half-width characters on both sides forms a joiner token. A line's only slash acts as an operator when CJK touches it. Repeated slashes on a line read as a file path or a list and stay unspaced.
 
-**Hyphen reading**:
-A hyphen between two half-width characters is a word connector (`A-B`, `HSIAO-MING`, `state-of-the-art`, `5-A`) and never gets spaces, because `-` commonly reads as hyphen or dash rather than minus. Only a hyphen in direct contact with CJK reads as an operator (`前面-後面`, `陳上進-Vinta`).
+**Affix reading**:
+A symbol that attaches to its half-width side at a CJK boundary instead of reading as an operator: `+` or `-` before digits as a sign (`打 +886`, `氣溫是 -5 度`), `-` before a lowercase flag (`參數要加 -m 的旗標`), `*` after a digit as a rating (`這是 5* 的飯店`), and single-letter grades (`A+`, `D-`). A capitalized word after a hyphen keeps the operator reading (`陳上進 - Vinta`).
 
 **No CJK contact, no change**:
-The invariant behind every symbol rule. A run of half-width text that touches no CJK is never modified, no matter what appears elsewhere in the line or text.
+The invariant behind every symbol rule. Half-width text that touches no CJK is never modified. A symbol must touch CJK directly to read as an operator, so CJK elsewhere in the line or text never licenses spacing between half-width characters.
 
 **Pattern preservation**:
-Compound words (`state-of-the-art`, `GPT-5`, `claude-4-opus`), programming terms (`C++`, `A+`, `i++`, `D-`, `C#`, `F#`), and file paths (`/usr/bin`, `src/main.py`, `C:\Users\`) keep their internal shape. A letter grade before CJK becomes `A+ `, not `A + `.
+Compound words (`state-of-the-art`, `GPT-5`, `claude-4-opus`), programming terms (`C++`, `A+`, `i++`, `D-`, `C#`, `F#`), arrow tokens (`=>`, `->`), glob patterns (`*.log`, `templates/*.html`), and file paths (`/usr/bin`, `src/main.py`, `C:\Users\`) keep their internal shape, even where an operator reading would otherwise apply.
 
 **Punctuation**:
 Half-width punctuation is never converted to full-width. Multiple consecutive punctuation marks are preserved.

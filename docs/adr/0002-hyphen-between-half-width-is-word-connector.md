@@ -1,5 +1,7 @@
 # Hyphens between half-width characters are word connectors, never operators
 
+**Superseded by [ADR 0003](0003-symbols-between-half-width-are-tokens.md), which generalizes this rule to every symbol.**
+
 A `-` between two half-width characters is ambiguous: minus (operator) or hyphen/dash (connector). The algorithm previously treated letter-letter and digit-letter hyphens as operators whenever the text contained CJK anywhere (`得到一個A-B的結果` became `得到一個 A - B 的結果`), which mangled hyphenated passport names (`WANG,HSIAO-MING` became `HSIAO - MING`), acronym pairs (`USB-C`, `X-RAY`), and codes (`5-A`). Since the hyphen/dash reading dominates real-world text, the connector reading wins: `ANS_HYPHEN_ANS_NOT_COMPOUND` was deleted, and a hyphen acts as an operator only in direct contact with CJK (`前面-後面`, `陳上進-Vinta`). This makes `-` contact-gated like `&` (`S&P` stays intact while `陳上進&Vinta` gets spaces), whereas `=` `+` `*` `<` `>` remain text-gated because they have no competing word-joining reading.
 
 Alternatives rejected:

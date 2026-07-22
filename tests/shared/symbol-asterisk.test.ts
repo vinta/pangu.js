@@ -23,16 +23,12 @@ describe('Symbol *', () => {
   // spaced from CJK as a unit and never split
   it('handle * symbol as asterisk token', () => {
     expect(pangu.spacingText('Vinta*Mollie')).toBe('Vinta*Mollie'); // If no CJK, DO NOT change
-
-    // FIXME
-    // expect(pangu.spacingText('得到一個A*B的結果')).toBe('得到一個 A*B 的結果');
-    // expect(pangu.spacingText('算式是2*3的積')).toBe('算式是 2*3 的積');
+    expect(pangu.spacingText('得到一個A*B的結果')).toBe('得到一個 A*B 的結果');
+    expect(pangu.spacingText('算式是2*3的積')).toBe('算式是 2*3 的積');
   });
 
   it('handle * symbol as special case', () => {
     expect(pangu.spacingText('刪掉*.log的檔案')).toBe('刪掉 *.log 的檔案');
-
-    // FIXME: attach * to the preceding number (star rating)
-    // expect(pangu.spacingText('這是5*的飯店')).toBe('這是 5* 的飯店');
+    expect(pangu.spacingText('這是5*的飯店')).toBe('這是 5* 的飯店');
   });
 });

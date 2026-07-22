@@ -23,10 +23,8 @@ describe('Symbol +', () => {
   // spaced from CJK as a unit and never split
   it('handle + symbol as plus token', () => {
     expect(pangu.spacingText('Vinta+Mollie')).toBe('Vinta+Mollie'); // If no CJK, DO NOT change
-
-    // FIXME
-    // expect(pangu.spacingText('得到一個A+B的結果')).toBe('得到一個 A+B 的結果');
-    // expect(pangu.spacingText('答案是5+5的和')).toBe('答案是 5+5 的和');
+    expect(pangu.spacingText('得到一個A+B的結果')).toBe('得到一個 A+B 的結果');
+    expect(pangu.spacingText('答案是5+5的和')).toBe('答案是 5+5 的和');
   });
 
   it('handle + symbol as special case', () => {
@@ -38,10 +36,11 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('成績是A+的等級')).toBe('成績是 A+ 的等級');
     expect(pangu.spacingText('我會寫C++的程式')).toBe('我會寫 C++ 的程式');
 
-    // FIXME: attach + to the preceding word (brand suffix) or the following digits (sign, phone code)
-    // (Disney+ needs a rule that keeps Vinta+陳上進 as operator)
+    expect(pangu.spacingText('打+886這個號碼')).toBe('打 +886 這個號碼');
+    expect(pangu.spacingText('氣溫是+5度左右')).toBe('氣溫是 +5 度左右');
+
+    // FIXME: attach + to the preceding word (brand suffix)
+    // (needs a rule that keeps Vinta+陳上進 as operator)
     // expect(pangu.spacingText('Disney+上架了新片')).toBe('Disney+ 上架了新片');
-    // expect(pangu.spacingText('打+886這個號碼')).toBe('打 +886 這個號碼');
-    // expect(pangu.spacingText('氣溫是+5度左右')).toBe('氣溫是 +5 度左右');
   });
 });

@@ -64,10 +64,8 @@ describe('Symbol -', () => {
     // prettier-ignore
     expect(pangu.spacingText('长者的智慧和复杂的维斯特洛- 文章')).toBe('长者的智慧和复杂的维斯特洛 - 文章');
 
-    // FIXME: attach - to the following digits (negative sign) or CLI flag letters
-    // (needs rules that keep 陳上進-Vinta spaced and avoid 2016年-2018年 becoming -2018)
-    // expect(pangu.spacingText('氣溫是-5度左右')).toBe('氣溫是 -5 度左右');
-    // expect(pangu.spacingText('參數要加-m的旗標')).toBe('參數要加 -m 的旗標');
+    expect(pangu.spacingText('氣溫是-5度左右')).toBe('氣溫是 -5 度左右');
+    expect(pangu.spacingText('參數要加-m的旗標')).toBe('參數要加 -m 的旗標');
 
     // FIXME
     // expect(pangu.spacingText('陳上進--Vinta')).toBe('陳上進 -- Vinta');
