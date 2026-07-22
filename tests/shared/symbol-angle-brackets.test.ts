@@ -52,15 +52,17 @@ describe('Symbol < >', () => {
     // A mention next to real markup: only the mention is spaced
     expect(pangu.spacingText('<p>用<code>標記程式碼</p>')).toBe('<p>用 <code> 標記程式碼</p>');
 
-    // <br> must stay untouched
+    // <br> or <hr> must stay untouched
     expect(pangu.spacingText('文字<br>換行')).toBe('文字<br>換行');
     expect(pangu.spacingText('文字<br />換行')).toBe('文字<br />換行');
+    expect(pangu.spacingText('第一段<hr>第二段')).toBe('第一段<hr>第二段');
+    expect(pangu.spacingText('第一段<hr />第二段')).toBe('第一段<hr />第二段');
 
     // Real-world markup stays untouched
     expect(pangu.spacingText('<ul><li>第一項</li><li>第二項</li></ul>')).toBe('<ul><li>第一項</li><li>第二項</li></ul>');
     expect(pangu.spacingText('<button disabled>送出表單</button>')).toBe('<button disabled>送出表單</button>');
     expect(pangu.spacingText('<img src="photo.jpg">上面是圖片')).toBe('<img src="photo.jpg">上面是圖片');
-    expect(pangu.spacingText('這裡放<Spinner />元件')).toBe('這裡放<Spinner />元件');
+    expect(pangu.spacingText('這裡放<Spinner />元件')).toBe('這裡放 <Spinner /> 元件');
 
     // prettier-ignore
     // FIXME
