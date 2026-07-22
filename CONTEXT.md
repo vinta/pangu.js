@@ -50,7 +50,7 @@ The invariant behind every symbol rule. Half-width text that touches no CJK is n
 Compound words (`state-of-the-art`, `GPT-5`, `claude-4-opus`), programming terms (`C++`, `A+`, `i++`, `D-`, `C#`, `F#`), arrow tokens (`=>`, `->`), glob patterns (`*.log`, `templates/*.html`), and file paths (`/usr/bin`, `src/main.py`, `C:\Users\`) keep their internal shape, even where an operator reading would otherwise apply.
 
 **Punctuation**:
-Half-width punctuation is never converted to full-width. Multiple consecutive punctuation marks are preserved.
+Half-width punctuation is not converted to full-width, with two exceptions: a colon in direct CJK contact right before a parenthesis becomes `：`, and middle dots (`·` `•` `‧`) normalize to `・`. Multiple consecutive punctuation marks are preserved.
 
 **HTML**:
 Tags are protected from spacing rules. Text inside attributes is processed. The exception is a tag mention, which is spaced.
