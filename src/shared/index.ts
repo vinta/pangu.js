@@ -116,17 +116,9 @@ const CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
 const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS_WITH_HYPHEN}])([${AN}])`, 'g');
 const ANS_OPERATOR_CJK = new RegExp(`([${AN}])([${OPERATORS_WITH_HYPHEN}])([${CJK}])`, 'g');
 // Handle operators between alphanumeric characters when CJK is present in text
-// Note: This pattern excludes hyphens entirely (only + * =) to avoid conflicts with compound words
+// Note: No hyphen or ampersand here - between half-width characters they are word connectors
+// (A-B, HSIAO-MING, S&P), and only act as operators in direct contact with CJK
 const ANS_OPERATOR_ANS = new RegExp(`([${AN}])([${OPERATORS_NO_HYPHEN}])([${AN}])`, 'g');
-
-// Hyphens that should be treated as operators (with spaces) rather than word connectors
-// This regex has 3 patterns to catch different cases while preserving compound words:
-// 1. Letter-Letter/Number: A-B, X-5 (spaces added) BUT NOT co-author, X-ray, GPT-5 (preserved)
-// 2. Mixed alphanumeric-number patterns that aren't already protected as compound words
-// 3. Number-Letter: 5-A, 3-B (spaces added) BUT NOT 5-year, 2016-12-26 (preserved)
-// Note: Patterns like GPT4-5, v1-2 are protected by COMPOUND_WORD_PATTERN and won't get spaces
-// The negative lookahead (?![a-z]) prevents matching hyphens followed by lowercase letters
-const ANS_HYPHEN_ANS_NOT_COMPOUND = new RegExp(`([A-Za-z])(-(?![a-z]))([A-Za-z0-9])|([A-Za-z]+[0-9]+)(-(?![a-z]))([0-9])|([0-9])(-(?![a-z0-9]))([A-Za-z])`, 'g');
 
 // Slash patterns for operator vs separator behavior
 const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
@@ -396,20 +388,6 @@ export class Pangu {
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_ANS, '$1 $2 $3');
-    newText = newText.replace(ANS_HYPHEN_ANS_NOT_COMPOUND, (match, ...groups) => {
-      // Handle all patterns in the alternation
-      if (groups[0] && groups[1] && groups[2]) {
-        // First pattern: letter-alphanumeric
-        return `${groups[0]} ${groups[1]} ${groups[2]}`;
-      } else if (groups[3] && groups[4] && groups[5]) {
-        // Second pattern: version range (letter+number-number)
-        return `${groups[3]} ${groups[4]} ${groups[5]}`;
-      } else if (groups[6] && groups[7] && groups[8]) {
-        // Third pattern: number-letter
-        return `${groups[6]} ${groups[7]} ${groups[8]}`;
-      }
-      return match;
-    });
 
     // Handle < and > as comparison operators
     newText = newText.replace(CJK_LESS_THAN, '$1 $2 $3');

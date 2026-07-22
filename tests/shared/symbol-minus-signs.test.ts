@@ -10,7 +10,6 @@ describe('Symbol -', () => {
     expect(pangu.spacingText('Vinta-Mollie')).toBe('Vinta-Mollie'); // If no CJK, DO NOT change
     expect(pangu.spacingText('Vinta-陳上進')).toBe('Vinta - 陳上進');
     expect(pangu.spacingText('陳上進-Vinta')).toBe('陳上進 - Vinta');
-    expect(pangu.spacingText('得到一個A-B的結果')).toBe('得到一個 A - B 的結果');
 
     // DO NOT change if already spacing
     expect(pangu.spacingText('前面 - 後面')).toBe('前面 - 後面');
@@ -23,6 +22,8 @@ describe('Symbol -', () => {
   it('handle - symbol as hyphen/dash', () => {
     // Compound words
     expect(pangu.spacingText('Sci-Fi')).toBe('Sci-Fi');
+    expect(pangu.spacingText('X-RAY')).toBe('X-RAY');
+    expect(pangu.spacingText('USB Type-C')).toBe('USB Type-C');
 
     // prettier-ignore
     expect(pangu.spacingText('The company offered a state-of-the-art machine-learning-powered real-time fraud-detection system with end-to-end encryption and cutting-edge performance.'))
@@ -37,6 +38,18 @@ describe('Symbol -', () => {
     expect(pangu.spacingText('OpenAI的gpt-4o模型')).toBe('OpenAI 的 gpt-4o 模型');
     expect(pangu.spacingText('OpenAI的GPT-5模型')).toBe('OpenAI 的 GPT-5 模型');
     expect(pangu.spacingText('Google的gemini-2.5-pro模型')).toBe('Google 的 gemini-2.5-pro 模型');
+
+    // Hyphen between half-width characters is a word connector, not an operator
+    // Only a hyphen in direct contact with CJK acts as an operator
+    expect(pangu.spacingText('得到一個A-B的結果')).toBe('得到一個 A-B 的結果');
+    expect(pangu.spacingText('去5-A教室上課')).toBe('去 5-A 教室上課');
+    expect(pangu.spacingText('用USB-C充電')).toBe('用 USB-C 充電');
+    expect(pangu.spacingText('照X-RAY檢查')).toBe('照 X-RAY 檢查');
+
+    // Hyphenated English names
+    // prettier-ignore
+    expect(pangu.spacingText('英文姓名須與護照上相同，包含標點符號；範例：王小明，英文名為WANG,HSIAO-MING，請於英文姓(Surname)欄位填入WANG,、英文名(Given Names)欄位填入HSIAO-MING。'))
+                       .toBe('英文姓名須與護照上相同，包含標點符號；範例：王小明，英文名為 WANG,HSIAO-MING，請於英文姓 (Surname) 欄位填入 WANG,、英文名 (Given Names) 欄位填入 HSIAO-MING。');
 
     // CLI flags
     // prettier-ignore
