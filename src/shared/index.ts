@@ -97,7 +97,7 @@ const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES}]+)[ ]*(.+?)[ ]*([${QUOTES}]+
 const QUOTE_AN = new RegExp(`([\u201d])([${AN}])`, 'g'); // Only closing curly quotes + AN
 
 // Special handling for straight quotes followed by alphanumeric after CJK
-// This catches patterns like: 中文"ABC where the quote appears to be closing a quoted CJK phrase
+// This catches patterns like: CJK"ABC where the quote appears to be closing a quoted CJK phrase
 const CJK_QUOTE_AN = new RegExp(`([${CJK}])(")([${AN}])`, 'g');
 
 const CJK_SINGLE_QUOTE_BUT_POSSESSIVE = new RegExp(`([${CJK}])('[^s])`, 'g');
@@ -184,11 +184,12 @@ const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 // \u00a0 is not \S so the guards also keep string-edge NBSPs and longer whitespace runs intact
 const SOLITARY_NBSP = /(?<=\S)[ ]*\u00a0[ ]*(?=\S)/g;
 
-// A bare unpaired non-void tag amid prose is a tag mention (在這裡插入一個<div>標籤),
+// A bare unpaired non-void tag amid prose is a tag mention,
 // not markup: it reads as one unit and is spaced from CJK it directly touches.
-// Void elements render on their own (文字<br>換行), so they stay markup even unpaired
+// A trailing self-closing slash is still bare, but void
+// elements render on their own (<br> or <hr>), so they stay markup even unpaired
 const VOID_HTML_TAGS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
-const BARE_HTML_TAG = /^<([a-zA-Z][a-zA-Z0-9]*)>$/;
+const BARE_HTML_TAG = /^<([a-zA-Z][a-zA-Z0-9]*)\s*\/?>$/;
 const CLOSING_HTML_TAG = /<\/([a-zA-Z][a-zA-Z0-9]*)/g;
 
 // Spacing at direct CJK contact with a tag mention placeholder (\uE002...\uE003)
