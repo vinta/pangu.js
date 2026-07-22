@@ -70,6 +70,8 @@ const ANY_CJK = new RegExp(`[${CJK}]`);
 const CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:]+)(?=[${CJK}${AN}])`, 'g');
 // Handle punctuation between AN and CJK - add space after punctuation
 const AN_PUNCTUATION_CJK = new RegExp(`([${AN}])([!;,\\?]+)([${CJK}])`, 'g');
+// Handle punctuation between a right bracket and CJK - add space after punctuation
+const RIGHT_BRACKET_PUNCTUATION_CJK = new RegExp(`([${RIGHT_BRACKETS_BASIC}])([!;,\\?]+)([${CJK}])`, 'g');
 // Handle tilde separately for special cases like ~=
 // Only add space if followed by CJK, letters, or numbers (not at end of text)
 const CJK_TILDE = new RegExp(`([${CJK}])(~+)(?!=)(?=[${CJK}${AN}])`, 'g');
@@ -365,6 +367,8 @@ export class Pangu {
     newText = newText.replace(CJK_PUNCTUATION, '$1$2 ');
     // Handle punctuation between AN and CJK
     newText = newText.replace(AN_PUNCTUATION_CJK, '$1$2 $3');
+    // Handle punctuation between a right bracket and CJK
+    newText = newText.replace(RIGHT_BRACKET_PUNCTUATION_CJK, '$1$2 $3');
     // Handle tilde separately for special cases
     newText = newText.replace(CJK_TILDE, '$1$2 ');
     newText = newText.replace(CJK_TILDE_EQUALS, '$1 $2 ');
