@@ -55,3 +55,5 @@ Tags are protected from spacing rules. Text inside attributes is processed.
 ## Agent Skill Overrides
 
 **improve-codebase-architecture**: write the Architecture Review HTML report to `./tmp/architecture-review-<timestamp>.html` (repo root) instead of the OS temp directory, so it survives a reboot. `/tmp/` is already gitignored via `~/.gitignore_global`; no further ignore rule needed.
+
+**handoff**: write handoff documents to `./tmp/handoff-<topic>.md` (repo root) instead of the OS temp directory, for the same reasons.
