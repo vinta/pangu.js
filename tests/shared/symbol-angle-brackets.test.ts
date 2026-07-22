@@ -36,9 +36,12 @@ describe('Symbol < >', () => {
     expect(pangu.spacingText('水平線<hr />分隔')).toBe('水平線<hr />分隔');
 
     // FIXME: a <tag> mentioned in prose should be spaced from CJK as one unit
-    // (conflicts with the real-markup assertions above, e.g. 文字<br>換行 must stay untouched)
-    // expect(pangu.spacingText('寫一個<div>的標籤')).toBe('寫一個 <div> 的標籤');
+    // expect(pangu.spacingText('在這裡插入一個<div>標籤')).toBe('在這裡插入一個 <div> 標籤');
     // expect(pangu.spacingText('型別是List<String>的容器')).toBe('型別是 List<String> 的容器');
+
+    // <br> must stay untouched
+    // expect(pangu.spacingText('文字<br>換行')).toBe('文字<br>換行');
+    // expect(pangu.spacingText('文字<br />換行')).toBe('文字<br />換行');
 
     // prettier-ignore
     // FIXME
