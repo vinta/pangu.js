@@ -20,4 +20,4 @@ Alternatives rejected:
 - Inline math in CJK prose stays tight. Authors who want `5 + 5` write the spaces themselves, and already-spaced text is never collapsed.
 - Sign attachment trades away year ranges and CJK-adjacent arithmetic: `2016年-2018年` renders with `-2018` attached, and `庫存-2件` reads as a signed delta (`庫存 -2 件`). Accepted cost.
 - "No CJK contact, no change" becomes symbol-level for every symbol: CJK elsewhere in the text never licenses spacing between half-width characters.
-- The per-symbol test files pin the model and run red until `src/shared/index.ts` catches up (the `+` `*` `=` `<` `>` files follow the ampersand operator/token template). Two readings stay open as FIXMEs: brand suffixes (`Disney+上架`) versus word-plus-CJK operators (`Vinta+陳上進`), and tags mentioned in prose (`寫一個<div>的標籤`) versus real markup (`文字<br>換行`).
+- The per-symbol test files pin the model (the `+` `*` `=` `<` `>` files follow the ampersand operator/token template). Two readings stay open as FIXMEs: brand suffixes (`Disney+上架`) versus word-plus-CJK operators (`Vinta+陳上進`), and tags mentioned in prose (`寫一個<div>的標籤`) versus real markup (`文字<br>換行`).
