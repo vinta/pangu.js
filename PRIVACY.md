@@ -1,6 +1,6 @@
 # Privacy Policy
 
-Last updated: June 2025
+Last updated: July 2026
 
 ## Overview
 
@@ -10,7 +10,7 @@ Last updated: June 2025
 
 This extension **does not collect any personal data**. Specifically:
 
-- No user data is collected or transmitted to any servers
+- The extension never sends any data to the developer or to any third-party servers
 - No analytics or tracking tools are used
 - No browsing history is recorded
 - No personal information is stored
@@ -20,7 +20,7 @@ This extension **does not collect any personal data**. Specifically:
 The extension only:
 
 - Processes text content on web pages locally in your browser
-- Stores your preferences (enabled/disabled sites, sound settings) locally using Chrome's storage API
+- Stores your preferences (enabled/disabled sites, sound settings) using Chrome's sync storage
 - All processing happens entirely on your device
 
 ## Permissions
@@ -29,7 +29,7 @@ The extension requires the following permissions:
 
 - **activeTab**: To apply spacing rules only to the currently active tab when you interact with the extension
 - **scripting**: To inject the spacing functionality into web pages
-- **storage**: To save your preferences and settings locally
+- **storage**: To save your preferences and settings
 - **host_permissions**: To run on web pages you visit
 
 ## Third-Party Services
@@ -38,7 +38,7 @@ This extension does not use any third-party services or send data to any externa
 
 ## Data Storage
 
-All settings and preferences are stored locally on your device using Chrome's storage API. This data never leaves your browser.
+All settings and preferences are stored using Chrome's sync storage API. If you sign in to Chrome, Chrome syncs them to your Google Account so your settings follow you across your devices. The extension itself never sends your data to the developer or to any third-party server.
 
 ## Changes to This Policy
 
