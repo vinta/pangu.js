@@ -35,13 +35,32 @@ describe('Symbol < >', () => {
     expect(pangu.spacingText('水平線<hr>分隔')).toBe('水平線<hr>分隔');
     expect(pangu.spacingText('水平線<hr />分隔')).toBe('水平線<hr />分隔');
 
-    // FIXME: a <tag> mentioned in prose should be spaced from CJK as one unit
-    // expect(pangu.spacingText('在這裡插入一個<div>標籤')).toBe('在這裡插入一個 <div> 標籤');
-    // expect(pangu.spacingText('型別是List<String>的容器')).toBe('型別是 List<String> 的容器');
+    // A bare unpaired non-void tag is a tag mention: spaced from CJK as one unit
+    expect(pangu.spacingText('在這裡插入一個<div>標籤')).toBe('在這裡插入一個 <div> 標籤');
+    expect(pangu.spacingText('型別是List<String>的容器')).toBe('型別是 List<String> 的容器');
+    expect(pangu.spacingText('把文字包在<span>裡面')).toBe('把文字包在 <span> 裡面');
+    expect(pangu.spacingText('每個<li>代表一個列表項目')).toBe('每個 <li> 代表一個列表項目');
+    expect(pangu.spacingText('用<table>排版是過時的做法')).toBe('用 <table> 排版是過時的做法');
+    expect(pangu.spacingText('HTML的<head>放的是metadata')).toBe('HTML 的 <head> 放的是 metadata');
+    expect(pangu.spacingText('<html>是整份文件的根元素')).toBe('<html> 是整份文件的根元素');
+
+    // Generic type parameters read as tag mentions too
+    expect(pangu.spacingText('回傳Promise<string>就好')).toBe('回傳 Promise<string> 就好');
+    expect(pangu.spacingText('用Vec<u8>儲存位元組')).toBe('用 Vec<u8> 儲存位元組');
+    expect(pangu.spacingText('先引入<iostream>標頭檔')).toBe('先引入 <iostream> 標頭檔');
+
+    // A mention next to real markup: only the mention is spaced
+    expect(pangu.spacingText('<p>用<code>標記程式碼</p>')).toBe('<p>用 <code> 標記程式碼</p>');
 
     // <br> must stay untouched
-    // expect(pangu.spacingText('文字<br>換行')).toBe('文字<br>換行');
-    // expect(pangu.spacingText('文字<br />換行')).toBe('文字<br />換行');
+    expect(pangu.spacingText('文字<br>換行')).toBe('文字<br>換行');
+    expect(pangu.spacingText('文字<br />換行')).toBe('文字<br />換行');
+
+    // Real-world markup stays untouched
+    expect(pangu.spacingText('<ul><li>第一項</li><li>第二項</li></ul>')).toBe('<ul><li>第一項</li><li>第二項</li></ul>');
+    expect(pangu.spacingText('<button disabled>送出表單</button>')).toBe('<button disabled>送出表單</button>');
+    expect(pangu.spacingText('<img src="photo.jpg">上面是圖片')).toBe('<img src="photo.jpg">上面是圖片');
+    expect(pangu.spacingText('這裡放<Spinner />元件')).toBe('這裡放<Spinner />元件');
 
     // prettier-ignore
     // FIXME
