@@ -28,10 +28,10 @@ _Avoid_: space element
 The algorithm behind text spacing. Source of truth: `src/shared/index.ts`, exhaustive examples: the per-symbol files in `tests/shared/`.
 
 **Symbol handling**:
-A symbol between two half-width characters binds them into a joiner token and never gets spaces. A symbol in direct contact with CJK reads as an operator and gets spaces, unless an affix reading attaches it to its half-width side. `/` additionally follows slash reading and `|` follows pipe reading. The separator `_` never gets spaces.
+A symbol between two half-width characters binds them into a joiner token and never gets spaces. A symbol in direct contact with CJK reads as an operator and gets spaces, unless an affix reading attaches it to its half-width side. A symbol in direct contact with a protected word reads as an operator, never as an affix. `/` additionally follows slash reading, `|` follows pipe reading, and `+` follows plus reading. The separator `_` never gets spaces.
 
 **Joiner token**:
-Half-width characters joined tight by any symbol (`A/B`, `26/30`, `vinta/hal-9000`, `S&P`, `Q&A`, `A+B`, `5+5`, `foo=bar&baz=1`, `A<B`, `HSIAO-MING`). Never split, and spaced from adjacent CJK as one unit. Slashes and pipes additionally follow slash reading and pipe reading.
+Half-width characters joined tight by any symbol (`A/B`, `26/30`, `vinta/hal-9000`, `S&P`, `Q&A`, `A+B`, `5+5`, `foo=bar&baz=1`, `A<B`, `HSIAO-MING`). Never split, and spaced from adjacent CJK as one unit. Slashes, pipes, and plus signs additionally follow slash reading, pipe reading, and plus reading.
 _Avoid_: slash token, slash operand pair, &-token
 
 **Slash reading**:
@@ -39,6 +39,9 @@ Decided per line, never across lines. A slash with half-width characters on both
 
 **Pipe reading**:
 Decided per line, never across lines. A pipe in direct CJK contact makes every pipe on the line a separator with spaces on both sides, covering concatenated page titles (`型號 | Disney+ 幫助中心 | TW`) and credit lines (`作詞 | 林夕`). A line whose pipes touch no CJK keeps them tight as joiner tokens (`條件是 x|y 的情況`, `ps aux|grep node`).
+
+**Plus reading**:
+Decided per line, never across lines. A plus in direct contact with CJK or a protected word makes every unsettled plus on the line a separator with spaces on both sides, covering bundle plans (`HiNet 光世代 + MOD + 影劇館+`). A plus is settled when it is already space-adjacent, attached by an affix reading (`Disney+ 上架`, `打 +886`), or inside a preserved pattern (`C++`). A line with no such contact keeps its pluses tight as joiner tokens (`得到一個 A+B 的結果`, `答案是 5+5 的和`).
 
 **Affix reading**:
 A symbol that attaches to its half-width side at a CJK boundary instead of reading as an operator: `+` or `-` before digits as a sign (`打 +886`, `氣溫是 -5 度`), `-` before a lowercase flag (`參數要加 -m 的旗標`), `+` after a half-width run as a suffix (`Disney+ 上架`, `有 100+ 的選擇`), and single-letter grades (`A+`, `D-`). A capitalized word after a hyphen keeps the operator reading (`陳上進 - Vinta`).
@@ -48,6 +51,10 @@ The invariant behind every symbol rule. Half-width text that touches no CJK is n
 
 **Pattern preservation**:
 Compound words (`state-of-the-art`, `GPT-5`, `claude-4-opus`), programming terms (`C++`, `A+`, `i++`, `D-`, `C#`, `F#`), arrow tokens (`=>`, `->`), glob patterns (`*.log`, `templates/*.html`), and file paths (`/usr/bin`, `src/main.py`, `C:\Users\`) keep their internal shape, even where an operator reading would otherwise apply.
+
+**Protected word**:
+A literal string from a fixed list (`公視+`, `影劇館+`), never modified inside and spaced from its neighbors as one unit. A tier above pattern preservation: a pattern preserves a shape, a protected word preserves one exact string. Open-class shapes stay on their shape rules, so `Disney+` and `100+` remain affix readings and `C++` remains a preserved pattern.
+_Avoid_: atom, lexicon, whitelist
 
 **Punctuation**:
 Half-width punctuation is not converted to full-width, with two exceptions: a colon in direct CJK contact right before a parenthesis becomes `：`, and middle dots (`·` `•` `‧`) normalize to `・`. Multiple consecutive punctuation marks are preserved.
