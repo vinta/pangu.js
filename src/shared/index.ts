@@ -30,7 +30,6 @@ const UPPER_AN = 'A-Z0-9'; // For FIX_CJK_COLON_ANS
 // Operators - note the different sets!
 const OPERATORS_BASE = '\\+\\*=&';
 const OPERATORS_WITH_HYPHEN = `${OPERATORS_BASE}\\-`; // For CJK patterns
-const OPERATORS_NO_HYPHEN = '\\+\\*='; // For ANS_OPERATOR_ANS only; no & - it joins half-width chars into a token (S&P, Q&A)
 const GRADE_OPERATORS = '\\+\\-\\*'; // For single letter grades
 
 // Quotes
@@ -113,12 +112,11 @@ const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, 'g');
 const CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
 
 // The symbol part only includes + - * = & (excluding | / < >)
+// Only direct CJK contact makes a symbol an operator: a symbol between two half-width
+// characters binds them into a joiner token (A+B, a=1, S&P) and never gets spaces,
+// so there is deliberately no between-half-width rule here
 const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS_WITH_HYPHEN}])([${AN}])`, 'g');
 const ANS_OPERATOR_CJK = new RegExp(`([${AN}])([${OPERATORS_WITH_HYPHEN}])([${CJK}])`, 'g');
-// Handle operators between alphanumeric characters when CJK is present in text
-// Note: No hyphen or ampersand here - between half-width characters they are word connectors
-// (A-B, HSIAO-MING, S&P), and only act as operators in direct contact with CJK
-const ANS_OPERATOR_ANS = new RegExp(`([${AN}])([${OPERATORS_NO_HYPHEN}])([${AN}])`, 'g');
 
 // Slash patterns for operator vs separator behavior
 const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
@@ -130,14 +128,20 @@ const ANS_SLASH_CJK = new RegExp(`([${AN}])([/])([${CJK}])`, 'g');
 // Use word boundary to ensure it's a single letter, not part of a longer word
 const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([${A}])([${GRADE_OPERATORS}])([${CJK}])`, 'g');
 
+// Affix readings attach a symbol to its half-width side at a CJK boundary, overriding the operator reading
+// Sign: + or - attaches to following digits (打 +886, 氣溫是 -5 度)
+const CJK_SIGN_DIGIT = new RegExp(`([${CJK}])([\\+\\-])([0-9])`, 'g');
+// Flag: - attaches to a following single lowercase letter (參數要加 -m 的旗標)
+// [a-z] keeps a capitalized word on the operator reading (陳上進 - Vinta) and the trailing \b keeps a longer lowercase word there too (蘋果-apple)
+const CJK_HYPHEN_FLAG = new RegExp(`([${CJK}])(\\-)([a-z])\\b`, 'g');
+// Rating: * attaches to a preceding digit (這是 5* 的飯店)
+const DIGIT_RATING_CJK = new RegExp(`([0-9])(\\*)([${CJK}])`, 'g');
+
 // Special handling for < and > as comparison operators (not brackets)
 const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([${AN}])`, 'g');
 const LESS_THAN_CJK = new RegExp(`([${AN}])(<)([${CJK}])`, 'g');
 const CJK_GREATER_THAN = new RegExp(`([${CJK}])(>)([${AN}])`, 'g');
 const GREATER_THAN_CJK = new RegExp(`([${AN}])(>)([${CJK}])`, 'g');
-// Handle < and > between alphanumeric characters when CJK is present in text
-const ANS_LESS_THAN_ANS = new RegExp(`([${AN}])(<)([${AN}])`, 'g');
-const ANS_GREATER_THAN_ANS = new RegExp(`([${AN}])(>)([${AN}])`, 'g');
 
 // Bracket patterns: ( ) [ ] { } and also < > (though < > are also handled as operators separately)
 // Note: The curly quotes “ ” (\u201c \u201d) appear in CJK_LEFT_BRACKET/RIGHT_BRACKET_CJK but are primarily handled in the patterns below
@@ -385,17 +389,19 @@ export class Pangu {
     // This ensures "A+的" becomes "A+ 的" not "A + 的"
     newText = newText.replace(SINGLE_LETTER_GRADE_CJK, '$1$2 $3');
 
+    // Affix readings run before the operator rules so the symbol stays attached to its half-width side
+    newText = newText.replace(CJK_SIGN_DIGIT, '$1 $2$3');
+    newText = newText.replace(CJK_HYPHEN_FLAG, '$1 $2$3');
+    newText = newText.replace(DIGIT_RATING_CJK, '$1$2 $3');
+
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
-    newText = newText.replace(ANS_OPERATOR_ANS, '$1 $2 $3');
 
     // Handle < and > as comparison operators
     newText = newText.replace(CJK_LESS_THAN, '$1 $2 $3');
     newText = newText.replace(LESS_THAN_CJK, '$1 $2 $3');
-    newText = newText.replace(ANS_LESS_THAN_ANS, '$1 $2 $3');
     newText = newText.replace(CJK_GREATER_THAN, '$1 $2 $3');
     newText = newText.replace(GREATER_THAN_CJK, '$1 $2 $3');
-    newText = newText.replace(ANS_GREATER_THAN_ANS, '$1 $2 $3');
 
     // Add space before filesystem paths after CJK
     newText = newText.replace(CJK_UNIX_ABSOLUTE_FILE_PATH, '$1 $2');
