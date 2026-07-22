@@ -53,7 +53,11 @@ Compound words (`state-of-the-art`, `GPT-5`, `claude-4-opus`), programming terms
 Half-width punctuation is never converted to full-width. Multiple consecutive punctuation marks are preserved.
 
 **HTML**:
-Tags are protected from spacing rules. Text inside attributes is processed.
+Tags are protected from spacing rules. Text inside attributes is processed. The exception is a tag mention, which is spaced.
+
+**Tag mention**:
+A bare opening tag with no attributes, a non-void name, and no closing counterpart anywhere in the text (`在這裡插入一個 <div> 標籤`, `型別是 List<String> 的容器`). Reads as one unit mentioned in prose rather than markup: spaced at direct CJK contact, tight against half-width characters. Paired tags, void elements (`<br>`), and tags with attributes or a self-closing slash stay protected markup.
+_Avoid_: tag-in-prose, prose tag
 
 ## Agent Skill Overrides
 
