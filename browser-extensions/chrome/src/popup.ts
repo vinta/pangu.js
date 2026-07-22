@@ -38,6 +38,13 @@ class PopupController {
       });
     }
 
+    const textAutospaceToggle = document.getElementById('text-autospace-toggle') as HTMLInputElement;
+    if (textAutospaceToggle) {
+      textAutospaceToggle.addEventListener('change', () => {
+        this.handleTextAutospaceToggleChange();
+      });
+    }
+
     const manualSpacingBtn = document.getElementById('manual-spacing-btn');
     if (manualSpacingBtn) {
       manualSpacingBtn.addEventListener('click', () => {
@@ -69,6 +76,7 @@ class PopupController {
   private async render() {
     await this.renderSpacingModeToggle();
     await this.renderMuteToggle();
+    await this.renderTextAutospaceToggle();
     await this.renderStatus();
     await this.renderAddToBlacklistButton();
     this.renderVersion();
@@ -87,6 +95,14 @@ class PopupController {
     const muteToggle = document.getElementById('mute-toggle') as HTMLInputElement;
     if (muteToggle) {
       muteToggle.checked = settings.is_mute_sound_effects;
+    }
+  }
+
+  private async renderTextAutospaceToggle() {
+    const settings = await getCachedSettings();
+    const textAutospaceToggle = document.getElementById('text-autospace-toggle') as HTMLInputElement;
+    if (textAutospaceToggle) {
+      textAutospaceToggle.checked = settings.is_enable_text_autospace;
     }
   }
 
@@ -147,6 +163,13 @@ class PopupController {
     if (!toggle.checked) {
       await playSound('Hadouken');
     }
+  }
+
+  private async handleTextAutospaceToggleChange() {
+    const toggle = document.getElementById('text-autospace-toggle') as HTMLInputElement;
+    await chrome.storage.sync.set({ is_enable_text_autospace: toggle.checked });
+
+    this.showMessage(chrome.i18n.getMessage('refresh_required'), 'info', 1000 * 3);
   }
 
   private async handleManualSpacing() {
