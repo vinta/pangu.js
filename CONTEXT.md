@@ -38,7 +38,7 @@ _Avoid_: slash token, slash operand pair, &-token
 Decided per line, never across lines. A slash with half-width characters on both sides forms a joiner token. A line's only slash acts as an operator when CJK touches it. Repeated slashes on a line read as a file path or a list and stay unspaced.
 
 **Affix reading**:
-A symbol that attaches to its half-width side at a CJK boundary instead of reading as an operator: `+` or `-` before digits as a sign (`打 +886`, `氣溫是 -5 度`), `-` before a lowercase flag (`參數要加 -m 的旗標`), `*` after a digit as a rating (`這是 5* 的飯店`), and single-letter grades (`A+`, `D-`). A capitalized word after a hyphen keeps the operator reading (`陳上進 - Vinta`).
+A symbol that attaches to its half-width side at a CJK boundary instead of reading as an operator: `+` or `-` before digits as a sign (`打 +886`, `氣溫是 -5 度`), `-` before a lowercase flag (`參數要加 -m 的旗標`), and single-letter grades (`A+`, `D-`). A capitalized word after a hyphen keeps the operator reading (`陳上進 - Vinta`).
 
 **No CJK contact, no change**:
 The invariant behind every symbol rule. Half-width text that touches no CJK is never modified. A symbol must touch CJK directly to read as an operator, so CJK elsewhere in the line or text never licenses spacing between half-width characters.
