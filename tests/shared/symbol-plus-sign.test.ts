@@ -44,12 +44,10 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('有100+的選擇')).toBe('有 100+ 的選擇');
     expect(pangu.spacingText('這裡有18+的內容')).toBe('這裡有 18+ 的內容');
 
-    // FIXME
     expect(pangu.spacingText('公視+上架了新片')).toBe('公視+ 上架了新片');
     expect(pangu.spacingText('MOD影劇館+上架了新片')).toBe('MOD 影劇館+ 上架了新片');
   });
 
-  // FIXME
   it('handle + symbol in real-world bundle plans', () => {
     // prettier-ignore
     expect(pangu.spacingText('【速在必行方案】HiNet光世代+Wi-Fi全屋通1台+MOD影劇館+(300M/300M)')).toBe('【速在必行方案】HiNet 光世代 + Wi-Fi 全屋通 1 台 + MOD 影劇館+ (300M/300M)');

@@ -128,6 +128,28 @@ const ANS_SLASH_CJK = new RegExp(`([${AN}])([/])([${CJK}])`, 'g');
 const PIPE_CJK_CONTACT = new RegExp(`[${CJK}]\\||\\|[${CJK}]`);
 const PIPE_SEPARATOR = /([^\s|])[ ]*(\|+)[ ]*(?=[^\s|])/g;
 
+// Plus patterns for separator vs joiner-token behavior, decided per line like the
+// pipe. Contact includes a protected word placeholder edge (\uE020/\uE021): a
+// symbol touching an atom reads as an operator. The separator matches a solitary
+// plus only - a space-adjacent plus is settled and a ++ run is a preserved
+// pattern (C++, i++)
+const PLUS_CJK_CONTACT = new RegExp(`[${CJK}\uE021]\\+|\\+[${CJK}\uE020]`);
+const PLUS_SEPARATOR = /(?<=[^\s+])\+(?=[^\s+])/g;
+
+// Protected words are literal atoms, never modified inside and spaced from their
+// neighbors as one unit; a + in direct contact with an atom reads as an operator,
+// never as an AN_PLUS_CJK affix (MOD+影劇館+ reads as MOD + the atom,
+// not as a MOD+ suffix). Disney+/100+ stay on the affix shape rule and C++ stays
+// pattern-preserved, so they stay out of the list. While rules run, an atom is an
+// opaque \uE020...\uE021 placeholder storing its + pre-masked as \uE022; it is
+// restored with the mask still on so no later rule re-reads the +, and the mask
+// is spaced from a following CJK, AN, or left bracket like a word edge (it stays
+// flush against a slash), then unmasked at the end
+const PROTECTED_WORDS = ['公視+', '影劇館+'];
+const PROTECTED_WORDS_PATTERN = new RegExp(PROTECTED_WORDS.map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
+const PROTECTED_WORD_PLUS_MASK_BEFORE_WORD = new RegExp(`(\uE022)(?=[${CJK}${AN}${LEFT_BRACKETS_BASIC}])`, 'g');
+const PROTECTED_WORD_PLUS_MASK = /\uE022/g;
+
 // Special handling for single letter grades/ratings (A+, B-, C*) before CJK
 // These should have space after the operator, not before
 // Use word boundary to ensure it's a single letter, not part of a longer word
@@ -416,6 +438,13 @@ export class Pangu {
       return compoundWordManager.store(match);
     });
 
+    // Protect words on the protected word list before the affix readings below:
+    // an atom is hidden while the symbol rules run, stored with its + pre-masked
+    const protectedWordManager = new PlaceholderReplacer('PROTECTED_WORD_PLACEHOLDER_', '\uE020', '\uE021');
+    newText = newText.replace(PROTECTED_WORDS_PATTERN, (match) => {
+      return protectedWordManager.store(match.replace(/\+/g, '\uE022'));
+    });
+
     // Handle single letter grades (A+, B-, etc.) before general operator rules
     // This ensures "A+的" becomes "A+ 的" not "A + 的"
     newText = newText.replace(SINGLE_LETTER_GRADE_CJK, '$1$2 $3');
@@ -474,8 +503,28 @@ export class Pangu {
       })
       .join('\n');
 
+    // Plus reading is per line: a plus in direct contact with CJK or a protected
+    // word makes every unsettled plus on the line a separator with spaces on both
+    // sides (telecom bundle plans chaining products with +). A settled plus keeps
+    // its reading: space-adjacent, affix-attached (Disney+, +886), or in a ++ run
+    // (C++); a line with no such contact keeps its joiner tokens tight (A+B, 5+5)
+    newText = newText
+      .split('\n')
+      .map((line) => {
+        if (!PLUS_CJK_CONTACT.test(line)) {
+          return line;
+        }
+        return line.replace(PLUS_SEPARATOR, ' + ');
+      })
+      .join('\n');
+
     // Restore compound words from placeholders
     newText = compoundWordManager.restore(newText);
+
+    // Restore protected words, still carrying the masked +: the atom's CJK is real
+    // text again so its left edge is spaced by the normal rules below (ANS_CJK
+    // spaces a half-width run before the atom), while the mask keeps the + attached
+    newText = protectedWordManager.restore(newText);
 
     newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
     newText = newText.replace(RIGHT_BRACKET_CJK, '$1 $2');
@@ -488,6 +537,11 @@ export class Pangu {
 
     newText = newText.replace(CJK_ANS, '$1 $2');
     newText = newText.replace(ANS_CJK, '$1 $2');
+
+    // A protected word's masked + is a word edge: space it from a following CJK,
+    // AN, or left bracket, then unmask it back to +
+    newText = newText.replace(PROTECTED_WORD_PLUS_MASK_BEFORE_WORD, '$1 ');
+    newText = newText.replace(PROTECTED_WORD_PLUS_MASK, '+');
 
     newText = newText.replace(S_A, '$1 $2');
 
