@@ -9,6 +9,7 @@ describe('Symbol /', () => {
     expect(pangu.spacingText('前面/後面')).toBe('前面 / 後面');
     expect(pangu.spacingText('Mollie/陳上進')).toBe('Mollie / 陳上進');
     expect(pangu.spacingText('陳上進/Mollie')).toBe('陳上進 / Mollie');
+    expect(pangu.spacingText('速度是60公里/小時')).toBe('速度是 60 公里 / 小時');
 
     // DO NOT change if already spacing
     expect(pangu.spacingText('前面 / 後面')).toBe('前面 / 後面');
@@ -29,6 +30,8 @@ describe('Symbol /', () => {
     expect(pangu.spacingText('打東東26/30')).toBe('打東東 26/30');
     expect(pangu.spacingText('打東東1/denominator')).toBe('打東東 1/denominator');
     expect(pangu.spacingText('吃apple/banana')).toBe('吃 apple/banana');
+    expect(pangu.spacingText('選A/B其中一個')).toBe('選 A/B 其中一個');
+    expect(pangu.spacingText('答案是6/2的商數')).toBe('答案是 6/2 的商數');
   });
 
   // Slash reading never crosses lines: each line counts its own slashes
@@ -43,6 +46,7 @@ describe('Symbol /', () => {
     expect(pangu.spacingText('陳上進/Mollie/貓咪')).toBe('陳上進/Mollie/貓咪');
     expect(pangu.spacingText('Mollie/Vinta/貓咪')).toBe('Mollie/Vinta/貓咪');
     expect(pangu.spacingText('Mollie/陳上進/貓咪')).toBe('Mollie/陳上進/貓咪');
+    expect(pangu.spacingText('日期是2024/01/22的早上')).toBe('日期是 2024/01/22 的早上');
 
     // prettier-ignore
     expect(pangu.spacingText("8964/3★集會所接待員/克隆·麻煩大師/手卷師傅（已退休）/主程式毀滅者/dae-dae-o/#絕地家庭小會議/#今天大掃除了沒有/NS編號在banner裡/discord:史單力#3230"))

@@ -43,6 +43,8 @@ describe('Symbol -', () => {
     // Only a hyphen in direct contact with CJK acts as an operator
     expect(pangu.spacingText('得到一個A-B的結果')).toBe('得到一個 A-B 的結果');
     expect(pangu.spacingText('去5-A教室上課')).toBe('去 5-A 教室上課');
+    expect(pangu.spacingText('搭2-A的公車')).toBe('搭 2-A 的公車');
+    expect(pangu.spacingText('範圍是1-10的整數')).toBe('範圍是 1-10 的整數');
     expect(pangu.spacingText('用USB-C充電')).toBe('用 USB-C 充電');
     expect(pangu.spacingText('照X-RAY檢查')).toBe('照 X-RAY 檢查');
 
@@ -61,6 +63,11 @@ describe('Symbol -', () => {
 
     // prettier-ignore
     expect(pangu.spacingText('长者的智慧和复杂的维斯特洛- 文章')).toBe('长者的智慧和复杂的维斯特洛 - 文章');
+
+    // FIXME: attach - to the following digits (negative sign) or CLI flag letters
+    // (needs rules that keep 陳上進-Vinta spaced and avoid 2016年-2018年 becoming -2018)
+    // expect(pangu.spacingText('氣溫是-5度左右')).toBe('氣溫是 -5 度左右');
+    // expect(pangu.spacingText('參數要加-m的旗標')).toBe('參數要加 -m 的旗標');
 
     // FIXME
     // expect(pangu.spacingText('陳上進--Vinta')).toBe('陳上進 -- Vinta');
