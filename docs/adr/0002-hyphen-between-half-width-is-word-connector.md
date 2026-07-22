@@ -13,4 +13,4 @@ Alternatives rejected:
 
 - `A-B` meaning "A minus B" in CJK prose stays unspaced. Accepted cost; authors who mean subtraction can write ` A - B ` themselves, and already-spaced text is preserved.
 - Digit-letter codes (`5-A`) stay intact. The old `5 - A` operator output had no test coverage.
-- The glossary terms for this model are **Symbol handling** and **Hyphen reading** in `CONTEXT.md` (contact-gated vs text-gated).
+- The glossary terms for this model were **Symbol handling** and **Hyphen reading** in `CONTEXT.md` (contact-gated vs text-gated). **Hyphen reading** has since been folded into **Symbol handling** by ADR 0003.
