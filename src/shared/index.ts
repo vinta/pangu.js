@@ -184,6 +184,17 @@ const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 // \u00a0 is not \S so the guards also keep string-edge NBSPs and longer whitespace runs intact
 const SOLITARY_NBSP = /(?<=\S)[ ]*\u00a0[ ]*(?=\S)/g;
 
+// A bare unpaired non-void tag amid prose is a tag mention (在這裡插入一個<div>標籤),
+// not markup: it reads as one unit and is spaced from CJK it directly touches.
+// Void elements render on their own (文字<br>換行), so they stay markup even unpaired
+const VOID_HTML_TAGS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
+const BARE_HTML_TAG = /^<([a-zA-Z][a-zA-Z0-9]*)>$/;
+const CLOSING_HTML_TAG = /<\/([a-zA-Z][a-zA-Z0-9]*)/g;
+
+// Spacing at direct CJK contact with a tag mention placeholder (\uE002...\uE003)
+const CJK_HTML_TAG_MENTION = new RegExp(`([${CJK}])(?=\uE002)`, 'g');
+const HTML_TAG_MENTION_CJK = new RegExp(`(?<=\uE003)([${CJK}])`, 'g');
+
 // Brackets: <fcontentl> (fcontentl) [fcontentl] {fcontentl}
 // f: the first character inside the brackets
 // l: the last character inside the brackets
@@ -280,6 +291,7 @@ export class Pangu {
 
     // Initialize placeholder managers
     const htmlTagManager = new PlaceholderReplacer('HTML_TAG_PLACEHOLDER_', '\uE000', '\uE001');
+    const mentionedTagManager = new PlaceholderReplacer('HTML_TAG_MENTION_', '\uE002', '\uE003');
     let hasHtmlTags = false;
 
     // Early return for HTML processing if no HTML tags present
@@ -292,8 +304,21 @@ export class Pangu {
       // This pattern ensures we only match actual HTML tags, not just any < > content
       const HTML_TAG_PATTERN = /<\/?[a-zA-Z][a-zA-Z0-9]*(?:\s+[^>]*)?>/g;
 
+      // Tag names whose closing tag appears anywhere in the text: their opening tags are paired markup
+      const closedTagNames = new Set<string>();
+      for (const closingTag of newText.matchAll(CLOSING_HTML_TAG)) {
+        closedTagNames.add(closingTag[1].toLowerCase());
+      }
+
       // Replace all HTML tags with placeholders, but process attribute values
       newText = newText.replace(HTML_TAG_PATTERN, (match) => {
+        const bareTag = match.match(BARE_HTML_TAG);
+        if (bareTag) {
+          const tagName = bareTag[1].toLowerCase();
+          if (!VOID_HTML_TAGS.has(tagName) && !closedTagNames.has(tagName)) {
+            return mentionedTagManager.store(match);
+          }
+        }
         // Process attribute values inside the tag
         const processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName, attrValue) => {
           // Process the attribute value with spacing
@@ -471,6 +496,10 @@ export class Pangu {
 
     // Restore HTML tags from placeholders (only if HTML processing occurred)
     if (hasHtmlTags) {
+      // A tag mention reads as one unit: space it from CJK it directly touches
+      newText = newText.replace(CJK_HTML_TAG_MENTION, '$1 ');
+      newText = newText.replace(HTML_TAG_MENTION_CJK, ' $1');
+      newText = mentionedTagManager.restore(newText);
       newText = htmlTagManager.restore(newText);
     }
 
