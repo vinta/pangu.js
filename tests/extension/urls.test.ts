@@ -8,15 +8,15 @@ function makeSettings(overrides: Partial<Settings> = {}): Settings {
 }
 
 describe('isValidUrl', () => {
-  it('accepts http, https, and file urls', () => {
+  it('accepts http and https urls', () => {
     expect(isValidUrl('http://example.com/')).toBe(true);
     expect(isValidUrl('https://example.com/')).toBe(true);
-    expect(isValidUrl('file:///Users/vinta/test.html')).toBe(true);
   });
 
   it('rejects browser-internal and unsupported schemes', () => {
     expect(isValidUrl('chrome://extensions/')).toBe(false);
     expect(isValidUrl('chrome://newtab/')).toBe(false);
+    expect(isValidUrl('file:///Users/vinta/test.html')).toBe(false);
     expect(isValidUrl('ftp://example.com/')).toBe(false);
   });
 });

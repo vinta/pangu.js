@@ -4,9 +4,8 @@ export function isValidMatchPattern(pattern: string) {
   // We only allow:
   // https://
   // http://
-  // file:///
   // *://
-  if (!pattern.match(/^(https?:\/\/|file:\/\/\/|\*:\/\/)/)) {
+  if (!pattern.match(/^(https?:\/\/|\*:\/\/)/)) {
     return false;
   }
 
@@ -19,9 +18,9 @@ export function isValidMatchPattern(pattern: string) {
 }
 
 export function isValidUrl(url: string) {
-  // valid urls, e.g., http://, https://, file://
-  // invalid urls, e.g., chrome://extensions/, chrome://flags/, ftp://
-  return /^(http(s?)|file)/i.test(url);
+  // valid urls, e.g., http://, https://
+  // invalid urls, e.g., chrome://extensions/, chrome://flags/, file://, ftp://
+  return /^http(s?)/i.test(url);
 }
 
 function isUrlExcludedByFilter(current: Settings, url: string) {

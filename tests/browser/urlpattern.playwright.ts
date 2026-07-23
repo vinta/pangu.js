@@ -36,10 +36,6 @@ test.describe('URLPattern', () => {
       testPattern('https://*.google.com/foo*bar', 'https://google.com/foobar', false);
       testPattern('https://*.google.com/foo*bar', 'http://drive.google.com/foobar', false);
 
-      testPattern('file:///*', 'file:///Users/john/Documents/report.pdf', true);
-      testPattern('file:///*', 'file:///C:/Windows/System32/drivers/etc/hosts', true);
-      testPattern('file:///*', 'file://localhost/Users/shared/config.json', false);
-
       return results;
     });
 
