@@ -146,11 +146,23 @@
     "description": ""
   },
   "label_is_enable_text_autospace": {
-    "message": "啟用瀏覽器內建的 text-autospace",
+    "message": "啟用瀏覽器內建的 text-autospace 排版",
     "description": ""
   },
   "text_autospace_description": {
-    "message": "讓瀏覽器直接渲染中文和英文、數字之間的間距。純視覺效果，不會插入任何空白字元，所以複製的文字不受影響。會套用到所有網站，無視黑名單和白名單。跟空格之神比起來的缺點是間距比真正的空格窄很多。需要 Chrome 140 以上才支援。",
+    "message": "讓$link_open$瀏覽器直接渲染中文和英文、數字之間的間距$link_close$。純視覺效果，不會插入任何空白字元，所以複製的文字不受影響。會套用到所有網站，無視黑名單和白名單。",
+    "description": "",
+    "placeholders": {
+      "link_open": {
+        "content": "<a href='https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/text-autospace' target='_blank'>"
+      },
+      "link_close": {
+        "content": "</a>"
+      }
+    }
+  },
+  "text_autospace_limitations": {
+    "message": "但是缺點是不支援符號而且那個間距比真正的空格窄很多，建議還是跟空格之神搭配使用。",
     "description": ""
   },
   "text_autospace_not_supported": {

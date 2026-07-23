@@ -21,4 +21,16 @@ export function translatePage() {
       }
     }
   }
+
+  // Translate elements whose message contains HTML declared via placeholders in messages.json
+  for (const element of document.querySelectorAll('[data-i18n-html]')) {
+    const messageKey = element.getAttribute('data-i18n-html');
+    if (messageKey) {
+      // No escaping: escapeLt would also escape the HTML in messages.json placeholders, and messages ship inside the extension package so they are as trusted as this page
+      const message = chrome.i18n.getMessage(messageKey);
+      if (message) {
+        element.innerHTML = message;
+      }
+    }
+  }
 }
