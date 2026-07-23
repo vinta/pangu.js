@@ -161,7 +161,14 @@ class PopupController {
     const toggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
 
     const spacingMode = toggle.checked ? 'spacing_when_load' : 'spacing_when_click';
-    await settings.update({ spacing_mode: spacingMode });
+    try {
+      await settings.update({ spacing_mode: spacingMode });
+    } catch (error) {
+      // The toggle already flipped visually: repaint it from confirmed settings
+      console.error('Failed to save settings:', error);
+      await this.renderSpacingModeToggle();
+      return;
+    }
 
     this.showMessage(chrome.i18n.getMessage('refresh_required'), 'info', 1000 * 3);
     await playSound(spacingMode === 'spacing_when_load' ? 'Shouryuuken' : 'Hadouken');
@@ -169,7 +176,13 @@ class PopupController {
 
   private async handleMuteToggleChange() {
     const toggle = document.getElementById('mute-toggle') as HTMLInputElement;
-    await settings.update({ is_mute_sound_effects: toggle.checked });
+    try {
+      await settings.update({ is_mute_sound_effects: toggle.checked });
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+      await this.renderMuteToggle();
+      return;
+    }
 
     // Play a sound when turning off mute to confirm it works
     if (!toggle.checked) {
@@ -179,7 +192,13 @@ class PopupController {
 
   private async handleTextAutospaceToggleChange() {
     const toggle = document.getElementById('text-autospace-toggle') as HTMLInputElement;
-    await settings.update({ is_enable_text_autospace: toggle.checked });
+    try {
+      await settings.update({ is_enable_text_autospace: toggle.checked });
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+      await this.renderTextAutospaceToggle();
+      return;
+    }
 
     this.showMessage(chrome.i18n.getMessage('refresh_required'), 'info', 1000 * 3);
   }

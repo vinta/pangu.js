@@ -69,10 +69,21 @@ class OptionsController {
       const target = e.target as HTMLElement;
       if (target.id === 'mute-checkbox') {
         const muteCheckbox = target as HTMLInputElement;
-        await settings.update({ is_mute_sound_effects: muteCheckbox.checked });
+        try {
+          await settings.update({ is_mute_sound_effects: muteCheckbox.checked });
+        } catch (error) {
+          // The checkbox already flipped visually: repaint it from confirmed settings
+          console.error('Failed to save settings:', error);
+          await this.renderMuteCheckbox();
+        }
       } else if (target.id === 'text-autospace-checkbox') {
         const textAutospaceCheckbox = target as HTMLInputElement;
-        await settings.update({ is_enable_text_autospace: textAutospaceCheckbox.checked });
+        try {
+          await settings.update({ is_enable_text_autospace: textAutospaceCheckbox.checked });
+        } catch (error) {
+          console.error('Failed to save settings:', error);
+          await this.renderTextAutospaceCheckbox();
+        }
       }
     });
   }
@@ -278,7 +289,14 @@ class OptionsController {
     // Optimistically close the input: on 'added' the subscription re-renders
     // with it already gone, so the list paints exactly once
     this.addUrlInput = null;
-    const outcome = newUrl ? await settings.addToActiveList(newUrl) : 'invalid';
+    let outcome: 'added' | 'duplicate' | 'invalid';
+    try {
+      outcome = newUrl ? await settings.addToActiveList(newUrl) : 'invalid';
+    } catch (error) {
+      console.error('Failed to save URL:', error);
+      this.addUrlInput = input;
+      return;
+    }
 
     if (outcome === 'invalid') {
       this.addUrlInput = input;
@@ -321,7 +339,14 @@ class OptionsController {
     // Optimistically leave edit mode: on 'saved' the subscription re-renders
     // with the row already back in display state
     this.editingUrls.delete(index);
-    const outcome = newUrl ? await settings.editActiveList(index, newUrl) : 'invalid';
+    let outcome: 'saved' | 'invalid';
+    try {
+      outcome = newUrl ? await settings.editActiveList(index, newUrl) : 'invalid';
+    } catch (error) {
+      console.error('Failed to save URL:', error);
+      this.editingUrls.set(index, newUrl);
+      return;
+    }
 
     if (outcome === 'invalid') {
       this.editingUrls.set(index, newUrl);
@@ -335,13 +360,21 @@ class OptionsController {
   }
 
   private async removeUrl(index: number) {
-    await settings.removeFromActiveList(index);
+    try {
+      await settings.removeFromActiveList(index);
+    } catch (error) {
+      console.error('Failed to remove URL:', error);
+    }
   }
 
   private async restoreDefaults() {
     if (confirm(chrome.i18n.getMessage('confirm_restore_defaults'))) {
-      // Restore only the current filter mode list to its default value
-      await settings.restoreActiveListDefaults();
+      try {
+        // Restore only the current filter mode list to its default value
+        await settings.restoreActiveListDefaults();
+      } catch (error) {
+        console.error('Failed to restore defaults:', error);
+      }
     }
   }
 }
