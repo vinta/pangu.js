@@ -10,7 +10,7 @@ const TEXT_AUTOSPACE_SCRIPT_ID = 'text-autospace';
 // setIcon paths resolve against this worker's own URL (dist/service-worker.js), unlike manifest icon paths which are extension-root-relative, so entries must be worker-relative ../icons/... forms.
 // Both bare icons/... and root-absolute /icons/... fail to load here
 const DEFAULT_ICON_PATHS = { '16': '../icons/icon-16.png', '24': '../icons/icon-24.png', '32': '../icons/icon-32.png', '48': '../icons/icon-48.png' };
-const OFF_ICON_PATHS = { '16': '../icons/icon-off-16.png', '24': '../icons/icon-off-24.png', '32': '../icons/icon-off-32.png', '48': '../icons/icon-off-48.png' };
+const OFF_ICON_PATHS = { '16': '../icons/off-icon-16.png', '24': '../icons/off-icon-24.png', '32': '../icons/off-icon-32.png', '48': '../icons/off-icon-48.png' };
 
 async function unregisterAllContentScripts() {
   try {
