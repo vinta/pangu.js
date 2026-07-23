@@ -7,10 +7,8 @@ interface StorageChange {
   newValue?: unknown;
 }
 
-// Stands in for chrome.storage in vitest: sync.get honors the defaults-object
-// form the module relies on, and every write notifies onChanged listeners with
-// the echo the real API fires in the writing context, only for keys whose
-// value actually changed.
+// Stands in for chrome.storage in vitest: sync.get honors the defaults-object form the module relies on, and every write notifies onChanged listeners with the echo the real API fires
+// in the writing context, only for keys whose value actually changed.
 function stubChromeStorage(initial: Record<string, unknown> = {}) {
   const data: Record<string, unknown> = structuredClone(initial);
   const listeners: ((changes: Record<string, StorageChange>, areaName: string) => void)[] = [];
