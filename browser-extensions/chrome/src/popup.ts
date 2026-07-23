@@ -19,8 +19,7 @@ class PopupController {
     this.currentTabUrl = activeTab?.url;
 
     translatePage();
-    // Subscribe before the first render, so a change landing mid-render still
-    // triggers a repaint instead of leaving a section stale
+    // Subscribe before the first render, so a change landing mid-render still triggers a repaint instead of leaving a section stale
     this.setupEventListeners();
     await this.render();
   }
@@ -74,8 +73,7 @@ class PopupController {
       }
     });
 
-    // Any settings change repaints the whole popup: it is small, and this
-    // keeps the status row honest after toggling spacing mode. Handlers never
+    // Any settings change repaints the whole popup: it is small, and this keeps the status row honest after toggling spacing mode. Handlers never
     // repaint after a successful write, the onChanged echo lands here instead.
     onSettingsChanged(() => {
       this.render().catch(console.error);
@@ -363,8 +361,7 @@ class PopupController {
       const url = new URL(this.currentTabUrl);
       const domainPattern = `${url.protocol}//${url.hostname}/*`;
 
-      // The button only shows in blacklist mode, and the pattern is built from
-      // an already-validated tab URL, so no match-pattern validation here
+      // The button only shows in blacklist mode, and the pattern is built from an already-validated tab URL, so no match-pattern validation here
       const current = await getSettings();
       if (current.blacklist.includes(domainPattern)) {
         this.showMessage(chrome.i18n.getMessage('already_in_blacklist'), 'info', 1000 * 3);

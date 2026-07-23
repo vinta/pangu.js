@@ -1,8 +1,3 @@
-/**
- * Modern i18n helper for Chrome Extensions
- * Translates elements with data-i18n attributes
- */
-
 export function translatePage() {
   // Translate all elements with data-i18n attribute
   for (const element of document.querySelectorAll('[data-i18n]')) {

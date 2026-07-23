@@ -3,8 +3,7 @@ import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, updateSettings } from
 import { playSound } from './utils/sounds';
 import { isValidMatchPattern } from './utils/urls';
 
-// Builds a Partial<Settings> for the list picked by filter mode without a
-// computed-key cast
+// Builds a Partial<Settings> for the list picked by filter mode without a computed-key cast
 function listPatch(key: 'blacklist' | 'whitelist', urls: string[]) {
   return key === 'blacklist' ? { blacklist: urls } : { whitelist: urls };
 }
@@ -19,15 +18,13 @@ class OptionsController {
 
   private async initialize() {
     translatePage();
-    // Subscribe before the first render, so a change landing mid-render still
-    // triggers a repaint instead of leaving a section stale
+    // Subscribe before the first render, so a change landing mid-render still triggers a repaint instead of leaving a section stale
     this.setupEventListeners();
     await this.render();
   }
 
   private setupEventListeners() {
-    // Every render below is driven by this subscription, so writes never
-    // re-render inline: the onChanged echo of each write lands here
+    // Every render below is driven by this subscription, so writes never re-render inline: the onChanged echo of each write lands here
     onSettingsChanged((changedKeys) => {
       // Only re-render the parts that actually changed
       if (changedKeys.includes('spacing_mode')) {
@@ -294,8 +291,7 @@ class OptionsController {
     const input = document.getElementById('new-url-input') as HTMLInputElement;
     const newUrl = input.value.trim();
 
-    // Optimistically close the input: on 'added' the subscription re-renders
-    // with it already gone, so the list paints exactly once
+    // Optimistically close the input: on 'added' the subscription re-renders with it already gone, so the list paints exactly once
     this.addUrlInput = null;
     let outcome: 'added' | 'duplicate' | 'invalid';
     try {
@@ -344,8 +340,7 @@ class OptionsController {
 
     const newUrl = input.value.trim();
 
-    // Optimistically leave edit mode: on 'saved' the subscription re-renders
-    // with the row already back in display state
+    // Optimistically leave edit mode: on 'saved' the subscription re-renders with the row already back in display state
     this.editingUrls.delete(index);
     let outcome: 'saved' | 'invalid';
     try {

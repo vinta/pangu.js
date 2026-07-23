@@ -18,8 +18,8 @@ async function unregisterAllContentScripts() {
   }
 }
 
-// One call per script: registerContentScripts() is all-or-nothing across its array,
-// so a user-supplied pattern that Chrome rejects must not take down the other script
+// One call per script: registerContentScripts() is all-or-nothing across its array, so a user-supplied pattern that Chrome rejects must not take
+// down the other script
 async function registerContentScript(contentScript: chrome.scripting.RegisteredContentScript) {
   try {
     await chrome.scripting.registerContentScripts([contentScript]);
@@ -38,8 +38,7 @@ async function registerContentScripts() {
   const current = await getSettings();
 
   if (current.is_enable_text_autospace) {
-    // Visual-only native autospacing, deliberately not gated by spacing_mode,
-    // filter_mode, blacklist, or whitelist (see docs/adr/0002)
+    // Visual-only native autospacing, deliberately not gated by spacing_mode, filter_mode, blacklist, or whitelist (see docs/adr/0002)
     await registerContentScript({
       id: TEXT_AUTOSPACE_SCRIPT_ID,
       css: ['dist/content-script.css'],
@@ -69,9 +68,8 @@ async function registerContentScripts() {
   }
 }
 
-// registerContentScripts() starts by unregistering everything and reads fresh
-// settings when its turn comes, so queued runs converge on the latest state;
-// the queue only keeps overlapping runs from interleaving
+// registerContentScripts() starts by unregistering everything and reads fresh settings when its turn comes, so queued runs converge on the latest
+// state; the queue only keeps overlapping runs from interleaving
 let registrationQueue = Promise.resolve();
 function queueRegisterContentScripts() {
   registrationQueue = registrationQueue.then(() => registerContentScripts()).catch(console.error);
@@ -89,8 +87,7 @@ chrome.runtime.onStartup.addListener(async () => {
   await queueRegisterContentScripts();
 });
 
-// Registered synchronously at module scope, as MV3 requires for storage events
-// to wake this worker. The event payload alone says what changed, so a
+// Registered synchronously at module scope, as MV3 requires for storage events to wake this worker. The event payload alone says what changed, so a
 // cold-started worker reacts correctly without any cached state.
 const REGISTRATION_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist', 'is_enable_text_autospace'];
 onSettingsChanged((changedKeys) => {
