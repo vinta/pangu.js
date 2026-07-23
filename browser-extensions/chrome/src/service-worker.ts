@@ -1,10 +1,16 @@
 // NOTE: In service workers, we can't export directly, everything goes through messages
 import { getSettings, onSettingsChanged, reconcileSettings } from './utils/settings';
 import type { Settings } from './utils/types';
-import { isValidMatchPattern } from './utils/urls';
+import { isValidMatchPattern, shouldShowOffIcon } from './utils/urls';
 
 const SCRIPT_ID = 'paranoid-auto-spacing';
 const TEXT_AUTOSPACE_SCRIPT_ID = 'text-autospace';
+
+// DEFAULT_ICON_PATHS must stay in sync with action.default_icon in manifest.json: per-tab setIcon overrides need an explicit restore, there is no "reset to manifest" call.
+// setIcon paths resolve against this worker's own URL (dist/service-worker.js), unlike manifest icon paths which are extension-root-relative, so entries must be worker-relative ../icons/... forms.
+// Both bare icons/... and root-absolute /icons/... fail to load here
+const DEFAULT_ICON_PATHS = { '16': '../icons/icon-16.png', '24': '../icons/icon-24.png', '32': '../icons/icon-32.png' };
+const OFF_ICON_PATHS = { '16': '../icons/icon-off-16.png', '32': '../icons/icon-off-32.png', '48': '../icons/icon-off-48.png' };
 
 async function unregisterAllContentScripts() {
   try {
@@ -76,22 +82,57 @@ function queueRegisterContentScripts() {
   return registrationQueue;
 }
 
+// The paper bag only marks spacing the user turned off: manual mode bags every tab, a filter-excluded url bags its tab (#296). Pages the extension merely cannot run on (chrome://, new tab pages, urls it cannot read) keep the face, so the icon is deliberately looser than the popup status row, which still reports those as 神隱中.
+async function updateTabIcon(tabId: number, url: string | undefined, current: Settings) {
+  const path = shouldShowOffIcon(current, url) ? OFF_ICON_PATHS : DEFAULT_ICON_PATHS;
+  try {
+    await chrome.action.setIcon({ tabId, path });
+  } catch {
+    // The tab can be closed between the triggering event and this write
+  }
+}
+
+async function updateAllTabIcons() {
+  const current = await getSettings();
+  const tabs = await chrome.tabs.query({});
+  await Promise.all(tabs.map((tab) => (tab.id === undefined ? undefined : updateTabIcon(tab.id, tab.url, current))));
+}
+
 chrome.runtime.onInstalled.addListener(async () => {
   // Reconcile settings when extension is installed or updated to a new version
   await reconcileSettings();
   await queueRegisterContentScripts();
+  await updateAllTabIcons();
 });
 
 chrome.runtime.onStartup.addListener(async () => {
   // Also register content scripts when extension starts
   await queueRegisterContentScripts();
+  await updateAllTabIcons();
+});
+
+// The url is often not set yet on onCreated (new tab pages never get one at all, and a missing url is never user-excluded, so it keeps the face), onUpdated below refines it as soon as navigation commits
+chrome.tabs.onCreated.addListener(async (tab) => {
+  if (tab.id !== undefined) {
+    await updateTabIcon(tab.id, tab.url || tab.pendingUrl, await getSettings());
+  }
+});
+
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'loading' || changeInfo.url) {
+    await updateTabIcon(tabId, tab.url, await getSettings());
+  }
 });
 
 // Registered synchronously at module scope, as MV3 requires for storage events to wake this worker. The event payload alone says what changed, so a
 // cold-started worker reacts correctly without any cached state.
 const REGISTRATION_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist', 'is_enable_text_autospace'];
+const ICON_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist'];
 onSettingsChanged((changedKeys) => {
   if (changedKeys.some((key) => REGISTRATION_KEYS.includes(key))) {
     queueRegisterContentScripts();
+  }
+  if (changedKeys.some((key) => ICON_KEYS.includes(key))) {
+    updateAllTabIcons().catch(console.error);
   }
 });

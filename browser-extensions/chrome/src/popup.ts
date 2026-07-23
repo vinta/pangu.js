@@ -2,6 +2,7 @@ import { translatePage } from './utils/i18n';
 import { getSettings, onSettingsChanged, updateSettings } from './utils/settings';
 import { playSound, stopSound } from './utils/sounds';
 import type { PingMessage, ManualSpacingMessage, ContentScriptResponse, MessageFromContentScript, Settings } from './utils/types';
+import { isValidUrl, shouldShowActiveStatus } from './utils/urls';
 
 class PopupController {
   private currentTabId: number | undefined;
@@ -123,9 +124,9 @@ class PopupController {
       return;
     }
 
-    const shouldBeActive = this.shouldContentScriptBeActive(current);
-    statusInput.checked = shouldBeActive;
-    const messageKey = shouldBeActive ? 'status_active' : 'status_inactive';
+    const isActive = shouldShowActiveStatus(current, this.currentTabUrl);
+    statusInput.checked = isActive;
+    const messageKey = isActive ? 'status_active' : 'status_inactive';
     statusLabel.setAttribute('data-i18n', messageKey);
     statusLabel.textContent = chrome.i18n.getMessage(messageKey);
   }
@@ -144,7 +145,7 @@ class PopupController {
     }
 
     // Hide button if not in blacklist mode or if URL is invalid
-    if (current.filter_mode !== 'blacklist' || !this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
+    if (current.filter_mode !== 'blacklist' || !this.currentTabUrl || !isValidUrl(this.currentTabUrl)) {
       button.style.display = 'none';
       return;
     }
@@ -202,7 +203,7 @@ class PopupController {
     // Disable button to prevent multiple clicks
     button.disabled = true;
 
-    if (!this.currentTabId || !this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
+    if (!this.currentTabId || !this.currentTabUrl || !isValidUrl(this.currentTabUrl)) {
       await this.showErrorMessage(() => {
         button.disabled = false;
       });
@@ -243,12 +244,6 @@ class PopupController {
     }
   }
 
-  private isValidUrl(url: string) {
-    // valid urls, e.g., http://, https://, file://
-    // invalid urls, e.g., chrome://extensions/, chrome://flags/, ftp://
-    return /^(http(s?)|file)/i.test(url);
-  }
-
   private async isContentScriptLoaded() {
     if (!this.currentTabId || !this.currentTabUrl) {
       return false;
@@ -262,37 +257,6 @@ class PopupController {
     } catch {
       return false;
     }
-  }
-
-  private shouldContentScriptBeActive(current: Settings) {
-    if (!this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
-      return false;
-    }
-
-    // If in manual mode, content script shouldn't be active
-    if (current.spacing_mode === 'spacing_when_click') {
-      return false;
-    }
-
-    // Check blacklist/whitelist
-    const urlPatterns = current[current.filter_mode];
-    for (const pattern of urlPatterns) {
-      try {
-        const urlPattern = new URLPattern(pattern);
-        if (urlPattern.test(this.currentTabUrl)) {
-          // If URL matches blacklist, should NOT be active
-          // If URL matches whitelist, SHOULD be active
-          return current.filter_mode === 'whitelist';
-        }
-      } catch {
-        // Invalid pattern, skip
-      }
-    }
-
-    // If no patterns matched:
-    // - For blacklist mode: should be active (not blacklisted)
-    // - For whitelist mode: should NOT be active (not whitelisted)
-    return current.filter_mode === 'blacklist';
   }
 
   private async showErrorMessage(callback?: () => void) {
@@ -348,7 +312,7 @@ class PopupController {
   }
 
   private async handleAddToBlacklist() {
-    if (!this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
+    if (!this.currentTabUrl || !isValidUrl(this.currentTabUrl)) {
       return;
     }
 
