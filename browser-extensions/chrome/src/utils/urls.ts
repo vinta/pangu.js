@@ -45,7 +45,8 @@ function isUrlExcludedByFilter(current: Settings, url: string) {
   return current.filter_mode === 'whitelist';
 }
 
-export function shouldContentScriptBeActive(current: Settings, url: string | undefined) {
+// Drives the popup status row (顯靈中/神隱中): stricter than shouldShowOffIcon below, it also reports pages the extension cannot run on as inactive
+export function shouldShowActiveStatus(current: Settings, url: string | undefined) {
   if (!url || !isValidUrl(url)) {
     return false;
   }

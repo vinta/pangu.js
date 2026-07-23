@@ -2,7 +2,7 @@ import { translatePage } from './utils/i18n';
 import { getSettings, onSettingsChanged, updateSettings } from './utils/settings';
 import { playSound, stopSound } from './utils/sounds';
 import type { PingMessage, ManualSpacingMessage, ContentScriptResponse, MessageFromContentScript, Settings } from './utils/types';
-import { isValidUrl, shouldContentScriptBeActive } from './utils/urls';
+import { isValidUrl, shouldShowActiveStatus } from './utils/urls';
 
 class PopupController {
   private currentTabId: number | undefined;
@@ -124,9 +124,9 @@ class PopupController {
       return;
     }
 
-    const shouldBeActive = shouldContentScriptBeActive(current, this.currentTabUrl);
-    statusInput.checked = shouldBeActive;
-    const messageKey = shouldBeActive ? 'status_active' : 'status_inactive';
+    const isActive = shouldShowActiveStatus(current, this.currentTabUrl);
+    statusInput.checked = isActive;
+    const messageKey = isActive ? 'status_active' : 'status_inactive';
     statusLabel.setAttribute('data-i18n', messageKey);
     statusLabel.textContent = chrome.i18n.getMessage(messageKey);
   }
