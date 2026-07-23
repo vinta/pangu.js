@@ -1,22 +1,36 @@
-import type { StoragePort } from '../../browser-extensions/chrome/src/utils/settings';
+import type { StoragePort, StorageValueChange } from '../../browser-extensions/chrome/src/utils/settings';
 
 // Mirrors chrome.storage.sync closely enough for the store's contract:
-// set() and remove() notify the change listeners (the echo the real API fires
-// in the writing context), emitExternal() simulates another device syncing a
-// change in, and rejectWrites stands in for sync quota errors.
+// set() and remove() notify the change listeners with oldValue/newValue pairs
+// (the echo the real API fires in the writing context), emitExternal()
+// simulates another device syncing a change in, and rejectWrites stands in for
+// sync quota errors.
 export interface InMemoryStorage extends StoragePort {
   data: Record<string, unknown>;
   rejectWrites: boolean;
-  emitExternal(changes: Record<string, unknown>): void;
+  emitExternal(newValues: Record<string, unknown>): void;
 }
 
 export function inMemoryStorage(initial: Record<string, unknown> = {}): InMemoryStorage {
-  const listeners: ((changes: Record<string, unknown>) => void)[] = [];
+  const listeners: ((changes: Record<string, StorageValueChange>) => void)[] = [];
 
-  const emit = (changes: Record<string, unknown>) => {
+  const emit = (changes: Record<string, StorageValueChange>) => {
     for (const listener of listeners) {
       listener({ ...changes });
     }
+  };
+
+  const applyAndDescribe = (newValues: Record<string, unknown>) => {
+    const changes: Record<string, StorageValueChange> = {};
+    for (const [key, value] of Object.entries(newValues)) {
+      changes[key] = { oldValue: storage.data[key], newValue: value };
+      if (value === undefined) {
+        delete storage.data[key];
+      } else {
+        storage.data[key] = value;
+      }
+    }
+    return changes;
   };
 
   const storage: InMemoryStorage = {
@@ -29,32 +43,23 @@ export function inMemoryStorage(initial: Record<string, unknown> = {}): InMemory
       if (storage.rejectWrites) {
         throw new Error('QUOTA_BYTES quota exceeded');
       }
-      Object.assign(storage.data, items);
-      emit({ ...items });
+      emit(applyAndDescribe({ ...items }));
     },
     async remove(keys) {
       if (storage.rejectWrites) {
         throw new Error('QUOTA_BYTES quota exceeded');
       }
-      const changes: Record<string, unknown> = {};
+      const newValues: Record<string, unknown> = {};
       for (const key of keys) {
-        delete storage.data[key];
-        changes[key] = undefined;
+        newValues[key] = undefined;
       }
-      emit(changes);
+      emit(applyAndDescribe(newValues));
     },
     onChanged(listener) {
       listeners.push(listener);
     },
-    emitExternal(changes) {
-      for (const [key, value] of Object.entries(changes)) {
-        if (value === undefined) {
-          delete storage.data[key];
-        } else {
-          storage.data[key] = value;
-        }
-      }
-      emit(changes);
+    emitExternal(newValues) {
+      emit(applyAndDescribe(newValues));
     },
   };
 

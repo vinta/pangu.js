@@ -154,6 +154,22 @@ describe('external changes', () => {
     expect(calls).toHaveLength(0);
   });
 
+  it('notifies changes that arrive before the first read, as on a service worker wake', async () => {
+    const storage = inMemoryStorage({ spacing_mode: 'spacing_when_load' });
+    const settings = createSettingsStore(storage);
+    const calls: SubscriberCall[] = [];
+    settings.subscribe(recordSubscriber(calls));
+
+    // No get() has happened: the change event itself is the first signal,
+    // exactly what a woken service worker sees
+    storage.emitExternal({ spacing_mode: 'spacing_when_click' });
+    await settle();
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0].changedKeys).toEqual(['spacing_mode']);
+    expect(calls[0].settings.spacing_mode).toBe('spacing_when_click');
+  });
+
   it('falls back to the default when a known key is removed externally', async () => {
     const storage = inMemoryStorage({ is_enable_text_autospace: false });
     const settings = createSettingsStore(storage);

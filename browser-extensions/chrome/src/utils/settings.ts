@@ -21,11 +21,18 @@ export const DEFAULT_SETTINGS: Settings = {
 
 // The storage the settings store sits on: chrome.storage.sync in the extension,
 // an in-memory implementation in vitest. Two adapters make the seam real.
+// Change events keep chrome's oldValue/newValue shape: the store needs oldValue
+// to recognize changes that arrive before it ever read (a woken service worker).
+export interface StorageValueChange {
+  oldValue?: unknown;
+  newValue?: unknown;
+}
+
 export interface StoragePort {
   get(): Promise<Record<string, unknown>>;
   set(items: Partial<Settings>): Promise<void>;
   remove(keys: string[]): Promise<void>;
-  onChanged(listener: (changes: Record<string, unknown>) => void): void;
+  onChanged(listener: (changes: Record<string, StorageValueChange>) => void): void;
 }
 
 export type SettingsSubscriber = (settings: ReadonlySettings, changedKeys: (keyof Settings)[]) => void;
@@ -97,14 +104,9 @@ const chromeSyncStorage: StoragePort = {
   remove: (keys) => chrome.storage.sync.remove(keys),
   onChanged: (listener) => {
     chrome.storage.onChanged.addListener((changes, areaName) => {
-      if (areaName !== 'sync') {
-        return;
+      if (areaName === 'sync') {
+        listener(changes);
       }
-      const newValues: Record<string, unknown> = {};
-      for (const [key, change] of Object.entries(changes)) {
-        newValues[key] = change.newValue;
-      }
-      listener(newValues);
     });
   },
 };
@@ -141,8 +143,20 @@ export function createSettingsStore(storage: StoragePort = chromeSyncStorage): S
   storage.onChanged((changes) => {
     eventChain = eventChain
       .then(async () => {
+        const hadCache = cache !== null;
         const current = await ensureLoaded();
-        notify(applyToCache(current, changes));
+        if (hadCache) {
+          const newValues: Record<string, unknown> = {};
+          for (const [key, change] of Object.entries(changes)) {
+            newValues[key] = change.newValue;
+          }
+          notify(applyToCache(current, newValues));
+          return;
+        }
+        // Cold context (a woken service worker): the load above already holds
+        // the new values, so diff the event against itself and only notify
+        const changedKeys = SETTINGS_KEYS.filter((key) => key in changes && !valueEquals(changes[key].oldValue, changes[key].newValue));
+        notify(changedKeys);
       })
       .catch(console.error);
   });
@@ -179,8 +193,11 @@ export function createSettingsStore(storage: StoragePort = chromeSyncStorage): S
 
     // Brings synced storage in line with the current schema: adds missing
     // defaults, prunes keys no version of Settings knows. Nothing user-visible
-    // changes (reads overlay defaults already), so subscribers stay quiet.
+    // changes (reads overlay defaults already), so subscribers stay quiet:
+    // priming the cache first routes the write echoes into the warm diff,
+    // where they cancel against the overlaid defaults.
     async reconcile() {
+      await ensureLoaded();
       const raw = await storage.get();
       const missing: Partial<Settings> = {};
       for (const key of SETTINGS_KEYS) {
