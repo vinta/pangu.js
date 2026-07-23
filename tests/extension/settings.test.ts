@@ -95,6 +95,23 @@ describe('subscribe', () => {
     expect('filter_mode' in storage.data).toBe(false);
   });
 
+  it('gives each subscriber its own snapshot', async () => {
+    const settings = createSettingsStore(inMemoryStorage());
+    const seen: string[] = [];
+    settings.subscribe((s) => {
+      // A hostile subscriber mutating through a cast must not reach its siblings
+      (s as Settings).spacing_mode = 'spacing_when_click';
+    });
+    settings.subscribe((s) => {
+      seen.push(s.spacing_mode);
+    });
+
+    await settings.update({ is_mute_sound_effects: true });
+    await settle();
+
+    expect(seen).toEqual(['spacing_when_load']);
+  });
+
   it('stops notifying after unsubscribe', async () => {
     const settings = createSettingsStore(inMemoryStorage());
     const calls: SubscriberCall[] = [];

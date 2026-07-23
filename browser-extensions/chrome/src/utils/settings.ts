@@ -132,9 +132,9 @@ export function createSettingsStore(storage: StoragePort = chromeSyncStorage): S
     if (!cache || changedKeys.length === 0) {
       return;
     }
-    const snapshot = cloneSettings(cache);
     for (const subscriber of [...subscribers]) {
-      subscriber(snapshot, [...changedKeys]);
+      // Each subscriber gets its own snapshot, so none can corrupt a sibling's
+      subscriber(cloneSettings(cache), [...changedKeys]);
     }
   };
 
