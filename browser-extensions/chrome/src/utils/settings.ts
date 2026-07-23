@@ -35,7 +35,7 @@ export interface StoragePort {
   onChanged(listener: (changes: Record<string, StorageValueChange>) => void): void;
 }
 
-export type SettingsSubscriber = (settings: ReadonlySettings, changedKeys: (keyof Settings)[]) => void;
+export type SettingsSubscriber = (settings: ReadonlySettings, changedKeys: readonly (keyof Settings)[]) => void;
 
 export interface SettingsStore {
   get(): Promise<ReadonlySettings>;
@@ -51,11 +51,11 @@ export interface SettingsStore {
 
 const SETTINGS_KEYS = Object.keys(DEFAULT_SETTINGS) as (keyof Settings)[];
 
-function cloneSettings(settings: Settings): Settings {
+function cloneSettings(settings: Settings) {
   return { ...settings, blacklist: [...settings.blacklist], whitelist: [...settings.whitelist] };
 }
 
-function overlayDefaults(raw: Record<string, unknown>): Settings {
+function overlayDefaults(raw: Record<string, unknown>) {
   const settings = cloneSettings(DEFAULT_SETTINGS);
   for (const key of SETTINGS_KEYS) {
     if (key in raw) {
@@ -67,7 +67,7 @@ function overlayDefaults(raw: Record<string, unknown>): Settings {
 
 // Builds a Partial<Settings> for the list picked by filter mode without a
 // computed-key cast
-function listPatch(key: 'blacklist' | 'whitelist', urls: string[]): Partial<Settings> {
+function listPatch(key: 'blacklist' | 'whitelist', urls: string[]) {
   return key === 'blacklist' ? { blacklist: urls } : { whitelist: urls };
 }
 
@@ -81,7 +81,7 @@ function valueEquals(a: unknown, b: unknown) {
 // Applies the known keys of `changes` onto `cache` (a removed key falls back to
 // its default) and reports which keys actually changed value. Diffing here is
 // also what dedupes the echo event storage fires for the store's own writes.
-function applyToCache(cache: Settings, changes: Record<string, unknown>): (keyof Settings)[] {
+function applyToCache(cache: Settings, changes: Record<string, unknown>) {
   const changedKeys: (keyof Settings)[] = [];
   for (const key of SETTINGS_KEYS) {
     if (!(key in changes)) {
@@ -111,7 +111,7 @@ const chromeSyncStorage: StoragePort = {
   },
 };
 
-export function createSettingsStore(storage: StoragePort = chromeSyncStorage): SettingsStore {
+export function createSettingsStore(storage: StoragePort = chromeSyncStorage) {
   let cache: Settings | null = null;
   let loading: Promise<Settings> | null = null;
   const subscribers: SettingsSubscriber[] = [];
@@ -171,7 +171,7 @@ export function createSettingsStore(storage: StoragePort = chromeSyncStorage): S
       const toWrite: Partial<Settings> = {};
       for (const key of SETTINGS_KEYS) {
         if (key in partial && !valueEquals(partial[key], current[key])) {
-          (toWrite as Record<string, unknown>)[key] = partial[key];
+          Object.assign(toWrite, { [key]: partial[key] });
         }
       }
       if (Object.keys(toWrite).length === 0) {
@@ -202,7 +202,7 @@ export function createSettingsStore(storage: StoragePort = chromeSyncStorage): S
       const missing: Partial<Settings> = {};
       for (const key of SETTINGS_KEYS) {
         if (!(key in raw)) {
-          (missing as Record<string, unknown>)[key] = DEFAULT_SETTINGS[key];
+          Object.assign(missing, { [key]: DEFAULT_SETTINGS[key] });
         }
       }
       const unknownKeys = Object.keys(raw).filter((key) => !(key in DEFAULT_SETTINGS));
@@ -272,7 +272,7 @@ let storeInstance: SettingsStore | undefined;
 
 // Callers bind this once per scope (`const settings = getSettingsStore();`)
 // and call methods on the binding, never inline off the accessor
-export function getSettingsStore(): SettingsStore {
+export function getSettingsStore() {
   storeInstance ??= createSettingsStore();
   return storeInstance;
 }

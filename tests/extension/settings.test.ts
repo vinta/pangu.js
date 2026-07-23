@@ -9,10 +9,13 @@ function settle() {
   return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
-type SubscriberCall = { settings: ReadonlySettings; changedKeys: (keyof Settings)[] };
+interface SubscriberCall {
+  settings: ReadonlySettings;
+  changedKeys: readonly (keyof Settings)[];
+}
 
 function recordSubscriber(calls: SubscriberCall[]) {
-  return (settings: ReadonlySettings, changedKeys: (keyof Settings)[]) => {
+  return (settings: ReadonlySettings, changedKeys: readonly (keyof Settings)[]) => {
     calls.push({ settings, changedKeys });
   };
 }
