@@ -165,95 +165,6 @@ export class BrowserPangu extends Pangu {
     return display === 'grid' || display === 'inline-grid' || display === 'flex' || display === 'inline-flex';
   }
 
-  // True only when both boundary nodes are children of the same row flex
-  // parent whose own layout provides no separation (no gap, no distributed
-  // justify-content) AND the boxes render flush per boxesRenderFlush
-  private isFlexRowFlushBoundary(currentBoundaryNode: Node, nextBoundaryNode: Node): boolean {
-    const parent = currentBoundaryNode.parentNode;
-    if (!parent || parent !== nextBoundaryNode.parentNode || !(parent instanceof Element)) {
-      return false;
-    }
-
-    const style = window.getComputedStyle(parent);
-    if ((style.display !== 'flex' && style.display !== 'inline-flex') || style.flexDirection !== 'row') {
-      return false;
-    }
-    if (style.justifyContent.includes('space-')) {
-      return false;
-    }
-    const columnGap = Number.parseFloat(style.columnGap); // 'normal' parses to NaN
-    if (columnGap > 0) {
-      return false;
-    }
-
-    return this.boxesRenderFlush(currentBoundaryNode, nextBoundaryNode);
-  }
-
-  // True only when both boundary nodes are sibling atomic inline-level boxes
-  // (inline-block and friends) sharing one line in normal flow. Such boxes
-  // trim collapsible spaces at their own edges just like flex items, but a
-  // <pangu> element between them joins their inline formatting context and
-  // renders a real U+0020
-  private isInlineBlockFlushBoundary(currentBoundaryNode: Node, nextBoundaryNode: Node): boolean {
-    const parent = currentBoundaryNode.parentNode;
-    if (!parent || parent !== nextBoundaryNode.parentNode || !(parent instanceof Element)) {
-      return false;
-    }
-    if (!this.isAtomicInlineLevel(currentBoundaryNode) || !this.isAtomicInlineLevel(nextBoundaryNode)) {
-      return false;
-    }
-    return this.boxesRenderFlush(currentBoundaryNode, nextBoundaryNode);
-  }
-
-  // Flex items never match: blockification computes their display to a
-  // block-level value, which also keeps this fact and the flex one disjoint
-  private isAtomicInlineLevel(node: Node): boolean {
-    if (!(node instanceof Element)) {
-      return false;
-    }
-    const display = window.getComputedStyle(node).display;
-    return display === 'inline-block' || display === 'inline-flex' || display === 'inline-grid';
-  }
-
-  // True when the two sibling boxes measurably touch on one line and neither
-  // facing edge carries its own separation. Margins show up as a gap between
-  // the border-box rects, but padding and borders sit inside them, so the
-  // facing edges need their own check
-  private boxesRenderFlush(currentBoundaryNode: Node, nextBoundaryNode: Node): boolean {
-    if (this.facingEdgeHasSeparation(currentBoundaryNode, 'right') || this.facingEdgeHasSeparation(nextBoundaryNode, 'left')) {
-      return false;
-    }
-
-    const currentRect = this.boundingRectOf(currentBoundaryNode);
-    const nextRect = this.boundingRectOf(nextBoundaryNode);
-    if (currentRect.width === 0 || currentRect.height === 0 || nextRect.width === 0 || nextRect.height === 0) {
-      return false;
-    }
-    const horizontalGap = nextRect.left - currentRect.right;
-    const verticalOverlap = Math.min(currentRect.bottom, nextRect.bottom) - Math.max(currentRect.top, nextRect.top);
-    return horizontalGap > -1 && horizontalGap < 1 && verticalOverlap > 0;
-  }
-
-  private facingEdgeHasSeparation(node: Node, side: 'left' | 'right'): boolean {
-    if (!(node instanceof Element)) {
-      return false;
-    }
-    const style = window.getComputedStyle(node);
-    if (side === 'right') {
-      return Number.parseFloat(style.paddingRight) > 0 || Number.parseFloat(style.borderRightWidth) > 0;
-    }
-    return Number.parseFloat(style.paddingLeft) > 0 || Number.parseFloat(style.borderLeftWidth) > 0;
-  }
-
-  private boundingRectOf(node: Node) {
-    if (node instanceof Element) {
-      return node.getBoundingClientRect();
-    }
-    const range = document.createRange();
-    range.selectNodeContents(node);
-    return range.getBoundingClientRect();
-  }
-
   private spacingTextNodes(textNodes: Node[]) {
     // Visibility verdicts are memoized per batch; styles may change between batches
     this.visibilityDetector.clearCache();
@@ -280,26 +191,19 @@ export class BrowserPangu extends Pangu {
 
         const currentBoundaryNode = DomWalker.findBoundaryNode(currentTextNode, 'last');
         const nextBoundaryNode = DomWalker.findBoundaryNode(nextTextNode, 'first');
-        const { whitespaceBetween, contentBetween, nbspBetween } = this.scanBetweenTextRuns(currentBoundaryNode, nextBoundaryNode);
+        const { whitespaceBetween, contentBetween } = this.scanBetweenTextRuns(currentBoundaryNode, nextBoundaryNode);
 
         // Stable bindings for the lazy facts: the loop variables are reassigned across iterations
         const currentRun = currentTextNode;
         const nextRun = nextTextNode;
 
-        // Leading U+0020s are skipped so the probe sees the visible junction:
-        // at a flush block boundary they collapse and the first glyph is what
-        // sits against the current run
-        const nextData = nextTextNode.data;
-        const strippedNextData = nextData.startsWith(' ') ? nextData.replace(/^ +/, '') : nextData;
         const verdict = decideBoundarySpacing({
           currentTail: currentTextNode.data.slice(-3),
-          nextFirst: strippedNextData.slice(0, 1),
-          nextHead: strippedNextData.slice(0, 4),
+          nextFirst: nextTextNode.data.slice(0, 1),
           currentEndsWithSpace: currentTextNode.data.endsWith(' '),
           nextStartsWithSpace: nextTextNode.data.startsWith(' '),
           whitespaceBetween,
           contentBetween,
-          nbspBetween,
           spaceLikeSiblingAfterCurrent: this.isSpaceLikeSibling(currentTextNode.nextSibling),
           spaceLikeSiblingAfterCurrentBoundary: this.isSpaceLikeSibling(currentBoundaryNode.nextSibling),
           spaceLikeSiblingBeforeNext: this.isSpaceLikeSibling(nextTextNode.previousSibling),
@@ -312,8 +216,6 @@ export class BrowserPangu extends Pangu {
           hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(nextRun),
           hiddenBoundaryAfter: () => this.isHiddenBoundaryAfter(currentRun),
           inGridOrFlexContainer: () => !!nextBoundaryNode.parentNode && this.isGridOrFlexContainer(nextBoundaryNode.parentNode),
-          flexRowFlushBoundary: () => this.isFlexRowFlushBoundary(currentBoundaryNode, nextBoundaryNode),
-          inlineBlockFlushBoundary: () => this.isInlineBlockFlushBoundary(currentBoundaryNode, nextBoundaryNode),
         });
 
         switch (verdict) {
@@ -326,12 +228,7 @@ export class BrowserPangu extends Pangu {
             this.lastWrittenData.set(currentTextNode, currentTextNode.data);
             break;
           case 'insert-element':
-            this.relocateCollapsedEdgeSpaces(currentTextNode, nextTextNode);
             this.insertPanguElement(nextBoundaryNode);
-            break;
-          case 'insert-nbsp-text':
-            this.relocateCollapsedEdgeSpaces(currentTextNode, nextTextNode);
-            this.insertNbspTextNode(nextBoundaryNode);
             break;
           case 'none':
             break;
@@ -412,29 +309,6 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  // Both flush-boundary verdicts imply that U+0020s at the runs' facing edges
-  // collapse and never render. The inserted carrier becomes the boundary's
-  // single space, so the dead ones move into it instead of piling up as
-  // redundant whitespace in the copied text. Legacy insert-element boundaries
-  // reach this with no edge spaces (the existing-space veto), so it no-ops
-  private relocateCollapsedEdgeSpaces(currentTextNode: Text, nextTextNode: Text) {
-    if (currentTextNode.data.endsWith(' ')) {
-      currentTextNode.data = currentTextNode.data.replace(/ +$/, '');
-      this.lastWrittenData.set(currentTextNode, currentTextNode.data);
-    }
-    if (nextTextNode.data.startsWith(' ')) {
-      nextTextNode.data = nextTextNode.data.replace(/^ +/, '');
-      this.lastWrittenData.set(nextTextNode, nextTextNode.data);
-    }
-  }
-
-  private insertNbspTextNode(nextBoundaryNode: Node) {
-    // A text node is invisible to CSS selectors and element traversal, and a
-    // U+00A0 matches \s in JavaScript, so re-runs classify it as existing
-    // whitespace between the runs and the insertion stays idempotent
-    nextBoundaryNode.parentNode?.insertBefore(document.createTextNode('\u00A0'), nextBoundaryNode);
-  }
-
   private findPreviousElementLastChar(textNode: Node) {
     const previousNode = textNode.previousSibling;
     if (previousNode && previousNode.nodeType === Node.ELEMENT_NODE && previousNode.textContent) {
@@ -450,7 +324,6 @@ export class BrowserPangu extends Pangu {
     // like <code> do not count) means the runs are not adjacent at all
     let whitespaceBetween = false;
     let contentBetween = false;
-    let nbspBetween = false;
 
     const scan = (node: Node) => {
       if (node.nodeType === Node.TEXT_NODE && node.textContent) {
@@ -459,9 +332,6 @@ export class BrowserPangu extends Pangu {
         }
         if (/\S/.test(node.textContent)) {
           contentBetween = true;
-        }
-        if (node.textContent.includes('\u00A0')) {
-          nbspBetween = true;
         }
       } else if (node instanceof Element && !DomWalker.isIgnoredElement(node)) {
         // Descend so wrapped whitespace counts too. Ignored islands like <code>
@@ -498,7 +368,7 @@ export class BrowserPangu extends Pangu {
       containerOfNext = child;
     }
 
-    return { whitespaceBetween, contentBetween, nbspBetween };
+    return { whitespaceBetween, contentBetween };
   }
 
   private isHiddenBoundaryBefore(node: Node) {

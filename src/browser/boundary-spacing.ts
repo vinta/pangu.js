@@ -3,7 +3,7 @@ import { ANY_CJK, pangu } from '../shared';
 const QUOTE = /["\u201c\u201d]/;
 
 // Where the space goes at the boundary between two adjacent text runs
-export type BoundarySpacingVerdict = 'none' | 'prepend-next' | 'append-current' | 'insert-element' | 'insert-nbsp-text';
+export type BoundarySpacingVerdict = 'none' | 'prepend-next' | 'append-current' | 'insert-element';
 
 // What a single text run needs before its boundaries are considered
 export type TextRunSpacingVerdict = 'trim-leading-space' | 'prepend-space' | 'apply-text-spacing';
@@ -14,16 +14,9 @@ export interface BoundarySpacingContext {
   // junction in view
   currentTail: string;
   nextFirst: string;
-  // The first few characters of the next run (leading U+0020s stripped), so
-  // the junction probe can reach a CJK that sits just past nextFirst
-  nextHead: string;
   currentEndsWithSpace: boolean;
   nextStartsWithSpace: boolean;
   whitespaceBetween: boolean;
-  // A U+00A0 sits between the runs. Unlike collapsible whitespace it renders
-  // in every layout, so it always settles the boundary; this is also what
-  // keeps pangu's own insertions idempotent across passes
-  nbspBetween: boolean;
   // Collectable text sits between the runs, so they are not adjacent and no
   // boundary exists (e.g. an unqueued sibling between two separately mutated
   // nodes). Content the engine never collects (ignored tags like <code>) does
@@ -43,14 +36,6 @@ export interface BoundarySpacingContext {
   hiddenBoundaryBefore: () => boolean;
   hiddenBoundaryAfter: () => boolean;
   inGridOrFlexContainer: () => boolean;
-  // The boundary nodes are siblings rendered flush on one line by a row flex
-  // parent, so only a non-collapsible U+00A0 between them can show a space.
-  // Reads computed styles and forces layout, so it is consulted last
-  flexRowFlushBoundary: () => boolean;
-  // The boundary nodes are sibling inline-blocks rendered flush on one shared
-  // line in normal flow, where a <pangu> element renders a real U+0020.
-  // Reads computed styles and forces layout, so it is consulted last
-  inlineBlockFlushBoundary: () => boolean;
 }
 
 export interface TextRunSpacingContext {
@@ -66,12 +51,7 @@ export function decideBoundarySpacing(context: BoundarySpacingContext) {
     return 'none';
   }
 
-  const blockBoundary = context.currentBoundaryIsBlock || context.nextBoundaryIsBlock;
-
-  // An existing space settles the boundary, except at block boundaries: a
-  // collapsible U+0020 at a box edge (or between suppressed flex items) can
-  // render as nothing there, so those consult the flush facts further down
-  if ((context.currentEndsWithSpace || context.nextStartsWithSpace || context.whitespaceBetween) && !blockBoundary) {
+  if (context.currentEndsWithSpace || context.nextStartsWithSpace || context.whitespaceBetween) {
     return 'none';
   }
 
@@ -79,44 +59,16 @@ export function decideBoundarySpacing(context: BoundarySpacingContext) {
     return 'none';
   }
 
-  if (!needsBoundarySpace(context.currentTail, context.nextFirst, context.nextHead)) {
+  if (!needsBoundarySpace(context.currentTail, context.nextFirst)) {
     return 'none';
   }
 
-  if (context.spaceLikeSiblingAfterCurrentBoundary) {
+  if (context.spaceLikeSiblingAfterCurrentBoundary || context.currentBoundaryIsBlock) {
     return 'none';
-  }
-
-  // Block boundaries normally stack vertically and take no boundary space, but
-  // layout can put them flush on one line: row flex items carry a
-  // non-collapsible U+00A0 text node (a written U+0020 cannot render there),
-  // and inline-block siblings in normal flow carry a <pangu> element, whose
-  // real U+0020 renders in their shared line box. The flush facts verify the
-  // layout themselves, so the hot prepend/append paths below never pay a
-  // computed-style read
-  if (blockBoundary) {
-    if (context.nextBoundaryIsIgnored || context.spaceLikeSiblingBeforeNext || context.spaceLikeSiblingBeforeNextBoundary) {
-      return 'none';
-    }
-    if (context.nbspBetween) {
-      return 'none';
-    }
-    if (context.hiddenBoundaryBefore() || context.hiddenBoundaryAfter()) {
-      return 'none';
-    }
-    if (context.flexRowFlushBoundary()) {
-      return 'insert-nbsp-text';
-    }
-    // Outside flex, whitespace between the boxes shares their line box and
-    // renders, so the runs are already visibly separated
-    if (context.whitespaceBetween) {
-      return 'none';
-    }
-    return context.inlineBlockFlushBoundary() ? 'insert-element' : 'none';
   }
 
   if (!context.nextBoundaryIsSpaceSensitive) {
-    if (context.nextBoundaryIsIgnored || context.spaceLikeSiblingBeforeNext || context.hiddenBoundaryBefore()) {
+    if (context.nextBoundaryIsIgnored || context.nextBoundaryIsBlock || context.spaceLikeSiblingBeforeNext || context.hiddenBoundaryBefore()) {
       return 'none';
     }
     return 'prepend-next';
@@ -133,11 +85,10 @@ export function decideBoundarySpacing(context: BoundarySpacingContext) {
     return 'none';
   }
 
-  // Skip <pangu> element insertion in Grid/Flexbox containers because the
-  // element becomes a layout item and breaks the layout. A flush flex row can
-  // carry a U+00A0 text node instead, which no CSS selector can observe
+  // Skip <pangu> element insertion in Grid/Flexbox containers
+  // because the element becomes a layout item and breaks the layout
   if (context.inGridOrFlexContainer()) {
-    return context.flexRowFlushBoundary() ? 'insert-nbsp-text' : 'none';
+    return 'none';
   }
 
   return 'insert-element';
@@ -170,21 +121,8 @@ export function decideTextRunSpacing(context: TextRunSpacingContext) {
 const junctionVerdictCache = new Map<string, boolean>();
 const JUNCTION_VERDICT_CACHE_MAX = 4096;
 
-function needsBoundarySpace(currentTail: string, nextFirst: string, nextHead: string) {
-  // spacingText bails without any CJK in view, so a junction of half-width
-  // characters hides rules whose CJK context sits just inside the next run,
-  // e.g. "Aug 1" + "(十九)". Extend the probe through that first CJK; stopping
-  // there keeps rules from inserting inside the probe itself, which would
-  // defeat the seam check below
-  let probe = nextFirst;
-  if (probe && !ANY_CJK.test(`${currentTail}${probe}`)) {
-    const cjkIndex = nextHead.search(ANY_CJK);
-    if (cjkIndex > 0) {
-      probe = nextHead.slice(0, cjkIndex + 1);
-    }
-  }
-
-  const junction = `${currentTail}${probe}`;
+function needsBoundarySpace(currentTail: string, nextFirst: string) {
+  const junction = `${currentTail}${nextFirst}`;
   const cached = junctionVerdictCache.get(junction);
   if (cached !== undefined) {
     return cached;
@@ -192,7 +130,7 @@ function needsBoundarySpace(currentTail: string, nextFirst: string, nextHead: st
 
   // Only a space right at the junction counts: a space that spacingText puts
   // anywhere else belongs inside the tail, not at the boundary
-  const verdict = pangu.spacingText(junction).endsWith(` ${probe}`) && !isQuoteNextToCjk(currentTail.slice(-1), nextFirst);
+  const verdict = pangu.spacingText(junction).endsWith(` ${nextFirst}`) && !isQuoteNextToCjk(currentTail.slice(-1), nextFirst);
 
   if (junctionVerdictCache.size >= JUNCTION_VERDICT_CACHE_MAX) {
     junctionVerdictCache.clear();
