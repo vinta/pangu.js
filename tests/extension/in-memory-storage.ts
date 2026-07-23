@@ -9,10 +9,20 @@ export interface InMemoryStorage extends StoragePort {
   data: Record<string, unknown>;
   rejectWrites: boolean;
   emitExternal(newValues: Record<string, unknown>): void;
+  // Delays set() and remove() until the returned release function is called,
+  // standing in for slow sync writes so races between mutations are testable
+  holdWrites(): () => void;
 }
 
 export function inMemoryStorage(initial: Record<string, unknown> = {}): InMemoryStorage {
   const listeners: ((changes: Record<string, StorageValueChange>) => void)[] = [];
+  let writeHold: Promise<void> | null = null;
+
+  const awaitHold = async () => {
+    while (writeHold) {
+      await writeHold;
+    }
+  };
 
   const emit = (changes: Record<string, StorageValueChange>) => {
     for (const listener of listeners) {
@@ -40,12 +50,14 @@ export function inMemoryStorage(initial: Record<string, unknown> = {}): InMemory
       return { ...storage.data };
     },
     async set(items) {
+      await awaitHold();
       if (storage.rejectWrites) {
         throw new Error('QUOTA_BYTES quota exceeded');
       }
       emit(applyAndDescribe({ ...items }));
     },
     async remove(keys) {
+      await awaitHold();
       if (storage.rejectWrites) {
         throw new Error('QUOTA_BYTES quota exceeded');
       }
@@ -60,6 +72,16 @@ export function inMemoryStorage(initial: Record<string, unknown> = {}): InMemory
     },
     emitExternal(newValues) {
       emit(applyAndDescribe(newValues));
+    },
+    holdWrites() {
+      let release: () => void = () => {};
+      writeHold = new Promise((resolve) => {
+        release = resolve;
+      });
+      return () => {
+        writeHold = null;
+        release();
+      };
     },
   };
 

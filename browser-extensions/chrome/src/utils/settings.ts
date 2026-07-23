@@ -167,24 +167,43 @@ export function createSettingsStore(storage: StoragePort = chromeSyncStorage) {
       .catch(console.error);
   });
 
+  // Mutations run one at a time: each derives its diff only after every prior
+  // write has confirmed and updated the cache, so overlapping toggles or list
+  // edits cannot silently discard each other. A rejected mutation still rejects
+  // for its caller, but never poisons the queue.
+  let mutationChain: Promise<unknown> = Promise.resolve();
+
+  const enqueueMutation = <T>(mutate: () => Promise<T>) => {
+    const result = mutationChain.then(mutate);
+    mutationChain = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
+  };
+
+  const applyUpdate = async (partial: Partial<Settings>) => {
+    const current = await ensureLoaded();
+    const toWrite: Partial<Settings> = {};
+    for (const key of SETTINGS_KEYS) {
+      if (key in partial && !valueEquals(partial[key], current[key])) {
+        Object.assign(toWrite, { [key]: partial[key] });
+      }
+    }
+    if (Object.keys(toWrite).length === 0) {
+      return;
+    }
+    await storage.set(toWrite);
+    notify(applyToCache(current, toWrite));
+  };
+
   const store: SettingsStore = {
     async get() {
       return cloneSettings(await ensureLoaded());
     },
 
-    async update(partial) {
-      const current = await ensureLoaded();
-      const toWrite: Partial<Settings> = {};
-      for (const key of SETTINGS_KEYS) {
-        if (key in partial && !valueEquals(partial[key], current[key])) {
-          Object.assign(toWrite, { [key]: partial[key] });
-        }
-      }
-      if (Object.keys(toWrite).length === 0) {
-        return;
-      }
-      await storage.set(toWrite);
-      notify(applyToCache(current, toWrite));
+    update(partial) {
+      return enqueueMutation(() => applyUpdate(partial));
     },
 
     subscribe(subscriber) {
@@ -202,22 +221,24 @@ export function createSettingsStore(storage: StoragePort = chromeSyncStorage) {
     // changes (reads overlay defaults already), so subscribers stay quiet:
     // priming the cache first routes the write echoes into the warm diff,
     // where they cancel against the overlaid defaults.
-    async reconcile() {
-      await ensureLoaded();
-      const raw = await storage.get();
-      const missing: Partial<Settings> = {};
-      for (const key of SETTINGS_KEYS) {
-        if (!(key in raw)) {
-          Object.assign(missing, { [key]: DEFAULT_SETTINGS[key] });
+    reconcile() {
+      return enqueueMutation(async () => {
+        await ensureLoaded();
+        const raw = await storage.get();
+        const missing: Partial<Settings> = {};
+        for (const key of SETTINGS_KEYS) {
+          if (!(key in raw)) {
+            Object.assign(missing, { [key]: DEFAULT_SETTINGS[key] });
+          }
         }
-      }
-      const unknownKeys = Object.keys(raw).filter((key) => !(key in DEFAULT_SETTINGS));
-      if (Object.keys(missing).length > 0) {
-        await storage.set(missing);
-      }
-      if (unknownKeys.length > 0) {
-        await storage.remove(unknownKeys);
-      }
+        const unknownKeys = Object.keys(raw).filter((key) => !(key in DEFAULT_SETTINGS));
+        if (Object.keys(missing).length > 0) {
+          await storage.set(missing);
+        }
+        if (unknownKeys.length > 0) {
+          await storage.remove(unknownKeys);
+        }
+      });
     },
 
     async activeList() {
@@ -225,49 +246,57 @@ export function createSettingsStore(storage: StoragePort = chromeSyncStorage) {
       return [...current[current.filter_mode]];
     },
 
-    async addToActiveList(pattern) {
-      if (!isValidMatchPattern(pattern)) {
-        return 'invalid';
-      }
-      const current = await ensureLoaded();
-      const key = current.filter_mode;
-      if (current[key].includes(pattern)) {
-        return 'duplicate';
-      }
-      await store.update(listPatch(key, [...current[key], pattern]));
-      return 'added';
+    addToActiveList(pattern) {
+      return enqueueMutation(async () => {
+        if (!isValidMatchPattern(pattern)) {
+          return 'invalid' as const;
+        }
+        const current = await ensureLoaded();
+        const key = current.filter_mode;
+        if (current[key].includes(pattern)) {
+          return 'duplicate' as const;
+        }
+        await applyUpdate(listPatch(key, [...current[key], pattern]));
+        return 'added' as const;
+      });
     },
 
-    async editActiveList(index, pattern) {
-      if (!isValidMatchPattern(pattern)) {
-        return 'invalid';
-      }
-      const current = await ensureLoaded();
-      const key = current.filter_mode;
-      if (index < 0 || index >= current[key].length) {
-        return 'invalid';
-      }
-      const urls = [...current[key]];
-      urls[index] = pattern;
-      await store.update(listPatch(key, urls));
-      return 'saved';
+    editActiveList(index, pattern) {
+      return enqueueMutation(async () => {
+        if (!isValidMatchPattern(pattern)) {
+          return 'invalid' as const;
+        }
+        const current = await ensureLoaded();
+        const key = current.filter_mode;
+        if (index < 0 || index >= current[key].length) {
+          return 'invalid' as const;
+        }
+        const urls = [...current[key]];
+        urls[index] = pattern;
+        await applyUpdate(listPatch(key, urls));
+        return 'saved' as const;
+      });
     },
 
-    async removeFromActiveList(index) {
-      const current = await ensureLoaded();
-      const key = current.filter_mode;
-      if (index < 0 || index >= current[key].length) {
-        return;
-      }
-      const urls = [...current[key]];
-      urls.splice(index, 1);
-      await store.update(listPatch(key, urls));
+    removeFromActiveList(index) {
+      return enqueueMutation(async () => {
+        const current = await ensureLoaded();
+        const key = current.filter_mode;
+        if (index < 0 || index >= current[key].length) {
+          return;
+        }
+        const urls = [...current[key]];
+        urls.splice(index, 1);
+        await applyUpdate(listPatch(key, urls));
+      });
     },
 
-    async restoreActiveListDefaults() {
-      const current = await ensureLoaded();
-      const key = current.filter_mode;
-      await store.update(listPatch(key, [...DEFAULT_SETTINGS[key]]));
+    restoreActiveListDefaults() {
+      return enqueueMutation(async () => {
+        const current = await ensureLoaded();
+        const key = current.filter_mode;
+        await applyUpdate(listPatch(key, [...DEFAULT_SETTINGS[key]]));
+      });
     },
   };
 

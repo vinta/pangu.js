@@ -128,6 +128,53 @@ describe('subscribe', () => {
   });
 });
 
+describe('overlapping mutations', () => {
+  it('serializes overlapping updates so the last write wins', async () => {
+    const storage = inMemoryStorage();
+    const settings = createSettingsStore(storage);
+    await settings.get();
+    const release = storage.holdWrites();
+
+    const first = settings.update({ is_mute_sound_effects: true });
+    const second = settings.update({ is_mute_sound_effects: false });
+    release();
+    await Promise.all([first, second]);
+    await settle();
+
+    expect(storage.data.is_mute_sound_effects).toBe(false);
+    expect((await settings.get()).is_mute_sound_effects).toBe(false);
+  });
+
+  it('serializes overlapping list additions so both survive', async () => {
+    const storage = inMemoryStorage();
+    const settings = createSettingsStore(storage);
+    await settings.get();
+    const release = storage.holdWrites();
+
+    const first = settings.addToActiveList('https://a.example/*');
+    const second = settings.addToActiveList('https://b.example/*');
+    release();
+
+    expect(await first).toBe('added');
+    expect(await second).toBe('added');
+    const list = await settings.activeList();
+    expect(list).toContain('https://a.example/*');
+    expect(list).toContain('https://b.example/*');
+  });
+
+  it('keeps accepting mutations after one write is rejected', async () => {
+    const storage = inMemoryStorage();
+    const settings = createSettingsStore(storage);
+    storage.rejectWrites = true;
+
+    await expect(settings.update({ is_mute_sound_effects: true })).rejects.toThrow('QUOTA_BYTES');
+
+    storage.rejectWrites = false;
+    await settings.update({ is_mute_sound_effects: true });
+    expect((await settings.get()).is_mute_sound_effects).toBe(true);
+  });
+});
+
 describe('update failure', () => {
   it('rejects, keeps the cache clean, and notifies nobody when storage refuses the write', async () => {
     const storage = inMemoryStorage();
