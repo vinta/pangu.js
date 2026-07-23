@@ -6,9 +6,9 @@ import { isValidMatchPattern, shouldContentScriptBeActive } from './utils/urls';
 const SCRIPT_ID = 'paranoid-auto-spacing';
 const TEXT_AUTOSPACE_SCRIPT_ID = 'text-autospace';
 
-// A single character keeps the badge at Chrome's minimum 14dp corner chip: three wide capitals like OFF widen it past 20dp and Chrome then centers a full-width pill over the whole icon.
-// U+00D7 MULTIPLICATION SIGN instead of the letter X because Chrome vertically centers badge text by font ascent/descent, so a capital rides high while the math glyph sits on the optical center.
-const OFF_BADGE_TEXT = '×';
+// DEFAULT_ICON_PATHS must stay in sync with action.default_icon in manifest.json: per-tab setIcon overrides need an explicit restore, there is no "reset to manifest" call.
+const DEFAULT_ICON_PATHS = { '16': 'icons/icon-16.png', '24': 'icons/icon-24.png', '32': 'icons/icon-32.png' };
+const OFF_ICON_PATHS = { '16': 'icons/icon-off-16.png', '32': 'icons/icon-off-32.png', '48': 'icons/icon-off-48.png' };
 
 async function unregisterAllContentScripts() {
   try {
@@ -80,58 +80,57 @@ function queueRegisterContentScripts() {
   return registrationQueue;
 }
 
-// The badge mirrors the popup status row with no special cases: 顯靈中 means no badge, 神隱中 means the × badge, so manual mode badges every tab and chrome:// or new tab pages showing × is deliberate (#296).
-// Badge colors are left entirely to Chrome: the unset background gives the theme-aware default chip with auto-contrast text, same as uBlacklist (setBadgeTextColor would need Chrome 110+, we support 96+).
-async function updateTabBadge(tabId: number, url: string | undefined, current: Settings) {
-  const text = shouldContentScriptBeActive(current, url) ? '' : OFF_BADGE_TEXT;
+// The icon mirrors the popup status row exactly: 顯靈中 shows the face, 神隱中 puts on the paper bag, so manual mode hides every tab and chrome:// or new tab pages wearing the bag is deliberate (#296).
+async function updateTabIcon(tabId: number, url: string | undefined, current: Settings) {
+  const path = shouldContentScriptBeActive(current, url) ? DEFAULT_ICON_PATHS : OFF_ICON_PATHS;
   try {
-    await chrome.action.setBadgeText({ tabId, text });
+    await chrome.action.setIcon({ tabId, path });
   } catch {
     // The tab can be closed between the triggering event and this write
   }
 }
 
-async function updateAllTabBadges() {
+async function updateAllTabIcons() {
   const current = await getSettings();
   const tabs = await chrome.tabs.query({});
-  await Promise.all(tabs.map((tab) => (tab.id === undefined ? undefined : updateTabBadge(tab.id, tab.url, current))));
+  await Promise.all(tabs.map((tab) => (tab.id === undefined ? undefined : updateTabIcon(tab.id, tab.url, current))));
 }
 
 chrome.runtime.onInstalled.addListener(async () => {
   // Reconcile settings when extension is installed or updated to a new version
   await reconcileSettings();
   await queueRegisterContentScripts();
-  await updateAllTabBadges();
+  await updateAllTabIcons();
 });
 
 chrome.runtime.onStartup.addListener(async () => {
   // Also register content scripts when extension starts
   await queueRegisterContentScripts();
-  await updateAllTabBadges();
+  await updateAllTabIcons();
 });
 
 // The url is often not set yet on onCreated (new tab pages never get one at all, which correctly reads as inactive), onUpdated below refines it as soon as navigation commits
 chrome.tabs.onCreated.addListener(async (tab) => {
   if (tab.id !== undefined) {
-    await updateTabBadge(tab.id, tab.url || tab.pendingUrl, await getSettings());
+    await updateTabIcon(tab.id, tab.url || tab.pendingUrl, await getSettings());
   }
 });
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'loading' || changeInfo.url) {
-    await updateTabBadge(tabId, tab.url, await getSettings());
+    await updateTabIcon(tabId, tab.url, await getSettings());
   }
 });
 
 // Registered synchronously at module scope, as MV3 requires for storage events to wake this worker. The event payload alone says what changed, so a
 // cold-started worker reacts correctly without any cached state.
 const REGISTRATION_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist', 'is_enable_text_autospace'];
-const BADGE_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist'];
+const ICON_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist'];
 onSettingsChanged((changedKeys) => {
   if (changedKeys.some((key) => REGISTRATION_KEYS.includes(key))) {
     queueRegisterContentScripts();
   }
-  if (changedKeys.some((key) => BADGE_KEYS.includes(key))) {
-    updateAllTabBadges().catch(console.error);
+  if (changedKeys.some((key) => ICON_KEYS.includes(key))) {
+    updateAllTabIcons().catch(console.error);
   }
 });
