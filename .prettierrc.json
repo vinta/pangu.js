@@ -4,12 +4,11 @@
   "useTabs": false,
   "semi": true,
   "singleQuote": true,
-  "quoteProps": "as-needed",
-  "jsxSingleQuote": false,
+  "quoteProps": "consistent",
   "trailingComma": "all",
   "bracketSpacing": true,
   "bracketSameLine": false,
   "arrowParens": "always",
-  "endOfLine": "lf",
+  "htmlWhitespaceSensitivity": "strict",
   "plugins": ["@trivago/prettier-plugin-sort-imports"]
 }
