@@ -166,7 +166,7 @@
     "description": ""
   },
   "text_autospace_not_supported": {
-    "message": "你的瀏覽器不支援這個功能，需要 Chrome 140 以上",
+    "message": "你的瀏覽器不支援這個功能，需要 Chrome v140 以上版本。",
     "description": ""
   }
 }
