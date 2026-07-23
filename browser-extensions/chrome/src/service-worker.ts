@@ -1,15 +1,10 @@
 // NOTE: In service workers, we can't export directly, everything goes through messages
-import { getSettingsStore } from './utils/settings';
+import { getSettings, onSettingsChanged, reconcileSettings } from './utils/settings';
 import type { Settings } from './utils/types';
 import { isValidMatchPattern } from './utils/urls';
 
 const SCRIPT_ID = 'paranoid-auto-spacing';
 const TEXT_AUTOSPACE_SCRIPT_ID = 'text-autospace';
-
-// Constructed at module scope on purpose: the store registers its
-// chrome.storage.onChanged listener synchronously here, which MV3 requires
-// for storage events to wake this worker
-const settings = getSettingsStore();
 
 async function unregisterAllContentScripts() {
   try {
@@ -40,7 +35,7 @@ async function registerContentScript(contentScript: chrome.scripting.RegisteredC
 async function registerContentScripts() {
   await unregisterAllContentScripts();
 
-  const current = await settings.get();
+  const current = await getSettings();
 
   if (current.is_enable_text_autospace) {
     // Visual-only native autospacing, deliberately not gated by spacing_mode,
@@ -74,23 +69,32 @@ async function registerContentScripts() {
   }
 }
 
+// registerContentScripts() starts by unregistering everything and reads fresh
+// settings when its turn comes, so queued runs converge on the latest state;
+// the queue only keeps overlapping runs from interleaving
+let registrationQueue = Promise.resolve();
+function queueRegisterContentScripts() {
+  registrationQueue = registrationQueue.then(() => registerContentScripts()).catch(console.error);
+  return registrationQueue;
+}
+
 chrome.runtime.onInstalled.addListener(async () => {
   // Reconcile settings when extension is installed or updated to a new version
-  await settings.reconcile();
-  await registerContentScripts();
+  await reconcileSettings();
+  await queueRegisterContentScripts();
 });
 
 chrome.runtime.onStartup.addListener(async () => {
   // Also register content scripts when extension starts
-  await registerContentScripts();
+  await queueRegisterContentScripts();
 });
 
-// Re-register content scripts when relevant settings change. The store also
-// notifies for the change that woke this worker, so a sleeping worker still
-// reacts to writes from the popup and options pages.
+// Registered synchronously at module scope, as MV3 requires for storage events
+// to wake this worker. The event payload alone says what changed, so a
+// cold-started worker reacts correctly without any cached state.
 const REGISTRATION_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist', 'is_enable_text_autospace'];
-settings.subscribe((_newSettings, changedKeys) => {
+onSettingsChanged((changedKeys) => {
   if (changedKeys.some((key) => REGISTRATION_KEYS.includes(key))) {
-    registerContentScripts().catch(console.error);
+    queueRegisterContentScripts();
   }
 });

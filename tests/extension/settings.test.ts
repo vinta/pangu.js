@@ -1,30 +1,90 @@
-import { createSettingsStore } from '../../browser-extensions/chrome/src/utils/settings';
-import type { ReadonlySettings, Settings } from '../../browser-extensions/chrome/src/utils/types';
-import { inMemoryStorage } from './in-memory-storage';
-import { describe, expect, it } from 'vitest';
+import {
+  DEFAULT_SETTINGS,
+  addToActiveList,
+  editActiveList,
+  getActiveList,
+  getSettings,
+  onSettingsChanged,
+  reconcileSettings,
+  removeFromActiveList,
+  restoreActiveListDefaults,
+  updateSettings,
+} from '../../browser-extensions/chrome/src/utils/settings';
+import type { Settings } from '../../browser-extensions/chrome/src/utils/types';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-// Storage events settle on later microtasks, so contract checks that assert
-// "nothing further happened" must let the queue drain first
-function settle() {
-  return new Promise((resolve) => setTimeout(resolve, 0));
+interface StorageChange {
+  oldValue?: unknown;
+  newValue?: unknown;
 }
 
-interface SubscriberCall {
-  settings: ReadonlySettings;
-  changedKeys: readonly (keyof Settings)[];
-}
+// Stands in for chrome.storage in vitest: sync.get honors the defaults-object
+// form the module relies on, and every write notifies onChanged listeners with
+// the echo the real API fires in the writing context, only for keys whose
+// value actually changed.
+function stubChromeStorage(initial: Record<string, unknown> = {}) {
+  const data: Record<string, unknown> = structuredClone(initial);
+  const listeners: ((changes: Record<string, StorageChange>, areaName: string) => void)[] = [];
 
-function recordSubscriber(calls: SubscriberCall[]) {
-  return (settings: ReadonlySettings, changedKeys: readonly (keyof Settings)[]) => {
-    calls.push({ settings, changedKeys });
+  const write = (newValues: Record<string, unknown>) => {
+    const changes: Record<string, StorageChange> = {};
+    for (const [key, value] of Object.entries(newValues)) {
+      if (JSON.stringify(data[key]) === JSON.stringify(value)) {
+        continue;
+      }
+      changes[key] = { oldValue: data[key], newValue: value };
+      if (value === undefined) {
+        delete data[key];
+      } else {
+        data[key] = structuredClone(value);
+      }
+    }
+    if (Object.keys(changes).length > 0) {
+      for (const listener of listeners) {
+        listener({ ...changes }, 'sync');
+      }
+    }
   };
+
+  const sync = {
+    async get(arg: Record<string, unknown> | null) {
+      if (arg === null) {
+        return structuredClone(data);
+      }
+      const result: Record<string, unknown> = {};
+      for (const [key, fallback] of Object.entries(arg)) {
+        result[key] = structuredClone(key in data ? data[key] : fallback);
+      }
+      return result;
+    },
+    async set(items: Record<string, unknown>) {
+      write(items);
+    },
+    async remove(keys: string[]) {
+      write(Object.fromEntries(keys.map((key) => [key, undefined])));
+    },
+  };
+
+  const onChanged = {
+    addListener(listener: (changes: Record<string, StorageChange>, areaName: string) => void) {
+      listeners.push(listener);
+    },
+  };
+
+  vi.stubGlobal('chrome', { storage: { sync, onChanged } });
+
+  return { data, sync };
 }
 
-describe('get', () => {
-  it('returns every default when storage is empty', async () => {
-    const settings = createSettingsStore(inMemoryStorage());
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
-    const result = await settings.get();
+describe('getSettings', () => {
+  it('returns every default when storage is empty', async () => {
+    stubChromeStorage();
+
+    const result = await getSettings();
 
     expect(result.spacing_mode).toBe('spacing_when_load');
     expect(result.filter_mode).toBe('blacklist');
@@ -35,347 +95,138 @@ describe('get', () => {
   });
 
   it('merges stored values over defaults', async () => {
-    const settings = createSettingsStore(inMemoryStorage({ spacing_mode: 'spacing_when_click', whitelist: ['https://example.com/*'] }));
+    stubChromeStorage({ spacing_mode: 'spacing_when_click', whitelist: ['https://example.com/*'] });
 
-    const result = await settings.get();
+    const result = await getSettings();
 
     expect(result.spacing_mode).toBe('spacing_when_click');
     expect(result.whitelist).toEqual(['https://example.com/*']);
     expect(result.filter_mode).toBe('blacklist');
   });
-
-  it('hands out copies, so mutating a result never reaches the cache', async () => {
-    const settings = createSettingsStore(inMemoryStorage());
-
-    const first = (await settings.get()) as Settings;
-    first.spacing_mode = 'spacing_when_click';
-    first.blacklist.push('https://corrupted.example/*');
-
-    const second = await settings.get();
-    expect(second.spacing_mode).toBe('spacing_when_load');
-    expect(second.blacklist).not.toContain('https://corrupted.example/*');
-  });
 });
 
-describe('update', () => {
+describe('updateSettings', () => {
   it('persists the change and resolves after storage accepted it', async () => {
-    const storage = inMemoryStorage();
-    const settings = createSettingsStore(storage);
+    const storage = stubChromeStorage();
 
-    await settings.update({ spacing_mode: 'spacing_when_click' });
+    await updateSettings({ spacing_mode: 'spacing_when_click' });
 
     expect(storage.data.spacing_mode).toBe('spacing_when_click');
-    expect((await settings.get()).spacing_mode).toBe('spacing_when_click');
+    expect((await getSettings()).spacing_mode).toBe('spacing_when_click');
   });
 });
 
-describe('subscribe', () => {
-  it('notifies exactly once per change, after the write, with only the keys that changed', async () => {
-    const storage = inMemoryStorage();
-    const settings = createSettingsStore(storage);
-    const calls: SubscriberCall[] = [];
-    settings.subscribe(recordSubscriber(calls));
+describe('onSettingsChanged', () => {
+  it('reports the changed keys for a write, own writes included', async () => {
+    stubChromeStorage();
+    const calls: (keyof Settings)[][] = [];
+    onSettingsChanged((changedKeys) => calls.push(changedKeys));
 
-    // filter_mode already defaults to blacklist, so only spacing_mode changes
-    await settings.update({ spacing_mode: 'spacing_when_click', filter_mode: 'blacklist' });
-    await settle();
+    await updateSettings({ spacing_mode: 'spacing_when_click' });
 
-    expect(calls).toHaveLength(1);
-    expect(calls[0].changedKeys).toEqual(['spacing_mode']);
-    expect(calls[0].settings.spacing_mode).toBe('spacing_when_click');
+    expect(calls).toEqual([['spacing_mode']]);
   });
 
-  it('does not notify or write when nothing actually changes', async () => {
-    const storage = inMemoryStorage();
-    const settings = createSettingsStore(storage);
-    const calls: SubscriberCall[] = [];
-    settings.subscribe(recordSubscriber(calls));
+  it('ignores keys no version of Settings knows', async () => {
+    const storage = stubChromeStorage();
+    const calls: (keyof Settings)[][] = [];
+    onSettingsChanged((changedKeys) => calls.push(changedKeys));
 
-    await settings.update({ filter_mode: 'blacklist' });
-    await settle();
+    await storage.sync.set({ legacy_key: true });
 
-    expect(calls).toHaveLength(0);
-    expect('filter_mode' in storage.data).toBe(false);
-  });
-
-  it('gives each subscriber its own snapshot', async () => {
-    const settings = createSettingsStore(inMemoryStorage());
-    const seen: string[] = [];
-    settings.subscribe((s) => {
-      // A hostile subscriber mutating through a cast must not reach its siblings
-      (s as Settings).spacing_mode = 'spacing_when_click';
-    });
-    settings.subscribe((s) => {
-      seen.push(s.spacing_mode);
-    });
-
-    await settings.update({ is_mute_sound_effects: true });
-    await settle();
-
-    expect(seen).toEqual(['spacing_when_load']);
-  });
-
-  it('stops notifying after unsubscribe', async () => {
-    const settings = createSettingsStore(inMemoryStorage());
-    const calls: SubscriberCall[] = [];
-    const unsubscribe = settings.subscribe(recordSubscriber(calls));
-
-    unsubscribe();
-    await settings.update({ is_mute_sound_effects: true });
-    await settle();
-
-    expect(calls).toHaveLength(0);
-  });
-});
-
-describe('overlapping mutations', () => {
-  it('serializes overlapping updates so the last write wins', async () => {
-    const storage = inMemoryStorage();
-    const settings = createSettingsStore(storage);
-    await settings.get();
-    const release = storage.holdWrites();
-
-    const first = settings.update({ is_mute_sound_effects: true });
-    const second = settings.update({ is_mute_sound_effects: false });
-    release();
-    await Promise.all([first, second]);
-    await settle();
-
-    expect(storage.data.is_mute_sound_effects).toBe(false);
-    expect((await settings.get()).is_mute_sound_effects).toBe(false);
-  });
-
-  it('serializes overlapping list additions so both survive', async () => {
-    const storage = inMemoryStorage();
-    const settings = createSettingsStore(storage);
-    await settings.get();
-    const release = storage.holdWrites();
-
-    const first = settings.addToActiveList('https://a.example/*');
-    const second = settings.addToActiveList('https://b.example/*');
-    release();
-
-    expect(await first).toBe('added');
-    expect(await second).toBe('added');
-    const list = await settings.activeList();
-    expect(list).toContain('https://a.example/*');
-    expect(list).toContain('https://b.example/*');
-  });
-
-  it('keeps accepting mutations after one write is rejected', async () => {
-    const storage = inMemoryStorage();
-    const settings = createSettingsStore(storage);
-    storage.rejectWrites = true;
-
-    await expect(settings.update({ is_mute_sound_effects: true })).rejects.toThrow('QUOTA_BYTES');
-
-    storage.rejectWrites = false;
-    await settings.update({ is_mute_sound_effects: true });
-    expect((await settings.get()).is_mute_sound_effects).toBe(true);
-  });
-});
-
-describe('update failure', () => {
-  it('rejects, keeps the cache clean, and notifies nobody when storage refuses the write', async () => {
-    const storage = inMemoryStorage();
-    const settings = createSettingsStore(storage);
-    const calls: SubscriberCall[] = [];
-    settings.subscribe(recordSubscriber(calls));
-    storage.rejectWrites = true;
-
-    await expect(settings.update({ is_mute_sound_effects: true })).rejects.toThrow('QUOTA_BYTES');
-    await settle();
-
-    expect((await settings.get()).is_mute_sound_effects).toBe(false);
-    expect(calls).toHaveLength(0);
-    expect('is_mute_sound_effects' in storage.data).toBe(false);
-  });
-});
-
-describe('external changes', () => {
-  it('updates the cache and notifies when another context changes a setting', async () => {
-    const storage = inMemoryStorage();
-    const settings = createSettingsStore(storage);
-    await settings.get();
-    const calls: SubscriberCall[] = [];
-    settings.subscribe(recordSubscriber(calls));
-
-    storage.emitExternal({ spacing_mode: 'spacing_when_click' });
-    await settle();
-
-    expect(calls).toHaveLength(1);
-    expect(calls[0].changedKeys).toEqual(['spacing_mode']);
-    expect((await settings.get()).spacing_mode).toBe('spacing_when_click');
-  });
-
-  it('ignores external no-op changes and unknown keys', async () => {
-    const storage = inMemoryStorage();
-    const settings = createSettingsStore(storage);
-    await settings.get();
-    const calls: SubscriberCall[] = [];
-    settings.subscribe(recordSubscriber(calls));
-
-    storage.emitExternal({ filter_mode: 'blacklist', some_legacy_key: 42 });
-    await settle();
-
-    expect(calls).toHaveLength(0);
-  });
-
-  it('notifies changes that arrive before the first read, as on a service worker wake', async () => {
-    const storage = inMemoryStorage({ spacing_mode: 'spacing_when_load' });
-    const settings = createSettingsStore(storage);
-    const calls: SubscriberCall[] = [];
-    settings.subscribe(recordSubscriber(calls));
-
-    // No get() has happened: the change event itself is the first signal,
-    // exactly what a woken service worker sees
-    storage.emitExternal({ spacing_mode: 'spacing_when_click' });
-    await settle();
-
-    expect(calls).toHaveLength(1);
-    expect(calls[0].changedKeys).toEqual(['spacing_mode']);
-    expect(calls[0].settings.spacing_mode).toBe('spacing_when_click');
-  });
-
-  it('does not drop a later key when several events arrive before the first read', async () => {
-    const storage = inMemoryStorage();
-    const settings = createSettingsStore(storage);
-    const calls: SubscriberCall[] = [];
-    settings.subscribe(recordSubscriber(calls));
-
-    // Both land while the store is still cold: the first handler's fresh load
-    // already contains the second event's value
-    storage.emitExternal({ is_mute_sound_effects: true });
-    storage.emitExternal({ spacing_mode: 'spacing_when_click' });
-    await settle();
-
-    const notifiedKeys = calls.flatMap((call) => [...call.changedKeys]);
-    expect(notifiedKeys).toContain('is_mute_sound_effects');
-    expect(notifiedKeys).toContain('spacing_mode');
-    expect((await settings.get()).spacing_mode).toBe('spacing_when_click');
-  });
-
-  it('falls back to the default when a known key is removed externally', async () => {
-    const storage = inMemoryStorage({ is_enable_text_autospace: false });
-    const settings = createSettingsStore(storage);
-    await settings.get();
-    const calls: SubscriberCall[] = [];
-    settings.subscribe(recordSubscriber(calls));
-
-    storage.emitExternal({ is_enable_text_autospace: undefined });
-    await settle();
-
-    expect(calls).toHaveLength(1);
-    expect((await settings.get()).is_enable_text_autospace).toBe(true);
+    expect(calls).toEqual([]);
   });
 });
 
 describe('active list', () => {
   it('reads the list selected by filter mode', async () => {
-    const settings = createSettingsStore(inMemoryStorage({ filter_mode: 'whitelist', whitelist: ['https://example.com/*'] }));
+    stubChromeStorage({ filter_mode: 'whitelist', whitelist: ['https://example.com/*'] });
 
-    expect(await settings.activeList()).toEqual(['https://example.com/*']);
+    expect(await getActiveList()).toEqual(['https://example.com/*']);
   });
 
   it('adds a valid pattern to the active list', async () => {
-    const storage = inMemoryStorage();
-    const settings = createSettingsStore(storage);
+    stubChromeStorage();
 
-    const outcome = await settings.addToActiveList('https://example.com/*');
+    expect(await addToActiveList('https://example.com/*')).toBe('added');
 
-    expect(outcome).toBe('added');
-    expect(await settings.activeList()).toContain('https://example.com/*');
-    expect(storage.data.blacklist).toContain('https://example.com/*');
+    const list = await getActiveList();
+    expect(list).toContain('https://example.com/*');
+    expect(list).toContain('https://docs.google.com/*');
   });
 
-  it('rejects a duplicate without writing or notifying', async () => {
-    const storage = inMemoryStorage({ blacklist: ['https://example.com/*'] });
-    const settings = createSettingsStore(storage);
-    const calls: SubscriberCall[] = [];
-    settings.subscribe(recordSubscriber(calls));
+  it('rejects a duplicate without writing', async () => {
+    const storage = stubChromeStorage({ blacklist: ['https://example.com/*'] });
 
-    const outcome = await settings.addToActiveList('https://example.com/*');
-    await settle();
+    expect(await addToActiveList('https://example.com/*')).toBe('duplicate');
 
-    expect(outcome).toBe('duplicate');
-    expect(await settings.activeList()).toEqual(['https://example.com/*']);
-    expect(calls).toHaveLength(0);
+    expect(storage.data.blacklist).toEqual(['https://example.com/*']);
   });
 
   it('rejects an invalid pattern without writing', async () => {
-    const settings = createSettingsStore(inMemoryStorage());
+    const storage = stubChromeStorage();
 
-    expect(await settings.addToActiveList('ftp://example.com/*')).toBe('invalid');
-    expect(await settings.activeList()).not.toContain('ftp://example.com/*');
+    expect(await addToActiveList('not a pattern')).toBe('invalid');
+
+    expect('blacklist' in storage.data).toBe(false);
   });
 
   it('edits an entry in place', async () => {
-    const settings = createSettingsStore(inMemoryStorage({ blacklist: ['https://a.example/*', 'https://b.example/*'] }));
+    stubChromeStorage({ blacklist: ['https://example.com/*', 'https://example.org/*'] });
 
-    const outcome = await settings.editActiveList(1, 'https://c.example/*');
+    expect(await editActiveList(1, 'https://example.net/*')).toBe('saved');
 
-    expect(outcome).toBe('saved');
-    expect(await settings.activeList()).toEqual(['https://a.example/*', 'https://c.example/*']);
+    expect(await getActiveList()).toEqual(['https://example.com/*', 'https://example.net/*']);
   });
 
   it('treats an invalid pattern or index as invalid and changes nothing', async () => {
-    const settings = createSettingsStore(inMemoryStorage({ blacklist: ['https://a.example/*'] }));
+    const storage = stubChromeStorage({ blacklist: ['https://example.com/*'] });
 
-    expect(await settings.editActiveList(0, 'not a pattern')).toBe('invalid');
-    expect(await settings.editActiveList(5, 'https://c.example/*')).toBe('invalid');
-    expect(await settings.activeList()).toEqual(['https://a.example/*']);
+    expect(await editActiveList(0, 'not a pattern')).toBe('invalid');
+    expect(await editActiveList(1, 'https://example.net/*')).toBe('invalid');
+    expect(await editActiveList(-1, 'https://example.net/*')).toBe('invalid');
+
+    expect(storage.data.blacklist).toEqual(['https://example.com/*']);
   });
 
   it('removes an entry by index', async () => {
-    const settings = createSettingsStore(inMemoryStorage({ blacklist: ['https://a.example/*', 'https://b.example/*'] }));
+    stubChromeStorage({ blacklist: ['https://example.com/*', 'https://example.org/*'] });
 
-    await settings.removeFromActiveList(0);
+    await removeFromActiveList(0);
 
-    expect(await settings.activeList()).toEqual(['https://b.example/*']);
+    expect(await getActiveList()).toEqual(['https://example.org/*']);
   });
 
   it('restores only the active list to its defaults', async () => {
-    const storage = inMemoryStorage({ filter_mode: 'whitelist', whitelist: ['https://example.com/*'], blacklist: ['https://custom.example/*'] });
-    const settings = createSettingsStore(storage);
+    const storage = stubChromeStorage({ filter_mode: 'whitelist', whitelist: ['https://example.com/*'], blacklist: ['https://example.org/*'] });
 
-    await settings.restoreActiveListDefaults();
+    await restoreActiveListDefaults();
 
-    expect(await settings.activeList()).toEqual([]);
-    expect((await settings.get()).blacklist).toEqual(['https://custom.example/*']);
+    expect(storage.data.whitelist).toEqual(DEFAULT_SETTINGS.whitelist);
+    expect(storage.data.blacklist).toEqual(['https://example.org/*']);
   });
 });
 
-describe('reconcile', () => {
-  it('adds missing defaults, prunes unknown keys, and keeps stored values, all without notifying', async () => {
-    const storage = inMemoryStorage({ spacing_mode: 'spacing_when_click', spacing_rule: 'legacy', old_flag: true });
-    const settings = createSettingsStore(storage);
-    const calls: SubscriberCall[] = [];
-    settings.subscribe(recordSubscriber(calls));
+describe('reconcileSettings', () => {
+  it('adds missing defaults, prunes unknown keys, and keeps stored values', async () => {
+    const storage = stubChromeStorage({ spacing_mode: 'spacing_when_click', legacy_key: 123 });
 
-    await settings.reconcile();
-    await settle();
+    await reconcileSettings();
 
     expect(storage.data.spacing_mode).toBe('spacing_when_click');
-    expect('spacing_rule' in storage.data).toBe(false);
-    expect('old_flag' in storage.data).toBe(false);
     expect(storage.data.filter_mode).toBe('blacklist');
-    expect(storage.data.is_enable_text_autospace).toBe(true);
-    expect(storage.data.blacklist).toContain('https://docs.google.com/*');
-    expect(calls).toHaveLength(0);
+    expect(storage.data.blacklist).toEqual(DEFAULT_SETTINGS.blacklist);
+    expect('legacy_key' in storage.data).toBe(false);
   });
 
-  it('is quiet when storage already matches the schema', async () => {
-    const storage = inMemoryStorage();
-    const settings = createSettingsStore(storage);
-    await settings.reconcile();
-    const dataAfterFirst = { ...storage.data };
-    const calls: SubscriberCall[] = [];
-    settings.subscribe(recordSubscriber(calls));
+  it('writes and notifies nothing when storage already matches the schema', async () => {
+    const storage = stubChromeStorage(structuredClone(DEFAULT_SETTINGS));
+    const calls: (keyof Settings)[][] = [];
+    onSettingsChanged((changedKeys) => calls.push(changedKeys));
 
-    await settings.reconcile();
-    await settle();
+    await reconcileSettings();
 
-    expect(storage.data).toEqual(dataAfterFirst);
-    expect(calls).toHaveLength(0);
+    expect(storage.data).toEqual(DEFAULT_SETTINGS);
+    expect(calls).toEqual([]);
   });
 });

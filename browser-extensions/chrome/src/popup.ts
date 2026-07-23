@@ -1,9 +1,7 @@
 import { translatePage } from './utils/i18n';
-import { getSettingsStore } from './utils/settings';
+import { addToActiveList, getSettings, onSettingsChanged, updateSettings } from './utils/settings';
 import { playSound, stopSound } from './utils/sounds';
-import type { PingMessage, ManualSpacingMessage, ContentScriptResponse, MessageFromContentScript } from './utils/types';
-
-const settings = getSettingsStore();
+import type { PingMessage, ManualSpacingMessage, ContentScriptResponse, MessageFromContentScript, Settings } from './utils/types';
 
 class PopupController {
   private currentTabId: number | undefined;
@@ -72,44 +70,43 @@ class PopupController {
 
     chrome.runtime.onMessage.addListener((message: MessageFromContentScript, sender) => {
       if (message.type === 'CONTENT_SCRIPT_LOADED' && sender.tab?.id === this.currentTabId) {
-        this.renderStatus();
+        this.render().catch(console.error);
       }
     });
 
     // Any settings change repaints the whole popup: it is small, and this
-    // keeps the status row honest after toggling spacing mode
-    settings.subscribe(() => {
+    // keeps the status row honest after toggling spacing mode. Handlers never
+    // repaint after a successful write, the onChanged echo lands here instead.
+    onSettingsChanged(() => {
       this.render().catch(console.error);
     });
   }
 
   private async render() {
-    await this.renderSpacingModeToggle();
-    await this.renderMuteToggle();
-    await this.renderTextAutospaceToggle();
-    await this.renderStatus();
-    await this.renderAddToBlacklistButton();
+    const current = await getSettings();
+    this.renderSpacingModeToggle(current);
+    this.renderMuteToggle(current);
+    this.renderTextAutospaceToggle(current);
+    this.renderStatus(current);
+    this.renderAddToBlacklistButton(current);
     this.renderVersion();
   }
 
-  private async renderSpacingModeToggle() {
-    const current = await settings.get();
+  private renderSpacingModeToggle(current: Settings) {
     const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
     if (spacingModeToggle) {
       spacingModeToggle.checked = current.spacing_mode === 'spacing_when_load';
     }
   }
 
-  private async renderMuteToggle() {
-    const current = await settings.get();
+  private renderMuteToggle(current: Settings) {
     const muteToggle = document.getElementById('mute-toggle') as HTMLInputElement;
     if (muteToggle) {
       muteToggle.checked = current.is_mute_sound_effects;
     }
   }
 
-  private async renderTextAutospaceToggle() {
-    const current = await settings.get();
+  private renderTextAutospaceToggle(current: Settings) {
     const textAutospaceToggle = document.getElementById('text-autospace-toggle') as HTMLInputElement;
     if (textAutospaceToggle) {
       const isSupported = CSS.supports('text-autospace', 'normal');
@@ -120,7 +117,7 @@ class PopupController {
     }
   }
 
-  private async renderStatus() {
+  private renderStatus(current: Settings) {
     const statusInput = document.getElementById('status-toggle-input') as HTMLInputElement;
     const statusLabel = document.getElementById('status-toggle-label');
 
@@ -128,7 +125,7 @@ class PopupController {
       return;
     }
 
-    const shouldBeActive = await this.shouldContentScriptBeActive();
+    const shouldBeActive = this.shouldContentScriptBeActive(current);
     statusInput.checked = shouldBeActive;
     const messageKey = shouldBeActive ? 'status_active' : 'status_inactive';
     statusLabel.setAttribute('data-i18n', messageKey);
@@ -142,13 +139,11 @@ class PopupController {
     }
   }
 
-  private async renderAddToBlacklistButton() {
+  private renderAddToBlacklistButton(current: Settings) {
     const button = document.getElementById('add-to-blacklist-btn');
     if (!button) {
       return;
     }
-
-    const current = await settings.get();
 
     // Hide button if not in blacklist mode or if URL is invalid
     if (current.filter_mode !== 'blacklist' || !this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
@@ -164,11 +159,11 @@ class PopupController {
 
     const spacingMode = toggle.checked ? 'spacing_when_load' : 'spacing_when_click';
     try {
-      await settings.update({ spacing_mode: spacingMode });
+      await updateSettings({ spacing_mode: spacingMode });
     } catch (error) {
-      // The toggle already flipped visually: repaint it from confirmed settings
+      // The toggle already flipped visually: repaint from confirmed settings
       console.error('Failed to save settings:', error);
-      await this.renderSpacingModeToggle();
+      await this.render();
       return;
     }
 
@@ -179,10 +174,10 @@ class PopupController {
   private async handleMuteToggleChange() {
     const toggle = document.getElementById('mute-toggle') as HTMLInputElement;
     try {
-      await settings.update({ is_mute_sound_effects: toggle.checked });
+      await updateSettings({ is_mute_sound_effects: toggle.checked });
     } catch (error) {
       console.error('Failed to save settings:', error);
-      await this.renderMuteToggle();
+      await this.render();
       return;
     }
 
@@ -195,10 +190,10 @@ class PopupController {
   private async handleTextAutospaceToggleChange() {
     const toggle = document.getElementById('text-autospace-toggle') as HTMLInputElement;
     try {
-      await settings.update({ is_enable_text_autospace: toggle.checked });
+      await updateSettings({ is_enable_text_autospace: toggle.checked });
     } catch (error) {
       console.error('Failed to save settings:', error);
-      await this.renderTextAutospaceToggle();
+      await this.render();
       return;
     }
 
@@ -276,12 +271,10 @@ class PopupController {
     }
   }
 
-  private async shouldContentScriptBeActive() {
+  private shouldContentScriptBeActive(current: Settings) {
     if (!this.currentTabUrl || !this.isValidUrl(this.currentTabUrl)) {
       return false;
     }
-
-    const current = await settings.get();
 
     // If in manual mode, content script shouldn't be active
     if (current.spacing_mode === 'spacing_when_click') {
@@ -371,7 +364,7 @@ class PopupController {
       const domainPattern = `${url.protocol}//${url.hostname}/*`;
 
       // The button only shows in blacklist mode, so the active list is the blacklist
-      const outcome = await settings.addToActiveList(domainPattern);
+      const outcome = await addToActiveList(domainPattern);
 
       if (outcome === 'duplicate') {
         this.showMessage(chrome.i18n.getMessage('already_in_blacklist'), 'info', 1000 * 3);

@@ -1,4 +1,4 @@
-import { getSettingsStore } from './settings';
+import { getSettings } from './settings';
 
 export type SoundName = 'Hadouken' | 'Shouryuuken' | 'YeahBaby' | 'WahWahWaaah';
 
@@ -12,8 +12,7 @@ const SOUND_FILES: Record<SoundName, string> = {
 let currentAudio: HTMLAudioElement | null = null;
 
 export async function playSound(name: SoundName) {
-  const settings = getSettingsStore();
-  const current = await settings.get();
+  const current = await getSettings();
   if (!current.is_mute_sound_effects) {
     stopSound();
 

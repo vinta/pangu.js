@@ -1,8 +1,6 @@
 import { translatePage } from './utils/i18n';
-import { getSettingsStore } from './utils/settings';
+import { addToActiveList, editActiveList, getActiveList, getSettings, onSettingsChanged, removeFromActiveList, restoreActiveListDefaults, updateSettings } from './utils/settings';
 import { playSound } from './utils/sounds';
-
-const settings = getSettingsStore();
 
 class OptionsController {
   private editingUrls: Map<number, string> = new Map();
@@ -22,8 +20,8 @@ class OptionsController {
 
   private setupEventListeners() {
     // Every render below is driven by this subscription, so writes never
-    // re-render inline: the store notifies once per confirmed change
-    settings.subscribe((_newSettings, changedKeys) => {
+    // re-render inline: the onChanged echo of each write lands here
+    onSettingsChanged((changedKeys) => {
       // Only re-render the parts that actually changed
       if (changedKeys.includes('spacing_mode')) {
         this.renderSpacingMode().catch(console.error);
@@ -72,7 +70,7 @@ class OptionsController {
       if (target.id === 'mute-checkbox') {
         const muteCheckbox = target as HTMLInputElement;
         try {
-          await settings.update({ is_mute_sound_effects: muteCheckbox.checked });
+          await updateSettings({ is_mute_sound_effects: muteCheckbox.checked });
         } catch (error) {
           // The checkbox already flipped visually: repaint it from confirmed settings
           console.error('Failed to save settings:', error);
@@ -81,7 +79,7 @@ class OptionsController {
       } else if (target.id === 'text-autospace-checkbox') {
         const textAutospaceCheckbox = target as HTMLInputElement;
         try {
-          await settings.update({ is_enable_text_autospace: textAutospaceCheckbox.checked });
+          await updateSettings({ is_enable_text_autospace: textAutospaceCheckbox.checked });
         } catch (error) {
           console.error('Failed to save settings:', error);
           await this.renderTextAutospaceCheckbox();
@@ -119,7 +117,7 @@ class OptionsController {
   }
 
   private async renderSpacingMode() {
-    const current = await settings.get();
+    const current = await getSettings();
     const button = document.getElementById('spacing_mode_btn') as HTMLButtonElement;
     button.textContent = chrome.i18n.getMessage(current.spacing_mode);
 
@@ -136,7 +134,7 @@ class OptionsController {
   }
 
   private async renderFilterMode() {
-    const current = await settings.get();
+    const current = await getSettings();
     const button = document.getElementById('filter_mode_btn') as HTMLButtonElement;
     button.textContent = chrome.i18n.getMessage(current.filter_mode);
 
@@ -144,7 +142,7 @@ class OptionsController {
   }
 
   private async renderUrlList() {
-    const urls = await settings.activeList();
+    const urls = await getActiveList();
     const container = document.getElementById('url-list-container') as HTMLDivElement;
 
     // Save templates before clearing
@@ -246,13 +244,13 @@ class OptionsController {
   }
 
   private async renderMuteCheckbox() {
-    const current = await settings.get();
+    const current = await getSettings();
     const checkbox = document.getElementById('mute-checkbox') as HTMLInputElement;
     checkbox.checked = current.is_mute_sound_effects;
   }
 
   private async renderTextAutospaceCheckbox() {
-    const current = await settings.get();
+    const current = await getSettings();
     const checkbox = document.getElementById('text-autospace-checkbox') as HTMLInputElement;
     const isSupported = CSS.supports('text-autospace', 'normal');
     // Display-only off when unsupported: never write back, the synced setting still applies on other devices
@@ -264,17 +262,17 @@ class OptionsController {
   }
 
   private async toggleSpacingMode() {
-    const current = await settings.get();
+    const current = await getSettings();
     const newSpacingMode = current.spacing_mode === 'spacing_when_load' ? 'spacing_when_click' : 'spacing_when_load';
-    await settings.update({ spacing_mode: newSpacingMode });
+    await updateSettings({ spacing_mode: newSpacingMode });
 
     await playSound(newSpacingMode === 'spacing_when_load' ? 'Shouryuuken' : 'Hadouken');
   }
 
   private async toggleFilterMode() {
-    const current = await settings.get();
+    const current = await getSettings();
     const newFilterMode = current.filter_mode === 'blacklist' ? 'whitelist' : 'blacklist';
-    await settings.update({ filter_mode: newFilterMode });
+    await updateSettings({ filter_mode: newFilterMode });
 
     await playSound(newFilterMode === 'blacklist' ? 'Shouryuuken' : 'Hadouken');
   }
@@ -293,7 +291,7 @@ class OptionsController {
     this.addUrlInput = null;
     let outcome: 'added' | 'duplicate' | 'invalid';
     try {
-      outcome = newUrl ? await settings.addToActiveList(newUrl) : 'invalid';
+      outcome = newUrl ? await addToActiveList(newUrl) : 'invalid';
     } catch (error) {
       console.error('Failed to save URL:', error);
       this.addUrlInput = input;
@@ -318,7 +316,7 @@ class OptionsController {
   }
 
   private async startEditingUrl(index: number) {
-    const urls = await settings.activeList();
+    const urls = await getActiveList();
     this.editingUrls.set(index, urls[index]);
     await this.renderUrlList();
 
@@ -343,7 +341,7 @@ class OptionsController {
     this.editingUrls.delete(index);
     let outcome: 'saved' | 'invalid';
     try {
-      outcome = newUrl ? await settings.editActiveList(index, newUrl) : 'invalid';
+      outcome = newUrl ? await editActiveList(index, newUrl) : 'invalid';
     } catch (error) {
       console.error('Failed to save URL:', error);
       this.editingUrls.set(index, newUrl);
@@ -363,7 +361,7 @@ class OptionsController {
 
   private async removeUrl(index: number) {
     try {
-      await settings.removeFromActiveList(index);
+      await removeFromActiveList(index);
     } catch (error) {
       console.error('Failed to remove URL:', error);
     }
@@ -373,7 +371,7 @@ class OptionsController {
     if (confirm(chrome.i18n.getMessage('confirm_restore_defaults'))) {
       try {
         // Restore only the current filter mode list to its default value
-        await settings.restoreActiveListDefaults();
+        await restoreActiveListDefaults();
       } catch (error) {
         console.error('Failed to restore defaults:', error);
       }
