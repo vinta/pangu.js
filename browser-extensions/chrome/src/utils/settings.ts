@@ -276,32 +276,3 @@ export function getSettingsStore(): SettingsStore {
   storeInstance ??= createSettingsStore();
   return storeInstance;
 }
-
-// Legacy read path, deleted in the last migration commit. The typeof guard keeps
-// this module importable outside extension contexts (vitest) until then.
-let cachedSettings: Settings = { ...DEFAULT_SETTINGS };
-let cacheInitialized = false;
-
-export async function getCachedSettings() {
-  if (!cacheInitialized) {
-    cachedSettings = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
-    cacheInitialized = true;
-  }
-  return cachedSettings;
-}
-
-if (typeof chrome !== 'undefined') {
-  chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName === 'sync' && cacheInitialized) {
-      for (const [key, change] of Object.entries(changes)) {
-        if (key in cachedSettings) {
-          // Create a new object to satisfy TypeScript's type checking
-          cachedSettings = {
-            ...cachedSettings,
-            [key]: change.newValue,
-          };
-        }
-      }
-    }
-  });
-}
