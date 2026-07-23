@@ -7,6 +7,12 @@ export interface Settings {
   is_enable_text_autospace: boolean;
 }
 
+// What the settings store hands out: deep readonly, since Readonly<Settings>
+// alone would leave the list arrays mutable
+export type ReadonlySettings = {
+  readonly [K in keyof Settings]: Settings[K] extends (infer T)[] ? readonly T[] : Settings[K];
+};
+
 export interface PingMessage {
   action: 'PING';
 }

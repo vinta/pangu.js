@@ -1,4 +1,5 @@
-import type { Settings } from './types';
+import type { ReadonlySettings, Settings } from './types';
+import { isValidMatchPattern } from './urls';
 
 export const DEFAULT_SETTINGS: Settings = {
   spacing_mode: 'spacing_when_load',
@@ -18,6 +19,249 @@ export const DEFAULT_SETTINGS: Settings = {
   is_enable_text_autospace: true,
 };
 
+// The storage the settings store sits on: chrome.storage.sync in the extension,
+// an in-memory implementation in vitest. Two adapters make the seam real.
+export interface StoragePort {
+  get(): Promise<Record<string, unknown>>;
+  set(items: Partial<Settings>): Promise<void>;
+  remove(keys: string[]): Promise<void>;
+  onChanged(listener: (changes: Record<string, unknown>) => void): void;
+}
+
+export type SettingsSubscriber = (settings: ReadonlySettings, changedKeys: (keyof Settings)[]) => void;
+
+export interface SettingsStore {
+  get(): Promise<ReadonlySettings>;
+  update(partial: Partial<Settings>): Promise<void>;
+  subscribe(subscriber: SettingsSubscriber): () => void;
+  reconcile(): Promise<void>;
+  activeList(): Promise<readonly string[]>;
+  addToActiveList(pattern: string): Promise<'added' | 'duplicate' | 'invalid'>;
+  editActiveList(index: number, pattern: string): Promise<'saved' | 'invalid'>;
+  removeFromActiveList(index: number): Promise<void>;
+  restoreActiveListDefaults(): Promise<void>;
+}
+
+const SETTINGS_KEYS = Object.keys(DEFAULT_SETTINGS) as (keyof Settings)[];
+
+function cloneSettings(settings: Settings): Settings {
+  return { ...settings, blacklist: [...settings.blacklist], whitelist: [...settings.whitelist] };
+}
+
+function overlayDefaults(raw: Record<string, unknown>): Settings {
+  const settings = cloneSettings(DEFAULT_SETTINGS);
+  for (const key of SETTINGS_KEYS) {
+    if (key in raw) {
+      Object.assign(settings, { [key]: raw[key] });
+    }
+  }
+  return settings;
+}
+
+// Builds a Partial<Settings> for the list picked by filter mode without a
+// computed-key cast
+function listPatch(key: 'blacklist' | 'whitelist', urls: string[]): Partial<Settings> {
+  return key === 'blacklist' ? { blacklist: urls } : { whitelist: urls };
+}
+
+function valueEquals(a: unknown, b: unknown) {
+  if (Array.isArray(a) && Array.isArray(b)) {
+    return a.length === b.length && a.every((item, index) => item === b[index]);
+  }
+  return a === b;
+}
+
+// Applies the known keys of `changes` onto `cache` (a removed key falls back to
+// its default) and reports which keys actually changed value. Diffing here is
+// also what dedupes the echo event storage fires for the store's own writes.
+function applyToCache(cache: Settings, changes: Record<string, unknown>): (keyof Settings)[] {
+  const changedKeys: (keyof Settings)[] = [];
+  for (const key of SETTINGS_KEYS) {
+    if (!(key in changes)) {
+      continue;
+    }
+    const next = changes[key] ?? DEFAULT_SETTINGS[key];
+    if (!valueEquals(cache[key], next)) {
+      Object.assign(cache, { [key]: Array.isArray(next) ? [...next] : next });
+      changedKeys.push(key);
+    }
+  }
+  return changedKeys;
+}
+
+// The production adapter. Only referenced when a store is constructed, so
+// importing this module never touches the chrome global.
+const chromeSyncStorage: StoragePort = {
+  get: () => chrome.storage.sync.get(null),
+  set: (items) => chrome.storage.sync.set(items),
+  remove: (keys) => chrome.storage.sync.remove(keys),
+  onChanged: (listener) => {
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName !== 'sync') {
+        return;
+      }
+      const newValues: Record<string, unknown> = {};
+      for (const [key, change] of Object.entries(changes)) {
+        newValues[key] = change.newValue;
+      }
+      listener(newValues);
+    });
+  },
+};
+
+export function createSettingsStore(storage: StoragePort = chromeSyncStorage): SettingsStore {
+  let cache: Settings | null = null;
+  let loading: Promise<Settings> | null = null;
+  const subscribers: SettingsSubscriber[] = [];
+  let eventChain: Promise<void> = Promise.resolve();
+
+  const ensureLoaded = async () => {
+    if (cache) {
+      return cache;
+    }
+    loading ??= storage.get().then((raw) => {
+      cache ??= overlayDefaults(raw);
+      return cache;
+    });
+    return loading;
+  };
+
+  const notify = (changedKeys: (keyof Settings)[]) => {
+    if (!cache || changedKeys.length === 0) {
+      return;
+    }
+    const snapshot = cloneSettings(cache);
+    for (const subscriber of [...subscribers]) {
+      subscriber(snapshot, [...changedKeys]);
+    }
+  };
+
+  // External changes (other contexts, other devices, and the echoes of this
+  // store's own writes) are serialized so they apply in arrival order
+  storage.onChanged((changes) => {
+    eventChain = eventChain
+      .then(async () => {
+        const current = await ensureLoaded();
+        notify(applyToCache(current, changes));
+      })
+      .catch(console.error);
+  });
+
+  const store: SettingsStore = {
+    async get() {
+      return cloneSettings(await ensureLoaded());
+    },
+
+    async update(partial) {
+      const current = await ensureLoaded();
+      const toWrite: Partial<Settings> = {};
+      for (const key of SETTINGS_KEYS) {
+        if (key in partial && !valueEquals(partial[key], current[key])) {
+          (toWrite as Record<string, unknown>)[key] = partial[key];
+        }
+      }
+      if (Object.keys(toWrite).length === 0) {
+        return;
+      }
+      await storage.set(toWrite);
+      notify(applyToCache(current, toWrite));
+    },
+
+    subscribe(subscriber) {
+      subscribers.push(subscriber);
+      return () => {
+        const index = subscribers.indexOf(subscriber);
+        if (index >= 0) {
+          subscribers.splice(index, 1);
+        }
+      };
+    },
+
+    // Brings synced storage in line with the current schema: adds missing
+    // defaults, prunes keys no version of Settings knows. Nothing user-visible
+    // changes (reads overlay defaults already), so subscribers stay quiet.
+    async reconcile() {
+      const raw = await storage.get();
+      const missing: Partial<Settings> = {};
+      for (const key of SETTINGS_KEYS) {
+        if (!(key in raw)) {
+          (missing as Record<string, unknown>)[key] = DEFAULT_SETTINGS[key];
+        }
+      }
+      const unknownKeys = Object.keys(raw).filter((key) => !(key in DEFAULT_SETTINGS));
+      if (Object.keys(missing).length > 0) {
+        await storage.set(missing);
+      }
+      if (unknownKeys.length > 0) {
+        await storage.remove(unknownKeys);
+      }
+    },
+
+    async activeList() {
+      const current = await ensureLoaded();
+      return [...current[current.filter_mode]];
+    },
+
+    async addToActiveList(pattern) {
+      if (!isValidMatchPattern(pattern)) {
+        return 'invalid';
+      }
+      const current = await ensureLoaded();
+      const key = current.filter_mode;
+      if (current[key].includes(pattern)) {
+        return 'duplicate';
+      }
+      await store.update(listPatch(key, [...current[key], pattern]));
+      return 'added';
+    },
+
+    async editActiveList(index, pattern) {
+      if (!isValidMatchPattern(pattern)) {
+        return 'invalid';
+      }
+      const current = await ensureLoaded();
+      const key = current.filter_mode;
+      if (index < 0 || index >= current[key].length) {
+        return 'invalid';
+      }
+      const urls = [...current[key]];
+      urls[index] = pattern;
+      await store.update(listPatch(key, urls));
+      return 'saved';
+    },
+
+    async removeFromActiveList(index) {
+      const current = await ensureLoaded();
+      const key = current.filter_mode;
+      if (index < 0 || index >= current[key].length) {
+        return;
+      }
+      const urls = [...current[key]];
+      urls.splice(index, 1);
+      await store.update(listPatch(key, urls));
+    },
+
+    async restoreActiveListDefaults() {
+      const current = await ensureLoaded();
+      const key = current.filter_mode;
+      await store.update(listPatch(key, [...DEFAULT_SETTINGS[key]]));
+    },
+  };
+
+  return store;
+}
+
+let storeInstance: SettingsStore | undefined;
+
+// Callers bind this once per scope (`const settings = getSettingsStore();`)
+// and call methods on the binding, never inline off the accessor
+export function getSettingsStore(): SettingsStore {
+  storeInstance ??= createSettingsStore();
+  return storeInstance;
+}
+
+// Legacy read path, deleted in the last migration commit. The typeof guard keeps
+// this module importable outside extension contexts (vitest) until then.
 let cachedSettings: Settings = { ...DEFAULT_SETTINGS };
 let cacheInitialized = false;
 
@@ -29,16 +273,18 @@ export async function getCachedSettings() {
   return cachedSettings;
 }
 
-chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName === 'sync' && cacheInitialized) {
-    for (const [key, change] of Object.entries(changes)) {
-      if (key in cachedSettings) {
-        // Create a new object to satisfy TypeScript's type checking
-        cachedSettings = {
-          ...cachedSettings,
-          [key]: change.newValue,
-        };
+if (typeof chrome !== 'undefined') {
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === 'sync' && cacheInitialized) {
+      for (const [key, change] of Object.entries(changes)) {
+        if (key in cachedSettings) {
+          // Create a new object to satisfy TypeScript's type checking
+          cachedSettings = {
+            ...cachedSettings,
+            [key]: change.newValue,
+          };
+        }
       }
     }
-  }
-});
+  });
+}

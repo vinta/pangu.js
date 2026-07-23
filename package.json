@@ -70,6 +70,7 @@
     "test": "npm run build && vitest run && playwright test --reporter=list",
     "test:shared": "npm run build && vitest run tests/shared/",
     "test:node": "npm run build && vitest run tests/node/",
+    "test:extension": "vitest run tests/extension/",
     "test:browser": "npm run build && playwright test --reporter=list",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
