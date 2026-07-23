@@ -102,7 +102,11 @@ class PopupController {
     const settings = await getCachedSettings();
     const textAutospaceToggle = document.getElementById('text-autospace-toggle') as HTMLInputElement;
     if (textAutospaceToggle) {
-      textAutospaceToggle.checked = settings.is_enable_text_autospace;
+      const isSupported = CSS.supports('text-autospace', 'normal');
+      // Display-only off when unsupported: never write back, the synced setting still applies on other devices
+      textAutospaceToggle.checked = isSupported && settings.is_enable_text_autospace;
+      textAutospaceToggle.disabled = !isSupported;
+      textAutospaceToggle.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
     }
   }
 

@@ -22,15 +22,15 @@ class OptionsController {
       if (areaName === 'sync') {
         // Only re-render the parts that actually changed
         const changedKeys = Object.keys(changes);
-        
+
         if (changedKeys.includes('spacing_mode')) {
           await this.renderSpacingMode();
         }
-        
+
         if (changedKeys.includes('filter_mode') || changedKeys.includes('blacklist') || changedKeys.includes('whitelist')) {
           await this.renderFilterMode();
         }
-        
+
         if (changedKeys.includes('is_mute_sound_effects')) {
           await this.renderMuteCheckbox();
         }
@@ -245,13 +245,14 @@ class OptionsController {
   private async renderTextAutospaceCheckbox() {
     const settings = await getCachedSettings();
     const checkbox = document.getElementById('text-autospace-checkbox') as HTMLInputElement;
-    checkbox.checked = settings.is_enable_text_autospace;
-
-    // Keep the toggle usable even without local support: the setting still syncs to other devices
+    const isSupported = CSS.supports('text-autospace', 'normal');
+    // Display-only off when unsupported: never write back, the synced setting still applies on other devices
+    checkbox.checked = isSupported && settings.is_enable_text_autospace;
+    checkbox.disabled = !isSupported;
+    checkbox.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
     const notSupportedMessage = document.getElementById('text-autospace-not-supported-msg') as HTMLElement;
-    notSupportedMessage.style.display = CSS.supports('text-autospace', 'normal') ? 'none' : 'block';
+    notSupportedMessage.style.display = isSupported ? 'none' : 'block';
   }
-
 
   private async toggleSpacingMode() {
     const settings = await getCachedSettings();
