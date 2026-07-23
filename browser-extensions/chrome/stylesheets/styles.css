@@ -243,8 +243,11 @@ a:hover {
 }
 
 .toggle.toggle-disabled {
-  opacity: 0.5;
   cursor: not-allowed;
+}
+
+.toggle.toggle-disabled .toggle-switch {
+  background-color: var(--color-surface-tertiary);
 }
 
 /* Cards */
