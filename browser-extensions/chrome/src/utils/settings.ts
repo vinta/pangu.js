@@ -141,21 +141,27 @@ export function createSettingsStore(storage: StoragePort = chromeSyncStorage) {
   // External changes (other contexts, other devices, and the echoes of this
   // store's own writes) are serialized so they apply in arrival order
   storage.onChanged((changes) => {
+    // Captured at arrival: by the time a queued handler runs, an earlier
+    // handler's fresh load may already have absorbed this event's values
+    const arrivedCold = cache === null;
     eventChain = eventChain
       .then(async () => {
-        const hadCache = cache !== null;
         const current = await ensureLoaded();
-        if (hadCache) {
-          const newValues: Record<string, unknown> = {};
-          for (const [key, change] of Object.entries(changes)) {
-            newValues[key] = change.newValue;
-          }
-          notify(applyToCache(current, newValues));
-          return;
+        const newValues: Record<string, unknown> = {};
+        for (const [key, change] of Object.entries(changes)) {
+          newValues[key] = change.newValue;
         }
-        // Cold context (a woken service worker): the load above already holds
-        // the new values, so diff the event against itself and only notify
-        const changedKeys = SETTINGS_KEYS.filter((key) => key in changes && !valueEquals(changes[key].oldValue, changes[key].newValue));
+        const changedKeys = applyToCache(current, newValues);
+        if (arrivedCold) {
+          // Cold arrival (a woken service worker): the cache diff alone can
+          // miss keys the initial load already held, so union in the event's
+          // own oldValue/newValue diff
+          for (const key of SETTINGS_KEYS) {
+            if (key in changes && !valueEquals(changes[key].oldValue, changes[key].newValue) && !changedKeys.includes(key)) {
+              changedKeys.push(key);
+            }
+          }
+        }
         notify(changedKeys);
       })
       .catch(console.error);

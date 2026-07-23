@@ -190,6 +190,24 @@ describe('external changes', () => {
     expect(calls[0].settings.spacing_mode).toBe('spacing_when_click');
   });
 
+  it('does not drop a later key when several events arrive before the first read', async () => {
+    const storage = inMemoryStorage();
+    const settings = createSettingsStore(storage);
+    const calls: SubscriberCall[] = [];
+    settings.subscribe(recordSubscriber(calls));
+
+    // Both land while the store is still cold: the first handler's fresh load
+    // already contains the second event's value
+    storage.emitExternal({ is_mute_sound_effects: true });
+    storage.emitExternal({ spacing_mode: 'spacing_when_click' });
+    await settle();
+
+    const notifiedKeys = calls.flatMap((call) => [...call.changedKeys]);
+    expect(notifiedKeys).toContain('is_mute_sound_effects');
+    expect(notifiedKeys).toContain('spacing_mode');
+    expect((await settings.get()).spacing_mode).toBe('spacing_when_click');
+  });
+
   it('falls back to the default when a known key is removed externally', async () => {
     const storage = inMemoryStorage({ is_enable_text_autospace: false });
     const settings = createSettingsStore(storage);
