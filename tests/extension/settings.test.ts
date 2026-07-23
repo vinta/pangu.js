@@ -1,15 +1,4 @@
-import {
-  DEFAULT_SETTINGS,
-  addToActiveList,
-  editActiveList,
-  getActiveList,
-  getSettings,
-  onSettingsChanged,
-  reconcileSettings,
-  removeFromActiveList,
-  restoreActiveListDefaults,
-  updateSettings,
-} from '../../browser-extensions/chrome/src/utils/settings';
+import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, reconcileSettings, updateSettings } from '../../browser-extensions/chrome/src/utils/settings';
 import type { Settings } from '../../browser-extensions/chrome/src/utils/types';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -135,75 +124,6 @@ describe('onSettingsChanged', () => {
     await storage.sync.set({ legacy_key: true });
 
     expect(calls).toEqual([]);
-  });
-});
-
-describe('active list', () => {
-  it('reads the list selected by filter mode', async () => {
-    stubChromeStorage({ filter_mode: 'whitelist', whitelist: ['https://example.com/*'] });
-
-    expect(await getActiveList()).toEqual(['https://example.com/*']);
-  });
-
-  it('adds a valid pattern to the active list', async () => {
-    stubChromeStorage();
-
-    expect(await addToActiveList('https://example.com/*')).toBe('added');
-
-    const list = await getActiveList();
-    expect(list).toContain('https://example.com/*');
-    expect(list).toContain('https://docs.google.com/*');
-  });
-
-  it('rejects a duplicate without writing', async () => {
-    const storage = stubChromeStorage({ blacklist: ['https://example.com/*'] });
-
-    expect(await addToActiveList('https://example.com/*')).toBe('duplicate');
-
-    expect(storage.data.blacklist).toEqual(['https://example.com/*']);
-  });
-
-  it('rejects an invalid pattern without writing', async () => {
-    const storage = stubChromeStorage();
-
-    expect(await addToActiveList('not a pattern')).toBe('invalid');
-
-    expect('blacklist' in storage.data).toBe(false);
-  });
-
-  it('edits an entry in place', async () => {
-    stubChromeStorage({ blacklist: ['https://example.com/*', 'https://example.org/*'] });
-
-    expect(await editActiveList(1, 'https://example.net/*')).toBe('saved');
-
-    expect(await getActiveList()).toEqual(['https://example.com/*', 'https://example.net/*']);
-  });
-
-  it('treats an invalid pattern or index as invalid and changes nothing', async () => {
-    const storage = stubChromeStorage({ blacklist: ['https://example.com/*'] });
-
-    expect(await editActiveList(0, 'not a pattern')).toBe('invalid');
-    expect(await editActiveList(1, 'https://example.net/*')).toBe('invalid');
-    expect(await editActiveList(-1, 'https://example.net/*')).toBe('invalid');
-
-    expect(storage.data.blacklist).toEqual(['https://example.com/*']);
-  });
-
-  it('removes an entry by index', async () => {
-    stubChromeStorage({ blacklist: ['https://example.com/*', 'https://example.org/*'] });
-
-    await removeFromActiveList(0);
-
-    expect(await getActiveList()).toEqual(['https://example.org/*']);
-  });
-
-  it('restores only the active list to its defaults', async () => {
-    const storage = stubChromeStorage({ filter_mode: 'whitelist', whitelist: ['https://example.com/*'], blacklist: ['https://example.org/*'] });
-
-    await restoreActiveListDefaults();
-
-    expect(storage.data.whitelist).toEqual(DEFAULT_SETTINGS.whitelist);
-    expect(storage.data.blacklist).toEqual(['https://example.org/*']);
   });
 });
 

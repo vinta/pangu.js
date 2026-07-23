@@ -1,6 +1,13 @@
 import { translatePage } from './utils/i18n';
-import { addToActiveList, editActiveList, getActiveList, getSettings, onSettingsChanged, removeFromActiveList, restoreActiveListDefaults, updateSettings } from './utils/settings';
+import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, updateSettings } from './utils/settings';
 import { playSound } from './utils/sounds';
+import { isValidMatchPattern } from './utils/urls';
+
+// Builds a Partial<Settings> for the list picked by filter mode without a
+// computed-key cast
+function listPatch(key: 'blacklist' | 'whitelist', urls: string[]) {
+  return key === 'blacklist' ? { blacklist: urls } : { whitelist: urls };
+}
 
 class OptionsController {
   private editingUrls: Map<number, string> = new Map();
@@ -142,7 +149,8 @@ class OptionsController {
   }
 
   private async renderUrlList() {
-    const urls = await getActiveList();
+    const settings = await getSettings();
+    const urls = settings[settings.filter_mode];
     const container = document.getElementById('url-list-container') as HTMLDivElement;
 
     // Save templates before clearing
@@ -291,7 +299,7 @@ class OptionsController {
     this.addUrlInput = null;
     let outcome: 'added' | 'duplicate' | 'invalid';
     try {
-      outcome = newUrl ? await addToActiveList(newUrl) : 'invalid';
+      outcome = newUrl ? await this.addToActiveList(newUrl) : 'invalid';
     } catch (error) {
       console.error('Failed to save URL:', error);
       this.addUrlInput = input;
@@ -316,8 +324,8 @@ class OptionsController {
   }
 
   private async startEditingUrl(index: number) {
-    const urls = await getActiveList();
-    this.editingUrls.set(index, urls[index]);
+    const settings = await getSettings();
+    this.editingUrls.set(index, settings[settings.filter_mode][index]);
     await this.renderUrlList();
 
     // Focus on the input
@@ -341,7 +349,7 @@ class OptionsController {
     this.editingUrls.delete(index);
     let outcome: 'saved' | 'invalid';
     try {
-      outcome = newUrl ? await editActiveList(index, newUrl) : 'invalid';
+      outcome = newUrl ? await this.editActiveList(index, newUrl) : 'invalid';
     } catch (error) {
       console.error('Failed to save URL:', error);
       this.editingUrls.set(index, newUrl);
@@ -361,7 +369,7 @@ class OptionsController {
 
   private async removeUrl(index: number) {
     try {
-      await removeFromActiveList(index);
+      await this.removeFromActiveList(index);
     } catch (error) {
       console.error('Failed to remove URL:', error);
     }
@@ -371,11 +379,56 @@ class OptionsController {
     if (confirm(chrome.i18n.getMessage('confirm_restore_defaults'))) {
       try {
         // Restore only the current filter mode list to its default value
-        await restoreActiveListDefaults();
+        await this.restoreActiveListDefaults();
       } catch (error) {
         console.error('Failed to restore defaults:', error);
       }
     }
+  }
+
+  private async addToActiveList(pattern: string) {
+    if (!isValidMatchPattern(pattern)) {
+      return 'invalid' as const;
+    }
+    const settings = await getSettings();
+    const key = settings.filter_mode;
+    if (settings[key].includes(pattern)) {
+      return 'duplicate' as const;
+    }
+    await updateSettings(listPatch(key, [...settings[key], pattern]));
+    return 'added' as const;
+  }
+
+  private async editActiveList(index: number, pattern: string) {
+    if (!isValidMatchPattern(pattern)) {
+      return 'invalid' as const;
+    }
+    const settings = await getSettings();
+    const key = settings.filter_mode;
+    if (index < 0 || index >= settings[key].length) {
+      return 'invalid' as const;
+    }
+    const urls = [...settings[key]];
+    urls[index] = pattern;
+    await updateSettings(listPatch(key, urls));
+    return 'saved' as const;
+  }
+
+  private async removeFromActiveList(index: number) {
+    const settings = await getSettings();
+    const key = settings.filter_mode;
+    if (index < 0 || index >= settings[key].length) {
+      return;
+    }
+    const urls = [...settings[key]];
+    urls.splice(index, 1);
+    await updateSettings(listPatch(key, urls));
+  }
+
+  private async restoreActiveListDefaults() {
+    const settings = await getSettings();
+    const key = settings.filter_mode;
+    await updateSettings(listPatch(key, [...DEFAULT_SETTINGS[key]]));
   }
 }
 

@@ -1,5 +1,4 @@
 import type { Settings } from './types';
-import { isValidMatchPattern } from './urls';
 
 export const DEFAULT_SETTINGS: Settings = {
   spacing_mode: 'spacing_when_load',
@@ -44,62 +43,6 @@ export function onSettingsChanged(callback: (changedKeys: (keyof Settings)[]) =>
       callback(changedKeys);
     }
   });
-}
-
-// Builds a Partial<Settings> for the list picked by filter mode without a
-// computed-key cast
-function listPatch(key: 'blacklist' | 'whitelist', urls: string[]) {
-  return key === 'blacklist' ? { blacklist: urls } : { whitelist: urls };
-}
-
-export async function getActiveList() {
-  const current = await getSettings();
-  return current[current.filter_mode];
-}
-
-export async function addToActiveList(pattern: string) {
-  if (!isValidMatchPattern(pattern)) {
-    return 'invalid' as const;
-  }
-  const current = await getSettings();
-  const key = current.filter_mode;
-  if (current[key].includes(pattern)) {
-    return 'duplicate' as const;
-  }
-  await updateSettings(listPatch(key, [...current[key], pattern]));
-  return 'added' as const;
-}
-
-export async function editActiveList(index: number, pattern: string) {
-  if (!isValidMatchPattern(pattern)) {
-    return 'invalid' as const;
-  }
-  const current = await getSettings();
-  const key = current.filter_mode;
-  if (index < 0 || index >= current[key].length) {
-    return 'invalid' as const;
-  }
-  const urls = [...current[key]];
-  urls[index] = pattern;
-  await updateSettings(listPatch(key, urls));
-  return 'saved' as const;
-}
-
-export async function removeFromActiveList(index: number) {
-  const current = await getSettings();
-  const key = current.filter_mode;
-  if (index < 0 || index >= current[key].length) {
-    return;
-  }
-  const urls = [...current[key]];
-  urls.splice(index, 1);
-  await updateSettings(listPatch(key, urls));
-}
-
-export async function restoreActiveListDefaults() {
-  const current = await getSettings();
-  const key = current.filter_mode;
-  await updateSettings(listPatch(key, [...DEFAULT_SETTINGS[key]]));
 }
 
 // Brings synced storage in line with the current schema on install/update:

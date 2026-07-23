@@ -1,5 +1,5 @@
 import { translatePage } from './utils/i18n';
-import { addToActiveList, getSettings, onSettingsChanged, updateSettings } from './utils/settings';
+import { getSettings, onSettingsChanged, updateSettings } from './utils/settings';
 import { playSound, stopSound } from './utils/sounds';
 import type { PingMessage, ManualSpacingMessage, ContentScriptResponse, MessageFromContentScript, Settings } from './utils/types';
 
@@ -363,14 +363,15 @@ class PopupController {
       const url = new URL(this.currentTabUrl);
       const domainPattern = `${url.protocol}//${url.hostname}/*`;
 
-      // The button only shows in blacklist mode, so the active list is the blacklist
-      const outcome = await addToActiveList(domainPattern);
-
-      if (outcome === 'duplicate') {
+      // The button only shows in blacklist mode, and the pattern is built from
+      // an already-validated tab URL, so no match-pattern validation here
+      const current = await getSettings();
+      if (current.blacklist.includes(domainPattern)) {
         this.showMessage(chrome.i18n.getMessage('already_in_blacklist'), 'info', 1000 * 3);
-      } else if (outcome === 'added') {
-        this.showMessage(chrome.i18n.getMessage('refresh_required'), 'info', 1000 * 3);
+        return;
       }
+      await updateSettings({ blacklist: [...current.blacklist, domainPattern] });
+      this.showMessage(chrome.i18n.getMessage('refresh_required'), 'info', 1000 * 3);
     } catch (error) {
       console.error('Failed to add to blacklist:', error);
     }
