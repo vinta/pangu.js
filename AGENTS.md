@@ -59,6 +59,7 @@
 - When tweaking spacing rules, if the simpler rule is blocked only by rare test cases (typo-shaped input, degenerate shapes, nothing a real user reported), challenge the user to drop those cases in favor of the simpler rule instead of complicating the rule to preserve them. Show the candidate rule and exactly which expectations it breaks, then recommend dropping. Comment dropped cases out in place with `// Rare cases (basically a typo), ignore`, and record reversals of documented contracts as an ADR (precedent: ADR 0007). This licenses dropping rare-case contracts, not pruning tests in general.
 - When fixing a spacing issue, try absorbing it into an existing rule first (widen a character class, adjust a lookahead, rename the rule if its name stops matching). This is a default, not a hard rule: if the tweak would overcomplicate the existing rule, such as forcing one regex to serve two unrelated readings, a separate new rule is better. Optimize for total complexity of the rule set, not rule count. When a rare test case is what blocks the tweak, the previous guideline applies: challenge the user to drop it.
 - Avoid hard-wrapping Markdown prose; keep paragraphs and list items on single logical lines unless a format requires manual line breaks.
+- Do not wrap code comments early. Fill each comment line up to Prettier's `printWidth` (200, in `.prettierrc.json`) and break only when the line would exceed it. Prettier never reflows comment text, so an early-wrapped comment stays narrow forever.
 
 ## Verification
 

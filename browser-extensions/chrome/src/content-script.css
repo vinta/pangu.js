@@ -1,5 +1,3 @@
-/* Native autospacing (text-autospace, Chrome 140+), registered on every http(s) page and frame.
-   Author-level with no !important, so any site's own text-autospace declaration wins through the cascade. */
 html {
   text-autospace: normal;
 }

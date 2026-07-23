@@ -70,9 +70,11 @@
     "test": "npm run build && vitest run && playwright test --reporter=list",
     "test:shared": "npm run build && vitest run tests/shared/",
     "test:node": "npm run build && vitest run tests/node/",
+    "test:extension": "vitest run tests/extension/",
     "test:browser": "npm run build && playwright test --reporter=list",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
+    "format": "prettier --write ./src/ ./browser-extensions/chrome/src ./browser-extensions/chrome/pages",
     "publish-package": "node ./scripts/publish-package.js",
     "pack-extension": "npm run pack-extension:chrome",
     "pack-extension:chrome": "./scripts/pack-extension-chrome.sh"
