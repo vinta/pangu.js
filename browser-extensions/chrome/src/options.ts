@@ -14,8 +14,10 @@ class OptionsController {
 
   private async initialize() {
     translatePage();
-    await this.render();
+    // Subscribe before the first render, so a change landing mid-render still
+    // triggers a repaint instead of leaving a section stale
     this.setupEventListeners();
+    await this.render();
   }
 
   private setupEventListeners() {
