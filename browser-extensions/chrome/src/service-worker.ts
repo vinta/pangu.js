@@ -1,10 +1,13 @@
 // NOTE: In service workers, we can't export directly, everything goes through messages
 import { getSettings, onSettingsChanged, reconcileSettings } from './utils/settings';
 import type { Settings } from './utils/types';
-import { isValidMatchPattern } from './utils/urls';
+import { isValidMatchPattern, shouldContentScriptBeActive } from './utils/urls';
 
 const SCRIPT_ID = 'paranoid-auto-spacing';
 const TEXT_AUTOSPACE_SCRIPT_ID = 'text-autospace';
+
+const OFF_BADGE_TEXT = 'OFF';
+const OFF_BADGE_COLOR = '#757575';
 
 async function unregisterAllContentScripts() {
   try {
@@ -76,22 +79,60 @@ function queueRegisterContentScripts() {
   return registrationQueue;
 }
 
+// The badge mirrors the popup status row with no special cases: 顯靈中 means no badge, 神隱中 means OFF, so manual mode badges every tab and chrome:// or new tab pages showing OFF is deliberate (#296).
+// Badge text color is left to Chrome's automatic contrast because setBadgeTextColor needs Chrome 110+ and we support 96+.
+async function updateTabBadge(tabId: number, url: string | undefined, current: Settings) {
+  const text = shouldContentScriptBeActive(current, url) ? '' : OFF_BADGE_TEXT;
+  try {
+    await chrome.action.setBadgeText({ tabId, text });
+  } catch {
+    // The tab can be closed between the triggering event and this write
+  }
+}
+
+async function updateAllTabBadges() {
+  const current = await getSettings();
+  const tabs = await chrome.tabs.query({});
+  await Promise.all(tabs.map((tab) => (tab.id === undefined ? undefined : updateTabBadge(tab.id, tab.url, current))));
+}
+
 chrome.runtime.onInstalled.addListener(async () => {
   // Reconcile settings when extension is installed or updated to a new version
   await reconcileSettings();
   await queueRegisterContentScripts();
+  await chrome.action.setBadgeBackgroundColor({ color: OFF_BADGE_COLOR });
+  await updateAllTabBadges();
 });
 
 chrome.runtime.onStartup.addListener(async () => {
   // Also register content scripts when extension starts
   await queueRegisterContentScripts();
+  await chrome.action.setBadgeBackgroundColor({ color: OFF_BADGE_COLOR });
+  await updateAllTabBadges();
+});
+
+// The url is often not set yet on onCreated (new tab pages never get one at all, which correctly reads as inactive), onUpdated below refines it as soon as navigation commits
+chrome.tabs.onCreated.addListener(async (tab) => {
+  if (tab.id !== undefined) {
+    await updateTabBadge(tab.id, tab.url || tab.pendingUrl, await getSettings());
+  }
+});
+
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'loading' || changeInfo.url) {
+    await updateTabBadge(tabId, tab.url, await getSettings());
+  }
 });
 
 // Registered synchronously at module scope, as MV3 requires for storage events to wake this worker. The event payload alone says what changed, so a
 // cold-started worker reacts correctly without any cached state.
 const REGISTRATION_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist', 'is_enable_text_autospace'];
+const BADGE_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist'];
 onSettingsChanged((changedKeys) => {
   if (changedKeys.some((key) => REGISTRATION_KEYS.includes(key))) {
     queueRegisterContentScripts();
+  }
+  if (changedKeys.some((key) => BADGE_KEYS.includes(key))) {
+    updateAllTabBadges().catch(console.error);
   }
 });
