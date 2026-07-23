@@ -6,8 +6,9 @@ import { isValidMatchPattern, shouldContentScriptBeActive } from './utils/urls';
 const SCRIPT_ID = 'paranoid-auto-spacing';
 const TEXT_AUTOSPACE_SCRIPT_ID = 'text-autospace';
 
-const OFF_BADGE_TEXT = 'OFF';
-const OFF_BADGE_COLOR = '#757575';
+// A single character keeps the badge at Chrome's minimum 14dp corner chip: three wide capitals like OFF widen it past 20dp and Chrome then centers a full-width pill over the whole icon.
+// U+00D7 MULTIPLICATION SIGN instead of the letter X because Chrome vertically centers badge text by font ascent/descent, so a capital rides high while the math glyph sits on the optical center.
+const OFF_BADGE_TEXT = '×';
 
 async function unregisterAllContentScripts() {
   try {
@@ -79,8 +80,8 @@ function queueRegisterContentScripts() {
   return registrationQueue;
 }
 
-// The badge mirrors the popup status row with no special cases: 顯靈中 means no badge, 神隱中 means OFF, so manual mode badges every tab and chrome:// or new tab pages showing OFF is deliberate (#296).
-// Badge text color is left to Chrome's automatic contrast because setBadgeTextColor needs Chrome 110+ and we support 96+.
+// The badge mirrors the popup status row with no special cases: 顯靈中 means no badge, 神隱中 means the × badge, so manual mode badges every tab and chrome:// or new tab pages showing × is deliberate (#296).
+// Badge colors are left entirely to Chrome: the unset background gives the theme-aware default chip with auto-contrast text, same as uBlacklist (setBadgeTextColor would need Chrome 110+, we support 96+).
 async function updateTabBadge(tabId: number, url: string | undefined, current: Settings) {
   const text = shouldContentScriptBeActive(current, url) ? '' : OFF_BADGE_TEXT;
   try {
@@ -100,14 +101,12 @@ chrome.runtime.onInstalled.addListener(async () => {
   // Reconcile settings when extension is installed or updated to a new version
   await reconcileSettings();
   await queueRegisterContentScripts();
-  await chrome.action.setBadgeBackgroundColor({ color: OFF_BADGE_COLOR });
   await updateAllTabBadges();
 });
 
 chrome.runtime.onStartup.addListener(async () => {
   // Also register content scripts when extension starts
   await queueRegisterContentScripts();
-  await chrome.action.setBadgeBackgroundColor({ color: OFF_BADGE_COLOR });
   await updateAllTabBadges();
 });
 
