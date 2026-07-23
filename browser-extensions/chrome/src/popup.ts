@@ -178,11 +178,6 @@ class PopupController {
       await this.render();
       return;
     }
-
-    // Play a sound when turning off mute to confirm it works
-    if (!toggle.checked) {
-      await playSound('Hadouken');
-    }
   }
 
   private async handleTextAutospaceToggleChange() {
