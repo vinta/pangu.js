@@ -1,6 +1,6 @@
 import { DEFAULT_SETTINGS } from '../../browser-extensions/chrome/src/utils/settings';
 import type { Settings } from '../../browser-extensions/chrome/src/utils/types';
-import { isValidUrl, shouldContentScriptBeActive } from '../../browser-extensions/chrome/src/utils/urls';
+import { isValidUrl, shouldContentScriptBeActive, shouldShowOffIcon } from '../../browser-extensions/chrome/src/utils/urls';
 import { describe, expect, it } from 'vitest';
 
 function makeSettings(overrides: Partial<Settings> = {}): Settings {
@@ -60,5 +60,33 @@ describe('shouldContentScriptBeActive', () => {
   it('is inactive everywhere in whitelist mode with an empty whitelist', () => {
     const current = makeSettings({ filter_mode: 'whitelist' });
     expect(shouldContentScriptBeActive(current, 'https://example.com/')).toBe(false);
+  });
+});
+
+describe('shouldShowOffIcon', () => {
+  it('shows the off icon everywhere in manual mode, even on pages without a url', () => {
+    const current = makeSettings({ spacing_mode: 'spacing_when_click' });
+    expect(shouldShowOffIcon(current, 'https://example.com/')).toBe(true);
+    expect(shouldShowOffIcon(current, undefined)).toBe(true);
+  });
+
+  it('keeps the default icon on pages the extension merely cannot run on', () => {
+    expect(shouldShowOffIcon(makeSettings(), undefined)).toBe(false);
+    expect(shouldShowOffIcon(makeSettings(), '')).toBe(false);
+    expect(shouldShowOffIcon(makeSettings(), 'chrome://extensions/')).toBe(false);
+  });
+
+  it('keeps the default icon on pages not matching the blacklist', () => {
+    expect(shouldShowOffIcon(makeSettings(), 'https://example.com/')).toBe(false);
+  });
+
+  it('shows the off icon on blacklisted pages', () => {
+    expect(shouldShowOffIcon(makeSettings(), 'https://docs.google.com/document/d/abc')).toBe(true);
+  });
+
+  it('shows the off icon on non-whitelisted pages in whitelist mode', () => {
+    const current = makeSettings({ filter_mode: 'whitelist', whitelist: ['https://example.com/*'] });
+    expect(shouldShowOffIcon(current, 'https://example.com/foo')).toBe(false);
+    expect(shouldShowOffIcon(current, 'https://other.com/')).toBe(true);
   });
 });

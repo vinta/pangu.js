@@ -1,7 +1,7 @@
 // NOTE: In service workers, we can't export directly, everything goes through messages
 import { getSettings, onSettingsChanged, reconcileSettings } from './utils/settings';
 import type { Settings } from './utils/types';
-import { isValidMatchPattern, shouldContentScriptBeActive } from './utils/urls';
+import { isValidMatchPattern, shouldShowOffIcon } from './utils/urls';
 
 const SCRIPT_ID = 'paranoid-auto-spacing';
 const TEXT_AUTOSPACE_SCRIPT_ID = 'text-autospace';
@@ -82,9 +82,9 @@ function queueRegisterContentScripts() {
   return registrationQueue;
 }
 
-// The icon mirrors the popup status row exactly: 顯靈中 shows the face, 神隱中 puts on the paper bag, so manual mode hides every tab and chrome:// or new tab pages wearing the bag is deliberate (#296).
+// The paper bag only marks spacing the user turned off: manual mode bags every tab, a filter-excluded url bags its tab (#296). Pages the extension merely cannot run on (chrome://, new tab pages, urls it cannot read) keep the face, so the icon is deliberately looser than the popup status row, which still reports those as 神隱中.
 async function updateTabIcon(tabId: number, url: string | undefined, current: Settings) {
-  const path = shouldContentScriptBeActive(current, url) ? DEFAULT_ICON_PATHS : OFF_ICON_PATHS;
+  const path = shouldShowOffIcon(current, url) ? OFF_ICON_PATHS : DEFAULT_ICON_PATHS;
   try {
     await chrome.action.setIcon({ tabId, path });
   } catch {
@@ -111,7 +111,7 @@ chrome.runtime.onStartup.addListener(async () => {
   await updateAllTabIcons();
 });
 
-// The url is often not set yet on onCreated (new tab pages never get one at all, which correctly reads as inactive), onUpdated below refines it as soon as navigation commits
+// The url is often not set yet on onCreated (new tab pages never get one at all, and a missing url is never user-excluded, so it keeps the face), onUpdated below refines it as soon as navigation commits
 chrome.tabs.onCreated.addListener(async (tab) => {
   if (tab.id !== undefined) {
     await updateTabIcon(tab.id, tab.url || tab.pendingUrl, await getSettings());
