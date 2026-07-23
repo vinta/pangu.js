@@ -6,11 +6,9 @@ import { describe, it, expect } from 'vitest';
 const spacingBoundary: BoundarySpacingContext = {
   currentTail: '中',
   nextFirst: 'a',
-  nextHead: 'a',
   currentEndsWithSpace: false,
   nextStartsWithSpace: false,
   whitespaceBetween: false,
-  nbspBetween: false,
   contentBetween: false,
   spaceLikeSiblingAfterCurrent: false,
   spaceLikeSiblingAfterCurrentBoundary: false,
@@ -24,8 +22,6 @@ const spacingBoundary: BoundarySpacingContext = {
   hiddenBoundaryBefore: () => false,
   hiddenBoundaryAfter: () => false,
   inGridOrFlexContainer: () => false,
-  flexRowFlushBoundary: () => false,
-  inlineBlockFlushBoundary: () => false,
 };
 
 // A layout-dependent fact that the verdict must not need on this path
@@ -110,10 +106,11 @@ describe('decideBoundarySpacing()', () => {
     { name: 'colon without context then CJK', context: { currentTail: ':', nextFirst: '低' }, verdict: 'none' },
     // The probe spaces inside the tail here (中 g), never at the junction
     { name: 'a space that belongs inside the tail', context: { currentTail: '中g', nextFirst: 'x' }, verdict: 'none' },
+    // FIXME: Reverted with the flush-boundary spacing feature; needs the nextHead context field back. Re-enable with the feature.
     // The junction alone has no CJK, but nextHead reaches the 十 inside the
     // brackets, so AN_LEFT_BRACKET gets its context (the Google Calendar case)
-    { name: 'a CJK just past the junction window', context: { currentTail: 'g 1', nextFirst: '(', nextHead: '(十九)' }, verdict: 'prepend-next' },
-    { name: 'no CJK anywhere near the junction', context: { currentTail: 'g 1', nextFirst: '(', nextHead: '(999' }, verdict: 'none' },
+    // { name: 'a CJK just past the junction window', context: { currentTail: 'g 1', nextFirst: '(', nextHead: '(十九)' }, verdict: 'prepend-next' },
+    // { name: 'no CJK anywhere near the junction', context: { currentTail: 'g 1', nextFirst: '(', nextHead: '(999' }, verdict: 'none' },
   ];
 
   it.each(probeCases)('probes the spacing engine with $name', ({ context, verdict }) => {
@@ -157,50 +154,6 @@ describe('decideBoundarySpacing()', () => {
   ];
 
   it.each(insertElementCases)('$name', ({ context, verdict }) => {
-    expect(decideBoundarySpacing(boundaryContext(context))).toBe(verdict);
-  });
-
-  // Block or blockified boundaries collapse any written U+0020, so a flush row
-  // flex parent upgrades them to a U+00A0 text node between the items
-  const flushFlexRowCases: BoundaryCase[] = [
-    { name: 'a flush flex row upgrades a current block boundary to insert-nbsp-text', context: { currentBoundaryIsBlock: true, flexRowFlushBoundary: () => true }, verdict: 'insert-nbsp-text' },
-    { name: 'a flush flex row upgrades a next block boundary to insert-nbsp-text', context: { nextBoundaryIsBlock: true, flexRowFlushBoundary: () => true }, verdict: 'insert-nbsp-text' },
-    { name: 'a flush flex row upgrades insert-element to insert-nbsp-text', context: { ...insertElementBoundary, inGridOrFlexContainer: () => true, flexRowFlushBoundary: () => true }, verdict: 'insert-nbsp-text' },
-    { name: 'a block boundary without a flush flex row still does nothing', context: { nextBoundaryIsBlock: true, flexRowFlushBoundary: () => false }, verdict: 'none' },
-    { name: 'a space-like sibling before the next run vetoes before the flush check runs', context: { currentBoundaryIsBlock: true, spaceLikeSiblingBeforeNext: true, flexRowFlushBoundary: neverConsulted('flexRowFlushBoundary') }, verdict: 'none' },
-    { name: 'a space-like sibling before the next boundary vetoes before the flush check runs', context: { nextBoundaryIsBlock: true, spaceLikeSiblingBeforeNextBoundary: true, flexRowFlushBoundary: neverConsulted('flexRowFlushBoundary') }, verdict: 'none' },
-    { name: 'an ignored next boundary vetoes before the flush check runs', context: { currentBoundaryIsBlock: true, nextBoundaryIsIgnored: true, flexRowFlushBoundary: neverConsulted('flexRowFlushBoundary') }, verdict: 'none' },
-  ];
-
-  it.each(flushFlexRowCases)('$name', ({ context, verdict }) => {
-    expect(decideBoundarySpacing(boundaryContext(context))).toBe(verdict);
-  });
-
-  // Collapsible spaces at flush block boundaries render as nothing, so they
-  // must not settle the boundary; a U+00A0 between the runs always does
-  const collapsedSpaceCases: BoundaryCase[] = [
-    { name: 'a leading space in the next run does not veto a flush flex row', context: { nextStartsWithSpace: true, nextBoundaryIsBlock: true, flexRowFlushBoundary: () => true }, verdict: 'insert-nbsp-text' },
-    { name: 'a trailing space in the current run does not veto a flush flex row', context: { currentEndsWithSpace: true, currentBoundaryIsBlock: true, flexRowFlushBoundary: () => true }, verdict: 'insert-nbsp-text' },
-    { name: 'whitespace between block runs does not veto a flush flex row', context: { whitespaceBetween: true, currentBoundaryIsBlock: true, flexRowFlushBoundary: () => true }, verdict: 'insert-nbsp-text' },
-    { name: 'whitespace between block runs settles the boundary outside flex', context: { whitespaceBetween: true, currentBoundaryIsBlock: true, inlineBlockFlushBoundary: neverConsulted('inlineBlockFlushBoundary') }, verdict: 'none' },
-    { name: 'a U+00A0 between the runs settles the boundary without any flush check', context: { whitespaceBetween: true, nbspBetween: true, currentBoundaryIsBlock: true, flexRowFlushBoundary: neverConsulted('flexRowFlushBoundary'), inlineBlockFlushBoundary: neverConsulted('inlineBlockFlushBoundary') }, verdict: 'none' },
-    { name: 'an existing space settles non-block boundaries without any flush check', context: { nextStartsWithSpace: true, flexRowFlushBoundary: neverConsulted('flexRowFlushBoundary'), inlineBlockFlushBoundary: neverConsulted('inlineBlockFlushBoundary') }, verdict: 'none' },
-  ];
-
-  it.each(collapsedSpaceCases)('$name', ({ context, verdict }) => {
-    expect(decideBoundarySpacing(boundaryContext(context))).toBe(verdict);
-  });
-
-  // Inline-blocks flush on one shared line take the pangu element, whose
-  // U+0020 renders in normal flow
-  const flushInlineBlockCases: BoundaryCase[] = [
-    { name: 'flush inline-blocks at a block boundary get a pangu element', context: { currentBoundaryIsBlock: true, inlineBlockFlushBoundary: () => true }, verdict: 'insert-element' },
-    { name: 'a leading space does not veto flush inline-blocks', context: { nextStartsWithSpace: true, nextBoundaryIsBlock: true, inlineBlockFlushBoundary: () => true }, verdict: 'insert-element' },
-    { name: 'a hidden boundary before vetoes the flush block path', context: { currentBoundaryIsBlock: true, hiddenBoundaryBefore: () => true, flexRowFlushBoundary: neverConsulted('flexRowFlushBoundary'), inlineBlockFlushBoundary: neverConsulted('inlineBlockFlushBoundary') }, verdict: 'none' },
-    { name: 'a hidden boundary after vetoes the flush block path', context: { currentBoundaryIsBlock: true, hiddenBoundaryAfter: () => true, flexRowFlushBoundary: neverConsulted('flexRowFlushBoundary'), inlineBlockFlushBoundary: neverConsulted('inlineBlockFlushBoundary') }, verdict: 'none' },
-  ];
-
-  it.each(flushInlineBlockCases)('$name', ({ context, verdict }) => {
     expect(decideBoundarySpacing(boundaryContext(context))).toBe(verdict);
   });
 });
@@ -259,8 +212,6 @@ describe('layout-dependent facts are consulted lazily', () => {
     hiddenBoundaryBefore: neverConsulted('hiddenBoundaryBefore'),
     hiddenBoundaryAfter: neverConsulted('hiddenBoundaryAfter'),
     inGridOrFlexContainer: neverConsulted('inGridOrFlexContainer'),
-    flexRowFlushBoundary: neverConsulted('flexRowFlushBoundary'),
-    inlineBlockFlushBoundary: neverConsulted('inlineBlockFlushBoundary'),
   };
 
   it('consults no layout fact when the text runs are already spaced', () => {
@@ -271,36 +222,34 @@ describe('layout-dependent facts are consulted lazily', () => {
     expect(decideBoundarySpacing(boundaryContext({ ...layoutFactsUnavailable, currentTail: '中', nextFirst: '文' }))).toBe('none');
   });
 
-  it('consults only hidden and flush facts when the current boundary is a block', () => {
-    const context = boundaryContext({
-      ...layoutFactsUnavailable,
-      currentBoundaryIsBlock: true,
-      hiddenBoundaryBefore: () => false,
-      hiddenBoundaryAfter: () => false,
-      flexRowFlushBoundary: () => false,
-      inlineBlockFlushBoundary: () => false,
-    });
-    expect(decideBoundarySpacing(context)).toBe('none');
+  it('consults no layout fact when the current boundary is a block', () => {
+    expect(decideBoundarySpacing(boundaryContext({ ...layoutFactsUnavailable, currentBoundaryIsBlock: true }))).toBe('none');
   });
 
-  it('leaves hidden-after, grid/flex, and the flush facts unconsulted on the prepend-next path', () => {
-    const context = boundaryContext({
-      hiddenBoundaryAfter: neverConsulted('hiddenBoundaryAfter'),
-      inGridOrFlexContainer: neverConsulted('inGridOrFlexContainer'),
-      flexRowFlushBoundary: neverConsulted('flexRowFlushBoundary'),
-      inlineBlockFlushBoundary: neverConsulted('inlineBlockFlushBoundary'),
-    });
+  // FIXME: Reverted with the flush-boundary spacing feature. When it returns,
+  // block boundaries consult the hidden and flush facts, so this replaces the
+  // test above (and the flush facts join layoutFactsUnavailable plus the
+  // prepend-next/append-current neverConsulted sets).
+  //
+  // it('consults only hidden and flush facts when the current boundary is a block', () => {
+  //   const context = boundaryContext({
+  //     ...layoutFactsUnavailable,
+  //     currentBoundaryIsBlock: true,
+  //     hiddenBoundaryBefore: () => false,
+  //     hiddenBoundaryAfter: () => false,
+  //     flexRowFlushBoundary: () => false,
+  //     inlineBlockFlushBoundary: () => false,
+  //   });
+  //   expect(decideBoundarySpacing(context)).toBe('none');
+  // });
+
+  it('leaves hidden-after and grid/flex unconsulted on the prepend-next path', () => {
+    const context = boundaryContext({ hiddenBoundaryAfter: neverConsulted('hiddenBoundaryAfter'), inGridOrFlexContainer: neverConsulted('inGridOrFlexContainer') });
     expect(decideBoundarySpacing(context)).toBe('prepend-next');
   });
 
-  it('leaves hidden-before, grid/flex, and the flush facts unconsulted on the append-current path', () => {
-    const context = boundaryContext({
-      ...appendCurrentBoundary,
-      hiddenBoundaryBefore: neverConsulted('hiddenBoundaryBefore'),
-      inGridOrFlexContainer: neverConsulted('inGridOrFlexContainer'),
-      flexRowFlushBoundary: neverConsulted('flexRowFlushBoundary'),
-      inlineBlockFlushBoundary: neverConsulted('inlineBlockFlushBoundary'),
-    });
+  it('leaves hidden-before and grid/flex unconsulted on the append-current path', () => {
+    const context = boundaryContext({ ...appendCurrentBoundary, hiddenBoundaryBefore: neverConsulted('hiddenBoundaryBefore'), inGridOrFlexContainer: neverConsulted('inGridOrFlexContainer') });
     expect(decideBoundarySpacing(context)).toBe('append-current');
   });
 
