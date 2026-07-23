@@ -1,38 +1,15 @@
 // NOTE: In service workers, we can't export directly, everything goes through messages
-import { DEFAULT_SETTINGS } from './utils/settings';
+import { getSettingsStore } from './utils/settings';
 import type { Settings } from './utils/types';
 import { isValidMatchPattern } from './utils/urls';
 
 const SCRIPT_ID = 'paranoid-auto-spacing';
 const TEXT_AUTOSPACE_SCRIPT_ID = 'text-autospace';
 
-async function initializeSettings() {
-  const syncedSettings = await chrome.storage.sync.get();
-
-  const settingsToAdd: Partial<Settings> = {};
-  const settingsToRemove: string[] = [];
-
-  for (const [key, defaultValue] of Object.entries(DEFAULT_SETTINGS)) {
-    if (!(key in syncedSettings)) {
-      settingsToAdd[key as keyof Settings] = defaultValue;
-    }
-  }
-
-  const validKeys = Object.keys(DEFAULT_SETTINGS);
-  for (const key of Object.keys(syncedSettings)) {
-    if (!validKeys.includes(key)) {
-      settingsToRemove.push(key);
-    }
-  }
-
-  if (Object.keys(settingsToAdd).length > 0) {
-    await chrome.storage.sync.set(settingsToAdd);
-  }
-
-  if (settingsToRemove.length > 0) {
-    await chrome.storage.sync.remove(settingsToRemove);
-  }
-}
+// Constructed at module scope on purpose: the store registers its
+// chrome.storage.onChanged listener synchronously here, which MV3 requires
+// for storage events to wake this worker
+const settings = getSettingsStore();
 
 async function unregisterAllContentScripts() {
   try {
@@ -63,9 +40,9 @@ async function registerContentScript(contentScript: chrome.scripting.RegisteredC
 async function registerContentScripts() {
   await unregisterAllContentScripts();
 
-  const settings = (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
+  const current = await settings.get();
 
-  if (settings.is_enable_text_autospace) {
+  if (current.is_enable_text_autospace) {
     // Visual-only native autospacing, deliberately not gated by spacing_mode,
     // filter_mode, blacklist, or whitelist (see docs/adr/0002)
     await registerContentScript({
@@ -76,7 +53,7 @@ async function registerContentScripts() {
     });
   }
 
-  if (settings.spacing_mode === 'spacing_when_load') {
+  if (current.spacing_mode === 'spacing_when_load') {
     const contentScript: chrome.scripting.RegisteredContentScript = {
       id: SCRIPT_ID,
       js: ['vendors/pangu/pangu.umd.js', 'dist/content-script.js'],
@@ -85,11 +62,11 @@ async function registerContentScripts() {
     };
 
     // Just in case there are invalid match patterns from old settings
-    const validBlacklist = settings.blacklist.filter((pattern) => isValidMatchPattern(pattern));
-    const validWhitelist = settings.whitelist.filter((pattern) => isValidMatchPattern(pattern));
-    if (settings.filter_mode === 'blacklist' && validBlacklist.length > 0) {
+    const validBlacklist = current.blacklist.filter((pattern) => isValidMatchPattern(pattern));
+    const validWhitelist = current.whitelist.filter((pattern) => isValidMatchPattern(pattern));
+    if (current.filter_mode === 'blacklist' && validBlacklist.length > 0) {
       contentScript.excludeMatches = validBlacklist;
-    } else if (settings.filter_mode === 'whitelist' && validWhitelist.length > 0) {
+    } else if (current.filter_mode === 'whitelist' && validWhitelist.length > 0) {
       contentScript.matches = validWhitelist;
     }
 
@@ -98,8 +75,8 @@ async function registerContentScripts() {
 }
 
 chrome.runtime.onInstalled.addListener(async () => {
-  // Initialize settings when extension is installed or updated to a new version
-  await initializeSettings();
+  // Reconcile settings when extension is installed or updated to a new version
+  await settings.reconcile();
   await registerContentScripts();
 });
 
@@ -108,14 +85,12 @@ chrome.runtime.onStartup.addListener(async () => {
   await registerContentScripts();
 });
 
-chrome.storage.onChanged.addListener(async (changes, areaName) => {
-  // Re-register content scripts when relevant settings change
-  if (areaName === 'sync') {
-    const relevantKeys: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist', 'is_enable_text_autospace'];
-    const hasRelevantChanges = Object.keys(changes).some((key) => relevantKeys.includes(key as keyof Settings));
-
-    if (hasRelevantChanges) {
-      await registerContentScripts();
-    }
+// Re-register content scripts when relevant settings change. The store also
+// notifies for the change that woke this worker, so a sleeping worker still
+// reacts to writes from the popup and options pages.
+const REGISTRATION_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist', 'is_enable_text_autospace'];
+settings.subscribe((_newSettings, changedKeys) => {
+  if (changedKeys.some((key) => REGISTRATION_KEYS.includes(key))) {
+    registerContentScripts().catch(console.error);
   }
 });
