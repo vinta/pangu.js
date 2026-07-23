@@ -23,6 +23,10 @@ _Avoid_: pair spacing, adjacent-node spacing
 A marker element injected to render a space at a boundary where neither adjacent text run may be modified.
 _Avoid_: space element
 
+**Native autospacing**:
+Visual-only spacing the browser renders where CJK meets half-width letters or digits, inserting no character, so copied text is unchanged. Narrower than a real space, blind to symbols, and skipped wherever a real space already exists, so it layers safely under text spacing and boundary spacing.
+_Avoid_: CSS spacing, autospace mode, text-autospace (in prose)
+
 ## Paranoid Text Spacing Algorithm
 
 The algorithm behind text spacing. Source of truth: `src/shared/index.ts`, exhaustive examples: the per-symbol files in `tests/shared/`.

@@ -242,6 +242,14 @@ a:hover {
   color: var(--color-text-primary);
 }
 
+.toggle.toggle-disabled {
+  cursor: not-allowed;
+}
+
+.toggle.toggle-disabled .toggle-switch {
+  background-color: var(--color-surface-tertiary);
+}
+
 /* Cards */
 .card {
   background-color: var(--color-surface);

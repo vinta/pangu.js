@@ -79,7 +79,7 @@
 
 ## External Tool Documentation
 
-When you need information about tools used in this project, use the `find-docs` skill or `WebFetch`.
+Invoke the `find-docs` skill BEFORE writing code that touches a dependency's API or config, not only when the user asks about a tool. Do not answer from training data, even for familiar APIs.
 
 ### Context7 Library IDs
 
@@ -87,30 +87,17 @@ Pre-resolved IDs for the `find-docs` skill. Pass directly to `ctx7 docs`, skippi
 
 | Tool                                    | `libraryId`                             |
 | --------------------------------------- | --------------------------------------- |
+| Chrome Extensions                       | `/websites/developer_chrome_extensions` |
 | ESLint                                  | `/eslint/eslint`                        |
 | eslint-plugin-unicorn                   | `/sindresorhus/eslint-plugin-unicorn`   |
 | typescript-eslint                       | `/typescript-eslint/typescript-eslint`  |
+| MDN Web Docs                            | `/mdn/content`                          |
 | nodemon                                 | `/remy/nodemon`                         |
 | Playwright                              | `/microsoft/playwright`                 |
 | Prettier                                | `/prettier/prettier`                    |
 | `@trivago/prettier-plugin-sort-imports` | `/trivago/prettier-plugin-sort-imports` |
 | Vite                                    | `/vitejs/vite`                          |
 | Vitest                                  | `/vitest-dev/vitest`                    |
-
-### Documentation Links
-
-For topics not well covered by Context7, use `WebFetch` on these URLs:
-
-- Chrome Extensions
-  - https://developer.chrome.com/docs/extensions/
-- Chrome Extension Manifest
-  - https://developer.chrome.com/docs/extensions/reference/manifest/
-- Chrome Extension Match Patterns
-  - https://developer.chrome.com/docs/extensions/develop/concepts/match-patterns
-- Chrome Extension Scripting API
-  - https://developer.chrome.com/docs/extensions/reference/api/scripting
-- Chrome Extension Storage API
-  - https://developer.chrome.com/docs/extensions/reference/api/storage
 
 ## Agent Skills
 
