@@ -21,12 +21,13 @@
   "homepage": "https://github.com/vinta/pangu.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/vinta/pangu.js.git"
+    "url": "git+https://github.com/vinta/pangu.js.git"
   },
   "bugs": {
     "url": "https://github.com/vinta/pangu.js/issues"
   },
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/node/index.cjs",
   "module": "./dist/node/index.js",
   "browser": {
