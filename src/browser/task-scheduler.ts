@@ -53,7 +53,7 @@ export class TaskQueue {
 export class TaskScheduler {
   public readonly config: TaskSchedulerConfig = {
     enabled: true,
-    timeout: 2000, // 2 second timeout for idle processing
+    timeout: 2000, // Not consulted by scheduleProcessing(), which uses a hardcoded 5000ms idle deadline
   };
 
   private taskQueue = new TaskQueue();

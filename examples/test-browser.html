@@ -75,7 +75,7 @@
         function spacingDemo1() {
             const elem = document.getElementById('demo1');
             const original = elem.textContent;
-            pangu.spacingElementById('demo1');
+            pangu.spacingNode(elem);
             const result = document.getElementById('result');
             result.textContent = `UMD Version Result:\nOriginal: ${original}\nProcessed: ${elem.textContent}`;
         }

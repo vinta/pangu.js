@@ -17,7 +17,6 @@ npm run test:node               # Test Node.js-specific code
 npm run test:browser            # Test browser code (uses Playwright)
 
 npm run lint
-npm run lint:fix
 
 npm run publish-package 1.2.3   # Bump version across files (incl. README), build, and pack extension (does NOT commit or tag)
 ```

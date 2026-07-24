@@ -34,9 +34,9 @@
 - Run shared logic tests with `npm run test:shared`.
 - Run Node.js tests with `npm run test:node`.
 - Run browser tests with `npm run test:browser`.
-- Run lint with `npm run lint`; use `npm run lint:fix` only when formatting or lint fixes are part of the task.
+- Run lint with `npm run lint`.
 - Clean generated artifacts with `npm run clean`.
-- Package the extension with `npm run pack-extension` or `npm run pack-extension:chrome`.
+- Package the extension with `npm run pack-extension`.
 
 ## Workflow
 
