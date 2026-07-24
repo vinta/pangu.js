@@ -3,7 +3,9 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
+    // The published .d.ts files are checked the way consumers resolve them, so an extensionless relative import fails the build here instead of breaking anyone using moduleResolution node16/nodenext
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "outDir": "../../dist",
     "rootDir": "..",
     "noEmit": false,
