@@ -72,6 +72,7 @@
     "test:node": "npm run build && vitest run tests/node/",
     "test:extension": "vitest run tests/extension/",
     "test:browser": "npm run build && playwright test --reporter=list",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p src/browser/tsconfig.json && tsc --noEmit -p src/node/tsconfig.json",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "format": "prettier --write ./src/ ./browser-extensions/chrome/src ./browser-extensions/chrome/pages",
