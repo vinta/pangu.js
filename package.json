@@ -73,6 +73,7 @@
     "test:extension": "vitest run tests/extension/",
     "test:browser": "npm run build && playwright test --reporter=list",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p src/browser/tsconfig.json && tsc --noEmit -p src/node/tsconfig.json",
+    "check:package": "attw --pack . --entrypoints . && attw --pack . --entrypoints ./browser --profile esm-only && publint",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "format": "prettier --write ./src/ ./browser-extensions/chrome/src ./browser-extensions/chrome/pages",
@@ -82,6 +83,7 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
     "@playwright/test": "1.58.2",
     "@trivago/prettier-plugin-sort-imports": "6.0.2",
     "@types/chrome": "0.1.37",
@@ -91,6 +93,7 @@
     "eslint-plugin-unicorn": "63.0.0",
     "nodemon": "3.1.14",
     "prettier": "3.8.1",
+    "publint": "0.3.21",
     "typescript": "5.9.3",
     "typescript-eslint": "8.56.1",
     "vite": "8.0.16",

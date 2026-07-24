@@ -44,6 +44,9 @@ jobs:
       - name: Run test
         run: npm run test
 
+      - name: Check package (types + exports)
+        run: npm run check:package
+
       - name: Check version
         if: startsWith(github.ref, 'refs/tags/v')
         run: |

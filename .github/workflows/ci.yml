@@ -40,6 +40,9 @@ jobs:
       - name: Run lint
         run: npm run lint
 
+      - name: Check package (types + exports)
+        run: npm run check:package
+
   node-test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
