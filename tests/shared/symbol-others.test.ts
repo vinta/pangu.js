@@ -46,4 +46,17 @@ describe('Other Symbols', () => {
     expect(pangu.spacingText('【UCG中字】“數毛社”DF的《戰神4》全新演示解析'))
                        .toBe('【UCG 中字】“數毛社” DF 的《戰神 4》全新演示解析');
   });
+
+  // ✀-➿
+  it('handle Dingbats symbols, add space between them and CJK', () => {
+    expect(pangu.spacingText('剪刀✂符號')).toBe('剪刀 ✂ 符號');
+    expect(pangu.spacingText('完成✅了')).toBe('完成 ✅ 了');
+    expect(pangu.spacingText('愛心❤符號')).toBe('愛心 ❤ 符號');
+  });
+
+  // — An em-dash is not a spaced half-width symbol, so it stays flush against CJK
+  it('handle — em-dash, does not add space with CJK', () => {
+    expect(pangu.spacingText('前面—後面')).toBe('前面—後面');
+    expect(pangu.spacingText('他說——不對')).toBe('他說——不對');
+  });
 });
