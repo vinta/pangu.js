@@ -10,6 +10,7 @@ permissions:
 jobs:
   check-title:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     permissions:
       issues: write

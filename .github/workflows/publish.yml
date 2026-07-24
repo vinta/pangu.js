@@ -15,12 +15,15 @@ concurrency:
 jobs:
   publish-npm:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     permissions:
       id-token: write # for npm provenance
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Use Node.js
         uses: actions/setup-node@v4
