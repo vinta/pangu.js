@@ -2,10 +2,6 @@
   "compilerOptions": {
     // Type checking
     "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
@@ -16,7 +12,6 @@
     "target": "ES2022",
     "moduleResolution": "bundler",
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
 
     // This base tsconfig is only used for type checking, not compilation
     "noEmit": true,
