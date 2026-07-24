@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    // Consumers on node16/nodenext are the strictest case: they require file extensions on relative imports, so checking here catches specifiers that would break them while bundler resolution stays quiet
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "noEmit": true,
+    // The point of this project is to check pangu's own published .d.ts files, so they must not be skipped
+    "skipLibCheck": false
+  },
+  "exclude": ["node_modules"]
+}

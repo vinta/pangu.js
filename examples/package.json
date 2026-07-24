@@ -3,13 +3,17 @@
   "version": "1.0.0",
   "description": "pangu.js Example app",
   "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "npm run test:commonjs && npm run test:esm && npm run test:cli && npm run typecheck",
     "test:commonjs": "node test-commonjs.js",
     "test:esm": "node test-esm.mjs",
     "test:cli": "node test-cli.js",
-    "test": "npm run test:commonjs && npm run test:esm && npm run test:cli",
     "server": "node server.js"
   },
   "dependencies": {
     "pangu": "8.1.0"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
   }
 }
