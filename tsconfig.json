@@ -6,6 +6,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
 
     // Module resolution
     "module": "ESNext",
