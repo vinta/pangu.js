@@ -13,6 +13,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # tests/ imports the built output from dist/, so typecheck needs a library build first
+      - name: Run build
+        run: npm run build:lib
+
+      - name: Run typecheck
+        run: npm run typecheck
+
+      - name: Run lint
+        run: npm run lint
+
   node-test:
     runs-on: ubuntu-latest
     strategy:
