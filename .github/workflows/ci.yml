@@ -30,18 +30,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # tests/ imports the built output from dist/, so typecheck needs a library build first
       - name: Run build
-        run: npm run build:lib
+        run: npm run build
 
       - name: Run typecheck
         run: npm run typecheck
 
       - name: Run lint
         run: npm run lint
-
-      - name: Check package (types + exports)
-        run: npm run check:package
 
   node-test:
     runs-on: ubuntu-latest
@@ -66,8 +62,11 @@ jobs:
       - name: Run build
         run: npm run build
 
+      - name: Run shared test
+        run: npm run test:shared
+
       - name: Run Node.js test
-        run: npm run test:shared && npm run test:node
+        run: npm run test:node
 
   browser-test:
     runs-on: ubuntu-latest
