@@ -1,4 +1,4 @@
-import { ANY_CJK, pangu } from '../shared';
+import { ANY_CJK, pangu } from '../shared/index.js';
 
 const QUOTE = /["\u201c\u201d]/;
 

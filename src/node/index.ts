@@ -1,4 +1,4 @@
-import { Pangu } from '../shared';
+import { Pangu } from '../shared/index.js';
 import { readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 
