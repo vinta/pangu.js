@@ -169,7 +169,7 @@ export class BrowserPangu extends Pangu {
     // Visibility verdicts are memoized per batch; styles may change between batches
     this.visibilityDetector.clearCache();
 
-    let currentTextNode: Node | null;
+    let currentTextNode: Node | undefined;
     let nextTextNode: Node | null = null;
 
     // Process nodes in the order provided

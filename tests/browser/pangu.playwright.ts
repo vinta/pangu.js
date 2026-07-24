@@ -183,8 +183,8 @@ test.describe('BrowserPangu', () => {
       await page.setContent(htmlContent);
       await page.evaluate(() => {
         const elements = document.getElementsByClassName('e2');
-        for (let i = 0; i < elements.length; i++) {
-          pangu.spacingNode(elements[i]);
+        for (const element of elements) {
+          pangu.spacingNode(element);
         }
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
@@ -198,8 +198,8 @@ test.describe('BrowserPangu', () => {
       await page.setContent(htmlContent);
       await page.evaluate(() => {
         const elements = document.getElementsByClassName('e4');
-        for (let i = 0; i < elements.length; i++) {
-          pangu.spacingNode(elements[i]);
+        for (const element of elements) {
+          pangu.spacingNode(element);
         }
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
@@ -213,8 +213,8 @@ test.describe('BrowserPangu', () => {
       await page.setContent(htmlContent);
       await page.evaluate(() => {
         const elements = document.getElementsByClassName('e5');
-        for (let i = 0; i < elements.length; i++) {
-          pangu.spacingNode(elements[i]);
+        for (const element of elements) {
+          pangu.spacingNode(element);
         }
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
@@ -230,8 +230,8 @@ test.describe('BrowserPangu', () => {
       await page.setContent(htmlContent);
       await page.evaluate(() => {
         const elements = document.getElementsByTagName('article');
-        for (let i = 0; i < elements.length; i++) {
-          pangu.spacingNode(elements[i]);
+        for (const element of elements) {
+          pangu.spacingNode(element);
         }
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());

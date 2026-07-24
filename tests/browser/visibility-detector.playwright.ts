@@ -164,10 +164,10 @@ test.describe('Visibility Detector', () => {
       const spans = content.querySelectorAll('span');
 
       return {
-        firstText: spans[0].textContent,
-        secondText: spans[1].textContent,
+        firstText: spans[0]!.textContent,
+        secondText: spans[1]!.textContent,
         // Second span should start with space since first is visible
-        secondStartsWithSpace: spans[1].textContent?.startsWith(' ') || false,
+        secondStartsWithSpace: spans[1]!.textContent?.startsWith(' ') || false,
       };
     });
 
@@ -208,8 +208,8 @@ test.describe('Visibility Detector', () => {
 
       // Find the last div (which is not sr-only) and get its last span
       for (let i = allDivs.length - 1; i >= 0; i--) {
-        if (!allDivs[i].classList.contains('sr-only')) {
-          const spans = allDivs[i].querySelectorAll('span');
+        if (!allDivs[i]!.classList.contains('sr-only')) {
+          const spans = allDivs[i]!.querySelectorAll('span');
           visibleNested = spans[spans.length - 1]; // Get the last span in this div
           break;
         }

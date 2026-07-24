@@ -8,6 +8,7 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
 
     // Module resolution
     "module": "ESNext",

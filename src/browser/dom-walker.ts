@@ -59,8 +59,7 @@ export class DomWalker {
 
     // Check if targetNode is the first child node (excluding comments) that has textContent
     // Note: textContent includes text from all descendants, so element nodes can match too
-    for (let i = 0; i < childNodes.length; i++) {
-      const childNode = childNodes[i];
+    for (const childNode of childNodes) {
       if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
         return childNode === targetNode;
       }
@@ -74,7 +73,7 @@ export class DomWalker {
     // Check if targetNode is the last child node (excluding comments) that has textContent
     // Note: textContent includes text from all descendants, so element nodes can match too
     for (let i = childNodes.length - 1; i > -1; i--) {
-      const childNode = childNodes[i];
+      const childNode = childNodes[i]!;
       if (childNode.nodeType !== Node.COMMENT_NODE && childNode.textContent) {
         return childNode === targetNode;
       }

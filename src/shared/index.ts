@@ -334,14 +334,14 @@ export class Pangu {
       // Tag names whose closing tag appears anywhere in the text: their opening tags are paired markup
       const closedTagNames = new Set<string>();
       for (const closingTag of newText.matchAll(CLOSING_HTML_TAG)) {
-        closedTagNames.add(closingTag[1].toLowerCase());
+        closedTagNames.add(closingTag[1]!.toLowerCase());
       }
 
       // Replace all HTML tags with placeholders, but process attribute values
       newText = newText.replace(HTML_TAG_PATTERN, (match) => {
         const bareTag = match.match(BARE_HTML_TAG);
         if (bareTag) {
-          const tagName = bareTag[1].toLowerCase();
+          const tagName = bareTag[1]!.toLowerCase();
           if (!VOID_HTML_TAGS.has(tagName) && !closedTagNames.has(tagName)) {
             return mentionedTagManager.store(match);
           }

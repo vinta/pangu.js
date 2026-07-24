@@ -321,7 +321,7 @@ class OptionsController {
 
   private async startEditingUrl(index: number) {
     const settings = await getSettings();
-    this.editingUrls.set(index, settings[settings.filter_mode][index]);
+    this.editingUrls.set(index, settings[settings.filter_mode][index]!);
     await this.renderUrlList();
 
     // Focus on the input
