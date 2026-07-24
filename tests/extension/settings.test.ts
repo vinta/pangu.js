@@ -138,7 +138,7 @@ describe('reconcileSettings', () => {
   });
 
   it('writes and notifies nothing when storage already matches the schema', async () => {
-    const storage = stubChromeStorage(structuredClone(DEFAULT_SETTINGS));
+    const storage = stubChromeStorage({ ...DEFAULT_SETTINGS });
     const calls: (keyof Settings)[][] = [];
     onSettingsChanged((changedKeys) => calls.push(changedKeys));
 
