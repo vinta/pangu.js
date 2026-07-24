@@ -13,6 +13,10 @@
     "moduleResolution": "bundler",
     "esModuleInterop": true,
 
+    // Vite transpiles each file in isolation, so reject syntax that only works when the compiler can see the whole program, and keep type-only imports explicit so they are erased predictably
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+
     // This base tsconfig is only used for type checking, not compilation
     "noEmit": true,
     "declaration": false,
