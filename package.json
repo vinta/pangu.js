@@ -38,16 +38,21 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/node/index.d.ts",
-      "import": "./dist/node/index.js",
-      "require": "./dist/node/index.cjs",
+      "import": {
+        "types": "./dist/node/index.d.ts",
+        "default": "./dist/node/index.js"
+      },
+      "require": {
+        "types": "./dist/node/index.d.cts",
+        "default": "./dist/node/index.cjs"
+      },
       "default": "./dist/node/index.js"
     },
     "./browser": {
-      "types": "./dist/browser/pangu.d.ts",
-      "import": "./dist/browser/pangu.js",
-      "require": "./dist/browser/pangu.umd.js",
-      "default": "./dist/browser/pangu.js"
+      "import": {
+        "types": "./dist/browser/pangu.d.ts",
+        "default": "./dist/browser/pangu.js"
+      }
     }
   },
   "files": [

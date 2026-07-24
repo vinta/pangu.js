@@ -63,7 +63,7 @@ const multiBuildPlugin = () => {
           minify: false,
           target: 'es2022',
           lib: {
-            entry: resolve(projectRoot, 'src/node/index.cjs.ts'),
+            entry: resolve(projectRoot, 'src/node/index.cts'),
             formats: ['cjs'],
             fileName: () => 'node/index.cjs',
           },

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-const { Pangu } = require('../shared/index.cjs');
-const { readFileSync } = require('node:fs');
-const { readFile } = require('node:fs/promises');
+const { Pangu } = require('../shared/index.cjs') as typeof import('../shared/index.js');
+const { readFileSync } = require('node:fs') as typeof import('node:fs');
+const { readFile } = require('node:fs/promises') as typeof import('node:fs/promises');
 /* eslint-enable @typescript-eslint/no-require-imports */
 
 // Re-implement NodePangu here to avoid circular imports
@@ -28,5 +28,4 @@ const pangu = new NodePangu();
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 // Export pangu instance as the module
-// @ts-expect-error - Using CommonJS export for compatibility
 export = pangu;
