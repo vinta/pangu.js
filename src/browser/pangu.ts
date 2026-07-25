@@ -10,6 +10,11 @@ export interface AutoSpacingPageConfig {
   nodeMaxWaitMs?: number;
 }
 
+// Any whitespace at a text run's edge already separates it from the neighboring run, matching the /\s/ that scanBetweenTextRuns uses on the nodes in the gap.
+// \s covers NBSP, which spacingText only normalizes to a regular space when it sits amid prose, so an NBSP that ends a text node survives to here and must still count as a space
+const TRAILING_WHITESPACE = /\s$/;
+const LEADING_WHITESPACE = /^\s/;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function once<T extends (...args: any[]) => any>(func: T) {
   let executed = false;
@@ -200,8 +205,8 @@ export class BrowserPangu extends Pangu {
         const verdict = decideBoundarySpacing({
           currentTail: currentTextNode.data.slice(-3),
           nextFirst: nextTextNode.data.slice(0, 1),
-          currentEndsWithSpace: currentTextNode.data.endsWith(' '),
-          nextStartsWithSpace: nextTextNode.data.startsWith(' '),
+          currentEndsWithSpace: TRAILING_WHITESPACE.test(currentTextNode.data),
+          nextStartsWithSpace: LEADING_WHITESPACE.test(nextTextNode.data),
           whitespaceBetween,
           contentBetween,
           spaceLikeSiblingAfterCurrent: this.isSpaceLikeSibling(currentTextNode.nextSibling),

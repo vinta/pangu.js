@@ -8,7 +8,8 @@ const __dirname = dirname(__filename);
 
 function loadFixture(filename: string) {
   const fixturePath = join(__dirname, '../../fixtures', filename);
-  return readFileSync(fixturePath, 'utf8');
+  // Byte-sensitive fixtures carry a <!-- prettier-ignore --> pragma to keep Prettier from reflowing them, which is not part of the markup under test
+  return readFileSync(fixturePath, 'utf8').replace('<!-- prettier-ignore -->\n', '');
 }
 
 test.describe('BrowserPangu', () => {
@@ -818,6 +819,21 @@ test.describe('BrowserPangu', () => {
       // newlines must survive, and the install command must stay copy-pasteable
       const htmlContent = loadFixture('tweet-text.html');
       const expected = loadFixture('tweet-text.expected.html').trim();
+
+      await page.setContent(htmlContent);
+      await page.evaluate(() => {
+        pangu.spacingPage();
+      });
+      const actual = await page.evaluate(() => document.body.innerHTML.trim());
+      expect(actual).toBe(expected);
+    });
+
+    test('should not add a space next to an &nbsp; that ends a text node before a link (real-world case)', async ({ page }) => {
+      // Every boundary here is already separated by an &nbsp;. Mid-text ones normalize to a plain
+      // space via SOLITARY_NBSP, but the one ending 不要用 sits at the text node edge, so it stays
+      // an &nbsp; and the 用/ether.fi boundary must not stack a second space on top of it
+      const htmlContent = loadFixture('calendar-event-description.html');
+      const expected = loadFixture('calendar-event-description.expected.html').trim();
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
