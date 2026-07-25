@@ -1,6 +1,7 @@
-import { Pangu } from '../shared/index.js';
 import { readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
+
+import { Pangu } from '../shared/index.js';
 
 export class NodePangu extends Pangu {
   async spacingFile(path: string) {
