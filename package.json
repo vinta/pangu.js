@@ -92,7 +92,6 @@
     "@types/node": "26.1.1",
     "eslint": "10.7.0",
     "eslint-config-prettier": "10.1.8",
-    "eslint-plugin-unicorn": "72.0.0",
     "prettier": "3.9.6",
     "publint": "0.3.21",
     "typescript": "5.9.3",
