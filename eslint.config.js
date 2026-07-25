@@ -22,7 +22,7 @@ export default tseslint.config(
     },
     rules: {
       'unicorn/prefer-node-protocol': 'error',
-      'unicorn/no-array-for-each': 'error',
+      'unicorn/no-for-each': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -50,7 +50,7 @@ export default tseslint.config(
     },
     rules: {
       'unicorn/prefer-node-protocol': 'error',
-      'unicorn/no-array-for-each': 'error',
+      'unicorn/no-for-each': 'error',
     },
   },
   // Apply prettier config last to disable formatting rules
