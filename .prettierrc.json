@@ -10,5 +10,6 @@
   "bracketSameLine": false,
   "arrowParens": "always",
   "htmlWhitespaceSensitivity": "strict",
+  "organizeImportsSkipDestructiveCodeActions": true,
   "plugins": ["prettier-plugin-organize-imports"]
 }
