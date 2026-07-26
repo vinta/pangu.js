@@ -580,5 +580,3 @@ export class Pangu {
 export const pangu = new Pangu();
 
 export { ANY_CJK };
-
-export default pangu;
