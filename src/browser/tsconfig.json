@@ -11,7 +11,8 @@
     "noEmit": false,
     "declaration": true,
     "declarationMap": false,
-    "sourceMap": true
+    "sourceMap": true,
+    "types": []
   },
   "include": ["./**/*.ts", "../shared/**/*.ts"]
 }
