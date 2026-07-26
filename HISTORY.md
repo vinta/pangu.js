@@ -8,6 +8,7 @@
 - 修正 `+` 直接貼著中文時會當成分隔符來加空格，跟 `|` 一樣以行為單位來判斷
 - 修正 `!` `;` `,` `?` 後面直接貼著中文時的加空格規則，現在不管這些符號前面是什麼字元，都會在符號後面加空格
 - 修正純文字中的 `<tag>` 現在會被當成一個詞來加空格，但是一般網頁中的 HTML 標籤不受影響
+- 修正文字節點的開頭或結尾是 `&nbsp;`、旁邊又緊接著連結之類的元素時，會多加一個半形空格的問題
 - Chrome extension 的工具列圖示新增了 OFF 狀態，切到手動模式、或是目前網址被黑白名單排除時，圖示會換成頭戴紙袋的圖示
 - Chrome extension 會在所有網頁啟用瀏覽器原生的 [`text-autospace: normal;`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/text-autospace) 排版
   - 預設啟用，可以在設定裡關掉
