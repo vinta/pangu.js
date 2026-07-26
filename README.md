@@ -55,7 +55,7 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 #### UMD (Script Tag)
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/pangu@8.1.0/dist/browser/pangu.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pangu@8.2.0/dist/browser/pangu.umd.js"></script>
 <script>
   const text = pangu.spacingText('當你凝視著bug，bug也凝視著你');
   // text = '當你凝視著 bug，bug 也凝視著你'
@@ -78,7 +78,7 @@ Bare specifiers like `pangu/browser` only resolve inside a bundler or an import 
 
 ```html
 <script type="module">
-  import { pangu } from 'https://cdn.jsdelivr.net/npm/pangu@8.1.0/dist/browser/pangu.js';
+  import { pangu } from 'https://cdn.jsdelivr.net/npm/pangu@8.2.0/dist/browser/pangu.js';
 
   const text = pangu.spacingText('這個人老是在寫程式，是不是有bin啊？');
   // text = '這個人老是在寫程式，是不是有 bin 啊？'
@@ -105,8 +105,8 @@ pangu.autoSpacingPage();
 
 Also on:
 
-- https://cdn.jsdelivr.net/npm/pangu@8.1.0/dist/browser/pangu.umd.js
-- https://unpkg.com/pangu@8.1.0/dist/browser/pangu.umd.js
+- https://cdn.jsdelivr.net/npm/pangu@8.2.0/dist/browser/pangu.umd.js
+- https://unpkg.com/pangu@8.2.0/dist/browser/pangu.umd.js
 
 ### Node.js
 
