@@ -1,4 +1,3 @@
-import prettierConfig from 'eslint-config-prettier';
 import { builtinModules } from 'node:module';
 import tseslint from 'typescript-eslint';
 
@@ -70,8 +69,6 @@ export default tseslint.config(
       ...styleRules,
     },
   },
-  // Apply prettier config last to disable formatting rules
-  prettierConfig,
   // Override the above configs
   {
     rules: {

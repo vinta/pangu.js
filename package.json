@@ -90,7 +90,6 @@
     "@types/chrome": "0.2.2",
     "@types/node": "26.1.1",
     "eslint": "10.7.0",
-    "eslint-config-prettier": "10.1.8",
     "prettier": "3.9.6",
     "prettier-plugin-organize-imports": "4.3.0",
     "publint": "0.3.21",
