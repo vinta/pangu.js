@@ -7,6 +7,7 @@
   - 之前用 bundler 直接 `import pangu from 'pangu'`，執行時會拿到瀏覽器版本，但是 TypeScript 給的型別是 Node.js 版本，所以 `pangu.spacingFile()` 可以通過型別檢查、執行的時候卻會壞掉
   - 只用 `spacingText()` 的話不受影響，Node.js 版本在瀏覽器裡一樣可以運作
   - 用 `<script>` 載入 UMD 檔案、或是已經在用 `pangu/browser` 的話都不受影響
+- 拿掉了 `package.json` 的 `module` 欄位，這是給 webpack 4 那個年代的 bundler 讀的，現在的工具都讀 `exports`，讀不懂的舊工具會改用 `main`
 - 支援的 Node.js 版本改成 v20 以上
 
 ## v8.2.0 / 2026-07-26
