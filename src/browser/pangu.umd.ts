@@ -1,13 +1,13 @@
 import pangu, { BrowserPangu } from './pangu.js';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-(pangu as any).BrowserPangu = BrowserPangu;
+// The UMD global carries the class as a property of the instance, so `window.pangu.BrowserPangu` stays constructible for <script> consumers
+const panguUmd = Object.assign(pangu, { BrowserPangu });
 
 // Declare global for UMD builds
 declare global {
   interface Window {
-    pangu: typeof pangu & { BrowserPangu: typeof BrowserPangu };
+    pangu: typeof panguUmd;
   }
 }
 
-export default pangu;
+export default panguUmd;
