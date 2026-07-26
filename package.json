@@ -30,10 +30,6 @@
   "sideEffects": false,
   "main": "./dist/node/index.cjs",
   "module": "./dist/node/index.js",
-  "browser": {
-    "./dist/node/index.js": "./dist/browser/pangu.js",
-    "./dist/node/index.cjs": "./dist/browser/pangu.umd.js"
-  },
   "bin": {
     "pangu": "./dist/node/cli.js"
   },

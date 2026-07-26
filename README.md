@@ -94,6 +94,9 @@ Bare specifiers like `pangu/browser` only resolve inside a bundler or an import 
 
 Import from `pangu/browser`, which is the DOM-aware build (`spacingNode()`, `autoSpacingPage()`) with matching TypeScript types and resolves correctly across all bundlers:
 
+> [!IMPORTANT]
+> Always use `pangu/browser` in browser code. The bare `pangu` specifier is the Node.js build, and it resolves that way for every bundler and for TypeScript alike, so it gives you `spacingText()` but not `spacingNode()` or `autoSpacingPage()`.
+
 ```js
 import { pangu } from 'pangu/browser';
 
