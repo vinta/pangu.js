@@ -10,5 +10,6 @@
   "bracketSameLine": false,
   "arrowParens": "always",
   "htmlWhitespaceSensitivity": "strict",
-  "plugins": ["@trivago/prettier-plugin-sort-imports"]
+  "organizeImportsSkipDestructiveCodeActions": true,
+  "plugins": ["prettier-plugin-organize-imports"]
 }

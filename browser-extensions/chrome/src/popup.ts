@@ -1,7 +1,7 @@
 import { translatePage } from './utils/i18n';
 import { getSettings, onSettingsChanged, updateSettings } from './utils/settings';
 import { playSound, stopSound } from './utils/sounds';
-import type { PingMessage, ManualSpacingMessage, ContentScriptResponse, MessageFromContentScript, Settings } from './utils/types';
+import type { ContentScriptResponse, ManualSpacingMessage, MessageFromContentScript, PingMessage, Settings } from './utils/types';
 import { isValidUrl, shouldShowActiveStatus } from './utils/urls';
 
 class PopupController {

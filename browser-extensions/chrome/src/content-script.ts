@@ -1,4 +1,4 @@
-import type { MessageToContentScript, ContentScriptResponse, ContentScriptLoadedMessage } from './utils/types';
+import type { ContentScriptLoadedMessage, ContentScriptResponse, MessageToContentScript } from './utils/types';
 
 // `Window.pangu` is declared globally in src/browser/pangu.umd.ts
 // The pangu object is injected by pangu.umd.js which loads before this script

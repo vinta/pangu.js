@@ -1,6 +1,30 @@
-import prettierConfig from 'eslint-config-prettier';
-import unicorn from 'eslint-plugin-unicorn';
+import { builtinModules } from 'node:module';
 import tseslint from 'typescript-eslint';
+
+// Derived from the running Node rather than hand-listed so a newly added builtin cannot slip through unprefixed. Names that are already namespaced (`node:test`, `node:sea`) are unreachable without the prefix, so they need no rule.
+const bareBuiltinModules = builtinModules.filter((name) => !name.startsWith('node:'));
+
+// Core-rule equivalents of eslint-plugin-unicorn's `prefer-node-protocol` and `no-for-each`. The plugin cost 36 transitive packages to supply just these two checks, so it was dropped in favour of the built-ins.
+const styleRules = {
+  'no-restricted-imports': [
+    'error',
+    {
+      patterns: [
+        {
+          regex: `^(?!node:)(${bareBuiltinModules.join('|')})(/.*)?$`,
+          message: 'Use the `node:` protocol prefix for Node.js builtins.',
+        },
+      ],
+    },
+  ],
+  'no-restricted-syntax': [
+    'error',
+    {
+      selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='forEach']",
+      message: 'Use `for…of` instead of `.forEach(…)`.',
+    },
+  ],
+};
 
 export default tseslint.config(
   {
@@ -17,12 +41,8 @@ export default tseslint.config(
         project: './tsconfig.json',
       },
     },
-    plugins: {
-      unicorn,
-    },
     rules: {
-      'unicorn/prefer-node-protocol': 'error',
-      'unicorn/no-array-for-each': 'error',
+      ...styleRules,
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -45,16 +65,10 @@ export default tseslint.config(
   {
     // JavaScript files
     files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
-    plugins: {
-      unicorn,
-    },
     rules: {
-      'unicorn/prefer-node-protocol': 'error',
-      'unicorn/no-array-for-each': 'error',
+      ...styleRules,
     },
   },
-  // Apply prettier config last to disable formatting rules
-  prettierConfig,
   // Override the above configs
   {
     rules: {
