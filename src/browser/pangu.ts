@@ -11,7 +11,7 @@ export interface AutoSpacingPageConfig {
 }
 
 // Any whitespace at a text run's edge already separates it from the neighboring run, matching the /\s/ that scanBetweenTextRuns uses on the nodes in the gap.
-// \s covers NBSP, which spacingText only normalizes to a regular space when it sits amid prose, so an NBSP that ends a text node survives to here and must still count as a space
+// \s covers NBSP, which spacingText never rewrites, so an author's NBSP reaches this check intact and must still count as a space
 const TRAILING_WHITESPACE = /\s$/;
 const LEADING_WHITESPACE = /^\s/;
 

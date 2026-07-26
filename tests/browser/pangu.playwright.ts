@@ -154,7 +154,7 @@ test.describe('BrowserPangu', () => {
         return div.textContent;
       });
       expect(result).toBe(
-        `Rev. (Reverend；牧師的尊稱) 這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We invited the Rev. Alan Darling." 或 "We invited the Rev. Mr. Darling."，而非 "We invited the Rev. Darling." 我們也不可以說 "We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 rev. 是 review 的縮寫，算是雙關語)`,
+        `Rev. (Reverend；牧師的尊稱) 這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We invited the Rev. Alan Darling." 或\u00a0 "We\u00a0invited the Rev. Mr. Darling."，而非 "We invited the Rev. Darling." 我們也不可以說 "We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 rev. 是 review 的縮寫，算是雙關語)`,
       );
     });
   });
@@ -829,9 +829,9 @@ test.describe('BrowserPangu', () => {
     });
 
     test('should not add a space next to an &nbsp; that ends a text node before a link (real-world case)', async ({ page }) => {
-      // Every boundary here is already separated by an &nbsp;. Mid-text ones normalize to a plain
-      // space via SOLITARY_NBSP, but the one ending 不要用 sits at the text node edge, so it stays
-      // an &nbsp; and the 用/ether.fi boundary must not stack a second space on top of it
+      // Every boundary here is already separated by an &nbsp;, so pangu must leave the page byte-identical.
+      // Each &nbsp; suppresses insertion on its own, and the one ending 不要用 must not get a second space
+      // stacked on it at the 用/ether.fi boundary
       const htmlContent = loadFixture('calendar-event-description.html');
       const expected = loadFixture('calendar-event-description.expected.html').trim();
 

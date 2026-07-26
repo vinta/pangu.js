@@ -45,6 +45,8 @@ const RIGHT_BRACKETS_EXTENDED = '\\)\\]\\}<>\u201d'; // For RIGHT_BRACKET_CJK
 // ANS extended sets - CAREFUL: different symbols!
 const ANS_CJK_AFTER = `${A}\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700-\u27bf`; // Has @, no punctuation
 const ANS_BEFORE_CJK = `${A}\u0370-\u03ff0-9\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700-\u27bf`; // No @ symbol
+// Both ranges start at \u00a1, one past NBSP (\u00a0), so an NBSP is in no character class at all. That inertness is load-bearing: an NBSP already separates the runs it sits between, so no rule matches across
+// it and none fires. pangu therefore never rewrites an author's NBSP, it only ever inserts a space where one is genuinely missing. See ADR 0009
 
 // File path components - common directories in Unix/project paths
 // prettier-ignore
@@ -109,8 +111,10 @@ const FIX_POSSESSIVE_SINGLE_QUOTE = new RegExp(`([${AN}${CJK}])( )('s)`, 'g');
 const SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, 'g');
 
 const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, 'g');
-const CJK_HASH = new RegExp(`([${CJK}])(#([^ ]))`, 'g');
-const HASH_CJK = new RegExp(`(([^ ])#)([${CJK}])`, 'g');
+// The negated class is the "something is glued to this #, so it is a hashtag" guard, so it has to reject an NBSP the same way it rejects a space. It stays a literal pair rather than \S because \S
+// also excludes zero-width characters like U+FEFF, and treating those as a gap would drop the space entirely and leave the runs flush
+const CJK_HASH = new RegExp(`([${CJK}])(#([^ \\u00a0]))`, 'g');
+const HASH_CJK = new RegExp(`(([^ \\u00a0])#)([${CJK}])`, 'g');
 // In file path context (multiple slashes), only a final hashtag not preceded by a slash gets a space
 const CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
 
@@ -204,11 +208,6 @@ const ANS_CJK = new RegExp(`([${ANS_BEFORE_CJK}])([${CJK}])`, 'g');
 const S_A = new RegExp(`(%)([${A}])`, 'g');
 
 const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
-
-// A run of spaces holding exactly one NBSP (\u00a0), bounded by non-whitespace, becomes one space
-// Runs of 2+ NBSPs are deliberate formatting (e.g. paragraph indentation) and are preserved
-// \u00a0 is not \S so the guards also keep string-edge NBSPs and longer whitespace runs intact
-const SOLITARY_NBSP = /(?<=\S)[ ]*\u00a0[ ]*(?=\S)/g;
 
 // A bare unpaired non-void tag amid prose is a tag mention,
 // not markup: it reads as one unit and is spaced from CJK it directly touches.
@@ -356,9 +355,6 @@ export class Pangu {
         return htmlTagManager.store(processedTag);
       });
     }
-
-    // Normalize a solitary NBSP amid prose to a regular space before any spacing rules run
-    newText = newText.replace(SOLITARY_NBSP, ' ');
 
     // Handle multiple dots first (before single period)
     newText = newText.replace(DOTS_CJK, '$1 $2');
