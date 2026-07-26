@@ -157,6 +157,20 @@ test.describe('BrowserPangu', () => {
         `Rev. (Reverend；牧師的尊稱) 這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We invited the Rev. Alan Darling." 或\u00a0 "We\u00a0invited the Rev. Mr. Darling."，而非 "We invited the Rev. Darling." 我們也不可以說 "We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 rev. 是 review 的縮寫，算是雙關語)`,
       );
     });
+
+    // The same paragraph as it ships on https://ananedu.com/yes928/writter/abbreviations.htm, where the wrapped HTML source leaves line breaks inside the text node and the quoted segments span them. Its spacing is
+    // already correct, so the whole paragraph must come back untouched
+    test('handle text node with line breaks inside quoted segments', async ({ page }) => {
+      // prettier-ignore
+      await page.setContent('<p id="test">Rev. (Reverend；牧師的尊稱) \n    這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用：&quot;We \n    invited the Rev. Alan Darling.&quot; 或&nbsp; &quot;We&nbsp; invited the Rev. Mr. \n    Darling.&quot; ，而非 &quot;We invited the Rev. Darling.&quot; 我們也不可以說&nbsp; \n    &quot;We invited the reverend to dinner.&quot; -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 \n    rev. 是 review 的縮寫，算是雙關語) </p>');
+      const result = await page.evaluate(() => {
+        const div = document.getElementById('test')!;
+        pangu.spacingNode(div);
+        return div.textContent;
+      });
+      // prettier-ignore
+      expect(result).toBe('Rev. (Reverend；牧師的尊稱) \n    這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We \n    invited the Rev. Alan Darling." 或\u00a0 "We\u00a0 invited the Rev. Mr. \n    Darling." ，而非 "We invited the Rev. Darling." 我們也不可以說\u00a0 \n    "We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 \n    rev. 是 review 的縮寫，算是雙關語) ');
+    });
   });
 
   test.describe('spacingNode() with getElementById', () => {

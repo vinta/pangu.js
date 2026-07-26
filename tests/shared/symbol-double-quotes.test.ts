@@ -25,6 +25,16 @@ describe('Symbol " "', () => {
                        .toBe('Rev. (Reverend；牧師的尊稱) 這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We invited the Rev. Alan Darling." 或\u00a0 "We\u00a0invited the Rev. Mr. Darling."，而非 "We invited the Rev. Darling." 我們也不可以說 "We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 rev. 是 review 的縮寫，算是雙關語)');
   });
 
+  // The real paragraph from ananedu.com/yes928/writter/abbreviations.htm, whose text node keeps the line breaks of the wrapped HTML source. Its spacing is already correct, so it must come back untouched: the
+  // quoted segments span those newlines, and pairing them line by line would resync on the wrong quote and eat the spaces around 或 and ，而非
+  it('handle " " across the line breaks of a wrapped HTML source', () => {
+    expect(pangu.spacingText('使用："We\ninvited Darling." 或 "We invited."')).toBe('使用："We\ninvited Darling." 或 "We invited."');
+
+    // prettier-ignore
+    const text = 'Rev. (Reverend；牧師的尊稱) \n    這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We \n    invited the Rev. Alan Darling." 或\u00a0 "We\u00a0 invited the Rev. Mr. \n    Darling." ，而非 "We invited the Rev. Darling." 我們也不可以說\u00a0 \n    "We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 \n    rev. 是 review 的縮寫，算是雙關語) ';
+    expect(pangu.spacingText(text)).toBe(text);
+  });
+
   // Some input habits type both quotes of a pair as closing curly quotes,
   // so a ”…” pair reads as opening/closing quotes when no unclosed “ precedes it
   it('handle misused ” ” quote pairs', () => {
@@ -35,13 +45,9 @@ describe('Symbol " "', () => {
                        .toBe('《战斧骨》里还有个镜头挺有意思，就是男主 ”见路不走”，不从峡谷入口走，而选择了从侧面翻越，还顺便借着口哨吸引出来一个食人族给杀了。');
   });
 
-  // Straight quotes cannot distinguish opening from closing, so quotes are paired
-  // left-to-right within a line. An unpaired leading closing quote or a quoted segment
-  // that spans a newline shifts the pairing, and the CJK prose between two segments is
-  // treated as quoted content whose edge spaces get stripped. This mis-pairing kept the
-  // browser suite's quote-spacing case skipped for years. See #287
+  // Straight quotes cannot distinguish opening from closing, so quotes are paired left-to-right. Text whose first quote is already a closing quote shifts the pairing for everything after it, and the CJK prose
+  // between two quoted segments is then treated as quoted content whose edge spaces get stripped. See #287
   it('handle " " mis-pairing (known limitation)', () => {
     expect(pangu.spacingText('Darling." 或 "We')).toBe('Darling."或" We');
-    expect(pangu.spacingText('使用："We\ninvited Darling." 或 "We invited."')).toBe('使用："We\ninvited Darling."或" We invited."');
   });
 });

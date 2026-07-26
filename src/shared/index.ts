@@ -93,7 +93,9 @@ const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, 'g');
 // The symbol part does not include '
 const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES}])`, 'g');
 const QUOTE_CJK = new RegExp(`([${QUOTES}])([${CJK}])`, 'g');
-const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES}]+)[ ]*(.+?)[ ]*([${QUOTES}]+)`, 'g');
+// The content class is [\s\S] rather than . so a quoted segment that spans a line break still pairs with its own closing quote. HTML source wrapping puts newlines mid-sentence, and with . that
+// closing quote is unreachable, so the scan resyncs on the next quote, pairs closing-to-opening and strips the spaces outside the quotes instead of inside
+const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES}]+)[ ]*([\\s\\S]+?)[ ]*([${QUOTES}]+)`, 'g');
 
 // Handle curly quotes with alphanumeric characters
 // These patterns should only apply to curly quotes, not straight quotes
