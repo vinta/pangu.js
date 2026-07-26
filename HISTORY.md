@@ -1,6 +1,6 @@
 # History
 
-## v8.1.0 / 2026-xx-xx
+## v8.1.0 / 2026-07-26
 
 - 修正 `-` `*` `=` `<` `>` `_` `+` 這些符號的加空格規則，夾在半形字元中間時會跟兩邊黏成同一個詞，不會再被拆開
 - 修正 `+` 在字尾的加空格規則
@@ -13,6 +13,9 @@
 - Chrome extension 會在所有網頁啟用瀏覽器原生的 [`text-autospace: normal;`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/text-autospace) 排版
   - 預設啟用，可以在設定裡關掉
   - 需要 Chrome v140 以上版本
+- `pangu/browser` 改成只提供 ESM，拿掉了 `require` 條件，`require('pangu/browser')` 會出現 `ERR_PACKAGE_PATH_NOT_EXPORTED`
+  - 用 bundler 的話 `import` 照舊，不受影響
+  - 在瀏覽器裡直接用 `<script>` 載入 UMD 檔案的方式也不受影響
 
 ## v8.0.0 / 2026-07-19
 
