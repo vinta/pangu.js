@@ -16,16 +16,22 @@ class NodePangu extends Pangu {
   }
 }
 
+// The module is a NodePangu instance carrying the named exports as properties. Declaring them here rather than casting to any is what puts them in the emitted .d.cts, so the published types show the same
+// surface the runtime has instead of hiding it from every require() consumer
+interface PanguModule extends NodePangu {
+  NodePangu: typeof NodePangu;
+  pangu: PanguModule;
+  default: PanguModule;
+}
+
 // Create the pangu instance
-const pangu = new NodePangu();
+const pangu = new NodePangu() as PanguModule;
 
 // Add named exports as properties on the instance
 // This allows both: const pangu = require('pangu') AND const { NodePangu } = require('pangu')
-/* eslint-disable @typescript-eslint/no-explicit-any */
-(pangu as any).NodePangu = NodePangu;
-(pangu as any).pangu = pangu;
-(pangu as any).default = pangu;
-/* eslint-enable @typescript-eslint/no-explicit-any */
+pangu.NodePangu = NodePangu;
+pangu.pangu = pangu;
+pangu.default = pangu;
 
 // Export pangu instance as the module
 export = pangu;
