@@ -45,6 +45,7 @@ describe('Symbol " "', () => {
                        .toBe('《战斧骨》里还有个镜头挺有意思，就是男主 ”见路不走”，不从峡谷入口走，而选择了从侧面翻越，还顺便借着口哨吸引出来一个食人族给杀了。');
   });
 
+  // FIXME
   // Straight quotes cannot distinguish opening from closing, so quotes are paired left-to-right. Text whose first quote is already a closing quote shifts the pairing for everything after it, and the CJK prose
   // between two quoted segments is then treated as quoted content whose edge spaces get stripped. See #287
   it('handle " " mis-pairing (known limitation)', () => {
