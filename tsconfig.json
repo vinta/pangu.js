@@ -14,24 +14,20 @@
     "module": "ESNext",
     "target": "ES2022",
     "moduleResolution": "bundler",
-    "esModuleInterop": true,
 
     // TypeScript 6 stopped auto-enumerating `node_modules/@types`, so every ambient type package this config needs has to be listed. This one spans the extension sources (`chrome`) plus the Node
     // sources and the Vite and Playwright configs (`node`). The narrower `src/node/tsconfig.json` overrides it back down to just `node`.
     "types": ["node", "chrome"],
 
-    // Vite transpiles each file in isolation, so reject syntax that only works when the compiler can see the whole program, and keep type-only imports explicit so they are erased predictably
-    "isolatedModules": true,
+    // Vite transpiles each file in isolation, so keep type-only imports explicit and erased predictably. This implies `isolatedModules`, which rejects syntax that only works when the compiler can
+    // see the whole program
     "verbatimModuleSyntax": true,
 
     // This base tsconfig is only used for type checking, not compilation
     "noEmit": true,
-    "declaration": false,
 
     // Other
-    "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "exclude": ["dist", "browser-extensions/chrome/dist", "examples", "node_modules"]
+  "exclude": ["dist", "browser-extensions/chrome/dist", "examples"]
 }
