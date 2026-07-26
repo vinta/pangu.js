@@ -24,6 +24,8 @@ This skill briefly repoints that consumer at the **freshly packed tarball** inst
 
 Everything below runs as one command so the `trap` restores `examples/package.json` whether the checks pass, fail, or error midway. Never split it.
 
+The checks capture their exit code explicitly instead of leaning on `set -e` to abort. Some runners (Claude Code's Bash tool among them) invoke this in a shell where `set -e` does not stop the script, and a bare `echo "VERIFY OK"` after an unguarded `npm test` then prints a pass over a real failure. Report the `VERIFY OK` / `VERIFY FAILED` line, never the tool's own exit status.
+
 ```bash
 set -eu
 
@@ -40,15 +42,17 @@ trap 'cp "$TARBALL_DIR/package.json.orig" examples/package.json; rm -rf "$TARBAL
 # Repoint the consumer at the tarball, install, and run every example check against it
 node -e "const fs=require('fs'),f='examples/package.json',p=JSON.parse(fs.readFileSync(f));p.dependencies.pangu='file:'+process.argv[1];fs.writeFileSync(f,JSON.stringify(p,null,2)+'\n')" "$TGZ"
 npm install --prefix examples --no-audit --no-fund
-npm test --prefix examples
 
-echo "VERIFY OK"
+rc=0
+npm test --prefix examples || rc=$?
+if [ "$rc" -eq 0 ]; then echo "VERIFY OK"; else echo "VERIFY FAILED (exit $rc)"; fi
+exit "$rc"
 ```
 
 ## Reading the result
 
-- Exit 0 with `VERIFY OK` on the last line → the tarball is clear to publish.
-- Any other exit → do not publish. The `trap` has already restored the pin and dropped the throwaway install; diagnose with the table below, fix in `src/`, and rerun.
+- `VERIFY OK` on the last line → the tarball is clear to publish.
+- `VERIFY FAILED` → do not publish. The `trap` has already restored the pin and dropped the throwaway install; diagnose with the table below, fix in `src/`, and rerun.
 
 Either way, confirm the pin came back before moving on: `git diff --quiet examples/package.json` must exit 0. A dirty `examples/package.json` means the run was interrupted before the trap fired; restore it with `git checkout -- examples/package.json`.
 
