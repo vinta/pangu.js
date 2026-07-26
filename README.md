@@ -55,7 +55,7 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 #### UMD (Script Tag)
 
 ```html
-<script src="pangu/dist/browser/pangu.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pangu@8.1.0/dist/browser/pangu.umd.js"></script>
 <script>
   const text = pangu.spacingText('當你凝視著bug，bug也凝視著你');
   // text = '當你凝視著 bug，bug 也凝視著你'
