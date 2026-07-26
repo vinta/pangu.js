@@ -76,31 +76,6 @@ const multiBuildPlugin = () => {
         },
       });
 
-      // Build node/cli.cjs
-      await build({
-        configFile: false,
-        build: {
-          outDir: 'dist',
-          emptyOutDir: false,
-          sourcemap: true,
-          minify: false,
-          target: 'es2022',
-          lib: {
-            entry: resolve(projectRoot, 'dist/node/cli.js'),
-            formats: ['cjs'],
-            fileName: () => 'node/cli.cjs',
-          },
-          rolldownOptions: {
-            output: {
-              exports: 'named',
-            },
-            external: (id) => {
-              return id.startsWith('node:') || ['fs', 'path', 'process'].includes(id);
-            },
-          },
-        },
-      });
-
       // Build UMD for browser
       console.log('\nBuilding browser UMD bundle...');
       await build({
