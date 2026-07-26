@@ -16,6 +16,10 @@
     "moduleResolution": "bundler",
     "esModuleInterop": true,
 
+    // TypeScript 6 stopped auto-enumerating `node_modules/@types`, so every ambient type package this config needs has to be listed. This one spans the extension sources (`chrome`) plus the Node
+    // sources and the Vite and Playwright configs (`node`). The narrower `src/node/tsconfig.json` overrides it back down to just `node`.
+    "types": ["node", "chrome"],
+
     // Vite transpiles each file in isolation, so reject syntax that only works when the compiler can see the whole program, and keep type-only imports explicit so they are erased predictably
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
