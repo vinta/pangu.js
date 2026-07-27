@@ -68,9 +68,6 @@ jobs:
       - name: Run Node.js test
         run: npm run test:node
 
-      - name: Run extension test
-        run: npm run test:extension
-
   browser-test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -96,3 +93,6 @@ jobs:
 
       - name: Run browser test
         run: npm run test:browser
+
+      - name: Run extension test
+        run: npm run test:extension
