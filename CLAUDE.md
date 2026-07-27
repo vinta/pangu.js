@@ -53,6 +53,7 @@ Pre-resolved IDs for the `find-docs` skill. Pass directly to `ctx7 docs`, skippi
 | ESLint            | `/eslint/eslint`                               |
 | MDN Web Docs      | `/mdn/content`                                 |
 | Node.js           | `/nodejs/node`                                 |
+| npm               | `/websites/npmjs`                              |
 | Playwright        | `/microsoft/playwright`                        |
 | Prettier          | `/prettier/prettier`                           |
 | publint           | `/publint/publint`                             |
