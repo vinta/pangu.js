@@ -93,3 +93,6 @@ jobs:
 
       - name: Run browser test
         run: npm run test:browser
+
+      - name: Run extension test
+        run: npm run test:extension

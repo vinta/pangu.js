@@ -52,55 +52,22 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 
 ### Browser
 
-#### UMD (Script Tag)
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/pangu@8.2.0/dist/browser/pangu.umd.js"></script>
-<script>
-  const text = pangu.spacingText('當你凝視著bug，bug也凝視著你');
-  // text = '當你凝視著 bug，bug 也凝視著你'
-
-  // Process specific elements using spacingNode()
-  pangu.spacingNode(document.getElementById('main'));
-  document.querySelectorAll('.comment').forEach((el) => pangu.spacingNode(el));
-  document.querySelectorAll('p').forEach((el) => pangu.spacingNode(el));
-
-  document.addEventListener('DOMContentLoaded', () => {
-    // listen to any DOM change and automatically perform spacing via MutationObserver()
-    pangu.autoSpacingPage();
-  });
-</script>
-```
-
-#### ES Modules (Native Browser, no bundler)
-
-Bare specifiers like `pangu/browser` only resolve inside a bundler or an import map, so a raw `<script type="module">` must import from a full URL:
-
-```html
-<script type="module">
-  import { pangu } from 'https://cdn.jsdelivr.net/npm/pangu@8.2.0/dist/browser/pangu.js';
-
-  const text = pangu.spacingText('這個人老是在寫程式，是不是有bin啊？');
-  // text = '這個人老是在寫程式，是不是有 bin 啊？'
-
-  // Process specific elements using spacingNode()
-  pangu.spacingNode(document.getElementById('main'));
-  document.querySelectorAll('.comment').forEach((el) => pangu.spacingNode(el));
-  document.querySelectorAll('p').forEach((el) => pangu.spacingNode(el));
-</script>
-```
-
-#### Bundlers & Frameworks (Vite, webpack, React, Vue, etc.)
-
-Import from `pangu/browser`, which is the DOM-aware build (`spacingNode()`, `autoSpacingPage()`) with matching TypeScript types and resolves correctly across all bundlers:
+**Make sure to import from `pangu/browser`** in ESM, which is the DOM-aware build (`spacingNode()`, `autoSpacingPage()`) with matching TypeScript types and resolves correctly across all bundlers.
 
 ```js
-import { pangu } from 'pangu/browser';
+// <script src="https://cdn.jsdelivr.net/npm/pangu@8.2.0/dist/browser/pangu.umd.js"></script>
+// or
+import pangu from 'pangu/browser';
+
+const text = pangu.spacingText('當你凝視著bug，bug也凝視著你');
+// text = '當你凝視著 bug，bug 也凝視著你'
 
 pangu.spacingNode(document.getElementById('main'));
+document.querySelectorAll('.comment').forEach((el) => pangu.spacingNode(el));
+document.querySelectorAll('p').forEach((el) => pangu.spacingNode(el));
 
-// listen to any DOM change and automatically perform spacing via MutationObserver()
-pangu.autoSpacingPage();
+// Listen to any DOM change and automatically perform spacing via MutationObserver()
+document.addEventListener('DOMContentLoaded', () => pangu.autoSpacingPage());
 ```
 
 Also on:
@@ -111,9 +78,9 @@ Also on:
 ### Node.js
 
 ```js
-import pangu from 'pangu';
+// const pangu = require('pangu');
 // or
-const pangu = require('pangu');
+import pangu from 'pangu';
 
 const text = pangu.spacingText('不能信任那些Terminal或Editor用白底的人');
 // text = '不能信任那些 Terminal 或 Editor 用白底的人'

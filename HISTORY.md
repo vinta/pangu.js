@@ -1,5 +1,14 @@
 # History
 
+## v9.0.0 / 2026-xx-xx
+
+- 拿掉了 `package.json` 的 `module` 欄位
+- 拿掉了 `package.json` 的 `browser` 欄位
+  - 瀏覽器端請改用 `import pangu from 'pangu/browser'`，本來就是文件建議的用法，型別也一直是對的
+  - 之前用 bundler 直接 `import pangu from 'pangu'`，執行時會拿到瀏覽器版本，但是 TypeScript 給的型別是 Node.js 版本
+  - 用 `<script>` 載入 UMD 檔案、或是已經在用 `pangu/browser` 的話都不受影響
+- 支援的 Node.js 版本改成 v20 以上
+
 ## v8.2.0 / 2026-07-26
 
 - 修正引號的加空格規則，當引號的內容跨越換行時，不會再把引號外面本來就有的空格吃掉
