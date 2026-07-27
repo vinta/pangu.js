@@ -45,6 +45,10 @@ console.log('\nVerifying pangu is an instance');
 assert.throws(() => require('pangu/browser'), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' });
 console.log('require("pangu/browser") fails with ERR_PACKAGE_PATH_NOT_EXPORTED as designed');
 
+// The exports map locks the code surface but still exposes package metadata, so tools that read a dependency's package.json at runtime keep working
+assert.equal(require('pangu/package.json').name, 'pangu');
+console.log('require("pangu/package.json") resolves');
+
 // Async file spacing trails every synchronous assertion because CommonJS has no top-level await, so source order here matches execution order rather than mirroring test-esm.mjs. A failed assertion inside
 // rejects, and Node exits non-zero on an unhandled rejection, so the IIFE still fails the suite
 const filePath = join(tmpdir(), 'pangu-example-commonjs.txt');
