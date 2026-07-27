@@ -547,12 +547,6 @@ export class Pangu {
     // Restore backtick content
     newText = backtickManager.restore(newText);
 
-    // TODO:
-    // Final fix for HTML comments: ensure no space after <!--
-    // This is needed because <!-- is not protected as an HTML tag
-    // and the ! character gets spaced by ANS_CJK pattern
-    // newText = newText.replace(/<!--\s+/g, '<!--');
-
     return newText;
   }
 
