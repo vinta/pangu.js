@@ -1,5 +1,5 @@
 import type { BoundarySpacingContext, BoundarySpacingVerdict, TextRunSpacingContext, TextRunSpacingVerdict } from '../../src/browser/boundary-spacing';
-import { decideBoundarySpacing, decideTextRunSpacing } from '../../src/browser/boundary-spacing';
+import { decideBoundarySpacing, decideTextRunSpacing, respaceCurrentTail } from '../../src/browser/boundary-spacing';
 import { describe, it, expect } from 'vitest';
 
 // A boundary that the spacing engine wants a space at, with every veto turned off
@@ -155,6 +155,20 @@ describe('decideBoundarySpacing()', () => {
 
   it.each(insertElementCases)('$name', ({ context, verdict }) => {
     expect(decideBoundarySpacing(boundaryContext(context))).toBe(verdict);
+  });
+});
+
+describe('respaceCurrentTail()', () => {
+  it('writes the interior space of a split slash junction back into the tail', () => {
+    expect(respaceCurrentTail('蒸馏/', '训')).toBe('蒸馏 /');
+  });
+
+  it('returns null when the junction space is the only space', () => {
+    expect(respaceCurrentTail('中', 'a')).toBeNull();
+  });
+
+  it('returns null when the junction reading adds no space at the junction', () => {
+    expect(respaceCurrentTail('中', '文')).toBeNull();
   });
 });
 

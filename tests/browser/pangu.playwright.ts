@@ -857,6 +857,19 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
+    test('should space both sides of a slash junction that a <wbr> splits across text nodes (real-world case)', async ({ page }) => {
+      // A <wbr> splits 蒸馏/训练 across text nodes, so each run alone shows the slash rule only one side: the junction reads 蒸馏 / 训, and the space before the slash belongs inside the current run,
+      // not at the boundary
+      await page.setContent('<li>贼喊捉贼：Anthropic 自己的所有模型内容，<wbr>其实都是从全人类的知识以及相当多的版权内容上蒸馏/<wbr>训练出来的，现在他们却不允许其他人来蒸馏自己的模型。</li>');
+
+      await page.evaluate(() => {
+        pangu.spacingPage();
+      });
+
+      const result = await page.evaluate(() => document.querySelector('li')!.textContent);
+      expect(result).toBe('贼喊捉贼：Anthropic 自己的所有模型内容，其实都是从全人类的知识以及相当多的版权内容上蒸馏 / 训练出来的，现在他们却不允许其他人来蒸馏自己的模型。');
+    });
+
     test('should not insert <pangu> in grid with CJK card content (real-world case)', async ({ page }) => {
       // Simulates the AgentPub directory page layout from the bug report
       await page.setContent(`

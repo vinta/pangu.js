@@ -115,28 +115,44 @@ export function decideTextRunSpacing(context: TextRunSpacingContext) {
   return verdicts;
 }
 
-// needsBoundarySpace is pure and a page repeats the same few junction windows
-// at every boundary, so verdicts are memoized. The cap only guards pathological
-// pages with unbounded unique windows
-const junctionVerdictCache = new Map<string, boolean>();
-const JUNCTION_VERDICT_CACHE_MAX = 4096;
+// spaceJunction is pure and a page repeats the same few junction windows at
+// every boundary, so the spaced junctions are memoized. The cap only guards
+// pathological pages with unbounded unique windows
+const spacedJunctionCache = new Map<string, string>();
+const SPACED_JUNCTION_CACHE_MAX = 4096;
 
-function needsBoundarySpace(currentTail: string, nextFirst: string) {
+function spaceJunction(currentTail: string, nextFirst: string) {
   const junction = `${currentTail}${nextFirst}`;
-  const cached = junctionVerdictCache.get(junction);
+  const cached = spacedJunctionCache.get(junction);
   if (cached !== undefined) {
     return cached;
   }
 
+  const spacedJunction = pangu.spacingText(junction);
+
+  if (spacedJunctionCache.size >= SPACED_JUNCTION_CACHE_MAX) {
+    spacedJunctionCache.clear();
+  }
+  spacedJunctionCache.set(junction, spacedJunction);
+  return spacedJunction;
+}
+
+function needsBoundarySpace(currentTail: string, nextFirst: string) {
   // Only a space right at the junction counts: a space that spacingText puts
   // anywhere else belongs inside the tail, not at the boundary
-  const verdict = pangu.spacingText(junction).endsWith(` ${nextFirst}`) && !isQuoteNextToCjk(currentTail.slice(-1), nextFirst);
+  return spaceJunction(currentTail, nextFirst).endsWith(` ${nextFirst}`) && !isQuoteNextToCjk(currentTail.slice(-1), nextFirst);
+}
 
-  if (junctionVerdictCache.size >= JUNCTION_VERDICT_CACHE_MAX) {
-    junctionVerdictCache.clear();
+// The junction reading can put a second space inside the tail itself, not only at the junction: 蒸馏/ + 训 reads 蒸馏 / 训, because the slash rule needs both sides of the slash in view while each
+// run alone shows it only one. The boundary verdict places the junction space; this returns the tail with its interior spaces written in, or null when the tail already reads right. Only meaningful
+// when the boundary verdict is a spacing action: 'none' means the runs are separated or the junction reading does not apply, so the tail must stay untouched
+export function respaceCurrentTail(currentTail: string, nextFirst: string) {
+  const spacedJunction = spaceJunction(currentTail, nextFirst);
+  if (!spacedJunction.endsWith(` ${nextFirst}`)) {
+    return null;
   }
-  junctionVerdictCache.set(junction, verdict);
-  return verdict;
+  const spacedTail = spacedJunction.slice(0, -2);
+  return spacedTail === currentTail ? null : spacedTail;
 }
 
 function isQuoteNextToCjk(currentLast: string, nextFirst: string) {

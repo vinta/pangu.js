@@ -1,5 +1,5 @@
 import { Pangu } from '../shared/index.js';
-import { decideBoundarySpacing, decideTextRunSpacing } from './boundary-spacing.js';
+import { decideBoundarySpacing, decideTextRunSpacing, respaceCurrentTail } from './boundary-spacing.js';
 import { DomWalker } from './dom-walker.js';
 import { TaskScheduler } from './task-scheduler.js';
 import { VisibilityDetector } from './visibility-detector.js';
@@ -202,9 +202,12 @@ export class BrowserPangu extends Pangu {
         const currentRun = currentTextNode;
         const nextRun = nextTextNode;
 
+        const currentTail = currentTextNode.data.slice(-3);
+        const nextFirst = nextTextNode.data.slice(0, 1);
+
         const verdict = decideBoundarySpacing({
-          currentTail: currentTextNode.data.slice(-3),
-          nextFirst: nextTextNode.data.slice(0, 1),
+          currentTail,
+          nextFirst,
           currentEndsWithSpace: TRAILING_WHITESPACE.test(currentTextNode.data),
           nextStartsWithSpace: LEADING_WHITESPACE.test(nextTextNode.data),
           whitespaceBetween,
@@ -222,6 +225,15 @@ export class BrowserPangu extends Pangu {
           hiddenBoundaryAfter: () => this.isHiddenBoundaryAfter(currentRun),
           inGridOrFlexContainer: () => !!nextBoundaryNode.parentNode && this.isGridOrFlexContainer(nextBoundaryNode.parentNode),
         });
+
+        // A junction space can come with a second space that belongs inside the current run's tail (蒸馏/ + 训 reads 蒸馏 / 训): write the respaced tail back before placing the junction space
+        if (verdict !== 'none') {
+          const respacedTail = respaceCurrentTail(currentTail, nextFirst);
+          if (respacedTail !== null) {
+            currentTextNode.data = currentTextNode.data.slice(0, currentTextNode.data.length - currentTail.length) + respacedTail;
+            this.lastWrittenData.set(currentTextNode, currentTextNode.data);
+          }
+        }
 
         switch (verdict) {
           case 'prepend-next':
