@@ -1,6 +1,6 @@
 # History
 
-## v9.0.0 / 2026-xx-xx
+## v9.0.0 / 2026-07-28
 
 - 拿掉了 `package.json` 的 `module` 欄位
 - 拿掉了 `package.json` 的 `browser` 欄位

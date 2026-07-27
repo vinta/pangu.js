@@ -55,7 +55,7 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 **Make sure to import from `pangu/browser`** in ESM, which is the DOM-aware build (`spacingNode()`, `autoSpacingPage()`) with matching TypeScript types and resolves correctly across all bundlers.
 
 ```js
-// <script src="https://cdn.jsdelivr.net/npm/pangu@8.2.0/dist/browser/pangu.umd.js"></script>
+// <script src="https://cdn.jsdelivr.net/npm/pangu@9.0.0/dist/browser/pangu.umd.js"></script>
 // or
 import pangu from 'pangu/browser';
 
@@ -72,8 +72,8 @@ document.addEventListener('DOMContentLoaded', () => pangu.autoSpacingPage());
 
 Also on:
 
-- https://cdn.jsdelivr.net/npm/pangu@8.2.0/dist/browser/pangu.umd.js
-- https://unpkg.com/pangu@8.2.0/dist/browser/pangu.umd.js
+- https://cdn.jsdelivr.net/npm/pangu@9.0.0/dist/browser/pangu.umd.js
+- https://unpkg.com/pangu@9.0.0/dist/browser/pangu.umd.js
 
 ### Node.js
 
