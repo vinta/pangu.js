@@ -29,5 +29,7 @@
     // Other
     "skipLibCheck": true
   },
-  "exclude": ["dist", "browser-extensions/chrome/dist", "examples"]
+  // src/node/index.cts is a CommonJS file that this ESM-modeled project cannot express: `module: "ESNext"` rejects its `import =` with TS1202. Excluding it here loses nothing, since
+  // src/node/tsconfig.json (NodeNext) is the project that both typechecks it correctly and emits its .d.cts, and eslint never lints .cts files (no `files` glob matches them)
+  "exclude": ["dist", "browser-extensions/chrome/dist", "examples", "src/node/index.cts"]
 }

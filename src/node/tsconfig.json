@@ -12,5 +12,8 @@
     "sourceMap": true,
     "types": ["node"]
   },
-  "include": ["./**/*.ts", "./**/*.cts", "../shared/**/*.ts"]
+  "include": ["./**/*.ts", "./**/*.cts", "../shared/**/*.ts"],
+  // Must stay, and stay empty: `exclude` is otherwise inherited from the base config, whose entry for src/node/index.cts would silently drop the file from this project too — no typecheck, no emitted
+  // index.d.cts, and tsc exits 0 the whole time. This project is exactly where that file must be checked, since NodeNext is the only module setting that models it
+  "exclude": []
 }
