@@ -1,14 +1,12 @@
 # History
 
-## v9.0.0 / 2026-07-27
+## v9.0.0 / 2026-xx-xx
 
-- 拿掉了 `package.json` 的 `browser` 欄位，`pangu` 這個名稱固定是 Node.js 版本，不管是 bundler 還是 TypeScript 都一樣
-  - 瀏覽器端請改用 `pangu/browser`，本來就是文件建議的用法，型別也一直是對的
-  - 之前用 bundler 直接 `import pangu from 'pangu'`，執行時會拿到瀏覽器版本，但是 TypeScript 給的型別是 Node.js 版本，所以 `pangu.spacingFile()` 可以通過型別檢查、執行的時候卻會壞掉
-  - 只用 `spacingText()` 的話不受影響，Node.js 版本在瀏覽器裡一樣可以運作
+- 拿掉了 `package.json` 的 `module` 欄位
+- 拿掉了 `package.json` 的 `browser` 欄位
+  - 瀏覽器端請改用 `import pangu from 'pangu/browser'`，本來就是文件建議的用法，型別也一直是對的
+  - 之前用 bundler 直接 `import pangu from 'pangu'`，執行時會拿到瀏覽器版本，但是 TypeScript 給的型別是 Node.js 版本
   - 用 `<script>` 載入 UMD 檔案、或是已經在用 `pangu/browser` 的話都不受影響
-- 拿掉了 `package.json` 的 `module` 欄位，這是給 webpack 4 那個年代的 bundler 讀的，現在的工具都讀 `exports`，讀不懂的舊工具會改用 `main`
-- `exports` 加上 `./package.json`，讓需要在執行期讀取套件資訊的工具可以 `require('pangu/package.json')`
 - 支援的 Node.js 版本改成 v20 以上
 
 ## v8.2.0 / 2026-07-26
