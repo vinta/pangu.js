@@ -19,7 +19,8 @@ const pangu = new NodePanguClass() as PanguModule;
 // This allows both: const pangu = require('pangu') AND const { NodePangu } = require('pangu')
 pangu.NodePangu = NodePanguClass;
 pangu.pangu = pangu;
-// `export =` emits no `__esModule` marker, so no interop layer supplies a `.default` for free. Assigning it by hand is what keeps this surface matching the ESM entry, which does have a default export
+// Pure surface parity, not interop. `export =` sets no `__esModule` flag, so a default import already receives the whole module and does not need this. What needs it is explicit `.default` access from a
+// require() consumer, which is undefined without it. Pinned by examples/test-commonjs.js so the CJS surface keeps matching the ESM namespace
 pangu.default = pangu;
 
 // `export =` is not a preference here, it is the only spelling that both runs and types. `export default` and `export const` are ESM syntax, which `verbatimModuleSyntax` rejects in a CommonJS file.
