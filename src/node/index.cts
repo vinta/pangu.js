@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
+// `require` rather than `import` because `verbatimModuleSyntax` rejects ESM syntax in a CommonJS file (TS1286), and this file has to emit CommonJS for the `export =` at the bottom to be legal at all
 // Aliased because the bundler inlines `class NodePangu` from the ESM entry into this output. An unaliased binding would collide with it, and Rolldown would rename the class to `NodePangu$1`, which is
 // observable through `constructor.name` and in stack traces
 const { NodePangu: NodePanguClass } = require('./index.js') as typeof import('./index.js');
@@ -12,14 +13,16 @@ interface PanguModule extends InstanceType<typeof NodePanguClass> {
   default: PanguModule;
 }
 
-// Create the pangu instance
 const pangu = new NodePanguClass() as PanguModule;
 
 // Add named exports as properties on the instance
 // This allows both: const pangu = require('pangu') AND const { NodePangu } = require('pangu')
 pangu.NodePangu = NodePanguClass;
 pangu.pangu = pangu;
+// `export =` emits no `__esModule` marker, so no interop layer supplies a `.default` for free. Assigning it by hand is what keeps this surface matching the ESM entry, which does have a default export
 pangu.default = pangu;
 
-// Export pangu instance as the module
+// `export =` is not a preference here, it is the only spelling that both runs and types. `export default` and `export const` are ESM syntax, which `verbatimModuleSyntax` rejects in a CommonJS file.
+// A plain `module.exports = pangu` assignment compiles and behaves identically at runtime, but TypeScript models export assignment only in .js files, so the emitted .d.cts collapses to
+// `export {}` and every property access in a consumer becomes TS2339. attw stays green on that, since types and runtime still agree on format, so nothing in `lint:package` would catch the regression
 export = pangu;
