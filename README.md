@@ -65,45 +65,20 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
   document.querySelectorAll('.comment').forEach((el) => pangu.spacingNode(el));
   document.querySelectorAll('p').forEach((el) => pangu.spacingNode(el));
 
-  document.addEventListener('DOMContentLoaded', () => {
-    // listen to any DOM change and automatically perform spacing via MutationObserver()
-    pangu.autoSpacingPage();
-  });
-</script>
-```
-
-#### ES Modules (Native Browser, no bundler)
-
-Bare specifiers like `pangu/browser` only resolve inside a bundler or an import map, so a raw `<script type="module">` must import from a full URL:
-
-```html
-<script type="module">
-  import { pangu } from 'https://cdn.jsdelivr.net/npm/pangu@8.2.0/dist/browser/pangu.js';
-
-  const text = pangu.spacingText('這個人老是在寫程式，是不是有bin啊？');
-  // text = '這個人老是在寫程式，是不是有 bin 啊？'
-
-  // Process specific elements using spacingNode()
-  pangu.spacingNode(document.getElementById('main'));
-  document.querySelectorAll('.comment').forEach((el) => pangu.spacingNode(el));
-  document.querySelectorAll('p').forEach((el) => pangu.spacingNode(el));
+  // Listen to any DOM change and automatically perform spacing via MutationObserver()
+  document.addEventListener('DOMContentLoaded', () => pangu.autoSpacingPage());
 </script>
 ```
 
 #### Bundlers & Frameworks (Vite, webpack, React, Vue, etc.)
 
-Import from `pangu/browser`, which is the DOM-aware build (`spacingNode()`, `autoSpacingPage()`) with matching TypeScript types and resolves correctly across all bundlers:
-
-> [!IMPORTANT]
-> Always use `pangu/browser` in browser code. The bare `pangu` specifier is the Node.js build, and it resolves that way for every bundler and for TypeScript alike, so it gives you `spacingText()` but not `spacingNode()` or `autoSpacingPage()`.
+**Make sure to import from `pangu/browser`**, which is the DOM-aware build (`spacingNode()`, `autoSpacingPage()`) with matching TypeScript types and resolves correctly across all bundlers:
 
 ```js
-import { pangu } from 'pangu/browser';
+import pangu from 'pangu/browser';
 
 pangu.spacingNode(document.getElementById('main'));
-
-// listen to any DOM change and automatically perform spacing via MutationObserver()
-pangu.autoSpacingPage();
+document.addEventListener('DOMContentLoaded', () => pangu.autoSpacingPage());
 ```
 
 Also on:
