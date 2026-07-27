@@ -51,6 +51,6 @@ The condition is not merely unused, it is refused. A future reader following `pu
 
 **`publint` now passes clean.** Its standing suggestion was specifically about the object-valued `browser` field, so removing the field resolves it rather than ignoring it.
 
-**`main` and `module` stay.** Both point at the Node build, which is now unambiguously what `.` means, so they are consistent with `exports` rather than in tension with it.
+**`main` stays, and `module` was subsequently dropped.** `main` points at the Node build, which is now unambiguously what `.` means, and TypeScript's node10 resolution still resolves through it, which is why `attw` keeps checking that mode. `module` was the same webpack 4 era generation as the `browser` field and followed it out: tools that read `exports` never consult it, and exports-blind tools fall back to `main`.
 
 **Verified.** `attw` is green on all four resolution modes for `.` and on the esm-only profile for `./browser`. `publint` reports no problems.
