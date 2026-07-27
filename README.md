@@ -52,32 +52,21 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 
 ### Browser
 
-#### UMD (Script Tag)
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/pangu@8.2.0/dist/browser/pangu.umd.js"></script>
-<script>
-  const text = pangu.spacingText('當你凝視著bug，bug也凝視著你');
-  // text = '當你凝視著 bug，bug 也凝視著你'
-
-  // Process specific elements using spacingNode()
-  pangu.spacingNode(document.getElementById('main'));
-  document.querySelectorAll('.comment').forEach((el) => pangu.spacingNode(el));
-  document.querySelectorAll('p').forEach((el) => pangu.spacingNode(el));
-
-  // Listen to any DOM change and automatically perform spacing via MutationObserver()
-  document.addEventListener('DOMContentLoaded', () => pangu.autoSpacingPage());
-</script>
-```
-
-#### Bundlers & Frameworks (Vite, webpack, React, Vue, etc.)
-
-**Make sure to import from `pangu/browser`**, which is the DOM-aware build (`spacingNode()`, `autoSpacingPage()`) with matching TypeScript types and resolves correctly across all bundlers:
+**Make sure to import from `pangu/browser`** in ESM, which is the DOM-aware build (`spacingNode()`, `autoSpacingPage()`) with matching TypeScript types and resolves correctly across all bundlers.
 
 ```js
+// <script src="https://cdn.jsdelivr.net/npm/pangu@8.2.0/dist/browser/pangu.umd.js"></script>
+// or
 import pangu from 'pangu/browser';
 
+const text = pangu.spacingText('當你凝視著bug，bug也凝視著你');
+// text = '當你凝視著 bug，bug 也凝視著你'
+
 pangu.spacingNode(document.getElementById('main'));
+document.querySelectorAll('.comment').forEach((el) => pangu.spacingNode(el));
+document.querySelectorAll('p').forEach((el) => pangu.spacingNode(el));
+
+// Listen to any DOM change and automatically perform spacing via MutationObserver()
 document.addEventListener('DOMContentLoaded', () => pangu.autoSpacingPage());
 ```
 
@@ -89,9 +78,9 @@ Also on:
 ### Node.js
 
 ```js
-import pangu from 'pangu';
+// const pangu = require('pangu');
 // or
-const pangu = require('pangu');
+import pangu from 'pangu';
 
 const text = pangu.spacingText('不能信任那些Terminal或Editor用白底的人');
 // text = '不能信任那些 Terminal 或 Editor 用白底的人'
