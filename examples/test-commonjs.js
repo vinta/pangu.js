@@ -1,5 +1,8 @@
 // Test CommonJS imports
 const assert = require('node:assert/strict');
+const { unlink, writeFile } = require('node:fs/promises');
+const { tmpdir } = require('node:os');
+const { join } = require('node:path');
 
 const pangu = require('pangu');
 const { NodePangu, pangu: namedPangu } = require('pangu');
@@ -42,4 +45,17 @@ console.log('\nVerifying pangu is an instance');
 assert.throws(() => require('pangu/browser'), { code: 'ERR_PACKAGE_PATH_NOT_EXPORTED' });
 console.log('require("pangu/browser") fails with ERR_PACKAGE_PATH_NOT_EXPORTED as designed');
 
-console.log('\nCommonJS imports working correctly!');
+// Async file spacing trails every synchronous assertion because CommonJS has no top-level await, so source order here matches execution order rather than mirroring test-esm.mjs. A failed assertion inside
+// rejects, and Node exits non-zero on an unhandled rejection, so the IIFE still fails the suite
+const filePath = join(tmpdir(), 'pangu-example-commonjs.txt');
+(async () => {
+  await writeFile(filePath, '測試spacingFile方法');
+  try {
+    assert.equal(await pangu.spacingFile(filePath), '測試 spacingFile 方法');
+    console.log('\nspacingFile() works');
+  } finally {
+    await unlink(filePath);
+  }
+
+  console.log('\nCommonJS imports working correctly!');
+})();
