@@ -20,129 +20,129 @@
 // For more information about Unicode blocks, see
 // https://symbl.cc/en/unicode-table/
 
-const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
+export const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
 
 // Basic character classes
-const AN = 'A-Za-z0-9';
-const A = 'A-Za-z';
-const UPPER_AN = 'A-Z0-9'; // For FIX_CJK_COLON_ANS
+export const AN = 'A-Za-z0-9';
+export const A = 'A-Za-z';
+export const UPPER_AN = 'A-Z0-9'; // For FIX_CJK_COLON_ANS
 
 // Operators - note the different sets!
-const OPERATORS_BASE = '\\+\\*=&';
-const OPERATORS_WITH_HYPHEN = `${OPERATORS_BASE}\\-`; // For CJK_OPERATOR_ANS
-const OPERATORS_NO_PLUS = '\\*=&\\-'; // For ANS_OPERATOR_CJK only; no + - it attaches to the preceding half-width run as a suffix (Disney+, 18+)
-const GRADE_OPERATORS = '\\+\\-\\*'; // For single letter grades
+export const OPERATORS_BASE = '\\+\\*=&';
+export const OPERATORS_WITH_HYPHEN = `${OPERATORS_BASE}\\-`; // For CJK_OPERATOR_ANS
+export const OPERATORS_NO_PLUS = '\\*=&\\-'; // For ANS_OPERATOR_CJK only; no + - it attaches to the preceding half-width run as a suffix (Disney+, 18+)
+export const GRADE_OPERATORS = '\\+\\-\\*'; // For single letter grades
 
 // Quotes
-const QUOTES = '\`"\u05f4'; // Backtick, straight quote, Hebrew punctuation
+export const QUOTES = '\`"\u05f4'; // Backtick, straight quote, Hebrew punctuation
 
 // Brackets - different sets!
-const LEFT_BRACKETS_BASIC = '\\(\\[\\{'; // For AN_LEFT_BRACKET
-const RIGHT_BRACKETS_BASIC = '\\)\\]\\}'; // For RIGHT_BRACKET_AN
-const LEFT_BRACKETS_EXTENDED = '\\(\\[\\{<>\u201c'; // For CJK_LEFT_BRACKET (includes angle brackets + curly quote)
-const RIGHT_BRACKETS_EXTENDED = '\\)\\]\\}<>\u201d'; // For RIGHT_BRACKET_CJK
+export const LEFT_BRACKETS_BASIC = '\\(\\[\\{'; // For AN_LEFT_BRACKET
+export const RIGHT_BRACKETS_BASIC = '\\)\\]\\}'; // For RIGHT_BRACKET_AN
+export const LEFT_BRACKETS_EXTENDED = '\\(\\[\\{<>\u201c'; // For CJK_LEFT_BRACKET (includes angle brackets + curly quote)
+export const RIGHT_BRACKETS_EXTENDED = '\\)\\]\\}<>\u201d'; // For RIGHT_BRACKET_CJK
 
 // ANS extended sets - CAREFUL: different symbols!
-const ANS_CJK_AFTER = `${A}\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700-\u27bf`; // Has @, no punctuation
-const ANS_BEFORE_CJK = `${A}\u0370-\u03ff0-9\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700-\u27bf`; // No @ symbol
+export const ANS_CJK_AFTER = `${A}\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700-\u27bf`; // Has @, no punctuation
+export const ANS_BEFORE_CJK = `${A}\u0370-\u03ff0-9\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700-\u27bf`; // No @ symbol
 // Both ranges start at \u00a1, one past NBSP (\u00a0), so an NBSP is in no character class at all. That inertness is load-bearing: an NBSP already separates the runs it sits between, so no rule matches across
 // it and none fires. pangu therefore never rewrites an author's NBSP, it only ever inserts a space where one is genuinely missing. See ADR 0009
 
 // File path components - common directories in Unix/project paths
 // prettier-ignore
-const FILE_PATH_DIRS = 'home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path|project|src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|your|\\.claude|\\.git|\\.vscode';
-const FILE_PATH_CHARS = '[A-Za-z0-9_\\-\\.@\\+\\*]+';
+export const FILE_PATH_DIRS = 'home|root|usr|etc|var|opt|tmp|dev|mnt|proc|sys|bin|boot|lib|media|run|sbin|srv|node_modules|path|project|src|dist|test|tests|docs|templates|assets|public|static|config|scripts|tools|build|out|target|your|\\.claude|\\.git|\\.vscode';
+export const FILE_PATH_CHARS = '[A-Za-z0-9_\\-\\.@\\+\\*]+';
 
 // Unix absolute paths: system dirs + common project paths
 // Examples: /home, /usr/bin, /etc/nginx.conf, /.bashrc, /node_modules/@babel/core, /path/to/your/project
-const UNIX_ABSOLUTE_FILE_PATH = new RegExp(`/(?:\\.?(?:${FILE_PATH_DIRS})|\\.(?:[A-Za-z0-9_\\-]+))(?:/${FILE_PATH_CHARS})*`);
+export const UNIX_ABSOLUTE_FILE_PATH = new RegExp(`/(?:\\.?(?:${FILE_PATH_DIRS})|\\.(?:[A-Za-z0-9_\\-]+))(?:/${FILE_PATH_CHARS})*`);
 
 // Unix relative paths common in documentation and blog posts
 // Examples: src/main.py, dist/index.js, test/spec.js, ./.claude/CLAUDE.md, templates/*.html
-const UNIX_RELATIVE_FILE_PATH = new RegExp(`(?:\\./)?(?:${FILE_PATH_DIRS})(?:/${FILE_PATH_CHARS})+`);
+export const UNIX_RELATIVE_FILE_PATH = new RegExp(`(?:\\./)?(?:${FILE_PATH_DIRS})(?:/${FILE_PATH_CHARS})+`);
 
 // Windows paths: C:\Users\name\, D:\Program Files\, C:\Windows\System32
-const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
+export const WINDOWS_FILE_PATH = /[A-Z]:\\(?:[A-Za-z0-9_\-\. ]+\\?)+/;
 
-const ANY_CJK = new RegExp(`[${CJK}]`);
+export const ANY_CJK = new RegExp(`[${CJK}]`);
 
 // Handle punctuation after CJK - add space but don't convert to full-width
 // Support multiple consecutive punctuation marks
 // Only add space if followed by CJK, letters, or numbers (not at end of text or before same punctuation)
-const CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:]+)(?=[${CJK}${AN}])`, 'g');
+export const CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:]+)(?=[${CJK}${AN}])`, 'g');
 // Handle punctuation directly before CJK - add space after the punctuation run,
 // whatever precedes it (no left anchor). An already-typed '前面 ,後面' shape is a
 // typo, not preserved. CJK_PUNCTUATION above still owns colon and punctuation-before-AN
-const PUNCTUATION_CJK = new RegExp(`([!;,\\?]+)(?=[${CJK}])`, 'g');
+export const PUNCTUATION_CJK = new RegExp(`([!;,\\?]+)(?=[${CJK}])`, 'g');
 // Handle tilde separately for special cases like ~=
 // Only add space if followed by CJK, letters, or numbers (not at end of text)
-const CJK_TILDE = new RegExp(`([${CJK}])(~+)(?!=)(?=[${CJK}${AN}])`, 'g');
-const CJK_TILDE_EQUALS = new RegExp(`([${CJK}])(~=)`, 'g');
+export const CJK_TILDE = new RegExp(`([${CJK}])(~+)(?!=)(?=[${CJK}${AN}])`, 'g');
+export const CJK_TILDE_EQUALS = new RegExp(`([${CJK}])(~=)`, 'g');
 // Handle period separately to avoid matching file extensions, multiple dots, and file paths
 // Note: Multiple dots are handled by DOTS_CJK pattern first
 // Only add space if followed by CJK, letters, or numbers (not at end of text)
-const CJK_PERIOD = new RegExp(`([${CJK}])(\\.)(?![${AN}\\./])(?=[${CJK}${AN}])`, 'g');
+export const CJK_PERIOD = new RegExp(`([${CJK}])(\\.)(?![${AN}\\./])(?=[${CJK}${AN}])`, 'g');
 // Handle period between AN and CJK - avoid file extensions
-const AN_PERIOD_CJK = new RegExp(`([${AN}])(\\.)([${CJK}])`, 'g');
+export const AN_PERIOD_CJK = new RegExp(`([${AN}])(\\.)([${CJK}])`, 'g');
 // Handle colon between AN and CJK
-const AN_COLON_CJK = new RegExp(`([${AN}])(:)([${CJK}])`, 'g');
-const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, 'g');
+export const AN_COLON_CJK = new RegExp(`([${AN}])(:)([${CJK}])`, 'g');
+export const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, 'g');
 // Special case for colon before uppercase letters/parentheses (convert to full-width)
-const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, 'g');
+export const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, 'g');
 
 // The symbol part does not include '
-const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES}])`, 'g');
-const QUOTE_CJK = new RegExp(`([${QUOTES}])([${CJK}])`, 'g');
+export const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES}])`, 'g');
+export const QUOTE_CJK = new RegExp(`([${QUOTES}])([${CJK}])`, 'g');
 // The content class is [\s\S] rather than . so a quoted segment that spans a line break still pairs with its own closing quote. HTML source wrapping puts newlines mid-sentence, and with . that
 // closing quote is unreachable, so the scan resyncs on the next quote, pairs closing-to-opening and strips the spaces outside the quotes instead of inside
-const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES}]+)[ ]*([\\s\\S]+?)[ ]*([${QUOTES}]+)`, 'g');
+export const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES}]+)[ ]*([\\s\\S]+?)[ ]*([${QUOTES}]+)`, 'g');
 
 // Handle curly quotes with alphanumeric characters
 // These patterns should only apply to curly quotes, not straight quotes
 // Straight quotes are already handled by CJK_QUOTE, QUOTE_CJK and FIX_QUOTE_ANY_QUOTE
-const QUOTE_AN = new RegExp(`([\u201d])([${AN}])`, 'g'); // Only closing curly quotes + AN
+export const QUOTE_AN = new RegExp(`([\u201d])([${AN}])`, 'g'); // Only closing curly quotes + AN
 
 // Special handling for straight quotes followed by alphanumeric after CJK
 // This catches patterns like: CJK"ABC where the quote appears to be closing a quoted CJK phrase
-const CJK_QUOTE_AN = new RegExp(`([${CJK}])(")([${AN}])`, 'g');
+export const CJK_QUOTE_AN = new RegExp(`([${CJK}])(")([${AN}])`, 'g');
 
-const CJK_SINGLE_QUOTE_BUT_POSSESSIVE = new RegExp(`([${CJK}])('[^s])`, 'g');
-const SINGLE_QUOTE_CJK = new RegExp(`(')([${CJK}])`, 'g');
-const FIX_POSSESSIVE_SINGLE_QUOTE = new RegExp(`([${AN}${CJK}])( )('s)`, 'g');
+export const CJK_SINGLE_QUOTE_BUT_POSSESSIVE = new RegExp(`([${CJK}])('[^s])`, 'g');
+export const SINGLE_QUOTE_CJK = new RegExp(`(')([${CJK}])`, 'g');
+export const FIX_POSSESSIVE_SINGLE_QUOTE = new RegExp(`([${AN}${CJK}])( )('s)`, 'g');
 // Pattern to match single quotes around pure CJK text (no spaces, no other characters)
-const SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, 'g');
+export const SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, 'g');
 
-const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, 'g');
+export const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, 'g');
 // The negated class is the "something is glued to this #, so it is a hashtag" guard, so it has to reject an NBSP the same way it rejects a space. It stays a literal pair rather than \S because \S
 // also excludes zero-width characters like U+FEFF, and treating those as a gap would drop the space entirely and leave the runs flush
-const CJK_HASH = new RegExp(`([${CJK}])(#([^ \\u00a0]))`, 'g');
-const HASH_CJK = new RegExp(`(([^ \\u00a0])#)([${CJK}])`, 'g');
+export const CJK_HASH = new RegExp(`([${CJK}])(#([^ \\u00a0]))`, 'g');
+export const HASH_CJK = new RegExp(`(([^ \\u00a0])#)([${CJK}])`, 'g');
 // In file path context (multiple slashes), only a final hashtag not preceded by a slash gets a space
-const CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
+export const CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
 
 // The symbol part only includes + - * = & (excluding | / < >)
 // Only direct CJK contact makes a symbol an operator: a symbol between two half-width
 // characters binds them into a joiner token (A+B, a=1, S&P) and never gets spaces,
 // so there is deliberately no between-half-width rule here
-const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS_WITH_HYPHEN}])([${AN}])`, 'g');
-const ANS_OPERATOR_CJK = new RegExp(`([${AN}])([${OPERATORS_NO_PLUS}])([${CJK}])`, 'g');
+export const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS_WITH_HYPHEN}])([${AN}])`, 'g');
+export const ANS_OPERATOR_CJK = new RegExp(`([${AN}])([${OPERATORS_NO_PLUS}])([${CJK}])`, 'g');
 
 // Slash patterns for operator vs separator behavior
-const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
-const CJK_SLASH_ANS = new RegExp(`([${CJK}])([/])([${AN}])`, 'g');
-const ANS_SLASH_CJK = new RegExp(`([${AN}])([/])([${CJK}])`, 'g');
+export const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
+export const CJK_SLASH_ANS = new RegExp(`([${CJK}])([/])([${AN}])`, 'g');
+export const ANS_SLASH_CJK = new RegExp(`([${AN}])([/])([${CJK}])`, 'g');
 
 // Pipe patterns for separator vs joiner-token behavior, decided per line
-const PIPE_CJK_CONTACT = new RegExp(`[${CJK}]\\||\\|[${CJK}]`);
-const PIPE_SEPARATOR = /([^\s|])[ ]*(\|+)[ ]*(?=[^\s|])/g;
+export const PIPE_CJK_CONTACT = new RegExp(`[${CJK}]\\||\\|[${CJK}]`);
+export const PIPE_SEPARATOR = /([^\s|])[ ]*(\|+)[ ]*(?=[^\s|])/g;
 
 // Plus patterns for separator vs joiner-token behavior, decided per line like the
 // pipe. Contact includes a protected word placeholder edge (\uE020/\uE021): a
 // symbol touching an atom reads as an operator. The separator matches a solitary
 // plus only - a space-adjacent plus is settled and a ++ run is a preserved
 // pattern (C++, i++)
-const PLUS_CJK_CONTACT = new RegExp(`[${CJK}\uE021]\\+|\\+[${CJK}\uE020]`);
-const PLUS_SEPARATOR = /(?<=[^\s+])\+(?=[^\s+])/g;
+export const PLUS_CJK_CONTACT = new RegExp(`[${CJK}\uE021]\\+|\\+[${CJK}\uE020]`);
+export const PLUS_SEPARATOR = /(?<=[^\s+])\+(?=[^\s+])/g;
 
 // Protected words are literal atoms, never modified inside and spaced from their
 // neighbors as one unit; a + in direct contact with an atom reads as an operator,
@@ -155,73 +155,73 @@ const PLUS_SEPARATOR = /(?<=[^\s+])\+(?=[^\s+])/g;
 // flush against a slash), then unmasked at the end.
 // Entries must be CJK runs with + only: the mask covers just +, so a word needing
 // any other preserved symbol or shape is unsupported, see ADR 0006 before adding
-const PROTECTED_WORDS = ['公視+', '影劇館+'];
-const PROTECTED_WORDS_PATTERN = new RegExp(PROTECTED_WORDS.map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
-const PROTECTED_WORD_PLUS_MASK_BEFORE_WORD = new RegExp(`(\uE022)(?=[${CJK}${AN}${LEFT_BRACKETS_BASIC}])`, 'g');
-const PROTECTED_WORD_PLUS_MASK = /\uE022/g;
+export const PROTECTED_WORDS = ['公視+', '影劇館+'];
+export const PROTECTED_WORDS_PATTERN = new RegExp(PROTECTED_WORDS.map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
+export const PROTECTED_WORD_PLUS_MASK_BEFORE_WORD = new RegExp(`(\uE022)(?=[${CJK}${AN}${LEFT_BRACKETS_BASIC}])`, 'g');
+export const PROTECTED_WORD_PLUS_MASK = /\uE022/g;
 
 // Special handling for single letter grades/ratings (A+, B-, C*) before CJK
 // These should have space after the operator, not before
 // Use word boundary to ensure it's a single letter, not part of a longer word
-const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([${A}])([${GRADE_OPERATORS}])([${CJK}])`, 'g');
+export const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([${A}])([${GRADE_OPERATORS}])([${CJK}])`, 'g');
 
 // Affix readings attach a symbol to its half-width side at a CJK boundary, overriding the operator reading
 // Sign: + or - attaches to following digits (+886, -5)
-const CJK_SIGN_DIGIT = new RegExp(`([${CJK}])([\\+\\-])([0-9])`, 'g');
+export const CJK_SIGN_DIGIT = new RegExp(`([${CJK}])([\\+\\-])([0-9])`, 'g');
 // Flag: - attaches to a following single lowercase letter (-m)
 // [a-z] keeps a capitalized word on the operator reading and the trailing \b keeps a longer lowercase word there too
-const CJK_HYPHEN_FLAG = new RegExp(`([${CJK}])(\\-)([a-z])\\b`, 'g');
+export const CJK_HYPHEN_FLAG = new RegExp(`([${CJK}])(\\-)([a-z])\\b`, 'g');
 // Suffix: + attaches to a preceding half-width run (Disney+, 18+)
-const AN_PLUS_CJK = new RegExp(`([${AN}])(\\+)([${CJK}])`, 'g');
+export const AN_PLUS_CJK = new RegExp(`([${AN}])(\\+)([${CJK}])`, 'g');
 
 // Special handling for < and > as comparison operators (not brackets)
-const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([${AN}])`, 'g');
-const LESS_THAN_CJK = new RegExp(`([${AN}])(<)([${CJK}])`, 'g');
-const CJK_GREATER_THAN = new RegExp(`([${CJK}])(>)([${AN}])`, 'g');
-const GREATER_THAN_CJK = new RegExp(`([${AN}])(>)([${CJK}])`, 'g');
+export const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([${AN}])`, 'g');
+export const LESS_THAN_CJK = new RegExp(`([${AN}])(<)([${CJK}])`, 'g');
+export const CJK_GREATER_THAN = new RegExp(`([${CJK}])(>)([${AN}])`, 'g');
+export const GREATER_THAN_CJK = new RegExp(`([${AN}])(>)([${CJK}])`, 'g');
 
 // Bracket patterns: ( ) [ ] { } and also < > (though < > are also handled as operators separately)
 // Note: The curly quotes “ ” (\u201c \u201d) appear in CJK_LEFT_BRACKET/RIGHT_BRACKET_CJK but are primarily handled in the patterns below
-const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([${LEFT_BRACKETS_EXTENDED}])`, 'g');
-const RIGHT_BRACKET_CJK = new RegExp(`([${RIGHT_BRACKETS_EXTENDED}])([${CJK}])`, 'g');
-const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([${AN}${CJK}])[ ]*([\u201c])([${AN}${CJK}\\-_ ]+)([\u201d])`, 'g');
-const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([\u201c])([${AN}${CJK}\\-_ ]+)([\u201d])[ ]*([${AN}${CJK}])`, 'g');
+export const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([${LEFT_BRACKETS_EXTENDED}])`, 'g');
+export const RIGHT_BRACKET_CJK = new RegExp(`([${RIGHT_BRACKETS_EXTENDED}])([${CJK}])`, 'g');
+export const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([${AN}${CJK}])[ ]*([\u201c])([${AN}${CJK}\\-_ ]+)([\u201d])`, 'g');
+export const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([\u201c])([${AN}${CJK}\\-_ ]+)([\u201d])[ ]*([${AN}${CJK}])`, 'g');
 // Some input habits type both quotes of a pair as closing curly quotes (\u201d), e.g. \u7537\u4e3b\u201d\u89c1\u8def\u4e0d\u8d70\u201d
 // A \u201d only opens a \u201d\u2026\u201d pair when no unclosed \u201c precedes it on the line (the lookbehind), otherwise it
 // closes that \u201c. Runs after RIGHT_BRACKET_CJK, so the [ ]* after the opener strips the space that rule
 // just added inside the pair
-const ANS_CJK_RIGHT_QUOTE_ANY_RIGHT_QUOTE = new RegExp(`([${AN}${CJK}])[ ]*(?<![\u201c][^\u201c\u201d\n]*)([\u201d])[ ]*([${AN}${CJK}\\-_ ]+?)[ ]*([\u201d])`, 'g');
+export const ANS_CJK_RIGHT_QUOTE_ANY_RIGHT_QUOTE = new RegExp(`([${AN}${CJK}])[ ]*(?<![\u201c][^\u201c\u201d\n]*)([\u201d])[ ]*([${AN}${CJK}\\-_ ]+?)[ ]*([\u201d])`, 'g');
 
-const AN_LEFT_BRACKET = new RegExp(`([${AN}])(?<!\\.[${AN}]*)([${LEFT_BRACKETS_BASIC}])`, 'g');
-const RIGHT_BRACKET_AN = new RegExp(`([${RIGHT_BRACKETS_BASIC}])([${AN}])`, 'g');
+export const AN_LEFT_BRACKET = new RegExp(`([${AN}])(?<!\\.[${AN}]*)([${LEFT_BRACKETS_BASIC}])`, 'g');
+export const RIGHT_BRACKET_AN = new RegExp(`([${RIGHT_BRACKETS_BASIC}])([${AN}])`, 'g');
 
 // Special patterns for filesystem paths after CJK
-const CJK_UNIX_ABSOLUTE_FILE_PATH = new RegExp(`([${CJK}])(${UNIX_ABSOLUTE_FILE_PATH.source})`, 'g');
-const CJK_UNIX_RELATIVE_FILE_PATH = new RegExp(`([${CJK}])(${UNIX_RELATIVE_FILE_PATH.source})`, 'g');
-const CJK_WINDOWS_PATH = new RegExp(`([${CJK}])(${WINDOWS_FILE_PATH.source})`, 'g');
+export const CJK_UNIX_ABSOLUTE_FILE_PATH = new RegExp(`([${CJK}])(${UNIX_ABSOLUTE_FILE_PATH.source})`, 'g');
+export const CJK_UNIX_RELATIVE_FILE_PATH = new RegExp(`([${CJK}])(${UNIX_RELATIVE_FILE_PATH.source})`, 'g');
+export const CJK_WINDOWS_PATH = new RegExp(`([${CJK}])(${WINDOWS_FILE_PATH.source})`, 'g');
 
 // Pattern for Unix paths ending with / followed by CJK
-const UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}/)([${CJK}])`, 'g');
-const UNIX_RELATIVE_FILE_PATH_SLASH_CJK = new RegExp(`(${UNIX_RELATIVE_FILE_PATH.source}/)([${CJK}])`, 'g');
+export const UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}/)([${CJK}])`, 'g');
+export const UNIX_RELATIVE_FILE_PATH_SLASH_CJK = new RegExp(`(${UNIX_RELATIVE_FILE_PATH.source}/)([${CJK}])`, 'g');
 
-const CJK_ANS = new RegExp(`([${CJK}])([${ANS_CJK_AFTER}])`, 'g');
-const ANS_CJK = new RegExp(`([${ANS_BEFORE_CJK}])([${CJK}])`, 'g');
+export const CJK_ANS = new RegExp(`([${CJK}])([${ANS_CJK_AFTER}])`, 'g');
+export const ANS_CJK = new RegExp(`([${ANS_BEFORE_CJK}])([${CJK}])`, 'g');
 
-const S_A = new RegExp(`(%)([${A}])`, 'g');
+export const S_A = new RegExp(`(%)([${A}])`, 'g');
 
-const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
+export const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
 // A bare unpaired non-void tag amid prose is a tag mention,
 // not markup: it reads as one unit and is spaced from CJK it directly touches.
 // A trailing self-closing slash is still bare, but void
 // elements render on their own (<br> or <hr>), so they stay markup even unpaired
-const VOID_HTML_TAGS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
-const BARE_HTML_TAG = /^<([a-zA-Z][a-zA-Z0-9]*)\s*\/?>$/;
-const CLOSING_HTML_TAG = /<\/([a-zA-Z][a-zA-Z0-9]*)/g;
+export const VOID_HTML_TAGS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
+export const BARE_HTML_TAG = /^<([a-zA-Z][a-zA-Z0-9]*)\s*\/?>$/;
+export const CLOSING_HTML_TAG = /<\/([a-zA-Z][a-zA-Z0-9]*)/g;
 
 // Spacing at direct CJK contact with a tag mention placeholder (\uE002...\uE003)
-const CJK_HTML_TAG_MENTION = new RegExp(`([${CJK}])(?=\uE002)`, 'g');
-const HTML_TAG_MENTION_CJK = new RegExp(`(?<=\uE003)([${CJK}])`, 'g');
+export const CJK_HTML_TAG_MENTION = new RegExp(`([${CJK}])(?=\uE002)`, 'g');
+export const HTML_TAG_MENTION_CJK = new RegExp(`(?<=\uE003)([${CJK}])`, 'g');
 
 // Brackets: <fcontentl> (fcontentl) [fcontentl] {fcontentl}
 // f: the first character inside the brackets
@@ -229,30 +229,14 @@ const HTML_TAG_MENTION_CJK = new RegExp(`(?<=\uE003)([${CJK}])`, 'g');
 // content: the content inside the brackets but exclude the first and last characters
 // DO NOT change the first and last characters inside brackets AT ALL
 // ONLY spacing the content between them
-const BRACKET_PATTERNS = [
+export const BRACKET_PATTERNS = [
   { pattern: /<([^<>]*)>/g, open: '<', close: '>' },
   { pattern: /\(([^()]*)\)/g, open: '(', close: ')' },
   { pattern: /\[([^\[\]]*)\]/g, open: '[', close: ']' },
   { pattern: /\{([^{}]*)\}/g, open: '{', close: '}' },
 ];
 
-// Fix spacing inside brackets according to the above rules:
-// Ensure no unwanted spaces immediately after opening or before closing brackets
-const fixBracketSpacing = (text: string) => {
-  for (const { pattern, open, close } of BRACKET_PATTERNS) {
-    text = text.replace(pattern, (_match, innerContent) => {
-      if (!innerContent) {
-        return `${open}${close}`;
-      }
-      // Remove spaces at the very beginning and end of content
-      const trimmedContent = innerContent.replace(/^ +| +$/g, '');
-      return `${open}${trimmedContent}${close}`;
-    });
-  }
-  return text;
-};
-
-class PlaceholderReplacer {
+export class PlaceholderReplacer {
   // Instances are created per spacingText() call with a handful of fixed
   // configs, so compiled patterns are shared across instances
   private static patternCache = new Map<string, RegExp>();
@@ -549,7 +533,7 @@ export class Pangu {
 
     newText = newText.replace(MIDDLE_DOT, '・');
 
-    newText = fixBracketSpacing(newText);
+    newText = this.fixBracketSpacing(newText);
 
     // Restore HTML tags from placeholders (only if HTML processing occurred)
     if (hasHtmlTags) {
@@ -575,8 +559,22 @@ export class Pangu {
   public hasProperSpacing(text: string) {
     return this.spacingText(text) === text;
   }
+
+  // Fix spacing inside brackets according to the above rules:
+  // Ensure no unwanted spaces immediately after opening or before closing brackets
+  private fixBracketSpacing(text: string) {
+    for (const { pattern, open, close } of BRACKET_PATTERNS) {
+      text = text.replace(pattern, (_match, innerContent) => {
+        if (!innerContent) {
+          return `${open}${close}`;
+        }
+        // Remove spaces at the very beginning and end of content
+        const trimmedContent = innerContent.replace(/^ +| +$/g, '');
+        return `${open}${trimmedContent}${close}`;
+      });
+    }
+    return text;
+  }
 }
 
 export const pangu = new Pangu();
-
-export { ANY_CJK };
