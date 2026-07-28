@@ -55,9 +55,9 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 **Make sure to import from `pangu/browser`** in ESM, which is the DOM-aware build (`spacingNode()`, `autoSpacingPage()`) with matching TypeScript types and resolves correctly across all bundlers.
 
 ```js
-// <script src="https://cdn.jsdelivr.net/npm/pangu@9.0.0/dist/browser/pangu.umd.js"></script>
-// or
 import pangu from 'pangu/browser';
+// or
+// <script src="https://cdn.jsdelivr.net/npm/pangu@9.0.0/dist/browser/pangu.umd.js"></script>
 
 const text = pangu.spacingText('當你凝視著bug，bug也凝視著你');
 // text = '當你凝視著 bug，bug 也凝視著你'
@@ -78,9 +78,9 @@ Also on:
 ### Node.js
 
 ```js
-// const pangu = require('pangu');
-// or
 import pangu from 'pangu';
+// or
+// const pangu = require('pangu');
 
 const text = pangu.spacingText('不能信任那些Terminal或Editor用白底的人');
 // text = '不能信任那些 Terminal 或 Editor 用白底的人'
