@@ -2,6 +2,7 @@
 
 ## v9.0.0 / 2026-07-28
 
+- 修正 `<wbr>` 這類元素把 `/` 兩邊拆成不同文字節點時，斜線前面會漏加空格的問題
 - 拿掉了 `package.json` 的 `module` 欄位
 - 拿掉了 `package.json` 的 `browser` 欄位
   - 瀏覽器端請改用 `import pangu from 'pangu/browser'`，本來就是文件建議的用法，型別也一直是對的
