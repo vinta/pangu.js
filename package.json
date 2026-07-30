@@ -76,7 +76,7 @@
     "lint:code": "eslint",
     "lint:package": "attw --pack . --entrypoints . && attw --pack . --entrypoints ./browser --profile esm-only && publint",
     "format": "prettier --write ./src/ ./browser-extensions/chrome/src ./browser-extensions/chrome/pages",
-    "publish-package": "node ./scripts/publish-package.js",
+    "bump-version": "node ./scripts/bump-version.js",
     "pack-extension": "./scripts/pack-extension-chrome.sh"
   },
   "dependencies": {},

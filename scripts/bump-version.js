@@ -10,7 +10,7 @@ const projectRoot = join(__dirname, '..');
 const newVersion = process.argv[2];
 
 if (!newVersion) {
-  console.error('Error: Version number required. Usage: npm run publish-package <x.y.z>');
+  console.error('Error: Version number required. Usage: npm run bump-version <x.y.z>');
   process.exit(1);
 }
 

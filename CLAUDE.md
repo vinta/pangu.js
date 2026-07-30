@@ -18,7 +18,7 @@ npm run test:browser            # Test browser code (uses Playwright)
 
 npm run lint
 
-npm run publish-package 1.2.3   # Bump version across files (incl. README), build, and pack extension (does NOT commit or tag)
+npm run bump-version 1.2.3      # Bump version across files (incl. README), build, and pack extension (does NOT commit or tag)
 ```
 
 **npm publishing**: Done via GitHub Actions (`.github/workflows/publish.yml`), triggered by pushing a `v*` tag. Uses npm Trusted Publishing (OIDC) — no tokens needed. Do NOT run `npm publish` locally.

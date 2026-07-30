@@ -75,7 +75,7 @@
 ## Publishing And Releases
 
 - Do not run `npm publish` locally. npm publishing is handled by GitHub Actions through the `v*` tag workflow and Trusted Publishing.
-- Use `npm run publish-package <version>` only when the task explicitly asks for a release/version flow.
+- Use `npm run bump-version <version>` only when the task explicitly asks for a release/version flow.
 - Keep release, package, and extension packaging changes especially small and verify the generated output path before modifying scripts.
 
 ## External Tool Documentation
