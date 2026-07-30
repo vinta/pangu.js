@@ -60,7 +60,6 @@
     "HISTORY.md"
   ],
   "scripts": {
-    "prepare": "npm run build:lib",
     "clean": "rm -rf browser-extensions/chrome/dist/ dist/ playwright-report/ test-results/",
     "build": "npm run clean && npm run build:lib && npm run build:extension",
     "build:lib": "vite build && npm run build:types",
@@ -75,7 +74,6 @@
     "lint": "npm run lint:code && npm run lint:package",
     "lint:code": "eslint",
     "lint:package": "attw --pack . --entrypoints . && attw --pack . --entrypoints ./browser --profile esm-only && publint",
-    "format": "prettier --write ./src/ ./browser-extensions/chrome/src ./browser-extensions/chrome/pages",
     "bump-version": "node ./scripts/bump-version.js",
     "pack-extension": "./scripts/pack-extension-chrome.sh"
   },
