@@ -26,14 +26,7 @@ jobs:
           node-version: '24'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
-
-      - name: Run build
-        run: npm run build
-
       - name: Check version
-        if: startsWith(github.ref, 'refs/tags/v')
         run: |
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
           TAG_VERSION=${GITHUB_REF#refs/tags/v}
@@ -45,8 +38,17 @@ jobs:
           fi
           echo "Version check passed: $PACKAGE_VERSION"
 
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run build
+        run: npm run build
+
       - name: Pack tarball
         run: npm pack --pack-destination ./release
+
+      - name: Verify tarball is not empty
+        run: tar tzf ./release/*.tgz | grep -q '^package/dist/' || { echo "Error: tarball is missing dist/"; exit 1; }
 
       - name: Upload tarball
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
