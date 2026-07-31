@@ -3,6 +3,7 @@
 ## v9.1.0 / 2026-xx-xx
 
 - 新增 `pangu-js` 這個 command 別名，不管 PATH 順序如何都會執行到 pangu.js
+- `pangu -v` 會在版本號前面加上 `pangu.js`，本來只印版本號，有在解析這個輸出的腳本要改
 - 修正 CLI 的輸出被導向 pipe 時，超過 64KB 的部分會被截斷的問題
 - CLI 支援從 stdin 讀取文字，`echo "他們在release的前一天爆炸" | pangu` 會直接印出加好空格的結果，`-c` 也可以這樣用
 - CLI 的 `-t`、`-f`、`-c` 不能再混用，同時給多個會出現錯誤訊息
