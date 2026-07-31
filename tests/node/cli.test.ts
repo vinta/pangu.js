@@ -1,8 +1,8 @@
 import { execSync } from 'node:child_process';
-import { writeFileSync, existsSync, unlinkSync } from 'node:fs';
-import { dirname, resolve, join } from 'node:path';
+import { existsSync, unlinkSync, writeFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, it, expect, afterEach } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
