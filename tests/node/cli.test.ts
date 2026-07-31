@@ -37,8 +37,14 @@ describe('CLI', () => {
     expect(output.trim()).toBe('老婆餅裡面沒有老婆，JavaScript 裡面也沒有 Java');
   });
 
-  // it('handle text by default', () => {
-  //   const output = execSync(`node ${cliPath} "我喜歡在填表單的時候加一些�和â€™，好讓那些工程師懷疑系統有bug"`, { encoding: 'utf8' });
-  //   expect(output.trim()).toBe('我喜歡在填表單的時候加一些 � 和 â€™，好讓那些工程師懷疑系統有 bug');
-  // });
+  it('reject mutually exclusive mode flags', () => {
+    try {
+      execSync(`node ${cliPath} -t -f ${tempFile}`, { encoding: 'utf8', stdio: 'pipe' });
+      expect.unreachable('CLI should reject -t together with -f');
+    } catch (error) {
+      const { status, stderr } = error as { status: number; stderr: string };
+      expect(status).toBe(1);
+      expect(stderr).toContain('pangu: error: argument --file: not allowed with argument --text');
+    }
+  });
 });

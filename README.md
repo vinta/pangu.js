@@ -99,11 +99,9 @@ $ pangu "與PM戰鬥的人，應當小心自己不要成為PM"
 $ pangu --check "盤古新聞網：工程師會議中默不作聲，PM 恐成最大贏家"
 
 $ pangu --help
-usage: pangu [-h] [-v] [-t] [-f] [-c] text_or_path
+usage: pangu [-h] [-v] [-t | -f | -c] text_or_path
 
-pangu.js -- Paranoid text spacing for good readability, to automatically
-insert whitespace between CJK and half-width characters (alphabetical letters,
-numerical digits and symbols).
+pangu.js -- Paranoid text spacing for good readability, to automatically insert whitespace between CJK and half-width characters (alphabetical letters, numerical digits and symbols).
 
 positional arguments:
   text_or_path   the text or file path to apply spacing

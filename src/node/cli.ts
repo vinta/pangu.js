@@ -2,11 +2,9 @@
 import pangu from './index.js';
 
 const usage = `
-usage: pangu [-h] [-v] [-t] [-f] [-c] text_or_path
+usage: pangu [-h] [-v] [-t | -f | -c] text_or_path
 
-pangu.js -- Paranoid text spacing for good readability, to automatically
-insert whitespace between CJK and half-width characters (alphabetical letters,
-numerical digits and symbols).
+pangu.js -- Paranoid text spacing for good readability, to automatically insert whitespace between CJK and half-width characters (alphabetical letters, numerical digits and symbols).
 
 positional arguments:
   text_or_path   the text or file path to apply spacing
@@ -20,6 +18,26 @@ optional arguments:
 `.trim();
 
 const [, , ...args] = process.argv;
+
+type Mode = '--text' | '--file' | '--check';
+
+const modeFlags: Record<string, Mode> = {
+  '-t': '--text',
+  '--text': '--text',
+  '-f': '--file',
+  '--file': '--file',
+  '-c': '--check',
+  '--check': '--check',
+};
+
+// -t, -f and -c are mutually exclusive
+const givenModes = new Set(args.filter((arg) => arg in modeFlags).map((flag) => modeFlags[flag]));
+if (givenModes.size > 1) {
+  const [first, second] = [...givenModes];
+  console.error(`pangu: error: argument ${second}: not allowed with argument ${first}`);
+  console.log(usage);
+  process.exit(1);
+}
 
 function printSpacingText(text: string | undefined) {
   if (typeof text === 'string') {
