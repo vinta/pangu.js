@@ -15,10 +15,15 @@ function run(args) {
 
 console.log('=== Testing CLI ===\n');
 
-// -v matches the library version
+// -v names the implementation, so a shadowed pangu.py install is distinguishable
 const version = run(['-v']);
-assert.equal(version, pangu.version);
+assert.equal(version, `pangu.js ${pangu.version}`);
 console.log(`Version: ${version}`);
+
+// The pangu-js alias resolves to this implementation regardless of PATH order
+const aliasCli = join(__dirname, 'node_modules', '.bin', 'pangu-js');
+assert.equal(execFileSync(aliasCli, ['-v'], { encoding: 'utf8' }).trim(), `pangu.js ${pangu.version}`);
+console.log('Alias (pangu-js) works');
 
 // Positional argument is treated as text
 assert.equal(run(['當你凝視著bug，bug也凝視著你']), '當你凝視著 bug，bug 也凝視著你');
@@ -37,6 +42,11 @@ try {
 } finally {
   rmSync(filePath);
 }
+
+// Piped stdin is spaced like a positional argument
+const piped = execFileSync(cli, [], { encoding: 'utf8', input: '當你凝視著bug，bug也凝視著你\n' });
+assert.equal(piped, '當你凝視著 bug，bug 也凝視著你\n');
+console.log('Spacing text (stdin) works');
 
 // -c exits 0 for proper spacing, 1 otherwise
 run(['-c', '當你凝視著 bug，bug 也凝視著你']);

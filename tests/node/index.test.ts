@@ -1,8 +1,8 @@
-import pangu from '../../dist/node/index.js';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import pangu from '../../dist/node/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

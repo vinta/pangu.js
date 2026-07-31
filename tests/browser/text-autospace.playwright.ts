@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 // The stylesheet the extension actually registers (ADR 0001: test what ships).
 // npm run build:extension copies browser-extensions/chrome/src/content-script.css here.

@@ -30,7 +30,8 @@
   "sideEffects": false,
   "main": "./dist/node/index.cjs",
   "bin": {
-    "pangu": "./dist/node/cli.js"
+    "pangu": "./dist/node/cli.js",
+    "pangu-js": "./dist/node/cli.js"
   },
   "exports": {
     ".": {

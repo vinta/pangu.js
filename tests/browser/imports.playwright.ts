@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 // Browser ESM imports are tested in the Node.js environment since they use the same ES modules
 // UMD is the primary browser target

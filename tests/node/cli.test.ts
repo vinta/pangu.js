@@ -1,8 +1,8 @@
 import { execSync } from 'node:child_process';
-import { writeFileSync, existsSync, unlinkSync } from 'node:fs';
-import { dirname, resolve, join } from 'node:path';
+import { existsSync, unlinkSync, writeFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, it, expect, afterEach } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -37,8 +37,59 @@ describe('CLI', () => {
     expect(output.trim()).toBe('老婆餅裡面沒有老婆，JavaScript 裡面也沒有 Java');
   });
 
-  // it('handle text by default', () => {
-  //   const output = execSync(`node ${cliPath} "我喜歡在填表單的時候加一些�和â€™，好讓那些工程師懷疑系統有bug"`, { encoding: 'utf8' });
-  //   expect(output.trim()).toBe('我喜歡在填表單的時候加一些 � 和 â€™，好讓那些工程師懷疑系統有 bug');
-  // });
+  it('handle text by default', () => {
+    const output = execSync(`node ${cliPath} "與PM戰鬥的人"`, { encoding: 'utf8' });
+    expect(output.trim()).toBe('與 PM 戰鬥的人');
+  });
+
+  it('handle text from stdin', () => {
+    const output = execSync(`node ${cliPath}`, { encoding: 'utf8', input: '當你凝視著bug，bug也凝視著你\n' });
+    expect(output).toBe('當你凝視著 bug，bug 也凝視著你\n');
+  });
+
+  it('handle text from stdin with -t', () => {
+    const output = execSync(`node ${cliPath} -t`, { encoding: 'utf8', input: '測試CLI參數\n' });
+    expect(output).toBe('測試 CLI 參數\n');
+  });
+
+  it('handle text from stdin with a - argument', () => {
+    const output = execSync(`node ${cliPath} -`, { encoding: 'utf8', input: '老婆餅裡面沒有老婆\n' });
+    expect(output).toBe('老婆餅裡面沒有老婆\n');
+  });
+
+  it('preserve line structure of multi-line stdin', () => {
+    const output = execSync(`node ${cliPath}`, { encoding: 'utf8', input: '第一行有bug\n第二行有Java\n' });
+    expect(output).toBe('第一行有 bug\n第二行有 Java\n');
+  });
+
+  it('prefer an explicit argument over stdin', () => {
+    const output = execSync(`node ${cliPath} -t "命令列的文字有PM"`, { encoding: 'utf8', input: '標準輸入的文字有bug\n' });
+    expect(output.trim()).toBe('命令列的文字有 PM');
+  });
+
+  it('check stdin that already has proper spacing', () => {
+    const output = execSync(`node ${cliPath} -c`, { encoding: 'utf8', input: '當你凝視著 bug，bug 也凝視著你\n' });
+    expect(output).toBe('');
+  });
+
+  it('check stdin that lacks proper spacing', () => {
+    try {
+      execSync(`node ${cliPath} -c`, { encoding: 'utf8', input: '當你凝視著bug\n', stdio: 'pipe' });
+      expect.unreachable('CLI should exit 1 for text without proper spacing');
+    } catch (error) {
+      const { status } = error as { status: number };
+      expect(status).toBe(1);
+    }
+  });
+
+  it('reject mutually exclusive mode flags', () => {
+    try {
+      execSync(`node ${cliPath} -t -f ${tempFile}`, { encoding: 'utf8', stdio: 'pipe' });
+      expect.unreachable('CLI should reject -t together with -f');
+    } catch (error) {
+      const { status, stderr } = error as { status: number; stderr: string };
+      expect(status).toBe(1);
+      expect(stderr).toContain('pangu: error: argument --file: not allowed with argument --text');
+    }
+  });
 });
