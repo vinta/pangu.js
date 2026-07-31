@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -65,13 +65,6 @@ const examplesPackageContent = readFileSync(examplesPackagePath, 'utf8');
 const updatedExamplesPackage = examplesPackageContent.replace(/"pangu":\s*"[\d.]+"/, `"pangu": "${newVersion}"`);
 writeFileSync(examplesPackagePath, updatedExamplesPackage, 'utf8');
 console.log(`Updated ${examplesPackagePath}`);
-
-// Update README.md
-const readmePath = join(projectRoot, 'README.md');
-const readmeContent = readFileSync(readmePath, 'utf8');
-const updatedReadme = readmeContent.replace(/pangu@[\d.]+/g, `pangu@${newVersion}`).replace(/pangu\/[\d.]+/g, `pangu/${newVersion}`);
-writeFileSync(readmePath, updatedReadme, 'utf8');
-console.log(`Updated ${readmePath}`);
 
 console.log(`Version bumped to ${newVersion}`);
 

@@ -57,7 +57,7 @@ Learn more on [npm](https://www.npmjs.com/package/pangu).
 ```js
 import pangu from 'pangu/browser';
 // or
-// <script src="https://cdn.jsdelivr.net/npm/pangu@9.1.0/dist/browser/pangu.umd.js"></script>
+// <script src="https://cdn.jsdelivr.net/npm/pangu@latest/dist/browser/pangu.umd.js"></script>
 
 const text = pangu.spacingText('當你凝視著bug，bug也凝視著你');
 // text = '當你凝視著 bug，bug 也凝視著你'
@@ -72,8 +72,12 @@ document.addEventListener('DOMContentLoaded', () => pangu.autoSpacingPage());
 
 Also on:
 
-- https://cdn.jsdelivr.net/npm/pangu@9.1.0/dist/browser/pangu.umd.js
-- https://unpkg.com/pangu@9.1.0/dist/browser/pangu.umd.js
+- [jsDelivr](https://www.jsdelivr.com/package/npm/pangu)
+  - `https://cdn.jsdelivr.net/npm/pangu@x.y.z/dist/browser/pangu.umd.js`
+- [unpkg](https://app.unpkg.com/pangu)
+  - `https://unpkg.com/pangu@x.y.z/dist/browser/pangu.umd.js`
+
+Replace `x.y.z` with the version you want to use.
 
 ### Node.js
 
