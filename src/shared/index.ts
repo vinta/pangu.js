@@ -1,26 +1,31 @@
-// CJK is short for Chinese, Japanese, and Korean:
-// \u2e80-\u2eff CJK Radicals Supplement
-// \u2f00-\u2fdf Kangxi Radicals
-// \u3040-\u309f Hiragana
-// \u30a0-\u30ff Katakana
-// \u3100-\u312f Bopomofo
-// \u3200-\u32ff Enclosed CJK Letters and Months
-// \u3400-\u4dbf CJK Unified Ideographs Extension A
-// \u4e00-\u9fff CJK Unified Ideographs
-// \uf900-\ufaff CJK Compatibility Ideographs
+// CJK is short for Chinese, Japanese, and Korean
 //
 // ANS is short for Alphabets, Numbers, and Symbols:
-// A includes A-Za-z\u0370-\u03ff
+// A includes A-Za-z plus Greek and Coptic
 // N includes 0-9
-// S includes `~!@#$%^&*()-_=+[]{}\|;:'",<.>/?
-//
-// All J below does not include \u30fb
-// Some S below does not include all symbols
+// S varies per rule, see the several symbol sets below
 //
 // For more information about Unicode blocks, see
 // https://symbl.cc/en/unicode-table/
 
-export const CJK = '\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30fa\u30fc-\u30ff\u3100-\u312f\u3200-\u32ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff';
+// Unicode blocks. A name that ends in a carve-out marks a range that is deliberately not its whole block, so widening it back to the block boundary is an obviously wrong edit rather than a plausible tidy-up
+export const CJK_RADICALS_SUPPLEMENT = '\u2e80-\u2eff';
+export const KANGXI_RADICALS = '\u2f00-\u2fdf';
+export const HIRAGANA = '\u3040-\u309f';
+// The Katakana block runs to \u30ff, but \u30fb is the character MIDDLE_DOT normalizes to, so it must not read as CJK itself
+export const KATAKANA_NO_MIDDLE_DOT = '\u30a0-\u30fa\u30fc-\u30ff';
+export const BOPOMOFO = '\u3100-\u312f';
+export const ENCLOSED_CJK_LETTERS_AND_MONTHS = '\u3200-\u32ff';
+export const CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A = '\u3400-\u4dbf';
+export const CJK_UNIFIED_IDEOGRAPHS = '\u4e00-\u9fff';
+export const CJK_COMPATIBILITY_IDEOGRAPHS = '\uf900-\ufaff';
+export const GREEK_AND_COPTIC = '\u0370-\u03ff';
+// The Latin-1 Supplement block starts at \u0080, but this range starts one past NBSP (\u00a0) so an NBSP lands in no character class at all. See ADR 0009
+export const LATIN_1_SUPPLEMENT_AFTER_NBSP = '\u00a1-\u00ff';
+export const NUMBER_FORMS = '\u2150-\u218f';
+export const DINGBATS = '\u2700-\u27bf';
+
+export const CJK = `${CJK_RADICALS_SUPPLEMENT}${KANGXI_RADICALS}${HIRAGANA}${KATAKANA_NO_MIDDLE_DOT}${BOPOMOFO}${ENCLOSED_CJK_LETTERS_AND_MONTHS}${CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A}${CJK_UNIFIED_IDEOGRAPHS}${CJK_COMPATIBILITY_IDEOGRAPHS}`;
 
 // Basic character classes
 export const AN = 'A-Za-z0-9';
@@ -43,8 +48,8 @@ export const LEFT_BRACKETS_EXTENDED = '\\(\\[\\{<>\u201c'; // For CJK_LEFT_BRACK
 export const RIGHT_BRACKETS_EXTENDED = '\\)\\]\\}<>\u201d'; // For RIGHT_BRACKET_CJK
 
 // ANS extended sets - CAREFUL: different symbols!
-export const ANS_CJK_AFTER = `${A}\u0370-\u03ff0-9@\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700-\u27bf`; // Has @, no punctuation
-export const ANS_BEFORE_CJK = `${A}\u0370-\u03ff0-9\\$%\\^&\\*\\-\\+\\\\=\u00a1-\u00ff\u2150-\u218f\u2700-\u27bf`; // No @ symbol
+export const ANS_CJK_AFTER = `${A}${GREEK_AND_COPTIC}0-9@\\$%\\^&\\*\\-\\+\\\\=${LATIN_1_SUPPLEMENT_AFTER_NBSP}${NUMBER_FORMS}${DINGBATS}`; // Has @, no punctuation
+export const ANS_BEFORE_CJK = `${A}${GREEK_AND_COPTIC}0-9\\$%\\^&\\*\\-\\+\\\\=${LATIN_1_SUPPLEMENT_AFTER_NBSP}${NUMBER_FORMS}${DINGBATS}`; // No @ symbol
 // Both ranges start at \u00a1, one past NBSP (\u00a0), so an NBSP is in no character class at all. That inertness is load-bearing: an NBSP already separates the runs it sits between, so no rule matches across
 // it and none fires. pangu therefore never rewrites an author's NBSP, it only ever inserts a space where one is genuinely missing. See ADR 0009
 
