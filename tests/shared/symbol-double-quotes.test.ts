@@ -14,6 +14,15 @@ describe('Symbol " "', () => {
     expect(pangu.spacingText('head "中文123漢字" tail')).toBe('head "中文 123 漢字" tail');
   });
 
+  // The per-line pipe/plus readings run after the quote cleanup, so a separator space landing just inside a closing quote must be re-stripped: the first pass emits what a second pass would
+  it('handle operator spacing inside quotes idempotently', () => {
+    expect(pangu.spacingText('"字+"')).toBe('"字 +"');
+    expect(pangu.spacingText('"字|"')).toBe('"字 |"');
+    expect(pangu.spacingText('你好"字+"世界')).toBe('你好 "字 +" 世界');
+    expect(pangu.spacingText('前面"字|"後面')).toBe('前面 "字 |" 後面');
+    expect(pangu.spacingText('多行"字+"\n下行"字|"')).toBe('多行 "字 +"\n下行 "字 |"');
+  });
+
   it('handle " " adjacent to CJK', () => {
     expect(pangu.spacingText('我們也不可以說"We invited the reverend to dinner."')).toBe('我們也不可以說 "We invited the reverend to dinner."');
     expect(pangu.spacingText('"We invited the Rev. Darling."我們也不可以說')).toBe('"We invited the Rev. Darling." 我們也不可以說');

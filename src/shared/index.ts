@@ -414,6 +414,9 @@ export class Pangu {
       })
       .join('\n');
 
+    // A pipe/plus separator space can land just inside a closing quote; re-strip so the first pass already emits what a second pass would (idempotency)
+    newText = newText.replace(FIX_QUOTE_ANY_QUOTE, '$1$2$3');
+
     newText = compoundWordManager.restore(newText);
 
     newText = newText.replace(CJK_LEFT_BRACKET, '$1 $2');
