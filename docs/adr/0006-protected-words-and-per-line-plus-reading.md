@@ -1,5 +1,7 @@
 # A protected word list pins CJK brand suffixes, and a plus in contact flips its line's unsettled pluses
 
+**Partially superseded by [ADR 0013](0013-protected-word-list-removed.md), which removes the protected word list and its machinery. Plus reading survives unchanged.**
+
 ADR 0003 left CJK brand suffixes open as a FIXME: `公視+上架` wants the suffix reading (`公視+ 上架`) while `前面+後面` wants the operator reading, and the two are structurally identical, so no shape rule can split them — it predicted a lexicon would be needed. Real-world bundle plans sharpened the problem: `HiNet光世代+MOD影劇館+(300M/300M)` chains products with pluses where most read as separators but one belongs to the brand `影劇館+`, and the affix shape rule misread `MOD+影劇館+` as a `MOD+` suffix.
 
 The decision adds two mechanisms on top of the affix shape rule:
