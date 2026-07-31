@@ -26,10 +26,10 @@
 ### For Developers
 
 - Official support:
-  - [pangu.go](https://github.com/vinta/pangu)
-  - [pangu.java](https://github.com/vinta/pangu.java)
   - [pangu.js](https://github.com/vinta/pangu.js)
   - [pangu.py](https://github.com/vinta/pangu.py)
+  - [pangu.go](https://github.com/vinta/pangu)
+  - [pangu.java](https://github.com/vinta/pangu.java)
   - [pangu.space](https://github.com/vinta/pangu.space)
 - Community support:
   - [pangu.clj](https://github.com/coldnew/pangu.clj)
