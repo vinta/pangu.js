@@ -33,11 +33,11 @@ jobs:
       - name: Run build
         run: npm run build
 
-      - name: Run typecheck
-        run: npm run typecheck
-
       - name: Run lint
         run: npm run lint
+
+      - name: Run typecheck
+        run: npm run typecheck
 
   node-test:
     runs-on: ubuntu-latest
