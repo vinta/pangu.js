@@ -1,5 +1,5 @@
+import { describe, expect, it } from 'vitest';
 import { Pangu } from '../../dist/shared/index.js';
-import { describe, it, expect } from 'vitest';
 
 const pangu = new Pangu();
 
@@ -47,16 +47,22 @@ describe('Other Symbols', () => {
                        .toBe('【UCG 中字】“數毛社” DF 的《戰神 4》全新演示解析');
   });
 
-  // ✀-➿
+  // — An em-dash is not a spaced half-width symbol, so it stays flush against CJK
+  it('handle — em-dash, does not add space with CJK', () => {
+    expect(pangu.spacingText('前面—後面')).toBe('前面—後面');
+    expect(pangu.spacingText('他說——不對')).toBe('他說——不對');
+  });
+
+  // \u2700 - \u27bf
   it('handle Dingbats symbols, add space between them and CJK', () => {
     expect(pangu.spacingText('剪刀✂符號')).toBe('剪刀 ✂ 符號');
     expect(pangu.spacingText('完成✅了')).toBe('完成 ✅ 了');
     expect(pangu.spacingText('愛心❤符號')).toBe('愛心 ❤ 符號');
   });
 
-  // — An em-dash is not a spaced half-width symbol, so it stays flush against CJK
-  it('handle — em-dash, does not add space with CJK', () => {
-    expect(pangu.spacingText('前面—後面')).toBe('前面—後面');
-    expect(pangu.spacingText('他說——不對')).toBe('他說——不對');
-  });
+  // FIXME
+  // // \ufffd
+  // it('handle Specials symbols, add space between them and CJK', () => {
+  //   expect(pangu.spacingText('我喜歡在填表單的時候故意加幾個� (U+FFFD)字元，好讓那些工程師懷疑系統有bug')).toBe('我喜歡在填表單的時候故意加幾個 � (U+FFFD) 字元，好讓那些工程師懷疑系統有 bug');
+  // });
 });

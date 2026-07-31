@@ -42,11 +42,6 @@ describe('CLI', () => {
     expect(output.trim()).toBe('與 PM 戰鬥的人');
   });
 
-  // it('handle text by default', () => {
-  //   const output = execSync(`node ${cliPath} "我喜歡在填表單的時候加一些�和â€™，好讓那些工程師懷疑系統有bug"`, { encoding: 'utf8' });
-  //   expect(output.trim()).toBe('我喜歡在填表單的時候加一些 � 和 â€™，好讓那些工程師懷疑系統有 bug');
-  // });
-
   it('handle text from stdin', () => {
     const output = execSync(`node ${cliPath}`, { encoding: 'utf8', input: '當你凝視著bug，bug也凝視著你\n' });
     expect(output).toBe('當你凝視著 bug，bug 也凝視著你\n');
