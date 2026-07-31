@@ -58,7 +58,7 @@
     "src/",
     "LICENSE",
     "README.md",
-    "HISTORY.md"
+    "CHANGELOG.md"
   ],
   "scripts": {
     "clean": "rm -rf browser-extensions/chrome/dist/ dist/ playwright-report/ test-results/",

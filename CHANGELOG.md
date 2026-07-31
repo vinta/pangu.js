@@ -1,4 +1,4 @@
-# History
+# Changelog
 
 ## v9.1.0 / 2026-xx-xx
 
