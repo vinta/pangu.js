@@ -1,9 +1,9 @@
 # 為什麼你們就是不能加個空格呢？
 
-[![jsDelivr Hits](https://img.shields.io/jsdelivr/npm/hm/pangu?style=for-the-badge)](https://www.jsdelivr.com/package/npm/pangu)
-[![npm Downloads](https://img.shields.io/npm/dm/pangu?style=for-the-badge&label=npm)](https://www.npmjs.com/package/pangu)
 [![npm Version](https://img.shields.io/npm/v/pangu?style=for-the-badge)](https://www.npmjs.com/package/pangu)
 [![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/paphcfdffjnbcgkokihcdjliihicmbpd?style=for-the-badge)](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+[![jsDelivr Hits](https://img.shields.io/jsdelivr/npm/hm/pangu?style=for-the-badge)](https://www.jsdelivr.com/package/npm/pangu)
+[![npm Downloads](https://img.shields.io/npm/dm/pangu?style=for-the-badge&label=npm)](https://www.npmjs.com/package/pangu)
 
 如果你跟我一樣，每次看到網頁上的中文字和英文、數字、符號擠在一塊，就會坐立難安，忍不住想在它們之間加個空格。這個 Google Chrome 外掛正是你在網路世界走跳所需要的東西，它會自動替你在網頁中所有的中文字和半形的英文、數字、符號之間插入空白。
 
@@ -107,7 +107,7 @@ $ pangu -f path/to/file.txt
 新來的 Designer 趁特價的時候幫自己買了一本 GoF Design Patterns
 
 $ pangu -c "盤古新聞網：工程師會議中默不作聲，PM恐成最大贏家"; echo $?
-Corrected: 盤古新聞網：工程師會議中默不作聲，PM恐成最大贏家
+Corrected: 盤古新聞網：工程師會議中默不作聲，PM 恐成最大贏家
 1
 
 $ echo "他們在release的前一天爆炸" | pangu
