@@ -37,6 +37,11 @@ describe('CLI', () => {
     expect(output.trim()).toBe('老婆餅裡面沒有老婆，JavaScript 裡面也沒有 Java');
   });
 
+  it('handle file content from stdin with a - argument', () => {
+    const output = execFileSync('node', [cliPath, '-f', '-'], { encoding: 'utf8', input: '老婆餅裡面沒有老婆，JavaScript裡面也沒有Java\n' });
+    expect(output).toBe('老婆餅裡面沒有老婆，JavaScript 裡面也沒有 Java\n');
+  });
+
   it('handle text by default', () => {
     const output = execFileSync('node', [cliPath, '與PM戰鬥的人'], { encoding: 'utf8' });
     expect(output.trim()).toBe('與 PM 戰鬥的人');
@@ -79,6 +84,29 @@ describe('CLI', () => {
     } catch (error) {
       const { status } = error as { status: number };
       expect(status).toBe(1);
+    }
+  });
+
+  it('reject -f without a file path even when input is piped', () => {
+    try {
+      execFileSync('node', [cliPath, '-f'], { encoding: 'utf8', input: '當你凝視著bug\n', stdio: 'pipe' });
+      expect.unreachable('CLI should reject -f without a file path');
+    } catch (error) {
+      const { status, stderr } = error as { status: number; stderr: string };
+      expect(status).toBe(1);
+      expect(stderr).toContain('pangu: error: argument --file: expected a file path');
+    }
+  });
+
+  it('reject -f with an empty file path without crashing', () => {
+    try {
+      execFileSync('node', [cliPath, '-f', ''], { encoding: 'utf8', input: '當你凝視著bug\n', stdio: 'pipe' });
+      expect.unreachable('CLI should reject -f with an empty file path');
+    } catch (error) {
+      const { status, stderr } = error as { status: number; stderr: string };
+      expect(status).toBe(1);
+      expect(stderr).toContain('pangu: error: argument --file: expected a file path');
+      expect(stderr).not.toContain('node:fs');
     }
   });
 

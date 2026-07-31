@@ -13,7 +13,7 @@ optional arguments:
   -h, --help     show this help message and exit
   -v, --version  show program's version number and exit
   -t, --text     specify the input value is a text
-  -f, --file     specify the input value is a file path
+  -f, --file     specify the input value is a file path (pass - to read from stdin)
   -c, --check    check if text has proper spacing (exit 0 if yes, 1 if no)
 `.trim();
 
@@ -56,10 +56,12 @@ function printSpacingText(text: string | undefined) {
   }
 }
 
+// An empty string is what -f "$EMPTY_VAR" expands to, so it counts as a missing path rather than a file to open
 function printSpacingFile(path: string | undefined) {
-  if (typeof path === 'string') {
+  if (path) {
     console.log(pangu.spacingFileSync(path));
   } else {
+    console.error('pangu: error: argument --file: expected a file path');
     console.log(usage);
     process.exitCode = 1;
   }
@@ -111,8 +113,9 @@ async function main() {
       break;
     case '-f':
     case '--file':
-      // A missing path with piped input means the text itself arrived on stdin, so there is no file to open
-      if (wantsStdin(args[1])) {
+      // An explicit - is the conventional spelling for "the file is stdin" (cf. tar -f -). A missing path is a usage error instead of a stdin fallback, so that -f with an empty path variable
+      // reports the missing path instead of silently spacing whatever happens to be piped in
+      if (args[1] === '-') {
         printSpacingText(await readStdin());
       } else {
         printSpacingFile(args[1]);
