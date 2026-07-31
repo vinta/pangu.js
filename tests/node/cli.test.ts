@@ -37,6 +37,11 @@ describe('CLI', () => {
     expect(output.trim()).toBe('老婆餅裡面沒有老婆，JavaScript 裡面也沒有 Java');
   });
 
+  it('handle text by default', () => {
+    const output = execSync(`node ${cliPath} "與PM戰鬥的人"`, { encoding: 'utf8' });
+    expect(output.trim()).toBe('與 PM 戰鬥的人');
+  });
+
   // it('handle text by default', () => {
   //   const output = execSync(`node ${cliPath} "我喜歡在填表單的時候加一些�和â€™，好讓那些工程師懷疑系統有bug"`, { encoding: 'utf8' });
   //   expect(output.trim()).toBe('我喜歡在填表單的時候加一些 � 和 â€™，好讓那些工程師懷疑系統有 bug');
