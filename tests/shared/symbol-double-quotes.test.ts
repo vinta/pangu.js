@@ -15,7 +15,7 @@ describe('Symbol " "', () => {
   });
 
   // The per-line pipe/plus readings run after the quote cleanup, so a separator space landing just inside a closing quote must be re-stripped: the first pass emits what a second pass would
-  it('handle operator spacing inside quotes idempotently', () => {
+  it('handle separator spacing inside quotes idempotently', () => {
     expect(pangu.spacingText('"字+"')).toBe('"字 +"');
     expect(pangu.spacingText('"字|"')).toBe('"字 |"');
     expect(pangu.spacingText('你好"字+"世界')).toBe('你好 "字 +" 世界');
