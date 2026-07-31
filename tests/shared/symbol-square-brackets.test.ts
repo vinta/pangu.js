@@ -12,4 +12,10 @@ describe('Symbol [ ]', () => {
     expect(pangu.spacingText('head [中文123漢字]後面')).toBe('head [中文 123 漢字] 後面');
     expect(pangu.spacingText('head [中文123漢字] tail')).toBe('head [中文 123 漢字] tail');
   });
+
+  it('handle multiline content in square brackets', () => {
+    // A space before a newline is mid-content, not a bracket-edge space: only the literal string edges get stripped
+    expect(pangu.spacingText('[x \n]中')).toBe('[x \n] 中');
+    expect(pangu.spacingText('中[ 多行\n內容 ]')).toBe('中 [多行\n內容]');
+  });
 });

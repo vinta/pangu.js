@@ -35,4 +35,10 @@ describe('Symbol ( )', () => {
     expect(pangu.spacingText("后续会直接用iframe window.addEventListener('message')"))
                        .toBe("后续会直接用 iframe window.addEventListener('message')");
   });
+
+  it('handle multiline content in round brackets', () => {
+    // A space before a newline is mid-content, not a bracket-edge space: only the literal string edges get stripped
+    expect(pangu.spacingText('(x \n)中')).toBe('(x \n) 中');
+    expect(pangu.spacingText('(參數 \n)後面')).toBe('(參數 \n) 後面');
+  });
 });
