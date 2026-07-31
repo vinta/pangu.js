@@ -190,8 +190,11 @@ export const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([\u201c])([${
 // A \u201d only opens a \u201d\u2026\u201d pair when no unclosed \u201c precedes it on the line (the lookbehind), otherwise it
 // closes that \u201c. Runs after RIGHT_BRACKET_CJK, so the [ ]* after the opener strips the space that rule
 // just added inside the pair
+// Not portable as a plain regex: this lookbehind is variable-length, which Python `re` and Go `regexp` reject. A port to those engines has to track the unclosed \u201c in code instead
 export const ANS_CJK_RIGHT_QUOTE_ANY_RIGHT_QUOTE = new RegExp(`([${AN}${CJK}])[ ]*(?<![\u201c][^\u201c\u201d\n]*)([\u201d])[ ]*([${AN}${CJK}\\-_ ]+?)[ ]*([\u201d])`, 'g');
 
+// A dotted name keeps its call parenthesis tight (`Math.floor(x)`, `array.map(fn)`), a bare name does not (`foo (x)`)
+// Not portable as a plain regex: this lookbehind is variable-length, which Python `re` and Go `regexp` reject. A port to those engines has to detect the preceding dot in code instead
 export const AN_LEFT_BRACKET = new RegExp(`([${AN}])(?<!\\.[${AN}]*)([${LEFT_BRACKETS_BASIC}])`, 'g');
 export const RIGHT_BRACKET_AN = new RegExp(`([${RIGHT_BRACKETS_BASIC}])([${AN}])`, 'g');
 
