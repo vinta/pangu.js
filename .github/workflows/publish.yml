@@ -13,9 +13,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  pack:
+  publish:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write # for npm provenance
     steps:
       - uses: actions/checkout@v7
         with:
@@ -26,6 +29,7 @@ jobs:
         with:
           node-version: '24'
           cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Check version
         run: |
@@ -45,41 +49,5 @@ jobs:
       - name: Run build
         run: npm run build
 
-      - name: Pack tarball
-        run: npm pack --pack-destination ./release
-
-      - name: Verify tarball is not empty
-        run: tar tzf ./release/*.tgz | grep -q '^package/dist/' || { echo "Error: tarball is missing dist/"; exit 1; }
-
-      - name: Upload tarball
-        uses: actions/upload-artifact@v7
-        with:
-          name: npm-tarball
-          path: ./release/*.tgz
-          if-no-files-found: error
-          retention-days: 7
-
-  # Deliberately minimal: this is the only job holding id-token, so it installs nothing, checks out nothing, and runs no scripts.
-  publish:
-    runs-on: ubuntu-latest
-    needs: [pack]
-    timeout-minutes: 10
-    permissions:
-      contents: read
-      id-token: write # for npm provenance
-    steps:
-      - name: Use Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
-          package-manager-cache: false
-
-      - name: Download tarball
-        uses: actions/download-artifact@v8
-        with:
-          name: npm-tarball
-          path: ./release
-
       - name: Publish to npm
-        run: npm publish ./release/*.tgz --provenance --access public
+        run: npm publish --provenance --access public
