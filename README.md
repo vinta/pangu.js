@@ -92,40 +92,22 @@ You **SHOULD NOT** use `pangu.js` to spacing Markdown documents, this library is
 
 ### CLI
 
-```console
+```bash
 $ pangu "不能信任那些Terminal或Editor用白底的人"
 不能信任那些 Terminal 或 Editor 用白底的人
 
+$ pangu -t "你在每個commit裡修改的程式碼越多，你在code review時被發現的錯誤就會越少"
+你在每個 commit 裡修改的程式碼越多，你在 code review 時被發現的錯誤就會越少
+
+$ pangu -f path/to/file.txt
+新來的 Designer 趁特價的時候幫自己買了一本 GoF Design Patterns
+
+$ pangu -c "盤古新聞網：工程師會議中默不作聲，PM恐成最大贏家"; echo $?
+Corrected: 盤古新聞網：工程師會議中默不作聲，PM恐成最大贏家
+1
+
 $ echo "他們在release的前一天爆炸" | pangu
 他們在 release 的前一天爆炸
-
-$ pangu --check "盤古新聞網：工程師會議中默不作聲，PM 恐成最大贏家"
-
-$ pangu --help
-usage: pangu [-h] [-v] [-t | -f | -c] [text_or_path]
-
-pangu.js -- Paranoid text spacing for good readability, to automatically insert whitespace between CJK and half-width characters (alphabetical letters, numerical digits and symbols).
-
-positional arguments:
-  text_or_path   the text or file path to apply spacing; omit it to read stdin when input is piped
-
-optional arguments:
-  -h, --help     show this help message and exit
-  -v, --version  show program's version number and exit
-  -t, --text     specify the input value is a text
-  -f, --file     specify the input value is a file path
-  -c, --check    check if text has proper spacing (exit 0 if yes, 1 if no)
-```
-
-## Testing
-
-You need to install [Node.js](https://vinta.ws/code/install-node-js-via-nvm.html).
-
-```bash
-$ git clone https://github.com/vinta/pangu.js.git && cd pangu.js
-$ npm install                          # install dependencies
-$ npx playwright install --with-deps   # install headless browsers for testing
-$ npm run test                         # run all tests
 ```
 
 ## License
