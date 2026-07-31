@@ -1,5 +1,5 @@
+import { describe, expect, it } from 'vitest';
 import { Pangu } from '../../dist/shared/index.js';
-import { describe, it, expect } from 'vitest';
 
 const pangu = new Pangu();
 

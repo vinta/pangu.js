@@ -1,6 +1,5 @@
-import { pangu as namedPangu, NodePangu } from '../../dist/node/index.js';
-import pangu from '../../dist/node/index.js';
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import pangu, { pangu as namedPangu, NodePangu } from '../../dist/node/index.js';
 
 describe('Node.js ESM imports', () => {
   it('handle default ESM imports', () => {

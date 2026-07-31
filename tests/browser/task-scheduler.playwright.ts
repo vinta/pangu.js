@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test.describe('TaskScheduler Enabled', () => {
   // Keep this guard even though spacing falls back to sync without requestIdleCallback:
@@ -84,7 +84,7 @@ test.describe('TaskScheduler Enabled', () => {
 
   test('should handle bulk content changes', async ({ page }) => {
     await page.setContent('<div id="content"></div>');
-    
+
     const result = await page.evaluate(async () => {
       pangu.taskScheduler.config.enabled = true;
       pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 50, nodeMaxWaitMs: 100 });
@@ -119,7 +119,7 @@ test.describe('TaskScheduler Enabled', () => {
 
   test('should handle rapid content changes with debounce', async ({ page }) => {
     await page.setContent('<div id="content"></div>');
-    
+
     const result = await page.evaluate(async () => {
       pangu.taskScheduler.config.enabled = true;
 

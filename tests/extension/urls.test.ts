@@ -1,7 +1,7 @@
+import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS } from '../../browser-extensions/chrome/src/utils/settings';
 import type { Settings } from '../../browser-extensions/chrome/src/utils/types';
 import { isValidUrl, shouldShowActiveStatus, shouldShowOffIcon } from '../../browser-extensions/chrome/src/utils/urls';
-import { describe, expect, it } from 'vitest';
 
 function makeSettings(overrides: Partial<Settings> = {}): Settings {
   return { ...DEFAULT_SETTINGS, ...overrides };
