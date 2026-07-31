@@ -37,6 +37,18 @@ describe('CLI', () => {
     expect(output.trim()).toBe('老婆餅裡面沒有老婆，JavaScript 裡面也沒有 Java');
   });
 
+  it('preserve EOF newlines of file content exactly', () => {
+    // File mode only does spacing: no newline appended, the file's own EOF newlines (zero, one, or many) pass through untouched
+    writeFileSync(tempFile, '中文abc');
+    expect(execFileSync('node', [cliPath, '-f', tempFile], { encoding: 'utf8' })).toBe('中文 abc');
+
+    writeFileSync(tempFile, '中文abc\n');
+    expect(execFileSync('node', [cliPath, '-f', tempFile], { encoding: 'utf8' })).toBe('中文 abc\n');
+
+    writeFileSync(tempFile, '中文abc\n\n');
+    expect(execFileSync('node', [cliPath, '-f', tempFile], { encoding: 'utf8' })).toBe('中文 abc\n\n');
+  });
+
   it('handle file content from stdin with a - argument', () => {
     const output = execFileSync('node', [cliPath, '-f', '-'], { encoding: 'utf8', input: '老婆餅裡面沒有老婆，JavaScript裡面也沒有Java\n' });
     expect(output).toBe('老婆餅裡面沒有老婆，JavaScript 裡面也沒有 Java\n');

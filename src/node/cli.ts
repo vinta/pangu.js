@@ -59,7 +59,8 @@ function printSpacingText(text: string | undefined) {
 // An empty string is what -f "$EMPTY_VAR" expands to, so it counts as a missing path rather than a file to open
 function printSpacingFile(path: string | undefined) {
   if (path) {
-    console.log(pangu.spacingFileSync(path));
+    // File mode only does spacing: no newline appended, the file's own EOF newlines (or lack of one) pass through untouched
+    process.stdout.write(pangu.spacingFileSync(path));
   } else {
     console.error('pangu: error: argument --file: expected a file path');
     console.log(usage);
