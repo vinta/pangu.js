@@ -30,12 +30,14 @@ const modeFlags: Record<string, Mode> = {
   '--check': '--check',
 };
 
-// An explicit - always means stdin. A missing argument only falls back to stdin when something is actually piped in, so running pangu with no arguments in a terminal still prints the usage instead of waiting for input that never comes
+// An explicit - always means stdin. A missing argument only falls back to stdin when something is actually piped in, so running pangu with no arguments in a terminal still prints
+// the usage instead of waiting for input that never comes
 function wantsStdin(arg: string | undefined) {
   return arg === '-' || (arg === undefined && !process.stdin.isTTY);
 }
 
-// Reading has to be async: readFileSync(0) throws EAGAIN once a pipe carries more than a buffer or two. console.log() puts a trailing newline back, so dropping one here passes piped input through byte for byte
+// Reading has to be async: readFileSync(0) throws EAGAIN once a pipe carries more than a buffer or two. console.log() puts a trailing newline back, so dropping one here passes piped
+// input through byte for byte
 async function readStdin() {
   process.stdin.setEncoding('utf8');
   const chunks: string[] = [];
