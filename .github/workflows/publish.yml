@@ -20,7 +20,8 @@ jobs:
       contents: read
       id-token: write # for npm provenance
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repository
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
