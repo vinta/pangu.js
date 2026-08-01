@@ -23,10 +23,10 @@ describe('Symbol :', () => {
   });
 
   // When the symbol appears 2+ times or more in one line
-  it('handle : symbol as separator', () => {
-    // FIXME
-    // expect(pangu.spacingText('前面:後面:再後面')).toBe('前面:後面:再後面');
-    // expect(pangu.spacingText('前面:後面:再後面:更後面')).toBe('前面:後面:再後面:更後面');
-    // expect(pangu.spacingText('前面:後面:再後面:更後面:超後面')).toBe('前面:後面:再後面:更後面:超後面');
-  });
+  // FIXME
+  // it('handle : symbol as separator', () => {
+  //   expect(pangu.spacingText('前面:後面:再後面')).toBe('前面:後面:再後面');
+  //   expect(pangu.spacingText('前面:後面:再後面:更後面')).toBe('前面:後面:再後面:更後面');
+  //   expect(pangu.spacingText('前面:後面:再後面:更後面:超後面')).toBe('前面:後面:再後面:更後面:超後面');
+  // });
 });

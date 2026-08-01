@@ -20,10 +20,10 @@ const version = run(['-v']);
 assert.equal(version, `pangu.js ${pangu.version}`);
 console.log(`Version: ${version}`);
 
-// The pangu-js alias resolves to this implementation regardless of PATH order
-const aliasCli = join(__dirname, 'node_modules', '.bin', 'pangu-js');
-assert.equal(execFileSync(aliasCli, ['-v'], { encoding: 'utf8' }).trim(), `pangu.js ${pangu.version}`);
-console.log('Alias (pangu-js) works');
+// The pangu-js command resolves to this implementation regardless of PATH order
+const panguJsCli = join(__dirname, 'node_modules', '.bin', 'pangu-js');
+assert.equal(execFileSync(panguJsCli, ['-v'], { encoding: 'utf8' }).trim(), `pangu.js ${pangu.version}`);
+console.log('Command (pangu-js) works');
 
 // Positional argument is treated as text
 assert.equal(run(['當你凝視著bug，bug也凝視著你']), '當你凝視著 bug，bug 也凝視著你');

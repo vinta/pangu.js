@@ -20,7 +20,7 @@ describe('Symbol _', () => {
     expect(pangu.spacingText('為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip'))
                        .toBe('為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip');
 
-    // Rare cases, ignore
+    // Rare cases (basically a typo), ignore
     // expect(pangu.spacingText('前面 _ 後面')).toBe('前面 _ 後面');
     // expect(pangu.spacingText('Vinta _ Mollie')).toBe('Vinta _ Mollie');
     // expect(pangu.spacingText('Vinta _ Mollie _ Kitten')).toBe('Vinta _ Mollie _ Kitten');

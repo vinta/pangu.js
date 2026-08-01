@@ -16,9 +16,9 @@ describe('Symbol # only add space on the left', () => {
     expect(pangu.spacingText('前面F#後面')).toBe('前面 F# 後面');
   });
 
-  it('handle # # symbols as Weibo-like hashtags', () => {
-    // FIXME
-    // expect(pangu.spacingText('前面#H2G2#後面')).toBe('前面 #H2G2# 後面');
-    // expect(pangu.spacingText('前面#銀河閃電霹靂車指南#後面')).toBe('前面 #銀河閃電霹靂車指南# 後面');
-  });
+  // FIXME
+  // it('handle # # symbols as Weibo-like hashtags', () => {
+  //   expect(pangu.spacingText('前面#H2G2#後面')).toBe('前面 #H2G2# 後面');
+  //   expect(pangu.spacingText('前面#銀河閃電霹靂車指南#後面')).toBe('前面 #銀河閃電霹靂車指南# 後面');
+  // });
 });

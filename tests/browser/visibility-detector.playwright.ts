@@ -11,7 +11,7 @@ test.describe('Visibility Detector', () => {
     });
   });
 
-  test('should detects all CSS hiding patterns when enabled', async ({ page }) => {
+  test('should detect all CSS hiding patterns when enabled', async ({ page }) => {
     await page.setContent('<div id="content"></div>');
 
     const result = await page.evaluate(() => {
@@ -466,7 +466,7 @@ test.describe('Visibility Detector', () => {
         </div>
       `;
 
-      // Test 2: Async mode with taskScheduler (currently has the bug)
+      // Test 2: Async mode with taskScheduler
       pangu.taskScheduler.config.enabled = true;
 
       pangu.spacingPage();

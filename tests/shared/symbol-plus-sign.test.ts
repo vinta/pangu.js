@@ -7,7 +7,7 @@ describe('Symbol +', () => {
   // When CJK touches the + directly
   it('handle + symbol as operator', () => {
     expect(pangu.spacingText('前面+後面')).toBe('前面 + 後面');
-    // expect(pangu.spacingText('Vinta+陳上進')).toBe('Vinta + 陳上進'); // Rare cases, ignore
+    // expect(pangu.spacingText('Vinta+陳上進')).toBe('Vinta + 陳上進'); // Rare cases (basically a typo), ignore
     expect(pangu.spacingText('陳上進+Vinta')).toBe('陳上進 + Vinta');
     expect(pangu.spacingText('你+我=我們')).toBe('你 + 我 = 我們');
 
