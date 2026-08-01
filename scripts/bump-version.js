@@ -52,13 +52,6 @@ const updatedIndex = indexContent.replace(/this\.version\s*=\s*['"][^'"]+['"]/, 
 writeFileSync(sharedIndexPath, updatedIndex, 'utf8');
 console.log(`Updated ${sharedIndexPath}`);
 
-// Build
-execSync('npm run build', { stdio: 'pipe' });
-
-// Copy updated pangu.umd.js to Chrome extension
-console.log('Copying updated pangu.umd.js to Chrome extension...');
-execSync('cp -f dist/browser/pangu.umd.js browser-extensions/chrome/vendors/pangu/pangu.umd.js', { stdio: 'pipe' });
-
 // Update examples/package.json
 const examplesPackagePath = join(projectRoot, 'examples/package.json');
 const examplesPackageContent = readFileSync(examplesPackagePath, 'utf8');

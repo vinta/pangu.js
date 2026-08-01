@@ -1,11 +1,8 @@
 #!/bin/bash
 echo "Building Chrome Extension..."
 
-echo "Building browser bundle..."
+echo "Building library and extension..."
 npm run build
-
-echo "Copying pangu.umd.js to extension..."
-cp -f dist/browser/pangu.umd.js browser-extensions/chrome/vendors/pangu/pangu.umd.js
 
 echo "Creating extension package..."
 cd browser-extensions/chrome/
