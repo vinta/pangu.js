@@ -1,7 +1,8 @@
 # 為什麼你們就是不能加個空格呢？
 
 [![npm Version](https://img.shields.io/npm/v/pangu?style=for-the-badge)](https://www.npmjs.com/package/pangu)
-[![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/paphcfdffjnbcgkokihcdjliihicmbpd?style=for-the-badge)](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+[![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/paphcfdffjnbcgkokihcdjliihicmbpd?style=for-the-badge)](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)<br>
+[![Chrome Web Store Rating](https://img.shields.io/chrome-web-store/rating/paphcfdffjnbcgkokihcdjliihicmbpd?style=for-the-badge&label=rating)](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd/reviews)
 [![jsDelivr Hits](https://img.shields.io/jsdelivr/npm/hm/pangu?style=for-the-badge)](https://www.jsdelivr.com/package/npm/pangu)
 [![npm Downloads](https://img.shields.io/npm/dm/pangu?style=for-the-badge&label=npm)](https://www.npmjs.com/package/pangu)
 
