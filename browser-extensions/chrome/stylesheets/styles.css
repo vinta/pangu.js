@@ -145,16 +145,6 @@ a:hover {
   border-color: var(--color-primary-hover);
 }
 
-.btn-secondary {
-  background-color: var(--color-surface);
-  color: var(--color-text-primary);
-  border-color: var(--color-border);
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background-color: var(--color-surface-secondary);
-}
-
 .btn-primary-black {
   background-color: var(--color-text-primary);
   color: var(--color-text-on-primary);
@@ -164,18 +154,6 @@ a:hover {
 .btn-primary-black:hover:not(:disabled) {
   background-color: var(--color-text-primary);
   border-color: var(--color-text-primary);
-  opacity: 0.9;
-}
-
-.btn-secondary-gray {
-  background-color: var(--color-text-secondary);
-  color: var(--color-text-on-primary);
-  border-color: var(--color-text-secondary);
-}
-
-.btn-secondary-gray:hover:not(:disabled) {
-  background-color: var(--color-text-secondary);
-  border-color: var(--color-text-secondary);
   opacity: 0.9;
 }
 

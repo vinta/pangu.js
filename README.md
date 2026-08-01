@@ -1,7 +1,7 @@
 # 為什麼你們就是不能加個空格呢？
 
 [![npm Version](https://img.shields.io/npm/v/pangu?style=for-the-badge)](https://www.npmjs.com/package/pangu)
-[![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/paphcfdffjnbcgkokihcdjliihicmbpd?style=for-the-badge)](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+[![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/paphcfdffjnbcgkokihcdjliihicmbpd?style=for-the-badge)](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 [![jsDelivr Hits](https://img.shields.io/jsdelivr/npm/hm/pangu?style=for-the-badge)](https://www.jsdelivr.com/package/npm/pangu)
 [![npm Downloads](https://img.shields.io/npm/dm/pangu?style=for-the-badge&label=npm)](https://www.npmjs.com/package/pangu)
 
@@ -11,14 +11,14 @@
 
 與大家共勉之。
 
-[![](browser-extensions/chrome/images/chrome_web_store_badge.png)](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+[![](browser-extensions/chrome/images/chrome_web_store_badge.png)](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 
 ## Installation
 
 ### For Users
 
 - Official support:
-  - [Google Chrome Extension](https://chrome.google.com/webstore/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+  - [Google Chrome Extension](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 - Community support:
   - [Paranoid Text Spacing](https://tools.1chooo.com/paranoid-text-spacing)
   - [盤古之白 - 文案排版轉換](https://pangu.serko.dev/)
