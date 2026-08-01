@@ -12,7 +12,8 @@ export default defineConfig({
     target: 'es2022',
   },
   environments: {
-    // All four ESM entries in one pass, so shared/index.js stays a single chunk that node/index.js and browser/pangu.js both import
+    // All four ESM entries in one pass, so the shared code stays a single chunk that the node and browser entries both import. Rolldown emits it as a hashed root chunk (dist/shared-<hash>.js), and
+    // dist/shared/index.js is a re-export facade over it
     esm: {
       consumer: 'client',
       build: {

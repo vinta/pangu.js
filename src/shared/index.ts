@@ -1,7 +1,7 @@
 // CJK is short for Chinese, Japanese, and Korean
 //
 // ANS is short for Alphabets, Numbers, and Symbols:
-// A includes A-Za-z plus Greek and Coptic
+// A is A-Za-z. Only the ANS_* extended sets below (feeding CJK_ANS and ANS_CJK) additionally cover Greek and Coptic, every other A/AN-named rule is bare ASCII
 // N includes 0-9
 // S varies per rule, see the symbol sets below
 //
@@ -73,12 +73,14 @@ export const PUNCTUATION_CJK = new RegExp(`([!;,\\?]+)(?=[${CJK}])`, 'g');
 // Tilde has its own rule so ~= stays intact. Space only when CJK, a letter, or a digit follows
 export const CJK_TILDE = new RegExp(`([${CJK}])(~+)(?!=)(?=[${CJK}${AN}])`, 'g');
 export const CJK_TILDE_EQUALS = new RegExp(`([${CJK}])(~=)`, 'g');
-// Period has its own rule so file extensions, dot runs, and file paths stay intact; DOTS_CJK handles runs of dots first. Space only when CJK, a letter, or a digit follows
+// Period has its own rule so file extensions, dot runs, and file paths stay intact; DOTS_CJK handles runs of dots first. Space only when CJK follows: the negative lookahead rejects a letter or digit,
+// which reads as a file extension and stays intact
 export const CJK_PERIOD = new RegExp(`([${CJK}])(\\.)(?![${AN}\\./])(?=[${CJK}${AN}])`, 'g');
 export const AN_PERIOD_CJK = new RegExp(`([${AN}])(\\.)([${CJK}])`, 'g');
 export const AN_COLON_CJK = new RegExp(`([${AN}])(:)([${CJK}])`, 'g');
 export const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, 'g');
-// The only case where a colon converts to full-width: after CJK, before an uppercase letter, a digit, or a parenthesis
+// The only case where a colon converts to full-width: after CJK, directly before a parenthesis. The A-Z0-9 half of the class is unreachable, because CJK_PUNCTUATION runs first and owns colon before
+// letters and digits, leaving a half-width colon plus a space
 export const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, 'g');
 
 // The quote class deliberately excludes ' because single quotes have their own rules
@@ -100,6 +102,7 @@ export const FIX_POSSESSIVE_SINGLE_QUOTE = new RegExp(`([${AN}${CJK}])( )('s)`, 
 // Single quotes whose content is only CJK characters
 export const SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, 'g');
 
+// Legacy name: the run between the two hashes is CJK only, the ANS in the name has never matched
 export const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, 'g');
 // The negated class is the "something is glued to this #, so it is a hashtag" guard, so it has to reject an NBSP the same way it rejects a space. It stays a literal pair rather than \S because \S
 // also excludes zero-width characters like U+FEFF, and treating those as a gap would drop the space entirely and leave the runs flush
@@ -146,6 +149,8 @@ export const GREATER_THAN_CJK = new RegExp(`([${AN}])(>)([${CJK}])`, 'g');
 
 // Bracket patterns: ( ) [ ] { } plus < >, which also act as comparison operators
 // The curly quotes \u201c and \u201d appear in CJK_LEFT_BRACKET/RIGHT_BRACKET_CJK, but the paired-quote patterns handle them primarily
+// Legacy names: the two ..._BRACKET_... rules below hold only \u201c and \u201d in their "bracket" classes and have never matched a real bracket. Real brackets belong to CJK_LEFT_BRACKET,
+// RIGHT_BRACKET_CJK, AN_LEFT_BRACKET, and RIGHT_BRACKET_AN
 export const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([${LEFT_BRACKETS_EXTENDED}])`, 'g');
 export const RIGHT_BRACKET_CJK = new RegExp(`([${RIGHT_BRACKETS_EXTENDED}])([${CJK}])`, 'g');
 export const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([${AN}${CJK}])[ ]*([\u201c])([${AN}${CJK}\\-_ ]+)([\u201d])`, 'g');
@@ -345,7 +350,8 @@ export class Pangu {
     // Protect compound words from operator spacing
     const compoundWordManager = new PlaceholderReplacer('COMPOUND_WORD_PLACEHOLDER_', '\uE010', '\uE011');
 
-    // Hyphen-joined alphanumeric runs that read as one name, for example state-of-the-art, GPT-4o, claude-4-opus. At least one part must contain a lowercase letter or mix letters with digits (GPT-5)
+    // Hyphen-joined alphanumeric runs that read as one name, for example state-of-the-art, GPT-4o, claude-4-opus. Qualifies when a part carries a lowercase letter, or when the hyphen joins an
+    // all-letters part to an all-digits part (GPT-5), or a letters-plus-digits part to anything (GPT4o-mini). An all-uppercase pair like ABC-DEF does not qualify
     const COMPOUND_WORD_PATTERN = /\b(?:[A-Za-z0-9]*[a-z][A-Za-z0-9]*-[A-Za-z0-9]+|[A-Za-z0-9]+-[A-Za-z0-9]*[a-z][A-Za-z0-9]*|[A-Za-z]+-[0-9]+|[A-Za-z]+[0-9]+-[A-Za-z0-9]+)(?:-[A-Za-z0-9]+)*\b/g;
 
     newText = newText.replace(COMPOUND_WORD_PATTERN, (match) => {

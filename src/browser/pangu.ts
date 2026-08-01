@@ -188,7 +188,7 @@ export class BrowserPangu extends Pangu {
         this.applyTextRunSpacing(currentTextNode);
       }
 
-      // Handle nested tag text processing
+      // Boundary between this run and the following one, for every adjacent pair rather than only nested tags. The list is in reverse document order, so nextTextNode is the previously visited node
       if (nextTextNode) {
         if (!(currentTextNode instanceof Text) || !(nextTextNode instanceof Text)) {
           continue;
@@ -226,7 +226,7 @@ export class BrowserPangu extends Pangu {
           inGridOrFlexContainer: () => !!nextBoundaryNode.parentNode && this.isGridOrFlexContainer(nextBoundaryNode.parentNode),
         });
 
-        // A junction space can come with a second space that belongs inside the current run's tail (蒸馏/ + 训 reads 蒸馏 / 训): write the respaced tail back before placing the junction space
+        // A junction space can come with a second space that belongs inside the current run's tail (CJK/ + CJK reads CJK / CJK): write the respaced tail back before placing the junction space
         if (verdict !== 'none') {
           const respacedTail = respaceCurrentTail(currentTail, nextFirst);
           if (respacedTail !== null) {
@@ -544,7 +544,7 @@ export class BrowserPangu extends Pangu {
         // Queue parent elements for spacing processing
         switch (mutation.type) {
           case 'characterData': {
-            // Text content changed (e.g., textContent = '新文字new text')
+            // Text content changed (e.g., textContent set to a string with CJK directly followed by ANS)
             const { target: node } = mutation;
             if (node instanceof Text && node.parentNode) {
               const lastWritten = this.lastWrittenData.get(node);
@@ -559,8 +559,8 @@ export class BrowserPangu extends Pangu {
                   break;
                 }
               }
-              // <p>Hello 世界</p>
-              // "Hello 世界" is the text node, <p> is the parent element
+              // <p>Hello CJK</p>
+              // "Hello CJK" is the text node, <p> is the parent element
               queue.push(node.parentNode); // Queue parent element, not text node
             }
             break;

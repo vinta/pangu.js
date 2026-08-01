@@ -72,7 +72,7 @@ function checkSpacing(text: string | undefined) {
   if (typeof text === 'string') {
     const hasProperSpacing = pangu.hasProperSpacing(text);
     if (!hasProperSpacing) {
-      // Optionally print the corrected version to stderr for debugging
+      // Print the corrected version to stderr so a failing -c is debuggable. stdout stays empty, so -c composes in a pipeline
       console.error(`Corrected: ${pangu.spacingText(text)}`);
     }
     process.exitCode = hasProperSpacing ? 0 : 1;
