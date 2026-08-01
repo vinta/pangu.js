@@ -20,7 +20,7 @@ This extension **does not collect any personal data**. Specifically:
 The extension only:
 
 - Processes text content on web pages locally in your browser
-- Stores your preferences (enabled/disabled sites, sound settings) using Chrome's sync storage
+- Stores your preferences (spacing mode, site blacklist and whitelist, sound effects, native text autospacing) using Chrome's sync storage
 - All processing happens entirely on your device
 
 ## Permissions

@@ -15,10 +15,12 @@ npm run test                    # Run all tests (vitest + playwright)
 npm run test:shared             # Test core/shared logic
 npm run test:node               # Test Node.js-specific code
 npm run test:browser            # Test browser code (uses Playwright)
+npm run test:extension          # Test Chrome extension settings and URL matching
 
 npm run lint
+npm run typecheck               # Type check all three tsconfigs
 
-npm run bump-version 1.2.3      # Bump version across files (incl. README), build, and pack extension (does NOT commit or tag)
+npm run bump-version 1.2.3      # Bump version in package.json, extension manifest, src/shared/index.ts, examples/package.json, then build and pack extension (does NOT commit or tag)
 ```
 
 **npm publishing**: Done via GitHub Actions (`.github/workflows/publish.yml`), triggered by pushing a `v*` tag. Uses npm Trusted Publishing (OIDC) — no tokens needed. Do NOT run `npm publish` locally.

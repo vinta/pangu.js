@@ -15,12 +15,14 @@
 ## Important Paths
 
 - `browser-extensions/chrome/pages/`, `stylesheets/`, `icons/`, `images/`, and `sounds/`: extension UI and store assets.
+- `browser-extensions/chrome/_locales/`: extension name, description, and UI strings; `zh_TW` is the default and only locale.
 - `browser-extensions/chrome/src/`: extension service worker, content script, popup, options page, and utilities.
 - `scripts/`: release and extension packaging helpers.
 - `src/browser/`: browser DOM spacing, TreeWalker traversal, task scheduling, visibility detection, and UMD entry.
 - `src/node/`: Node.js API, CommonJS wrapper, and CLI implementation.
 - `src/shared/index.ts`: core platform-agnostic spacing logic and regex rules.
 - `tests/browser/`: Playwright browser behavior tests.
+- `tests/extension/`: Chrome extension settings and URL-matching tests.
 - `tests/node/`: Node-specific tests and file-processing coverage.
 - `tests/shared/`: shared spacing behavior tests.
 
@@ -34,7 +36,9 @@
 - Run shared logic tests with `npm run test:shared`.
 - Run Node.js tests with `npm run test:node`.
 - Run browser tests with `npm run test:browser`.
+- Run extension tests with `npm run test:extension`.
 - Run lint with `npm run lint`.
+- Run type checking with `npm run typecheck`; it covers all three tsconfigs.
 - Clean generated artifacts with `npm run clean`.
 - Package the extension with `npm run pack-extension`.
 
@@ -97,6 +101,7 @@ Pre-resolved IDs for the `find-docs` skill. Pass directly to `ctx7 docs`, skippi
 | Playwright        | `/microsoft/playwright`                        |
 | Prettier          | `/prettier/prettier`                           |
 | publint           | `/publint/publint`                             |
+| Shields.io        | `/websites/shields_io_badges`                  |
 | TypeScript        | `/websites/typescriptlang`                     |
 | typescript-eslint | `/typescript-eslint/typescript-eslint`         |
 | Vite              | `/vitejs/vite`                                 |
