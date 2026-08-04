@@ -12,7 +12,7 @@ export default defineConfig({
     target: 'es2022',
   },
   environments: {
-    // All four ESM entries in one pass, so the shared code stays a single chunk that the node and browser entries both import. Rolldown emits it as a hashed root chunk (dist/shared-<hash>.js), and
+    // The shared and node ESM entries in one pass, so the shared code stays a single chunk that the node entries import. Rolldown emits it as a hashed root chunk (dist/shared-<hash>.js), and
     // dist/shared/index.js is a re-export facade over it
     esm: {
       consumer: 'client',
@@ -23,11 +23,18 @@ export default defineConfig({
             'shared/index': 'src/shared/index.ts',
             'node/index': 'src/node/index.ts',
             'node/cli': 'src/node/cli.ts',
-            'browser/pangu': 'src/browser/pangu.ts',
           },
           formats: ['es'],
         },
         rolldownOptions: { external },
+      },
+    },
+    // The ESM browser build gets its own pass so it inlines the shared engine instead of importing ../shared-<hash>.js: cdnjs mirrors only dist/browser/ (its fileMap basePath), so a relative parent import would 404 there
+    browserEsm: {
+      consumer: 'client',
+      build: {
+        emptyOutDir: false,
+        lib: { entry: 'src/browser/pangu.ts', formats: ['es'], fileName: () => 'browser/pangu.js' },
       },
     },
     // The CJS half of the package, built from its own .cts source because `export =` cannot be expressed in the ESM entry. Self-contained: it inlines the shared engine rather than reaching for another
@@ -52,7 +59,7 @@ export default defineConfig({
   builder: {
     // Defining `builder` is what makes a plain `vite build` build every environment. They run in order, and esm has to go first because it is the only one that empties dist/
     buildApp: async (builder) => {
-      for (const name of ['esm', 'nodeCjs', 'browserUmd']) {
+      for (const name of ['esm', 'browserEsm', 'nodeCjs', 'browserUmd']) {
         await builder.build(builder.environments[name]!);
       }
     },
