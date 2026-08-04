@@ -77,6 +77,8 @@ Also on:
   - `https://cdn.jsdelivr.net/npm/pangu@x.y.z/dist/browser/pangu.umd.js`
 - [unpkg](https://app.unpkg.com/pangu)
   - `https://unpkg.com/pangu@x.y.z/dist/browser/pangu.umd.js`
+- [cdnjs](https://cdnjs.com/libraries/pangu)
+  - `https://cdnjs.cloudflare.com/ajax/libs/pangu/x.y.z/browser/pangu.umd.min.js`
 
 Replace `x.y.z` with the version you want to use.
 
