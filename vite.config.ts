@@ -37,6 +37,14 @@ export default defineConfig({
         lib: { entry: 'src/browser/pangu.ts', formats: ['es'], fileName: () => 'browser/pangu.js' },
       },
     },
+    // Loaded by a plain <script> tag, and copied into the Chrome extension's vendors/ by build:extension. cdnjs pins this exact path too: its config (cdnjs/packages packages/p/pangu.json) mirrors it from the npm tarball and serves the generated browser/pangu.umd.min.js as pangu's default file, so renaming/moving pangu.umd.js breaks cdnjs
+    browserUmd: {
+      consumer: 'client',
+      build: {
+        emptyOutDir: false,
+        lib: { entry: 'src/browser/pangu.umd.ts', name: 'pangu', formats: ['umd'], fileName: () => 'browser/pangu.umd.js' },
+      },
+    },
     // The CJS half of the package, built from its own .cts source because `export =` cannot be expressed in the ESM entry. Self-contained: it inlines the shared engine rather than reaching for another
     // environment's output, so nothing here depends on build order
     nodeCjs: {
@@ -47,19 +55,11 @@ export default defineConfig({
         rolldownOptions: { external },
       },
     },
-    // Loaded by a plain <script> tag, and copied into the Chrome extension's vendors/ by build:extension. cdnjs pins this exact path too: its config (cdnjs/packages packages/p/pangu.json) mirrors it from the npm tarball and serves the generated browser/pangu.umd.min.js as pangu's default file, so renaming/moving pangu.umd.js breaks cdnjs
-    browserUmd: {
-      consumer: 'client',
-      build: {
-        emptyOutDir: false,
-        lib: { entry: 'src/browser/pangu.umd.ts', name: 'pangu', formats: ['umd'], fileName: () => 'browser/pangu.umd.js' },
-      },
-    },
   },
   builder: {
     // Defining `builder` is what makes a plain `vite build` build every environment. They run in order, and esm has to go first because it is the only one that empties dist/
     buildApp: async (builder) => {
-      for (const name of ['esm', 'browserEsm', 'nodeCjs', 'browserUmd']) {
+      for (const name of ['esm', 'browserEsm', 'browserUmd', 'nodeCjs']) {
         await builder.build(builder.environments[name]!);
       }
     },
