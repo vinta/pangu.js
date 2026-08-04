@@ -29,7 +29,7 @@ export default defineConfig({
         rolldownOptions: { external },
       },
     },
-    // The ESM browser build gets its own pass so it inlines the shared engine instead of importing ../shared-<hash>.js: cdnjs mirrors only dist/browser/ (its fileMap basePath), so a relative parent import would 404 there
+    // The ESM browser build gets its own pass so it inlines the shared engine instead of importing ../shared-<hash>.js: dist/browser/pangu.js must stay a self-contained single file so CDN users can load it as a standalone module without sibling chunks being hosted alongside (cdnjs hosted exactly that broken shape for 8.1.0-9.1.0)
     browserEsm: {
       consumer: 'client',
       build: {
@@ -47,7 +47,7 @@ export default defineConfig({
         rolldownOptions: { external },
       },
     },
-    // Loaded by a plain <script> tag, and copied into the Chrome extension's vendors/ by build:extension
+    // Loaded by a plain <script> tag, and copied into the Chrome extension's vendors/ by build:extension. cdnjs pins this exact path too: its config (cdnjs/packages packages/p/pangu.json) mirrors it from the npm tarball and serves the generated browser/pangu.umd.min.js as pangu's default file, so renaming/moving pangu.umd.js breaks cdnjs
     browserUmd: {
       consumer: 'client',
       build: {
