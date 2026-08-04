@@ -29,7 +29,7 @@ export default defineConfig({
         rolldownOptions: { external },
       },
     },
-    // The ESM browser build gets its own pass so it inlines the shared engine instead of importing ../shared-<hash>.js: dist/browser/pangu.js must stay a self-contained single file so CDN users can load it as a standalone module without sibling chunks being hosted alongside (cdnjs hosted exactly that broken shape for 8.1.0-9.1.0)
+    // The ESM browser build gets its own pass so it inlines the shared engine instead of importing ../shared-<hash>.js: dist/browser/pangu.js must stay a self-contained single file so CDN users can load it as a standalone module without sibling chunks being hosted alongside (8.1.0-9.1.0 shipped an import-bearing pangu.js that would have 404ed on cdnjs)
     browserEsm: {
       consumer: 'client',
       build: {
