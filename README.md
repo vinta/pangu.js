@@ -49,7 +49,7 @@
 npm install pangu --save-exact
 ```
 
-Learn more on [npm](https://www.npmjs.com/package/pangu).
+Learn more in the [changelog](CHANGELOG.md) or on [npm](https://www.npmjs.com/package/pangu).
 
 ### Browser
 
