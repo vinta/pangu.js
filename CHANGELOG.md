@@ -1,5 +1,11 @@
 # Changelog
 
+## v9.1.1 / 2026-xx-xx
+
+- 修正 `dist/browser/pangu.js` 會 import 其他檔案的問題，現在是獨立的單一檔案了，可以直接用 `<script type="module">` 載入
+  - v8.1.0 到 v9.1.0 都有這個問題，在只複製 `dist/browser/` 目錄的 CDN 上（例如 cdnjs）會因為找不到檔案而載入失敗
+- Chrome extension 支援的最低版本改成 Chrome 99
+
 ## v9.1.0 / 2026-08-01
 
 - CLI 的 `-v` 會在版本號前面加上 `pangu.js`，本來只印版本號
