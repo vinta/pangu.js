@@ -106,17 +106,3 @@ Pre-resolved IDs for the `find-docs` skill. Pass directly to `ctx7 docs`, skippi
 | typescript-eslint | `/typescript-eslint/typescript-eslint`         |
 | Vite              | `/vitejs/vite`                                 |
 | Vitest            | `/vitest-dev/vitest`                           |
-
-## Agent Skills
-
-### Issue Tracker
-
-Issues are tracked on GitHub (github.com/vinta/pangu.js) via the `gh` CLI. See `docs/agents/issue-tracker.md`.
-
-### Triage Labels
-
-Default five-role vocabulary (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix). See `docs/agents/triage-labels.md`.
-
-### Domain Docs
-
-Single-context layout — `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
