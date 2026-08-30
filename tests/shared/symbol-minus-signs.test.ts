@@ -71,10 +71,10 @@ describe('Symbol -', () => {
       '博客來 - Rewire - 神經可塑性：用神經科學突破行為模式迴圈，終結焦慮、恐慌和憂鬱，實現最佳的心理健康',
     );
     expect(pangu.spacingText('博客來-經濟學原理 10/e Mankiw (授權經銷版)')).toBe('博客來 - 經濟學原理 10/e Mankiw (授權經銷版)');
+    expect(pangu.spacingText('財政部電子發票整合服務平台[自然人憑證]-歸戶設定通知')).toBe('財政部電子發票整合服務平台 [自然人憑證] - 歸戶設定通知');
 
     // FIXME:
     // expect(pangu.spacingText('博客來-4%法則：讓錢活得比你久的提領金律(電子書)')).toBe('博客來 - 4% 法則：讓錢活得比你久的提領金律 (電子書)');
-    // expect(pangu.spacingText('財政部電子發票整合服務平台[自然人憑證]-歸戶設定通知')).toBe('財政部電子發票整合服務平台 [自然人憑證] - 歸戶設定通知');
 
     // FIXME: a year range should read the hyphen as an operator, not as a sign attached to the second year
     // expect(pangu.spacingText('2016年-2018年')).toBe('2016 年 - 2018 年');
