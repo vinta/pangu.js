@@ -48,7 +48,7 @@ Decided per line, never across lines. A pipe in direct CJK contact makes every p
 Decided per line, never across lines. A plus in direct contact with CJK makes every unsettled plus on the line a separator with spaces on both sides, covering bundle plans (`HiNet 光世代 + MOD`). A plus is settled when it is already space-adjacent, attached by an affix reading (`Disney+ 上架`, `打 +886`), or inside a preserved pattern (`C++`). A line with no such contact keeps its pluses tight as joiner tokens (`得到一個 A+B 的結果`, `答案是 5+5 的和`).
 
 **Affix reading**:
-A symbol that attaches to its half-width side at a CJK boundary instead of reading as an operator: `+` or `-` before digits as a sign (`打 +886`, `氣溫是 -5 度`), `-` before a lowercase flag (`參數要加 -m 的旗標`), `+` after a half-width run as a suffix (`Disney+ 上架`, `有 100+ 的選擇`), and single-letter grades (`A+`, `D-`). A capitalized word after a hyphen keeps the operator reading (`陳上進 - Vinta`).
+A symbol that attaches to its half-width side at a CJK boundary instead of reading as an operator: `+` before digits as a sign (`打 +886`), `-` before a lowercase flag (`參數要加 -m 的旗標`), `+` after a half-width run as a suffix (`Disney+ 上架`, `有 100+ 的選擇`), and single-letter grades (`A+`, `D-`). A hyphen before digits is not an affix: `CJK-N` reads as an operator (`2016 年 - 2018 年`, `氣溫是 - 5 度`), see ADR 0015. A capitalized word after a hyphen keeps the operator reading (`陳上進 - Vinta`).
 
 **No CJK contact, no change**:
 The invariant behind every symbol rule. Half-width text that touches no CJK is never modified. A symbol must touch CJK directly to read as an operator, so CJK elsewhere in the line or text never licenses spacing between half-width characters.

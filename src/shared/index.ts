@@ -135,8 +135,9 @@ export const PLUS_SEPARATOR = /(?<=[^\s+])\+(?=[^\s+])/g;
 export const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([${A}])([${GRADE_OPERATORS}])([${CJK}])`, 'g');
 
 // Affix readings attach a symbol to its half-width side at a CJK boundary, overriding the operator reading
-// Sign: + or - attaches to following digits (+886, -5)
-export const CJK_SIGN_DIGIT = new RegExp(`([${CJK}])([\\+\\-])([0-9])`, 'g');
+// Sign: + attaches to following digits (+886). A hyphen before digits is not a sign: CJK-N falls to CJK_OPERATOR_ANS, because year ranges and site-title separators outnumber glued negative
+// numbers. See ADR 0015
+export const CJK_SIGN_DIGIT = new RegExp(`([${CJK}])(\\+)([0-9])`, 'g');
 // Flag: - attaches to a following single lowercase letter (-m). [a-z] keeps a capitalized word on the operator reading, and the trailing \b keeps a longer lowercase word there too
 export const CJK_HYPHEN_FLAG = new RegExp(`([${CJK}])(\\-)([a-z])\\b`, 'g');
 // Suffix: + attaches to a preceding half-width run (Disney+, 18+)
