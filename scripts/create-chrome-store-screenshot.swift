@@ -10,7 +10,7 @@ guard (3...4).contains(CommandLine.arguments.count) else {
 
 let text = CommandLine.arguments[1]
 let output = CommandLine.arguments[2]
-let fontName = CommandLine.arguments.count == 4 ? CommandLine.arguments[3] : "PingFangTC-Regular"
+let fontName = CommandLine.arguments.count == 4 ? CommandLine.arguments[3] : "PingFangTC-Light"
 
 guard let font = NSFont(name: fontName, size: 451) else {
     fputs("Error: Font not found: \(fontName)\n", stderr)
