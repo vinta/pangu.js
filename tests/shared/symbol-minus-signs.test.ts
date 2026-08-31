@@ -57,18 +57,23 @@ describe('Symbol -', () => {
     // prettier-ignore
     expect(pangu.spacingText('你可以使用uname -m指令來檢查你的Linux作業系統是32位元或是[敏感词已被屏蔽]位元'))
                        .toBe('你可以使用 uname -m 指令來檢查你的 Linux 作業系統是 32 位元或是 [敏感词已被屏蔽] 位元');
+    expect(pangu.spacingText('參數要加-m的旗標')).toBe('參數要加 -m 的旗標');
 
     expect(pangu.spacingText('得到一個D-的結果')).toBe('得到一個 D- 的結果');
     expect(pangu.spacingText('得到一個D--的結果')).toBe('得到一個 D-- 的結果');
 
     // prettier-ignore
+    expect(pangu.spacingText('博客來-Rewire-神經可塑性：用神經科學突破行為模式迴圈，終結焦慮、恐慌和憂鬱，實現最佳的心理健康')).toBe('博客來 - Rewire - 神經可塑性：用神經科學突破行為模式迴圈，終結焦慮、恐慌和憂鬱，實現最佳的心理健康');
+    expect(pangu.spacingText('博客來-經濟學原理 10/e Mankiw (授權經銷版)')).toBe('博客來 - 經濟學原理 10/e Mankiw (授權經銷版)');
+    expect(pangu.spacingText('財政部電子發票整合服務平台[自然人憑證]-歸戶設定通知')).toBe('財政部電子發票整合服務平台 [自然人憑證] - 歸戶設定通知');
+    expect(pangu.spacingText('博客來-4%法則：讓錢活得比你久的提領金律(電子書)')).toBe('博客來 - 4% 法則：讓錢活得比你久的提領金律 (電子書)');
     expect(pangu.spacingText('长者的智慧和复杂的维斯特洛- 文章')).toBe('长者的智慧和复杂的维斯特洛 - 文章');
+    expect(pangu.spacingText('1976年-2018年')).toBe('1976 年 - 2018 年');
 
-    expect(pangu.spacingText('氣溫是-5度左右')).toBe('氣溫是 -5 度左右');
-    expect(pangu.spacingText('參數要加-m的旗標')).toBe('參數要加 -m 的旗標');
-
-    // FIXME: a year range should read the hyphen as an operator, not as a sign attached to the second year
-    // expect(pangu.spacingText('2016年-2018年')).toBe('2016 年 - 2018 年');
+    // FIXME
+    // The hyphen sign reading was dropped, CJK-N reads as an operator, see ADR 0015
+    // expect(pangu.spacingText('氣溫是-5度左右')).toBe('氣溫是 -5 度左右');
+    // expect(pangu.spacingText('Nasdaq-100本週下跌-13.44%')).toBe('Nasdaq-100 本週下跌 -13.44%');
 
     // FIXME
     // expect(pangu.spacingText('陳上進--Vinta')).toBe('陳上進 -- Vinta');

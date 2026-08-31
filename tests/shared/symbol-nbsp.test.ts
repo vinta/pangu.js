@@ -3,7 +3,6 @@ import { Pangu } from '../../dist/shared/index.js';
 
 const pangu = new Pangu();
 
-//
 describe('Symbol &nbsp; suppresses spacing, always preserve', () => {
   it('handle solitary &nbsp;, preserve', () => {
     // The &nbsp; already separates the runs it sits between, so only the genuinely missing 說|We junction gets a space

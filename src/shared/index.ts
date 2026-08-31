@@ -39,7 +39,7 @@ export const QUOTES = '\`"\u05f4'; // Backtick, straight quote, Hebrew punctuati
 
 // Brackets. Each rule uses a different set
 export const LEFT_BRACKETS_BASIC = '\\(\\[\\{'; // For AN_LEFT_BRACKET
-export const RIGHT_BRACKETS_BASIC = '\\)\\]\\}'; // For RIGHT_BRACKET_AN
+export const RIGHT_BRACKETS_BASIC = '\\)\\]\\}'; // For RIGHT_BRACKET_AN and ANS_OPERATOR_CJK
 export const LEFT_BRACKETS_EXTENDED = '\\(\\[\\{<>\u201c'; // For CJK_LEFT_BRACKET (includes angle brackets + curly quote)
 export const RIGHT_BRACKETS_EXTENDED = '\\)\\]\\}<>\u201d'; // For RIGHT_BRACKET_CJK
 
@@ -113,8 +113,9 @@ export const CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
 
 // The operator set is + - * = & only (no | / < >). Only direct CJK contact makes a symbol an operator: a symbol between two half-width characters binds them into a joiner token (A+B, a=1, S&P)
 // and never gets spaces, so there is deliberately no between-half-width rule here
+// On the left, a closing bracket also counts as the half-width side: ]-CJK reads as an operator whose operand is the bracketed run
 export const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS_WITH_HYPHEN}])([${AN}])`, 'g');
-export const ANS_OPERATOR_CJK = new RegExp(`([${AN}])([${OPERATORS_NO_PLUS}])([${CJK}])`, 'g');
+export const ANS_OPERATOR_CJK = new RegExp(`([${AN}${RIGHT_BRACKETS_BASIC}])([${OPERATORS_NO_PLUS}])([${CJK}])`, 'g');
 
 // Slash patterns for operator vs separator behavior
 export const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
@@ -134,8 +135,9 @@ export const PLUS_SEPARATOR = /(?<=[^\s+])\+(?=[^\s+])/g;
 export const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([${A}])([${GRADE_OPERATORS}])([${CJK}])`, 'g');
 
 // Affix readings attach a symbol to its half-width side at a CJK boundary, overriding the operator reading
-// Sign: + or - attaches to following digits (+886, -5)
-export const CJK_SIGN_DIGIT = new RegExp(`([${CJK}])([\\+\\-])([0-9])`, 'g');
+// Sign: + attaches to following digits (+886). A hyphen before digits is not a sign: CJK-N falls to CJK_OPERATOR_ANS, because year ranges and site-title separators outnumber glued negative
+// numbers. See ADR 0015
+export const CJK_SIGN_DIGIT = new RegExp(`([${CJK}])(\\+)([0-9])`, 'g');
 // Flag: - attaches to a following single lowercase letter (-m). [a-z] keeps a capitalized word on the operator reading, and the trailing \b keeps a longer lowercase word there too
 export const CJK_HYPHEN_FLAG = new RegExp(`([${CJK}])(\\-)([a-z])\\b`, 'g');
 // Suffix: + attaches to a preceding half-width run (Disney+, 18+)
@@ -241,7 +243,7 @@ export class Pangu {
   version: string;
 
   constructor() {
-    this.version = '9.1.0';
+    this.version = '9.1.1';
   }
 
   public spacingText(text: string) {
