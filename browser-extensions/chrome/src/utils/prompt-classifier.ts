@@ -35,6 +35,9 @@ async function getBaseSession() {
     throw new Error(`model availability is ${availability}`);
   }
 
+  // Deliberately NO expectedInputs/expectedOutputs language declaration, despite the console warning this leaves ("An output language should be specified..."): the API's supported set is
+  // en/ja/es/de/fr, declaring any zh variant makes availability() report unavailable and create() reject with NotSupportedError, and declaring en would attest a language the output is not.
+  // An undeclared session is the only way to run Chinese, and the explainer says the declaration would not steer output anyway. See docs/prompt-api-reference.md, Languages.
   baseSession = await LanguageModel.create({
     initialPrompts: [{ role: 'system', content: SYSTEM_PROMPT }],
     temperature: 0,
