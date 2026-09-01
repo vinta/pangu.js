@@ -42,6 +42,10 @@ class OptionsController {
       if (changedKeys.includes('is_enable_text_autospace')) {
         this.renderTextAutospaceCheckbox().catch(console.error);
       }
+
+      if (changedKeys.includes('is_enable_ai_spacing')) {
+        this.renderAiSpacingCheckbox().catch(console.error);
+      }
     });
 
     document.addEventListener('click', (e) => {
@@ -66,6 +70,8 @@ class OptionsController {
         this.showAddUrlInput();
       } else if (target.id === 'restore-defaults-btn') {
         this.restoreDefaults();
+      } else if (target.id === 'ai-model-download-btn') {
+        this.downloadAiModel().catch(console.error);
       }
     });
 
@@ -87,6 +93,14 @@ class OptionsController {
         } catch (error) {
           console.error('Failed to save settings:', error);
           await this.renderTextAutospaceCheckbox();
+        }
+      } else if (target.id === 'ai-spacing-checkbox') {
+        const aiSpacingCheckbox = target as HTMLInputElement;
+        try {
+          await updateSettings({ is_enable_ai_spacing: aiSpacingCheckbox.checked });
+        } catch (error) {
+          console.error('Failed to save settings:', error);
+          await this.renderAiSpacingCheckbox();
         }
       }
     });
@@ -118,6 +132,9 @@ class OptionsController {
     await this.renderFilterMode();
     await this.renderMuteCheckbox();
     await this.renderTextAutospaceCheckbox();
+    await this.renderAiSpacingCheckbox();
+    // Last, because it is the only render that waits on something outside storage
+    await this.renderAiModelStatus();
   }
 
   private async renderSpacingMode() {
@@ -264,6 +281,53 @@ class OptionsController {
     checkbox.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
     const notSupportedMessage = document.getElementById('text-autospace-not-supported-msg') as HTMLElement;
     notSupportedMessage.style.display = isSupported ? 'none' : 'block';
+  }
+
+  private async renderAiSpacingCheckbox() {
+    const current = await getSettings();
+    const checkbox = document.getElementById('ai-spacing-checkbox') as HTMLInputElement;
+    checkbox.checked = current.is_enable_ai_spacing;
+  }
+
+  // The model's own state, which is browser-wide and has nothing to do with the toggle: the setting can be on while the model is still absent, and then the page simply keeps the rules output
+  private async renderAiModelStatus() {
+    const statusText = document.getElementById('ai-model-status') as HTMLElement;
+    const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
+    downloadButton.textContent = chrome.i18n.getMessage('button_download_ai_model');
+
+    // The types declare LanguageModel unconditionally, but a browser without the Prompt API has no such global at all
+    if (typeof LanguageModel === 'undefined') {
+      statusText.textContent = chrome.i18n.getMessage('ai_model_unsupported');
+      downloadButton.style.display = 'none';
+      return;
+    }
+
+    const availability = await LanguageModel.availability();
+    statusText.textContent = chrome.i18n.getMessage(`ai_model_${availability}`);
+    // Only a model that is absent can be fetched, and starting a multi-gigabyte download is the user's call to make
+    downloadButton.style.display = availability === 'downloadable' ? 'block' : 'none';
+  }
+
+  private async downloadAiModel() {
+    const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
+    downloadButton.disabled = true;
+
+    try {
+      // The download is browser-wide, so this page needs the session only long enough to start it
+      const session = await LanguageModel.create({
+        monitor: (monitor) => {
+          monitor.addEventListener('downloadprogress', (event) => {
+            console.log(`Downloading the built-in model: ${Math.round(event.loaded * 100)}%`);
+          });
+        },
+      });
+      session.destroy();
+    } catch (error) {
+      console.error('Failed to download the model:', error);
+    }
+
+    downloadButton.disabled = false;
+    await this.renderAiModelStatus();
   }
 
   private async toggleSpacingMode() {
