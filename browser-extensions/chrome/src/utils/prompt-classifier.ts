@@ -3,7 +3,7 @@
 //
 // This lives in the service worker rather than the content script for one reason: `temperature` and `topK` are documented as the extension-context surface and a content script appears to get the
 // plain-web surface instead, where sampling cannot be pinned at all. See docs/prompt-api-reference.md.
-import { buildQuestion, DISPLAY_TOKEN_ENUM, labelForDisplayToken, SYSTEM_PROMPT } from './hyphen-prompt';
+import { buildQuestion, DISPLAY_TOKEN_ENUM, labelForDisplayToken, PROMPT_VARIANT, SYSTEM_PROMPT } from './hyphen-prompt';
 import type { ClassifiedSpan, ClassifySpanRequest, ClassifySpansResponse } from './types';
 
 // One base session holding only the system prompt: cloning it per span saves re-parsing the system instructions, and create() costs roughly five prompts. The session is in-memory, so MV3 idle
@@ -40,12 +40,16 @@ async function getBaseSession() {
     temperature: 0,
     topK: 1,
   });
+  // The system prompt rides in initialPrompts, so this is the only place it is ever sent; a fresh line here also marks every MV3 cold start paying the multi-second create()
+  console.debug(`[pangu] hyphen-sign base session created (variant ${PROMPT_VARIANT}, temperature 0, topK 1), system prompt:\n${SYSTEM_PROMPT}`);
   return baseSession;
 }
 
 async function classifyOne(base: LanguageModel, span: ClassifySpanRequest): Promise<ClassifiedSpan> {
+  // Logged before the model call so a span that hangs or throws still shows what was asked. Debug level: visible in this worker's console (chrome://extensions -> service worker) at Verbose
+  const question = buildQuestion(span.sentence, span.at);
+  console.debug(`[pangu] hyphen-sign prompt:\n${question}`);
   try {
-    const question = buildQuestion(span.sentence, span.at);
     // One clone per span: a fresh context without paying create() again
     const turn = await base.clone();
     let raw: string;
@@ -64,9 +68,12 @@ async function classifyOne(base: LanguageModel, span: ClassifySpanRequest): Prom
     if (answer === null) {
       throw new TypeError(`response outside the constraint enum: ${parsed}`);
     }
+    console.debug(`[pangu] hyphen-sign raw answer: ${raw} -> ${answer}`);
     return { answer, error: null };
   } catch (caught) {
-    return { answer: null, error: describeError(caught) };
+    const error = describeError(caught);
+    console.debug(`[pangu] hyphen-sign error: ${error}`);
+    return { answer: null, error };
   }
 }
 

@@ -26,7 +26,9 @@ async function classifySpans(spans: ClassifySpansMessage['spans']): Promise<Clas
   }
 }
 
-// The model layer's page-side half: the rules already spaced these spans, and the ones read as signed numbers get that space taken back out
+// The model layer's page-side half: the rules already spaced these spans, and the ones read as signed numbers get that space taken back out.
+// Every step logs at debug level (hidden until the console's Verbose level is on), so a wrong verdict on a live page is traceable without a build: this side shows each span's sentence and verdict,
+// and the service worker's console shows the exact prompt text and raw model output
 async function fixHyphenSigns(pangu: NonNullable<Window['pangu']>, candidates: HyphenSignCandidate[]) {
   if (isModelPathDisabled) {
     return;
@@ -34,14 +36,22 @@ async function fixHyphenSigns(pangu: NonNullable<Window['pangu']>, candidates: H
 
   const response = await classifySpans(candidates.map(({ sentence, at }) => ({ sentence, at })));
   if (response === null) {
+    console.debug(`[pangu] hyphen-sign: no answer within ${CLASSIFY_DEADLINE_MS / 1000}s, batch of ${candidates.length} dropped, rules output stands`);
     return;
   }
   if (!response.ok) {
     isModelPathDisabled = true;
+    console.debug(`[pangu] hyphen-sign: disabled for this page (${response.error})`);
     return;
   }
 
   // Answers zip against the candidates by index
+  for (const [index, candidate] of candidates.entries()) {
+    const span = response.spans[index];
+    const verdict = span ? (span.answer ?? `error: ${span.error}`) : 'error: no answer at this index';
+    const action = span?.answer === 'signed-number' ? ' -> removing the space after the hyphen' : '';
+    console.debug(`[pangu] hyphen-sign: "${candidate.sentence}" (hyphen at ${candidate.at}) read as ${verdict}${action}`);
+  }
   const signedNumbers = candidates.filter((_candidate, index) => response.spans[index]?.answer === 'signed-number');
   if (signedNumbers.length > 0) {
     pangu.applyHyphenSignFixes(signedNumbers);
