@@ -139,7 +139,7 @@ export class BrowserPangu extends Pangu {
   public spacingNode(contextNode: Node) {
     // Only process nodes with actual content (excluding text nodes that contain only whitespace)
     const textNodes = DomWalker.collectTextNodes(contextNode, true);
-    this.schedule(textNodes);
+    this.schedule(() => this.spacingTextNodes(textNodes));
   }
 
   public stopAutoSpacingPage() {
@@ -398,18 +398,16 @@ export class BrowserPangu extends Pangu {
 
   // The single seam that decides how spacing work is executed: synchronously
   // or as one idle-time batch. Boundary spacing needs adjacent-run context, so
-  // the node list is never split across calls
-  private schedule(textNodes: Node[]) {
+  // the node list a task closes over is never split across calls
+  private schedule(task: () => void) {
     // Stock Safari ships requestIdleCallback behind a preference flag, so fall
     // back to synchronous spacing instead of throwing in TaskQueue
     if (!this.taskScheduler.config.enabled || typeof requestIdleCallback !== 'function') {
-      this.spacingTextNodes(textNodes);
+      task();
       return;
     }
 
-    this.taskScheduler.queue.add(() => {
-      this.spacingTextNodes(textNodes);
-    });
+    this.taskScheduler.queue.add(task);
   }
 
   private waitForVideosToLoad(delayMs: number, onLoaded: () => void) {
@@ -506,7 +504,7 @@ export class BrowserPangu extends Pangu {
         }
         allTextNodes.reverse();
 
-        this.schedule(allTextNodes);
+        this.schedule(() => this.spacingTextNodes(allTextNodes));
       },
       nodeDelayMs,
       nodeMaxWaitMs,
