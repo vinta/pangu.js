@@ -7,6 +7,7 @@ export interface Settings {
   whitelist: string[];
   is_mute_sound_effects: boolean;
   is_enable_text_autospace: boolean;
+  is_enable_ai_spacing: boolean;
 }
 
 export interface PingMessage {
