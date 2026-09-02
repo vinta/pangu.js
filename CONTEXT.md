@@ -39,7 +39,7 @@ A hyphen-minus flagged on pre-spacing text as sitting tight between CJK and a di
 _Avoid_: ambiguous span, model span
 
 **Late fix**:
-Taking back out, after classification, a space the rules themselves inserted at a hyphen-sign candidate read as a signed number (`氣溫是 - 5` becomes `氣溫是 -5`). Applied after the rules pass and only ever removes pangu-written spaces, so author bytes stay untouched and with no classifier the rules output stands.
+A correction to the rules output, applied after the rules pass and decided by something other than the rules, such as a classifier. Only ever inserts or removes spaces, never rewrites author characters, and with no classifier the rules output stands. Today's only late fix takes back out the space the rules inserted at a hyphen-sign candidate read as a signed number (`氣溫是 - 5` becomes `氣溫是 -5`).
 _Avoid_: un-insert (in prose), model fix
 
 ## Paranoid Text Spacing Algorithm
