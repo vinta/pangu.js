@@ -71,45 +71,54 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 
 // Main call flows from autoSpacingPage() to requestIdleCallback():
 //
-// Entry A: initial page sweep                 Entry B: dynamic content (MutationObserver)
+// Entry A and Entry B are independent: the observer is live at once while the sweep waits pageDelayMs, so a mutation in that window is spaced before the sweep. Both land in the same FIFO
+// queue, and a second pass over spaced text is a no-op, so the order only costs duplicate work.
 //
-// 1a. autoSpacingPage()                       1b. autoSpacingPage()
-//     ↓ waitForVideosToLoad(pageDelayMs)          ↓ setupAutoSpacingPageObserver()
-// 2a. spacingPage()                           2b. observer fires on characterData/childList
-//     ├─ spacingNode(<head><title>)               ↓ push affected nodes onto queue
-//     └─ spacingNode(document.body)               ↓ debounce(nodeDelayMs, max nodeMaxWaitMs)
-//     ↓                                       3b. sort queued nodes into document order,
-// 3a. spacingNode(node)                           dedupe, merge all their text runs via
-//     - DomWalker.collectTextNodes(node, true)    DomWalker.collectTextNodes(), reverse
-//       (reverse document order, skips             ↓
-//       whitespace-only and ignored tags)         (title changes take their own debounce
-//     ↓                                            → spacingNode(<title>))
-//     └──────────────────┬────────────────────────┘
-//                        ↓
-// 4. schedule(textNodes)
+//                          autoSpacingPage()
+//                                  ↓
+//     ┌────────────────────────────┴────────────────────────────┐
+//     |                                                         |
+// Entry A: initial page sweep                               Entry B: dynamic content (MutationObserver)
+//     |                                                         |
+// 1a. waitForVideosToLoad(pageDelayMs)                      1b. setupAutoSpacingPageObserver()
+//     ↓                                                         ↓
+// 2a. spacingPage()                                         2b. observer fires on characterData/childList
+//     ├─ spacingNode(<head><title>)                             ├─ a page re-render (the page writes its own unspaced data over a text run pangu spaced, in place or by replacing the node)
+//     └─ spacingNode(document.body)                             │  runs spacingNodeSync() inline, before paint, unless the subtree exceeds maxSyncTextNodes (then it is queued like everything else)
+//     ↓                                                         ↓ push affected nodes onto queue
+// 3a. spacingNode(node)                                         ↓ debounce(nodeDelayMs, max nodeMaxWaitMs)
+//     - DomWalker.collectTextNodes(node, true)              3b. sort queued nodes into document order, dedupe, merge all their text runs via DomWalker.collectTextNodes(), reverse
+//       (reverse document order, skips                          ↓
+//       whitespace-only and ignored tags)                       (title changes take their own debounce → spacingNode(<title>))
+//     ↓                                                         ↓
+//     └────────────────────────────┬────────────────────────────┘
+//                                  ↓
+// 4. schedule(task)
+//    - Callers pass a closure. Spacing callers pass () => spacingTextNodes(textNodes), always ONE task holding the whole list, never chunked. applyLateFixes() (step 7) passes its
+//      compare-and-set writes through the same seam
 //    - Decision point: taskScheduler.config.enabled && requestIdleCallback supported?
-//      ├─ NO  → spacingTextNodes(textNodes)   (synchronous, no requestIdleCallback)
-//      └─ YES (default) → taskScheduler.queue.add(() => spacingTextNodes(textNodes))
-//                         (always ONE task holding the whole list, never chunked)
+//      ├─ NO  → task()                       (synchronous, no requestIdleCallback)
+//      └─ YES (default) → taskScheduler.queue.add(task)
 // ↓
 // 5. TaskQueue.add() → scheduleProcessing() → requestIdleCallback(process, { timeout: 5000 })
-//    - process(deadline): pops and runs queued tasks while deadline.timeRemaining() > 0
-//    - if tasks remain when the slice ends, re-arms requestIdleCallback for the rest
+//    - process(deadline): pops and runs queued tasks while deadline.timeRemaining() > 0; if tasks remain when the slice ends, re-arms requestIdleCallback for the rest
 // ↓
 // 6. spacingTextNodes(textNodes)
-//    - per text run: decideTextRunSpacing() → trim-leading-space / prepend-space /
-//      apply-text-spacing (spacingText)
-//    - per adjacent run pair: decideBoundarySpacing() → prepend-next / append-current /
-//      insert <pangu> element / none
-//    - visibility detection happens here: always on, consulted lazily per boundary
-//      (hiddenBoundaryBefore / hiddenBoundaryAfter), not a scheduling decision
-//    - batch tail: onBatchSettled fires once with every text run text spacing read
+//    - per text run: decideTextRunSpacing() → trim-leading-space / prepend-space / apply-text-spacing (spacingText)
+//    - per adjacent run pair: decideBoundarySpacing() → prepend-next / append-current / insert <pangu> element / none; a non-none verdict first writes back the respaced current tail
+//      (respaceCurrentTail) when the junction needs one
+//    - visibility detection happens here: always on, consulted lazily per boundary (hiddenBoundaryBefore / hiddenBoundaryAfter), not a scheduling decision
+//    - batch tail: onBatchSettled fires once with every text run text spacing read (only when the extension assigned it; the package alone captures nothing)
+// ↓
+// 7. applyLateFixes(fixes)   (Chrome extension only, from its onBatchSettled handler)
+//    - the extension decides AI spacing fixes off the settled runs and hands them back as LateFix { node, expected, data }
+//    - schedule(() => for each fix: write data only if node is connected and still holds expected) → back to step 4, so the fix lands with the same beat as any pending spacing,
+//      including at focus on a hidden tab
 //
 // Summary of paths to requestIdleCallback():
-// - taskScheduler.enabled=true + requestIdleCallback available → one batch task per
-//   schedule() call, drained in idle slices
-// - taskScheduler.enabled=false, or no requestIdleCallback (stock Safari) → never
-//   (fully synchronous processing)
+// - taskScheduler.enabled=true + requestIdleCallback available → one task per schedule() call (a spacing batch or a late-fix batch), drained in idle slices
+// - taskScheduler.enabled=false, or no requestIdleCallback (stock Safari) → never (fully synchronous processing)
+// - pre-paint re-space inside the observer callback (2b) → never; it runs spacingTextNodes() directly and bypasses schedule()
 export class BrowserPangu extends Pangu {
   // Pre-paint re-space stays bounded: subtrees with more text runs than this fall back to the queue
   private static readonly maxSyncTextNodes = 256;
