@@ -11,7 +11,7 @@ The class of Chinese, Japanese, and Korean characters that every spacing rule ke
 Alphabetical letters, numerical digits, and symbols that trigger spacing when adjacent to CJK. Named for its three parts, parallel to CJK; `A`, `N`, and `S` also name the sub-classes in code and shapes.
 
 **Text run**:
-One string of text spaced as a unit. On a page, the data of one `Text` node. The unit text spacing works within and boundary spacing works between.
+One string the rules receive whole: on a page the data of one `Text` node, for the string API the entire input.
 _Avoid_: run (bare), text node (in prose), chunk, span
 
 **Text spacing**:
@@ -26,20 +26,12 @@ _Avoid_: pair spacing, adjacent-node spacing
 A marker element injected to render a space at a boundary where neither adjacent text run may be modified.
 _Avoid_: space element
 
-**Native autospacing**:
-Visual-only spacing the browser renders where CJK meets ANS letters or digits, inserting no character, so copied text is unchanged. Narrower than a real space, blind to symbols, and skipped wherever a real space already exists, so it layers safely under text spacing and boundary spacing.
-_Avoid_: CSS spacing, autospace mode, text-autospace (in prose)
-
-**Symbol sense disambiguation**:
-Deciding which reading a symbol carries from the context around it, rather than from the symbol alone. Borrowed from the established NLP task of the same name. Slash reading, pipe reading, plus reading, and affix reading are all heuristic implementations of it, so it names something the algorithm already does; the hyphen-sign model layer (`docs/hyphen-sign-model-layer.md`) does it explicitly for one shape. Use the term to relate pangu to outside work. When describing the algorithm itself, name the specific reading.
-_Avoid_: symbol WSD, symbol disambiguation
-
-**Hyphen-sign candidate**:
-A hyphen-minus flagged on pre-spacing text as sitting tight between CJK and a digit, carrying the sentence around it for a classifier to read and the settled position of the space the rules inserted. The only shape the hyphen-sign model layer ever sees; everything else on a page stays rules-only.
-_Avoid_: ambiguous span, model span
+**Native text-autospace**:
+The gap the browser renders through the `text-autospace` CSS property between CJK and ANS letters or digits: visual only, no character inserted, narrower than a real space, blind to symbols, and suppressed wherever a real space already exists, so it layers under text spacing and boundary spacing without doubling up.
+_Avoid_: native autospacing, text autospace, CSS spacing, autospace mode, text-autospace (bare, in prose)
 
 **Late fix**:
-A correction to the rules output, applied after the rules pass and decided by something other than the rules, such as a classifier. Only ever inserts or removes spaces, never rewrites author characters, and with no classifier the rules output stands. Today's only late fix takes back out the space the rules inserted at a hyphen-sign candidate read as a signed number (`氣溫是 - 5` becomes `氣溫是 -5`).
+A correction to the rules output, applied after the rules pass and decided by something other than the rules, such as a classifier. Only ever inserts or removes spaces, never rewrites author characters, and with no classifier the rules output stands. Today's only late fix takes back out the space the rules inserted at a candidate read as a signed number (`CJK - N` becomes `CJK -N`).
 _Avoid_: un-insert (in prose), model fix
 
 ## Paranoid Text Spacing Algorithm
@@ -80,3 +72,31 @@ Tags are protected from spacing rules. Text inside attributes is processed. The 
 **Tag mention**:
 A bare tag with no attributes, a non-void name, and no closing counterpart anywhere in the text, self-closing or not (`CJK <div> CJK`, `CJK List<String> CJK`, `CJK <Spinner /> CJK`). Reads as one unit mentioned in prose rather than markup: spaced at direct CJK contact, tight against ANS characters. Paired tags, void elements (`<br>`, `<br />`), and tags with attributes stay protected markup.
 _Avoid_: tag-in-prose, prose tag
+
+## AI Spacing
+
+Spacing decided by a classifier where the rules cannot tell two readings apart. Source of truth: `docs/ai-spacing.md`; the decision to build it is ADR 0016.
+
+**AI spacing**:
+The extension's opt-in path that hands each candidate to a classifier and lands its label as a late fix. Never load-bearing: with the model absent, off, or slow, the rules output stands.
+_Avoid_: model layer, hyphen-sign model layer
+
+**Symbol sense disambiguation**:
+Deciding which reading a symbol carries from the context around it rather than from the symbol alone; the NLP task of the same name. Slash, pipe, plus, and affix reading do it heuristically and AI spacing does it with a classifier, so use the term to relate pangu to outside work and name the specific reading when describing the algorithm.
+_Avoid_: symbol WSD, symbol disambiguation
+
+**Ambiguous shape**:
+A shape where the rules cannot derive the symbol's reading, so a classifier decides it: what to flag, the menu of labels, and the fix per label. Today's only ambiguous shape is the hyphen sign, a hyphen-minus tight between CJK and a digit, read as a signed number or as a range or separator.
+_Avoid_: symbol class, ambiguity, shape (bare, for this sense)
+
+**Candidate**:
+One occurrence of an ambiguous shape, flagged on pre-spacing text, carrying the sentence around it for the classifier and where the symbol sits after the rules ran.
+_Avoid_: hyphen-sign candidate (as a term), span, ambiguous span, model span
+
+**Classifier**:
+The component that reads one candidate and answers with one label from a fixed menu, never with text, so it can never rewrite an author's characters.
+_Avoid_: LLM, AI (for the component)
+
+**Label**:
+The classifier's answer for one candidate, one of the fixed menu for its ambiguous shape: today signed number, range or separator, or unsure.
+_Avoid_: verdict (the rules' word), answer
