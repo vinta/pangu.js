@@ -2,8 +2,9 @@ import type { HyphenSignCandidate } from '../../../src/browser/hyphen-sign';
 import { getSettings } from './utils/settings';
 import type { ClassifySpansMessage, ClassifySpansResponse, ContentScriptLoadedMessage, ContentScriptResponse, MessageToContentScript } from './utils/types';
 
-// `Window.pangu` is declared globally in src/browser/pangu.umd.ts
-// The pangu object is injected by pangu.umd.js which loads before this script
+// `Window.pangu` is declared globally in src/browser/pangu.umd.ts, and pangu.umd.js is always listed before this script in the injection arrays (service worker
+// registration and the popup's manual injection), so it is already set when this module runs
+const pangu = window.pangu;
 
 // One CLASSIFY_SPANS round trip per spacing batch, awaited with no deadline: a late answer is still safe to apply, because the applier drops any fix whose node changed since it was flagged, and
 // the worker has no abort signal, so a deadline could only discard answers the model already paid for
@@ -25,7 +26,7 @@ async function fixHyphenSigns(candidates: HyphenSignCandidate[]) {
   if (!response.ok) {
     // The first no is final for this page. An absent model, an availability other than 'available', and a create() that fails are all conditions that will not change while the page is open, so
     // unassigning the seam stops the finder as well as any further worker wakes
-    window.pangu.onHyphenSpans = null;
+    pangu.onHyphenSpans = null;
     console.debug(`[pangu] hyphen-sign: disabled for this page (${response.error})`);
     return;
   }
@@ -42,16 +43,11 @@ async function fixHyphenSigns(candidates: HyphenSignCandidate[]) {
     }
   }
   if (signedNumbers.length > 0) {
-    window.pangu.applyHyphenSignFixes(signedNumbers);
+    pangu.applyHyphenSignFixes(signedNumbers);
   }
 }
 
 async function autoSpacingPage() {
-  const pangu = window.pangu;
-  if (!pangu) {
-    return;
-  }
-
   // Assigned before the sweep starts, so the initial pass is captured too
   const settings = await getSettings();
   if (settings.is_enable_ai_spacing) {
@@ -64,10 +60,7 @@ async function autoSpacingPage() {
 }
 
 function spacingPage() {
-  const pangu = window.pangu;
-  if (pangu) {
-    pangu.spacingPage();
-  }
+  pangu.spacingPage();
 }
 
 const loadedMessage: ContentScriptLoadedMessage = { type: 'CONTENT_SCRIPT_LOADED' };
