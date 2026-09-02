@@ -36,7 +36,11 @@ _Avoid_: un-insert (in prose), model fix
 
 ## Paranoid Text Spacing Algorithm
 
-The algorithm behind text spacing. Source of truth: `src/shared/index.ts`, exhaustive examples: the per-symbol files in `tests/shared/`. Shapes below are generic: `CJK` is any CJK character, `A` any letter, `N` any digit, symbols are literal.
+The algorithm behind text spacing, in two stages: the rules decide every space, and AI spacing, the Chrome extension's opt-in second stage, corrects the rules output at the few ambiguous shapes they cannot read. The npm package ships the rules only. Shapes below are generic: `CJK` is any CJK character, `A` any letter, `N` any digit, symbols are literal.
+
+### Rule-based Spacing
+
+Source of truth: `src/shared/index.ts`, exhaustive examples: the per-symbol files in `tests/shared/`.
 
 **Symbol handling**:
 A symbol between two ANS characters binds them into a joiner token and never gets spaces. A symbol in direct contact with CJK reads as an operator and gets spaces, unless an affix reading attaches it to its ANS side. `/` additionally follows slash reading, `|` follows pipe reading, and `+` follows plus reading. The separator `_` never gets spaces.
@@ -73,9 +77,9 @@ Tags are protected from spacing rules. Text inside attributes is processed. The 
 A bare tag with no attributes, a non-void name, and no closing counterpart anywhere in the text, self-closing or not (`CJK <div> CJK`, `CJK List<String> CJK`, `CJK <Spinner /> CJK`). Reads as one unit mentioned in prose rather than markup: spaced at direct CJK contact, tight against ANS characters. Paired tags, void elements (`<br>`, `<br />`), and tags with attributes stay protected markup.
 _Avoid_: tag-in-prose, prose tag
 
-## AI Spacing
+### AI Spacing
 
-Spacing decided by a classifier where the rules cannot tell two readings apart. Source of truth: `docs/ai-spacing.md`; the decision to build it is ADR 0016.
+Source of truth: `docs/ai-spacing.md`; the decision to build it is ADR 0016.
 
 **AI spacing**:
 The extension's opt-in path that hands each candidate to a classifier and lands its label as a late fix. Never load-bearing: with the model absent, off, or slow, the rules output stands.
