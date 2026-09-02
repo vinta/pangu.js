@@ -6,28 +6,28 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/ensure-build.sh",
+            "command": "npm run build >/dev/null || exit 2",
             "if": "Edit(/src/**)",
             "timeout": 60,
             "statusMessage": "Building..."
           },
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/ensure-build.sh",
+            "command": "npm run build >/dev/null || exit 2",
             "if": "Edit(/browser-extensions/**)",
             "timeout": 60,
             "statusMessage": "Building..."
           },
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/ensure-build.sh",
+            "command": "npm run build >/dev/null || exit 2",
             "if": "Write(/src/**)",
             "timeout": 60,
             "statusMessage": "Building..."
           },
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/ensure-build.sh",
+            "command": "npm run build >/dev/null || exit 2",
             "if": "Write(/browser-extensions/**)",
             "timeout": 60,
             "statusMessage": "Building..."
