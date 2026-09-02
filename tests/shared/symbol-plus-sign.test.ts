@@ -11,9 +11,12 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('陳上進+Vinta')).toBe('陳上進 + Vinta');
     expect(pangu.spacingText('你+我=我們')).toBe('你 + 我 = 我們');
 
+    // FIXME
     // CJK brand suffixes (公視+, 影劇館+) read as operators too, see ADR 0013
     expect(pangu.spacingText('公視+上架了新片')).toBe('公視 + 上架了新片');
     expect(pangu.spacingText('MOD影劇館+上架了新片')).toBe('MOD 影劇館 + 上架了新片');
+    // expect(pangu.spacingText('公視+上架了新片')).toBe('公視+ 上架了新片');
+    // expect(pangu.spacingText('MOD影劇館+上架了新片')).toBe('MOD 影劇館+ 上架了新片');
 
     // DO NOT change if already spacing
     expect(pangu.spacingText('前面 + 後面')).toBe('前面 + 後面');
