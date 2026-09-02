@@ -4,13 +4,13 @@
 
 The decision:
 
-1. **Chrome's built-in Prompt API classifies exactly one shape.** A hyphen-minus directly between a CJK character and a digit, choosing between a signed number and a range or separator. No other symbol class gets a model; everything else in pangu stays rules-only, forever.
+1. **Chrome's built-in Prompt API classifies one shape first.** A hyphen-minus directly between a CJK character and a digit, choosing between a signed number and a range or separator. Nothing else in pangu gets a model in this change, and everything else stays rules-only until some other shape earns its own decision.
 2. **The model classifies, it never rewrites.** The rules flag the span, the model picks one label from an enum, and the rules insert or remove spaces per label. [ADR 0009](0009-nbsp-suppresses-spacing-never-rewritten.md) holds by construction rather than by review: a component that only ever returns a label cannot rewrite an author's bytes.
 3. **Extension-only, opt-in, and a late fix.** No model dependency reaches the npm package, the setting is off by default, and the rules pass runs to completion first. With the model absent, disabled, or slow, today's output is what the page gets.
 
-Alternatives rejected:
+The other ambiguous symbol classes — filename-versus-mention, formula-versus-prose, brand suffixes — are deferred, not ruled out. Their first probe on this contract did not clear the zero-regression bar, which is why the hyphen goes first. But the prompt campaign that followed moved this same model, on this same contract, from failing that bar on the hyphen to clearing it, through prompt work alone. "The model's priors are wrong there" is therefore one probe's reading rather than a closed question, and each class earns its own decision on its own measurements.
 
-- **A broader model layer over other ambiguous symbols** — filename-versus-mention, formula-versus-prose, brand suffixes. Measured on the same contract, the on-device model's priors were simply wrong on those classes, which is not something a better prompt or a stricter output format reaches. Those cases stay dropped by policy.
+Alternatives rejected:
 - **Any backend other than the browser's own.** A local model server is a companion install, a hosted API is a network round trip and someone's bill, and a fine-tuned encoder is a training pipeline. None of that belongs behind a text-spacing library that has always been a pure function.
 - **A cue-character lexicon instead of a model** — a list of characters that may precede a signed number, consulted by a widened rule. It is cheaper and fully deterministic, but it is an open-ended word list, the machinery [ADR 0013](0013-protected-word-list-removed.md) removed, and ADR 0015 already named it as such when it declined the same idea.
 
