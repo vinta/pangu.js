@@ -5,17 +5,12 @@ import type { ClassifySpansMessage, ClassifySpansResponse, ContentScriptLoadedMe
 // `Window.pangu` is declared globally in src/browser/pangu.umd.ts
 // The pangu object is injected by pangu.umd.js which loads before this script
 
-// One CLASSIFY_SPANS round trip per spacing batch. A batch that has not answered by then is abandoned: the rules output stands and the late answer is dropped
-const CLASSIFY_DEADLINE_MS = 30 * 1000;
-
-async function classifySpans(spans: ClassifySpansMessage['spans']): Promise<ClassifySpansResponse | null> {
+// One CLASSIFY_SPANS round trip per spacing batch, awaited with no deadline: a late answer is still safe to apply, because the applier drops any fix whose node changed since it was flagged, and
+// the worker has no abort signal, so a deadline could only discard answers the model already paid for
+async function classifySpans(spans: ClassifySpansMessage['spans']): Promise<ClassifySpansResponse> {
   const message: ClassifySpansMessage = { type: 'CLASSIFY_SPANS', spans };
-  const deadline = new Promise<null>((resolve) => {
-    setTimeout(() => resolve(null), CLASSIFY_DEADLINE_MS);
-  });
-
   try {
-    return await Promise.race([chrome.runtime.sendMessage<ClassifySpansMessage, ClassifySpansResponse>(message), deadline]);
+    return await chrome.runtime.sendMessage<ClassifySpansMessage, ClassifySpansResponse>(message);
   } catch (error) {
     // No worker to answer, e.g. the extension was reloaded while this page stayed open. Same verdict as any other no
     return { ok: false, error: String(error) };
@@ -27,10 +22,6 @@ async function classifySpans(spans: ClassifySpansMessage['spans']): Promise<Clas
 // and the service worker's console shows the exact prompt text and raw model output
 async function fixHyphenSigns(pangu: NonNullable<Window['pangu']>, candidates: HyphenSignCandidate[]) {
   const response = await classifySpans(candidates.map(({ sentence, at }) => ({ sentence, at })));
-  if (response === null) {
-    console.debug(`[pangu] hyphen-sign: no answer within ${CLASSIFY_DEADLINE_MS / 1000}s, batch of ${candidates.length} dropped, rules output stands`);
-    return;
-  }
   if (!response.ok) {
     // The first no is final for this page. An absent model, an availability other than 'available', and a create() that fails are all conditions that will not change while the page is open, so
     // unassigning the seam stops the finder as well as any further worker wakes
