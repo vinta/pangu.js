@@ -126,7 +126,7 @@ export const ANS_SLASH_CJK = new RegExp(`([${AN}])([/])([${CJK}])`, 'g');
 export const PIPE_CJK_CONTACT = new RegExp(`[${CJK}]\\||\\|[${CJK}]`);
 export const PIPE_SEPARATOR = /([^\s|])[ ]*(\|+)[ ]*(?=[^\s|])/g;
 
-// Plus patterns for separator vs joiner-token behavior, decided per line like the pipe. The separator matches a solitary plus only: a space-adjacent plus is settled and a ++ run is a preserved
+// Plus patterns for separator vs joiner-token behavior, decided per line like the pipe. The separator matches a solitary plus only: a space-adjacent plus is decided and a ++ run is a preserved
 // pattern (C++, i++)
 export const PLUS_CJK_CONTACT = new RegExp(`[${CJK}]\\+|\\+[${CJK}]`);
 export const PLUS_SEPARATOR = /(?<=[^\s+])\+(?=[^\s+])/g;
@@ -410,8 +410,8 @@ export class Pangu {
       })
       .join('\n');
 
-    // Plus reading is per line: a plus in direct contact with CJK makes every unsettled plus on the line a separator with spaces on both sides, as in telecom bundle plans that chain products with +
-    // A settled plus keeps its reading: space-adjacent, affix-attached (Disney+, +886), or in a ++ run (C++). A line with no CJK contact keeps its joiner tokens tight (A+B, 5+5)
+    // Plus reading is per line: a plus in direct contact with CJK makes every undecided plus on the line a separator with spaces on both sides, as in telecom bundle plans that chain products with +
+    // A decided plus keeps its reading: space-adjacent, affix-attached (Disney+, +886), or in a ++ run (C++). A line with no CJK contact keeps its joiner tokens tight (A+B, 5+5)
     newText = newText
       .split('\n')
       .map((line) => {

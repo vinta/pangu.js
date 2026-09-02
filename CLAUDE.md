@@ -4,7 +4,7 @@
 
 `pangu.js` is a text spacing library that automatically inserts whitespace between CJK (Chinese, Japanese, Korean) characters and ANS characters (alphabetical letters, numerical digits, and symbols) for better readability. It ships two build targets: an npm package (ESM/CommonJS/UMD) for Node.js and browsers, and a Chrome extension (Manifest V3).
 
-Domain vocabulary (joiner token, slash/pipe/plus/affix reading, boundary spacing, tag mention) and per-skill overrides live in `CONTEXT.md`; decisions that changed spacing contracts live in `docs/adr/`. Read the glossary before touching spacing rules and use its terms, not the synonyms it lists under Avoid.
+Domain vocabulary (joiner token, slash/pipe/plus/affix reading, boundary spacing, tag mention) and per-skill overrides live in `CONTEXT.md`; decisions that changed spacing contracts live in `docs/adr/`. Read the glossary before touching spacing rules and use its terms, not the synonyms it lists under Avoid. A definition may use only bold glossary terms, platform names as the platform spells them (`Text` node, string, line, element), and ordinary English in its ordinary sense. One word carries one sense: a word needed in a technical sense gets its own entry or gets replaced. A glossary term matches the code identifier for the same concept; when they diverge, define the code's word or rename the code.
 
 ## Common Development Commands
 
