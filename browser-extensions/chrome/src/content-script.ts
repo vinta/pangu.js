@@ -8,10 +8,6 @@ import type { ClassifySpansMessage, ClassifySpansResponse, ContentScriptLoadedMe
 // One CLASSIFY_SPANS round trip per spacing batch. A batch that has not answered by then is abandoned: the rules output stands and the late answer is dropped
 const CLASSIFY_DEADLINE_MS = 30 * 1000;
 
-// The first no is final for this page. An absent model, an availability other than 'available', and a create() that fails are all conditions that will not change while the page is open, so there is
-// nothing to gain from waking the service worker again
-let isModelPathDisabled = false;
-
 async function classifySpans(spans: ClassifySpansMessage['spans']): Promise<ClassifySpansResponse | null> {
   const message: ClassifySpansMessage = { type: 'CLASSIFY_SPANS', spans };
   const deadline = new Promise<null>((resolve) => {
@@ -30,17 +26,15 @@ async function classifySpans(spans: ClassifySpansMessage['spans']): Promise<Clas
 // Every step logs at debug level (hidden until the console's Verbose level is on), so a wrong verdict on a live page is traceable without a build: this side shows each span's sentence and verdict,
 // and the service worker's console shows the exact prompt text and raw model output
 async function fixHyphenSigns(pangu: NonNullable<Window['pangu']>, candidates: HyphenSignCandidate[]) {
-  if (isModelPathDisabled) {
-    return;
-  }
-
   const response = await classifySpans(candidates.map(({ sentence, at }) => ({ sentence, at })));
   if (response === null) {
     console.debug(`[pangu] hyphen-sign: no answer within ${CLASSIFY_DEADLINE_MS / 1000}s, batch of ${candidates.length} dropped, rules output stands`);
     return;
   }
   if (!response.ok) {
-    isModelPathDisabled = true;
+    // The first no is final for this page. An absent model, an availability other than 'available', and a create() that fails are all conditions that will not change while the page is open, so
+    // unassigning the seam stops the finder as well as any further worker wakes
+    pangu.onHyphenSpans = null;
     console.debug(`[pangu] hyphen-sign: disabled for this page (${response.error})`);
     return;
   }
