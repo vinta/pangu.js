@@ -37,9 +37,10 @@ async function createBaseSession() {
     throw new Error(`model availability is ${availability}`);
   }
 
-  // Deliberately NO expectedInputs/expectedOutputs language declaration, despite the console warning this leaves ("An output language should be specified..."): the API's supported set is
-  // en/ja/es/de/fr, declaring any zh variant makes availability() report unavailable and create() reject with NotSupportedError, and declaring en would attest a language the output is not.
-  // An undeclared session is the only way to run Chinese, and the explainer says the declaration would not steer output anyway. See docs/prompt-api-reference.md, Languages.
+  // Deliberately NO expectedInputs/expectedOutputs language declaration: the API's supported set is en/ja/es/de/fr, declaring any zh variant makes availability() report unavailable and create()
+  // reject with NotSupportedError, and declaring en or ja would attest a language the output is not. An undeclared session is the only way to run Chinese, and declaring a supported one buys nothing:
+  // measured 2026-09-02 in this context, six configurations over the 23-case set returned identical labels and identical raw bytes, and the "No output language was specified" warning a declaration
+  // would silence never reaches a service worker in the first place -- it is logged for extension pages only. See docs/prompt-api-reference.md, Languages.
   const session = await LanguageModel.create({
     initialPrompts: [{ role: 'system', content: SYSTEM_PROMPT }],
     temperature: 0,

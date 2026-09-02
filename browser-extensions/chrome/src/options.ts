@@ -3,6 +3,12 @@ import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, updateSettings } from
 import { playSound } from './utils/sounds';
 import { isValidMatchPattern } from './utils/urls';
 
+// Chrome logs "No output language was specified in a LanguageModel API request" for any call that declares none, and collects it into the extension's Errors page, which is a user-facing surface. The
+// warning is logged for extension pages only, never for the service worker (measured 2026-09-02), so declaring a language on this page's two calls is what clears it. Nothing here is misattested:
+// neither call ever produces model output, one probes availability and the other exists only to start the browser-wide download. The classifier, which is the session that actually prompts, stays
+// undeclared on purpose -- see utils/prompt-classifier.ts. `en` is a member of the supported set (en/ja/es/de/fr); no zh variant is, and declaring one makes availability() report unavailable.
+const PAGE_MODEL_LANGUAGES: LanguageModelExpected[] = [{ type: 'text', languages: ['en'] }];
+
 // Builds a Partial<Settings> for the list picked by filter mode without a computed-key cast
 function listPatch(key: 'blacklist' | 'whitelist', urls: string[]) {
   return key === 'blacklist' ? { blacklist: urls } : { whitelist: urls };
@@ -301,7 +307,7 @@ class OptionsController {
       return;
     }
 
-    const availability = await LanguageModel.availability();
+    const availability = await LanguageModel.availability({ expectedOutputs: PAGE_MODEL_LANGUAGES });
     statusText.textContent = chrome.i18n.getMessage(`ai_model_${availability}`);
     // Only a model that is absent can be fetched, and starting a multi-gigabyte download is the user's call to make
     downloadButton.style.display = availability === 'downloadable' ? 'block' : 'none';
@@ -314,6 +320,7 @@ class OptionsController {
     try {
       // The download is browser-wide, so this page needs the session only long enough to start it
       const session = await LanguageModel.create({
+        expectedOutputs: PAGE_MODEL_LANGUAGES,
         monitor: (monitor) => {
           monitor.addEventListener('downloadprogress', (event) => {
             console.log(`Downloading the built-in model: ${Math.round(event.loaded * 100)}%`);
