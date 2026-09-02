@@ -1,3 +1,5 @@
+import type { HyphenLabel } from './hyphen-prompt';
+
 export interface Settings {
   spacing_mode: 'spacing_when_load' | 'spacing_when_click';
   filter_mode: 'blacklist' | 'whitelist';
@@ -31,3 +33,36 @@ export interface ContentScriptLoadedMessage {
 
 // Messages sent FROM content script to extension (via chrome.runtime.sendMessage)
 export type MessageFromContentScript = ContentScriptLoadedMessage;
+
+// One flagged hyphen-minus. `at` is its index inside `sentence` rather than the span text, because span text does not identify which symbol is meant when a sentence carries a second hyphen.
+export interface ClassifySpanRequest {
+  sentence: string;
+  at: number;
+}
+
+export interface ClassifySpansMessage {
+  type: 'CLASSIFY_SPANS';
+  spans: ClassifySpanRequest[];
+}
+
+// Messages sent TO the service worker (via chrome.runtime.sendMessage)
+export type MessageToServiceWorker = ClassifySpansMessage;
+
+// Answers zip against the request array by index, which the classifier's sequential loop preserves
+export interface ClassifiedSpan {
+  answer: HyphenLabel | null;
+  error: string | null;
+}
+
+export interface ClassifySpansSucceeded {
+  ok: true;
+  spans: ClassifiedSpan[];
+}
+
+export interface ClassifySpansFailed {
+  ok: false;
+  error: string;
+}
+
+// A single span's failure is reported per span; only a failure that costs the whole batch, such as an absent model, answers ok: false
+export type ClassifySpansResponse = ClassifySpansSucceeded | ClassifySpansFailed;

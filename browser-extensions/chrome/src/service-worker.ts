@@ -1,6 +1,7 @@
 // NOTE: In service workers, we can't export directly, everything goes through messages
+import { classifySpans } from './utils/prompt-classifier';
 import { getSettings, onSettingsChanged, reconcileSettings } from './utils/settings';
-import type { Settings } from './utils/types';
+import type { ClassifySpansResponse, MessageFromContentScript, MessageToServiceWorker, Settings } from './utils/types';
 import { isValidMatchPattern, shouldShowOffIcon } from './utils/urls';
 
 const SCRIPT_ID = 'paranoid-auto-spacing';
@@ -135,4 +136,18 @@ onSettingsChanged((changedKeys) => {
   if (changedKeys.some((key) => ICON_KEYS.includes(key))) {
     updateAllTabIcons().catch(console.error);
   }
+});
+
+// The model layer's only entry point, registered synchronously at module scope for the same reason as onSettingsChanged above. It reads no settings: whether the feature is on is the content script's
+// question, and it is the gate.
+// Chrome closes the message channel when a listener returns a promise, so the listener stays a plain function that returns true and lets an async helper call sendResponse. classifySpans reports
+// failure in its response rather than rejecting, so there is no path that leaves a caller without an answer.
+chrome.runtime.onMessage.addListener((message: MessageToServiceWorker | MessageFromContentScript, _sender: chrome.runtime.MessageSender, sendResponse: (response: ClassifySpansResponse) => void) => {
+  if (message.type === 'CLASSIFY_SPANS') {
+    classifySpans(message.spans).then(sendResponse);
+    return true;
+  }
+
+  // Messages this worker does not answer, such as the content script's CONTENT_SCRIPT_LOADED, must leave their channel closing normally
+  return false;
 });
