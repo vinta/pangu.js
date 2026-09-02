@@ -1,6 +1,6 @@
 # Plan: generalize the AI spacing seam before the second ambiguous shape
 
-Status: reviewed with Vinta on 2026-09-02, names settled, and amended on 2026-09-03 after the glossary review (candidate vocabulary on the wire, `AmbiguousShape`). Ready to implement. Not started. Branch: `feature/chrome-prompt-api`, this checkout, one commit, because every intermediate state either fails tests or has docs describing code that does not exist. Purely structural: DOM output is identical before and after, and the existing suites are the proof.
+Status: reviewed with Vinta on 2026-09-02, names settled, and amended on 2026-09-03 after the glossary review (candidate vocabulary on the wire, `AmbiguousShape`). Implemented on 2026-09-03. Branch: `feature/chrome-prompt-api`, this checkout, one commit, because every intermediate state either fails tests or has docs describing code that does not exist. Purely structural: DOM output is identical before and after, and the existing suites are the proof.
 
 ## Why now
 

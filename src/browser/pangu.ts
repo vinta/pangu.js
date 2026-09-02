@@ -1,8 +1,6 @@
 import { Pangu } from '../shared/index.js';
 import { decideBoundarySpacing, decideTextRunSpacing, respaceCurrentTail } from './boundary-spacing.js';
 import { DomWalker } from './dom-walker.js';
-import type { HyphenSignCandidate, PendingHyphenSpan } from './hyphen-sign.js';
-import { findHyphenSpans, hasInsertedGap, indexOfNthHyphen } from './hyphen-sign.js';
 import { TaskScheduler } from './task-scheduler.js';
 import { VisibilityDetector } from './visibility-detector.js';
 
@@ -10,6 +8,21 @@ export interface AutoSpacingPageConfig {
   pageDelayMs?: number;
   nodeDelayMs?: number;
   nodeMaxWaitMs?: number;
+}
+
+// One text run as a batch left it: the bytes text spacing read, and the bytes settled after every boundary write in the batch landed. Text runs that got only a trim or a prepended space are not
+// here, because text spacing never ran on them
+export interface SettledTextRun {
+  readonly node: Text;
+  readonly before: string;
+  readonly after: string;
+}
+
+// A compare-and-set write: applied only while the node still holds `expected`, so a fix computed from a snapshot can never land on bytes it did not see
+export interface LateFix {
+  readonly node: Text;
+  readonly expected: string;
+  readonly data: string;
 }
 
 // Any whitespace at a text run's edge already separates it from the neighboring run, matching the /\s/ that scanBetweenTextRuns uses on the nodes in the gap.
@@ -90,6 +103,7 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 //      insert <pangu> element / none
 //    - visibility detection happens here: always on, consulted lazily per boundary
 //      (hiddenBoundaryBefore / hiddenBoundaryAfter), not a scheduling decision
+//    - batch tail: onBatchSettled fires once with every text run text spacing read
 //
 // Summary of paths to requestIdleCallback():
 // - taskScheduler.enabled=true + requestIdleCallback available → one batch task per
@@ -106,14 +120,14 @@ export class BrowserPangu extends Pangu {
   // (data still equals the entry, drop them) from external rewrites of spaced content
   // (data differs, re-space before the next paint)
   private readonly lastWrittenData = new WeakMap<Text, string>();
-  // Flagged hyphens waiting for the batch to settle, collected from pre-spacing text and resolved against post-spacing data at the batch tail
-  private pendingHyphenSpans: PendingHyphenSpan[] = [];
+  // Text runs waiting for the batch to settle, captured from pre-spacing text and resolved against post-spacing data at the batch tail
+  private pendingTextRuns: { node: Text; before: string }[] = [];
   public readonly taskScheduler = new TaskScheduler();
   public readonly visibilityDetector = new VisibilityDetector();
 
-  // The seam the Chrome extension's AI spacing hangs off. Unassigned means the finder never runs, which is what keeps this package inert: nothing here knows the model exists, and the extension is
+  // The seam the Chrome extension's AI spacing hangs off. Unassigned means nothing is captured, which is what keeps this package inert: nothing here knows the model exists, and the extension is
   // the only assigner
-  public onHyphenSpans: ((candidates: HyphenSignCandidate[]) => void) | null = null;
+  public onBatchSettled: ((runs: SettledTextRun[]) => void) | null = null;
 
   // PUBLIC
 
@@ -163,46 +177,20 @@ export class BrowserPangu extends Pangu {
     return this.visibilityDetector.isElementVisuallyHidden(element);
   }
 
-  // The late fix, for the candidates a classifier read as signed numbers: the space the rules inserted after the hyphen comes back out, so `CJK - 5` becomes `CJK -5`. The space before the hyphen
-  // stays. Every other reading leaves the rules output alone.
+  // The late fix: a correction to the rules output decided by something other than the rules, landed as one write per text run. A second fix on the same text run in the same call fails its own
+  // `expected` check and drops silently, so composing several edits into one fix is the caller's job.
   // The write goes through schedule() like every other spacing write: AI spacing is text spacing too, not a separate system with its own seam. On a hidden tab this means the fix applies at
   // focus, together with any pending spacing — the same beat dynamic content already gets — so a verdict in the console with the page still unchanged is a waiting tab, not a bug (see CLAUDE.md)
-  public applyHyphenSignFixes(candidates: readonly HyphenSignCandidate[]) {
-    const byNode = new Map<Text, HyphenSignCandidate[]>();
-    for (const candidate of candidates) {
-      const group = byNode.get(candidate.node);
-      if (group) {
-        group.push(candidate);
-      } else {
-        byNode.set(candidate.node, [candidate]);
-      }
-    }
-
+  public applyLateFixes(fixes: readonly LateFix[]) {
     this.schedule(() => {
-      for (const [node, group] of byNode) {
-        if (!node.isConnected) {
+      for (const fix of fixes) {
+        // The snapshot proves nothing has touched this node since the fix was computed, which is what keeps a write from landing on bytes it did not see
+        if (!fix.node.isConnected || fix.node.data !== fix.expected) {
           continue;
         }
 
-        // One guard per candidate: the snapshot proves nothing has touched this node since the candidate was flagged, which pins every position so no re-scan is needed, and keeps the gap the
-        // batch tail verified on these same bytes, so the space about to be deleted is still one the rules inserted
-        const { data } = node;
-        const indexes = group
-          .filter((candidate) => candidate.postSnapshot === data)
-          .map((candidate) => candidate.postIndex)
-          .sort((first, second) => second - first);
-        if (indexes.length === 0) {
-          continue;
-        }
-
-        // Descending, so each deletion leaves the indexes still to come untouched
-        let fixed = data;
-        for (const postIndex of indexes) {
-          fixed = fixed.slice(0, postIndex + 1) + fixed.slice(postIndex + 2);
-        }
-
-        node.data = fixed;
-        this.lastWrittenData.set(node, fixed);
+        fix.node.data = fix.data;
+        this.lastWrittenData.set(fix.node, fix.data);
       }
     });
   }
@@ -307,33 +295,21 @@ export class BrowserPangu extends Pangu {
       nextTextNode = currentTextNode;
     }
 
-    this.flushHyphenSpans();
+    this.flushSettledTextRuns();
   }
 
   // The batch tail. Boundary spacing rewrites tails and prepends junction spaces to nodes text-run spacing already visited, so a snapshot is only settled once the whole batch is done.
-  // pendingHyphenSpans is batch-scoped state kept on the instance, which only works because spacingTextNodes runs synchronously from the first push to this drain; if that ever changes, thread a
+  // pendingTextRuns is batch-scoped state kept on the instance, which only works because spacingTextNodes runs synchronously from the first push to this drain; if that ever changes, thread a
   // local array through applyTextRunSpacing and this function instead
-  private flushHyphenSpans() {
-    if (this.pendingHyphenSpans.length === 0) {
+  private flushSettledTextRuns() {
+    if (this.pendingTextRuns.length === 0) {
       return;
     }
 
-    const pending = this.pendingHyphenSpans;
-    this.pendingHyphenSpans = [];
+    const pending = this.pendingTextRuns;
+    this.pendingTextRuns = [];
 
-    const candidates: HyphenSignCandidate[] = [];
-    for (const span of pending) {
-      const postSnapshot = span.node.data;
-      const postIndex = indexOfNthHyphen(postSnapshot, span.ordinal);
-      if (!hasInsertedGap(postSnapshot, postIndex)) {
-        continue;
-      }
-      candidates.push({ sentence: span.sentence, at: span.at, node: span.node, postIndex, postSnapshot });
-    }
-
-    if (candidates.length > 0) {
-      this.onHyphenSpans?.(candidates);
-    }
+    this.onBatchSettled?.(pending.map(({ node, before }) => ({ node, before, after: node.data })));
   }
 
   private applyTextRunSpacing(textNode: Text) {
@@ -354,11 +330,9 @@ export class BrowserPangu extends Pangu {
           this.lastWrittenData.set(textNode, textNode.data);
           break;
         case 'apply-text-spacing': {
-          // Flagged before the write, because the tight original is the only thing that proves the gap the applier later closes was pangu's own
-          if (this.onHyphenSpans) {
-            for (const match of findHyphenSpans(textNode.data)) {
-              this.pendingHyphenSpans.push({ ...match, node: textNode });
-            }
+          // Captured before the write, because only the tight original proves which spaces the rules wrote; what any of it means is the host's policy, and lives in the extension
+          if (this.onBatchSettled) {
+            this.pendingTextRuns.push({ node: textNode, before: textNode.data });
           }
           const newText = this.spacingText(textNode.data);
           if (textNode.data !== newText) {
