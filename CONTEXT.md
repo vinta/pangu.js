@@ -19,7 +19,7 @@ Inserting whitespace between CJK and ANS characters within one text run.
 _Avoid_: paranoid spacing
 
 **Boundary spacing**:
-Deciding whether and where whitespace goes at the boundary between adjacent rendered text runs on a page, including boundaries interrupted by markup or hidden content. Distinct from text spacing, which operates within one text run.
+Deciding whether and where whitespace goes between two adjacent text runs on a page: `CJK<b>A</b>` gets the space at the start of the `A` run, `CJK<a>A</a>` at the end of the `CJK` run because a link, underline, or strike-through would render a space added inside it, and `<a>A</a><a>CJK</a>` gets a pangu element between the links. Nothing is added where whitespace or a block edge already separates the runs, across an ignored tag such as `<code>`, or against a hidden run.
 _Avoid_: pair spacing, adjacent-node spacing
 
 **Pangu element**:
