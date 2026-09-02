@@ -323,7 +323,7 @@ export class BrowserPangu extends Pangu {
     for (const span of pending) {
       const postSnapshot = span.node.data;
       const postIndex = indexOfNthHyphen(postSnapshot, span.ordinal);
-      if (postIndex === -1 || !hasInsertedGap(postSnapshot, postIndex)) {
+      if (!hasInsertedGap(postSnapshot, postIndex)) {
         continue;
       }
       candidates.push({ sentence: span.sentence, at: span.at, node: span.node, postIndex, postSnapshot });

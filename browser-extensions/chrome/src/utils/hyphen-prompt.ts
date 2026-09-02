@@ -4,34 +4,26 @@
 
 export const PROMPT_VARIANT = 'v20-zh';
 
-export type HyphenLabel = 'signed-number' | 'range-or-separator' | 'unsure';
-
-// The menu order the retest measured. Answers move with the order, so production never shuffles it
-export const CANONICAL_LABELS: readonly HyphenLabel[] = ['signed-number', 'range-or-separator', 'unsure'];
-
 export const SYSTEM_PROMPT = '你是中文朗讀老師。想像把整句話唸出來給聽眾聽，判斷朗讀時句子裡指定的「-」該怎麼唸。只判斷那一個符號，不要改寫句子，不要解釋，只從選項中挑一個回答。';
 
-// The model answers in reading words rather than in canonical labels, which is the change that stabilized this chassis. Answers are mapped back before anything outside this module sees them
-const DISPLAY_TOKENS: Record<HyphenLabel, string> = {
-  'signed-number': '負',
-  'range-or-separator': '到或分隔',
-  'unsure': '聽不出來',
-};
+// The menu, in the order the retest measured: answers move with the order, so production never shuffles it. The model answers in reading words (`token`) rather than in canonical labels, which is
+// the change that stabilized this chassis; tokens are mapped back to labels before anything outside this module sees them
+const OPTIONS = [
+  { label: 'signed-number', token: '負', gloss: '朗讀時唸作「負」或「零下」：後面的數字是負數' },
+  { label: 'range-or-separator', token: '到或分隔', gloss: '朗讀時唸作「到」或「至」，或是完全不唸出來、只停頓一下（當作分隔）' },
+  { label: 'unsure', token: '聽不出來', gloss: '真的聽不出來該怎麼唸' },
+] as const;
 
-const GLOSSES: Record<HyphenLabel, string> = {
-  'signed-number': '朗讀時唸作「負」或「零下」：後面的數字是負數',
-  'range-or-separator': '朗讀時唸作「到」或「至」，或是完全不唸出來、只停頓一下（當作分隔）',
-  'unsure': '真的聽不出來該怎麼唸',
-};
+export type HyphenLabel = (typeof OPTIONS)[number]['label'];
 
 // What the response constraint allows the model to emit
-export const DISPLAY_TOKEN_ENUM = CANONICAL_LABELS.map((label) => DISPLAY_TOKENS[label]);
+export const DISPLAY_TOKEN_ENUM = OPTIONS.map((option) => option.token);
 
-export function labelForDisplayToken(token: string) {
-  return CANONICAL_LABELS.find((label) => DISPLAY_TOKENS[label] === token) ?? null;
+export function labelForDisplayToken(token: unknown) {
+  return OPTIONS.find((option) => option.token === token)?.label ?? null;
 }
 
-const MENU = CANONICAL_LABELS.map((label) => `- ${DISPLAY_TOKENS[label]}：${GLOSSES[label]}`).join('\n');
+const MENU = OPTIONS.map((option) => `- ${option.token}：${option.gloss}`).join('\n');
 
 // No mark around the flagged symbol: the guillemets earlier variants wrapped it in read as a tokenizer to Nano rather than as a pointer. The question shows the sentence untouched and points at the
 // symbol by quoting the character before it, which is what a sentence carrying a second hyphen makes necessary

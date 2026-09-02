@@ -10,10 +10,6 @@ import type { ClassifiedSpan, ClassifySpanRequest, ClassifySpansResponse } from 
 // termination simply means the next call recreates it.
 let baseSession: LanguageModel | null = null;
 
-function describeError(error: unknown) {
-  return error instanceof Error ? `${error.name}: ${error.message}` : String(error);
-}
-
 // Two runtime guards the types cannot supply: the package declares LanguageModel and its params() unconditionally, but the class is absent outside a context that has the API, and params() is the
 // marker of the extension context where temperature and topK actually pin sampling (Chrome 151+, against a manifest floor of 99). Unpinned sampling is not a degraded version of this feature, it is
 // the drift that flipped controls in the plain-page runs, so a context without the knobs gets no session at all and the page stays on the rules output.
@@ -62,19 +58,15 @@ async function classifyOne(base: LanguageModel, span: ClassifySpanRequest): Prom
       turn.destroy();
     }
 
-    const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed !== 'string') {
-      throw new TypeError(`response was not a string: ${raw}`);
-    }
     // The model answers in display tokens; nothing outside this module ever sees one
-    const answer = labelForDisplayToken(parsed);
+    const answer = labelForDisplayToken(JSON.parse(raw));
     if (answer === null) {
-      throw new TypeError(`response outside the constraint enum: ${parsed}`);
+      throw new TypeError(`response outside the constraint enum: ${raw}`);
     }
     console.debug(`[pangu] hyphen-sign raw answer: ${raw} -> ${answer}`);
     return { answer, error: null };
   } catch (caught) {
-    const error = describeError(caught);
+    const error = String(caught);
     console.debug(`[pangu] hyphen-sign error: ${error}`);
     return { answer: null, error };
   }
@@ -87,7 +79,7 @@ export async function classifySpans(spans: readonly ClassifySpanRequest[]): Prom
   try {
     base = await getBaseSession();
   } catch (error) {
-    return { ok: false, error: describeError(error) };
+    return { ok: false, error: String(error) };
   }
 
   const classified: ClassifiedSpan[] = [];

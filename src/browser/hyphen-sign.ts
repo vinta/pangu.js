@@ -63,19 +63,9 @@ export function findHyphenSpans(text: string) {
   for (const match of text.matchAll(CJK_HYPHEN_DIGIT)) {
     // Every code point in the CJK class is a single UTF-16 unit, so the hyphen is one past the match
     const hyphenIndex = match.index + 1;
-    matches.push({ ...sliceSentence(text, hyphenIndex), ordinal: countHyphensBefore(text, hyphenIndex) });
+    matches.push({ ...sliceSentence(text, hyphenIndex), ordinal: text.slice(0, hyphenIndex).split('-').length - 1 });
   }
   return matches;
-}
-
-function countHyphensBefore(text: string, index: number) {
-  let count = 0;
-  for (let scan = 0; scan < index; scan++) {
-    if (text[scan] === '-') {
-      count++;
-    }
-  }
-  return count;
 }
 
 export function indexOfNthHyphen(text: string, ordinal: number) {

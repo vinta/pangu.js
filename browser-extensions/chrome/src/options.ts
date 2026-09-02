@@ -293,7 +293,6 @@ class OptionsController {
   private async renderAiModelStatus() {
     const statusText = document.getElementById('ai-model-status') as HTMLElement;
     const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
-    downloadButton.textContent = chrome.i18n.getMessage('button_download_ai_model');
 
     // The types declare LanguageModel unconditionally, but a browser without the Prompt API has no such global at all
     if (typeof LanguageModel === 'undefined') {

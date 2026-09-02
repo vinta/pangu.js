@@ -46,13 +46,16 @@ async function fixHyphenSigns(pangu: NonNullable<Window['pangu']>, candidates: H
   }
 
   // Answers zip against the candidates by index
+  const signedNumbers: HyphenSignCandidate[] = [];
   for (const [index, candidate] of candidates.entries()) {
     const span = response.spans[index];
     const verdict = span ? (span.answer ?? `error: ${span.error}`) : 'error: no answer at this index';
-    const action = span?.answer === 'signed-number' ? ' -> removing the space after the hyphen' : '';
-    console.debug(`[pangu] hyphen-sign: "${candidate.sentence}" (hyphen at ${candidate.at}) read as ${verdict}${action}`);
+    const isSignedNumber = span?.answer === 'signed-number';
+    console.debug(`[pangu] hyphen-sign: "${candidate.sentence}" (hyphen at ${candidate.at}) read as ${verdict}${isSignedNumber ? ' -> removing the space after the hyphen' : ''}`);
+    if (isSignedNumber) {
+      signedNumbers.push(candidate);
+    }
   }
-  const signedNumbers = candidates.filter((_candidate, index) => response.spans[index]?.answer === 'signed-number');
   if (signedNumbers.length > 0) {
     pangu.applyHyphenSignFixes(signedNumbers);
   }
