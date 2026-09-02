@@ -1,4 +1,4 @@
-// The hyphen-sign model layer: Chrome's built-in Prompt API classifies how one flagged hyphen-minus reads, and rules elsewhere decide the spacing. The model only ever picks a label from an enum, it
+// AI spacing's classifier: Chrome's built-in Prompt API classifies how one flagged hyphen-minus reads, and rules elsewhere decide the spacing. The model only ever picks a label from an enum, it
 // never emits text (ADR 0009).
 //
 // This lives in the service worker rather than the content script for one reason: `temperature` and `topK` are documented as the extension-context surface and a content script appears to get the

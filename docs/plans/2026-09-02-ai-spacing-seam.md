@@ -1,10 +1,10 @@
-# Plan: generalize the model-layer seam before the second symbol class
+# Plan: generalize the AI spacing seam before the second symbol class
 
 Status: reviewed with Vinta on 2026-09-02, names settled, ready to implement. Not started. Branch: `feature/chrome-prompt-api`, this checkout, one commit, because every intermediate state either fails tests or has docs describing code that does not exist. Purely structural: DOM output is identical before and after, and the existing suites are the proof.
 
 ## Why now
 
-`docs/hyphen-sign-model-layer.md` decision 8 chose hyphen-specific names for the seam and deferred the generic rename until a second symbol class earned a model. That class is now planned: the `+` brand-suffix reading (`CJK+CJK` where the plus is a suffix, the open bundle-plan FIXME in `tests/shared/symbol-plus-sign.test.ts`, ADR 0013). Adding it on the current seam means either a second core pair (`onPlusSpans` plus `applyPlusSuffixFixes`, duplicating the pending, flush, and applier machinery per class) or generalizing anyway. Generalize first as its own structural change, then add plus as a behavioral change on the generic seam.
+`docs/ai-spacing.md` decision 8 chose hyphen-specific names for the seam and deferred the generic rename until a second symbol class earned a model. That class is now planned: the `+` brand-suffix reading (`CJK+CJK` where the plus is a suffix, the open bundle-plan FIXME in `tests/shared/symbol-plus-sign.test.ts`, ADR 0013). Adding it on the current seam means either a second core pair (`onPlusSpans` plus `applyPlusSuffixFixes`, duplicating the pending, flush, and applier machinery per class) or generalizing anyway. Generalize first as its own structural change, then add plus as a behavioral change on the generic seam.
 
 ## Principle
 
@@ -54,7 +54,7 @@ Both primitives ship to every npm consumer, as the hyphen pair does today. The b
 - A class is two halves in two runtime contexts, joined by nothing but `kind` and a label type, which is the split `hyphen-sign.ts` and `hyphen-prompt.ts` already have today. Keeping them apart matters because the content script and the service worker are separate bundles and object-literal properties do not tree-shake: one merged interface would ship prompt bytes to the page and finder regexes to the worker.
 
 ```ts
-// Page side, content script. utils/model-layer.ts
+// Page side, content script. utils/ai-spacing.ts
 export interface TextEdit {
   readonly index: number;
   readonly remove: number;
@@ -102,7 +102,7 @@ The Playwright fixtures can keep the hyphen strings; the assertions change from 
 
 ## Docs
 
-- `docs/hyphen-sign-model-layer.md`: rewrite decisions 5 and 8 to record the generic seam and the extension-side per-class registry, and rewrite the "Finder" and "Applier" component sections to describe `onBatchSettled` and `applyLateFixes` in core and the hyphen class in the extension. Keep the file name until plus lands, then rename to `model-layer.md` in the plus change.
+- `docs/ai-spacing.md`: rewrite decisions 5 and 8 to record the generic seam and the extension-side per-class registry, and rewrite the "Finder" and "Applier" component sections to describe `onBatchSettled` and `applyLateFixes` in core and the hyphen class in the extension.
 - `CONTEXT.md`: "Text run" is now defined, and the "Hyphen-sign candidate" and "Late fix" entries stay true. No new entry: the record type is an implementation detail.
 - No new ADR. ADR 0016 point 3 (extension-only, opt-in, late fix) holds either way, and no spacing contract changes.
 - `src/browser/pangu.ts` call-flow comment: step 6 gains the batch-tail hook line.
@@ -114,7 +114,7 @@ The Playwright fixtures can keep the hyphen strings; the assertions change from 
 ## Out of scope
 
 - The plus class itself. It gets its own plan after the prompt campaign in the experiments worktree, and lands as a behavioral change.
-- Insert-direction fixes. The bundle-plan FIXME wants `AN+ CJK` to become `AN + CJK`, which inserts a space the rules withheld rather than removing one they wrote. `applyLateFixes` can express it, and the glossary's late fix entry allows it since 2026-09-02 (inserts or removes spaces, never rewrites author characters), but `docs/hyphen-sign-model-layer.md` still states the contract as removal-only. Widen that contract line and the glossary example together when plus lands.
+- Insert-direction fixes. The bundle-plan FIXME wants `AN+ CJK` to become `AN + CJK`, which inserts a space the rules withheld rather than removing one they wrote. `applyLateFixes` can express it, and the glossary's late fix entry allows it since 2026-09-02 (inserts or removes spaces, never rewrites author characters), but `docs/ai-spacing.md` still states the contract as removal-only. Widen that contract line and the glossary example together when plus lands.
 - A page-language gate, result caching, and span dedupe, all still parked per the design doc.
 
 ## Defaults chosen here, veto any of them

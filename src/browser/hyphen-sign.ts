@@ -1,6 +1,6 @@
 import { CJK } from '../shared/index.js';
 
-// The only shape the hyphen-sign model layer looks at: a hyphen-minus sitting tight between a CJK character and a digit. Flagging the tight form on pre-spacing text is what makes a later un-insert
+// The hyphen-sign ambiguous shape, the only one AI spacing reads today: a hyphen-minus sitting tight between a CJK character and a digit. Flagging the tight form on pre-spacing text is what makes a later un-insert
 // safe, because once the rules have run a pangu-written `CJK - digit` is byte-identical to the same string typed by an author, and only the tight original identifies who wrote the space
 const CJK_HYPHEN_DIGIT = new RegExp(`[${CJK}]-[0-9]`, 'g');
 

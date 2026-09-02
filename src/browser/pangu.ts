@@ -111,7 +111,7 @@ export class BrowserPangu extends Pangu {
   public readonly taskScheduler = new TaskScheduler();
   public readonly visibilityDetector = new VisibilityDetector();
 
-  // The seam the Chrome extension's model layer hangs off. Unassigned means the finder never runs, which is what keeps this package inert: nothing here knows the model exists, and the extension is
+  // The seam the Chrome extension's AI spacing hangs off. Unassigned means the finder never runs, which is what keeps this package inert: nothing here knows the model exists, and the extension is
   // the only assigner
   public onHyphenSpans: ((candidates: HyphenSignCandidate[]) => void) | null = null;
 
@@ -165,7 +165,7 @@ export class BrowserPangu extends Pangu {
 
   // The late fix, for the candidates a classifier read as signed numbers: the space the rules inserted after the hyphen comes back out, so `CJK - 5` becomes `CJK -5`. The space before the hyphen
   // stays. Every other reading leaves the rules output alone.
-  // The write goes through schedule() like every other spacing write: the model layer is text spacing too, not a separate system with its own seam. On a hidden tab this means the fix applies at
+  // The write goes through schedule() like every other spacing write: AI spacing is text spacing too, not a separate system with its own seam. On a hidden tab this means the fix applies at
   // focus, together with any pending spacing — the same beat dynamic content already gets — so a verdict in the console with the page still unchanged is a waiting tab, not a bug (see CLAUDE.md)
   public applyHyphenSignFixes(candidates: readonly HyphenSignCandidate[]) {
     const byNode = new Map<Text, HyphenSignCandidate[]>();

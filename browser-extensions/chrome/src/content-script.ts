@@ -18,7 +18,7 @@ async function classifySpans(spans: ClassifySpansMessage['spans']): Promise<Clas
   }
 }
 
-// The model layer's page-side half: the rules already spaced these spans, and the ones read as signed numbers get that space taken back out.
+// AI spacing's page-side half: the rules already spaced these spans, and the ones read as signed numbers get that space taken back out.
 // Every step logs at debug level (hidden until the console's Verbose level is on), so a wrong verdict on a live page is traceable without a build: this side shows each span's sentence and verdict,
 // and the service worker's console shows the exact prompt text and raw model output
 async function fixHyphenSigns(candidates: HyphenSignCandidate[]) {

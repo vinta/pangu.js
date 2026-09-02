@@ -2,7 +2,7 @@
 
 Compiled 2026-09-01, before any integration work, to answer one question that [`prompt-api-reference.md`](prompt-api-reference.md) deliberately leaves open: how do you exercise this API from an automated test without mocking it, and what can actually be automated versus what stays a manual run?
 
-That file records what the API is and how it behaves; this one records how to reach it from a test harness. The API surface, the availability states, the session and sampling semantics, the language gates, and the measured latencies are all there and are not restated here. The integration decision itself — a hyphen-only model layer — lives in [ADR 0016](adr/0016-hyphen-before-digit-gets-a-model-layer.md).
+That file records what the API is and how it behaves; this one records how to reach it from a test harness. The API surface, the availability states, the session and sampling semantics, the language gates, and the measured latencies are all there and are not restated here. The integration decision itself — hyphen-only AI spacing — lives in [ADR 0016](adr/0016-hyphen-before-digit-gets-a-model-layer.md).
 
 Evidence tags follow the sibling document's convention: **[docs]** for something in official documentation, **[probe]** for something measured on this machine, **[secondary]** for a claim that only appears in blog posts or issue threads, **[open]** for an unanswered question.
 
@@ -149,7 +149,7 @@ Questions 3 and 4 falling to a manual page before any automation existed is wort
 
 - [`prompt-api-reference.md`](prompt-api-reference.md) — the API itself, probed on Chrome 152 on 2026-08-31
 - [ADR 0016](adr/0016-hyphen-before-digit-gets-a-model-layer.md) — the integration decision
-- [`hyphen-sign-model-layer.md`](hyphen-sign-model-layer.md) — how the layer is built
+- [`ai-spacing.md`](ai-spacing.md) — how AI spacing is built
 - Chrome extensions, Playwright — https://playwright.dev/docs/chrome-extensions (fetched 2026-09-01)
 - PSA: Removing `--load-extension` flag in Chrome branded builds, chromium-extensions — https://groups.google.com/a/chromium.org/g/chromium-extensions/c/1-g8EFx2BBY
 - Chrome 142 removed the `--load-extension` option and the workaround, SeleniumBase issue 4053 — https://github.com/seleniumbase/SeleniumBase/issues/4053

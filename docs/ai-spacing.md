@@ -1,6 +1,6 @@
-# Hyphen-sign model layer
+# AI spacing
 
-pangu's rules read a hyphen-minus between a CJK character and a digit as an operator ([ADR 0015](adr/0015-hyphen-before-digit-reads-as-operator.md)), because at that shape no rule can separate a year range from a signed number: whatever it decides for `博客來-4%` it decides for `氣溫是-5度`. The model layer restores the sign reading on the spans where it is the right one, for extension users who turn it on. This document is how the layer is built. The decision to build one at all, and what that decision closed, is [ADR 0016](adr/0016-hyphen-before-digit-gets-a-model-layer.md). The API it runs on is described in [`prompt-api-reference.md`](prompt-api-reference.md).
+pangu's rules read a hyphen-minus between a CJK character and a digit as an operator ([ADR 0015](adr/0015-hyphen-before-digit-reads-as-operator.md)), because at that shape no rule can separate a year range from a signed number: whatever it decides for `博客來-4%` it decides for `氣溫是-5度`. AI spacing restores the sign reading on the candidates where it is the right one, for extension users who turn it on. This document is how it is built. The decision to build one at all, and what that decision closed, is [ADR 0016](adr/0016-hyphen-before-digit-gets-a-model-layer.md). The API it runs on is described in [`prompt-api-reference.md`](prompt-api-reference.md).
 
 ## Contract
 

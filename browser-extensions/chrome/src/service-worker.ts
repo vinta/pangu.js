@@ -138,7 +138,7 @@ onSettingsChanged((changedKeys) => {
   }
 });
 
-// The model layer's only entry point, registered synchronously at module scope for the same reason as onSettingsChanged above. It reads no settings: whether the feature is on is the content script's
+// AI spacing's only entry point, registered synchronously at module scope for the same reason as onSettingsChanged above. It reads no settings: whether the feature is on is the content script's
 // question, and it is the gate.
 // Chrome closes the message channel when a listener returns a promise, so the listener stays a plain function that returns true and lets an async helper call sendResponse. classifySpans reports
 // failure in its response rather than rejecting, so there is no path that leaves a caller without an answer.
