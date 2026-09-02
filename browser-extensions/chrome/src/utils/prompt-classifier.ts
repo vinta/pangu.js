@@ -7,18 +7,24 @@ import { buildQuestion, DISPLAY_TOKEN_ENUM, labelForDisplayToken, PROMPT_VARIANT
 import type { ClassifiedSpan, ClassifySpanRequest, ClassifySpansResponse } from './types';
 
 // One base session holding only the system prompt: cloning it per span saves re-parsing the system instructions, and create() costs roughly five prompts. The session is in-memory, so MV3 idle
-// termination simply means the next call recreates it.
-let baseSession: LanguageModel | null = null;
+// termination simply means the next call recreates it. What is cached is the promise, not the session: batches from several tabs that arrive while the first create() is still in flight share
+// that one create() instead of each paying for its own and leaking the extra sessions. A rejected create() is not kept, because the model can arrive later (the options-page download) and the
+// next batch should ask again.
+let baseSession: Promise<LanguageModel> | null = null;
+
+function getBaseSession() {
+  baseSession ??= createBaseSession().catch((error: unknown) => {
+    baseSession = null;
+    throw error;
+  });
+  return baseSession;
+}
 
 // Two runtime guards the types cannot supply: the package declares LanguageModel and its params() unconditionally, but the class is absent outside a context that has the API, and params() is the
 // marker of the extension context where temperature and topK actually pin sampling (Chrome 151+, against a manifest floor of 99). Unpinned sampling is not a degraded version of this feature, it is
 // the drift that flipped controls in the plain-page runs, so a context without the knobs gets no session at all and the page stays on the rules output.
 // create() at availability 'downloadable' silently starts a multi-gigabyte download, so a session is only ever created once the model is already there.
-async function getBaseSession() {
-  if (baseSession) {
-    return baseSession;
-  }
-
+async function createBaseSession() {
   if (typeof LanguageModel === 'undefined') {
     throw new Error('LanguageModel is not exposed in this context');
   }
@@ -34,14 +40,14 @@ async function getBaseSession() {
   // Deliberately NO expectedInputs/expectedOutputs language declaration, despite the console warning this leaves ("An output language should be specified..."): the API's supported set is
   // en/ja/es/de/fr, declaring any zh variant makes availability() report unavailable and create() reject with NotSupportedError, and declaring en would attest a language the output is not.
   // An undeclared session is the only way to run Chinese, and the explainer says the declaration would not steer output anyway. See docs/prompt-api-reference.md, Languages.
-  baseSession = await LanguageModel.create({
+  const session = await LanguageModel.create({
     initialPrompts: [{ role: 'system', content: SYSTEM_PROMPT }],
     temperature: 0,
     topK: 1,
   });
   // The system prompt rides in initialPrompts, so this is the only place it is ever sent; a fresh line here also marks every MV3 cold start paying the multi-second create()
   console.debug(`[pangu] hyphen-sign base session created (variant ${PROMPT_VARIANT}, temperature 0, topK 1), system prompt:\n${SYSTEM_PROMPT}`);
-  return baseSession;
+  return session;
 }
 
 async function classifyOne(base: LanguageModel, span: ClassifySpanRequest): Promise<ClassifiedSpan> {
