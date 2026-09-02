@@ -70,7 +70,7 @@ describe('Symbol -', () => {
     expect(pangu.spacingText('长者的智慧和复杂的维斯特洛- 文章')).toBe('长者的智慧和复杂的维斯特洛 - 文章');
     expect(pangu.spacingText('1976年-2018年')).toBe('1976 年 - 2018 年');
 
-    // FIXME
+    // NOTE: fixed by AI spacing, see browser-extensions/chrome/src/utils/hyphen-sign.ts
     // The hyphen sign reading was dropped, CJK-N reads as an operator, see ADR 0015
     // expect(pangu.spacingText('氣溫是-5度左右')).toBe('氣溫是 -5 度左右');
     // expect(pangu.spacingText('Nasdaq-100本週下跌-13.44%')).toBe('Nasdaq-100 本週下跌 -13.44%');
