@@ -6,32 +6,13 @@
 
 ## Common Development Commands
 
+Build, test, lint, and typecheck scripts are listed in `package.json`. The one whose behavior is not obvious from its name:
+
 ```bash
-npm run build                   # Build all targets (library + extension)
-npm run build:lib               # Build library (shared, browser, node)
-npm run build:extension         # Build Chrome extension (needs dist/ from build:lib, copies pangu.umd.js into vendors/)
-
-npm run test                    # Run all tests (vitest + playwright)
-npm run test:shared             # Test core/shared logic
-npm run test:node               # Test Node.js-specific code
-npm run test:browser            # Test browser code (uses Playwright)
-npm run test:extension          # Test Chrome extension settings and URL matching
-
-npm run lint
-npm run typecheck               # Type check all three tsconfigs
-
-npm run bump-version 1.2.3      # Bump version in package.json, extension manifest, src/shared/index.ts, examples/package.json, then build and pack extension (does NOT commit or tag)
+npm run bump-version 1.2.3      # Bumps package.json, extension manifest, src/shared/index.ts, examples/package.json, then builds and packs the extension zip. Does NOT commit or tag.
 ```
 
-**npm publishing**: Done via GitHub Actions (`.github/workflows/publish.yml`), triggered by pushing a `v*` tag. Uses npm Trusted Publishing (OIDC) — no tokens needed. Do NOT run `npm publish` locally.
-
-## Where Things Live
-
-- Core spacing logic (regex patterns): `src/shared/index.ts`
-- Browser DOM layer: `src/browser/`
-- Node.js API and CLI: `src/node/`
-- Chrome extension: `browser-extensions/chrome/`
-- Test cases: `tests/`
+**npm publishing** runs in GitHub Actions (`.github/workflows/publish.yml`) when a `v*` tag is pushed, using npm Trusted Publishing (OIDC), so no tokens are needed. Never run `npm publish` locally. ADR 0014 records why the workflow is a single job.
 
 ## Gotcha
 
