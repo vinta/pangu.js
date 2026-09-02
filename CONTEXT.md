@@ -26,6 +26,18 @@ _Avoid_: space element
 Visual-only spacing the browser renders where CJK meets ANS letters or digits, inserting no character, so copied text is unchanged. Narrower than a real space, blind to symbols, and skipped wherever a real space already exists, so it layers safely under text spacing and boundary spacing.
 _Avoid_: CSS spacing, autospace mode, text-autospace (in prose)
 
+**Symbol sense disambiguation**:
+Deciding which reading a symbol carries from the context around it, rather than from the symbol alone. Borrowed from the established NLP task of the same name. Slash reading, pipe reading, plus reading, and affix reading are all heuristic implementations of it, so it names something the algorithm already does; the hyphen-sign model layer (`docs/hyphen-sign-model-layer.md`) does it explicitly for one shape. Use the term to relate pangu to outside work. When describing the algorithm itself, name the specific reading.
+_Avoid_: symbol WSD, symbol disambiguation
+
+**Hyphen-sign candidate**:
+A hyphen-minus flagged on pre-spacing text as sitting tight between CJK and a digit, carrying the sentence around it for a classifier to read and the settled position of the space the rules inserted. The only shape the hyphen-sign model layer ever sees; everything else on a page stays rules-only.
+_Avoid_: ambiguous span, model span
+
+**Late fix**:
+Taking back out, after classification, a space the rules themselves inserted at a hyphen-sign candidate read as a signed number (`氣溫是 - 5` becomes `氣溫是 -5`). Runs after the rules pass and only ever removes pangu-written spaces, so author bytes stay untouched and with no classifier the rules output stands.
+_Avoid_: un-insert (in prose), model fix
+
 ## Paranoid Text Spacing Algorithm
 
 The algorithm behind text spacing. Source of truth: `src/shared/index.ts`, exhaustive examples: the per-symbol files in `tests/shared/`. Shapes below are generic: `CJK` is any CJK character, `A` any letter, `N` any digit, symbols are literal.
