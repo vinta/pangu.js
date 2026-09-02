@@ -1,6 +1,6 @@
 ---
 name: verify-before-npm-publish
-description: Before publishing pangu, pack it and run the examples app against that tarball to prove the about-to-ship build is consumable by a real install
+description: (project) Before publishing pangu, pack it and run the examples app against that tarball to prove the about-to-ship build is consumable by a real install
 disable-model-invocation: true
 allowed-tools:
   - Bash(npm:*)

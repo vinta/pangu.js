@@ -1,6 +1,6 @@
 ---
 name: generate-test-texts
-description: Harvest real-world CJK/Latin mixed-symbol texts (non-spacing form) into ./tmp for evaluating spacing-rule coverage
+description: (project) Harvest real-world CJK/Latin mixed-symbol texts (non-spacing form) into ./tmp for evaluating spacing-rule coverage
 disable-model-invocation: true
 allowed-tools:
   - WebSearch
