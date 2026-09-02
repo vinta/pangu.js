@@ -15,9 +15,10 @@
     "target": "ES2022",
     "moduleResolution": "bundler",
 
-    // TypeScript 6 stopped auto-enumerating `node_modules/@types`, so every ambient type package this config needs has to be listed. This one spans the extension sources (`chrome`) plus the Node
-    // sources and the Vite and Playwright configs (`node`). The narrower `src/node/tsconfig.json` overrides it back down to just `node`.
-    "types": ["node", "chrome"],
+    // TypeScript 6 stopped auto-enumerating `node_modules/@types`, so every ambient type package this config needs has to be listed. This one spans the extension sources (`chrome` for the extension
+    // APIs, `dom-chromium-ai` for the built-in Prompt API the hyphen-sign classifier calls) plus the Node sources and the Vite and Playwright configs (`node`). The narrower `src/node/tsconfig.json`
+    // overrides it back down to just `node`.
+    "types": ["node", "chrome", "dom-chromium-ai"],
 
     // Vite transpiles each file in isolation, so keep type-only imports explicit and erased predictably. This implies `isolatedModules`, which rejects syntax that only works when the compiler can
     // see the whole program
