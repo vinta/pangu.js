@@ -184,11 +184,11 @@ export class BrowserPangu extends Pangu {
           continue;
         }
 
-        // Two guards, both per candidate: the snapshot proves nothing has touched this node since the candidate was flagged, which also pins every position so no re-scan is needed, and the gap
-        // proves the space about to be deleted is one the rules inserted rather than one the author typed
+        // One guard per candidate: the snapshot proves nothing has touched this node since the candidate was flagged, which pins every position so no re-scan is needed, and keeps the gap the
+        // batch tail verified on these same bytes, so the space about to be deleted is still one the rules inserted
         const { data } = node;
         const indexes = group
-          .filter((candidate) => candidate.postSnapshot === data && hasInsertedGap(data, candidate.postIndex))
+          .filter((candidate) => candidate.postSnapshot === data)
           .map((candidate) => candidate.postIndex)
           .sort((first, second) => second - first);
         if (indexes.length === 0) {
