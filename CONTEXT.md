@@ -34,6 +34,10 @@ _Avoid_: native autospacing, text autospace, CSS spacing, autospace mode, text-a
 A correction to the rules output, applied after the rules pass and decided by something other than the rules, such as a classifier. Only ever inserts or removes spaces, never rewrites author characters, and with no classifier the rules output stands. Lands through the same scheduling path as text spacing, never as a separate write, so on a hidden page it waits with everything else. Today's only late fix takes back out the space the rules inserted at a candidate read as a signed number (`CJK - N` becomes `CJK -N`).
 _Avoid_: un-insert (in prose), model fix
 
+**Page re-render**:
+The page writing its own data over a text run pangu already spaced, either by setting the `Text` node's data again or by removing the node and inserting a fresh one. The page has `CJKA`, pangu spaces it to `CJK A`, then the page writes `CJKA` into the same node again, or replaces the node with one holding `CJKA`. The page did not intend to remove the space: it only rendered its own data again, and its data never had the space. From pangu's view, the write undid its work. Common causes: a React or Vue second render pass, a script that sets `textContent` from a variable, a live region that refreshes on a timer. Detected by comparing the new data against the last data pangu wrote to that node, and re-spaced inside the observer callback before the browser paints, unless the subtree is too large to re-space before paint; then it queues like other dynamic content.
+_Avoid_: revert, external rewrite, overwrite
+
 ## Paranoid Text Spacing Algorithm
 
 The algorithm behind text spacing, in two stages: the rules decide every space, and AI spacing, the Chrome extension's opt-in second stage, corrects the rules output at the few ambiguous shapes they cannot read. The npm package ships the rules only. Shapes below are generic: `CJK` is any CJK character, `A` any letter, `N` any digit, symbols are literal.
