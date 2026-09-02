@@ -31,7 +31,7 @@ The gap the browser renders through the `text-autospace` CSS property between CJ
 _Avoid_: native autospacing, text autospace, CSS spacing, autospace mode, text-autospace (bare, in prose)
 
 **Late fix**:
-A correction to the rules output, applied after the rules pass and decided by something other than the rules, such as a classifier. Only ever inserts or removes spaces, never rewrites author characters, and with no classifier the rules output stands. Today's only late fix takes back out the space the rules inserted at a candidate read as a signed number (`CJK - N` becomes `CJK -N`).
+A correction to the rules output, applied after the rules pass and decided by something other than the rules, such as a classifier. Only ever inserts or removes spaces, never rewrites author characters, and with no classifier the rules output stands. Lands through the same scheduling path as text spacing, never as a separate write, so on a hidden page it waits with everything else. Today's only late fix takes back out the space the rules inserted at a candidate read as a signed number (`CJK - N` becomes `CJK -N`).
 _Avoid_: un-insert (in prose), model fix
 
 ## Paranoid Text Spacing Algorithm
