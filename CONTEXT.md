@@ -23,8 +23,8 @@ Deciding whether and where whitespace goes between two adjacent text runs on a p
 _Avoid_: pair spacing, adjacent-node spacing
 
 **Pangu element**:
-A marker element injected to render a space at a boundary where neither adjacent text run may be modified.
-_Avoid_: space element
+An inline `<pangu>` element holding one space, inserted between two text runs that both sit in a link, underline, or strike-through, where a space added inside either run would render as part of it (`<a>A</a><pangu> </pangu><a>CJK</a>`). Never inserted inside a grid or flex container, where it would become a layout item.
+_Avoid_: space element, marker element
 
 **Native text-autospace**:
 The gap the browser renders through the `text-autospace` CSS property between CJK and ANS letters or digits: visual only, no character inserted, narrower than a real space, blind to symbols, and suppressed wherever a real space already exists, so it layers under text spacing and boundary spacing without doubling up.
