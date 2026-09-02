@@ -64,9 +64,3 @@ Tags are protected from spacing rules. Text inside attributes is processed. The 
 **Tag mention**:
 A bare tag with no attributes, a non-void name, and no closing counterpart anywhere in the text, self-closing or not (`CJK <div> CJK`, `CJK List<String> CJK`, `CJK <Spinner /> CJK`). Reads as one unit mentioned in prose rather than markup: spaced at direct CJK contact, tight against ANS characters. Paired tags, void elements (`<br>`, `<br />`), and tags with attributes stay protected markup.
 _Avoid_: tag-in-prose, prose tag
-
-## Agent Skill Overrides
-
-**improve-codebase-architecture**: write the Architecture Review HTML report to `./tmp/architecture-review-<timestamp>.html` (repo root) instead of the OS temp directory, so it survives a reboot. `/tmp/` is already gitignored via `~/.gitignore_global`; no further ignore rule needed.
-
-**handoff**: write handoff documents to `./tmp/handoff-<topic>.md` (repo root) instead of the OS temp directory, for the same reasons.
