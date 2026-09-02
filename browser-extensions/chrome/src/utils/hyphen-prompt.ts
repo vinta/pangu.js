@@ -4,7 +4,7 @@ import type { PromptSpec } from './ai-spacing';
 // Gemini Nano tracks presentation rather than meaning and is hypersensitive to surface form, so these bytes are load-bearing -- rewording, reordering or reformatting any of them invalidates the
 // measured numbers. Copied from the variant of the same name in experiments/hyphen-sign/prompts.js, which the extension is deliberately independent of from here on.
 
-const PROMPT_VARIANT = 'v20-zh';
+const PROMPT_VERSION = 'v20-zh';
 
 const SYSTEM_PROMPT = '你是中文朗讀老師。想像把整句話唸出來給聽眾聽，判斷朗讀時句子裡指定的「-」該怎麼唸。只判斷那一個符號，不要改寫句子，不要解釋，只從選項中挑一個回答。';
 
@@ -37,7 +37,7 @@ function buildQuestion(sentence: string, at: number) {
 export const hyphenPrompt: PromptSpec<HyphenLabel> = {
   kind: 'hyphen-sign',
   systemPrompt: SYSTEM_PROMPT,
-  variant: PROMPT_VARIANT,
+  version: PROMPT_VERSION,
   buildQuestion,
   displayTokenEnum: DISPLAY_TOKEN_ENUM,
   labelForDisplayToken,

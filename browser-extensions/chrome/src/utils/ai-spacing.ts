@@ -45,8 +45,8 @@ export interface AmbiguousShape {
 export interface PromptSpec<Label extends string> {
   readonly kind: string;
   readonly systemPrompt: string;
-  // The measured prompt variant, logged with the base session so a live page says which prompt produced its labels
-  readonly variant?: string;
+  // The id of the measured prompt bytes, logged with the base session so a live page says which prompt produced its labels
+  readonly version: string;
   buildQuestion(sentence: string, at: number): string;
   readonly displayTokenEnum: readonly string[];
   labelForDisplayToken(token: unknown): Label | null;

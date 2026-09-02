@@ -55,7 +55,7 @@ async function createBaseSession(spec: PromptSpec<CandidateLabel>) {
     topK: 1,
   });
   // The system prompt rides in initialPrompts, so this is the only place it is ever sent; a fresh line here also marks every MV3 cold start paying the multi-second create()
-  console.debug(`[pangu] ${spec.kind} base session created (${spec.variant ? `variant ${spec.variant}, ` : ''}temperature 0, topK 1), system prompt:\n${spec.systemPrompt}`);
+  console.debug(`[pangu] ${spec.kind} base session created (version ${spec.version}, temperature 0, topK 1), system prompt:\n${spec.systemPrompt}`);
   return session;
 }
 
