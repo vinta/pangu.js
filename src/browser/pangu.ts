@@ -310,7 +310,9 @@ export class BrowserPangu extends Pangu {
     this.flushHyphenSpans();
   }
 
-  // The batch tail. Boundary spacing rewrites tails and prepends junction spaces to nodes text-run spacing already visited, so a snapshot is only settled once the whole batch is done
+  // The batch tail. Boundary spacing rewrites tails and prepends junction spaces to nodes text-run spacing already visited, so a snapshot is only settled once the whole batch is done.
+  // pendingHyphenSpans is batch-scoped state kept on the instance, which only works because spacingTextNodes runs synchronously from the first push to this drain; if that ever changes, thread a
+  // local array through applyTextRunSpacing and this function instead
   private flushHyphenSpans() {
     if (this.pendingHyphenSpans.length === 0) {
       return;
