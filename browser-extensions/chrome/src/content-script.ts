@@ -20,12 +20,12 @@ async function classifySpans(spans: ClassifySpansMessage['spans']): Promise<Clas
 // The model layer's page-side half: the rules already spaced these spans, and the ones read as signed numbers get that space taken back out.
 // Every step logs at debug level (hidden until the console's Verbose level is on), so a wrong verdict on a live page is traceable without a build: this side shows each span's sentence and verdict,
 // and the service worker's console shows the exact prompt text and raw model output
-async function fixHyphenSigns(pangu: NonNullable<Window['pangu']>, candidates: HyphenSignCandidate[]) {
+async function fixHyphenSigns(candidates: HyphenSignCandidate[]) {
   const response = await classifySpans(candidates.map(({ sentence, at }) => ({ sentence, at })));
   if (!response.ok) {
     // The first no is final for this page. An absent model, an availability other than 'available', and a create() that fails are all conditions that will not change while the page is open, so
     // unassigning the seam stops the finder as well as any further worker wakes
-    pangu.onHyphenSpans = null;
+    window.pangu.onHyphenSpans = null;
     console.debug(`[pangu] hyphen-sign: disabled for this page (${response.error})`);
     return;
   }
@@ -42,7 +42,7 @@ async function fixHyphenSigns(pangu: NonNullable<Window['pangu']>, candidates: H
     }
   }
   if (signedNumbers.length > 0) {
-    pangu.applyHyphenSignFixes(signedNumbers);
+    window.pangu.applyHyphenSignFixes(signedNumbers);
   }
 }
 
@@ -56,7 +56,7 @@ async function autoSpacingPage() {
   const settings = await getSettings();
   if (settings.is_enable_ai_spacing) {
     pangu.onHyphenSpans = (candidates) => {
-      void fixHyphenSigns(pangu, candidates);
+      void fixHyphenSigns(candidates);
     };
   }
 
