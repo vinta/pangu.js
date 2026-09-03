@@ -9,7 +9,7 @@ import type { ClassifiedCandidate, ClassifyCandidatesMessage, ClassifyCandidates
 const pangu = window.pangu;
 
 // The core seam's records, read off the singleton rather than imported: the content script is a classic script that cannot import the package at runtime
-type SettledTextNode = Parameters<NonNullable<typeof pangu.onBatchSettled>>[0][number];
+type SettledTextNode = Parameters<NonNullable<typeof pangu.onTextNodesSettled>>[0][number];
 type LateFix = Parameters<typeof pangu.applyLateFixes>[0][number];
 
 // Every ambiguous shape AI spacing reads on a page. Each one is asked in its own message, and the shapes that land on one text node compose into one late fix
@@ -29,9 +29,9 @@ async function classifyCandidates(kind: string, candidates: ClassifyCandidatesMe
 
 // Every occurrence of one ambiguous shape in this batch: flagged on the bytes text spacing read, then resolved against the bytes the batch settled on. A match whose symbol did not end up with the
 // inserted gap settles to null and is dropped here, so nothing that is not the extension's own space to take back ever reaches the classifier
-function findCandidates(shape: AmbiguousShape, settledNodes: readonly SettledTextNode[]) {
+function findCandidates(shape: AmbiguousShape, settledTextNodes: readonly SettledTextNode[]) {
   const candidates: Candidate[] = [];
-  for (const settled of settledNodes) {
+  for (const settled of settledTextNodes) {
     for (const match of shape.find(settled.before)) {
       const index = shape.settle(settled.after, match);
       if (index !== null) {
@@ -45,10 +45,10 @@ function findCandidates(shape: AmbiguousShape, settledNodes: readonly SettledTex
 // AI spacing's page-side half: the rules already spaced these text nodes, and the candidates whose label calls for a fix get that space taken back out.
 // Every step logs at debug level (hidden until the console's Verbose level is on), so a wrong verdict on a live page is traceable without a build: this side shows each candidate's sentence and
 // verdict, and the service worker's console shows the exact prompt text and raw model output
-async function classifyBatch(settledNodes: readonly SettledTextNode[]) {
+async function classifyBatch(settledTextNodes: readonly SettledTextNode[]) {
   // Core hands over every text node text spacing read, so most batches carry no candidate at all. Asking only for the shapes that found one is what keeps the worker wakes, and the multi-second
   // cold-start create() behind them, down to the batches that can actually produce a fix
-  const batches = AMBIGUOUS_SHAPES.map((shape) => ({ shape, candidates: findCandidates(shape, settledNodes) })).filter((batch) => batch.candidates.length > 0);
+  const batches = AMBIGUOUS_SHAPES.map((shape) => ({ shape, candidates: findCandidates(shape, settledTextNodes) })).filter((batch) => batch.candidates.length > 0);
   if (batches.length === 0) {
     return;
   }
@@ -67,7 +67,7 @@ async function classifyBatch(settledNodes: readonly SettledTextNode[]) {
   const labelBatches: ClassifiedCandidate[][] = [];
   for (const [batchIndex, response] of responses.entries()) {
     if (!response.ok) {
-      pangu.onBatchSettled = null;
+      pangu.onTextNodesSettled = null;
       console.debug(`[pangu] ${batches[batchIndex]!.shape.kind}: disabled for this page (${response.error})`);
       return;
     }
@@ -104,8 +104,8 @@ async function autoSpacingPage() {
   // Assigned before the sweep starts, so the initial pass is captured too
   const settings = await getSettings();
   if (settings.is_enable_ai_spacing) {
-    pangu.onBatchSettled = (settledNodes) => {
-      void classifyBatch(settledNodes);
+    pangu.onTextNodesSettled = (settledTextNodes) => {
+      void classifyBatch(settledTextNodes);
     };
   }
 

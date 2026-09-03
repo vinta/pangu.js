@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 declare global {
   interface Window {
     // Where these tests park what the batch tail hands them. The Text nodes cannot cross the evaluate boundary, so only the serializable half of each settled text node is kept
-    __settledNodes: { before: string; after: string }[];
+    __settledTextNodes: { before: string; after: string }[];
     // How many times the batch tail fired, which is what proves the seam is per batch rather than per text node
     __batchCount: number;
   }
@@ -13,23 +13,23 @@ declare global {
 // Stands in for the Chrome extension's classifier: the settled text nodes are parked on the page instead of being read for candidates, so nothing here knows any ambiguous shape exists
 function collectSettledRuns(page: Page) {
   return page.evaluate(() => {
-    pangu.onBatchSettled = (settledNodes) => {
+    pangu.onTextNodesSettled = (settledTextNodes) => {
       window.__batchCount++;
-      window.__settledNodes.push(...settledNodes.map(({ before, after }) => ({ before, after })));
+      window.__settledTextNodes.push(...settledTextNodes.map(({ before, after }) => ({ before, after })));
     };
     pangu.spacingNode(document.body);
-    return window.__settledNodes;
+    return window.__settledTextNodes;
   });
 }
 
-test.describe('onBatchSettled', () => {
+test.describe('onTextNodesSettled', () => {
   test.beforeEach(async ({ page }) => {
     await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
     await page.waitForFunction(() => typeof window.pangu !== 'undefined');
 
     await page.evaluate(() => {
       pangu.taskScheduler.config.enabled = false;
-      window.__settledNodes = [];
+      window.__settledTextNodes = [];
       window.__batchCount = 0;
     });
   });
@@ -38,9 +38,9 @@ test.describe('onBatchSettled', () => {
     await page.setContent('<div>氣溫是-5度左右</div>');
 
     const result = await page.evaluate(() => {
-      const unassigned = pangu.onBatchSettled === null;
+      const unassigned = pangu.onTextNodesSettled === null;
       pangu.spacingNode(document.body);
-      return { unassigned, text: document.body.textContent, captured: window.__settledNodes.length };
+      return { unassigned, text: document.body.textContent, captured: window.__settledTextNodes.length };
     });
 
     expect(result.unassigned).toBe(true);

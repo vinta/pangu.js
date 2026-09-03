@@ -107,9 +107,9 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 //    - per adjacent text node pair: decideBoundarySpacing() → prepend-next / append-current / insert <pangu> element / none; a non-none verdict first writes back the respaced current tail
 //      (respaceCurrentTail) when the junction needs one
 //    - visibility detection happens here: always on, consulted lazily per boundary (hiddenBoundaryBefore / hiddenBoundaryAfter), not a scheduling decision
-//    - batch tail: onBatchSettled fires once with every text node text spacing read (only when the extension assigned it; the package alone captures nothing)
+//    - batch tail: onTextNodesSettled fires once with every text node text spacing read (only when the extension assigned it; the package alone captures nothing)
 // ↓
-// 7. applyLateFixes(fixes)   (Chrome extension only, from its onBatchSettled handler)
+// 7. applyLateFixes(fixes)   (Chrome extension only, from its onTextNodesSettled handler)
 //    - the extension decides AI spacing fixes off the settled nodes and hands them back as LateFix { node, settled, data }
 //    - schedule(() => for each fix: write data only if node is connected and still holds settled) → back to step 4, so the fix lands with the same beat as any pending spacing,
 //      including at focus on a hidden tab
@@ -138,7 +138,7 @@ export class BrowserPangu extends Pangu {
 
   // A callback called after spacingTextNodes() settles a batch, carrying each text node's before/after strings
   // The Chrome extension's AI spacing uses it to apply late fixes from LLM
-  public onBatchSettled: ((settledNodes: SettledTextNode[]) => void) | null = null;
+  public onTextNodesSettled: ((settledTextNodes: SettledTextNode[]) => void) | null = null;
 
   // PUBLIC
 
@@ -318,7 +318,7 @@ export class BrowserPangu extends Pangu {
     const pending = this.pendingTextNodes;
     this.pendingTextNodes = [];
 
-    this.onBatchSettled?.(pending.map(({ node, before }) => ({ node, before, after: node.data })));
+    this.onTextNodesSettled?.(pending.map(({ node, before }) => ({ node, before, after: node.data })));
   }
 
   private applyTextNodeSpacing(textNode: Text) {
@@ -340,7 +340,7 @@ export class BrowserPangu extends Pangu {
           break;
         case 'apply-text-spacing': {
           // Captured before the write, because only the tight original proves which spaces the rules wrote; what any of it means is the host's policy, and lives in the extension
-          if (this.onBatchSettled) {
+          if (this.onTextNodesSettled) {
             this.pendingTextNodes.push({ node: textNode, before: textNode.data });
           }
           const newText = this.spacingText(textNode.data);
