@@ -303,6 +303,10 @@ export class BrowserPangu extends Pangu {
       nextTextNode = currentTextNode;
     }
 
+    // At this point, the text nodes in this batch are "settled": the loop above is over, so nothing in this batch writes to them again:
+    // - text spacing has visited every node
+    // - boundary spacing has rewritten every tail and placed every junction space
+    // "Settled" only means the rules are done with them. A late fix from applyLateFixes() can still change them in a later batch
     this.flushSettledTextNodes();
   }
 
