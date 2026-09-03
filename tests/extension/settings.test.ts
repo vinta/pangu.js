@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, reconcileSettings, updateSettings } from '../../browser-extensions/chrome/src/settings/storage';
-import type { Settings } from '../../browser-extensions/chrome/src/utils/types';
+import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, reconcileSettings, updateSettings, type Settings } from '../../browser-extensions/chrome/src/settings/storage';
 
 interface StorageChange {
   oldValue?: unknown;

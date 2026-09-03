@@ -1,4 +1,12 @@
-import type { Settings } from '../utils/types';
+export interface Settings {
+  spacing_mode: 'spacing_when_load' | 'spacing_when_click';
+  filter_mode: 'blacklist' | 'whitelist';
+  blacklist: string[];
+  whitelist: string[];
+  is_mute_sound_effects: boolean;
+  is_enable_text_autospace: boolean;
+  is_enable_ai_spacing: boolean;
+}
 
 export const DEFAULT_SETTINGS: Settings = {
   spacing_mode: 'spacing_when_load',

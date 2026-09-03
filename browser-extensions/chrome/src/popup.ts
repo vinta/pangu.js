@@ -1,8 +1,9 @@
+import type { ContentScriptResponse, ManualSpacingMessage, MessageFromContentScript, PingMessage } from './messages';
+import type { Settings } from './settings/storage';
 import { getSettings, onSettingsChanged, updateSettings } from './settings/storage';
 import { isValidUrl, shouldShowActiveStatus } from './settings/urls';
 import { translatePage } from './ui/i18n';
 import { playSound, stopSound } from './ui/sounds';
-import type { ContentScriptResponse, ManualSpacingMessage, MessageFromContentScript, PingMessage, Settings } from './utils/types';
 
 class PopupController {
   private currentTabId: number | undefined;

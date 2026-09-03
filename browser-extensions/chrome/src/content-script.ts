@@ -1,8 +1,9 @@
 import type { AmbiguousShape, SettledCandidate, TextEdit } from './ai-spacing/ambiguous-shape';
 import { applyTextEdits } from './ai-spacing/ambiguous-shape';
 import { hyphenSign } from './ai-spacing/hyphen-sign';
+import type { ClassifiedCandidate, ClassifyCandidatesMessage, ClassifyCandidatesResponse } from './ai-spacing/messages';
+import type { ContentScriptLoadedMessage, ContentScriptResponse, MessageToContentScript } from './messages';
 import { getSettings } from './settings/storage';
-import type { ClassifiedCandidate, ClassifyCandidatesMessage, ClassifyCandidatesResponse, ContentScriptLoadedMessage, ContentScriptResponse, MessageToContentScript } from './utils/types';
 
 // `Window.pangu` is declared globally in src/browser/pangu.umd.ts, and pangu.umd.js is always listed before this script in the injection arrays (service worker
 // registration and the popup's manual injection), so it is already set when this module runs
