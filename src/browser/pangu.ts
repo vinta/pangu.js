@@ -17,6 +17,12 @@ export interface SettledTextNode {
   readonly after: string;
 }
 
+// A text node text spacing already wrote to, waiting for the batch to settle; `before` is the pre-spacing text
+interface UnsettledTextNode {
+  readonly node: Text;
+  readonly before: string;
+}
+
 // A late fix: a correction to the rules output, anything that comes from a non-rules spacing engine like an LLM (the Chrome Prompt API)
 export interface LateFix {
   readonly node: Text;
@@ -130,9 +136,6 @@ export class BrowserPangu extends Pangu {
   // (data differs, re-space before the next paint)
   private readonly lastWrittenData = new WeakMap<Text, string>();
 
-  // Text nodes waiting for the batch to settle, captured from pre-spacing text and resolved against post-spacing data at the batch tail
-  private unsettledTextNodes: { node: Text; before: string }[] = [];
-
   public readonly taskScheduler = new TaskScheduler();
   public readonly visibilityDetector = new VisibilityDetector();
 
@@ -222,6 +225,9 @@ export class BrowserPangu extends Pangu {
     // Visibility verdicts are memoized per batch; styles may change between batches
     this.visibilityDetector.clearCache();
 
+    // Text nodes waiting for the batch to settle, captured from pre-spacing text and resolved against post-spacing data at the batch tail
+    const unsettledTextNodes: UnsettledTextNode[] = [];
+
     let currentTextNode: Node | undefined;
     let nextTextNode: Node | null = null;
 
@@ -233,7 +239,7 @@ export class BrowserPangu extends Pangu {
       }
 
       if (currentTextNode instanceof Text) {
-        this.applyTextNodeSpacing(currentTextNode);
+        this.applyTextNodeSpacing(currentTextNode, unsettledTextNodes);
       }
 
       // Boundary between this text node and the following one, for every adjacent pair rather than only nested tags. The list is in reverse document order, so nextTextNode is the previously visited node
@@ -307,23 +313,19 @@ export class BrowserPangu extends Pangu {
     // - text spacing has visited every node
     // - boundary spacing has rewritten every tail and placed every junction space
     // "Settled" only means the rules are done with them. A late fix from applyLateFixes() can still change them in a later batch
-    this.flushSettledTextNodes();
+    this.flushSettledTextNodes(unsettledTextNodes);
   }
 
-  // NOTE: unsettledTextNodes is batch-scoped state kept on the instance, which only works because spacingTextNodes runs synchronously
-  // If that ever changes, thread a local array through applyTextNodeSpacing and this function instead
-  private flushSettledTextNodes() {
-    if (this.unsettledTextNodes.length === 0) {
+  private flushSettledTextNodes(unsettledTextNodes: readonly UnsettledTextNode[]) {
+    if (unsettledTextNodes.length === 0) {
       return;
     }
 
-    const settledTextNodes = this.unsettledTextNodes.map(({ node, before }) => ({ node, before, after: node.data }));
-    this.unsettledTextNodes = [];
-
+    const settledTextNodes = unsettledTextNodes.map(({ node, before }) => ({ node, before, after: node.data }));
     this.onTextNodesSettled?.(settledTextNodes);
   }
 
-  private applyTextNodeSpacing(textNode: Text) {
+  private applyTextNodeSpacing(textNode: Text, unsettledTextNodes: UnsettledTextNode[]) {
     const textNodeSpacingVerdicts = decideTextNodeSpacing({
       text: textNode.data,
       previousElementLastChar: this.findPreviousElementLastChar(textNode),
@@ -343,7 +345,7 @@ export class BrowserPangu extends Pangu {
         case 'apply-text-spacing': {
           // Captured before the write, because only the tight original proves which spaces the rules wrote; what any of it means is the host's policy, and lives in the extension
           if (this.onTextNodesSettled) {
-            this.unsettledTextNodes.push({ node: textNode, before: textNode.data });
+            unsettledTextNodes.push({ node: textNode, before: textNode.data });
           }
           const newText = this.spacingText(textNode.data);
           if (textNode.data !== newText) {
