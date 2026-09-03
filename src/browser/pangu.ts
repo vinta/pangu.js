@@ -11,14 +11,15 @@ export interface AutoSpacingPageConfig {
 }
 
 // A text node after text spacing, before the batch settles, with its text before the spacing
+// Its current text is still moving in node.data
 interface UnsettledTextNode {
   readonly node: Text;
-  readonly before: string;
+  readonly unspaced: string;
 }
 
 // A text node after the batch settled, with its text before/after the spacing
 export interface SettledTextNode extends UnsettledTextNode {
-  readonly after: string;
+  readonly settled: string;
 }
 
 // A late fix: a correction to the rules output, anything that comes from a non-rules spacing engine like an LLM (the Chrome Prompt API)
@@ -317,7 +318,7 @@ export class BrowserPangu extends Pangu {
       return;
     }
 
-    const settledTextNodes = unsettledTextNodes.map(({ node, before }) => ({ node, before, after: node.data }));
+    const settledTextNodes = unsettledTextNodes.map(({ node, unspaced }) => ({ node, unspaced, settled: node.data }));
     this.onTextNodesSettled?.(settledTextNodes);
   }
 
@@ -341,7 +342,7 @@ export class BrowserPangu extends Pangu {
         case 'apply-text-spacing': {
           // Captured before the write, because only the tight original proves which spaces the rules wrote; what any of it means is the host's policy, and lives in the extension
           if (this.onTextNodesSettled) {
-            unsettledTextNodes.push({ node: textNode, before: textNode.data });
+            unsettledTextNodes.push({ node: textNode, unspaced: textNode.data });
           }
           const newText = this.spacingText(textNode.data);
           if (textNode.data !== newText) {

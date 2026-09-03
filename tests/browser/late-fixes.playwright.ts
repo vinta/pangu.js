@@ -65,14 +65,14 @@ test.describe('applyLateFixes', () => {
       pangu.onTextNodesSettled = (settledTextNodes) => {
         const lateFixes = [];
         for (const settledTextNode of settledTextNodes) {
-          let data = settledTextNode.after;
+          let data = settledTextNode.settled;
           for (let index = data.length - 1; index >= 0; index--) {
             if (data[index] === '-' && data[index + 1] === ' ' && /[0-9]/.test(data[index + 2] ?? '')) {
               data = data.slice(0, index + 1) + data.slice(index + 2);
             }
           }
-          if (data !== settledTextNode.after) {
-            lateFixes.push({ node: settledTextNode.node, settled: settledTextNode.after, data });
+          if (data !== settledTextNode.settled) {
+            lateFixes.push({ node: settledTextNode.node, settled: settledTextNode.settled, data });
           }
         }
         pangu.applyLateFixes(lateFixes);

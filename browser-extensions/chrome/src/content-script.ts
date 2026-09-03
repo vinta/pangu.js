@@ -32,10 +32,10 @@ async function classifyCandidates(kind: string, candidates: ClassifyCandidatesMe
 function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readonly SettledTextNode[]) {
   const settledCandidates: SettledCandidate[] = [];
   for (const settledTextNode of settledTextNodes) {
-    for (const candidateMatch of ambiguousShape.find(settledTextNode.before)) {
-      const index = ambiguousShape.settle(settledTextNode.after, candidateMatch);
+    for (const candidateMatch of ambiguousShape.find(settledTextNode.unspaced)) {
+      const index = ambiguousShape.settle(settledTextNode.settled, candidateMatch);
       if (index !== null) {
-        settledCandidates.push({ kind: ambiguousShape.kind, node: settledTextNode.node, sentence: candidateMatch.sentence, at: candidateMatch.at, index, after: settledTextNode.after });
+        settledCandidates.push({ kind: ambiguousShape.kind, node: settledTextNode.node, sentence: candidateMatch.sentence, at: candidateMatch.at, index, settled: settledTextNode.settled });
       }
     }
   }
@@ -77,7 +77,7 @@ async function classifyBatch(settledTextNodes: readonly SettledTextNode[]) {
   }
 
   // A text node can carry candidates from more than one ambiguous shape, and core applies one fix per text node per call, so every edit for one node composes into a single late fix
-  const textEditsByNode = new Map<Text, { after: string; textEdits: TextEdit[] }>();
+  const textEditsByNode = new Map<Text, { settled: string; textEdits: TextEdit[] }>();
   for (const [batchIndex, { ambiguousShape, settledCandidates }] of batches.entries()) {
     for (const [index, settledCandidate] of settledCandidates.entries()) {
       // Labels zip against the candidates by index
@@ -86,16 +86,16 @@ async function classifyBatch(settledTextNodes: readonly SettledTextNode[]) {
       const isFix = classifiedCandidate?.label != null && ambiguousShape.isFix(classifiedCandidate.label);
       console.debug(`[pangu] ${ambiguousShape.kind}: "${settledCandidate.sentence}" (symbol at ${settledCandidate.at}) read as ${verdict}${isFix ? ' -> applying its late fix' : ''}`);
       if (isFix) {
-        const pending = textEditsByNode.get(settledCandidate.node) ?? { after: settledCandidate.after, textEdits: [] };
-        pending.textEdits.push(...ambiguousShape.edits(settledCandidate.after, settledCandidate.index));
+        const pending = textEditsByNode.get(settledCandidate.node) ?? { settled: settledCandidate.settled, textEdits: [] };
+        pending.textEdits.push(...ambiguousShape.edits(settledCandidate.settled, settledCandidate.index));
         textEditsByNode.set(settledCandidate.node, pending);
       }
     }
   }
 
   const lateFixes: LateFix[] = [];
-  for (const [node, { after, textEdits }] of textEditsByNode) {
-    lateFixes.push({ node, settled: after, data: applyTextEdits(after, textEdits) });
+  for (const [node, { settled, textEdits }] of textEditsByNode) {
+    lateFixes.push({ node, settled, data: applyTextEdits(settled, textEdits) });
   }
   if (lateFixes.length > 0) {
     pangu.applyLateFixes(lateFixes);

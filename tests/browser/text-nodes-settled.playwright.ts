@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 declare global {
   interface Window {
     // Where these tests park what the batch tail hands them. The Text nodes cannot cross the evaluate boundary, so only the serializable half of each settled text node is kept
-    __settledTextNodes: { before: string; after: string }[];
+    __settledTextNodes: { unspaced: string; settled: string }[];
     // How many times the batch tail fired, which is what proves the seam is per batch rather than per text node
     __batchCount: number;
   }
@@ -15,7 +15,7 @@ function collectSettledRuns(page: Page) {
   return page.evaluate(() => {
     pangu.onTextNodesSettled = (settledTextNodes) => {
       window.__batchCount++;
-      window.__settledTextNodes.push(...settledTextNodes.map(({ before, after }) => ({ before, after })));
+      window.__settledTextNodes.push(...settledTextNodes.map(({ unspaced, settled }) => ({ unspaced, settled })));
     };
     pangu.spacingNode(document.body);
     return window.__settledTextNodes;
@@ -51,7 +51,7 @@ test.describe('onTextNodesSettled', () => {
   test('carry the bytes text spacing read and the bytes it wrote', async ({ page }) => {
     await page.setContent('<div>氣溫是-5度左右</div>');
 
-    expect(await collectSettledRuns(page)).toEqual([{ before: '氣溫是-5度左右', after: '氣溫是 - 5 度左右' }]);
+    expect(await collectSettledRuns(page)).toEqual([{ unspaced: '氣溫是-5度左右', settled: '氣溫是 - 5 度左右' }]);
   });
 
   test('settle a text node a junction space wrote to after its own text spacing ran', async ({ page }) => {
@@ -60,8 +60,8 @@ test.describe('onTextNodesSettled', () => {
     await page.setContent('<div><b>abc</b><span>氣溫是-5度</span></div>');
 
     expect(await collectSettledRuns(page)).toEqual([
-      { before: '氣溫是-5度', after: ' 氣溫是 - 5 度' },
-      { before: 'abc', after: 'abc' },
+      { unspaced: '氣溫是-5度', settled: ' 氣溫是 - 5 度' },
+      { unspaced: 'abc', settled: 'abc' },
     ]);
     expect(await page.evaluate(() => document.body.textContent)).toBe('abc 氣溫是 - 5 度');
   });
@@ -70,7 +70,7 @@ test.describe('onTextNodesSettled', () => {
     // The standalone quote node gets prepend-space and nothing else, so it is never captured; the CJK node beside it is
     await page.setContent('<div><b>中文</b>"</div>');
 
-    expect(await collectSettledRuns(page)).toEqual([{ before: '中文', after: '中文' }]);
+    expect(await collectSettledRuns(page)).toEqual([{ unspaced: '中文', settled: '中文' }]);
     expect(await page.evaluate(() => document.body.textContent)).toBe('中文 "');
   });
 

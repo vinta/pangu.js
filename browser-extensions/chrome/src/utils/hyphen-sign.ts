@@ -73,14 +73,14 @@ export function hasInsertedGap(text: string, hyphenIndex: number) {
 export const hyphenSign: AmbiguousShape = {
   kind: 'hyphen-sign',
 
-  find(before: string) {
-    return findHyphenMatches(before);
+  find(unspaced: string) {
+    return findHyphenMatches(unspaced);
   },
 
   // A missing ordinal answers -1, which fails the inserted-gap check like any other index that is not a hyphen, so an unsettled match needs no guard of its own
-  settle(after: string, candidateMatch: CandidateMatch) {
-    const index = indexOfNthHyphen(after, candidateMatch.ordinal);
-    return hasInsertedGap(after, index) ? index : null;
+  settle(settled: string, candidateMatch: CandidateMatch) {
+    const index = indexOfNthHyphen(settled, candidateMatch.ordinal);
+    return hasInsertedGap(settled, index) ? index : null;
   },
 
   isFix(label: string) {
@@ -88,7 +88,7 @@ export const hyphenSign: AmbiguousShape = {
   },
 
   // Only the space the rules inserted between the hyphen and the digit goes; the space before the hyphen is the boundary the rules were right about, and it stays
-  edits(_after: string, index: number) {
+  edits(_settled: string, index: number) {
     return [{ index: index + 1, remove: 1, insert: '' }];
   },
 };

@@ -116,8 +116,8 @@ describe('CJK', () => {
 
 describe('hyphenSign.settle()', () => {
   // What a batch hands the page side: the bytes text spacing read, then the bytes the batch settled on
-  function settleAll(before: string, after: string) {
-    return hyphenSign.find(before).map((candidateMatch) => hyphenSign.settle(after, candidateMatch));
+  function settleAll(unspaced: string, settled: string) {
+    return hyphenSign.find(unspaced).map((candidateMatch) => hyphenSign.settle(settled, candidateMatch));
   }
 
   it('settle on the index the rules left the hyphen at', () => {
@@ -147,12 +147,12 @@ describe('hyphenSign.isFix()', () => {
 
 describe('hyphenSign.edits()', () => {
   // The whole page-side pipeline for one text node whose every candidate came back as a fix: find, settle, edit, compose
-  function fixAll(before: string, after: string) {
-    const textEdits = hyphenSign.find(before).flatMap((candidateMatch) => {
-      const index = hyphenSign.settle(after, candidateMatch);
-      return index === null ? [] : hyphenSign.edits(after, index);
+  function fixAll(unspaced: string, settled: string) {
+    const textEdits = hyphenSign.find(unspaced).flatMap((candidateMatch) => {
+      const index = hyphenSign.settle(settled, candidateMatch);
+      return index === null ? [] : hyphenSign.edits(settled, index);
     });
-    return applyTextEdits(after, textEdits);
+    return applyTextEdits(settled, textEdits);
   }
 
   it('delete only the space the rules inserted after the hyphen', () => {
@@ -179,11 +179,11 @@ describe('applyTextEdits()', () => {
   };
 
   it('apply edits from two ambiguous shapes to one text node', () => {
-    const after = '氣溫是 - 5 度 A+B';
-    const textEdits: TextEdit[] = [...hyphenSign.edits(after, 4), ...spaceInserter.edits(after, 11)];
+    const settled = '氣溫是 - 5 度 A+B';
+    const textEdits: TextEdit[] = [...hyphenSign.edits(settled, 4), ...spaceInserter.edits(settled, 11)];
 
     // Descending index order is what keeps the insert from shifting the delete, whichever order the shapes were asked in
-    expect(applyTextEdits(after, textEdits)).toBe('氣溫是 -5 度 A +B');
-    expect(applyTextEdits(after, [...textEdits].reverse())).toBe('氣溫是 -5 度 A +B');
+    expect(applyTextEdits(settled, textEdits)).toBe('氣溫是 -5 度 A +B');
+    expect(applyTextEdits(settled, [...textEdits].reverse())).toBe('氣溫是 -5 度 A +B');
   });
 });
