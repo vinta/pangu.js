@@ -10,17 +10,15 @@ export interface AutoSpacingPageConfig {
   nodeMaxWaitMs?: number;
 }
 
-// An already settled (== spaced) text node, with before/after of the spacing
-export interface SettledTextNode {
-  readonly node: Text;
-  readonly before: string;
-  readonly after: string;
-}
-
-// A text node text spacing already wrote to, waiting for the batch to settle; `before` is the pre-spacing text
+// A text node after text spacing, before the batch settles, with its text before the spacing
 interface UnsettledTextNode {
   readonly node: Text;
   readonly before: string;
+}
+
+// A text node after the batch settled, with its text before/after the spacing
+export interface SettledTextNode extends UnsettledTextNode {
+  readonly after: string;
 }
 
 // A late fix: a correction to the rules output, anything that comes from a non-rules spacing engine like an LLM (the Chrome Prompt API)
@@ -309,10 +307,8 @@ export class BrowserPangu extends Pangu {
       nextTextNode = currentTextNode;
     }
 
-    // At this point, the text nodes in this batch are "settled": the loop above is over, so nothing in this batch writes to them again:
-    // - text spacing has visited every node
-    // - boundary spacing has rewritten every tail and placed every junction space
-    // "Settled" only means the rules are done with them. A late fix from applyLateFixes() can still change them in a later batch
+    // At this point, the text nodes in this batch are "settled": the loop above is over, so nothing in this batch writes to them again
+    // Settled only means the rules are done with them. A late fix from applyLateFixes() can still change them in a later batch
     this.flushSettledTextNodes(unsettledTextNodes);
   }
 
