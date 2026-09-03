@@ -36,7 +36,7 @@ export interface Candidate {
 export interface AmbiguousShape {
   readonly kind: string; // joins this half to its PromptSpec, and discriminates CLASSIFY_CANDIDATES
   find(before: string): CandidateMatch[]; // tight-shape scan on pre-spacing bytes, with sentence slice and ordinal
-  settle(after: string, match: CandidateMatch): number | null; // the symbol's settled index when the inserted gap is present, else null
+  settle(after: string, candidateMatch: CandidateMatch): number | null; // the symbol's settled index when the inserted gap is present, else null
   isFix(label: string): boolean; // which label triggers the fix
   edits(after: string, index: number): TextEdit[]; // what to change at one settled index, never a composed string
 }
@@ -54,10 +54,10 @@ export interface PromptSpec<Label extends string> {
 
 // Every edit one text node collected, from every ambiguous shape, composed into the bytes a single late fix writes. Descending index order is what keeps an earlier edit from shifting a later one's
 // index, and one text node must reach core as one fix because a second fix on the same text node would fail its own compare-and-set check and silently drop
-export function applyTextEdits(after: string, edits: readonly TextEdit[]) {
+export function applyTextEdits(after: string, textEdits: readonly TextEdit[]) {
   let data = after;
-  for (const edit of [...edits].sort((left, right) => right.index - left.index)) {
-    data = data.slice(0, edit.index) + edit.insert + data.slice(edit.index + edit.remove);
+  for (const textEdit of [...textEdits].sort((left, right) => right.index - left.index)) {
+    data = data.slice(0, textEdit.index) + textEdit.insert + data.slice(textEdit.index + textEdit.remove);
   }
   return data;
 }

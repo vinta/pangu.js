@@ -78,8 +78,8 @@ export const hyphenSign: AmbiguousShape = {
   },
 
   // A missing ordinal answers -1, which fails the inserted-gap check like any other index that is not a hyphen, so an unsettled match needs no guard of its own
-  settle(after: string, match: CandidateMatch) {
-    const index = indexOfNthHyphen(after, match.ordinal);
+  settle(after: string, candidateMatch: CandidateMatch) {
+    const index = indexOfNthHyphen(after, candidateMatch.ordinal);
     return hasInsertedGap(after, index) ? index : null;
   },
 

@@ -16,14 +16,14 @@ const PROMPT_SPECS = new Map<string, PromptSpec<CandidateLabel>>([[hyphenPrompt.
 // options-page download) and the next batch should ask again.
 const baseSessions = new Map<string, Promise<LanguageModel>>();
 
-function getBaseSession(spec: PromptSpec<CandidateLabel>) {
-  let session = baseSessions.get(spec.kind);
+function getBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
+  let session = baseSessions.get(promptSpec.kind);
   if (session === undefined) {
-    session = createBaseSession(spec).catch((error: unknown) => {
-      baseSessions.delete(spec.kind);
+    session = createBaseSession(promptSpec).catch((error: unknown) => {
+      baseSessions.delete(promptSpec.kind);
       throw error;
     });
-    baseSessions.set(spec.kind, session);
+    baseSessions.set(promptSpec.kind, session);
   }
   return session;
 }
@@ -32,7 +32,7 @@ function getBaseSession(spec: PromptSpec<CandidateLabel>) {
 // marker of the extension context where temperature and topK actually pin sampling (Chrome 151+, against a manifest floor of 99). Unpinned sampling is not a degraded version of this feature, it is
 // the drift that flipped controls in the plain-page runs, so a context without the knobs gets no session at all and the page stays on the rules output.
 // create() at availability 'downloadable' silently starts a multi-gigabyte download, so a session is only ever created once the model is already there.
-async function createBaseSession(spec: PromptSpec<CandidateLabel>) {
+async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   if (typeof LanguageModel === 'undefined') {
     throw new Error('LanguageModel is not exposed in this context');
   }
@@ -50,39 +50,39 @@ async function createBaseSession(spec: PromptSpec<CandidateLabel>) {
   // measured 2026-09-02 in this context, six configurations over the 23-case set returned identical labels and identical raw bytes, and the "No output language was specified" warning a declaration
   // would silence never reaches a service worker in the first place -- it is logged for extension pages only. See docs/prompt-api-reference.md, Languages.
   const session = await LanguageModel.create({
-    initialPrompts: [{ role: 'system', content: spec.systemPrompt }],
+    initialPrompts: [{ role: 'system', content: promptSpec.systemPrompt }],
     temperature: 0,
     topK: 1,
   });
   // The system prompt rides in initialPrompts, so this is the only place it is ever sent; a fresh line here also marks every MV3 cold start paying the multi-second create()
-  console.debug(`[pangu] ${spec.kind} base session created (version ${spec.version}, temperature 0, topK 1), system prompt:\n${spec.systemPrompt}`);
+  console.debug(`[pangu] ${promptSpec.kind} base session created (version ${promptSpec.version}, temperature 0, topK 1), system prompt:\n${promptSpec.systemPrompt}`);
   return session;
 }
 
-async function classifyOne(spec: PromptSpec<CandidateLabel>, base: LanguageModel, candidate: ClassifyRequest): Promise<ClassifiedCandidate> {
+async function classifyOne(promptSpec: PromptSpec<CandidateLabel>, base: LanguageModel, candidate: ClassifyRequest): Promise<ClassifiedCandidate> {
   // Logged before the model call so a candidate that hangs or throws still shows what was asked. Debug level: visible in this worker's console (chrome://extensions -> service worker) at Verbose
-  const question = spec.buildQuestion(candidate.sentence, candidate.at);
-  console.debug(`[pangu] ${spec.kind} prompt:\n${question}`);
+  const question = promptSpec.buildQuestion(candidate.sentence, candidate.at);
+  console.debug(`[pangu] ${promptSpec.kind} prompt:\n${question}`);
   try {
     // One clone per candidate: a fresh context without paying create() again
     const turn = await base.clone();
     let raw: string;
     try {
-      raw = await turn.prompt(question, { responseConstraint: { type: 'string', enum: spec.displayTokenEnum } });
+      raw = await turn.prompt(question, { responseConstraint: { type: 'string', enum: promptSpec.displayTokenEnum } });
     } finally {
       turn.destroy();
     }
 
     // The model answers in display tokens; nothing outside the prompt spec ever sees one
-    const label = spec.labelForDisplayToken(JSON.parse(raw));
+    const label = promptSpec.labelForDisplayToken(JSON.parse(raw));
     if (label === null) {
       throw new TypeError(`response outside the constraint enum: ${raw}`);
     }
-    console.debug(`[pangu] ${spec.kind} raw answer: ${raw} -> ${label}`);
+    console.debug(`[pangu] ${promptSpec.kind} raw answer: ${raw} -> ${label}`);
     return { label, error: null };
   } catch (caught) {
     const error = String(caught);
-    console.debug(`[pangu] ${spec.kind} error: ${error}`);
+    console.debug(`[pangu] ${promptSpec.kind} error: ${error}`);
     return { label: null, error };
   }
 }
@@ -91,21 +91,21 @@ async function classifyOne(spec: PromptSpec<CandidateLabel>, base: LanguageModel
 // sequential because the on-device model runs inference single-lane, so parallel clones only wait on each other, and because request and response then zip by index.
 // A kind with no prompt spec registered here answers like any other batch-wide failure rather than throwing, so the page gets the same clean no as it does for an absent model.
 export async function classifyCandidates(kind: string, candidates: readonly ClassifyRequest[]): Promise<ClassifyCandidatesResponse> {
-  const spec = PROMPT_SPECS.get(kind);
-  if (spec === undefined) {
+  const promptSpec = PROMPT_SPECS.get(kind);
+  if (promptSpec === undefined) {
     return { ok: false, error: `no prompt spec for ${kind}` };
   }
 
   let base: LanguageModel;
   try {
-    base = await getBaseSession(spec);
+    base = await getBaseSession(promptSpec);
   } catch (error) {
     return { ok: false, error: String(error) };
   }
 
-  const classified: ClassifiedCandidate[] = [];
+  const classifiedCandidates: ClassifiedCandidate[] = [];
   for (const candidate of candidates) {
-    classified.push(await classifyOne(spec, base, candidate));
+    classifiedCandidates.push(await classifyOne(promptSpec, base, candidate));
   }
-  return { ok: true, candidates: classified };
+  return { ok: true, candidates: classifiedCandidates };
 }

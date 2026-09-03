@@ -253,7 +253,7 @@ export class BrowserPangu extends Pangu {
         const currentTail = currentTextNode.data.slice(-3);
         const nextFirst = nextTextNode.data.slice(0, 1);
 
-        const verdict = decideBoundarySpacing({
+        const boundarySpacingVerdict = decideBoundarySpacing({
           currentTail,
           nextFirst,
           currentEndsWithSpace: TRAILING_WHITESPACE.test(currentTextNode.data),
@@ -275,7 +275,7 @@ export class BrowserPangu extends Pangu {
         });
 
         // A junction space can come with a second space that belongs inside the current text node's tail (CJK/ + CJK reads CJK / CJK): write the respaced tail back before placing the junction space
-        if (verdict !== 'none') {
+        if (boundarySpacingVerdict !== 'none') {
           const respacedTail = respaceCurrentTail(currentTail, nextFirst);
           if (respacedTail !== null) {
             currentTextNode.data = currentTextNode.data.slice(0, currentTextNode.data.length - currentTail.length) + respacedTail;
@@ -283,7 +283,7 @@ export class BrowserPangu extends Pangu {
           }
         }
 
-        switch (verdict) {
+        switch (boundarySpacingVerdict) {
           case 'prepend-next':
             nextTextNode.data = ` ${nextTextNode.data}`;
             this.lastWrittenData.set(nextTextNode, nextTextNode.data);
@@ -321,14 +321,14 @@ export class BrowserPangu extends Pangu {
   }
 
   private applyTextNodeSpacing(textNode: Text) {
-    const verdicts = decideTextNodeSpacing({
+    const textNodeSpacingVerdicts = decideTextNodeSpacing({
       text: textNode.data,
       previousElementLastChar: this.findPreviousElementLastChar(textNode),
       hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(textNode),
     });
 
-    for (const verdict of verdicts) {
-      switch (verdict) {
+    for (const textNodeSpacingVerdict of textNodeSpacingVerdicts) {
+      switch (textNodeSpacingVerdict) {
         case 'trim-leading-space':
           textNode.data = textNode.data.substring(1);
           this.lastWrittenData.set(textNode, textNode.data);

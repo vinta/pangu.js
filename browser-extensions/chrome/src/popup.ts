@@ -82,41 +82,41 @@ class PopupController {
   }
 
   private async render() {
-    const current = await getSettings();
-    this.renderSpacingModeToggle(current);
-    this.renderMuteToggle(current);
-    this.renderTextAutospaceToggle(current);
-    this.renderStatus(current);
-    this.renderAddToBlacklistButton(current);
+    const settings = await getSettings();
+    this.renderSpacingModeToggle(settings);
+    this.renderMuteToggle(settings);
+    this.renderTextAutospaceToggle(settings);
+    this.renderStatus(settings);
+    this.renderAddToBlacklistButton(settings);
     this.renderVersion();
   }
 
-  private renderSpacingModeToggle(current: Settings) {
+  private renderSpacingModeToggle(settings: Settings) {
     const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
     if (spacingModeToggle) {
-      spacingModeToggle.checked = current.spacing_mode === 'spacing_when_load';
+      spacingModeToggle.checked = settings.spacing_mode === 'spacing_when_load';
     }
   }
 
-  private renderMuteToggle(current: Settings) {
+  private renderMuteToggle(settings: Settings) {
     const muteToggle = document.getElementById('mute-toggle') as HTMLInputElement;
     if (muteToggle) {
-      muteToggle.checked = current.is_mute_sound_effects;
+      muteToggle.checked = settings.is_mute_sound_effects;
     }
   }
 
-  private renderTextAutospaceToggle(current: Settings) {
+  private renderTextAutospaceToggle(settings: Settings) {
     const textAutospaceToggle = document.getElementById('text-autospace-toggle') as HTMLInputElement;
     if (textAutospaceToggle) {
       const isSupported = CSS.supports('text-autospace', 'normal');
       // Display-only off when unsupported: never write back, the synced setting still applies on other devices
-      textAutospaceToggle.checked = isSupported && current.is_enable_text_autospace;
+      textAutospaceToggle.checked = isSupported && settings.is_enable_text_autospace;
       textAutospaceToggle.disabled = !isSupported;
       textAutospaceToggle.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
     }
   }
 
-  private renderStatus(current: Settings) {
+  private renderStatus(settings: Settings) {
     const statusInput = document.getElementById('status-toggle-input') as HTMLInputElement;
     const statusLabel = document.getElementById('status-toggle-label');
 
@@ -124,7 +124,7 @@ class PopupController {
       return;
     }
 
-    const isActive = shouldShowActiveStatus(current, this.currentTabUrl);
+    const isActive = shouldShowActiveStatus(settings, this.currentTabUrl);
     statusInput.checked = isActive;
     const messageKey = isActive ? 'status_active' : 'status_inactive';
     statusLabel.setAttribute('data-i18n', messageKey);
@@ -138,14 +138,14 @@ class PopupController {
     }
   }
 
-  private renderAddToBlacklistButton(current: Settings) {
+  private renderAddToBlacklistButton(settings: Settings) {
     const button = document.getElementById('add-to-blacklist-btn');
     if (!button) {
       return;
     }
 
     // Hide button if not in blacklist mode or if URL is invalid
-    if (current.filter_mode !== 'blacklist' || !this.currentTabUrl || !isValidUrl(this.currentTabUrl)) {
+    if (settings.filter_mode !== 'blacklist' || !this.currentTabUrl || !isValidUrl(this.currentTabUrl)) {
       button.style.display = 'none';
       return;
     }
@@ -321,12 +321,12 @@ class PopupController {
       const domainPattern = `${url.protocol}//${url.hostname}/*`;
 
       // The button only shows in blacklist mode, and the pattern is built from an already-validated tab URL, so no match-pattern validation here
-      const current = await getSettings();
-      if (current.blacklist.includes(domainPattern)) {
+      const settings = await getSettings();
+      if (settings.blacklist.includes(domainPattern)) {
         this.showMessage(chrome.i18n.getMessage('already_in_blacklist'), 'info', 1000 * 3);
         return;
       }
-      await updateSettings({ blacklist: [...current.blacklist, domainPattern] });
+      await updateSettings({ blacklist: [...settings.blacklist, domainPattern] });
       this.showMessage(chrome.i18n.getMessage('refresh_required'), 'info', 1000 * 3);
     } catch (error) {
       console.error('Failed to add to blacklist:', error);

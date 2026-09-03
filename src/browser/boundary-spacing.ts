@@ -46,73 +46,78 @@ export interface TextNodeSpacingContext {
   hiddenBoundaryBefore: () => boolean;
 }
 
-export function decideBoundarySpacing(context: BoundarySpacingContext) {
-  if (context.spaceLikeSiblingAfterCurrent) {
+export function decideBoundarySpacing(boundarySpacingContext: BoundarySpacingContext) {
+  if (boundarySpacingContext.spaceLikeSiblingAfterCurrent) {
     return 'none';
   }
 
-  if (context.currentEndsWithSpace || context.nextStartsWithSpace || context.whitespaceBetween) {
+  if (boundarySpacingContext.currentEndsWithSpace || boundarySpacingContext.nextStartsWithSpace || boundarySpacingContext.whitespaceBetween) {
     return 'none';
   }
 
-  if (context.contentBetween) {
+  if (boundarySpacingContext.contentBetween) {
     return 'none';
   }
 
-  if (!needsBoundarySpace(context.currentTail, context.nextFirst)) {
+  if (!needsBoundarySpace(boundarySpacingContext.currentTail, boundarySpacingContext.nextFirst)) {
     return 'none';
   }
 
-  if (context.spaceLikeSiblingAfterCurrentBoundary || context.currentBoundaryIsBlock) {
+  if (boundarySpacingContext.spaceLikeSiblingAfterCurrentBoundary || boundarySpacingContext.currentBoundaryIsBlock) {
     return 'none';
   }
 
-  if (!context.nextBoundaryIsSpaceSensitive) {
-    if (context.nextBoundaryIsIgnored || context.nextBoundaryIsBlock || context.spaceLikeSiblingBeforeNext || context.hiddenBoundaryBefore()) {
+  if (!boundarySpacingContext.nextBoundaryIsSpaceSensitive) {
+    if (
+      boundarySpacingContext.nextBoundaryIsIgnored ||
+      boundarySpacingContext.nextBoundaryIsBlock ||
+      boundarySpacingContext.spaceLikeSiblingBeforeNext ||
+      boundarySpacingContext.hiddenBoundaryBefore()
+    ) {
       return 'none';
     }
     return 'prepend-next';
   }
 
-  if (!context.currentBoundaryIsSpaceSensitive) {
-    if (context.hiddenBoundaryAfter()) {
+  if (!boundarySpacingContext.currentBoundaryIsSpaceSensitive) {
+    if (boundarySpacingContext.hiddenBoundaryAfter()) {
       return 'none';
     }
     return 'append-current';
   }
 
-  if (context.spaceLikeSiblingBeforeNextBoundary || context.hiddenBoundaryAfter()) {
+  if (boundarySpacingContext.spaceLikeSiblingBeforeNextBoundary || boundarySpacingContext.hiddenBoundaryAfter()) {
     return 'none';
   }
 
   // Skip <pangu> element insertion in Grid/Flexbox containers
   // because the element becomes a layout item and breaks the layout
-  if (context.inGridOrFlexContainer()) {
+  if (boundarySpacingContext.inGridOrFlexContainer()) {
     return 'none';
   }
 
   return 'insert-element';
 }
 
-export function decideTextNodeSpacing(context: TextNodeSpacingContext) {
-  const verdicts: TextNodeSpacingVerdict[] = [];
+export function decideTextNodeSpacing(textNodeSpacingContext: TextNodeSpacingContext) {
+  const textNodeSpacingVerdicts: TextNodeSpacingVerdict[] = [];
 
   // The standalone quote rule reads the text left by the trim rule
-  let { text } = context;
-  if (text.startsWith(' ') && context.hiddenBoundaryBefore()) {
-    verdicts.push('trim-leading-space');
+  let { text } = textNodeSpacingContext;
+  if (text.startsWith(' ') && textNodeSpacingContext.hiddenBoundaryBefore()) {
+    textNodeSpacingVerdicts.push('trim-leading-space');
     text = text.substring(1);
   }
 
   if (isStandaloneQuote(text)) {
-    if (context.previousElementLastChar !== null && ANY_CJK.test(context.previousElementLastChar)) {
-      verdicts.push('prepend-space');
+    if (textNodeSpacingContext.previousElementLastChar !== null && ANY_CJK.test(textNodeSpacingContext.previousElementLastChar)) {
+      textNodeSpacingVerdicts.push('prepend-space');
     }
   } else {
-    verdicts.push('apply-text-spacing');
+    textNodeSpacingVerdicts.push('apply-text-spacing');
   }
 
-  return verdicts;
+  return textNodeSpacingVerdicts;
 }
 
 // spaceJunction is pure and a page repeats the same few junction windows at

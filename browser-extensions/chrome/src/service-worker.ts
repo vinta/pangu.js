@@ -42,9 +42,9 @@ async function registerContentScript(contentScript: chrome.scripting.RegisteredC
 async function registerContentScripts() {
   await unregisterAllContentScripts();
 
-  const current = await getSettings();
+  const settings = await getSettings();
 
-  if (current.is_enable_text_autospace) {
+  if (settings.is_enable_text_autospace) {
     // Visual-only native autospacing, deliberately not gated by spacing_mode, filter_mode, blacklist, or whitelist (see docs/adr/0008)
     await registerContentScript({
       id: TEXT_AUTOSPACE_SCRIPT_ID,
@@ -54,7 +54,7 @@ async function registerContentScripts() {
     });
   }
 
-  if (current.spacing_mode === 'spacing_when_load') {
+  if (settings.spacing_mode === 'spacing_when_load') {
     const contentScript: chrome.scripting.RegisteredContentScript = {
       id: SCRIPT_ID,
       js: ['vendors/pangu/pangu.umd.js', 'dist/content-script.js'],
@@ -63,11 +63,11 @@ async function registerContentScripts() {
     };
 
     // Just in case there are invalid match patterns from old settings
-    const validBlacklist = current.blacklist.filter((pattern) => isValidMatchPattern(pattern));
-    const validWhitelist = current.whitelist.filter((pattern) => isValidMatchPattern(pattern));
-    if (current.filter_mode === 'blacklist' && validBlacklist.length > 0) {
+    const validBlacklist = settings.blacklist.filter((pattern) => isValidMatchPattern(pattern));
+    const validWhitelist = settings.whitelist.filter((pattern) => isValidMatchPattern(pattern));
+    if (settings.filter_mode === 'blacklist' && validBlacklist.length > 0) {
       contentScript.excludeMatches = validBlacklist;
-    } else if (current.filter_mode === 'whitelist' && validWhitelist.length > 0) {
+    } else if (settings.filter_mode === 'whitelist' && validWhitelist.length > 0) {
       contentScript.matches = validWhitelist;
     }
 
@@ -84,8 +84,8 @@ function queueRegisterContentScripts() {
 }
 
 // The paper bag only marks spacing the user turned off: manual mode bags every tab, a filter-excluded url bags its tab (#296). Pages the extension merely cannot run on (chrome://, new tab pages, urls it cannot read) keep the face, so the icon is deliberately looser than the popup status row, which still reports those as 神隱中.
-async function updateTabIcon(tabId: number, url: string | undefined, current: Settings) {
-  const path = shouldShowOffIcon(current, url) ? OFF_ICON_PATHS : DEFAULT_ICON_PATHS;
+async function updateTabIcon(tabId: number, url: string | undefined, settings: Settings) {
+  const path = shouldShowOffIcon(settings, url) ? OFF_ICON_PATHS : DEFAULT_ICON_PATHS;
   try {
     await chrome.action.setIcon({ tabId, path });
   } catch {
@@ -94,9 +94,9 @@ async function updateTabIcon(tabId: number, url: string | undefined, current: Se
 }
 
 async function updateAllTabIcons() {
-  const current = await getSettings();
+  const settings = await getSettings();
   const tabs = await chrome.tabs.query({});
-  await Promise.all(tabs.map((tab) => (tab.id === undefined ? undefined : updateTabIcon(tab.id, tab.url, current))));
+  await Promise.all(tabs.map((tab) => (tab.id === undefined ? undefined : updateTabIcon(tab.id, tab.url, settings))));
 }
 
 chrome.runtime.onInstalled.addListener(async () => {

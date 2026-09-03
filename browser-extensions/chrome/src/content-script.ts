@@ -32,10 +32,10 @@ async function classifyCandidates(kind: string, candidates: ClassifyCandidatesMe
 function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readonly SettledTextNode[]) {
   const candidates: Candidate[] = [];
   for (const settledTextNode of settledTextNodes) {
-    for (const match of ambiguousShape.find(settledTextNode.before)) {
-      const index = ambiguousShape.settle(settledTextNode.after, match);
+    for (const candidateMatch of ambiguousShape.find(settledTextNode.before)) {
+      const index = ambiguousShape.settle(settledTextNode.after, candidateMatch);
       if (index !== null) {
-        candidates.push({ kind: ambiguousShape.kind, node: settledTextNode.node, sentence: match.sentence, at: match.at, index, after: settledTextNode.after });
+        candidates.push({ kind: ambiguousShape.kind, node: settledTextNode.node, sentence: candidateMatch.sentence, at: candidateMatch.at, index, after: settledTextNode.after });
       }
     }
   }
@@ -64,36 +64,36 @@ async function classifyBatch(settledTextNodes: readonly SettledTextNode[]) {
 
   // The first no is final for this page, whichever ambiguous shape hit it. An absent model, an availability other than 'available', and a create() that fails are all conditions that will not change
   // while the page is open, so unassigning the seam stops the finder as well as any further worker wakes. Checked across every kind before anything is composed, so a no never lands a half-batch
-  const labelBatches: ClassifiedCandidate[][] = [];
+  const classifiedCandidateBatches: ClassifiedCandidate[][] = [];
   for (const [batchIndex, response] of responses.entries()) {
     if (!response.ok) {
       pangu.onTextNodesSettled = null;
       console.debug(`[pangu] ${batches[batchIndex]!.ambiguousShape.kind}: disabled for this page (${response.error})`);
       return;
     }
-    labelBatches.push(response.candidates);
+    classifiedCandidateBatches.push(response.candidates);
   }
 
   // A text node can carry candidates from more than one ambiguous shape, and core applies one fix per text node per call, so every edit for one node composes into a single late fix
-  const editsByNode = new Map<Text, { after: string; edits: TextEdit[] }>();
+  const textEditsByNode = new Map<Text, { after: string; textEdits: TextEdit[] }>();
   for (const [batchIndex, { ambiguousShape, candidates }] of batches.entries()) {
     for (const [index, candidate] of candidates.entries()) {
       // Labels zip against the candidates by index
-      const classified = labelBatches[batchIndex]![index];
-      const verdict = classified ? (classified.label ?? `error: ${classified.error}`) : 'error: no label at this index';
-      const isFix = classified?.label != null && ambiguousShape.isFix(classified.label);
+      const classifiedCandidate = classifiedCandidateBatches[batchIndex]![index];
+      const verdict = classifiedCandidate ? (classifiedCandidate.label ?? `error: ${classifiedCandidate.error}`) : 'error: no label at this index';
+      const isFix = classifiedCandidate?.label != null && ambiguousShape.isFix(classifiedCandidate.label);
       console.debug(`[pangu] ${ambiguousShape.kind}: "${candidate.sentence}" (symbol at ${candidate.at}) read as ${verdict}${isFix ? ' -> applying its late fix' : ''}`);
       if (isFix) {
-        const pending = editsByNode.get(candidate.node) ?? { after: candidate.after, edits: [] };
-        pending.edits.push(...ambiguousShape.edits(candidate.after, candidate.index));
-        editsByNode.set(candidate.node, pending);
+        const pending = textEditsByNode.get(candidate.node) ?? { after: candidate.after, textEdits: [] };
+        pending.textEdits.push(...ambiguousShape.edits(candidate.after, candidate.index));
+        textEditsByNode.set(candidate.node, pending);
       }
     }
   }
 
   const lateFixes: LateFix[] = [];
-  for (const [node, { after, edits }] of editsByNode) {
-    lateFixes.push({ node, settled: after, data: applyTextEdits(after, edits) });
+  for (const [node, { after, textEdits }] of textEditsByNode) {
+    lateFixes.push({ node, settled: after, data: applyTextEdits(after, textEdits) });
   }
   if (lateFixes.length > 0) {
     pangu.applyLateFixes(lateFixes);

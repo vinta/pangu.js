@@ -117,7 +117,7 @@ describe('CJK', () => {
 describe('hyphenSign.settle()', () => {
   // What a batch hands the page side: the bytes text spacing read, then the bytes the batch settled on
   function settleAll(before: string, after: string) {
-    return hyphenSign.find(before).map((match) => hyphenSign.settle(after, match));
+    return hyphenSign.find(before).map((candidateMatch) => hyphenSign.settle(after, candidateMatch));
   }
 
   it('settle on the index the rules left the hyphen at', () => {
@@ -148,11 +148,11 @@ describe('hyphenSign.isFix()', () => {
 describe('hyphenSign.edits()', () => {
   // The whole page-side pipeline for one text node whose every candidate came back as a fix: find, settle, edit, compose
   function fixAll(before: string, after: string) {
-    const edits = hyphenSign.find(before).flatMap((match) => {
-      const index = hyphenSign.settle(after, match);
+    const textEdits = hyphenSign.find(before).flatMap((candidateMatch) => {
+      const index = hyphenSign.settle(after, candidateMatch);
       return index === null ? [] : hyphenSign.edits(after, index);
     });
-    return applyTextEdits(after, edits);
+    return applyTextEdits(after, textEdits);
   }
 
   it('delete only the space the rules inserted after the hyphen', () => {
@@ -180,10 +180,10 @@ describe('applyTextEdits()', () => {
 
   it('apply edits from two ambiguous shapes to one text node', () => {
     const after = '氣溫是 - 5 度 A+B';
-    const edits: TextEdit[] = [...hyphenSign.edits(after, 4), ...spaceInserter.edits(after, 11)];
+    const textEdits: TextEdit[] = [...hyphenSign.edits(after, 4), ...spaceInserter.edits(after, 11)];
 
     // Descending index order is what keeps the insert from shifting the delete, whichever order the shapes were asked in
-    expect(applyTextEdits(after, edits)).toBe('氣溫是 -5 度 A +B');
-    expect(applyTextEdits(after, [...edits].reverse())).toBe('氣溫是 -5 度 A +B');
+    expect(applyTextEdits(after, textEdits)).toBe('氣溫是 -5 度 A +B');
+    expect(applyTextEdits(after, [...textEdits].reverse())).toBe('氣溫是 -5 度 A +B');
   });
 });
