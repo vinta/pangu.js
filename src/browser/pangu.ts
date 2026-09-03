@@ -310,9 +310,8 @@ export class BrowserPangu extends Pangu {
     this.flushSettledTextNodes();
   }
 
-  // The batch tail. Boundary spacing rewrites tails and prepends junction spaces to nodes text spacing already visited, so a snapshot is only settled once the whole batch is done.
-  // unsettledTextNodes is batch-scoped state kept on the instance, which only works because spacingTextNodes runs synchronously from the first push to this drain; if that ever changes, thread a
-  // local array through applyTextNodeSpacing and this function instead
+  // NOTE: unsettledTextNodes is batch-scoped state kept on the instance, which only works because spacingTextNodes runs synchronously
+  // If that ever changes, thread a local array through applyTextNodeSpacing and this function instead
   private flushSettledTextNodes() {
     if (this.unsettledTextNodes.length === 0) {
       return;
