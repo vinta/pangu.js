@@ -84,7 +84,7 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 // 1a. waitForVideosToLoad(pageDelayMs)                      1b. setupAutoSpacingPageObserver()
 //     ↓                                                         ↓
 // 2a. spacingPage()                                         2b. observer fires on characterData/childList
-//     ├─ spacingNode(<head><title>)                             ├─ a page re-render (the page writes its own unspaced data over a text node pangu spaced, in place or by replacing the node)
+//     ├─ spacingNode(<head><title>)                             ├─ a page re-render (the page writes its own unspaced data over a text node we spaced, in place or by replacing the node)
 //     └─ spacingNode(document.body)                             │  runs spacingNodeSync() inline, before paint, unless the subtree exceeds maxSyncTextNodes (then it is queued like everything else)
 //     ↓                                                         ↓ push affected nodes onto queue
 // 3a. spacingNode(node)                                         ↓ debounce(nodeDelayMs, max nodeMaxWaitMs)
@@ -127,8 +127,8 @@ export class BrowserPangu extends Pangu {
   private isAutoSpacingPageExecuted = false;
   private autoSpacingPageObserver: MutationObserver | null = null;
 
-  // Last data pangu wrote per text node: distinguishes pangu's own mutation records
-  // (data still equals the entry, drop them) from external rewrites of spaced content
+  // Last data we wrote per text node: distinguishes pangu's own mutation records
+  // (data still equals the entry, drop them) from page re-renders of spaced content
   // (data differs, re-space before the next paint)
   private readonly lastWrittenData = new WeakMap<Text, string>();
 
@@ -337,7 +337,6 @@ export class BrowserPangu extends Pangu {
           this.lastWrittenData.set(textNode, textNode.data);
           break;
         case 'apply-text-spacing': {
-          // Captured before the write, because only the tight original proves which spaces the rules wrote; what any of it means is the host's policy, and lives in the extension
           if (this.onTextNodesSettled) {
             unsettledTextNodes.push({ node: textNode, unspaced: textNode.data });
           }
@@ -577,13 +576,12 @@ export class BrowserPangu extends Pangu {
       nodeMaxWaitMs,
     );
 
-    // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+    // See: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
     this.autoSpacingPageObserver = new MutationObserver((mutations) => {
       let titleChanged = false;
 
-      // When this batch removed content pangu already spaced, the page is re-rendering
-      // over processed DOM (e.g. a framework's second render pass): added subtrees are
-      // then re-spaced synchronously below, before the browser paints the reverted text
+      // If this batch removed content we already spaced, there is usually a page re-render
+      // So the added nodes below are re-spaced with spacingNodeSync(), before the browser paints the re-rendered text
       let removedSpacedContent = false;
       for (const mutation of mutations) {
         for (const node of mutation.removedNodes) {
@@ -615,11 +613,11 @@ export class BrowserPangu extends Pangu {
               const lastWritten = this.lastWrittenData.get(node);
               if (lastWritten !== undefined) {
                 if (node.data === lastWritten) {
-                  // pangu's own write: nothing to reprocess
                   break;
                 }
-                // External rewrite of a node pangu already spaced is a revert:
-                // re-space it before the next paint so the revert never renders
+
+                // The current text node's data doesn't match what we last wrote, which usually means there is a page re-render
+                // So re-space it before the next paint so the re-render never paints
                 if (this.spacingNodeSync(node.parentNode, BrowserPangu.maxSyncTextNodes)) {
                   break;
                 }
@@ -659,17 +657,13 @@ export class BrowserPangu extends Pangu {
       debouncedSpacingNode();
     });
 
-    // NOTE: A single MutationObserver can observe multiple targets simultaneously
-    // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver/observe:
-
-    // Observe page title changes
+    // A single MutationObserver can observe multiple targets simultaneously
     this.autoSpacingPageObserver.observe(document.head, {
       characterData: true,
       childList: true,
-      subtree: true, // Need subtree to observe text node changes inside title
+      subtree: true,
     });
 
-    // Observe page content changes
     this.autoSpacingPageObserver.observe(document.body, {
       characterData: true,
       childList: true,
