@@ -4,6 +4,10 @@ pangu.js inserts whitespace between CJK and ANS characters automatically. It shi
 
 ## Language
 
+**Space**:
+The verb for inserting whitespace: pangu spaces CJK from ANS, and respaces a text run that a page re-render undid. Spaced and unspaced are the adjectives, and tight describes a shape that stays unspaced on purpose (`A/B`). Spacing is the noun and the modifier: spacing rules, boundary spacing. A space is also the character itself, and it counts: a pangu element holds one space. Public method names keep an older spacing prefix (`spacingText()`, `spacingPage()`), and those stay as they are.
+_Avoid_: spacings (no plural), space out, spaced out, spacer, spacious
+
 **CJK**:
 The class of Chinese, Japanese, and Korean characters. Every spacing rule depends on this class.
 
@@ -12,7 +16,7 @@ Alphabetical letters, numerical digits, and symbols. When an ANS character is ad
 
 **Text run**:
 One string that the rules receive as a whole. On a page, a text run is the data of one `Text` node. For the string API, a text run is the entire input.
-_Avoid_: run (bare), text node (in prose), chunk, span
+_Avoid_: run (bare), text node (as a synonym for the string), chunk, span
 
 **Text spacing**:
 Inserting whitespace between CJK and ANS characters inside one text run.
@@ -21,6 +25,10 @@ _Avoid_: paranoid spacing
 **Boundary spacing**:
 Deciding whether whitespace goes between two adjacent text runs on a page, and where it goes. `CJK<b>A</b>` gets the space at the start of the `A` run. `CJK<a>A</a>` gets the space at the end of the `CJK` run, because a link, underline, or strike-through would render a space that is added inside it. `<a>A</a><a>CJK</a>` gets a pangu element between the links. In three cases, nothing is added: whitespace or a block edge already separates the runs, an ignored tag such as `<code>` sits between them, or one run is hidden.
 _Avoid_: pair spacing, adjacent-node spacing
+
+**Settle**:
+A text run settles when nothing will rewrite it again in this batch. Text spacing runs first, then boundary spacing rewrites tails of runs it already visited, so a run is spaced before it is settled. Pangu hands settled runs to the host at the batch tail, never per run.
+_Avoid_: finished, done, final
 
 **Pangu element**:
 An inline `<pangu>` element that holds one space. Pangu inserts it between two text runs that both sit in a link, underline, or strike-through, because a space that is added inside either run would render as part of that run (`<a>A</a><pangu> </pangu><a>CJK</a>`). Pangu never inserts it inside a grid or flex container, because there the element would become a layout item.
