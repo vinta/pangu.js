@@ -17,7 +17,7 @@ test.describe('applyLateFixes', () => {
       pangu.spacingNode(document.body);
 
       const textNode = document.getElementById('target')!.firstChild as Text;
-      pangu.applyLateFixes([{ node: textNode, expected: '氣溫是 - 5 度左右', data: '氣溫是 -5 度左右' }]);
+      pangu.applyLateFixes([{ node: textNode, settled: '氣溫是 - 5 度左右', data: '氣溫是 -5 度左右' }]);
       return document.getElementById('target')!.textContent;
     });
 
@@ -33,7 +33,7 @@ test.describe('applyLateFixes', () => {
       // Something else rewrote the node while the classifier was still thinking
       const textNode = document.getElementById('target')!.firstChild as Text;
       textNode.data = '外部改寫 - 5 度';
-      pangu.applyLateFixes([{ node: textNode, expected: '氣溫是 - 5 度左右', data: '氣溫是 -5 度左右' }]);
+      pangu.applyLateFixes([{ node: textNode, settled: '氣溫是 - 5 度左右', data: '氣溫是 -5 度左右' }]);
       return textNode.data;
     });
 
@@ -49,7 +49,7 @@ test.describe('applyLateFixes', () => {
       const target = document.getElementById('target')!;
       const textNode = target.firstChild as Text;
       target.remove();
-      pangu.applyLateFixes([{ node: textNode, expected: '氣溫是 - 5 度左右', data: '氣溫是 -5 度左右' }]);
+      pangu.applyLateFixes([{ node: textNode, settled: '氣溫是 - 5 度左右', data: '氣溫是 -5 度左右' }]);
       return textNode.data;
     });
 
@@ -72,7 +72,7 @@ test.describe('applyLateFixes', () => {
             }
           }
           if (data !== run.after) {
-            fixes.push({ node: run.node, expected: run.after, data });
+            fixes.push({ node: run.node, settled: run.after, data });
           }
         }
         pangu.applyLateFixes(fixes);

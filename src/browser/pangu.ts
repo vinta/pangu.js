@@ -18,10 +18,10 @@ export interface SettledTextRun {
   readonly after: string;
 }
 
-// A compare-and-set write: applied only while the node still holds `expected`, so a fix computed from a snapshot can never land on bytes it did not see
+// A late fix: a correction to the rules output, anything that comes from a non-rules spacing engine like an LLM (the Chrome Prompt API)
 export interface LateFix {
   readonly node: Text;
-  readonly expected: string;
+  readonly settled: string;
   readonly data: string;
 }
 
@@ -111,8 +111,8 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 //    - batch tail: onBatchSettled fires once with every text run text spacing read (only when the extension assigned it; the package alone captures nothing)
 // ↓
 // 7. applyLateFixes(fixes)   (Chrome extension only, from its onBatchSettled handler)
-//    - the extension decides AI spacing fixes off the settled runs and hands them back as LateFix { node, expected, data }
-//    - schedule(() => for each fix: write data only if node is connected and still holds expected) → back to step 4, so the fix lands with the same beat as any pending spacing,
+//    - the extension decides AI spacing fixes off the settled runs and hands them back as LateFix { node, settled, data }
+//    - schedule(() => for each fix: write data only if node is connected and still holds settled) → back to step 4, so the fix lands with the same beat as any pending spacing,
 //      including at focus on a hidden tab
 //
 // Summary of paths to requestIdleCallback():
@@ -125,17 +125,20 @@ export class BrowserPangu extends Pangu {
 
   private isAutoSpacingPageExecuted = false;
   private autoSpacingPageObserver: MutationObserver | null = null;
+
   // Last data pangu wrote per text node: distinguishes pangu's own mutation records
   // (data still equals the entry, drop them) from external rewrites of spaced content
   // (data differs, re-space before the next paint)
   private readonly lastWrittenData = new WeakMap<Text, string>();
+
   // Text runs waiting for the batch to settle, captured from pre-spacing text and resolved against post-spacing data at the batch tail
   private pendingTextRuns: { node: Text; before: string }[] = [];
+
   public readonly taskScheduler = new TaskScheduler();
   public readonly visibilityDetector = new VisibilityDetector();
 
-  // The seam the Chrome extension's AI spacing hangs off. Unassigned means nothing is captured, which is what keeps this package inert: nothing here knows the model exists, and the extension is
-  // the only assigner
+  // A callback called after spacingTextNodes() settles a batch, carrying each text node's before/after strings
+  // The Chrome extension's AI spacing uses it to apply late fixes from LLM
   public onBatchSettled: ((runs: SettledTextRun[]) => void) | null = null;
 
   // PUBLIC
@@ -186,15 +189,13 @@ export class BrowserPangu extends Pangu {
     return this.visibilityDetector.isElementVisuallyHidden(element);
   }
 
-  // The late fix: a correction to the rules output decided by something other than the rules, landed as one write per text run. A second fix on the same text run in the same call fails its own
-  // `expected` check and drops silently, so composing several edits into one fix is the caller's job.
-  // The write goes through schedule() like every other spacing write: AI spacing is text spacing too, not a separate system with its own seam. On a hidden tab this means the fix applies at
-  // focus, together with any pending spacing — the same beat dynamic content already gets — so a verdict in the console with the page still unchanged is a waiting tab, not a bug (see CLAUDE.md)
+  // A compare-and-set write: applied only while the node still holds `settled`, so a fix computed from a snapshot can never land on bytes it did not see
+  // The write goes through schedule() like every other spacing write
   public applyLateFixes(fixes: readonly LateFix[]) {
     this.schedule(() => {
       for (const fix of fixes) {
         // The snapshot proves nothing has touched this node since the fix was computed, which is what keeps a write from landing on bytes it did not see
-        if (!fix.node.isConnected || fix.node.data !== fix.expected) {
+        if (!fix.node.isConnected || fix.node.data !== fix.settled) {
           continue;
         }
 

@@ -93,7 +93,7 @@ async function classifyBatch(runs: readonly SettledTextRun[]) {
 
   const fixes: LateFix[] = [];
   for (const [node, { after, edits }] of editsByNode) {
-    fixes.push({ node, expected: after, data: applyTextEdits(after, edits) });
+    fixes.push({ node, settled: after, data: applyTextEdits(after, edits) });
   }
   if (fixes.length > 0) {
     pangu.applyLateFixes(fixes);
