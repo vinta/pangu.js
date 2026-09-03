@@ -10,8 +10,7 @@ export interface AutoSpacingPageConfig {
   nodeMaxWaitMs?: number;
 }
 
-// One text run as a batch left it: the bytes text spacing read, and the bytes settled after every boundary write in the batch landed. Text runs that got only a trim or a prepended space are not
-// here, because text spacing never ran on them
+// An already settled (and spaced) text node, with before/after of the spacing
 export interface SettledTextRun {
   readonly node: Text;
   readonly before: string;
