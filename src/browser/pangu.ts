@@ -131,7 +131,7 @@ export class BrowserPangu extends Pangu {
   private readonly lastWrittenData = new WeakMap<Text, string>();
 
   // Text nodes waiting for the batch to settle, captured from pre-spacing text and resolved against post-spacing data at the batch tail
-  private pendingTextNodes: { node: Text; before: string }[] = [];
+  private unsettledTextNodes: { node: Text; before: string }[] = [];
 
   public readonly taskScheduler = new TaskScheduler();
   public readonly visibilityDetector = new VisibilityDetector();
@@ -307,17 +307,17 @@ export class BrowserPangu extends Pangu {
   }
 
   // The batch tail. Boundary spacing rewrites tails and prepends junction spaces to nodes text spacing already visited, so a snapshot is only settled once the whole batch is done.
-  // pendingTextNodes is batch-scoped state kept on the instance, which only works because spacingTextNodes runs synchronously from the first push to this drain; if that ever changes, thread a
+  // unsettledTextNodes is batch-scoped state kept on the instance, which only works because spacingTextNodes runs synchronously from the first push to this drain; if that ever changes, thread a
   // local array through applyTextNodeSpacing and this function instead
   private flushSettledTextNodes() {
-    if (this.pendingTextNodes.length === 0) {
+    if (this.unsettledTextNodes.length === 0) {
       return;
     }
 
-    const pending = this.pendingTextNodes;
-    this.pendingTextNodes = [];
+    const settledTextNodes = this.unsettledTextNodes.map(({ node, before }) => ({ node, before, after: node.data }));
+    this.unsettledTextNodes = [];
 
-    this.onTextNodesSettled?.(pending.map(({ node, before }) => ({ node, before, after: node.data })));
+    this.onTextNodesSettled?.(settledTextNodes);
   }
 
   private applyTextNodeSpacing(textNode: Text) {
@@ -340,7 +340,7 @@ export class BrowserPangu extends Pangu {
         case 'apply-text-spacing': {
           // Captured before the write, because only the tight original proves which spaces the rules wrote; what any of it means is the host's policy, and lives in the extension
           if (this.onTextNodesSettled) {
-            this.pendingTextNodes.push({ node: textNode, before: textNode.data });
+            this.unsettledTextNodes.push({ node: textNode, before: textNode.data });
           }
           const newText = this.spacingText(textNode.data);
           if (textNode.data !== newText) {
