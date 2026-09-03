@@ -102,8 +102,11 @@ A shape where the rules cannot derive the symbol's reading, so a classifier deci
 _Avoid_: symbol class, ambiguity, shape (bare, for this sense)
 
 **Candidate**:
-One occurrence of an ambiguous shape, flagged on the text before spacing. It carries the sentence around it for the classifier, and the position of the symbol after the rules ran.
+One occurrence of an ambiguous shape, flagged on the text before spacing. It carries the sentence around it and the symbol's position in that sentence, which is all the classifier reads.
 _Avoid_: hyphen-sign candidate (as a term), span, ambiguous span, model span
+
+**Settled candidate**:
+A candidate bound to the text node it came from, with the symbol's index in the settled text, so a late fix edits only bytes the batch settled on.
 
 **Classifier**:
 The component that reads one candidate and answers with one label from a fixed menu. It never answers with text, so it can never rewrite an author's characters.

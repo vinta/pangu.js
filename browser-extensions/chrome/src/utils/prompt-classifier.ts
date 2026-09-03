@@ -5,7 +5,7 @@
 // plain-web surface instead, where sampling cannot be pinned at all. See docs/prompt-api-reference.md.
 import type { PromptSpec } from './ai-spacing';
 import { hyphenPrompt } from './hyphen-prompt';
-import type { CandidateLabel, ClassifiedCandidate, ClassifyCandidatesResponse, ClassifyRequest } from './types';
+import type { Candidate, CandidateLabel, ClassifiedCandidate, ClassifyCandidatesResponse } from './types';
 
 // One prompt spec per ambiguous shape, keyed by the `kind` the message carries
 const PROMPT_SPECS = new Map<string, PromptSpec<CandidateLabel>>([[hyphenPrompt.kind, hyphenPrompt]]);
@@ -59,7 +59,7 @@ async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   return session;
 }
 
-async function classifyOne(promptSpec: PromptSpec<CandidateLabel>, base: LanguageModel, candidate: ClassifyRequest): Promise<ClassifiedCandidate> {
+async function classifyOne(promptSpec: PromptSpec<CandidateLabel>, base: LanguageModel, candidate: Candidate): Promise<ClassifiedCandidate> {
   // Logged before the model call so a candidate that hangs or throws still shows what was asked. Debug level: visible in this worker's console (chrome://extensions -> service worker) at Verbose
   const question = promptSpec.buildQuestion(candidate.sentence, candidate.at);
   console.debug(`[pangu] ${promptSpec.kind} prompt:\n${question}`);
@@ -90,7 +90,7 @@ async function classifyOne(promptSpec: PromptSpec<CandidateLabel>, base: Languag
 // A single candidate's failure stays that candidate's failure: the batch always answers, so a constraint the model cannot satisfy shows up as one recorded error rather than a lost page. The loop is
 // sequential because the on-device model runs inference single-lane, so parallel clones only wait on each other, and because request and response then zip by index.
 // A kind with no prompt spec registered here answers like any other batch-wide failure rather than throwing, so the page gets the same clean no as it does for an absent model.
-export async function classifyCandidates(kind: string, candidates: readonly ClassifyRequest[]): Promise<ClassifyCandidatesResponse> {
+export async function classifyCandidates(kind: string, candidates: readonly Candidate[]): Promise<ClassifyCandidatesResponse> {
   const promptSpec = PROMPT_SPECS.get(kind);
   if (promptSpec === undefined) {
     return { ok: false, error: `no prompt spec for ${kind}` };

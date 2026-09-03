@@ -36,7 +36,7 @@ export interface ContentScriptLoadedMessage {
 export type MessageFromContentScript = ContentScriptLoadedMessage;
 
 // One flagged symbol. `at` is its index inside `sentence` rather than a slice of its own, because the symbol's own characters do not identify which one is meant when a sentence carries a second one.
-export interface ClassifyRequest {
+export interface Candidate {
   sentence: string;
   at: number;
 }
@@ -46,7 +46,7 @@ export interface ClassifyRequest {
 export interface ClassifyCandidatesMessage {
   type: 'CLASSIFY_CANDIDATES';
   kind: string;
-  candidates: ClassifyRequest[];
+  candidates: Candidate[];
 }
 
 // Messages sent TO the service worker (via chrome.runtime.sendMessage)
