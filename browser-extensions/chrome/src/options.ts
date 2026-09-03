@@ -1,7 +1,7 @@
-import { translatePage } from './utils/i18n';
-import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, updateSettings } from './utils/settings';
-import { playSound } from './utils/sounds';
-import { isValidMatchPattern } from './utils/urls';
+import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, updateSettings } from './settings/storage';
+import { isValidMatchPattern } from './settings/urls';
+import { translatePage } from './ui/i18n';
+import { playSound } from './ui/sounds';
 
 // Chrome logs "No output language was specified in a LanguageModel API request" for any call that declares none, and collects it into the extension's Errors page, which is a user-facing surface. The
 // warning is logged for extension pages only, never for the service worker (measured 2026-09-02), so declaring a language on this page's two calls is what clears it. Nothing here is misattested:

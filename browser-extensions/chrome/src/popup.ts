@@ -1,8 +1,8 @@
-import { translatePage } from './utils/i18n';
-import { getSettings, onSettingsChanged, updateSettings } from './utils/settings';
-import { playSound, stopSound } from './utils/sounds';
+import { getSettings, onSettingsChanged, updateSettings } from './settings/storage';
+import { isValidUrl, shouldShowActiveStatus } from './settings/urls';
+import { translatePage } from './ui/i18n';
+import { playSound, stopSound } from './ui/sounds';
 import type { ContentScriptResponse, ManualSpacingMessage, MessageFromContentScript, PingMessage, Settings } from './utils/types';
-import { isValidUrl, shouldShowActiveStatus } from './utils/urls';
 
 class PopupController {
   private currentTabId: number | undefined;

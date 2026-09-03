@@ -1,7 +1,7 @@
 import type { AmbiguousShape, SettledCandidate, TextEdit } from './ai-spacing/ambiguous-shape';
 import { applyTextEdits } from './ai-spacing/ambiguous-shape';
 import { hyphenSign } from './ai-spacing/hyphen-sign';
-import { getSettings } from './utils/settings';
+import { getSettings } from './settings/storage';
 import type { ClassifiedCandidate, ClassifyCandidatesMessage, ClassifyCandidatesResponse, ContentScriptLoadedMessage, ContentScriptResponse, MessageToContentScript } from './utils/types';
 
 // `Window.pangu` is declared globally in src/browser/pangu.umd.ts, and pangu.umd.js is always listed before this script in the injection arrays (service worker

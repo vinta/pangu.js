@@ -1,4 +1,4 @@
-import type { Settings } from './types';
+import type { Settings } from '../utils/types';
 
 export function isValidMatchPattern(pattern: string) {
   // We only allow:

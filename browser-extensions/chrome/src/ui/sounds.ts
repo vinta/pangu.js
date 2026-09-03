@@ -1,4 +1,4 @@
-import { getSettings } from './settings';
+import { getSettings } from '../settings/storage';
 
 export type SoundName = 'Hadouken' | 'Shouryuuken' | 'YeahBaby' | 'WahWahWaaah';
 

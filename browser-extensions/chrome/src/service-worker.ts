@@ -1,8 +1,8 @@
 // NOTE: In service workers, we can't export directly, everything goes through messages
 import { classifyCandidates } from './ai-spacing/prompt-classifier';
-import { getSettings, onSettingsChanged, reconcileSettings } from './utils/settings';
+import { getSettings, onSettingsChanged, reconcileSettings } from './settings/storage';
+import { isValidMatchPattern, shouldShowOffIcon } from './settings/urls';
 import type { ClassifyCandidatesResponse, MessageFromContentScript, MessageToServiceWorker, Settings } from './utils/types';
-import { isValidMatchPattern, shouldShowOffIcon } from './utils/urls';
 
 const SCRIPT_ID = 'paranoid-auto-spacing';
 const TEXT_AUTOSPACE_SCRIPT_ID = 'text-autospace';
