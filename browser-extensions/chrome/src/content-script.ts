@@ -29,13 +29,13 @@ async function classifyCandidates(kind: string, candidates: ClassifyCandidatesMe
 
 // Every occurrence of one ambiguous shape in this batch: flagged on the bytes text spacing read, then resolved against the bytes the batch settled on. A match whose symbol did not end up with the
 // inserted gap settles to null and is dropped here, so nothing that is not the extension's own space to take back ever reaches the classifier
-function findCandidates(shape: AmbiguousShape, settledTextNodes: readonly SettledTextNode[]) {
+function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readonly SettledTextNode[]) {
   const candidates: Candidate[] = [];
-  for (const settled of settledTextNodes) {
-    for (const match of shape.find(settled.before)) {
-      const index = shape.settle(settled.after, match);
+  for (const settledTextNode of settledTextNodes) {
+    for (const match of ambiguousShape.find(settledTextNode.before)) {
+      const index = ambiguousShape.settle(settledTextNode.after, match);
       if (index !== null) {
-        candidates.push({ kind: shape.kind, node: settled.node, sentence: match.sentence, at: match.at, index, after: settled.after });
+        candidates.push({ kind: ambiguousShape.kind, node: settledTextNode.node, sentence: match.sentence, at: match.at, index, after: settledTextNode.after });
       }
     }
   }
@@ -48,15 +48,15 @@ function findCandidates(shape: AmbiguousShape, settledTextNodes: readonly Settle
 async function classifyBatch(settledTextNodes: readonly SettledTextNode[]) {
   // Core hands over every text node text spacing read, so most batches carry no candidate at all. Asking only for the shapes that found one is what keeps the worker wakes, and the multi-second
   // cold-start create() behind them, down to the batches that can actually produce a fix
-  const batches = AMBIGUOUS_SHAPES.map((shape) => ({ shape, candidates: findCandidates(shape, settledTextNodes) })).filter((batch) => batch.candidates.length > 0);
+  const batches = AMBIGUOUS_SHAPES.map((ambiguousShape) => ({ ambiguousShape, candidates: findCandidates(ambiguousShape, settledTextNodes) })).filter((batch) => batch.candidates.length > 0);
   if (batches.length === 0) {
     return;
   }
 
   const responses = await Promise.all(
-    batches.map(({ shape, candidates }) =>
+    batches.map(({ ambiguousShape, candidates }) =>
       classifyCandidates(
-        shape.kind,
+        ambiguousShape.kind,
         candidates.map(({ sentence, at }) => ({ sentence, at })),
       ),
     ),
@@ -68,7 +68,7 @@ async function classifyBatch(settledTextNodes: readonly SettledTextNode[]) {
   for (const [batchIndex, response] of responses.entries()) {
     if (!response.ok) {
       pangu.onTextNodesSettled = null;
-      console.debug(`[pangu] ${batches[batchIndex]!.shape.kind}: disabled for this page (${response.error})`);
+      console.debug(`[pangu] ${batches[batchIndex]!.ambiguousShape.kind}: disabled for this page (${response.error})`);
       return;
     }
     labelBatches.push(response.candidates);
@@ -76,27 +76,27 @@ async function classifyBatch(settledTextNodes: readonly SettledTextNode[]) {
 
   // A text node can carry candidates from more than one ambiguous shape, and core applies one fix per text node per call, so every edit for one node composes into a single late fix
   const editsByNode = new Map<Text, { after: string; edits: TextEdit[] }>();
-  for (const [batchIndex, { shape, candidates }] of batches.entries()) {
+  for (const [batchIndex, { ambiguousShape, candidates }] of batches.entries()) {
     for (const [index, candidate] of candidates.entries()) {
       // Labels zip against the candidates by index
       const classified = labelBatches[batchIndex]![index];
       const verdict = classified ? (classified.label ?? `error: ${classified.error}`) : 'error: no label at this index';
-      const isFix = classified?.label != null && shape.isFix(classified.label);
-      console.debug(`[pangu] ${shape.kind}: "${candidate.sentence}" (symbol at ${candidate.at}) read as ${verdict}${isFix ? ' -> applying its late fix' : ''}`);
+      const isFix = classified?.label != null && ambiguousShape.isFix(classified.label);
+      console.debug(`[pangu] ${ambiguousShape.kind}: "${candidate.sentence}" (symbol at ${candidate.at}) read as ${verdict}${isFix ? ' -> applying its late fix' : ''}`);
       if (isFix) {
         const pending = editsByNode.get(candidate.node) ?? { after: candidate.after, edits: [] };
-        pending.edits.push(...shape.edits(candidate.after, candidate.index));
+        pending.edits.push(...ambiguousShape.edits(candidate.after, candidate.index));
         editsByNode.set(candidate.node, pending);
       }
     }
   }
 
-  const fixes: LateFix[] = [];
+  const lateFixes: LateFix[] = [];
   for (const [node, { after, edits }] of editsByNode) {
-    fixes.push({ node, settled: after, data: applyTextEdits(after, edits) });
+    lateFixes.push({ node, settled: after, data: applyTextEdits(after, edits) });
   }
-  if (fixes.length > 0) {
-    pangu.applyLateFixes(fixes);
+  if (lateFixes.length > 0) {
+    pangu.applyLateFixes(lateFixes);
   }
 }
 

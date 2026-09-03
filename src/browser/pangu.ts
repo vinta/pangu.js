@@ -189,16 +189,16 @@ export class BrowserPangu extends Pangu {
   }
 
   // Late fixes go through schedule() like every other spacing write
-  public applyLateFixes(fixes: readonly LateFix[]) {
+  public applyLateFixes(lateFixes: readonly LateFix[]) {
     this.schedule(() => {
-      for (const fix of fixes) {
+      for (const lateFix of lateFixes) {
         // Skip if the node is no longer in the document or changed since the fix was computed
-        if (!fix.node.isConnected || fix.node.data !== fix.settled) {
+        if (!lateFix.node.isConnected || lateFix.node.data !== lateFix.settled) {
           continue;
         }
 
-        fix.node.data = fix.data;
-        this.lastWrittenData.set(fix.node, fix.data);
+        lateFix.node.data = lateFix.data;
+        this.lastWrittenData.set(lateFix.node, lateFix.data);
       }
     });
   }
