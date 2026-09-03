@@ -10,14 +10,11 @@ export interface AutoSpacingPageConfig {
   nodeMaxWaitMs?: number;
 }
 
-// A text node after text spacing, before the batch settles, with its unspaced text
-// Its current text is still moving in node.data
 interface UnsettledTextNode {
-  readonly node: Text;
+  readonly node: Text; // the spaced but unsettled text is in node.data
   readonly unspaced: string;
 }
 
-// A text node after the batch settled, with its unspaced and settled text
 export interface SettledTextNode extends UnsettledTextNode {
   readonly settled: string;
 }
