@@ -1,6 +1,6 @@
-import type { AmbiguousShape, SettledCandidate, TextEdit } from './utils/ai-spacing';
-import { applyTextEdits } from './utils/ai-spacing';
-import { hyphenSign } from './utils/hyphen-sign';
+import type { AmbiguousShape, SettledCandidate, TextEdit } from './ai-spacing/ambiguous-shape';
+import { applyTextEdits } from './ai-spacing/ambiguous-shape';
+import { hyphenSign } from './ai-spacing/hyphen-sign';
 import { getSettings } from './utils/settings';
 import type { ClassifiedCandidate, ClassifyCandidatesMessage, ClassifyCandidatesResponse, ContentScriptLoadedMessage, ContentScriptResponse, MessageToContentScript } from './utils/types';
 

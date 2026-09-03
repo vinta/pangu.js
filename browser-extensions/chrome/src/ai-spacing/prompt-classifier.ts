@@ -3,9 +3,9 @@
 //
 // This lives in the service worker rather than the content script for one reason: `temperature` and `topK` are documented as the extension-context surface and a content script appears to get the
 // plain-web surface instead, where sampling cannot be pinned at all. See docs/prompt-api-reference.md.
-import type { PromptSpec } from './ai-spacing';
+import type { Candidate, CandidateLabel, ClassifiedCandidate, ClassifyCandidatesResponse } from '../utils/types';
+import type { PromptSpec } from './ambiguous-shape';
 import { hyphenPrompt } from './hyphen-prompt';
-import type { Candidate, CandidateLabel, ClassifiedCandidate, ClassifyCandidatesResponse } from './types';
 
 // One prompt spec per ambiguous shape, keyed by the `kind` the message carries
 const PROMPT_SPECS = new Map<string, PromptSpec<CandidateLabel>>([[hyphenPrompt.kind, hyphenPrompt]]);

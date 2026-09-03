@@ -1,5 +1,5 @@
 // NOTE: In service workers, we can't export directly, everything goes through messages
-import { classifyCandidates } from './utils/prompt-classifier';
+import { classifyCandidates } from './ai-spacing/prompt-classifier';
 import { getSettings, onSettingsChanged, reconcileSettings } from './utils/settings';
 import type { ClassifyCandidatesResponse, MessageFromContentScript, MessageToServiceWorker, Settings } from './utils/types';
 import { isValidMatchPattern, shouldShowOffIcon } from './utils/urls';

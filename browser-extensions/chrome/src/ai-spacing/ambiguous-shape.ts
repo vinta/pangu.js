@@ -4,7 +4,7 @@
 // An ambiguous shape is two halves living in two runtime contexts: an `AmbiguousShape` in the content script and a `PromptSpec` in the service worker, joined by nothing but `kind` and a label type.
 // They stay in separate modules because the two bundles are separate and object-literal properties do not tree-shake, so one merged object would ship prompt bytes to the page and finder regexes to
 // the worker. The interfaces can share this file because types erase.
-import type { Candidate } from './types';
+import type { Candidate } from '../utils/types';
 
 // One change at one settled index: `remove` characters at `index` become `insert`. Never a composed string, because a text node can carry edits from more than one ambiguous shape and only the
 // content script sees all of them

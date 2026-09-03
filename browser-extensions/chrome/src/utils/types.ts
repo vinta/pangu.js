@@ -1,4 +1,4 @@
-import type { HyphenLabel } from './hyphen-prompt';
+import type { HyphenLabel } from '../ai-spacing/hyphen-prompt';
 
 export interface Settings {
   spacing_mode: 'spacing_when_load' | 'spacing_when_click';

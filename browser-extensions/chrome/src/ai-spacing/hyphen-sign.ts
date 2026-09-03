@@ -1,4 +1,4 @@
-import type { AmbiguousShape, CandidateMatch } from './ai-spacing';
+import type { AmbiguousShape, CandidateMatch } from './ambiguous-shape';
 
 // The extension's own copy of the CJK character class, pinned to `CJK` in src/shared/index.ts by a vitest case so drift fails CI. Three reasons it is a copy rather than an import: the content script
 // loads pangu.umd.js as a separate classic script and the UMD global does not expose CJK; a content script cannot be an ES module, so it cannot import the ESM build at runtime; and bundling

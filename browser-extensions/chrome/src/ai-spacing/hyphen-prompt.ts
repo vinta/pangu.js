@@ -1,4 +1,4 @@
-import type { PromptSpec } from './ai-spacing';
+import type { PromptSpec } from './ambiguous-shape';
 
 // The hyphen-sign classifier's shipping prompt, variant `v20-zh`: the variant that held every control at temperature 0 in the extension-context retest (docs/hyphen-sign-probe-handoff.md).
 // Gemini Nano tracks presentation rather than meaning and is hypersensitive to surface form, so these bytes are load-bearing -- rewording, reordering or reformatting any of them invalidates the
@@ -33,7 +33,7 @@ function buildQuestion(sentence: string, at: number) {
   return `句子：${sentence}\n\n把這句話唸出來時，「${sentence[at - 1]}」後面的那個「${sentence[at]}」該怎麼唸？\n${MENU}\n\n用選項的名稱回答。`;
 }
 
-// The worker-side half of the hyphen-sign ambiguous shape, joined to the page-side half in utils/hyphen-sign.ts by `kind` alone
+// The worker-side half of the hyphen-sign ambiguous shape, joined to the page-side half in hyphen-sign.ts by `kind` alone
 export const hyphenPrompt: PromptSpec<HyphenLabel> = {
   kind: 'hyphen-sign',
   systemPrompt: SYSTEM_PROMPT,
