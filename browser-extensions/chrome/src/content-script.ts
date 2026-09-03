@@ -26,8 +26,7 @@ const loadedMessage: ContentScriptLoadedMessage = { type: 'CONTENT_SCRIPT_LOADED
 chrome.runtime.sendMessage(loadedMessage);
 
 // Document Loading Lifecycle:
-// loading → (DOM parsing completes) → DOMContentLoaded event fires →
-// interactive → (resources load) → load event fires → complete
+// loading → (DOM parsing completes) → DOMContentLoaded event fires → interactive → (resources load) → load event fires → complete
 if (document.readyState === 'loading') {
   // DOMContentLoaded only fires once -> autoSpacingPage() only runs once
   document.addEventListener('DOMContentLoaded', autoSpacingPage);
