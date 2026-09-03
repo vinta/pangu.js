@@ -10,7 +10,7 @@ export interface AutoSpacingPageConfig {
   nodeMaxWaitMs?: number;
 }
 
-// An already settled (and spaced) text node, with before/after of the spacing
+// An already settled (== spaced) text node, with before/after of the spacing
 export interface SettledTextNode {
   readonly node: Text;
   readonly before: string;
@@ -136,7 +136,7 @@ export class BrowserPangu extends Pangu {
   public readonly taskScheduler = new TaskScheduler();
   public readonly visibilityDetector = new VisibilityDetector();
 
-  // A callback called after spacingTextNodes() settles a batch, carrying each text node's before/after strings
+  // A callback called after spacingTextNodes() settles a batch of text nodes, carrying each node's text before/after spacing
   // The Chrome extension's AI spacing uses it to apply late fixes from LLM
   public onTextNodesSettled: ((settledTextNodes: SettledTextNode[]) => void) | null = null;
 
@@ -188,12 +188,11 @@ export class BrowserPangu extends Pangu {
     return this.visibilityDetector.isElementVisuallyHidden(element);
   }
 
-  // A compare-and-set write: applied only while the node still holds `settled`, so a fix computed from a snapshot can never land on bytes it did not see
-  // The write goes through schedule() like every other spacing write
+  // Late fixes go through schedule() like every other spacing write
   public applyLateFixes(fixes: readonly LateFix[]) {
     this.schedule(() => {
       for (const fix of fixes) {
-        // The snapshot proves nothing has touched this node since the fix was computed, which is what keeps a write from landing on bytes it did not see
+        // Skip if the node is no longer in the document or changed since the fix was computed
         if (!fix.node.isConnected || fix.node.data !== fix.settled) {
           continue;
         }
