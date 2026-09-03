@@ -3,22 +3,22 @@ import { expect, test } from '@playwright/test';
 
 declare global {
   interface Window {
-    // Where these tests park what the batch tail hands them. The Text nodes cannot cross the evaluate boundary, so only the serializable half of each settled text run is kept
-    __settledRuns: { before: string; after: string }[];
-    // How many times the batch tail fired, which is what proves the seam is per batch rather than per text run
+    // Where these tests park what the batch tail hands them. The Text nodes cannot cross the evaluate boundary, so only the serializable half of each settled text node is kept
+    __settledNodes: { before: string; after: string }[];
+    // How many times the batch tail fired, which is what proves the seam is per batch rather than per text node
     __batchCount: number;
   }
 }
 
-// Stands in for the Chrome extension's classifier: the settled text runs are parked on the page instead of being read for candidates, so nothing here knows any ambiguous shape exists
+// Stands in for the Chrome extension's classifier: the settled text nodes are parked on the page instead of being read for candidates, so nothing here knows any ambiguous shape exists
 function collectSettledRuns(page: Page) {
   return page.evaluate(() => {
-    pangu.onBatchSettled = (runs) => {
+    pangu.onBatchSettled = (settledNodes) => {
       window.__batchCount++;
-      window.__settledRuns.push(...runs.map(({ before, after }) => ({ before, after })));
+      window.__settledNodes.push(...settledNodes.map(({ before, after }) => ({ before, after })));
     };
     pangu.spacingNode(document.body);
-    return window.__settledRuns;
+    return window.__settledNodes;
   });
 }
 
@@ -29,7 +29,7 @@ test.describe('onBatchSettled', () => {
 
     await page.evaluate(() => {
       pangu.taskScheduler.config.enabled = false;
-      window.__settledRuns = [];
+      window.__settledNodes = [];
       window.__batchCount = 0;
     });
   });
@@ -40,7 +40,7 @@ test.describe('onBatchSettled', () => {
     const result = await page.evaluate(() => {
       const unassigned = pangu.onBatchSettled === null;
       pangu.spacingNode(document.body);
-      return { unassigned, text: document.body.textContent, captured: window.__settledRuns.length };
+      return { unassigned, text: document.body.textContent, captured: window.__settledNodes.length };
     });
 
     expect(result.unassigned).toBe(true);
@@ -54,9 +54,9 @@ test.describe('onBatchSettled', () => {
     expect(await collectSettledRuns(page)).toEqual([{ before: '氣溫是-5度左右', after: '氣溫是 - 5 度左右' }]);
   });
 
-  test('settle a text run a junction space wrote to after its own text spacing ran', async ({ page }) => {
-    // The boundary between the two runs prepends a space to the very node text-run spacing already visited. The list is in reverse document order, so the second run settles first, and the
-    // unchanged run is in the list too: whether that matters is the host's policy, so nothing is filtered here
+  test('settle a text node a junction space wrote to after its own text spacing ran', async ({ page }) => {
+    // The boundary between the two text nodes prepends a space to the very node text spacing already visited. The list is in reverse document order, so the second node settles first, and the
+    // unchanged node is in the list too: whether that matters is the host's policy, so nothing is filtered here
     await page.setContent('<div><b>abc</b><span>氣溫是-5度</span></div>');
 
     expect(await collectSettledRuns(page)).toEqual([
@@ -66,15 +66,15 @@ test.describe('onBatchSettled', () => {
     expect(await page.evaluate(() => document.body.textContent)).toBe('abc 氣溫是 - 5 度');
   });
 
-  test('skip a text run text spacing never ran on', async ({ page }) => {
-    // The standalone quote run gets prepend-space and nothing else, so it is never captured; the CJK run beside it is
+  test('skip a text node text spacing never ran on', async ({ page }) => {
+    // The standalone quote node gets prepend-space and nothing else, so it is never captured; the CJK node beside it is
     await page.setContent('<div><b>中文</b>"</div>');
 
     expect(await collectSettledRuns(page)).toEqual([{ before: '中文', after: '中文' }]);
     expect(await page.evaluate(() => document.body.textContent)).toBe('中文 "');
   });
 
-  test('fire once per batch rather than once per text run', async ({ page }) => {
+  test('fire once per batch rather than once per text node', async ({ page }) => {
     await page.setContent('<div><b>abc</b><span>氣溫是-5度</span></div>');
 
     await collectSettledRuns(page);

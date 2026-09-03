@@ -5,7 +5,7 @@ pangu.js inserts whitespace between CJK and ANS characters automatically. It shi
 ## Language
 
 **Space**:
-The verb for inserting whitespace: pangu spaces CJK from ANS, and respaces a text run that a page re-render undid. Spaced and unspaced are the adjectives, and tight describes a shape that stays unspaced on purpose (`A/B`). Spacing is the noun and the modifier: spacing rules, boundary spacing. A space is also the character itself, and it counts: a pangu element holds one space. Public method names keep an older spacing prefix (`spacingText()`, `spacingPage()`), and those stay as they are.
+The verb for inserting whitespace: pangu spaces CJK from ANS, and respaces a text node that a page re-render undid. Spaced and unspaced are the adjectives, and tight describes a shape that stays unspaced on purpose (`A/B`). Spacing is the noun and the modifier: spacing rules, boundary spacing. A space is also the character itself, and it counts: a pangu element holds one space. Public method names keep an older spacing prefix (`spacingText()`, `spacingPage()`), and those stay as they are.
 _Avoid_: spacings (no plural), space out, spaced out, spacer, spacious
 
 **CJK**:
@@ -14,24 +14,20 @@ The class of Chinese, Japanese, and Korean characters. Every spacing rule depend
 **ANS**:
 Alphabetical letters, numerical digits, and symbols. When an ANS character is adjacent to CJK, it triggers spacing. The name lists its three parts, parallel to CJK. `A`, `N`, and `S` also name the sub-classes in code and in shapes.
 
-**Text run**:
-One string that the rules receive as a whole. On a page, a text run is the data of one `Text` node. For the string API, a text run is the entire input.
-_Avoid_: run (bare), text node (as a synonym for the string), chunk, span
-
 **Text spacing**:
-Inserting whitespace between CJK and ANS characters inside one text run.
+Inserting whitespace between CJK and ANS characters inside one string. On a page that string is one text node's data; for the string API it is the whole input.
 _Avoid_: paranoid spacing
 
 **Boundary spacing**:
-Deciding whether whitespace goes between two adjacent text runs on a page, and where it goes. `CJK<b>A</b>` gets the space at the start of the `A` run. `CJK<a>A</a>` gets the space at the end of the `CJK` run, because a link, underline, or strike-through would render a space that is added inside it. `<a>A</a><a>CJK</a>` gets a pangu element between the links. In three cases, nothing is added: whitespace or a block edge already separates the runs, an ignored tag such as `<code>` sits between them, or one run is hidden.
+Deciding whether whitespace goes between two adjacent text nodes on a page, and where it goes. `CJK<b>A</b>` gets the space at the start of the `A` node. `CJK<a>A</a>` gets the space at the end of the `CJK` node, because a link, underline, or strike-through would render a space that is added inside it. `<a>A</a><a>CJK</a>` gets a pangu element between the links. In three cases, nothing is added: whitespace or a block edge already separates the nodes, an ignored tag such as `<code>` sits between them, or one node is hidden.
 _Avoid_: pair spacing, adjacent-node spacing
 
 **Settle**:
-A text run settles when nothing will rewrite it again in this batch. Text spacing runs first, then boundary spacing rewrites tails of runs it already visited, so a run is spaced before it is settled. Pangu hands settled runs to the host at the batch tail, never per run.
+A text node settles when nothing will rewrite it again in this batch. Text spacing runs first, then boundary spacing rewrites tails of nodes it already visited, so a node is spaced before it is settled. Pangu hands settled nodes to the host at the batch tail, never per node.
 _Avoid_: finished, done, final
 
 **Pangu element**:
-An inline `<pangu>` element that holds one space. Pangu inserts it between two text runs that both sit in a link, underline, or strike-through, because a space that is added inside either run would render as part of that run (`<a>A</a><pangu> </pangu><a>CJK</a>`). Pangu never inserts it inside a grid or flex container, because there the element would become a layout item.
+An inline `<pangu>` element that holds one space. Pangu inserts it between two text nodes that both sit in a link, underline, or strike-through, because a space that is added inside either node would render as part of that node (`<a>A</a><pangu> </pangu><a>CJK</a>`). Pangu never inserts it inside a grid or flex container, because there the element would become a layout item.
 _Avoid_: space element, marker element
 
 **Native text-autospace**:
@@ -43,7 +39,7 @@ A correction to the rules output. It is applied after the rules run, and somethi
 _Avoid_: un-insert (in prose), model fix
 
 **Page re-render**:
-The page writes its own data over a text run that pangu already spaced. The page does this in one of two ways: it sets the `Text` node's data again, or it removes the node and inserts a fresh one. For example, the page has `CJKA`. Pangu spaces it to `CJK A`. Then the page writes `CJKA` into the same node again, or replaces the node with one that holds `CJKA`. The page did not intend to remove the space. It only rendered its own data again, and its data never had the space. From pangu's view, the write undid its work. Common causes: a second render pass in React or Vue, a script that sets `textContent` from a variable, or a live region that refreshes on a timer. Pangu detects a page re-render by comparing the new data against the last data that pangu wrote to that node. Pangu then re-spaces the node inside the observer callback, before the browser paints. If the subtree is too large to re-space before paint, the node queues like other dynamic content.
+The page writes its own data over a text node that pangu already spaced. The page does this in one of two ways: it sets the `Text` node's data again, or it removes the node and inserts a fresh one. For example, the page has `CJKA`. Pangu spaces it to `CJK A`. Then the page writes `CJKA` into the same node again, or replaces the node with one that holds `CJKA`. The page did not intend to remove the space. It only rendered its own data again, and its data never had the space. From pangu's view, the write undid its work. Common causes: a second render pass in React or Vue, a script that sets `textContent` from a variable, or a live region that refreshes on a timer. Pangu detects a page re-render by comparing the new data against the last data that pangu wrote to that node. Pangu then re-spaces the node inside the observer callback, before the browser paints. If the subtree is too large to re-space before paint, the node queues like other dynamic content.
 _Avoid_: revert, external rewrite, overwrite
 
 ## Paranoid Text Spacing Algorithm

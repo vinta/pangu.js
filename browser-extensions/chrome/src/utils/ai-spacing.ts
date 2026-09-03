@@ -1,11 +1,11 @@
-// AI spacing's shared vocabulary. Core owns the mechanism -- it hands over every text run a batch spaced, and it lands whatever fixes come back -- and this extension owns every per-shape fact:
+// AI spacing's shared vocabulary. Core owns the mechanism -- it hands over every text node a batch spaced, and it lands whatever fixes come back -- and this extension owns every per-shape fact:
 // what to flag, what to ask, which label triggers a fix, and what that fix changes.
 //
 // An ambiguous shape is two halves living in two runtime contexts: an `AmbiguousShape` in the content script and a `PromptSpec` in the service worker, joined by nothing but `kind` and a label type.
 // They stay in separate modules because the two bundles are separate and object-literal properties do not tree-shake, so one merged object would ship prompt bytes to the page and finder regexes to
 // the worker. The interfaces can share this file because types erase.
 
-// One change at one settled index: `remove` characters at `index` become `insert`. Never a composed string, because a text run can carry edits from more than one ambiguous shape and only the
+// One change at one settled index: `remove` characters at `index` become `insert`. Never a composed string, because a text node can carry edits from more than one ambiguous shape and only the
 // content script sees all of them
 export interface TextEdit {
   readonly index: number;
@@ -21,7 +21,7 @@ export interface CandidateMatch {
   readonly ordinal: number;
 }
 
-// A match resolved against settled data and bound to the text run it came from. `sentence`/`at` are the pre-spacing bytes the classifier reads; `index`/`after` are the settled bytes an edit is
+// A match resolved against settled data and bound to the text node it came from. `sentence`/`at` are the pre-spacing bytes the classifier reads; `index`/`after` are the settled bytes an edit is
 // allowed to touch
 export interface Candidate {
   readonly kind: string;
@@ -52,8 +52,8 @@ export interface PromptSpec<Label extends string> {
   labelForDisplayToken(token: unknown): Label | null;
 }
 
-// Every edit one text run collected, from every ambiguous shape, composed into the bytes a single late fix writes. Descending index order is what keeps an earlier edit from shifting a later one's
-// index, and one text run must reach core as one fix because a second fix on the same text run would fail its own compare-and-set check and silently drop
+// Every edit one text node collected, from every ambiguous shape, composed into the bytes a single late fix writes. Descending index order is what keeps an earlier edit from shifting a later one's
+// index, and one text node must reach core as one fix because a second fix on the same text node would fail its own compare-and-set check and silently drop
 export function applyTextEdits(after: string, edits: readonly TextEdit[]) {
   let data = after;
   for (const edit of [...edits].sort((left, right) => right.index - left.index)) {

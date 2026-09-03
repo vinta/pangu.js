@@ -4,7 +4,7 @@
 
 ## Domain Vocabulary
 
-- `CONTEXT.md` is the glossary: the terms the spacing rules, docs, and code share (text run, joiner token, slash/pipe/plus/affix reading, boundary spacing, tag mention, late fix, ambiguous shape). Read it before touching spacing rules, and use its terms, never the synonyms it lists under _Avoid_.
+- `CONTEXT.md` is the glossary: the terms the spacing rules, docs, and code share (text node, joiner token, slash/pipe/plus/affix reading, boundary spacing, tag mention, late fix, ambiguous shape). Read it before touching spacing rules, and use its terms, never the synonyms it lists under _Avoid_.
 - Decisions that changed a spacing contract are ADRs in `docs/adr/`. Check them before proposing a rule change that reverses one.
 - When adding or editing a glossary entry, a definition uses only bold glossary terms, platform names as the platform spells them (`Text` node, string, line, element), and ordinary English in its ordinary sense. One word carries one sense: a word needed in a technical sense gets its own entry or gets replaced. A term matches the code identifier for the same concept; when they diverge, define the code's word or rename the code.
 

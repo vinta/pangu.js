@@ -62,17 +62,17 @@ test.describe('applyLateFixes', () => {
     await page.evaluate(() => {
       // Stands in for the extension's policy half: whatever the seam settled, delete every space between a hyphen-minus and the digit after it. Descending, so each deletion leaves the
       // indexes still to come untouched
-      pangu.onBatchSettled = (runs) => {
+      pangu.onBatchSettled = (settledNodes) => {
         const fixes = [];
-        for (const run of runs) {
-          let data = run.after;
+        for (const settled of settledNodes) {
+          let data = settled.after;
           for (let index = data.length - 1; index >= 0; index--) {
             if (data[index] === '-' && data[index + 1] === ' ' && /[0-9]/.test(data[index + 2] ?? '')) {
               data = data.slice(0, index + 1) + data.slice(index + 2);
             }
           }
-          if (data !== run.after) {
-            fixes.push({ node: run.node, settled: run.after, data });
+          if (data !== settled.after) {
+            fixes.push({ node: settled.node, settled: settled.after, data });
           }
         }
         pangu.applyLateFixes(fixes);

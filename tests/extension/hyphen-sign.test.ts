@@ -146,7 +146,7 @@ describe('hyphenSign.isFix()', () => {
 });
 
 describe('hyphenSign.edits()', () => {
-  // The whole page-side pipeline for one text run whose every candidate came back as a fix: find, settle, edit, compose
+  // The whole page-side pipeline for one text node whose every candidate came back as a fix: find, settle, edit, compose
   function fixAll(before: string, after: string) {
     const edits = hyphenSign.find(before).flatMap((match) => {
       const index = hyphenSign.settle(after, match);
@@ -159,7 +159,7 @@ describe('hyphenSign.edits()', () => {
     expect(fixAll('氣溫是-5度左右', '氣溫是 - 5 度左右')).toBe('氣溫是 -5 度左右');
   });
 
-  it('fix every hyphen in one text run', () => {
+  it('fix every hyphen in one text node', () => {
     expect(fixAll('從-5到-3度', '從 - 5 到 - 3 度')).toBe('從 -5 到 -3 度');
   });
 
@@ -169,7 +169,7 @@ describe('hyphenSign.edits()', () => {
 });
 
 describe('applyTextEdits()', () => {
-  // A stand-in second ambiguous shape, inserting a space rather than removing one, so the composition is exercised in both directions on one text run
+  // A stand-in second ambiguous shape, inserting a space rather than removing one, so the composition is exercised in both directions on one text node
   const spaceInserter: AmbiguousShape = {
     kind: 'space-inserter',
     find: () => [],
@@ -178,7 +178,7 @@ describe('applyTextEdits()', () => {
     edits: (_after, index) => [{ index, remove: 0, insert: ' ' }],
   };
 
-  it('apply edits from two ambiguous shapes to one text run', () => {
+  it('apply edits from two ambiguous shapes to one text node', () => {
     const after = '氣溫是 - 5 度 A+B';
     const edits: TextEdit[] = [...hyphenSign.edits(after, 4), ...spaceInserter.edits(after, 11)];
 

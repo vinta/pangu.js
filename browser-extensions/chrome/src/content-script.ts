@@ -9,10 +9,10 @@ import type { ClassifiedCandidate, ClassifyCandidatesMessage, ClassifyCandidates
 const pangu = window.pangu;
 
 // The core seam's records, read off the singleton rather than imported: the content script is a classic script that cannot import the package at runtime
-type SettledTextRun = Parameters<NonNullable<typeof pangu.onBatchSettled>>[0][number];
+type SettledTextNode = Parameters<NonNullable<typeof pangu.onBatchSettled>>[0][number];
 type LateFix = Parameters<typeof pangu.applyLateFixes>[0][number];
 
-// Every ambiguous shape AI spacing reads on a page. Each one is asked in its own message, and the shapes that land on one text run compose into one late fix
+// Every ambiguous shape AI spacing reads on a page. Each one is asked in its own message, and the shapes that land on one text node compose into one late fix
 const AMBIGUOUS_SHAPES: AmbiguousShape[] = [hyphenSign];
 
 // One CLASSIFY_CANDIDATES round trip per ambiguous shape per batch, awaited with no deadline: a late answer is still safe to apply, because the applier drops any fix whose node changed since it was
@@ -29,26 +29,26 @@ async function classifyCandidates(kind: string, candidates: ClassifyCandidatesMe
 
 // Every occurrence of one ambiguous shape in this batch: flagged on the bytes text spacing read, then resolved against the bytes the batch settled on. A match whose symbol did not end up with the
 // inserted gap settles to null and is dropped here, so nothing that is not the extension's own space to take back ever reaches the classifier
-function findCandidates(shape: AmbiguousShape, runs: readonly SettledTextRun[]) {
+function findCandidates(shape: AmbiguousShape, settledNodes: readonly SettledTextNode[]) {
   const candidates: Candidate[] = [];
-  for (const run of runs) {
-    for (const match of shape.find(run.before)) {
-      const index = shape.settle(run.after, match);
+  for (const settled of settledNodes) {
+    for (const match of shape.find(settled.before)) {
+      const index = shape.settle(settled.after, match);
       if (index !== null) {
-        candidates.push({ kind: shape.kind, node: run.node, sentence: match.sentence, at: match.at, index, after: run.after });
+        candidates.push({ kind: shape.kind, node: settled.node, sentence: match.sentence, at: match.at, index, after: settled.after });
       }
     }
   }
   return candidates;
 }
 
-// AI spacing's page-side half: the rules already spaced these text runs, and the candidates whose label calls for a fix get that space taken back out.
+// AI spacing's page-side half: the rules already spaced these text nodes, and the candidates whose label calls for a fix get that space taken back out.
 // Every step logs at debug level (hidden until the console's Verbose level is on), so a wrong verdict on a live page is traceable without a build: this side shows each candidate's sentence and
 // verdict, and the service worker's console shows the exact prompt text and raw model output
-async function classifyBatch(runs: readonly SettledTextRun[]) {
-  // Core hands over every text run text spacing read, so most batches carry no candidate at all. Asking only for the shapes that found one is what keeps the worker wakes, and the multi-second
+async function classifyBatch(settledNodes: readonly SettledTextNode[]) {
+  // Core hands over every text node text spacing read, so most batches carry no candidate at all. Asking only for the shapes that found one is what keeps the worker wakes, and the multi-second
   // cold-start create() behind them, down to the batches that can actually produce a fix
-  const batches = AMBIGUOUS_SHAPES.map((shape) => ({ shape, candidates: findCandidates(shape, runs) })).filter((batch) => batch.candidates.length > 0);
+  const batches = AMBIGUOUS_SHAPES.map((shape) => ({ shape, candidates: findCandidates(shape, settledNodes) })).filter((batch) => batch.candidates.length > 0);
   if (batches.length === 0) {
     return;
   }
@@ -74,7 +74,7 @@ async function classifyBatch(runs: readonly SettledTextRun[]) {
     labelBatches.push(response.candidates);
   }
 
-  // A text run can carry candidates from more than one ambiguous shape, and core applies one fix per text run per call, so every edit for one node composes into a single late fix
+  // A text node can carry candidates from more than one ambiguous shape, and core applies one fix per text node per call, so every edit for one node composes into a single late fix
   const editsByNode = new Map<Text, { after: string; edits: TextEdit[] }>();
   for (const [batchIndex, { shape, candidates }] of batches.entries()) {
     for (const [index, candidate] of candidates.entries()) {
@@ -104,8 +104,8 @@ async function autoSpacingPage() {
   // Assigned before the sweep starts, so the initial pass is captured too
   const settings = await getSettings();
   if (settings.is_enable_ai_spacing) {
-    pangu.onBatchSettled = (runs) => {
-      void classifyBatch(runs);
+    pangu.onBatchSettled = (settledNodes) => {
+      void classifyBatch(settledNodes);
     };
   }
 
