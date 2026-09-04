@@ -146,7 +146,7 @@
     "description": ""
   },
   "label_is_enable_text_autospace": {
-    "message": "非侵入式 text-autospace 排版",
+    "message": "佛系空格",
     "description": ""
   },
   "text_autospace_description": {
@@ -160,6 +160,10 @@
         "content": "</a>"
       }
     }
+  },
+  "text_autospace_tooltip": {
+    "message": "讓瀏覽器直接渲染中文和英文、數字之間的間距。純視覺效果，不會插入任何空白字元，所以複製的文字不受影響。會套用到所有網站，無視黑名單和白名單。",
+    "description": ""
   },
   "text_autospace_limitations": {
     "message": "但是缺點是不支援符號而且那個間距比真正的空格窄很多，建議還是跟空格之神搭配使用。",
@@ -184,6 +188,10 @@
         "content": "</code>"
       }
     }
+  },
+  "ai_spacing_tooltip": {
+    "message": "某些符號（例如 + 或 -）在不同語境下的意思完全不一樣，只靠空格之神原有的靜態規則來判斷到底要不要加空格是有極限的，但是 LLM 正好彌補了這個不足，於是 ── 各位觀眾，威力加強版 AI 空格之神！",
+    "description": ""
   },
   "ai_spacing_description_2": {
     "message": "使用瀏覽器內建的 $link_open$Gemini Nano$link_close$ 模型，所有的操作只在你的電腦上運行（完全離線，沒有任何資料會被上傳到雲端），更重要的是：不用錢。",
