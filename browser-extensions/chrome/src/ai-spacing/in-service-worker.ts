@@ -79,7 +79,6 @@ async function classifyOne(promptSpec: PromptSpec<CandidateLabel>, base: Languag
 }
 
 // A single candidate's failure stays that candidate's failure, so the batch always answers
-// The loop is sequential because the on-device model runs inference single-lane, and because labels zip against candidates by index
 // An unknown kind answers like any other batch-wide failure, so the page gets the same no as for an absent model
 export async function classifyCandidates(kind: string, candidates: readonly Candidate[]): Promise<ClassifyCandidatesResponse> {
   const promptSpec = PROMPT_SPECS.get(kind);
@@ -94,6 +93,9 @@ export async function classifyCandidates(kind: string, candidates: readonly Cand
     return { ok: false, error: String(error) };
   }
 
+  // NOTE: Only one model instance in the browser and it runs one task at a time,
+  // so sending prompts in parallel won't make them faster
+  // See https://source.chromium.org/chromium/chromium/src/+/main:services/on_device_model/on_device_model_mojom_impl.cc (RunTaskIfPossible)
   const classifiedCandidates: ClassifiedCandidate[] = [];
   for (const candidate of candidates) {
     classifiedCandidates.push(await classifyOne(promptSpec, base, candidate));
