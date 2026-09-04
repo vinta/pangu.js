@@ -51,7 +51,7 @@ async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   return session;
 }
 
-async function classifyOne(promptSpec: PromptSpec<CandidateLabel>, base: LanguageModel, candidate: Candidate): Promise<ClassifiedCandidate> {
+async function classifyOneCandidate(promptSpec: PromptSpec<CandidateLabel>, base: LanguageModel, candidate: Candidate): Promise<ClassifiedCandidate> {
   const question = promptSpec.buildQuestion(candidate.sentence, candidate.at);
   console.debug(`[pangu] ${promptSpec.kind} prompt:\n${question}`);
 
@@ -98,7 +98,7 @@ export async function classifyCandidates(kind: string, candidates: readonly Cand
   // See https://source.chromium.org/chromium/chromium/src/+/main:services/on_device_model/on_device_model_mojom_impl.cc (RunTaskIfPossible)
   const classifiedCandidates: ClassifiedCandidate[] = [];
   for (const candidate of candidates) {
-    classifiedCandidates.push(await classifyOne(promptSpec, base, candidate));
+    classifiedCandidates.push(await classifyOneCandidate(promptSpec, base, candidate));
   }
   return { ok: true, candidates: classifiedCandidates };
 }
