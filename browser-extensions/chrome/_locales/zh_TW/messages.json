@@ -146,8 +146,16 @@
     "description": ""
   },
   "ai_spacing_description": {
-    "message": "某些符號（例如 `-` 或 `+`）在不同語境下的意思完全不一樣，沒辦法只靠規則定義來判斷，但是這正好是 LLM 擅長的領域。",
-    "description": ""
+    "message": "某些符號（例如 $code_open$-$code_close$ 或 $code_open$+$code_close$）在不同語境下的意思完全不一樣，沒辦法只靠規則定義來判斷，但是這正好是 LLM 擅長的領域。",
+    "description": "",
+    "placeholders": {
+      "code_open": {
+        "content": "<code>"
+      },
+      "code_close": {
+        "content": "</code>"
+      }
+    }
   },
   "ai_spacing_description_2": {
     "message": "使用瀏覽器內建的 $link_open$Gemini Nano$link_close$ 模型，所有的操作都只在你的裝置上運行（完全離線，沒有任何資料會被上傳到雲端），最重要的是：不用錢。",
