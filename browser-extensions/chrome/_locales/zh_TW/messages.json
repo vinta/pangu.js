@@ -146,7 +146,7 @@
     "description": ""
   },
   "ai_spacing_description": {
-    "message": "某些符號（例如 $code_open$-$code_close$ 或 $code_open$+$code_close$）在不同語境下的意思完全不一樣，沒辦法只靠規則定義來判斷，但是這正好是 LLM 擅長的領域。",
+    "message": "某些符號（例如 $code_open$-$code_close$ 或 $code_open$+$code_close$）在不同語境下的意思完全不一樣，沒辦法只靠規則定義來判斷，但是這正好是 LLM 擅長的領域。各位觀眾，威力加強版空格之神！",
     "description": "",
     "placeholders": {
       "code_open": {
