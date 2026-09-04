@@ -1,9 +1,3 @@
-// AI spacing's shared vocabulary. Core owns the mechanism -- it hands over every text node a batch spaced, and it lands whatever fixes come back -- and this extension owns every per-shape fact:
-// what to flag, what to ask, which label triggers a fix, and what that fix changes.
-//
-// An ambiguous shape is two halves living in two runtime contexts: an `AmbiguousShape` in the content script and a `PromptSpec` in the service worker, joined by nothing but `kind` and a label type.
-// They stay in separate modules because the two bundles are separate and object-literal properties do not tree-shake, so one merged object would ship prompt bytes to the page and finder regexes to
-// the worker. The interfaces can share this file because types erase.
 import type { Candidate } from './messages';
 
 // One change at one settled index: `remove` characters at `index` become `insert`. Never a composed string, because a text node can carry edits from more than one ambiguous shape and only the
@@ -31,7 +25,6 @@ export interface SettledCandidate extends Candidate {
   readonly settled: string;
 }
 
-// Page side, content script
 export interface AmbiguousShape {
   readonly kind: string; // joins this half to its PromptSpec, and discriminates CLASSIFY_CANDIDATES
   occursIn(text: string): boolean; // whether the tight shape occurs anywhere in text: the warm-up's page-level gate, a yes/no scan without find's per-hit work
@@ -41,7 +34,6 @@ export interface AmbiguousShape {
   edits(settled: string, index: number): TextEdit[]; // what to change at one settled index, never a composed string
 }
 
-// Worker side, service worker. One per kind, registered in in-service-worker.ts
 export interface PromptSpec<Label extends string> {
   readonly kind: string;
   readonly systemPrompt: string;
