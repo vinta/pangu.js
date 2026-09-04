@@ -28,14 +28,13 @@ function getBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   return session;
 }
 
-// Two runtime guards the types cannot supply: the package declares LanguageModel and its params() unconditionally, but the class is absent outside a context that has the API, and params() is the
-// marker of the extension context where temperature and topK actually pin sampling (Chrome 151+, against a manifest floor of 99). Unpinned sampling is not a degraded version of this feature, it is
-// the drift that flipped controls in the plain-page runs, so a context without the knobs gets no session at all and the page stays on the rules output.
 // create() at availability 'downloadable' silently starts a multi-gigabyte download, so a session is only ever created once the model is already there.
 async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   if (typeof LanguageModel === 'undefined') {
     throw new Error('LanguageModel is not exposed in this context');
   }
+
+  // NOTE: no params() means we cannot control (temperature, topK) which means the model output could be unpredictable, and we disable AI spacing
   if (typeof LanguageModel.params !== 'function') {
     throw new Error('sampling cannot be pinned in this context');
   }
@@ -45,12 +44,12 @@ async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
     throw new Error(`model availability is ${availability}`);
   }
 
-  // Deliberately NO expectedInputs/expectedOutputs language declaration: the API's supported set is en/ja/es/de/fr, declaring any zh variant makes availability() report unavailable and create()
-  // reject with NotSupportedError, and declaring en or ja would attest a language the output is not. An undeclared session is the only way to run Chinese, and declaring a supported one buys nothing:
-  // measured 2026-09-02 in this context, six configurations over the 23-case set returned identical labels and identical raw bytes, and the "No output language was specified" warning a declaration
-  // would silence never reaches a service worker in the first place -- it is logged for extension pages only. See docs/prompt-api-reference.md, Languages.
+  // Deliberately NO expectedInputs/expectedOutputs here: the API supports en/ja/es/de/fr only, declaring zh makes availability() report unavailable and create() reject
   const session = await LanguageModel.create({
     initialPrompts: [{ role: 'system', content: promptSpec.systemPrompt }],
+    // TODO: These two sampling parameters are deprecated, migrate when needed
+    // https://developer.chrome.com/docs/ai/prompt-api#sampling_parameters
+    // https://github.com/webmachinelearning/prompt-api#configuration-of-sampling-modes
     temperature: 0,
     topK: 1,
   });

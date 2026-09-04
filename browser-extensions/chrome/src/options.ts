@@ -307,6 +307,8 @@ class OptionsController {
       return;
     }
 
+    // We set expectedOutputs here, only to silence the "No output language was specified" warning, which is logged for extension pages only
+    // 2026-09-02: we measured that declaring a supported language does not alter the model output
     const availability = await LanguageModel.availability({ expectedOutputs: PAGE_MODEL_LANGUAGES });
     statusText.textContent = chrome.i18n.getMessage(`ai_model_${availability}`);
     // Only a model that is absent can be fetched, and starting a multi-gigabyte download is the user's call to make
