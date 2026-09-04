@@ -4,10 +4,11 @@ import type { Candidate, CandidateLabel, ClassifiedCandidate, ClassifyCandidates
 
 const PROMPT_SPECS = new Map<string, PromptSpec<CandidateLabel>>([[hyphenPrompt.kind, hyphenPrompt]]);
 
-// One base session per ambiguous shape, holding only that shape's system prompt. Cloning it per candidate saves re-parsing the system prompt, and create() costs roughly five prompts
-// We cache the promise, not the session, so batches arriving while create() is in flight share it. A rejected create() is dropped, because the model can arrive later (the options-page download)
+// One base session per ambiguous shape
 const baseSessions = new Map<string, Promise<LanguageModel>>();
 
+// We cache the promise, not the session, so batches arriving while create() is in flight share it.
+// A rejected create() is dropped, because the model can arrive later (the options-page download)
 function getBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   let session = baseSessions.get(promptSpec.kind);
   if (session === undefined) {
@@ -46,7 +47,6 @@ async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
     topK: 1,
   });
 
-  // The system prompt only rides in initialPrompts, so this is the only place it is ever logged. A fresh line here also marks an MV3 cold start
   console.debug(`[pangu] ${promptSpec.kind} base session created (version ${promptSpec.version}, temperature 0, topK 1), system prompt:\n${promptSpec.systemPrompt}`);
   return session;
 }
@@ -56,7 +56,7 @@ async function classifyOne(promptSpec: PromptSpec<CandidateLabel>, base: Languag
   console.debug(`[pangu] ${promptSpec.kind} prompt:\n${question}`);
 
   try {
-    // One clone per candidate: a fresh context without paying create() again
+    // One clone per candidate: a fresh context without create() which is slow
     const turn = await base.clone();
     let raw: string;
     try {
@@ -65,7 +65,6 @@ async function classifyOne(promptSpec: PromptSpec<CandidateLabel>, base: Languag
       turn.destroy();
     }
 
-    // The model answers in display tokens; only the prompt spec knows them
     const label = promptSpec.labelForDisplayToken(JSON.parse(raw));
     if (label === null) {
       throw new TypeError(`response outside the constraint enum: ${raw}`);
@@ -79,8 +78,8 @@ async function classifyOne(promptSpec: PromptSpec<CandidateLabel>, base: Languag
   }
 }
 
-// A single candidate's failure stays that candidate's failure, so the batch always answers. The loop is sequential because the on-device model runs inference single-lane, and because labels
-// zip against candidates by index
+// A single candidate's failure stays that candidate's failure, so the batch always answers
+// The loop is sequential because the on-device model runs inference single-lane, and because labels zip against candidates by index
 // An unknown kind answers like any other batch-wide failure, so the page gets the same no as for an absent model
 export async function classifyCandidates(kind: string, candidates: readonly Candidate[]): Promise<ClassifyCandidatesResponse> {
   const promptSpec = PROMPT_SPECS.get(kind);
