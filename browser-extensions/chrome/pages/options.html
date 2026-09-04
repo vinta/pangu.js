@@ -126,18 +126,19 @@
               <label class="toggle">
                 <input type="checkbox" class="toggle-input" id="ai-spacing-checkbox" />
                 <span class="toggle-switch"></span>
-                <span class="toggle-label" data-i18n="label_is_enable_ai_spacing">用瀏覽器內建的 AI 判斷負號</span>
+                <span class="toggle-label" data-i18n="label_is_enable_ai_spacing">啟用 AI 空格之神</span>
               </label>
-              <p class="form-help-text" data-i18n="ai_spacing_description">
-                中文和數字之間的「-」有時候是負號（氣溫是 -5 度），有時候是範圍或分隔（1976 年 - 2018 年），規則分不出來。開啟後會用 Chrome
-                內建的模型判斷，只有讀成負號的才會把後面的空白拿掉，其他情況維持原本的排版。判斷都在你的裝置上進行，不會把網頁內容傳到任何地方。
+              <p class="form-help-text" data-i18n="ai_spacing_description"> 某些符號（例如 `-` 或 `+`）在不同語境下的意思完全不一樣，沒辦法只靠規則定義來判斷，但是這正好是 LLM 擅長的領域。 </p>
+              <p class="form-help-text" data-i18n-html="ai_spacing_description_2">
+                使用瀏覽器內建的
+                <a href="https://developer.chrome.com/docs/ai/prompt-api" target="_blank">Gemini Nano</a>
+                模型，所有的操作都只在你的裝置上運行（完全離線，沒有任何資料會被上傳到雲端），最重要的是：不用錢。
               </p>
-              <p class="form-help-text" data-i18n="ai_spacing_requirements">需要 Chrome 內建的模型，第一次使用要先下載好幾 GB。沒有模型的時候會自動退回原本的規則。</p>
-              <p class="form-help-text" data-i18n="refresh_required">重新整理網頁之後才會生效</p>
               <p class="form-help-text" id="ai-model-status"></p>
               <button id="ai-model-download-btn" class="btn btn-sm" style="display: none" data-i18n="button_download_ai_model">下載模型</button>
             </div>
           </div>
+          <p class="form-help-text" data-i18n="hidden_settings_refresh_required">部分功能需要重新整理網頁之後才會生效</p>
         </div>
 
         <!-- Footer -->
