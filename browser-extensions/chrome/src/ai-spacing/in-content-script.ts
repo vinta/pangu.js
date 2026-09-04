@@ -40,14 +40,13 @@ function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readon
   return settledCandidates;
 }
 
-// The worker's base session costs a four-to-five-second create() after every MV3 idle termination, and the first batch that can carry a candidate is not settled until pageDelayMs and the sweep are
-// over. Asked for at injection with no candidates, that create() overlaps the wait instead of following it; the answer is dropped, since the first real batch reads its own. Gated on the page text
-// showing the shape at all, for the same reason applyAiSpacing asks only for the shapes that found a candidate: AI spacing is on by default, and an unconditional warm-up would load the model on every
-// page for every user. Script and style text is inside the gate's text, an over-approximation that only costs the occasional idle wake
+// Warm up the service worker's base sessions to mitigate cold start, which takes seconds on the first LanguageModel.create()
 export function warmUpAiSpacing() {
   const pageText = document.documentElement.textContent ?? '';
+  // The loop is not redundant: we create base sessions per ambiguous shape
   for (const ambiguousShape of AMBIGUOUS_SHAPES) {
     if (ambiguousShape.occursIn(pageText)) {
+      console.debug(`[pangu] warm up base session: ${ambiguousShape.kind}`);
       void classifyCandidates(ambiguousShape.kind, []);
     }
   }
