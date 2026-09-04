@@ -3,14 +3,14 @@ import { expect, test } from '@playwright/test';
 
 declare global {
   interface Window {
-    // Where these tests park what the batch tail hands them. The Text nodes cannot cross the evaluate boundary, so only the serializable half of each settled text node is kept
+    // Where the batch tail's output is parked. Text nodes cannot cross the evaluate boundary, so only the serializable half is kept
     __settledTextNodes: { unspaced: string; settled: string }[];
-    // How many times the batch tail fired, which is what proves the seam is per batch rather than per text node
+    // How many times the batch tail fired: proves the callback is per batch, not per text node
     __batchCount: number;
   }
 }
 
-// Stands in for the Chrome extension's classifier: the settled text nodes are parked on the page instead of being read for candidates, so nothing here knows any ambiguous shape exists
+// Stands in for the Chrome extension: the settled text nodes are parked on the page instead of being classified
 function collectSettledRuns(page: Page) {
   return page.evaluate(() => {
     pangu.onTextNodesSettled = (settledTextNodes) => {
@@ -55,8 +55,8 @@ test.describe('onTextNodesSettled', () => {
   });
 
   test('settle a text node a junction space wrote to after its own text spacing ran', async ({ page }) => {
-    // The boundary between the two text nodes prepends a space to the very node text spacing already visited. The list is in reverse document order, so the second node settles first, and the
-    // unchanged node is in the list too: whether that matters is the host's policy, so nothing is filtered here
+    // Boundary spacing prepends a space to a node text spacing already visited, so its settled text is not what spacingText() alone gave. The list is in reverse document order, so the second
+    // node settles first. The unchanged node is in the list too: nothing is filtered here
     await page.setContent('<div><b>abc</b><span>氣溫是-5度</span></div>');
 
     expect(await collectSettledRuns(page)).toEqual([

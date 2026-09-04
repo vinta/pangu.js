@@ -148,9 +148,8 @@ function needsBoundarySpace(currentTail: string, nextFirst: string) {
   return spaceJunction(currentTail, nextFirst).endsWith(` ${nextFirst}`) && !isQuoteNextToCjk(currentTail.slice(-1), nextFirst);
 }
 
-// The junction reading can put a second space inside the tail itself, not only at the junction: CJK/ + CJK reads CJK / CJK, because the slash rule needs both sides of the slash in view while each
-// node alone shows it only one. The boundary verdict places the junction space; this returns the tail with its interior spaces written in, or null when the tail already reads right. Only meaningful
-// when the boundary verdict is a spacing action: 'none' means the nodes are separated or the junction reading does not apply, so the tail must stay untouched
+// The junction reading can put a second space inside the tail itself: CJK/ + CJK reads CJK / CJK, because the slash rule needs both sides of the slash in view. Returns the tail with its interior
+// spaces written in, or null when the tail already reads right. Only meaningful when the boundary verdict is a spacing action; on 'none' the tail must stay untouched
 export function respaceCurrentTail(currentTail: string, nextFirst: string) {
   const spacedJunction = spaceJunction(currentTail, nextFirst);
   if (!spacedJunction.endsWith(` ${nextFirst}`)) {

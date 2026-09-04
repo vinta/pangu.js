@@ -60,8 +60,7 @@ test.describe('applyLateFixes', () => {
     await page.setContent('<div id="target">氣溫是-5度左右</div>');
 
     await page.evaluate(() => {
-      // Stands in for the extension's policy half: whatever the seam settled, delete every space between a hyphen-minus and the digit after it. Descending, so each deletion leaves the
-      // indexes still to come untouched
+      // Stands in for the extension: delete every space between a hyphen-minus and the digit after it. Descending, so a deletion never shifts the indexes still to come
       pangu.onTextNodesSettled = (settledTextNodes) => {
         const lateFixes = [];
         for (const settledTextNode of settledTextNodes) {

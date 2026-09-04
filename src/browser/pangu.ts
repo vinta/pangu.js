@@ -26,8 +26,8 @@ export interface LateFix {
   readonly data: string;
 }
 
-// Any whitespace at a text node's edge already separates it from the neighboring text node, matching the /\s/ that scanBetweenTextNodes uses on the nodes in the gap.
-// \s covers NBSP, which spacingText never rewrites, so an author's NBSP reaches this check intact and must still count as a space
+// Any whitespace at a text node's edge already separates it from its neighbor, matching the /\s/ that scanBetweenTextNodes() uses on the gap
+// \s covers NBSP, which spacingText() never rewrites, so an author's NBSP still counts as a space here
 const TRAILING_WHITESPACE = /\s$/;
 const LEADING_WHITESPACE = /^\s/;
 
@@ -219,7 +219,7 @@ export class BrowserPangu extends Pangu {
     // Visibility verdicts are memoized per batch; styles may change between batches
     this.visibilityDetector.clearCache();
 
-    // Text nodes waiting for the batch to settle, captured from pre-spacing text and resolved against post-spacing data at the batch tail
+    // Text nodes waiting for the batch to settle: unspaced text captured now, settled text read at the batch tail
     const unsettledTextNodes: UnsettledTextNode[] = [];
 
     let currentTextNode: Node | undefined;

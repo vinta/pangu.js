@@ -5,7 +5,7 @@ import type { ClassifiedCandidate, ClassifyCandidatesMessage, ClassifyCandidates
 
 const pangu = window.pangu;
 
-// The core seam's records, read off the singleton rather than imported: the content script is a classic script that cannot import the package at runtime
+// Read off the singleton rather than imported: the content script is a classic script and cannot import the package
 type SettledTextNode = Parameters<NonNullable<typeof pangu.onTextNodesSettled>>[0][number];
 type LateFix = Parameters<typeof pangu.applyLateFixes>[0][number];
 
@@ -16,7 +16,7 @@ async function classifyCandidates(kind: string, candidates: ClassifyCandidatesMe
   try {
     return await chrome.runtime.sendMessage<ClassifyCandidatesMessage, ClassifyCandidatesResponse>(message);
   } catch (error) {
-    // No worker to answer, e.g. the extension was reloaded while this page stayed open. Same verdict as any other no
+    // No worker to answer, e.g. the extension was reloaded while this page stayed open
     return { ok: false, error: String(error) };
   }
 }
@@ -74,7 +74,7 @@ export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[
     classifiedCandidateBatches.push(response.candidates);
   }
 
-  // A text node can carry candidates from more than one ambiguous shape, and core applies one fix per text node per call, so every edit for one node composes into a single late fix
+  // Core applies one fix per text node per call, so every edit for one node composes into a single late fix
   const textEditsByNode = new Map<Text, { settled: string; textEdits: TextEdit[] }>();
   for (const [batchIndex, { ambiguousShape, settledCandidates }] of batches.entries()) {
     for (const [index, settledCandidate] of settledCandidates.entries()) {

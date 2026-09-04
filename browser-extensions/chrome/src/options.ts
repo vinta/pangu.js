@@ -294,14 +294,14 @@ class OptionsController {
     checkbox.closest('.toggle')?.classList.toggle('toggle-disabled', !canRun);
   }
 
-  // The model's own state, which is browser-wide and has nothing to do with the toggle: the setting can be on while the model is still absent, and then the page simply keeps the rules output
+  // The model's state is browser-wide and independent of the toggle: the setting can be on while the model is still absent, and then the page just keeps the rules output
   private async renderAiModelStatus() {
     const statusText = document.getElementById('ai-model-status') as HTMLElement;
     const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
 
     const availability = await getAiModelAvailability();
     statusText.textContent = chrome.i18n.getMessage(`ai_model_${availability}`);
-    // Only a model that is absent can be fetched, and starting a multi-gigabyte download is the user's call to make
+    // Only an absent model can be fetched, and a multi-gigabyte download is the user's call
     downloadButton.style.display = availability === 'downloadable' ? 'block' : 'none';
   }
 

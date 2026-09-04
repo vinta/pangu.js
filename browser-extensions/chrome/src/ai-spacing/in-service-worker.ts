@@ -1,19 +1,11 @@
-// AI spacing's classifier: Chrome's built-in Prompt API classifies how one flagged symbol reads, and rules elsewhere decide the spacing. The model only ever picks a label from an enum, it
-// never emits text (ADR 0009).
-//
-// This lives in the service worker rather than the content script for one reason: `temperature` and `topK` are documented as the extension-context surface and a content script appears to get the
-// plain-web surface instead, where sampling cannot be pinned at all. See docs/prompt-api-reference.md.
 import type { PromptSpec } from './ambiguous-shape';
 import { hyphenPrompt } from './hyphen-prompt';
 import type { Candidate, CandidateLabel, ClassifiedCandidate, ClassifyCandidatesResponse } from './messages';
 
-// One prompt spec per ambiguous shape, keyed by the `kind` the message carries
 const PROMPT_SPECS = new Map<string, PromptSpec<CandidateLabel>>([[hyphenPrompt.kind, hyphenPrompt]]);
 
-// One base session per ambiguous shape, each holding only that shape's system prompt: cloning it per candidate saves re-parsing the system instructions, and create() costs roughly five prompts. The
-// sessions are in-memory, so MV3 idle termination simply means the next call recreates them. What is cached is the promise, not the session: batches from several tabs that arrive while the first
-// create() is still in flight share that one create() instead of each paying for its own and leaking the extra sessions. A rejected create() is not kept, because the model can arrive later (the
-// options-page download) and the next batch should ask again.
+// One base session per ambiguous shape, holding only that shape's system prompt. Cloning it per candidate saves re-parsing the system prompt, and create() costs roughly five prompts
+// We cache the promise, not the session, so batches arriving while create() is in flight share it. A rejected create() is dropped, because the model can arrive later (the options-page download)
 const baseSessions = new Map<string, Promise<LanguageModel>>();
 
 function getBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
@@ -28,7 +20,7 @@ function getBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   return session;
 }
 
-// create() at availability 'downloadable' silently starts a multi-gigabyte download, so a session is only ever created once the model is already there.
+// create() at availability 'downloadable' silently starts a multi-gigabyte download, so we only create a session once the model is already there
 async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   if (typeof LanguageModel === 'undefined') {
     throw new Error('LanguageModel is not exposed in this context');
@@ -53,15 +45,16 @@ async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
     temperature: 0,
     topK: 1,
   });
-  // The system prompt rides in initialPrompts, so this is the only place it is ever sent; a fresh line here also marks every MV3 cold start paying the multi-second create()
+
+  // The system prompt only rides in initialPrompts, so this is the only place it is ever logged. A fresh line here also marks an MV3 cold start
   console.debug(`[pangu] ${promptSpec.kind} base session created (version ${promptSpec.version}, temperature 0, topK 1), system prompt:\n${promptSpec.systemPrompt}`);
   return session;
 }
 
 async function classifyOne(promptSpec: PromptSpec<CandidateLabel>, base: LanguageModel, candidate: Candidate): Promise<ClassifiedCandidate> {
-  // Logged before the model call so a candidate that hangs or throws still shows what was asked. Debug level: visible in this worker's console (chrome://extensions -> service worker) at Verbose
   const question = promptSpec.buildQuestion(candidate.sentence, candidate.at);
   console.debug(`[pangu] ${promptSpec.kind} prompt:\n${question}`);
+
   try {
     // One clone per candidate: a fresh context without paying create() again
     const turn = await base.clone();
@@ -72,7 +65,7 @@ async function classifyOne(promptSpec: PromptSpec<CandidateLabel>, base: Languag
       turn.destroy();
     }
 
-    // The model answers in display tokens; nothing outside the prompt spec ever sees one
+    // The model answers in display tokens; only the prompt spec knows them
     const label = promptSpec.labelForDisplayToken(JSON.parse(raw));
     if (label === null) {
       throw new TypeError(`response outside the constraint enum: ${raw}`);
@@ -86,9 +79,9 @@ async function classifyOne(promptSpec: PromptSpec<CandidateLabel>, base: Languag
   }
 }
 
-// A single candidate's failure stays that candidate's failure: the batch always answers, so a constraint the model cannot satisfy shows up as one recorded error rather than a lost page. The loop is
-// sequential because the on-device model runs inference single-lane, so parallel clones only wait on each other, and because request and response then zip by index.
-// A kind with no prompt spec registered here answers like any other batch-wide failure rather than throwing, so the page gets the same clean no as it does for an absent model.
+// A single candidate's failure stays that candidate's failure, so the batch always answers. The loop is sequential because the on-device model runs inference single-lane, and because labels
+// zip against candidates by index
+// An unknown kind answers like any other batch-wide failure, so the page gets the same no as for an absent model
 export async function classifyCandidates(kind: string, candidates: readonly Candidate[]): Promise<ClassifyCandidatesResponse> {
   const promptSpec = PROMPT_SPECS.get(kind);
   if (promptSpec === undefined) {

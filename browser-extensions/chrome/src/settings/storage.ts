@@ -29,8 +29,7 @@ export const DEFAULT_SETTINGS: Settings = {
 
 const SETTINGS_KEYS = Object.keys(DEFAULT_SETTINGS) as (keyof Settings)[];
 
-// chrome.storage.sync reads from a local database (cloud sync happens in the background), so reading fresh on every call is cheap; there is no cache.
-// get(DEFAULT_SETTINGS) fills missing keys with defaults natively.
+// chrome.storage.sync reads from a local database, so reading fresh on every call is cheap and there is no cache. get(DEFAULT_SETTINGS) fills missing keys with defaults
 export async function getSettings() {
   return (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
 }

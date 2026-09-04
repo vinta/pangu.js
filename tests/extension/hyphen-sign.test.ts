@@ -134,7 +134,7 @@ describe('hyphenSign.occursIn()', () => {
 });
 
 describe('hyphenSign.settle()', () => {
-  // What a batch hands the page side: the bytes text spacing read, then the bytes the batch settled on
+  // What a batch hands the page side: the unspaced text, then the settled text
   function settleAll(unspaced: string, settled: string) {
     return hyphenSign.find(unspaced).map((candidateMatch) => hyphenSign.settle(settled, candidateMatch));
   }
@@ -188,7 +188,7 @@ describe('hyphenSign.edits()', () => {
 });
 
 describe('applyTextEdits()', () => {
-  // A stand-in second ambiguous shape, inserting a space rather than removing one, so the composition is exercised in both directions on one text node
+  // A stand-in second ambiguous shape that inserts a space rather than removing one, so one text node composes edits in both directions
   const spaceInserter: AmbiguousShape = {
     kind: 'space-inserter',
     occursIn: () => false,
@@ -202,7 +202,7 @@ describe('applyTextEdits()', () => {
     const settled = '氣溫是 - 5 度 A+B';
     const textEdits: TextEdit[] = [...hyphenSign.edits(settled, 4), ...spaceInserter.edits(settled, 11)];
 
-    // Descending index order is what keeps the insert from shifting the delete, whichever order the shapes were asked in
+    // Descending index order keeps the insert from shifting the delete, whichever order the shapes were asked in
     expect(applyTextEdits(settled, textEdits)).toBe('氣溫是 -5 度 A +B');
     expect(applyTextEdits(settled, [...textEdits].reverse())).toBe('氣溫是 -5 度 A +B');
   });

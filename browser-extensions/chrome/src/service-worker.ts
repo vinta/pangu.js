@@ -26,8 +26,7 @@ async function unregisterAllContentScripts() {
   }
 }
 
-// One call per script: registerContentScripts() is all-or-nothing across its array, so a user-supplied pattern that Chrome rejects must not take
-// down the other script
+// One call per script: registerContentScripts() is all-or-nothing across its array, so a pattern Chrome rejects must not take down the other script
 async function registerContentScript(contentScript: chrome.scripting.RegisteredContentScript) {
   try {
     await chrome.scripting.registerContentScripts([contentScript]);
@@ -76,15 +75,15 @@ async function registerContentScripts() {
   }
 }
 
-// registerContentScripts() starts by unregistering everything and reads fresh settings when its turn comes, so queued runs converge on the latest
-// state; the queue only keeps overlapping runs from interleaving
+// registerContentScripts() unregisters everything first and reads fresh settings, so queued runs converge on the latest state. The queue only keeps overlapping runs from interleaving
 let registrationQueue = Promise.resolve();
 function queueRegisterContentScripts() {
   registrationQueue = registrationQueue.then(() => registerContentScripts()).catch(console.error);
   return registrationQueue;
 }
 
-// The paper bag only marks spacing the user turned off: manual mode bags every tab, a filter-excluded url bags its tab (#296). Pages the extension merely cannot run on (chrome://, new tab pages, urls it cannot read) keep the face, so the icon is deliberately looser than the popup status row, which still reports those as 神隱中.
+// The paper bag only marks spacing the user turned off: manual mode bags every tab, a filter-excluded url bags its tab (#296). Pages the extension cannot run on (chrome://, new tab pages) keep
+// the face, unlike the popup status row, which reports them as inactive
 async function updateTabIcon(tabId: number, url: string | undefined, settings: Settings) {
   const path = shouldShowOffIcon(settings, url) ? OFF_ICON_PATHS : DEFAULT_ICON_PATHS;
   try {
@@ -101,7 +100,6 @@ async function updateAllTabIcons() {
 }
 
 chrome.runtime.onInstalled.addListener(async () => {
-  // Reconcile settings when extension is installed or updated to a new version
   await reconcileSettings();
   await queueRegisterContentScripts();
   await updateAllTabIcons();
@@ -113,7 +111,7 @@ chrome.runtime.onStartup.addListener(async () => {
   await updateAllTabIcons();
 });
 
-// The url is often not set yet on onCreated (new tab pages never get one at all, and a missing url is never user-excluded, so it keeps the face), onUpdated below refines it as soon as navigation commits
+// The url is often not set yet on onCreated (new tab pages never get one), so onUpdated below refines it as soon as navigation commits
 chrome.tabs.onCreated.addListener(async (tab) => {
   if (tab.id !== undefined) {
     await updateTabIcon(tab.id, tab.url || tab.pendingUrl, await getSettings());
@@ -126,8 +124,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 });
 
-// Registered synchronously at module scope, as MV3 requires for storage events to wake this worker. The event payload alone says what changed, so a
-// cold-started worker reacts correctly without any cached state.
+// Registered synchronously at module scope, as MV3 requires for storage events to wake this worker. The event payload alone says what changed, so a cold-started worker needs no cached state
 const REGISTRATION_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist', 'is_enable_text_autospace'];
 const ICON_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist'];
 onSettingsChanged((changedKeys) => {
@@ -139,16 +136,14 @@ onSettingsChanged((changedKeys) => {
   }
 });
 
-// AI spacing's only entry point, registered synchronously at module scope for the same reason as onSettingsChanged above. It reads no settings: whether the feature is on is the content script's
-// question, and it is the gate.
-// Chrome closes the message channel when a listener returns a promise, so the listener stays a plain function that returns true and lets an async helper call sendResponse. classifyCandidates reports
-// failure in its response rather than rejecting, so there is no path that leaves a caller without an answer.
+// AI spacing's only entry point, registered at module scope for the same reason as onSettingsChanged above. It reads no settings: the content script is the gate
+// Chrome closes the message channel when a listener returns a promise, so this stays a plain function that returns true and lets classifyCandidates() call sendResponse. It never rejects
 chrome.runtime.onMessage.addListener((message: MessageToServiceWorker, _sender: chrome.runtime.MessageSender, sendResponse: (response: ClassifyCandidatesResponse) => void) => {
   if (message.type === 'CLASSIFY_CANDIDATES') {
     classifyCandidates(message.kind, message.candidates).then(sendResponse);
     return true;
   }
 
-  // A message this worker does not answer must leave its channel closing normally
+  // A message this worker does not answer closes its channel normally
   return false;
 });
