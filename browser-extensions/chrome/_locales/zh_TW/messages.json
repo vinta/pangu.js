@@ -170,11 +170,11 @@
     "description": ""
   },
   "label_is_enable_ai_spacing": {
-    "message": "威力加強版 AI 空格之神 Plus",
+    "message": "威力加強版 AI 空格之神",
     "description": ""
   },
   "ai_spacing_description": {
-    "message": "某些符號（例如 $code_open$+$code_close$ 或 $code_open$-$code_close$）在不同語境下的意思完全不一樣，沒辦法只靠規則定義來判斷，但是這正好是 LLM 擅長的領域。各位觀眾，威力加強版 AI 空格之神 Plus！",
+    "message": "某些符號（例如 $code_open$+$code_close$ 或 $code_open$-$code_close$）在不同語境下的意思完全不一樣，沒辦法只靠空格之神的規則定義來判斷，但是這正好是 LLM 擅長的領域。各位觀眾，威力加強版 AI 空格之神！",
     "description": "",
     "placeholders": {
       "code_open": {
@@ -186,7 +186,7 @@
     }
   },
   "ai_spacing_description_2": {
-    "message": "使用瀏覽器內建的 $link_open$Gemini Nano$link_close$ 模型，所有的操作都只在你的裝置上運行（完全離線，沒有任何資料會被上傳到雲端），最重要的是：不用錢。",
+    "message": "使用瀏覽器內建的 $link_open$Gemini Nano$link_close$ 模型，所有的操作都只在你的電腦上運行（完全離線，沒有任何資料會被上傳到雲端），最重要的是：不用錢。",
     "description": "",
     "placeholders": {
       "link_open": {
@@ -198,11 +198,11 @@
     }
   },
   "ai_model_unsupported": {
-    "message": "你的瀏覽器沒有內建的模型",
+    "message": "你的瀏覽器不支援這個功能",
     "description": ""
   },
   "ai_model_unavailable": {
-    "message": "這台裝置跑不動內建的模型",
+    "message": "你的電腦跑不動內建的模型，可憐吶",
     "description": ""
   },
   "ai_model_downloadable": {
@@ -214,7 +214,7 @@
     "description": ""
   },
   "ai_model_available": {
-    "message": "模型已經準備好了",
+    "message": "模型蓄勢待發",
     "description": ""
   },
   "button_download_ai_model": {
