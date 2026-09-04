@@ -103,28 +103,6 @@
           </div>
         </div>
 
-        <!-- AI Spacing Section -->
-        <div class="options-section">
-          <h2 class="options-section-title" data-i18n="label_ai_settings">實驗性功能</h2>
-          <div class="card">
-            <div class="options-toggle-section">
-              <label class="toggle">
-                <input type="checkbox" class="toggle-input" id="ai-spacing-checkbox" />
-                <span class="toggle-switch"></span>
-                <span class="toggle-label" data-i18n="label_is_enable_ai_spacing">用瀏覽器內建的 AI 判斷負號</span>
-              </label>
-              <p class="form-help-text" data-i18n="ai_spacing_description">
-                中文和數字之間的「-」有時候是負號（氣溫是 -5 度），有時候是範圍或分隔（1976 年 - 2018 年），規則分不出來。開啟後會用 Chrome
-                內建的模型判斷，只有讀成負號的才會把後面的空白拿掉，其他情況維持原本的排版。判斷都在你的裝置上進行，不會把網頁內容傳到任何地方。
-              </p>
-              <p class="form-help-text" data-i18n="ai_spacing_requirements">需要 Chrome 內建的模型，第一次使用要先下載好幾 GB。沒有模型的時候會自動退回原本的規則。</p>
-              <p class="form-help-text" data-i18n="refresh_required">重新整理網頁之後才會生效</p>
-              <p class="form-help-text" id="ai-model-status"></p>
-              <button id="ai-model-download-btn" class="btn btn-sm" style="display: none" data-i18n="button_download_ai_model">下載模型</button>
-            </div>
-          </div>
-        </div>
-
         <!-- Hidden Settings Section -->
         <div class="options-section">
           <h2 class="options-section-title" data-i18n="label_hidden_settings">隱藏設定</h2>
@@ -141,6 +119,23 @@
               </p>
               <p class="form-help-text" data-i18n="text_autospace_limitations">但是缺點是不支援符號而且那個間距比真正的空格窄很多，建議還是跟空格之神搭配使用。</p>
               <p class="form-help-text" id="text-autospace-not-supported-msg" style="display: none" data-i18n="text_autospace_not_supported">你的瀏覽器不支援這個功能，需要 Chrome v140 以上版本。</p>
+            </div>
+          </div>
+          <div class="card mt-4">
+            <div class="options-toggle-section">
+              <label class="toggle">
+                <input type="checkbox" class="toggle-input" id="ai-spacing-checkbox" />
+                <span class="toggle-switch"></span>
+                <span class="toggle-label" data-i18n="label_is_enable_ai_spacing">用瀏覽器內建的 AI 判斷負號</span>
+              </label>
+              <p class="form-help-text" data-i18n="ai_spacing_description">
+                中文和數字之間的「-」有時候是負號（氣溫是 -5 度），有時候是範圍或分隔（1976 年 - 2018 年），規則分不出來。開啟後會用 Chrome
+                內建的模型判斷，只有讀成負號的才會把後面的空白拿掉，其他情況維持原本的排版。判斷都在你的裝置上進行，不會把網頁內容傳到任何地方。
+              </p>
+              <p class="form-help-text" data-i18n="ai_spacing_requirements">需要 Chrome 內建的模型，第一次使用要先下載好幾 GB。沒有模型的時候會自動退回原本的規則。</p>
+              <p class="form-help-text" data-i18n="refresh_required">重新整理網頁之後才會生效</p>
+              <p class="form-help-text" id="ai-model-status"></p>
+              <button id="ai-model-download-btn" class="btn btn-sm" style="display: none" data-i18n="button_download_ai_model">下載模型</button>
             </div>
           </div>
         </div>

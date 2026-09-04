@@ -141,10 +141,6 @@
     "message": "太吵了，靜音",
     "description": ""
   },
-  "label_ai_settings": {
-    "message": "實驗性功能",
-    "description": ""
-  },
   "label_is_enable_ai_spacing": {
     "message": "用瀏覽器內建的 AI 判斷負號",
     "description": ""
