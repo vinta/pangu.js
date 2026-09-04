@@ -73,6 +73,11 @@ export function hasInsertedGap(text: string, hyphenIndex: number) {
 export const hyphenSign: AmbiguousShape = {
   kind: 'hyphen-sign',
 
+  // search() starts at 0 whatever lastIndex holds and puts it back afterwards, so the scan regex doubles as the gate; test() on a g regex would advance it
+  occursIn(text: string) {
+    return text.search(CJK_HYPHEN_DIGIT) !== -1;
+  },
+
   find(unspaced: string) {
     return findHyphenMatches(unspaced);
   },

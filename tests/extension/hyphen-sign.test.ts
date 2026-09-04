@@ -114,6 +114,25 @@ describe('CJK', () => {
   });
 });
 
+describe('hyphenSign.occursIn()', () => {
+  it('answer yes when the tight shape occurs anywhere in the text', () => {
+    expect(hyphenSign.occursIn('前面一句。氣溫是-5度左右')).toBe(true);
+  });
+
+  it('answer no when only looser shapes occur', () => {
+    expect(hyphenSign.occursIn('abc-5')).toBe(false);
+    expect(hyphenSign.occursIn('氣溫是 -5度')).toBe(false);
+    expect(hyphenSign.occursIn('沒有連字號')).toBe(false);
+  });
+
+  it('leave the shared scan regex where a repeat and find() expect it', () => {
+    const text = '氣溫是-5度左右';
+    expect(hyphenSign.occursIn(text)).toBe(true);
+    expect(hyphenSign.occursIn(text)).toBe(true);
+    expect(hyphenSign.find(text)).toHaveLength(1);
+  });
+});
+
 describe('hyphenSign.settle()', () => {
   // What a batch hands the page side: the bytes text spacing read, then the bytes the batch settled on
   function settleAll(unspaced: string, settled: string) {
@@ -172,6 +191,7 @@ describe('applyTextEdits()', () => {
   // A stand-in second ambiguous shape, inserting a space rather than removing one, so the composition is exercised in both directions on one text node
   const spaceInserter: AmbiguousShape = {
     kind: 'space-inserter',
+    occursIn: () => false,
     find: () => [],
     settle: () => null,
     isFix: (label) => label === 'insert',

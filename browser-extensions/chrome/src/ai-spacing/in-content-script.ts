@@ -40,6 +40,19 @@ function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readon
   return settledCandidates;
 }
 
+// The worker's base session costs a four-to-five-second create() after every MV3 idle termination, and the first batch that can carry a candidate is not settled until pageDelayMs and the sweep are
+// over. Asked for at injection with no candidates, that create() overlaps the wait instead of following it; the answer is dropped, since the first real batch reads its own. Gated on the page text
+// showing the shape at all, for the same reason applyAiSpacing asks only for the shapes that found a candidate: AI spacing is on by default, and an unconditional warm-up would load the model on every
+// page for every user. Script and style text is inside the gate's text, an over-approximation that only costs the occasional idle wake
+export function warmUpAiSpacing() {
+  const pageText = document.documentElement.textContent ?? '';
+  for (const ambiguousShape of AMBIGUOUS_SHAPES) {
+    if (ambiguousShape.occursIn(pageText)) {
+      void classifyCandidates(ambiguousShape.kind, []);
+    }
+  }
+}
+
 // AI spacing's page-side half: the rules already spaced these text nodes, and the candidates whose label calls for a fix get that space taken back out.
 // Every step logs at debug level (hidden until the console's Verbose level is on), so a wrong verdict on a live page is traceable without a build: this side shows each candidate's sentence and
 // verdict, and the service worker's console shows the exact prompt text and raw model output

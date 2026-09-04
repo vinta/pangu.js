@@ -34,6 +34,7 @@ export interface SettledCandidate extends Candidate {
 // Page side, content script
 export interface AmbiguousShape {
   readonly kind: string; // joins this half to its PromptSpec, and discriminates CLASSIFY_CANDIDATES
+  occursIn(text: string): boolean; // whether the tight shape occurs anywhere in text: the warm-up's page-level gate, a yes/no scan without find's per-hit work
   find(unspaced: string): CandidateMatch[]; // tight-shape scan on pre-spacing bytes, with sentence slice and ordinal
   settle(settled: string, candidateMatch: CandidateMatch): number | null; // the symbol's settled index when the inserted gap is present, else null
   isFix(label: string): boolean; // which label triggers the fix
