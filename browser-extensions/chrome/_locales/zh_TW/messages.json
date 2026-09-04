@@ -206,7 +206,7 @@
     "description": ""
   },
   "ai_model_downloadable": {
-    "message": "模型還沒下載",
+    "message": "模型還沒下載，是在等什麼？",
     "description": ""
   },
   "ai_model_downloading": {
@@ -214,7 +214,7 @@
     "description": ""
   },
   "ai_model_available": {
-    "message": "模型蓄勢待發",
+    "message": "模型運作中",
     "description": ""
   },
   "button_download_ai_model": {
