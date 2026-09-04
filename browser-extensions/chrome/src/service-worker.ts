@@ -27,7 +27,7 @@ async function unregisterAllContentScripts() {
 }
 
 // One call per script: registerContentScripts() is all-or-nothing across its array, so a pattern Chrome rejects must not take down the other script
-async function registerContentScript(contentScript: chrome.scripting.RegisteredContentScript) {
+async function registerOneContentScript(contentScript: chrome.scripting.RegisteredContentScript) {
   try {
     await chrome.scripting.registerContentScripts([contentScript]);
   } catch (error) {
@@ -46,7 +46,7 @@ async function registerContentScripts() {
 
   if (settings.is_enable_text_autospace) {
     // Visual-only native autospacing, deliberately not gated by spacing_mode, filter_mode, blacklist, or whitelist (see docs/adr/0008)
-    await registerContentScript({
+    await registerOneContentScript({
       id: TEXT_AUTOSPACE_SCRIPT_ID,
       css: ['dist/content-script.css'],
       matches: ['http://*/*', 'https://*/*'],
@@ -71,7 +71,7 @@ async function registerContentScripts() {
       contentScript.matches = validWhitelist;
     }
 
-    await registerContentScript(contentScript);
+    await registerOneContentScript(contentScript);
   }
 }
 
