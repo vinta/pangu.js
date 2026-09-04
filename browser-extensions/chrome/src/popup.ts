@@ -48,6 +48,13 @@ class PopupController {
       });
     }
 
+    const aiSpacingToggle = document.getElementById('ai-spacing-toggle') as HTMLInputElement;
+    if (aiSpacingToggle) {
+      aiSpacingToggle.addEventListener('change', () => {
+        this.handleAiSpacingToggleChange();
+      });
+    }
+
     const manualSpacingBtn = document.getElementById('manual-spacing-btn');
     if (manualSpacingBtn) {
       manualSpacingBtn.addEventListener('click', () => {
@@ -87,6 +94,7 @@ class PopupController {
     this.renderSpacingModeToggle(settings);
     this.renderMuteToggle(settings);
     this.renderTextAutospaceToggle(settings);
+    this.renderAiSpacingToggle(settings);
     this.renderStatus(settings);
     this.renderAddToBlacklistButton(settings);
     this.renderVersion();
@@ -114,6 +122,13 @@ class PopupController {
       textAutospaceToggle.checked = isSupported && settings.is_enable_text_autospace;
       textAutospaceToggle.disabled = !isSupported;
       textAutospaceToggle.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
+    }
+  }
+
+  private renderAiSpacingToggle(settings: Settings) {
+    const aiSpacingToggle = document.getElementById('ai-spacing-toggle') as HTMLInputElement;
+    if (aiSpacingToggle) {
+      aiSpacingToggle.checked = settings.is_enable_ai_spacing;
     }
   }
 
@@ -186,6 +201,19 @@ class PopupController {
     const toggle = document.getElementById('text-autospace-toggle') as HTMLInputElement;
     try {
       await updateSettings({ is_enable_text_autospace: toggle.checked });
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+      await this.render();
+      return;
+    }
+
+    this.showMessage(chrome.i18n.getMessage('refresh_required'), 'info', 1000 * 3);
+  }
+
+  private async handleAiSpacingToggleChange() {
+    const toggle = document.getElementById('ai-spacing-toggle') as HTMLInputElement;
+    try {
+      await updateSettings({ is_enable_ai_spacing: toggle.checked });
     } catch (error) {
       console.error('Failed to save settings:', error);
       await this.render();
