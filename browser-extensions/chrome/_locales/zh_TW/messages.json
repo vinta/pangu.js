@@ -186,7 +186,7 @@
     }
   },
   "ai_spacing_description_2": {
-    "message": "使用瀏覽器內建的 $link_open$Gemini Nano$link_close$ 模型，所有的操作都只在你的電腦上運行（完全離線，沒有任何資料會被上傳到雲端），最重要的是：不用錢。",
+    "message": "使用瀏覽器內建的 $link_open$Gemini Nano$link_close$ 模型，所有的操作都只在你的電腦上運行（完全離線，沒有任何資料會被上傳到雲端），更重要的是：不用錢。",
     "description": "",
     "placeholders": {
       "link_open": {
