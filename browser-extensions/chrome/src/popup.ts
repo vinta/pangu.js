@@ -1,4 +1,4 @@
-import { canAiModelRun, getAiModelAvailability } from './ai-spacing/in-extension-pages';
+import { canAiModelRun, getAiModelAvailability } from './ai-spacing/model';
 import type { ContentScriptResponse, ManualSpacingMessage, PingMessage } from './messages';
 import type { Settings } from './settings/storage';
 import { getSettings, onSettingsChanged, updateSettings } from './settings/storage';

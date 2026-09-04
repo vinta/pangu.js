@@ -1,4 +1,4 @@
-import { canAiModelRun, getAiModelAvailability, PAGE_MODEL_LANGUAGES } from './ai-spacing/in-extension-pages';
+import { canAiModelRun, getAiModelAvailability, startAiModelDownload } from './ai-spacing/model';
 import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, updateSettings } from './settings/storage';
 import { isValidMatchPattern } from './settings/urls';
 import { translatePage } from './ui/i18n';
@@ -309,9 +309,7 @@ class OptionsController {
     const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
     downloadButton.disabled = true;
     try {
-      // The download is browser-wide and outlives this page, so the session only exists to start it
-      const session = await LanguageModel.create({ expectedOutputs: PAGE_MODEL_LANGUAGES });
-      session.destroy();
+      await startAiModelDownload();
     } finally {
       downloadButton.disabled = false;
       await this.renderAiModelStatus();
