@@ -43,7 +43,7 @@ function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readon
 // AI spacing's page-side half: the rules already spaced these text nodes, and the candidates whose label calls for a fix get that space taken back out.
 // Every step logs at debug level (hidden until the console's Verbose level is on), so a wrong verdict on a live page is traceable without a build: this side shows each candidate's sentence and
 // verdict, and the service worker's console shows the exact prompt text and raw model output
-export async function classifyBatch(settledTextNodes: readonly SettledTextNode[]) {
+export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[]) {
   // Core hands over every text node text spacing read, so most batches carry no candidate at all. Asking only for the shapes that found one is what keeps the worker wakes, and the multi-second
   // cold-start create() behind them, down to the batches that can actually produce a fix
   const batches = AMBIGUOUS_SHAPES.map((ambiguousShape) => ({ ambiguousShape, settledCandidates: findCandidates(ambiguousShape, settledTextNodes) })).filter(

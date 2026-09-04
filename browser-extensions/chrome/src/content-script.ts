@@ -1,4 +1,4 @@
-import { classifyBatch } from './ai-spacing/in-content-script';
+import { applyAiSpacing } from './ai-spacing/in-content-script';
 import type { ContentScriptResponse, MessageToContentScript } from './messages';
 import { getSettings } from './settings/storage';
 
@@ -11,7 +11,7 @@ async function autoSpacingPage() {
   const settings = await getSettings();
   if (settings.is_enable_ai_spacing) {
     pangu.onTextNodesSettled = (settledTextNodes) => {
-      void classifyBatch(settledTextNodes);
+      void applyAiSpacing(settledTextNodes);
     };
   }
 
