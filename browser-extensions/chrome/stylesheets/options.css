@@ -78,6 +78,12 @@
   margin-top: var(--spacing-2);
 }
 
+/* A note under a section's cards; the bottom margin collapses with the footer's 2rem, so the same value on top keeps the gaps equal */
+.options-section-note {
+  margin-block: var(--spacing-8);
+  text-align: center;
+}
+
 /* URL list section */
 .url-list-section {
   margin-top: var(--spacing-4);

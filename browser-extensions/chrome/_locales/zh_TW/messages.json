@@ -189,7 +189,7 @@
     "message": "隱藏設定",
     "description": ""
   },
-  "hidden_settings_refresh_required": {
+  "settings_refresh_required": {
     "message": "部分功能需要重新整理網頁之後才會生效",
     "description": ""
   },
