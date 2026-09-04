@@ -318,24 +318,14 @@ class OptionsController {
   private async downloadAiModel() {
     const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
     downloadButton.disabled = true;
-
     try {
-      // The download is browser-wide, so this page needs the session only long enough to start it
-      const session = await LanguageModel.create({
-        expectedOutputs: PAGE_MODEL_LANGUAGES,
-        monitor: (monitor) => {
-          monitor.addEventListener('downloadprogress', (event) => {
-            console.log(`Downloading the built-in model: ${Math.round(event.loaded * 100)}%`);
-          });
-        },
-      });
+      // The download is browser-wide and outlives this page, so the session only exists to start it
+      const session = await LanguageModel.create({ expectedOutputs: PAGE_MODEL_LANGUAGES });
       session.destroy();
-    } catch (error) {
-      console.error('Failed to download the model:', error);
+    } finally {
+      downloadButton.disabled = false;
+      await this.renderAiModelStatus();
     }
-
-    downloadButton.disabled = false;
-    await this.renderAiModelStatus();
   }
 
   private async toggleSpacingMode() {
