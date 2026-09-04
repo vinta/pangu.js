@@ -74,7 +74,7 @@
     "description": ""
   },
   "quote": {
-    "message": "漢學家稱這個空白字元為「盤古之白」，因為它劈開了全形字和半形字之間的混沌。另有研究顯示，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有七成的比例會在 34 歲的時候跟自己不愛的人結婚，而其餘三成的人最後只能把遺產留給自己的貓。畢竟愛情跟書寫都需要適時地留白。",
+    "message": "漢學家稱這個空白字元為「盤古之白」，因為它劈開了全形字和半形字之間的混沌。江湖上也有傳言，打字的時候不喜歡在中文和英文之間加空格的人，感情路都走得很辛苦，有七成的比例會在 34 歲的時候跟自己不愛的人結婚，而其餘三成的人最後只能把遺產留給自己的貓。畢竟愛情跟書寫都需要適時地留白。",
     "description": ""
   },
   "label_settings": {
@@ -174,7 +174,7 @@
     "description": ""
   },
   "ai_spacing_description": {
-    "message": "某些符號（例如 $code_open$+$code_close$ 或 $code_open$-$code_close$）在不同語境下的意思完全不一樣，沒辦法只靠空格之神的規則定義來判斷，但是這正好是 LLM 擅長的領域。各位觀眾，威力加強版 AI 空格之神！",
+    "message": "某些符號（例如 $code_open$+$code_close$ 或 $code_open$-$code_close$）在不同語境下的意思完全不一樣，只靠空格之神原有的靜態規則來判斷到底要不要加空格是有極限的，但是 LLM 正好彌補了這個不足，於是 ── 各位觀眾，威力加強版 AI 空格之神！",
     "description": "",
     "placeholders": {
       "code_open": {
@@ -186,7 +186,7 @@
     }
   },
   "ai_spacing_description_2": {
-    "message": "使用瀏覽器內建的 $link_open$Gemini Nano$link_close$ 模型，所有的操作都只在你的電腦上運行（完全離線，沒有任何資料會被上傳到雲端），更重要的是：不用錢。",
+    "message": "使用瀏覽器內建的 $link_open$Gemini Nano$link_close$ 模型，所有的操作只在你的電腦上運行（完全離線，沒有任何資料會被上傳到雲端），更重要的是：不用錢。",
     "description": "",
     "placeholders": {
       "link_open": {
