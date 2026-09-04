@@ -12,7 +12,7 @@ AI spacing is a late fix on top of a finished result, not a step the output depe
 
 - **Zero-regression bar.** Control cases — the candidates the rules already get right — must never flip. A configuration that wins an ambiguous case at the cost of one control fails outright. Wins and flips are reported split, never blended into one accuracy number.
 - **Latency target.** Under half a second warm per candidate, so a page of a few dozen candidates settles in seconds. Nothing enforces a page-level cutoff: a late answer applies when it arrives (decision 2).
-- **Opt-in, extension-only.** No model dependency reaches the npm package. The extension feature-detects with `availability()` and degrades to rules-only, so the manifest floor stays at Chrome 99 and detection is a runtime check rather than a manifest bump.
+- **On by default, extension-only.** No model dependency reaches the npm package. The extension feature-detects with `availability()` and degrades to rules-only, so the manifest floor stays at Chrome 99 and detection is a runtime check rather than a manifest bump.
 - **zh is the measured envelope.** Every prompt variant and every corpus case behind AI spacing is Chinese, and the numbers carry no further. It nevertheless ships without a page-language gate; if ja or ko pages prove problematic, the gate candidates are `chrome.i18n.detectLanguage` (Chrome 99+, inside the manifest floor) with `documentElement.lang` as a pre-check.
 
 ## Decisions
@@ -73,7 +73,7 @@ There is no worker-side setting check. The content script is the gate, and behav
 
 ### Setting and options page (`browser-extensions/chrome`)
 
-`is_enable_ai_spacing` defaults to `false` and lives in `DEFAULT_SETTINGS`, which `reconcileSettings` and the `chrome.storage.sync` schema pick up automatically. The toggle follows the `refresh_required` registration pattern, so there is no live-toggle plumbing. The options page gains a section with the toggle, a status line from `availability()`, and an explicit download button driving `LanguageModel.create({monitor})` — the download is browser-wide, and the page-context session is destroyed afterwards. There is no progress UI: the monitor callback logs the `downloadprogress` percentage and the status line's `downloading` state covers the visible feedback. A machine whose model is absent degrades silently to rules-only, with the badge and popup untouched.
+`is_enable_ai_spacing` defaults to `true` and lives in `DEFAULT_SETTINGS`, which `reconcileSettings` and the `chrome.storage.sync` schema pick up automatically. The toggle follows the `refresh_required` registration pattern, so there is no live-toggle plumbing. The options page gains a section with the toggle, a status line from `availability()`, and an explicit download button driving `LanguageModel.create({monitor})` — the download is browser-wide, and the page-context session is destroyed afterwards. There is no progress UI: the monitor callback logs the `downloadprogress` percentage and the status line's `downloading` state covers the visible feedback. A machine whose model is absent degrades silently to rules-only, with the badge and popup untouched.
 
 ## Known limitations
 

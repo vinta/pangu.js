@@ -6,7 +6,7 @@ The decision:
 
 1. **Chrome's built-in Prompt API classifies one shape first.** A hyphen-minus directly between a CJK character and a digit, choosing between a signed number and a range or separator. Nothing else in pangu gets a model in this change, and everything else stays rules-only until some other shape earns its own decision.
 2. **The model classifies, it never rewrites.** The rules flag the span, the model picks one label from an enum, and the rules insert or remove spaces per label. [ADR 0009](0009-nbsp-suppresses-spacing-never-rewritten.md) holds by construction rather than by review: a component that only ever returns a label cannot rewrite an author's bytes.
-3. **Extension-only, opt-in, and a late fix.** No model dependency reaches the npm package, the setting is off by default, and the rules pass runs to completion first. With the model absent, disabled, or slow, today's output is what the page gets.
+3. **Extension-only, on by default, and a late fix.** No model dependency reaches the npm package, the setting is on by default with a toggle to opt out, and the rules pass runs to completion first. With the model absent, disabled, or slow, today's output is what the page gets.
 
 The other ambiguous symbol classes — filename-versus-mention, formula-versus-prose, brand suffixes — are deferred, not ruled out. Their first probe on this contract did not clear the zero-regression bar, which is why the hyphen goes first. But the prompt campaign that followed moved this same model, on this same contract, from failing that bar on the hyphen to clearing it, through prompt work alone. "The model's priors are wrong there" is therefore one probe's reading rather than a closed question, and each class earns its own decision on its own measurements.
 
@@ -16,7 +16,7 @@ Alternatives rejected:
 
 ## Consequences
 
-- ADR 0015's operator default is narrowed on one shape, and only for extension users who turn the setting on. Default output, and every npm consumer's output, is unchanged.
-- The two hyphen-sign FIXME expectations in `tests/shared/symbol-minus-signs.test.ts` stay commented out, even though the model layer answers both correctly. They record what the _rules_ cannot do, which has not changed, and an opt-in browser-dependent path can never be what a shared-layer test asserts.
+- ADR 0015's operator default is narrowed on one shape, and only for extension users with the model present. Every npm consumer's output is unchanged.
+- The two hyphen-sign FIXME expectations in `tests/shared/symbol-minus-signs.test.ts` stay commented out, even though the model layer answers both correctly. They record what the _rules_ cannot do, which has not changed, and a browser-dependent path can never be what a shared-layer test asserts.
 - pangu gains a code path whose result depends on a model, so the invariant is that it can never be load-bearing: rules first, model late, silent degradation. A page with no model is not a degraded page, it is the normal one.
 - The feature is Chrome-only in practice, since no other browser ships an on-device prompt API. Feature detection at runtime, not a manifest floor bump.

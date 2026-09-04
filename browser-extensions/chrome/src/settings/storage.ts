@@ -24,7 +24,7 @@ export const DEFAULT_SETTINGS: Settings = {
   whitelist: [],
   is_mute_sound_effects: false,
   is_enable_text_autospace: true,
-  is_enable_ai_spacing: false,
+  is_enable_ai_spacing: true,
 };
 
 const SETTINGS_KEYS = Object.keys(DEFAULT_SETTINGS) as (keyof Settings)[];
