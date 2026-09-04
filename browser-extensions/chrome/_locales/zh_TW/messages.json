@@ -93,12 +93,8 @@
     "message": "只在這些網頁召喚空格之神",
     "description": ""
   },
-  "placeholder_enter_url": {
-    "message": "輸入網址，例如 https://vinta.ws/*",
-    "description": ""
-  },
-  "error_invalid_match_pattern": {
-    "message": "網址的格式不對啦！用心一點好不好？算了，你這輩子大概就這樣了",
+  "button_remove": {
+    "message": "刪掉",
     "description": ""
   },
   "button_save": {
@@ -109,12 +105,20 @@
     "message": "算了",
     "description": ""
   },
-  "button_remove": {
-    "message": "刪掉",
+  "empty_list": {
+    "message": "這個列表空無一物，就跟你的靈魂一樣",
     "description": ""
   },
   "button_add_new_url": {
     "message": "新增網址",
+    "description": ""
+  },
+  "placeholder_enter_url": {
+    "message": "輸入網址，例如 https://vinta.ws/*",
+    "description": ""
+  },
+  "error_invalid_match_pattern": {
+    "message": "網址的格式不對啦！用心一點好不好？算了，你這輩子大概就這樣了",
     "description": ""
   },
   "button_restore_defaults": {
@@ -129,16 +133,40 @@
     "message": "你可以在網址裡用 * (wildcard)",
     "description": ""
   },
-  "empty_list": {
-    "message": "這個列表空無一物，就跟你的靈魂一樣",
-    "description": ""
-  },
   "label_other_settings": {
     "message": "其他設定",
     "description": ""
   },
   "label_is_mute_sound_effects": {
     "message": "太吵了，靜音",
+    "description": ""
+  },
+  "label_hidden_settings": {
+    "message": "隱藏設定",
+    "description": ""
+  },
+  "label_is_enable_text_autospace": {
+    "message": "非侵入式 text-autospace 排版",
+    "description": ""
+  },
+  "text_autospace_description": {
+    "message": "讓$link_open$瀏覽器直接渲染中文和英文、數字之間的間距$link_close$。純視覺效果，不會插入任何空白字元，所以複製的文字不受影響。會套用到所有網站，無視黑名單和白名單。",
+    "description": "",
+    "placeholders": {
+      "link_open": {
+        "content": "<a href='https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/text-autospace' target='_blank'>"
+      },
+      "link_close": {
+        "content": "</a>"
+      }
+    }
+  },
+  "text_autospace_limitations": {
+    "message": "但是缺點是不支援符號而且那個間距比真正的空格窄很多，建議還是跟空格之神搭配使用。",
+    "description": ""
+  },
+  "text_autospace_not_supported": {
+    "message": "你的瀏覽器不支援這個功能，需要 Chrome v140 以上版本。",
     "description": ""
   },
   "label_is_enable_ai_spacing": {
@@ -169,10 +197,6 @@
       }
     }
   },
-  "button_download_ai_model": {
-    "message": "下載模型",
-    "description": ""
-  },
   "ai_model_unsupported": {
     "message": "你的瀏覽器沒有內建的模型",
     "description": ""
@@ -193,36 +217,12 @@
     "message": "模型已經準備好了",
     "description": ""
   },
-  "label_hidden_settings": {
-    "message": "隱藏設定",
+  "button_download_ai_model": {
+    "message": "下載模型",
     "description": ""
   },
   "settings_refresh_required": {
     "message": "部分功能需要重新整理網頁之後才會生效",
-    "description": ""
-  },
-  "label_is_enable_text_autospace": {
-    "message": "非侵入式 text-autospace 排版",
-    "description": ""
-  },
-  "text_autospace_description": {
-    "message": "讓$link_open$瀏覽器直接渲染中文和英文、數字之間的間距$link_close$。純視覺效果，不會插入任何空白字元，所以複製的文字不受影響。會套用到所有網站，無視黑名單和白名單。",
-    "description": "",
-    "placeholders": {
-      "link_open": {
-        "content": "<a href='https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/text-autospace' target='_blank'>"
-      },
-      "link_close": {
-        "content": "</a>"
-      }
-    }
-  },
-  "text_autospace_limitations": {
-    "message": "但是缺點是不支援符號而且那個間距比真正的空格窄很多，建議還是跟空格之神搭配使用。",
-    "description": ""
-  },
-  "text_autospace_not_supported": {
-    "message": "你的瀏覽器不支援這個功能，需要 Chrome v140 以上版本。",
     "description": ""
   }
 }
