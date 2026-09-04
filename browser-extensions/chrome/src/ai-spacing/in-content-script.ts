@@ -3,18 +3,14 @@ import { applyTextEdits } from './ambiguous-shape';
 import { hyphenSign } from './hyphen-sign';
 import type { ClassifiedCandidate, ClassifyCandidatesMessage, ClassifyCandidatesResponse } from './messages';
 
-// The same singleton the entry reads; see the content-script.ts entry for why it is already set when this module runs
 const pangu = window.pangu;
 
 // The core seam's records, read off the singleton rather than imported: the content script is a classic script that cannot import the package at runtime
 type SettledTextNode = Parameters<NonNullable<typeof pangu.onTextNodesSettled>>[0][number];
 type LateFix = Parameters<typeof pangu.applyLateFixes>[0][number];
 
-// Every ambiguous shape AI spacing reads on a page. Each one is asked in its own message, and the shapes that land on one text node compose into one late fix
 const AMBIGUOUS_SHAPES: AmbiguousShape[] = [hyphenSign];
 
-// One CLASSIFY_CANDIDATES round trip per ambiguous shape per batch, awaited with no deadline: a late answer is still safe to apply, because the applier drops any fix whose node changed since it was
-// flagged, and the worker has no abort signal, so a deadline could only discard answers the model already paid for
 async function classifyCandidates(kind: string, candidates: ClassifyCandidatesMessage['candidates']): Promise<ClassifyCandidatesResponse> {
   const message: ClassifyCandidatesMessage = { type: 'CLASSIFY_CANDIDATES', kind, candidates };
   try {
@@ -25,8 +21,6 @@ async function classifyCandidates(kind: string, candidates: ClassifyCandidatesMe
   }
 }
 
-// Every occurrence of one ambiguous shape in this batch: flagged on the bytes text spacing read, then resolved against the bytes the batch settled on. A match whose symbol did not end up with the
-// inserted gap settles to null and is dropped here, so nothing that is not the extension's own space to take back ever reaches the classifier
 function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readonly SettledTextNode[]) {
   const settledCandidates: SettledCandidate[] = [];
   for (const settledTextNode of settledTextNodes) {
@@ -52,12 +46,7 @@ export function warmUpAiSpacing() {
   }
 }
 
-// AI spacing's page-side half: the rules already spaced these text nodes, and the candidates whose label calls for a fix get that space taken back out.
-// Every step logs at debug level (hidden until the console's Verbose level is on), so a wrong verdict on a live page is traceable without a build: this side shows each candidate's sentence and
-// verdict, and the service worker's console shows the exact prompt text and raw model output
 export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[]) {
-  // Core hands over every text node text spacing read, so most batches carry no candidate at all. Asking only for the shapes that found one is what keeps the worker wakes, and the multi-second
-  // cold-start create() behind them, down to the batches that can actually produce a fix
   const batches = AMBIGUOUS_SHAPES.map((ambiguousShape) => ({ ambiguousShape, settledCandidates: findCandidates(ambiguousShape, settledTextNodes) })).filter(
     (batch) => batch.settledCandidates.length > 0,
   );
@@ -74,10 +63,9 @@ export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[
     ),
   );
 
-  // The first no is final for this page, whichever ambiguous shape hit it. An absent model, an availability other than 'available', and a create() that fails are all conditions that will not change
-  // while the page is open, so unassigning the seam stops the finder as well as any further worker wakes. Checked across every kind before anything is composed, so a no never lands a half-batch
   const classifiedCandidateBatches: ClassifiedCandidate[][] = [];
   for (const [batchIndex, response] of responses.entries()) {
+    // This means ClassifyCandidatesFailed, then we disable AI spacing
     if (!response.ok) {
       pangu.onTextNodesSettled = null;
       console.debug(`[pangu] ${batches[batchIndex]!.ambiguousShape.kind}: disabled for this page (${response.error})`);

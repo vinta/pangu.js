@@ -2,8 +2,6 @@ import { applyAiSpacing, warmUpAiSpacing } from './ai-spacing/in-content-script'
 import type { ContentScriptResponse, MessageToContentScript } from './messages';
 import { getSettings } from './settings/storage';
 
-// `Window.pangu` is declared globally in src/browser/pangu.umd.ts, and pangu.umd.js is always listed before this script in the injection arrays (service worker
-// registration and the popup's manual injection), so it is already set when this module runs
 const pangu = window.pangu;
 
 async function autoSpacingPage() {
