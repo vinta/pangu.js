@@ -123,6 +123,10 @@ a:hover {
   text-decoration: none;
 }
 
+.btn-sm {
+  padding: var(--spacing-1) var(--spacing-3);
+}
+
 .btn:focus {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
