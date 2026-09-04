@@ -1,7 +1,6 @@
 // NOTE: In service workers, we can't export directly, everything goes through messages
 import { classifyCandidates } from './ai-spacing/in-service-worker';
 import type { ClassifyCandidatesResponse, MessageToServiceWorker } from './ai-spacing/messages';
-import type { MessageFromContentScript } from './messages';
 import type { Settings } from './settings/storage';
 import { getSettings, onSettingsChanged, reconcileSettings } from './settings/storage';
 import { isValidMatchPattern, shouldShowOffIcon } from './settings/urls';
@@ -144,14 +143,12 @@ onSettingsChanged((changedKeys) => {
 // question, and it is the gate.
 // Chrome closes the message channel when a listener returns a promise, so the listener stays a plain function that returns true and lets an async helper call sendResponse. classifyCandidates reports
 // failure in its response rather than rejecting, so there is no path that leaves a caller without an answer.
-chrome.runtime.onMessage.addListener(
-  (message: MessageToServiceWorker | MessageFromContentScript, _sender: chrome.runtime.MessageSender, sendResponse: (response: ClassifyCandidatesResponse) => void) => {
-    if (message.type === 'CLASSIFY_CANDIDATES') {
-      classifyCandidates(message.kind, message.candidates).then(sendResponse);
-      return true;
-    }
+chrome.runtime.onMessage.addListener((message: MessageToServiceWorker, _sender: chrome.runtime.MessageSender, sendResponse: (response: ClassifyCandidatesResponse) => void) => {
+  if (message.type === 'CLASSIFY_CANDIDATES') {
+    classifyCandidates(message.kind, message.candidates).then(sendResponse);
+    return true;
+  }
 
-    // Messages this worker does not answer, such as the content script's CONTENT_SCRIPT_LOADED, must leave their channel closing normally
-    return false;
-  },
-);
+  // A message this worker does not answer must leave its channel closing normally
+  return false;
+});

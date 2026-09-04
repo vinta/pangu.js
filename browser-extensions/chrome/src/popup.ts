@@ -1,5 +1,5 @@
 import { canAiModelRun, getAiModelAvailability } from './ai-spacing/in-extension-pages';
-import type { ContentScriptResponse, ManualSpacingMessage, MessageFromContentScript, PingMessage } from './messages';
+import type { ContentScriptResponse, ManualSpacingMessage, PingMessage } from './messages';
 import type { Settings } from './settings/storage';
 import { getSettings, onSettingsChanged, updateSettings } from './settings/storage';
 import { isValidUrl, shouldShowActiveStatus } from './settings/urls';
@@ -35,12 +35,6 @@ class PopupController {
     document.getElementById('manual-spacing-btn')!.addEventListener('click', () => this.handleManualSpacing());
     document.getElementById('add-to-blacklist-btn')!.addEventListener('click', () => this.handleAddToBlacklist());
     document.getElementById('notification')!.addEventListener('click', () => this.hideNotification());
-
-    chrome.runtime.onMessage.addListener((message: MessageFromContentScript, sender) => {
-      if (message.type === 'CONTENT_SCRIPT_LOADED' && sender.tab?.id === this.currentTabId) {
-        this.render().catch(console.error);
-      }
-    });
 
     // Any settings change repaints the whole popup: it is small, and this keeps the status row honest after toggling spacing mode. Handlers never
     // repaint after a successful write, the onChanged echo lands here instead.

@@ -15,10 +15,3 @@ export type MessageToContentScript = PingMessage | ManualSpacingMessage;
 export interface ContentScriptResponse {
   success: boolean;
 }
-
-export interface ContentScriptLoadedMessage {
-  type: 'CONTENT_SCRIPT_LOADED';
-}
-
-// Messages sent FROM content script to extension (via chrome.runtime.sendMessage)
-export type MessageFromContentScript = ContentScriptLoadedMessage;

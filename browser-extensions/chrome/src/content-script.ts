@@ -1,5 +1,5 @@
 import { classifyBatch } from './ai-spacing/in-content-script';
-import type { ContentScriptLoadedMessage, ContentScriptResponse, MessageToContentScript } from './messages';
+import type { ContentScriptResponse, MessageToContentScript } from './messages';
 import { getSettings } from './settings/storage';
 
 // `Window.pangu` is declared globally in src/browser/pangu.umd.ts, and pangu.umd.js is always listed before this script in the injection arrays (service worker
@@ -21,9 +21,6 @@ async function autoSpacingPage() {
 function spacingPage() {
   pangu.spacingPage();
 }
-
-const loadedMessage: ContentScriptLoadedMessage = { type: 'CONTENT_SCRIPT_LOADED' };
-chrome.runtime.sendMessage(loadedMessage);
 
 // Document Loading Lifecycle:
 // loading → (DOM parsing completes) → DOMContentLoaded event fires → interactive → (resources load) → load event fires → complete
