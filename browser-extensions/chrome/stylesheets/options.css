@@ -98,6 +98,13 @@
   text-align: right;
 }
 
+/* Model status under the AI spacing toggle, aligned like the URL list help but quieter since it is not a link */
+.ai-model-status {
+  margin-top: var(--spacing-3);
+  text-align: right;
+  color: var(--color-text-tertiary);
+}
+
 /* URL list styles */
 .filter_mode_list {
   list-style: none;
