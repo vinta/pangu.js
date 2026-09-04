@@ -1,6 +1,6 @@
 // NOTE: In service workers, we can't export directly, everything goes through messages
+import { classifyCandidates } from './ai-spacing/in-service-worker';
 import type { ClassifyCandidatesResponse, MessageToServiceWorker } from './ai-spacing/messages';
-import { classifyCandidates } from './ai-spacing/prompt-classifier';
 import type { MessageFromContentScript } from './messages';
 import type { Settings } from './settings/storage';
 import { getSettings, onSettingsChanged, reconcileSettings } from './settings/storage';

@@ -3,7 +3,7 @@ import { applyTextEdits } from './ambiguous-shape';
 import { hyphenSign } from './hyphen-sign';
 import type { ClassifiedCandidate, ClassifyCandidatesMessage, ClassifyCandidatesResponse } from './messages';
 
-// The same singleton the entry reads; see content-script.ts at the root for why it is already set when this module runs
+// The same singleton the entry reads; see the content-script.ts entry for why it is already set when this module runs
 const pangu = window.pangu;
 
 // The core seam's records, read off the singleton rather than imported: the content script is a classic script that cannot import the package at runtime

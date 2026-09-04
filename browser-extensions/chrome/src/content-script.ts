@@ -1,4 +1,4 @@
-import { classifyBatch } from './ai-spacing/content-script';
+import { classifyBatch } from './ai-spacing/in-content-script';
 import type { ContentScriptLoadedMessage, ContentScriptResponse, MessageToContentScript } from './messages';
 import { getSettings } from './settings/storage';
 

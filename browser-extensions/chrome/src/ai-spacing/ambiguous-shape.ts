@@ -40,7 +40,7 @@ export interface AmbiguousShape {
   edits(settled: string, index: number): TextEdit[]; // what to change at one settled index, never a composed string
 }
 
-// Worker side, service worker. One per kind, registered in prompt-classifier.ts
+// Worker side, service worker. One per kind, registered in in-service-worker.ts
 export interface PromptSpec<Label extends string> {
   readonly kind: string;
   readonly systemPrompt: string;
