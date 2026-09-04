@@ -1,13 +1,8 @@
+import { canAiModelRun, getAiModelAvailability, PAGE_MODEL_LANGUAGES } from './ai-spacing/in-extension-pages';
 import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, updateSettings } from './settings/storage';
 import { isValidMatchPattern } from './settings/urls';
 import { translatePage } from './ui/i18n';
 import { playSound } from './ui/sounds';
-
-// Chrome logs "No output language was specified in a LanguageModel API request" for any call that declares none, and collects it into the extension's Errors page, which is a user-facing surface. The
-// warning is logged for extension pages only, never for the service worker (measured 2026-09-02), so declaring a language on this page's two calls is what clears it. Nothing here is misattested:
-// neither call ever produces model output, one probes availability and the other exists only to start the browser-wide download. The classifier, which is the session that actually prompts, stays
-// undeclared on purpose -- see ai-spacing/in-service-worker.ts. `en` is a member of the supported set (en/ja/es/de/fr); no zh variant is, and declaring one makes availability() report unavailable.
-const PAGE_MODEL_LANGUAGES: LanguageModelExpected[] = [{ type: 'text', languages: ['en'] }];
 
 // Builds a Partial<Settings> for the list picked by filter mode without a computed-key cast
 function listPatch(key: 'blacklist' | 'whitelist', urls: string[]) {
@@ -292,7 +287,11 @@ class OptionsController {
   private async renderAiSpacingCheckbox() {
     const current = await getSettings();
     const checkbox = document.getElementById('ai-spacing-checkbox') as HTMLInputElement;
-    checkbox.checked = current.is_enable_ai_spacing;
+    const canRun = canAiModelRun(await getAiModelAvailability());
+    // Display-only off when the model can never run here: never write back, the synced setting still applies on other devices
+    checkbox.checked = canRun && current.is_enable_ai_spacing;
+    checkbox.disabled = !canRun;
+    checkbox.closest('.toggle')?.classList.toggle('toggle-disabled', !canRun);
   }
 
   // The model's own state, which is browser-wide and has nothing to do with the toggle: the setting can be on while the model is still absent, and then the page simply keeps the rules output
@@ -300,16 +299,7 @@ class OptionsController {
     const statusText = document.getElementById('ai-model-status') as HTMLElement;
     const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
 
-    // The types declare LanguageModel unconditionally, but a browser without the Prompt API has no such global at all
-    if (typeof LanguageModel === 'undefined') {
-      statusText.textContent = chrome.i18n.getMessage('ai_model_unsupported');
-      downloadButton.style.display = 'none';
-      return;
-    }
-
-    // We set expectedOutputs here, only to silence the "No output language was specified" warning, which is logged for extension pages only
-    // 2026-09-02: we measured that declaring a supported language does not alter the model output
-    const availability = await LanguageModel.availability({ expectedOutputs: PAGE_MODEL_LANGUAGES });
+    const availability = await getAiModelAvailability();
     statusText.textContent = chrome.i18n.getMessage(`ai_model_${availability}`);
     // Only a model that is absent can be fetched, and starting a multi-gigabyte download is the user's call to make
     downloadButton.style.display = availability === 'downloadable' ? 'block' : 'none';
