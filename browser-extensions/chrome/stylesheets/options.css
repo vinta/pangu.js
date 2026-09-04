@@ -80,6 +80,8 @@
 
 /* A note under a section's cards; the bottom margin collapses with the footer's 2rem, so the same value on top keeps the gaps equal */
 .options-section-note {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
   margin-block: var(--spacing-8);
   text-align: center;
 }
