@@ -72,7 +72,7 @@ class OptionsController {
       } else if (target.id === 'restore-defaults-btn') {
         this.restoreDefaults();
       } else if (target.id === 'ai-model-download-btn') {
-        this.downloadAiModel().catch(console.error);
+        this.handleModelDownload().catch(console.error);
       }
     });
 
@@ -307,7 +307,7 @@ class OptionsController {
     downloadButton.style.display = availability === 'downloadable' ? 'block' : 'none';
   }
 
-  private async downloadAiModel() {
+  private async handleModelDownload() {
     const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
     downloadButton.disabled = true;
     try {
