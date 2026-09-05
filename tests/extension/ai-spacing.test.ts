@@ -17,25 +17,27 @@ afterEach(() => {
 });
 
 describe('AI spacing message flow', () => {
-  it('keeps failed candidates in place and composes successful fixes into one write', async () => {
-    const answers = ['"負"', '"invalid"', '"負"'];
+  it.each(['"負"', 'null', 'signed-number'])('keeps invalid answer %s in place and composes successful fixes into one write', async (invalidAnswer) => {
+    const answers = ['"signed-number"', invalidAnswer, '"signed-number"', '"range-or-separator"', '"unsure"'];
     const destroy = vi.fn();
-    const clone = vi.fn(async () => ({ prompt: async () => answers.shift(), destroy }));
+    const prompt = vi.fn(async () => answers.shift());
+    const clone = vi.fn(async () => ({ prompt, destroy }));
     vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create: async () => ({ clone }) });
     const { pangu, sendMessage, applyAiSpacing } = await loadAiSpacing();
     const onTextNodesSettled = pangu.onTextNodesSettled;
     const textNode = {} as Text;
-    const settled = '從 - 5 到 - 3 再到 - 1 度';
+    const settled = '從 - 5 到 - 3 再到 - 1 度。區間 - 2。未知 - 4';
 
-    await applyAiSpacing([{ node: textNode, unspaced: '從-5到-3再到-1度', settled }]);
+    await applyAiSpacing([{ node: textNode, unspaced: '從-5到-3再到-1度。區間-2。未知-4', settled }]);
 
     expect(sendMessage).toHaveBeenCalledTimes(1);
-    expect(await sendMessage.mock.results[0]!.value).toEqual({ ok: true, candidateLabels: ['signed-number', null, 'signed-number'] });
-    expect(clone).toHaveBeenCalledTimes(3);
-    expect(destroy).toHaveBeenCalledTimes(3);
+    expect(await sendMessage.mock.results[0]!.value).toEqual({ ok: true, candidateLabels: ['signed-number', null, 'signed-number', 'range-or-separator', 'unsure'] });
+    expect(prompt).toHaveBeenCalledWith(expect.any(String), { responseConstraint: { type: 'string', enum: ['signed-number', 'range-or-separator', 'unsure'] } });
+    expect(clone).toHaveBeenCalledTimes(5);
+    expect(destroy).toHaveBeenCalledTimes(5);
     expect(pangu.onTextNodesSettled).toBe(onTextNodesSettled);
     expect(pangu.applyLateFixes).toHaveBeenCalledTimes(1);
-    expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node: textNode, settled, data: '從 -5 到 - 3 再到 -1 度' }]);
+    expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node: textNode, settled, data: '從 -5 到 - 3 再到 -1 度。區間 - 2。未知 - 4' }]);
   });
 
   it('disables AI spacing without writing when the model is absent', async () => {

@@ -10,8 +10,8 @@ it.each([
 ])('quote the target hyphen with its local phrase in %s', (sentence, at, phrase) => {
   expect(hyphenPrompt.buildQuestion(sentence, at)).toBe(
     `句子：${sentence}\n\n把這句話唸出來時，「${phrase}」裡的「-」該怎麼唸？\n` +
-      '- 負：朗讀時唸作「負」或「零下」：後面的數字是負數\n' +
-      '- 到或分隔：朗讀時唸作「到」或「至」，或是完全不唸出來、只停頓一下（當作分隔）\n' +
-      '- 聽不出來：真的聽不出來該怎麼唸\n\n用選項的名稱回答。',
+      '- signed-number：朗讀時唸作「負」或「零下」：後面的數字是負數\n' +
+      '- range-or-separator：朗讀時唸作「到」或「至」，或是完全不唸出來、只停頓一下（當作分隔）\n' +
+      '- unsure：真的聽不出來該怎麼唸\n\n用選項的名稱回答。',
   );
 });

@@ -60,13 +60,14 @@ async function classifyOneCandidate(promptSpec: PromptSpec<CandidateLabel>, base
     const turn = await base.clone();
     let raw: string;
     try {
-      raw = await turn.prompt(question, { responseConstraint: { type: 'string', enum: promptSpec.displayTokenEnum } });
+      raw = await turn.prompt(question, { responseConstraint: { type: 'string', enum: promptSpec.candidateLabels } });
     } finally {
       turn.destroy();
     }
 
-    const candidateLabel = promptSpec.labelForDisplayToken(JSON.parse(raw));
-    if (candidateLabel === null) {
+    const answer: unknown = JSON.parse(raw);
+    const candidateLabel = promptSpec.candidateLabels.find((candidateLabel) => candidateLabel === answer);
+    if (candidateLabel === undefined) {
       throw new TypeError(`response outside the constraint enum: ${raw}`);
     }
     console.debug(`[pangu] ${promptSpec.kind} raw answer: ${raw} -> ${candidateLabel}`);

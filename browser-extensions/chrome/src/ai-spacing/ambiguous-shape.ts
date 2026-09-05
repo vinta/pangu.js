@@ -32,8 +32,7 @@ export interface PromptSpec<Label extends string> {
   // Logged with the base session, so a live page says which prompt produced its labels
   readonly version: string;
   buildQuestion(sentence: string, at: number): string;
-  readonly displayTokenEnum: readonly string[];
-  labelForDisplayToken(token: unknown): Label | null;
+  readonly candidateLabels: readonly Label[];
 }
 
 // Composes every edit one text node collected into one late fix, since a second fix on the same node would fail core's compare-and-set check. Descending index order keeps an earlier edit
