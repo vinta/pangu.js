@@ -78,7 +78,7 @@ There is no worker-side setting check. The content script is the gate, and behav
 
 ### Setting and options page (`browser-extensions/chrome`)
 
-`is_enable_ai_spacing` defaults to `true` and lives in `DEFAULT_SETTINGS`, which `reconcileSettings` and the `chrome.storage.sync` schema pick up automatically. The toggle follows the `refresh_required` registration pattern, so there is no live-toggle plumbing. The options page gains a section with the toggle, a status line from `availability()`, and an explicit download button driving `LanguageModel.create({monitor})` — the download is browser-wide, and the page-context session is destroyed afterwards. There is no progress UI: the monitor callback logs the `downloadprogress` percentage and the status line's `downloading` state covers the visible feedback. A machine whose model is absent degrades silently to rules-only, with the badge and popup untouched.
+`is_enable_ai_spacing` defaults to `true` and lives in `DEFAULT_SETTINGS`, which `reconcileSettings` and the `chrome.storage.sync` schema pick up automatically. The toggle follows the `refresh_required` registration pattern, so there is no live-toggle plumbing. The options page gains a section with the toggle, a status line from `availability()`, and an explicit download button driving `LanguageModel.create()`: the download is browser-wide, and the page-context session is destroyed afterwards. There is no progress UI: the status line switches to its `downloading` state on click, and since `create()` resolves only after the whole download, the line is re-read from `availability()` when it settles. A machine whose model is absent degrades silently to rules-only, with the badge and popup untouched.
 
 ## Known limitations
 
