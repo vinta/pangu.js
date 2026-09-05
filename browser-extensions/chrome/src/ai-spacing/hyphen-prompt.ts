@@ -1,6 +1,6 @@
 import type { PromptSpec } from './ambiguous-shape';
 
-const PROMPT_VERSION = 'v20-zh';
+const PROMPT_VERSION = 'v21-zh';
 
 const SYSTEM_PROMPT = '你是中文朗讀老師。想像把整句話唸出來給聽眾聽，判斷朗讀時句子裡指定的「-」該怎麼唸。只判斷那一個符號，不要改寫句子，不要解釋，只從選項中挑一個回答。';
 
@@ -21,7 +21,8 @@ function labelForDisplayToken(token: unknown) {
 const MENU = OPTIONS.map((option) => `- ${option.token}：${option.gloss}`).join('\n');
 
 function buildQuestion(sentence: string, at: number) {
-  return `句子：${sentence}\n\n把這句話唸出來時，「${sentence[at - 1]}」後面的那個「${sentence[at]}」該怎麼唸？\n${MENU}\n\n用選項的名稱回答。`;
+  const number = sentence.slice(at + 1).match(/^\d+(?:\.\d+)?/)?.[0] ?? '';
+  return `句子：${sentence}\n\n把這句話唸出來時，「${sentence[at - 1]}${sentence[at]}${number}」裡的「${sentence[at]}」該怎麼唸？\n${MENU}\n\n用選項的名稱回答。`;
 }
 
 export const hyphenPrompt: PromptSpec<HyphenLabel> = {
