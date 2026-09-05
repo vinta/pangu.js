@@ -1,4 +1,4 @@
-import { applyAiSpacing, warmUpAiSpacing } from './ai-spacing/in-content-script';
+import { applyAiSpacing, warmUpAiSpacing } from './ai-spacing/content-script';
 import type { ContentScriptResponse, MessageToContentScript } from './messages';
 import { getSettings } from './settings/storage';
 

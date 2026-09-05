@@ -5,10 +5,10 @@ async function loadAiSpacing() {
   vi.resetModules();
   const pangu = { onTextNodesSettled: vi.fn(), applyLateFixes: vi.fn() };
   vi.stubGlobal('window', { pangu });
-  const { classifyCandidates } = await import('../../browser-extensions/chrome/src/ai-spacing/in-service-worker');
+  const { classifyCandidates } = await import('../../browser-extensions/chrome/src/ai-spacing/service-worker');
   const sendMessage = vi.fn(({ kind, candidates }: ClassifyCandidatesMessage) => classifyCandidates(kind, candidates));
   vi.stubGlobal('chrome', { runtime: { sendMessage } });
-  const { applyAiSpacing } = await import('../../browser-extensions/chrome/src/ai-spacing/in-content-script');
+  const { applyAiSpacing } = await import('../../browser-extensions/chrome/src/ai-spacing/content-script');
   return { pangu, sendMessage, applyAiSpacing, classifyCandidates };
 }
 

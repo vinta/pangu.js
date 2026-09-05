@@ -12,7 +12,7 @@ export type AiModelAvailability = Availability | 'unsupported';
 // 2026-09-02: we measured that declaring a supported language does not alter the model output
 const PAGE_MODEL_LANGUAGES: LanguageModelExpected[] = [{ type: 'text', languages: ['en'] }];
 
-export async function getAiModelAvailability(): Promise<AiModelAvailability> {
+export async function getModelAvailability(): Promise<AiModelAvailability> {
   // The types declare LanguageModel unconditionally, but a browser without the Prompt API has no such global
   if (typeof LanguageModel === 'undefined') {
     return 'unsupported';
@@ -20,7 +20,8 @@ export async function getAiModelAvailability(): Promise<AiModelAvailability> {
   return LanguageModel.availability({ expectedOutputs: PAGE_MODEL_LANGUAGES });
 }
 
-export function canAiModelRun(availability: AiModelAvailability) {
+export async function canModelRun() {
+  const availability = await getModelAvailability();
   return availability !== 'unsupported' && availability !== 'unavailable';
 }
 
@@ -60,7 +61,7 @@ async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   }
 
   // create() at availability 'downloadable' silently starts a multi-gigabyte download, so we only create a session once the model is already there
-  const session = await LanguageModel.create({
+  const baseSession = await LanguageModel.create({
     initialPrompts: [{ role: 'system', content: promptSpec.systemPrompt }],
     // TODO: These two sampling parameters are deprecated, migrate when needed
     // https://developer.chrome.com/docs/ai/prompt-api#sampling_parameters
@@ -70,21 +71,21 @@ async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   });
 
   console.debug(`[pangu] ${promptSpec.kind} base session created (version ${promptSpec.version}, temperature 0, topK 1), system prompt:\n${promptSpec.systemPrompt}`);
-  return session;
+  return baseSession;
 }
 
-async function classifyOneCandidate(promptSpec: PromptSpec<CandidateLabel>, base: LanguageModel, candidate: Candidate): Promise<CandidateLabel | null> {
+async function classifyOneCandidate(promptSpec: PromptSpec<CandidateLabel>, baseSession: LanguageModel, candidate: Candidate): Promise<CandidateLabel | null> {
   const question = promptSpec.buildQuestion(candidate.sentence, candidate.at);
   console.debug(`[pangu] ${promptSpec.kind} prompt:\n${question}`);
 
   try {
     // One clone per candidate: a fresh context without create() which is slow
-    const turn = await base.clone();
+    const session = await baseSession.clone();
     let raw: string;
     try {
-      raw = await turn.prompt(question, { responseConstraint: { type: 'string', enum: promptSpec.candidateLabels } });
+      raw = await session.prompt(question, { responseConstraint: { type: 'string', enum: promptSpec.candidateLabels } });
     } finally {
-      turn.destroy();
+      session.destroy();
     }
 
     const answer: unknown = JSON.parse(raw);
@@ -102,13 +103,13 @@ async function classifyOneCandidate(promptSpec: PromptSpec<CandidateLabel>, base
 
 // A single candidate's failure stays that candidate's failure, so the batch always answers
 export async function classifyWithModel(promptSpec: PromptSpec<CandidateLabel>, candidates: readonly Candidate[]): Promise<(CandidateLabel | null)[]> {
-  const base = await getBaseSession(promptSpec);
+  const baseSession = await getBaseSession(promptSpec);
 
   // NOTE: Only one model instance in the browser and it runs one task at a time, so sending prompts in parallel won't make them faster
   // See https://source.chromium.org/chromium/chromium/src/+/main:services/on_device_model/on_device_model_mojom_impl.cc (RunTaskIfPossible)
   const candidateLabels: (CandidateLabel | null)[] = [];
   for (const candidate of candidates) {
-    candidateLabels.push(await classifyOneCandidate(promptSpec, base, candidate));
+    candidateLabels.push(await classifyOneCandidate(promptSpec, baseSession, candidate));
   }
   return candidateLabels;
 }

@@ -1,4 +1,4 @@
-import { canAiModelRun, downloadModel, getAiModelAvailability } from './ai-spacing/model';
+import { canModelRun, downloadModel, getModelAvailability } from './ai-spacing/models';
 import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, updateSettings } from './settings/storage';
 import { isValidMatchPattern } from './settings/urls';
 import { translatePage } from './ui/i18n';
@@ -276,6 +276,7 @@ class OptionsController {
     const current = await getSettings();
     const checkbox = document.getElementById('text-autospace-checkbox') as HTMLInputElement;
     const isSupported = CSS.supports('text-autospace', 'normal');
+
     // Display-only off when unsupported: never write back, the synced setting still applies on other devices
     checkbox.checked = isSupported && current.is_enable_text_autospace;
     checkbox.disabled = !isSupported;
@@ -287,7 +288,8 @@ class OptionsController {
   private async renderAiSpacingCheckbox() {
     const current = await getSettings();
     const checkbox = document.getElementById('ai-spacing-checkbox') as HTMLInputElement;
-    const canRun = canAiModelRun(await getAiModelAvailability());
+    const canRun = await canModelRun();
+
     // Display-only off when the model can never run here: never write back, the synced setting still applies on other devices
     checkbox.checked = canRun && current.is_enable_ai_spacing;
     checkbox.disabled = !canRun;
@@ -299,7 +301,7 @@ class OptionsController {
     const statusText = document.getElementById('ai-model-status') as HTMLElement;
     const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
 
-    const availability = await getAiModelAvailability();
+    const availability = await getModelAvailability();
     statusText.textContent = chrome.i18n.getMessage(`ai_model_${availability}`);
     // Only an absent model can be fetched, and a multi-gigabyte download is the user's call
     downloadButton.style.display = availability === 'downloadable' ? 'block' : 'none';
