@@ -31,6 +31,32 @@ function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readon
   return settledCandidates;
 }
 
+function collectLateFixes(batches: readonly { ambiguousShape: AmbiguousShape; settledCandidates: SettledCandidate[] }[], candidateLabelsByBatch: readonly (CandidateLabel | null)[][]) {
+  // Core applies one fix per text node per call, so every edit for one node composes into a single late fix
+  const textEditsByNode = new Map<Text, { settled: string; textEdits: TextEdit[] }>();
+  for (const [batchIndex, { ambiguousShape, settledCandidates }] of batches.entries()) {
+    for (const [index, settledCandidate] of settledCandidates.entries()) {
+      // Labels zip against the candidates by index
+      const candidateLabel = candidateLabelsByBatch[batchIndex]![index];
+      const isFix = candidateLabel != null && ambiguousShape.isFix(candidateLabel);
+      console.debug(
+        `[pangu] ${ambiguousShape.kind}: "${settledCandidate.sentence}" (symbol at ${settledCandidate.at}) read as ${candidateLabel ?? 'no label'}${isFix ? ' -> applying its late fix' : ''}`,
+      );
+      if (isFix) {
+        const textNodeEdits = textEditsByNode.get(settledCandidate.node) ?? { settled: settledCandidate.settled, textEdits: [] };
+        textNodeEdits.textEdits.push(...ambiguousShape.edits(settledCandidate.settled, settledCandidate.index));
+        textEditsByNode.set(settledCandidate.node, textNodeEdits);
+      }
+    }
+  }
+
+  const lateFixes: LateFix[] = [];
+  for (const [textNode, { settled, textEdits }] of textEditsByNode) {
+    lateFixes.push({ node: textNode, settled, data: applyTextEdits(settled, textEdits) });
+  }
+  return lateFixes;
+}
+
 // Warm up the service worker's base sessions to mitigate cold start, which takes seconds on the first LanguageModel.create()
 export function warmUpAiSpacing() {
   const pageText = document.documentElement.textContent ?? '';
@@ -70,28 +96,7 @@ export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[
     candidateLabelsByBatch.push(response.candidateLabels);
   }
 
-  // Core applies one fix per text node per call, so every edit for one node composes into a single late fix
-  const textEditsByNode = new Map<Text, { settled: string; textEdits: TextEdit[] }>();
-  for (const [batchIndex, { ambiguousShape, settledCandidates }] of batches.entries()) {
-    for (const [index, settledCandidate] of settledCandidates.entries()) {
-      // Labels zip against the candidates by index
-      const candidateLabel = candidateLabelsByBatch[batchIndex]![index];
-      const isFix = candidateLabel != null && ambiguousShape.isFix(candidateLabel);
-      console.debug(
-        `[pangu] ${ambiguousShape.kind}: "${settledCandidate.sentence}" (symbol at ${settledCandidate.at}) read as ${candidateLabel ?? 'no label'}${isFix ? ' -> applying its late fix' : ''}`,
-      );
-      if (isFix) {
-        const textNodeEdits = textEditsByNode.get(settledCandidate.node) ?? { settled: settledCandidate.settled, textEdits: [] };
-        textNodeEdits.textEdits.push(...ambiguousShape.edits(settledCandidate.settled, settledCandidate.index));
-        textEditsByNode.set(settledCandidate.node, textNodeEdits);
-      }
-    }
-  }
-
-  const lateFixes: LateFix[] = [];
-  for (const [textNode, { settled, textEdits }] of textEditsByNode) {
-    lateFixes.push({ node: textNode, settled, data: applyTextEdits(settled, textEdits) });
-  }
+  const lateFixes = collectLateFixes(batches, candidateLabelsByBatch);
   if (lateFixes.length > 0) {
     pangu.applyLateFixes(lateFixes);
   }

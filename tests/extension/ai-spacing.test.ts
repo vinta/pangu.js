@@ -9,11 +9,49 @@ async function loadAiSpacing() {
   const sendMessage = vi.fn(({ kind, candidates }: ClassifyCandidatesMessage) => classifyCandidates(kind, candidates));
   vi.stubGlobal('chrome', { runtime: { sendMessage } });
   const { applyAiSpacing } = await import('../../browser-extensions/chrome/src/ai-spacing/in-content-script');
-  return { pangu, sendMessage, applyAiSpacing };
+  return { pangu, sendMessage, applyAiSpacing, classifyCandidates };
 }
 
 afterEach(() => {
   vi.unstubAllGlobals();
+});
+
+describe('AI spacing model sessions', () => {
+  it('warms up on an empty batch and shares pending creation with another batch', async () => {
+    let finishCreation!: () => void;
+    const clone = vi.fn(async () => ({ prompt: async () => '"signed-number"', destroy: vi.fn() }));
+    const create = vi.fn(async () => {
+      await new Promise<void>((resolve) => {
+        finishCreation = resolve;
+      });
+      return { clone };
+    });
+    vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create });
+    const { classifyCandidates } = await loadAiSpacing();
+
+    const warmup = classifyCandidates('hyphen-sign', []);
+    await Promise.resolve();
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(clone).not.toHaveBeenCalled();
+
+    const batch = classifyCandidates('hyphen-sign', [{ sentence: '氣溫是-5度', at: 3 }]);
+    finishCreation();
+
+    expect(await warmup).toEqual({ ok: true, candidateLabels: [] });
+    expect(await batch).toEqual({ ok: true, candidateLabels: ['signed-number'] });
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(clone).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries session creation after a rejected warmup', async () => {
+    const create = vi.fn().mockRejectedValueOnce(new Error('creation failed')).mockResolvedValue({ clone: vi.fn() });
+    vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create });
+    const { classifyCandidates } = await loadAiSpacing();
+
+    expect(await classifyCandidates('hyphen-sign', [])).toEqual({ ok: false, error: 'Error: creation failed' });
+    expect(await classifyCandidates('hyphen-sign', [])).toEqual({ ok: true, candidateLabels: [] });
+    expect(create).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe('AI spacing message flow', () => {
