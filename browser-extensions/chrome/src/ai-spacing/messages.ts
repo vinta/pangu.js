@@ -20,4 +20,4 @@ export type MessageToServiceWorker = ClassifyCandidatesMessage;
 export type CandidateLabel = HyphenLabel;
 
 // Labels zip against the request array by index. null skips one candidate; ok: false disables AI spacing for the page
-export type ClassifyCandidatesResponse = { ok: true; candidates: (CandidateLabel | null)[] } | { ok: false; error: string };
+export type ClassifyCandidatesResponse = { ok: true; candidateLabels: (CandidateLabel | null)[] } | { ok: false; error: string };

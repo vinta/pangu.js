@@ -65,12 +65,12 @@ async function classifyOneCandidate(promptSpec: PromptSpec<CandidateLabel>, base
       turn.destroy();
     }
 
-    const label = promptSpec.labelForDisplayToken(JSON.parse(raw));
-    if (label === null) {
+    const candidateLabel = promptSpec.labelForDisplayToken(JSON.parse(raw));
+    if (candidateLabel === null) {
       throw new TypeError(`response outside the constraint enum: ${raw}`);
     }
-    console.debug(`[pangu] ${promptSpec.kind} raw answer: ${raw} -> ${label}`);
-    return label;
+    console.debug(`[pangu] ${promptSpec.kind} raw answer: ${raw} -> ${candidateLabel}`);
+    return candidateLabel;
   } catch (error) {
     console.debug(`[pangu] ${promptSpec.kind} error: ${String(error)}`);
     return null;
@@ -95,9 +95,9 @@ export async function classifyCandidates(kind: string, candidates: readonly Cand
   // NOTE: Only one model instance in the browser and it runs one task at a time,
   // so sending prompts in parallel won't make them faster
   // See https://source.chromium.org/chromium/chromium/src/+/main:services/on_device_model/on_device_model_mojom_impl.cc (RunTaskIfPossible)
-  const classifiedCandidates: (CandidateLabel | null)[] = [];
+  const candidateLabels: (CandidateLabel | null)[] = [];
   for (const candidate of candidates) {
-    classifiedCandidates.push(await classifyOneCandidate(promptSpec, base, candidate));
+    candidateLabels.push(await classifyOneCandidate(promptSpec, base, candidate));
   }
-  return { ok: true, candidates: classifiedCandidates };
+  return { ok: true, candidateLabels };
 }

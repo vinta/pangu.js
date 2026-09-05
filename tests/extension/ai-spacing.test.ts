@@ -24,18 +24,18 @@ describe('AI spacing message flow', () => {
     vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create: async () => ({ clone }) });
     const { pangu, sendMessage, applyAiSpacing } = await loadAiSpacing();
     const onTextNodesSettled = pangu.onTextNodesSettled;
-    const node = {} as Text;
+    const textNode = {} as Text;
     const settled = '從 - 5 到 - 3 再到 - 1 度';
 
-    await applyAiSpacing([{ node, unspaced: '從-5到-3再到-1度', settled }]);
+    await applyAiSpacing([{ node: textNode, unspaced: '從-5到-3再到-1度', settled }]);
 
     expect(sendMessage).toHaveBeenCalledTimes(1);
-    expect(await sendMessage.mock.results[0]!.value).toEqual({ ok: true, candidates: ['signed-number', null, 'signed-number'] });
+    expect(await sendMessage.mock.results[0]!.value).toEqual({ ok: true, candidateLabels: ['signed-number', null, 'signed-number'] });
     expect(clone).toHaveBeenCalledTimes(3);
     expect(destroy).toHaveBeenCalledTimes(3);
     expect(pangu.onTextNodesSettled).toBe(onTextNodesSettled);
     expect(pangu.applyLateFixes).toHaveBeenCalledTimes(1);
-    expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node, settled, data: '從 -5 到 - 3 再到 -1 度' }]);
+    expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node: textNode, settled, data: '從 -5 到 - 3 再到 -1 度' }]);
   });
 
   it('disables AI spacing without writing when the model is absent', async () => {

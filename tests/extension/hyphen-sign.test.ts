@@ -176,8 +176,8 @@ describe('applyTextEdits()', () => {
     kind: 'space-inserter',
     occursIn: () => false,
     find: () => [],
-    isFix: (label) => label === 'insert',
-    edits: (_after, index) => [{ index, remove: 0, insert: ' ' }],
+    isFix: (candidateLabel) => candidateLabel === 'insert',
+    edits: (_settled, index) => [{ index, remove: 0, insert: ' ' }],
   };
 
   it('apply edits from two ambiguous shapes to one text node', () => {

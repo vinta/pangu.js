@@ -66,21 +66,21 @@ export const hyphenSign: AmbiguousShape = {
   },
 
   find(unspaced: string, settled: string) {
-    const matches: CandidateMatch[] = [];
-    for (const match of unspaced.matchAll(CJK_HYPHEN_DIGIT)) {
+    const candidateMatches: CandidateMatch[] = [];
+    for (const hyphenMatch of unspaced.matchAll(CJK_HYPHEN_DIGIT)) {
       // Every code point in the CJK class is a single UTF-16 unit, so the hyphen is one past the match
-      const hyphenIndex = match.index + 1;
+      const unspacedIndex = hyphenMatch.index + 1;
       // Spacing never changes hyphens, so their ordinal survives. A missing ordinal answers -1 and fails hasInsertedGap()
-      const index = indexOfNthHyphen(settled, unspaced.slice(0, hyphenIndex).split('-').length - 1);
+      const index = indexOfNthHyphen(settled, unspaced.slice(0, unspacedIndex).split('-').length - 1);
       if (hasInsertedGap(settled, index)) {
-        matches.push({ ...sliceSentence(unspaced, hyphenIndex), index });
+        candidateMatches.push({ ...sliceSentence(unspaced, unspacedIndex), index });
       }
     }
-    return matches;
+    return candidateMatches;
   },
 
-  isFix(label: string) {
-    return label === 'signed-number';
+  isFix(candidateLabel: string) {
+    return candidateLabel === 'signed-number';
   },
 
   // Only the space after the hyphen goes. The space before it is a boundary the rules got right

@@ -60,14 +60,14 @@ export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[
     ),
   );
 
-  const labelBatches: (CandidateLabel | null)[][] = [];
+  const candidateLabelsByBatch: (CandidateLabel | null)[][] = [];
   for (const [batchIndex, response] of responses.entries()) {
     if (!response.ok) {
       pangu.onTextNodesSettled = null;
       console.debug(`[pangu] ${batches[batchIndex]!.ambiguousShape.kind}: disabled for this page (${response.error})`);
       return;
     }
-    labelBatches.push(response.candidates);
+    candidateLabelsByBatch.push(response.candidateLabels);
   }
 
   // Core applies one fix per text node per call, so every edit for one node composes into a single late fix
@@ -75,20 +75,22 @@ export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[
   for (const [batchIndex, { ambiguousShape, settledCandidates }] of batches.entries()) {
     for (const [index, settledCandidate] of settledCandidates.entries()) {
       // Labels zip against the candidates by index
-      const label = labelBatches[batchIndex]![index];
-      const isFix = label != null && ambiguousShape.isFix(label);
-      console.debug(`[pangu] ${ambiguousShape.kind}: "${settledCandidate.sentence}" (symbol at ${settledCandidate.at}) read as ${label ?? 'no label'}${isFix ? ' -> applying its late fix' : ''}`);
+      const candidateLabel = candidateLabelsByBatch[batchIndex]![index];
+      const isFix = candidateLabel != null && ambiguousShape.isFix(candidateLabel);
+      console.debug(
+        `[pangu] ${ambiguousShape.kind}: "${settledCandidate.sentence}" (symbol at ${settledCandidate.at}) read as ${candidateLabel ?? 'no label'}${isFix ? ' -> applying its late fix' : ''}`,
+      );
       if (isFix) {
-        const pending = textEditsByNode.get(settledCandidate.node) ?? { settled: settledCandidate.settled, textEdits: [] };
-        pending.textEdits.push(...ambiguousShape.edits(settledCandidate.settled, settledCandidate.index));
-        textEditsByNode.set(settledCandidate.node, pending);
+        const textNodeEdits = textEditsByNode.get(settledCandidate.node) ?? { settled: settledCandidate.settled, textEdits: [] };
+        textNodeEdits.textEdits.push(...ambiguousShape.edits(settledCandidate.settled, settledCandidate.index));
+        textEditsByNode.set(settledCandidate.node, textNodeEdits);
       }
     }
   }
 
   const lateFixes: LateFix[] = [];
-  for (const [node, { settled, textEdits }] of textEditsByNode) {
-    lateFixes.push({ node, settled, data: applyTextEdits(settled, textEdits) });
+  for (const [textNode, { settled, textEdits }] of textEditsByNode) {
+    lateFixes.push({ node: textNode, settled, data: applyTextEdits(settled, textEdits) });
   }
   if (lateFixes.length > 0) {
     pangu.applyLateFixes(lateFixes);
