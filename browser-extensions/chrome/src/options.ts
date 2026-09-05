@@ -308,8 +308,11 @@ class OptionsController {
   }
 
   private async handleModelDownload() {
+    const statusText = document.getElementById('ai-model-status') as HTMLElement;
     const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
     downloadButton.disabled = true;
+    // downloadModel() resolves only after the whole download, so the status line switches now rather than at the re-render below
+    statusText.textContent = chrome.i18n.getMessage('ai_model_downloading');
     try {
       await downloadModel();
     } finally {
