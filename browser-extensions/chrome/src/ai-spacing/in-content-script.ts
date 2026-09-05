@@ -24,11 +24,8 @@ async function classifyCandidates(kind: string, candidates: ClassifyCandidatesMe
 function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readonly SettledTextNode[]) {
   const settledCandidates: SettledCandidate[] = [];
   for (const settledTextNode of settledTextNodes) {
-    for (const candidateMatch of ambiguousShape.find(settledTextNode.unspaced)) {
-      const index = ambiguousShape.settle(settledTextNode.settled, candidateMatch);
-      if (index !== null) {
-        settledCandidates.push({ kind: ambiguousShape.kind, node: settledTextNode.node, sentence: candidateMatch.sentence, at: candidateMatch.at, index, settled: settledTextNode.settled });
-      }
+    for (const candidateMatch of ambiguousShape.find(settledTextNode.unspaced, settledTextNode.settled)) {
+      settledCandidates.push({ ...candidateMatch, node: settledTextNode.node, settled: settledTextNode.settled });
     }
   }
   return settledCandidates;

@@ -39,16 +39,6 @@ export function sliceSentence(text: string, at: number) {
   return { sentence: text.slice(start, end), at: at - start };
 }
 
-export function findHyphenMatches(text: string) {
-  const matches: CandidateMatch[] = [];
-  for (const match of text.matchAll(CJK_HYPHEN_DIGIT)) {
-    // Every code point in the CJK class is a single UTF-16 unit, so the hyphen is one past the match
-    const hyphenIndex = match.index + 1;
-    matches.push({ ...sliceSentence(text, hyphenIndex), ordinal: text.slice(0, hyphenIndex).split('-').length - 1 });
-  }
-  return matches;
-}
-
 export function indexOfNthHyphen(text: string, ordinal: number) {
   let seen = 0;
   for (let index = 0; index < text.length; index++) {
@@ -75,14 +65,18 @@ export const hyphenSign: AmbiguousShape = {
     return text.search(CJK_HYPHEN_DIGIT) !== -1;
   },
 
-  find(unspaced: string) {
-    return findHyphenMatches(unspaced);
-  },
-
-  // A missing ordinal answers -1, which fails hasInsertedGap() like any other non-hyphen index
-  settle(settled: string, candidateMatch: CandidateMatch) {
-    const index = indexOfNthHyphen(settled, candidateMatch.ordinal);
-    return hasInsertedGap(settled, index) ? index : null;
+  find(unspaced: string, settled: string) {
+    const matches: CandidateMatch[] = [];
+    for (const match of unspaced.matchAll(CJK_HYPHEN_DIGIT)) {
+      // Every code point in the CJK class is a single UTF-16 unit, so the hyphen is one past the match
+      const hyphenIndex = match.index + 1;
+      // Spacing never changes hyphens, so their ordinal survives. A missing ordinal answers -1 and fails hasInsertedGap()
+      const index = indexOfNthHyphen(settled, unspaced.slice(0, hyphenIndex).split('-').length - 1);
+      if (hasInsertedGap(settled, index)) {
+        matches.push({ ...sliceSentence(unspaced, hyphenIndex), index });
+      }
+    }
+    return matches;
   },
 
   isFix(label: string) {

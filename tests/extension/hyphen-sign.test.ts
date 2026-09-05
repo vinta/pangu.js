@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { applyTextEdits, type AmbiguousShape, type TextEdit } from '../../browser-extensions/chrome/src/ai-spacing/ambiguous-shape';
-import { CJK, findHyphenMatches, hasInsertedGap, hyphenSign, indexOfNthHyphen, sliceSentence } from '../../browser-extensions/chrome/src/ai-spacing/hyphen-sign';
+import { CJK, hasInsertedGap, hyphenSign, indexOfNthHyphen, sliceSentence } from '../../browser-extensions/chrome/src/ai-spacing/hyphen-sign';
 import { CJK as SHARED_CJK } from '../../src/shared/index';
 
 describe('sliceSentence()', () => {
@@ -46,36 +46,45 @@ describe('sliceSentence()', () => {
   });
 });
 
-describe('findHyphenMatches()', () => {
+describe('hyphenSign.find()', () => {
   it('flag a tight CJK-digit hyphen', () => {
-    expect(findHyphenMatches('氣溫是-5度左右')).toEqual([{ sentence: '氣溫是-5度左右', at: 3, ordinal: 0 }]);
+    expect(hyphenSign.find('氣溫是-5度左右', '氣溫是 - 5 度左右')).toEqual([{ sentence: '氣溫是-5度左右', at: 3, index: 4 }]);
+  });
+
+  it('follow the hyphen past a junction space', () => {
+    expect(hyphenSign.find('氣溫是-5度', ' 氣溫是 - 5 度')).toEqual([{ sentence: '氣溫是-5度', at: 3, index: 5 }]);
   });
 
   it('count earlier hyphens that were never flagged into the ordinal', () => {
     // The Nasdaq-100 hyphen is ordinal 0 and reads A-digit, so only the second hyphen is flagged
-    expect(findHyphenMatches('Nasdaq-100本週下跌-13.44%')).toEqual([{ sentence: 'Nasdaq-100本週下跌-13.44%', at: 14, ordinal: 1 }]);
+    expect(hyphenSign.find('Nasdaq-100本週下跌-13.44%', 'Nasdaq-100 本週下跌 - 13.44%')).toEqual([{ sentence: 'Nasdaq-100本週下跌-13.44%', at: 14, index: 16 }]);
   });
 
   it('flag every hyphen in one text node', () => {
-    expect(findHyphenMatches('從-5到-3度')).toEqual([
-      { sentence: '從-5到-3度', at: 1, ordinal: 0 },
-      { sentence: '從-5到-3度', at: 4, ordinal: 1 },
+    expect(hyphenSign.find('從-5到-3度', '從 - 5 到 - 3 度')).toEqual([
+      { sentence: '從-5到-3度', at: 1, index: 2 },
+      { sentence: '從-5到-3度', at: 4, index: 8 },
     ]);
   });
 
   it('slice each hyphen into its own sentence', () => {
-    expect(findHyphenMatches('溫度是-5度。濕度是-3度')).toEqual([
-      { sentence: '溫度是-5度', at: 3, ordinal: 0 },
-      { sentence: '濕度是-3度', at: 3, ordinal: 1 },
+    expect(hyphenSign.find('溫度是-5度。濕度是-3度', '溫度是 - 5 度。濕度是 - 3 度')).toEqual([
+      { sentence: '溫度是-5度', at: 3, index: 4 },
+      { sentence: '濕度是-3度', at: 3, index: 14 },
     ]);
   });
 
   it('ignore shapes outside the tight CJK-digit form', () => {
     // Half-width left side, non-digit right side, and an already-spaced original are all out of scope
-    expect(findHyphenMatches('abc-5')).toEqual([]);
-    expect(findHyphenMatches('中文-abc')).toEqual([]);
-    expect(findHyphenMatches('氣溫是 -5度')).toEqual([]);
-    expect(findHyphenMatches('氣溫是- 5度')).toEqual([]);
+    expect(hyphenSign.find('abc-5', 'abc-5')).toEqual([]);
+    expect(hyphenSign.find('中文-abc', '中文 - abc')).toEqual([]);
+    expect(hyphenSign.find('氣溫是 -5度', '氣溫是 - 5 度')).toEqual([]);
+    expect(hyphenSign.find('氣溫是- 5度', '氣溫是 - 5 度')).toEqual([]);
+  });
+
+  it('drop a tight match when its settled hyphen or inserted gap is absent', () => {
+    expect(hyphenSign.find('氣溫是-5度', '氣溫是 -5 度')).toEqual([]);
+    expect(hyphenSign.find('氣溫是-5度', '氣溫是 5 度')).toEqual([]);
   });
 });
 
@@ -129,30 +138,7 @@ describe('hyphenSign.occursIn()', () => {
     const text = '氣溫是-5度左右';
     expect(hyphenSign.occursIn(text)).toBe(true);
     expect(hyphenSign.occursIn(text)).toBe(true);
-    expect(hyphenSign.find(text)).toHaveLength(1);
-  });
-});
-
-describe('hyphenSign.settle()', () => {
-  // What a batch hands the page side: the unspaced text, then the settled text
-  function settleAll(unspaced: string, settled: string) {
-    return hyphenSign.find(unspaced).map((candidateMatch) => hyphenSign.settle(settled, candidateMatch));
-  }
-
-  it('settle on the index the rules left the hyphen at', () => {
-    expect(settleAll('氣溫是-5度左右', '氣溫是 - 5 度左右')).toEqual([4]);
-  });
-
-  it('follow the hyphen past a junction space', () => {
-    expect(settleAll('氣溫是-5度', ' 氣溫是 - 5 度')).toEqual([5]);
-  });
-
-  it('settle the flagged hyphen when an earlier hyphen was never flagged', () => {
-    expect(settleAll('Nasdaq-100本週下跌-13.44%', 'Nasdaq-100 本週下跌 - 13.44%')).toEqual([16]);
-  });
-
-  it('never flag an author-spaced hyphen', () => {
-    expect(hyphenSign.find('氣溫是 -5度左右')).toEqual([]);
+    expect(hyphenSign.find(text, '氣溫是 - 5 度左右')).toHaveLength(1);
   });
 });
 
@@ -165,12 +151,9 @@ describe('hyphenSign.isFix()', () => {
 });
 
 describe('hyphenSign.edits()', () => {
-  // The whole page-side pipeline for one text node whose every candidate came back as a fix: find, settle, edit, compose
+  // The whole page-side pipeline for one text node whose every candidate came back as a fix: find, edit, compose
   function fixAll(unspaced: string, settled: string) {
-    const textEdits = hyphenSign.find(unspaced).flatMap((candidateMatch) => {
-      const index = hyphenSign.settle(settled, candidateMatch);
-      return index === null ? [] : hyphenSign.edits(settled, index);
-    });
+    const textEdits = hyphenSign.find(unspaced, settled).flatMap(({ index }) => hyphenSign.edits(settled, index));
     return applyTextEdits(settled, textEdits);
   }
 
@@ -193,7 +176,6 @@ describe('applyTextEdits()', () => {
     kind: 'space-inserter',
     occursIn: () => false,
     find: () => [],
-    settle: () => null,
     isFix: (label) => label === 'insert',
     edits: (_after, index) => [{ index, remove: 0, insert: ' ' }],
   };
