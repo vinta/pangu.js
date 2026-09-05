@@ -1,5 +1,5 @@
 import { Pangu } from '../shared/index.js';
-import { decideBoundarySpacing, decideTextRunSpacing, respaceCurrentTail } from './boundary-spacing.js';
+import { decideBoundarySpacing, decideTextNodeSpacing, respaceCurrentTail } from './boundary-spacing.js';
 import { DomWalker } from './dom-walker.js';
 import { TaskScheduler } from './task-scheduler.js';
 import { VisibilityDetector } from './visibility-detector.js';
@@ -10,8 +10,24 @@ export interface AutoSpacingPageConfig {
   nodeMaxWaitMs?: number;
 }
 
-// Any whitespace at a text run's edge already separates it from the neighboring run, matching the /\s/ that scanBetweenTextRuns uses on the nodes in the gap.
-// \s covers NBSP, which spacingText never rewrites, so an author's NBSP reaches this check intact and must still count as a space
+interface UnsettledTextNode {
+  readonly node: Text; // the spaced but unsettled text is in node.data
+  readonly unspaced: string;
+}
+
+export interface SettledTextNode extends UnsettledTextNode {
+  readonly settled: string;
+}
+
+// A late fix: a correction to the rules output, anything that comes from a non-rules spacing engine like an LLM (the Chrome Prompt API)
+export interface LateFix {
+  readonly node: Text;
+  readonly settled: string;
+  readonly data: string;
+}
+
+// Any whitespace at a text node's edge already separates it from its neighbor, matching the /\s/ that scanBetweenTextNodes() uses on the gap
+// \s covers NBSP, which spacingText() never rewrites, so an author's NBSP still counts as a space here
 const TRAILING_WHITESPACE = /\s$/;
 const LEADING_WHITESPACE = /^\s/;
 
@@ -56,56 +72,70 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
 
 // Main call flows from autoSpacingPage() to requestIdleCallback():
 //
-// Entry A: initial page sweep                 Entry B: dynamic content (MutationObserver)
+// Entry A and Entry B are independent. The observer is live at once while the sweep waits pageDelayMs, so a mutation in that window is spaced before the sweep. Both land in the same
+// FIFO queue. A second pass over spaced text is a no-op, so the order only costs duplicate work.
 //
-// 1a. autoSpacingPage()                       1b. autoSpacingPage()
-//     ↓ waitForVideosToLoad(pageDelayMs)          ↓ setupAutoSpacingPageObserver()
-// 2a. spacingPage()                           2b. observer fires on characterData/childList
-//     ├─ spacingNode(<head><title>)               ↓ push affected nodes onto queue
-//     └─ spacingNode(document.body)               ↓ debounce(nodeDelayMs, max nodeMaxWaitMs)
-//     ↓                                       3b. sort queued nodes into document order,
-// 3a. spacingNode(node)                           dedupe, merge all their text runs via
-//     - DomWalker.collectTextNodes(node, true)    DomWalker.collectTextNodes(), reverse
-//       (reverse document order, skips             ↓
-//       whitespace-only and ignored tags)         (title changes take their own debounce
-//     ↓                                            → spacingNode(<title>))
-//     └──────────────────┬────────────────────────┘
-//                        ↓
-// 4. schedule(textNodes)
-//    - Decision point: taskScheduler.config.enabled && requestIdleCallback supported?
-//      ├─ NO  → spacingTextNodes(textNodes)   (synchronous, no requestIdleCallback)
-//      └─ YES (default) → taskScheduler.queue.add(() => spacingTextNodes(textNodes))
-//                         (always ONE task holding the whole list, never chunked)
+//                          autoSpacingPage()
+//                                  ↓
+//     ┌────────────────────────────┴────────────────────────────┐
+//     |                                                         |
+// Entry A: initial page sweep                               Entry B: dynamic content (MutationObserver)
+//     |                                                         |
+// 1a. waitForVideosToLoad(pageDelayMs)                      1b. setupAutoSpacingPageObserver()
+//     ↓                                                         ↓
+// 2a. spacingPage()                                         2b. observer fires on characterData/childList
+//     ├─ spacingNode(<title>)                                   ├─ a page re-render (the page writes its own unspaced data over a text node we spaced, in place or by replacing the node)
+//     └─ spacingNode(<body>)                                    │  runs spacingNodeSync() before paint, unless the subtree exceeds maxSyncTextNodes (then it is queued like everything else)
+//     ↓                                                         ↓ push affected nodes onto queue
+// 3a. spacingNode(node)                                         ↓ debounce(nodeDelayMs, max nodeMaxWaitMs)
+//     - DomWalker.collectTextNodes(node, true)              3b. sort queued nodes into document order, dedupe, merge all their text nodes via DomWalker.collectTextNodes(), reverse
+//       (reverse document order, skips                          ↓
+//       whitespace-only and ignored tags)                       (title changes take their own debounce → spacingNode(<title>))
+//     ↓                                                         ↓
+//     └────────────────────────────┬────────────────────────────┘
+//                                  ↓
+// 4. schedule(task)
+//    - Spacing callers pass () => spacingTextNodes(textNodes): always ONE task holding the whole list, never chunked. applyLateFixes() (step 7) goes through the same path
+//    - taskScheduler.config.enabled && requestIdleCallback supported?
+//      ├─ NO  → task() - synchronous
+//      └─ YES (default) → taskScheduler.queue.add(task) - asynchronous
 // ↓
 // 5. TaskQueue.add() → scheduleProcessing() → requestIdleCallback(process, { timeout: 5000 })
-//    - process(deadline): pops and runs queued tasks while deadline.timeRemaining() > 0
-//    - if tasks remain when the slice ends, re-arms requestIdleCallback for the rest
+//    - process(deadline): runs queued tasks while deadline.timeRemaining() > 0, then re-arms requestIdleCallback for the rest
 // ↓
 // 6. spacingTextNodes(textNodes)
-//    - per text run: decideTextRunSpacing() → trim-leading-space / prepend-space /
-//      apply-text-spacing (spacingText)
-//    - per adjacent run pair: decideBoundarySpacing() → prepend-next / append-current /
-//      insert <pangu> element / none
-//    - visibility detection happens here: always on, consulted lazily per boundary
-//      (hiddenBoundaryBefore / hiddenBoundaryAfter), not a scheduling decision
+//    - per text node: decideTextNodeSpacing() → trim-leading-space / prepend-space / apply-text-spacing (spacingText)
+//    - per adjacent text node pair: decideBoundarySpacing() → prepend-next / append-current / insert <pangu> element / none. A non-none verdict first writes back the respaced
+//      current tail (respaceCurrentTail) when the boundary needs one
+//    - visibility detection happens here, lazily per boundary (hiddenBoundaryBefore / hiddenBoundaryAfter). It is not a scheduling decision
+//    - batch tail: onTextNodesSettled fires once with every settled text node. Only the extension assigns it, the package alone captures nothing
+// ↓
+// 7. applyLateFixes(fixes)   (Chrome extension only, from its onTextNodesSettled handler)
+//    - the extension decides AI spacing fixes off the settled nodes and hands them back as LateFix { node, settled, data }
+//    - schedule(() => write each fix only if its node is still connected and still holds settled) → back to step 4, so the fix lands together with any pending spacing, even on a hidden tab
 //
 // Summary of paths to requestIdleCallback():
-// - taskScheduler.enabled=true + requestIdleCallback available → one batch task per
-//   schedule() call, drained in idle slices
-// - taskScheduler.enabled=false, or no requestIdleCallback (stock Safari) → never
-//   (fully synchronous processing)
+// - taskScheduler.enabled=true + requestIdleCallback available → one task per schedule() call (a spacing batch or a late-fix batch), drained in idle slices
+// - taskScheduler.enabled=false, or no requestIdleCallback (stock Safari) → never (fully synchronous)
+// - pre-paint re-space inside the observer callback (2b) → never; it calls spacingTextNodes() directly and bypasses schedule()
 export class BrowserPangu extends Pangu {
-  // Pre-paint re-space stays bounded: subtrees with more text runs than this fall back to the queue
+  // Pre-paint re-space stays bounded: subtrees with more text nodes than this fall back to the queue
   private static readonly maxSyncTextNodes = 256;
 
   private isAutoSpacingPageExecuted = false;
   private autoSpacingPageObserver: MutationObserver | null = null;
-  // Last data pangu wrote per text node: distinguishes pangu's own mutation records
-  // (data still equals the entry, drop them) from external rewrites of spaced content
+
+  // Last data we wrote per text node: distinguishes pangu's own mutation records
+  // (data still equals the entry, drop them) from page re-renders of spaced content
   // (data differs, re-space before the next paint)
   private readonly lastWrittenData = new WeakMap<Text, string>();
+
   public readonly taskScheduler = new TaskScheduler();
   public readonly visibilityDetector = new VisibilityDetector();
+
+  // A callback called after spacingTextNodes() settles a batch of text nodes, carrying each node's text before/after spacing
+  // The Chrome extension's AI spacing uses it to apply late fixes from LLM
+  public onTextNodesSettled: ((settledTextNodes: SettledTextNode[]) => void) | null = null;
 
   // PUBLIC
 
@@ -139,7 +169,7 @@ export class BrowserPangu extends Pangu {
   public spacingNode(contextNode: Node) {
     // Only process nodes with actual content (excluding text nodes that contain only whitespace)
     const textNodes = DomWalker.collectTextNodes(contextNode, true);
-    this.schedule(textNodes);
+    this.schedule(() => this.spacingTextNodes(textNodes));
   }
 
   public stopAutoSpacingPage() {
@@ -153,6 +183,21 @@ export class BrowserPangu extends Pangu {
 
   public isElementVisuallyHidden(element: Element) {
     return this.visibilityDetector.isElementVisuallyHidden(element);
+  }
+
+  // Late fixes go through schedule() like every other spacing write
+  public applyLateFixes(lateFixes: readonly LateFix[]) {
+    this.schedule(() => {
+      for (const lateFix of lateFixes) {
+        // Skip if the node is no longer in the document or changed since the fix was computed
+        if (!lateFix.node.isConnected || lateFix.node.data !== lateFix.settled) {
+          continue;
+        }
+
+        lateFix.node.data = lateFix.data;
+        this.lastWrittenData.set(lateFix.node, lateFix.data);
+      }
+    });
   }
 
   // INTERNAL
@@ -174,6 +219,9 @@ export class BrowserPangu extends Pangu {
     // Visibility verdicts are memoized per batch; styles may change between batches
     this.visibilityDetector.clearCache();
 
+    // Text nodes waiting for the batch to settle: unspaced text captured now, settled text read at the batch tail
+    const unsettledTextNodes: UnsettledTextNode[] = [];
+
     let currentTextNode: Node | undefined;
     let nextTextNode: Node | null = null;
 
@@ -185,10 +233,10 @@ export class BrowserPangu extends Pangu {
       }
 
       if (currentTextNode instanceof Text) {
-        this.applyTextRunSpacing(currentTextNode);
+        this.applyTextNodeSpacing(currentTextNode, unsettledTextNodes);
       }
 
-      // Boundary between this run and the following one, for every adjacent pair rather than only nested tags. The list is in reverse document order, so nextTextNode is the previously visited node
+      // Boundary between this text node and the following one, for every adjacent pair rather than only nested tags. The list is in reverse document order, so nextTextNode is the previously visited node
       if (nextTextNode) {
         if (!(currentTextNode instanceof Text) || !(nextTextNode instanceof Text)) {
           continue;
@@ -196,16 +244,16 @@ export class BrowserPangu extends Pangu {
 
         const currentBoundaryNode = DomWalker.findBoundaryNode(currentTextNode, 'last');
         const nextBoundaryNode = DomWalker.findBoundaryNode(nextTextNode, 'first');
-        const { whitespaceBetween, contentBetween } = this.scanBetweenTextRuns(currentBoundaryNode, nextBoundaryNode);
+        const { whitespaceBetween, contentBetween } = this.scanBetweenTextNodes(currentBoundaryNode, nextBoundaryNode);
 
         // Stable bindings for the lazy facts: the loop variables are reassigned across iterations
-        const currentRun = currentTextNode;
-        const nextRun = nextTextNode;
+        const currentNode = currentTextNode;
+        const nextNode = nextTextNode;
 
         const currentTail = currentTextNode.data.slice(-3);
         const nextFirst = nextTextNode.data.slice(0, 1);
 
-        const verdict = decideBoundarySpacing({
+        const boundarySpacingVerdict = decideBoundarySpacing({
           currentTail,
           nextFirst,
           currentEndsWithSpace: TRAILING_WHITESPACE.test(currentTextNode.data),
@@ -221,13 +269,13 @@ export class BrowserPangu extends Pangu {
           nextBoundaryIsBlock: DomWalker.blockTags.test(nextBoundaryNode.nodeName),
           nextBoundaryIsIgnored: DomWalker.ignoredTags.test(nextBoundaryNode.nodeName),
           nextBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(nextBoundaryNode.nodeName),
-          hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(nextRun),
-          hiddenBoundaryAfter: () => this.isHiddenBoundaryAfter(currentRun),
+          hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(nextNode),
+          hiddenBoundaryAfter: () => this.isHiddenBoundaryAfter(currentNode),
           inGridOrFlexContainer: () => !!nextBoundaryNode.parentNode && this.isGridOrFlexContainer(nextBoundaryNode.parentNode),
         });
 
-        // A junction space can come with a second space that belongs inside the current run's tail (CJK/ + CJK reads CJK / CJK): write the respaced tail back before placing the junction space
-        if (verdict !== 'none') {
+        // A junction space can come with a second space that belongs inside the current text node's tail (CJK/ + CJK reads CJK / CJK): write the respaced tail back before placing the junction space
+        if (boundarySpacingVerdict !== 'none') {
           const respacedTail = respaceCurrentTail(currentTail, nextFirst);
           if (respacedTail !== null) {
             currentTextNode.data = currentTextNode.data.slice(0, currentTextNode.data.length - currentTail.length) + respacedTail;
@@ -235,7 +283,7 @@ export class BrowserPangu extends Pangu {
           }
         }
 
-        switch (verdict) {
+        switch (boundarySpacingVerdict) {
           case 'prepend-next':
             nextTextNode.data = ` ${nextTextNode.data}`;
             this.lastWrittenData.set(nextTextNode, nextTextNode.data);
@@ -254,17 +302,30 @@ export class BrowserPangu extends Pangu {
 
       nextTextNode = currentTextNode;
     }
+
+    // At this point, the text nodes in this batch are "settled": the loop above is over, so nothing in this batch writes to them again
+    // Settled only means the rules are done with them. A late fix from applyLateFixes() can still change them in a later batch
+    this.flushSettledTextNodes(unsettledTextNodes);
   }
 
-  private applyTextRunSpacing(textNode: Text) {
-    const verdicts = decideTextRunSpacing({
+  private flushSettledTextNodes(unsettledTextNodes: readonly UnsettledTextNode[]) {
+    if (unsettledTextNodes.length === 0) {
+      return;
+    }
+
+    const settledTextNodes = unsettledTextNodes.map(({ node, unspaced }) => ({ node, unspaced, settled: node.data }));
+    this.onTextNodesSettled?.(settledTextNodes);
+  }
+
+  private applyTextNodeSpacing(textNode: Text, unsettledTextNodes: UnsettledTextNode[]) {
+    const textNodeSpacingVerdicts = decideTextNodeSpacing({
       text: textNode.data,
       previousElementLastChar: this.findPreviousElementLastChar(textNode),
       hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(textNode),
     });
 
-    for (const verdict of verdicts) {
-      switch (verdict) {
+    for (const textNodeSpacingVerdict of textNodeSpacingVerdicts) {
+      switch (textNodeSpacingVerdict) {
         case 'trim-leading-space':
           textNode.data = textNode.data.substring(1);
           this.lastWrittenData.set(textNode, textNode.data);
@@ -274,6 +335,9 @@ export class BrowserPangu extends Pangu {
           this.lastWrittenData.set(textNode, textNode.data);
           break;
         case 'apply-text-spacing': {
+          if (this.onTextNodesSettled) {
+            unsettledTextNodes.push({ node: textNode, unspaced: textNode.data });
+          }
           const newText = this.spacingText(textNode.data);
           if (textNode.data !== newText) {
             textNode.data = newText;
@@ -334,11 +398,11 @@ export class BrowserPangu extends Pangu {
     return null;
   }
 
-  private scanBetweenTextRuns(currentBoundaryNode: Node, nextBoundaryNode: Node) {
+  private scanBetweenTextNodes(currentBoundaryNode: Node, nextBoundaryNode: Node) {
     // Scan the document-order gap between the two boundary nodes. Whitespace
-    // text means the runs are already separated. Collectable text (checked
-    // through the same DomWalker rules that build the runs, so ignored islands
-    // like <code> do not count) means the runs are not adjacent at all
+    // text means the nodes are already separated. Collectable text (checked
+    // through the same DomWalker rules that build the list, so ignored islands
+    // like <code> do not count) means the nodes are not adjacent at all
     let whitespaceBetween = false;
     let contentBetween = false;
 
@@ -352,7 +416,7 @@ export class BrowserPangu extends Pangu {
         }
       } else if (node instanceof Element && !DomWalker.isIgnoredElement(node)) {
         // Descend so wrapped whitespace counts too. Ignored islands like <code>
-        // stay invisible, matching how the runs themselves are collected
+        // stay invisible, matching how the nodes themselves are collected
         for (let child = node.firstChild; child; child = child.nextSibling) {
           scan(child);
         }
@@ -397,19 +461,17 @@ export class BrowserPangu extends Pangu {
   }
 
   // The single seam that decides how spacing work is executed: synchronously
-  // or as one idle-time batch. Boundary spacing needs adjacent-run context, so
-  // the node list is never split across calls
-  private schedule(textNodes: Node[]) {
+  // or as one idle-time batch. Boundary spacing needs adjacent-node context, so
+  // the node list a task closes over is never split across calls
+  private schedule(task: () => void) {
     // Stock Safari ships requestIdleCallback behind a preference flag, so fall
     // back to synchronous spacing instead of throwing in TaskQueue
     if (!this.taskScheduler.config.enabled || typeof requestIdleCallback !== 'function') {
-      this.spacingTextNodes(textNodes);
+      task();
       return;
     }
 
-    this.taskScheduler.queue.add(() => {
-      this.spacingTextNodes(textNodes);
-    });
+    this.taskScheduler.queue.add(task);
   }
 
   private waitForVideosToLoad(delayMs: number, onLoaded: () => void) {
@@ -483,10 +545,10 @@ export class BrowserPangu extends Pangu {
           return;
         }
 
-        // Merge all queued nodes' text runs into one reverse-document-order pass,
+        // Merge all queued nodes' text nodes into one reverse-document-order pass,
         // so boundary spacing sees pairs that span separately queued nodes.
         // Sort into document order first (mutation order is not document order)
-        // and drop duplicate runs (a parent and its child can both be queued)
+        // and drop duplicate nodes (a parent and its child can both be queued)
         nodesToProcess.sort((a, b) => {
           if (a === b) {
             return 0;
@@ -506,19 +568,18 @@ export class BrowserPangu extends Pangu {
         }
         allTextNodes.reverse();
 
-        this.schedule(allTextNodes);
+        this.schedule(() => this.spacingTextNodes(allTextNodes));
       },
       nodeDelayMs,
       nodeMaxWaitMs,
     );
 
-    // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+    // See: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
     this.autoSpacingPageObserver = new MutationObserver((mutations) => {
       let titleChanged = false;
 
-      // When this batch removed content pangu already spaced, the page is re-rendering
-      // over processed DOM (e.g. a framework's second render pass): added subtrees are
-      // then re-spaced synchronously below, before the browser paints the reverted text
+      // If this batch removed content we already spaced, there is usually a page re-render
+      // So the added nodes below are re-spaced with spacingNodeSync(), before the browser paints the re-rendered text
       let removedSpacedContent = false;
       for (const mutation of mutations) {
         for (const node of mutation.removedNodes) {
@@ -550,11 +611,11 @@ export class BrowserPangu extends Pangu {
               const lastWritten = this.lastWrittenData.get(node);
               if (lastWritten !== undefined) {
                 if (node.data === lastWritten) {
-                  // pangu's own write: nothing to reprocess
                   break;
                 }
-                // External rewrite of a node pangu already spaced is a revert:
-                // re-space it before the next paint so the revert never renders
+
+                // The current text node's data doesn't match what we last wrote, which usually means there is a page re-render
+                // So re-space it before the next paint so the re-render never paints
                 if (this.spacingNodeSync(node.parentNode, BrowserPangu.maxSyncTextNodes)) {
                   break;
                 }
@@ -594,17 +655,13 @@ export class BrowserPangu extends Pangu {
       debouncedSpacingNode();
     });
 
-    // NOTE: A single MutationObserver can observe multiple targets simultaneously
-    // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver/observe:
-
-    // Observe page title changes
+    // A single MutationObserver can observe multiple targets simultaneously
     this.autoSpacingPageObserver.observe(document.head, {
       characterData: true,
       childList: true,
-      subtree: true, // Need subtree to observe text node changes inside title
+      subtree: true,
     });
 
-    // Observe page content changes
     this.autoSpacingPageObserver.observe(document.body, {
       characterData: true,
       childList: true,

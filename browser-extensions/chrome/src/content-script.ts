@@ -1,28 +1,28 @@
-import type { ContentScriptLoadedMessage, ContentScriptResponse, MessageToContentScript } from './utils/types';
+import { applyAiSpacing, warmUpAiSpacing } from './ai-spacing/in-content-script';
+import type { ContentScriptResponse, MessageToContentScript } from './messages';
+import { getSettings } from './settings/storage';
 
-// `Window.pangu` is declared globally in src/browser/pangu.umd.ts
-// The pangu object is injected by pangu.umd.js which loads before this script
+const pangu = window.pangu;
 
 async function autoSpacingPage() {
-  const pangu = window.pangu;
-  if (pangu) {
-    pangu.autoSpacingPage();
+  // Assigned before the sweep starts, so the initial pass is captured too
+  const settings = await getSettings();
+  if (settings.is_enable_ai_spacing) {
+    pangu.onTextNodesSettled = (settledTextNodes) => {
+      void applyAiSpacing(settledTextNodes);
+    };
+    warmUpAiSpacing();
   }
+
+  pangu.autoSpacingPage();
 }
 
 function spacingPage() {
-  const pangu = window.pangu;
-  if (pangu) {
-    pangu.spacingPage();
-  }
+  pangu.spacingPage();
 }
 
-const loadedMessage: ContentScriptLoadedMessage = { type: 'CONTENT_SCRIPT_LOADED' };
-chrome.runtime.sendMessage(loadedMessage);
-
 // Document Loading Lifecycle:
-// loading → (DOM parsing completes) → DOMContentLoaded event fires →
-// interactive → (resources load) → load event fires → complete
+// loading → (DOM parsing completes) → DOMContentLoaded event fires → interactive → (resources load) → load event fires → complete
 if (document.readyState === 'loading') {
   // DOMContentLoaded only fires once -> autoSpacingPage() only runs once
   document.addEventListener('DOMContentLoaded', autoSpacingPage);

@@ -94,6 +94,15 @@ p {
   margin: 0;
 }
 
+code {
+  padding: 0 var(--spacing-1);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  background-color: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
+}
+
 a {
   color: var(--color-primary);
   text-decoration: none;
@@ -121,6 +130,10 @@ a:hover {
   gap: var(--spacing-2);
   white-space: nowrap;
   text-decoration: none;
+}
+
+.btn-sm {
+  padding: var(--spacing-1) var(--spacing-3);
 }
 
 .btn:focus {

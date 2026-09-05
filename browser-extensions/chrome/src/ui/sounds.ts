@@ -1,4 +1,4 @@
-import { getSettings } from './settings';
+import { getSettings } from '../settings/storage';
 
 export type SoundName = 'Hadouken' | 'Shouryuuken' | 'YeahBaby' | 'WahWahWaaah';
 
@@ -11,12 +11,12 @@ const SOUND_FILES: Record<SoundName, string> = {
 
 let currentAudio: HTMLAudioElement | null = null;
 
-export async function playSound(name: SoundName) {
-  const current = await getSettings();
-  if (!current.is_mute_sound_effects) {
+export async function playSound(soundName: SoundName) {
+  const settings = await getSettings();
+  if (!settings.is_mute_sound_effects) {
     stopSound();
 
-    const audio = new Audio(chrome.runtime.getURL(SOUND_FILES[name]));
+    const audio = new Audio(chrome.runtime.getURL(SOUND_FILES[soundName]));
     currentAudio = audio;
 
     audio.addEventListener('ended', () => {

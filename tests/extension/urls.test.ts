@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_SETTINGS } from '../../browser-extensions/chrome/src/utils/settings';
-import type { Settings } from '../../browser-extensions/chrome/src/utils/types';
-import { isValidUrl, shouldShowActiveStatus, shouldShowOffIcon } from '../../browser-extensions/chrome/src/utils/urls';
+import { DEFAULT_SETTINGS, type Settings } from '../../browser-extensions/chrome/src/settings/storage';
+import { isValidUrl, shouldShowActiveStatus, shouldShowOffIcon } from '../../browser-extensions/chrome/src/settings/urls';
 
 function makeSettings(overrides: Partial<Settings> = {}): Settings {
   return { ...DEFAULT_SETTINGS, ...overrides };

@@ -1,8 +1,10 @@
-import { translatePage } from './utils/i18n';
-import { getSettings, onSettingsChanged, updateSettings } from './utils/settings';
-import { playSound, stopSound } from './utils/sounds';
-import type { ContentScriptResponse, ManualSpacingMessage, MessageFromContentScript, PingMessage, Settings } from './utils/types';
-import { isValidUrl, shouldShowActiveStatus } from './utils/urls';
+import { canAiModelRun, getAiModelAvailability } from './ai-spacing/model';
+import type { ContentScriptResponse, ManualSpacingMessage, PingMessage } from './messages';
+import type { Settings } from './settings/storage';
+import { getSettings, onSettingsChanged, updateSettings } from './settings/storage';
+import { isValidUrl, shouldShowActiveStatus } from './settings/urls';
+import { translatePage } from './ui/i18n';
+import { playSound, stopSound } from './ui/sounds';
 
 class PopupController {
   private currentTabId: number | undefined;
@@ -26,53 +28,13 @@ class PopupController {
   }
 
   private setupEventListeners() {
-    const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
-    if (spacingModeToggle) {
-      spacingModeToggle.addEventListener('change', () => {
-        this.handleSpacingModeToggleChange();
-      });
-    }
-
-    const muteToggle = document.getElementById('mute-toggle') as HTMLInputElement;
-    if (muteToggle) {
-      muteToggle.addEventListener('change', () => {
-        this.handleMuteToggleChange();
-      });
-    }
-
-    const textAutospaceToggle = document.getElementById('text-autospace-toggle') as HTMLInputElement;
-    if (textAutospaceToggle) {
-      textAutospaceToggle.addEventListener('change', () => {
-        this.handleTextAutospaceToggleChange();
-      });
-    }
-
-    const manualSpacingBtn = document.getElementById('manual-spacing-btn');
-    if (manualSpacingBtn) {
-      manualSpacingBtn.addEventListener('click', () => {
-        this.handleManualSpacing();
-      });
-    }
-
-    const addToBlacklistBtn = document.getElementById('add-to-blacklist-btn');
-    if (addToBlacklistBtn) {
-      addToBlacklistBtn.addEventListener('click', () => {
-        this.handleAddToBlacklist();
-      });
-    }
-
-    const notification = document.getElementById('notification');
-    if (notification) {
-      notification.addEventListener('click', () => {
-        this.hideNotification();
-      });
-    }
-
-    chrome.runtime.onMessage.addListener((message: MessageFromContentScript, sender) => {
-      if (message.type === 'CONTENT_SCRIPT_LOADED' && sender.tab?.id === this.currentTabId) {
-        this.render().catch(console.error);
-      }
-    });
+    document.getElementById('spacing-mode-toggle')!.addEventListener('change', () => this.handleSpacingModeToggleChange());
+    document.getElementById('mute-toggle')!.addEventListener('change', () => this.handleMuteToggleChange());
+    document.getElementById('text-autospace-toggle')!.addEventListener('change', () => this.handleTextAutospaceToggleChange());
+    document.getElementById('ai-spacing-toggle')!.addEventListener('change', () => this.handleAiSpacingToggleChange());
+    document.getElementById('manual-spacing-btn')!.addEventListener('click', () => this.handleManualSpacing());
+    document.getElementById('add-to-blacklist-btn')!.addEventListener('click', () => this.handleAddToBlacklist());
+    document.getElementById('notification')!.addEventListener('click', () => this.hideNotification());
 
     // Any settings change repaints the whole popup: it is small, and this keeps the status row honest after toggling spacing mode. Handlers never
     // repaint after a successful write, the onChanged echo lands here instead.
@@ -82,49 +44,49 @@ class PopupController {
   }
 
   private async render() {
-    const current = await getSettings();
-    this.renderSpacingModeToggle(current);
-    this.renderMuteToggle(current);
-    this.renderTextAutospaceToggle(current);
-    this.renderStatus(current);
-    this.renderAddToBlacklistButton(current);
+    const settings = await getSettings();
+    this.renderSpacingModeToggle(settings);
+    this.renderMuteToggle(settings);
+    this.renderTextAutospaceToggle(settings);
+    await this.renderAiSpacingToggle(settings);
+    this.renderStatus(settings);
+    this.renderAddToBlacklistButton(settings);
     this.renderVersion();
   }
 
-  private renderSpacingModeToggle(current: Settings) {
+  private renderSpacingModeToggle(settings: Settings) {
     const spacingModeToggle = document.getElementById('spacing-mode-toggle') as HTMLInputElement;
-    if (spacingModeToggle) {
-      spacingModeToggle.checked = current.spacing_mode === 'spacing_when_load';
-    }
+    spacingModeToggle.checked = settings.spacing_mode === 'spacing_when_load';
   }
 
-  private renderMuteToggle(current: Settings) {
+  private renderMuteToggle(settings: Settings) {
     const muteToggle = document.getElementById('mute-toggle') as HTMLInputElement;
-    if (muteToggle) {
-      muteToggle.checked = current.is_mute_sound_effects;
-    }
+    muteToggle.checked = settings.is_mute_sound_effects;
   }
 
-  private renderTextAutospaceToggle(current: Settings) {
+  private renderTextAutospaceToggle(settings: Settings) {
     const textAutospaceToggle = document.getElementById('text-autospace-toggle') as HTMLInputElement;
-    if (textAutospaceToggle) {
-      const isSupported = CSS.supports('text-autospace', 'normal');
-      // Display-only off when unsupported: never write back, the synced setting still applies on other devices
-      textAutospaceToggle.checked = isSupported && current.is_enable_text_autospace;
-      textAutospaceToggle.disabled = !isSupported;
-      textAutospaceToggle.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
-    }
+    const isSupported = CSS.supports('text-autospace', 'normal');
+    // Display-only off when unsupported: never write back, the synced setting still applies on other devices
+    textAutospaceToggle.checked = isSupported && settings.is_enable_text_autospace;
+    textAutospaceToggle.disabled = !isSupported;
+    textAutospaceToggle.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
   }
 
-  private renderStatus(current: Settings) {
+  private async renderAiSpacingToggle(settings: Settings) {
+    const aiSpacingToggle = document.getElementById('ai-spacing-toggle') as HTMLInputElement;
+    const canRun = canAiModelRun(await getAiModelAvailability());
+    // Display-only off when the model can never run here: never write back, the synced setting still applies on other devices
+    aiSpacingToggle.checked = canRun && settings.is_enable_ai_spacing;
+    aiSpacingToggle.disabled = !canRun;
+    aiSpacingToggle.closest('.toggle')?.classList.toggle('toggle-disabled', !canRun);
+  }
+
+  private renderStatus(settings: Settings) {
     const statusInput = document.getElementById('status-toggle-input') as HTMLInputElement;
-    const statusLabel = document.getElementById('status-toggle-label');
+    const statusLabel = document.getElementById('status-toggle-label')!;
 
-    if (!statusInput || !statusLabel) {
-      return;
-    }
-
-    const isActive = shouldShowActiveStatus(current, this.currentTabUrl);
+    const isActive = shouldShowActiveStatus(settings, this.currentTabUrl);
     statusInput.checked = isActive;
     const messageKey = isActive ? 'status_active' : 'status_inactive';
     statusLabel.setAttribute('data-i18n', messageKey);
@@ -132,20 +94,14 @@ class PopupController {
   }
 
   private renderVersion() {
-    const versionElement = document.getElementById('version');
-    if (versionElement) {
-      versionElement.textContent = chrome.runtime.getManifest().version;
-    }
+    document.getElementById('version')!.textContent = chrome.runtime.getManifest().version;
   }
 
-  private renderAddToBlacklistButton(current: Settings) {
-    const button = document.getElementById('add-to-blacklist-btn');
-    if (!button) {
-      return;
-    }
+  private renderAddToBlacklistButton(settings: Settings) {
+    const button = document.getElementById('add-to-blacklist-btn')!;
 
     // Hide button if not in blacklist mode or if URL is invalid
-    if (current.filter_mode !== 'blacklist' || !this.currentTabUrl || !isValidUrl(this.currentTabUrl)) {
+    if (settings.filter_mode !== 'blacklist' || !this.currentTabUrl || !isValidUrl(this.currentTabUrl)) {
       button.style.display = 'none';
       return;
     }
@@ -194,11 +150,21 @@ class PopupController {
     this.showMessage(chrome.i18n.getMessage('refresh_required'), 'info', 1000 * 3);
   }
 
-  private async handleManualSpacing() {
-    const button = document.getElementById('manual-spacing-btn') as HTMLButtonElement;
-    if (!button) {
+  private async handleAiSpacingToggleChange() {
+    const toggle = document.getElementById('ai-spacing-toggle') as HTMLInputElement;
+    try {
+      await updateSettings({ is_enable_ai_spacing: toggle.checked });
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+      await this.render();
       return;
     }
+
+    this.showMessage(chrome.i18n.getMessage('refresh_required'), 'info', 1000 * 3);
+  }
+
+  private async handleManualSpacing() {
+    const button = document.getElementById('manual-spacing-btn') as HTMLButtonElement;
 
     // Disable button to prevent multiple clicks
     button.disabled = true;
@@ -213,7 +179,7 @@ class PopupController {
     try {
       button.textContent = chrome.i18n.getMessage('spacing_processing');
 
-      const isContentScriptLoaded = await this.isContentScriptLoaded();
+      const isContentScriptLoaded = await this.isContentScriptLoaded(this.currentTabId);
       if (!isContentScriptLoaded) {
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
@@ -244,15 +210,11 @@ class PopupController {
     }
   }
 
-  private async isContentScriptLoaded() {
-    if (!this.currentTabId || !this.currentTabUrl) {
-      return false;
-    }
-
+  private async isContentScriptLoaded(tabId: number) {
     // Try to ping the content script to see if it's active in this tab
     try {
       const message: PingMessage = { action: 'PING' };
-      await chrome.tabs.sendMessage<PingMessage, ContentScriptResponse>(this.currentTabId, message);
+      await chrome.tabs.sendMessage<PingMessage, ContentScriptResponse>(tabId, message);
       return true;
     } catch {
       return false;
@@ -270,33 +232,28 @@ class PopupController {
   }
 
   private showMessage(text: string, type: 'info' | 'error' | 'success' = 'info', hideMessageDelayMs: number, callback?: () => void) {
-    const notificationElement = document.getElementById('notification');
-    const notificationMessage = document.getElementById('notification-message');
+    const notificationElement = document.getElementById('notification')!;
+    const notificationMessage = document.getElementById('notification-message')!;
 
-    if (notificationElement && notificationMessage) {
-      // Clear any existing timeout to prevent premature hiding
-      if (this.messageTimeoutId) {
-        clearTimeout(this.messageTimeoutId);
-      }
-
-      // Store the callback so it can be called when manually dismissing
-      this.notificationCallback = callback;
-
-      notificationMessage.textContent = text;
-      notificationElement.className = `notification ${type}`;
-      notificationElement.style.display = 'block';
-
-      this.messageTimeoutId = window.setTimeout(() => {
-        this.hideNotification();
-      }, hideMessageDelayMs);
+    // Clear any existing timeout to prevent premature hiding
+    if (this.messageTimeoutId) {
+      clearTimeout(this.messageTimeoutId);
     }
+
+    // Store the callback so it can be called when manually dismissing
+    this.notificationCallback = callback;
+
+    notificationMessage.textContent = text;
+    notificationElement.className = `notification ${type}`;
+    notificationElement.style.display = 'block';
+
+    this.messageTimeoutId = window.setTimeout(() => {
+      this.hideNotification();
+    }, hideMessageDelayMs);
   }
 
   private hideNotification() {
-    const notificationElement = document.getElementById('notification');
-    if (notificationElement) {
-      notificationElement.style.display = 'none';
-    }
+    document.getElementById('notification')!.style.display = 'none';
 
     stopSound();
 
@@ -321,12 +278,12 @@ class PopupController {
       const domainPattern = `${url.protocol}//${url.hostname}/*`;
 
       // The button only shows in blacklist mode, and the pattern is built from an already-validated tab URL, so no match-pattern validation here
-      const current = await getSettings();
-      if (current.blacklist.includes(domainPattern)) {
+      const settings = await getSettings();
+      if (settings.blacklist.includes(domainPattern)) {
         this.showMessage(chrome.i18n.getMessage('already_in_blacklist'), 'info', 1000 * 3);
         return;
       }
-      await updateSettings({ blacklist: [...current.blacklist, domainPattern] });
+      await updateSettings({ blacklist: [...settings.blacklist, domainPattern] });
       this.showMessage(chrome.i18n.getMessage('refresh_required'), 'info', 1000 * 3);
     } catch (error) {
       console.error('Failed to add to blacklist:', error);

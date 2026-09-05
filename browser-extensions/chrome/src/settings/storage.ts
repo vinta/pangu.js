@@ -1,4 +1,12 @@
-import type { Settings } from './types';
+export interface Settings {
+  spacing_mode: 'spacing_when_load' | 'spacing_when_click';
+  filter_mode: 'blacklist' | 'whitelist';
+  blacklist: string[];
+  whitelist: string[];
+  is_mute_sound_effects: boolean;
+  is_enable_text_autospace: boolean;
+  is_enable_ai_spacing: boolean;
+}
 
 export const DEFAULT_SETTINGS: Settings = {
   spacing_mode: 'spacing_when_load',
@@ -16,12 +24,12 @@ export const DEFAULT_SETTINGS: Settings = {
   whitelist: [],
   is_mute_sound_effects: false,
   is_enable_text_autospace: true,
+  is_enable_ai_spacing: true,
 };
 
 const SETTINGS_KEYS = Object.keys(DEFAULT_SETTINGS) as (keyof Settings)[];
 
-// chrome.storage.sync reads from a local database (cloud sync happens in the background), so reading fresh on every call is cheap; there is no cache.
-// get(DEFAULT_SETTINGS) fills missing keys with defaults natively.
+// chrome.storage.sync reads from a local database, so reading fresh on every call is cheap and there is no cache. get(DEFAULT_SETTINGS) fills missing keys with defaults
 export async function getSettings() {
   return (await chrome.storage.sync.get(DEFAULT_SETTINGS)) as Settings;
 }

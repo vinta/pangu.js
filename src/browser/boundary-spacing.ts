@@ -2,14 +2,14 @@ import { ANY_CJK, pangu } from '../shared/index.js';
 
 const QUOTE = /["\u201c\u201d]/;
 
-// Where the space goes at the boundary between two adjacent text runs
+// Where the space goes at the boundary between two adjacent text nodes
 export type BoundarySpacingVerdict = 'none' | 'prepend-next' | 'append-current' | 'insert-element';
 
-// What a single text run needs before its boundaries are considered
-export type TextRunSpacingVerdict = 'trim-leading-space' | 'prepend-space' | 'apply-text-spacing';
+// What a single text node needs before its boundaries are considered
+export type TextNodeSpacingVerdict = 'trim-leading-space' | 'prepend-space' | 'apply-text-spacing';
 
 export interface BoundarySpacingContext {
-  // Up to three trailing characters of the current text run, not just the last
+  // Up to three trailing characters of the current text node, not just the last
   // one: rules like AN_COLON_CJK only fire with the characters before the
   // junction in view
   currentTail: string;
@@ -17,7 +17,7 @@ export interface BoundarySpacingContext {
   currentEndsWithSpace: boolean;
   nextStartsWithSpace: boolean;
   whitespaceBetween: boolean;
-  // Collectable text sits between the runs, so they are not adjacent and no
+  // Collectable text sits between the nodes, so they are not adjacent and no
   // boundary exists (e.g. an unqueued sibling between two separately mutated
   // nodes). Content the engine never collects (ignored tags like <code>) does
   // not count, so spacing across those islands is preserved
@@ -38,81 +38,86 @@ export interface BoundarySpacingContext {
   inGridOrFlexContainer: () => boolean;
 }
 
-export interface TextRunSpacingContext {
+export interface TextNodeSpacingContext {
   text: string;
   previousElementLastChar: string | null;
   // Reads computed styles, so it is supplied lazily and only consulted when
-  // the text run starts with a space
+  // the text node starts with a space
   hiddenBoundaryBefore: () => boolean;
 }
 
-export function decideBoundarySpacing(context: BoundarySpacingContext) {
-  if (context.spaceLikeSiblingAfterCurrent) {
+export function decideBoundarySpacing(boundarySpacingContext: BoundarySpacingContext) {
+  if (boundarySpacingContext.spaceLikeSiblingAfterCurrent) {
     return 'none';
   }
 
-  if (context.currentEndsWithSpace || context.nextStartsWithSpace || context.whitespaceBetween) {
+  if (boundarySpacingContext.currentEndsWithSpace || boundarySpacingContext.nextStartsWithSpace || boundarySpacingContext.whitespaceBetween) {
     return 'none';
   }
 
-  if (context.contentBetween) {
+  if (boundarySpacingContext.contentBetween) {
     return 'none';
   }
 
-  if (!needsBoundarySpace(context.currentTail, context.nextFirst)) {
+  if (!needsBoundarySpace(boundarySpacingContext.currentTail, boundarySpacingContext.nextFirst)) {
     return 'none';
   }
 
-  if (context.spaceLikeSiblingAfterCurrentBoundary || context.currentBoundaryIsBlock) {
+  if (boundarySpacingContext.spaceLikeSiblingAfterCurrentBoundary || boundarySpacingContext.currentBoundaryIsBlock) {
     return 'none';
   }
 
-  if (!context.nextBoundaryIsSpaceSensitive) {
-    if (context.nextBoundaryIsIgnored || context.nextBoundaryIsBlock || context.spaceLikeSiblingBeforeNext || context.hiddenBoundaryBefore()) {
+  if (!boundarySpacingContext.nextBoundaryIsSpaceSensitive) {
+    if (
+      boundarySpacingContext.nextBoundaryIsIgnored ||
+      boundarySpacingContext.nextBoundaryIsBlock ||
+      boundarySpacingContext.spaceLikeSiblingBeforeNext ||
+      boundarySpacingContext.hiddenBoundaryBefore()
+    ) {
       return 'none';
     }
     return 'prepend-next';
   }
 
-  if (!context.currentBoundaryIsSpaceSensitive) {
-    if (context.hiddenBoundaryAfter()) {
+  if (!boundarySpacingContext.currentBoundaryIsSpaceSensitive) {
+    if (boundarySpacingContext.hiddenBoundaryAfter()) {
       return 'none';
     }
     return 'append-current';
   }
 
-  if (context.spaceLikeSiblingBeforeNextBoundary || context.hiddenBoundaryAfter()) {
+  if (boundarySpacingContext.spaceLikeSiblingBeforeNextBoundary || boundarySpacingContext.hiddenBoundaryAfter()) {
     return 'none';
   }
 
   // Skip <pangu> element insertion in Grid/Flexbox containers
   // because the element becomes a layout item and breaks the layout
-  if (context.inGridOrFlexContainer()) {
+  if (boundarySpacingContext.inGridOrFlexContainer()) {
     return 'none';
   }
 
   return 'insert-element';
 }
 
-export function decideTextRunSpacing(context: TextRunSpacingContext) {
-  const verdicts: TextRunSpacingVerdict[] = [];
+export function decideTextNodeSpacing(textNodeSpacingContext: TextNodeSpacingContext) {
+  const textNodeSpacingVerdicts: TextNodeSpacingVerdict[] = [];
 
   // The standalone quote rule reads the text left by the trim rule
-  let { text } = context;
-  if (text.startsWith(' ') && context.hiddenBoundaryBefore()) {
-    verdicts.push('trim-leading-space');
+  let { text } = textNodeSpacingContext;
+  if (text.startsWith(' ') && textNodeSpacingContext.hiddenBoundaryBefore()) {
+    textNodeSpacingVerdicts.push('trim-leading-space');
     text = text.substring(1);
   }
 
   if (isStandaloneQuote(text)) {
-    if (context.previousElementLastChar !== null && ANY_CJK.test(context.previousElementLastChar)) {
-      verdicts.push('prepend-space');
+    if (textNodeSpacingContext.previousElementLastChar !== null && ANY_CJK.test(textNodeSpacingContext.previousElementLastChar)) {
+      textNodeSpacingVerdicts.push('prepend-space');
     }
   } else {
-    verdicts.push('apply-text-spacing');
+    textNodeSpacingVerdicts.push('apply-text-spacing');
   }
 
-  return verdicts;
+  return textNodeSpacingVerdicts;
 }
 
 // spaceJunction is pure and a page repeats the same few junction windows at
@@ -143,9 +148,8 @@ function needsBoundarySpace(currentTail: string, nextFirst: string) {
   return spaceJunction(currentTail, nextFirst).endsWith(` ${nextFirst}`) && !isQuoteNextToCjk(currentTail.slice(-1), nextFirst);
 }
 
-// The junction reading can put a second space inside the tail itself, not only at the junction: CJK/ + CJK reads CJK / CJK, because the slash rule needs both sides of the slash in view while each
-// run alone shows it only one. The boundary verdict places the junction space; this returns the tail with its interior spaces written in, or null when the tail already reads right. Only meaningful
-// when the boundary verdict is a spacing action: 'none' means the runs are separated or the junction reading does not apply, so the tail must stay untouched
+// The junction reading can put a second space inside the tail itself: CJK/ + CJK reads CJK / CJK, because the slash rule needs both sides of the slash in view. Returns the tail with its interior
+// spaces written in, or null when the tail already reads right. Only meaningful when the boundary verdict is a spacing action; on 'none' the tail must stay untouched
 export function respaceCurrentTail(currentTail: string, nextFirst: string) {
   const spacedJunction = spaceJunction(currentTail, nextFirst);
   if (!spacedJunction.endsWith(` ${nextFirst}`)) {

@@ -17,6 +17,17 @@ export function translatePage() {
     }
   }
 
+  // Translate tooltips
+  for (const element of document.querySelectorAll('[data-i18n-title]')) {
+    const messageKey = element.getAttribute('data-i18n-title');
+    if (messageKey) {
+      const message = chrome.i18n.getMessage(messageKey);
+      if (message) {
+        element.setAttribute('title', message);
+      }
+    }
+  }
+
   // Translate elements whose message contains HTML declared via placeholders in messages.json
   for (const element of document.querySelectorAll('[data-i18n-html]')) {
     const messageKey = element.getAttribute('data-i18n-html');

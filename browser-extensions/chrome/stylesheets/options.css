@@ -78,6 +78,14 @@
   margin-top: var(--spacing-2);
 }
 
+/* A note under a section's cards; the bottom margin collapses with the footer's 2rem, so the same value on top keeps the gaps equal */
+.options-section-note {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+  margin-block: var(--spacing-8);
+  text-align: center;
+}
+
 /* URL list section */
 .url-list-section {
   margin-top: var(--spacing-4);
@@ -88,6 +96,13 @@
 .url-list-help {
   margin-top: var(--spacing-3);
   text-align: right;
+}
+
+/* Model status under the AI spacing toggle, aligned like the URL list help but quieter since it is not a link */
+.ai-model-status {
+  margin-top: var(--spacing-3);
+  text-align: right;
+  color: var(--color-text-tertiary);
 }
 
 /* URL list styles */
@@ -118,7 +133,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
-  padding: var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-2);
   background-color: var(--color-surface-secondary);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius);
@@ -132,7 +147,7 @@
 /* URL edit input */
 .url-edit-input {
   flex: 1;
-  padding: var(--spacing-2) var(--spacing-3);
+  padding: var(--spacing-1) var(--spacing-3);
   font-size: var(--text-base);
   font-family: var(--font-mono);
   border: 1px solid var(--color-border);
@@ -150,7 +165,7 @@
 /* URL display input (clickable) */
 .url-display-input {
   flex: 1;
-  padding: var(--spacing-2) var(--spacing-3);
+  padding: var(--spacing-1) var(--spacing-3);
   font-size: var(--text-base);
   font-family: var(--font-mono);
   color: var(--color-text-primary);

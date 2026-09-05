@@ -1,7 +1,8 @@
-import { translatePage } from './utils/i18n';
-import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, updateSettings } from './utils/settings';
-import { playSound } from './utils/sounds';
-import { isValidMatchPattern } from './utils/urls';
+import { canAiModelRun, getAiModelAvailability, startAiModelDownload } from './ai-spacing/model';
+import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, updateSettings } from './settings/storage';
+import { isValidMatchPattern } from './settings/urls';
+import { translatePage } from './ui/i18n';
+import { playSound } from './ui/sounds';
 
 // Builds a Partial<Settings> for the list picked by filter mode without a computed-key cast
 function listPatch(key: 'blacklist' | 'whitelist', urls: string[]) {
@@ -42,6 +43,10 @@ class OptionsController {
       if (changedKeys.includes('is_enable_text_autospace')) {
         this.renderTextAutospaceCheckbox().catch(console.error);
       }
+
+      if (changedKeys.includes('is_enable_ai_spacing')) {
+        this.renderAiSpacingCheckbox().catch(console.error);
+      }
     });
 
     document.addEventListener('click', (e) => {
@@ -66,6 +71,8 @@ class OptionsController {
         this.showAddUrlInput();
       } else if (target.id === 'restore-defaults-btn') {
         this.restoreDefaults();
+      } else if (target.id === 'ai-model-download-btn') {
+        this.downloadAiModel().catch(console.error);
       }
     });
 
@@ -87,6 +94,14 @@ class OptionsController {
         } catch (error) {
           console.error('Failed to save settings:', error);
           await this.renderTextAutospaceCheckbox();
+        }
+      } else if (target.id === 'ai-spacing-checkbox') {
+        const aiSpacingCheckbox = target as HTMLInputElement;
+        try {
+          await updateSettings({ is_enable_ai_spacing: aiSpacingCheckbox.checked });
+        } catch (error) {
+          console.error('Failed to save settings:', error);
+          await this.renderAiSpacingCheckbox();
         }
       }
     });
@@ -118,6 +133,9 @@ class OptionsController {
     await this.renderFilterMode();
     await this.renderMuteCheckbox();
     await this.renderTextAutospaceCheckbox();
+    await this.renderAiSpacingCheckbox();
+    // Last, because it is the only render that waits on something outside storage
+    await this.renderAiModelStatus();
   }
 
   private async renderSpacingMode() {
@@ -264,6 +282,38 @@ class OptionsController {
     checkbox.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
     const notSupportedMessage = document.getElementById('text-autospace-not-supported-msg') as HTMLElement;
     notSupportedMessage.style.display = isSupported ? 'none' : 'block';
+  }
+
+  private async renderAiSpacingCheckbox() {
+    const current = await getSettings();
+    const checkbox = document.getElementById('ai-spacing-checkbox') as HTMLInputElement;
+    const canRun = canAiModelRun(await getAiModelAvailability());
+    // Display-only off when the model can never run here: never write back, the synced setting still applies on other devices
+    checkbox.checked = canRun && current.is_enable_ai_spacing;
+    checkbox.disabled = !canRun;
+    checkbox.closest('.toggle')?.classList.toggle('toggle-disabled', !canRun);
+  }
+
+  // The model's state is browser-wide and independent of the toggle: the setting can be on while the model is still absent, and then the page just keeps the rules output
+  private async renderAiModelStatus() {
+    const statusText = document.getElementById('ai-model-status') as HTMLElement;
+    const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
+
+    const availability = await getAiModelAvailability();
+    statusText.textContent = chrome.i18n.getMessage(`ai_model_${availability}`);
+    // Only an absent model can be fetched, and a multi-gigabyte download is the user's call
+    downloadButton.style.display = availability === 'downloadable' ? 'block' : 'none';
+  }
+
+  private async downloadAiModel() {
+    const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
+    downloadButton.disabled = true;
+    try {
+      await startAiModelDownload();
+    } finally {
+      downloadButton.disabled = false;
+      await this.renderAiModelStatus();
+    }
   }
 
   private async toggleSpacingMode() {

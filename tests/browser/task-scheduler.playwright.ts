@@ -159,7 +159,7 @@ test.describe('TaskScheduler Enabled', () => {
     expect(result.processingCount).toBe(1);
   });
 
-  test('should apply boundary spacing between all adjacent runs when processing asynchronously', async ({ page }) => {
+  test('should apply boundary spacing between all adjacent text nodes when processing asynchronously', async ({ page }) => {
     await page.setContent('<div id="content"><span>中文</span><span>abc</span><span>漢字</span><span>def</span></div>');
 
     const result = await page.evaluate(async () => {
@@ -185,7 +185,7 @@ test.describe('TaskScheduler Enabled', () => {
       // Large pageDelayMs keeps the initial page sweep out of the assertion window
       pangu.autoSpacingPage({ pageDelayMs: 60000, nodeDelayMs: 100, nodeMaxWaitMs: 200 });
 
-      // The two queued spans sandwich an untouched sibling, so their text runs are not adjacent
+      // The two queued spans sandwich an untouched sibling, so their text nodes are not adjacent
       const container = document.getElementById('container')!;
       const existing = document.getElementById('existing')!;
       const first = document.createElement('span');

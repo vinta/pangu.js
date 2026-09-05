@@ -1,7 +1,9 @@
 // NOTE: In service workers, we can't export directly, everything goes through messages
-import { getSettings, onSettingsChanged, reconcileSettings } from './utils/settings';
-import type { Settings } from './utils/types';
-import { isValidMatchPattern, shouldShowOffIcon } from './utils/urls';
+import { classifyCandidates } from './ai-spacing/in-service-worker';
+import type { ClassifyCandidatesResponse, MessageToServiceWorker } from './ai-spacing/messages';
+import type { Settings } from './settings/storage';
+import { getSettings, onSettingsChanged, reconcileSettings } from './settings/storage';
+import { isValidMatchPattern, shouldShowOffIcon } from './settings/urls';
 
 const SCRIPT_ID = 'paranoid-auto-spacing';
 const TEXT_AUTOSPACE_SCRIPT_ID = 'text-autospace';
@@ -24,9 +26,8 @@ async function unregisterAllContentScripts() {
   }
 }
 
-// One call per script: registerContentScripts() is all-or-nothing across its array, so a user-supplied pattern that Chrome rejects must not take
-// down the other script
-async function registerContentScript(contentScript: chrome.scripting.RegisteredContentScript) {
+// One call per script: registerContentScripts() is all-or-nothing across its array, so a pattern Chrome rejects must not take down the other script
+async function registerOneContentScript(contentScript: chrome.scripting.RegisteredContentScript) {
   try {
     await chrome.scripting.registerContentScripts([contentScript]);
   } catch (error) {
@@ -41,11 +42,11 @@ async function registerContentScript(contentScript: chrome.scripting.RegisteredC
 async function registerContentScripts() {
   await unregisterAllContentScripts();
 
-  const current = await getSettings();
+  const settings = await getSettings();
 
-  if (current.is_enable_text_autospace) {
+  if (settings.is_enable_text_autospace) {
     // Visual-only native autospacing, deliberately not gated by spacing_mode, filter_mode, blacklist, or whitelist (see docs/adr/0008)
-    await registerContentScript({
+    await registerOneContentScript({
       id: TEXT_AUTOSPACE_SCRIPT_ID,
       css: ['dist/content-script.css'],
       matches: ['http://*/*', 'https://*/*'],
@@ -53,7 +54,7 @@ async function registerContentScripts() {
     });
   }
 
-  if (current.spacing_mode === 'spacing_when_load') {
+  if (settings.spacing_mode === 'spacing_when_load') {
     const contentScript: chrome.scripting.RegisteredContentScript = {
       id: SCRIPT_ID,
       js: ['vendors/pangu/pangu.umd.js', 'dist/content-script.js'],
@@ -62,29 +63,29 @@ async function registerContentScripts() {
     };
 
     // Just in case there are invalid match patterns from old settings
-    const validBlacklist = current.blacklist.filter((pattern) => isValidMatchPattern(pattern));
-    const validWhitelist = current.whitelist.filter((pattern) => isValidMatchPattern(pattern));
-    if (current.filter_mode === 'blacklist' && validBlacklist.length > 0) {
+    const validBlacklist = settings.blacklist.filter((pattern) => isValidMatchPattern(pattern));
+    const validWhitelist = settings.whitelist.filter((pattern) => isValidMatchPattern(pattern));
+    if (settings.filter_mode === 'blacklist' && validBlacklist.length > 0) {
       contentScript.excludeMatches = validBlacklist;
-    } else if (current.filter_mode === 'whitelist' && validWhitelist.length > 0) {
+    } else if (settings.filter_mode === 'whitelist' && validWhitelist.length > 0) {
       contentScript.matches = validWhitelist;
     }
 
-    await registerContentScript(contentScript);
+    await registerOneContentScript(contentScript);
   }
 }
 
-// registerContentScripts() starts by unregistering everything and reads fresh settings when its turn comes, so queued runs converge on the latest
-// state; the queue only keeps overlapping runs from interleaving
+// registerContentScripts() unregisters everything first and reads fresh settings, so queued runs converge on the latest state. The queue only keeps overlapping runs from interleaving
 let registrationQueue = Promise.resolve();
 function queueRegisterContentScripts() {
   registrationQueue = registrationQueue.then(() => registerContentScripts()).catch(console.error);
   return registrationQueue;
 }
 
-// The paper bag only marks spacing the user turned off: manual mode bags every tab, a filter-excluded url bags its tab (#296). Pages the extension merely cannot run on (chrome://, new tab pages, urls it cannot read) keep the face, so the icon is deliberately looser than the popup status row, which still reports those as 神隱中.
-async function updateTabIcon(tabId: number, url: string | undefined, current: Settings) {
-  const path = shouldShowOffIcon(current, url) ? OFF_ICON_PATHS : DEFAULT_ICON_PATHS;
+// The paper bag only marks spacing the user turned off: manual mode bags every tab, a filter-excluded url bags its tab (#296). Pages the extension cannot run on (chrome://, new tab pages) keep
+// the face, unlike the popup status row, which reports them as inactive
+async function updateTabIcon(tabId: number, url: string | undefined, settings: Settings) {
+  const path = shouldShowOffIcon(settings, url) ? OFF_ICON_PATHS : DEFAULT_ICON_PATHS;
   try {
     await chrome.action.setIcon({ tabId, path });
   } catch {
@@ -93,13 +94,12 @@ async function updateTabIcon(tabId: number, url: string | undefined, current: Se
 }
 
 async function updateAllTabIcons() {
-  const current = await getSettings();
+  const settings = await getSettings();
   const tabs = await chrome.tabs.query({});
-  await Promise.all(tabs.map((tab) => (tab.id === undefined ? undefined : updateTabIcon(tab.id, tab.url, current))));
+  await Promise.all(tabs.map((tab) => (tab.id === undefined ? undefined : updateTabIcon(tab.id, tab.url, settings))));
 }
 
 chrome.runtime.onInstalled.addListener(async () => {
-  // Reconcile settings when extension is installed or updated to a new version
   await reconcileSettings();
   await queueRegisterContentScripts();
   await updateAllTabIcons();
@@ -111,7 +111,7 @@ chrome.runtime.onStartup.addListener(async () => {
   await updateAllTabIcons();
 });
 
-// The url is often not set yet on onCreated (new tab pages never get one at all, and a missing url is never user-excluded, so it keeps the face), onUpdated below refines it as soon as navigation commits
+// The url is often not set yet on onCreated (new tab pages never get one), so onUpdated below refines it as soon as navigation commits
 chrome.tabs.onCreated.addListener(async (tab) => {
   if (tab.id !== undefined) {
     await updateTabIcon(tab.id, tab.url || tab.pendingUrl, await getSettings());
@@ -124,8 +124,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
 });
 
-// Registered synchronously at module scope, as MV3 requires for storage events to wake this worker. The event payload alone says what changed, so a
-// cold-started worker reacts correctly without any cached state.
+// Registered synchronously at module scope, as MV3 requires for storage events to wake this worker. The event payload alone says what changed, so a cold-started worker needs no cached state
 const REGISTRATION_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist', 'is_enable_text_autospace'];
 const ICON_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist'];
 onSettingsChanged((changedKeys) => {
@@ -135,4 +134,16 @@ onSettingsChanged((changedKeys) => {
   if (changedKeys.some((key) => ICON_KEYS.includes(key))) {
     updateAllTabIcons().catch(console.error);
   }
+});
+
+// AI spacing's only entry point, registered at module scope for the same reason as onSettingsChanged above. It reads no settings: the content script is the gate
+// Chrome closes the message channel when a listener returns a promise, so this stays a plain function that returns true and lets classifyCandidates() call sendResponse. It never rejects
+chrome.runtime.onMessage.addListener((message: MessageToServiceWorker, _sender: chrome.runtime.MessageSender, sendResponse: (response: ClassifyCandidatesResponse) => void) => {
+  if (message.type === 'CLASSIFY_CANDIDATES') {
+    classifyCandidates(message.kind, message.candidates).then(sendResponse);
+    return true;
+  }
+
+  // A message this worker does not answer closes its channel normally
+  return false;
 });
