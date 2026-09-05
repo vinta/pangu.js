@@ -70,7 +70,7 @@ class OptionsController {
       } else if (target.id === 'add-url-btn') {
         this.showAddUrlInput();
       } else if (target.id === 'restore-defaults-btn') {
-        this.restoreDefaults();
+        this.handleRestoreListDefaults();
       } else if (target.id === 'ai-model-download-btn') {
         this.handleModelDownload().catch(console.error);
       }
@@ -422,7 +422,7 @@ class OptionsController {
     }
   }
 
-  private async restoreDefaults() {
+  private async handleRestoreListDefaults() {
     if (confirm(chrome.i18n.getMessage('confirm_restore_defaults'))) {
       try {
         // Restore only the current filter mode list to its default value
