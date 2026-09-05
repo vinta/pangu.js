@@ -1,0 +1,69 @@
+# Prompt experiments
+
+Run Gemini Nano experiments alongside the shipping code. The CLI sends evaluation code through Playwright to the installed pangu extension's service worker. No extra extension, eval page, or extension rebuild is needed to compare prompts.
+
+Requires Node 22.18+ and `playwright-cli` on PATH. The model must already be available in the configured Chrome profile. The runner does not download it.
+
+## Connect to Chrome
+
+For this machine's settings, read the ignored `AGENTS.local.md` at the repository root if present. Keep personal setup details there.
+
+Check `playwright-cli list` first. Reuse an open `pangu-eval` session across experiment rounds; attach only when it is missing. Detach when the experiment work is finished.
+
+1. Open the intended Chrome profile. In that window, open `chrome://inspect/#remote-debugging` and enable **Allow remote debugging for this browser instance**.
+2. Attach to the displayed server address and accept Chrome's debugging connection dialog. The command below uses `127.0.0.1:9222`; use the address shown by the configured profile.
+3. Set `PANGU_CHROME_PROFILE_PATH` to the absolute **Profile Path** from `chrome://version`, and `PANGU_CHROME_PROFILE_NAME` to its Chrome display name. The runner verifies that path through a temporary tab created by the target extension. CDP can expose several profiles; a generic Playwright `newPage()` can open in Default.
+
+```bash
+# Attach to the configured profile and accept Chrome's debugging connection dialog.
+playwright-cli -s=pangu-eval attach --cdp=ws://127.0.0.1:9222/devtools/browser
+```
+
+In that profile's `chrome://extensions/`, find the shipping pangu extension and copy its ID. For an unpacked installation, verify that its source directory is the intended shipping checkout. Set `PANGU_EXTENSION_ID` in your shell to that ID. The runner requires `--extension-id` and selects only that extension's `dist/service-worker.js`.
+
+If the worker is missing, click its **service worker** inspection link in `chrome://extensions/`, then retry. The runner fails with the exact target URL if it cannot find the worker.
+
+## Run
+
+The default experiment is `hyphen-sign`. For suffix/separator classification, use `--experiment plus-sign`; see [the plus experiment](plus-sign/README.md).
+
+Run from the repository root. Every output directory must be new; existing results are never overwritten.
+
+```bash
+# Validate the cases and render selected prompts without connecting to Chrome.
+node scripts/prompt-experiments/sweep.mjs --check shipping v21-zh v26-zh
+
+# Compare the current shipping source with a candidate, 3 times per case.
+node scripts/prompt-experiments/sweep.mjs --extension-id "$PANGU_EXTENSION_ID" --profile-path "$PANGU_CHROME_PROFILE_PATH" --profile-name "$PANGU_CHROME_PROFILE_NAME" --repeats 3 --out scripts/prompt-experiments/hyphen-sign/results/my-comparison shipping v26-zh
+
+# Require the candidate to pass every scored case in two fresh sessions.
+node scripts/prompt-experiments/sweep.mjs --extension-id "$PANGU_EXTENSION_ID" --profile-path "$PANGU_CHROME_PROFILE_PATH" --profile-name "$PANGU_CHROME_PROFILE_NAME" --require-perfect --repeats 3 --out scripts/prompt-experiments/hyphen-sign/results/my-confirmation v26-zh v26-zh
+
+# Disconnect when finished, leaving Chrome open.
+playwright-cli -s=pangu-eval detach
+```
+
+With no variant arguments, the runner uses `shipping`. This imports `hyphenPrompt` from `browser-extensions/chrome/src/ai-spacing/hyphen-prompt.ts` in the current checkout. It measures those source bytes even if the installed extension was built from an older checkout. The installed worker provides the execution context; its classifier and cached sessions are not used by the sweep.
+
+Add candidates to `hyphen-sign/prompts.js`. Keep measured variants unchanged and give revised prompts new IDs. Keep glosses generic; never describe control-specific cases or copy evaluation sentences into examples. To promote a winner, update the shipping prompt and compare `shipping` with the measured candidate.
+
+## What the runner measures
+
+- Original sign accuracy, control flips, and field accuracy, reported separately. Any wrong repeat makes that case fail.
+- Exact system/user prompts, response schemas, token-to-label mappings, every raw response, errors, timings, browser user agent and prompt version in each new export.
+- Fixed `temperature: 0`, `topK: 1`, canonical menu order, and no language declaration. Each variant gets a fresh base session; each case/repeat gets a fresh clone.
+
+The runner verifies the configured profile before each variant. Inference errors make the command fail; `--require-perfect` also fails if any scored case is wrong. A normal comparison can finish successfully while reporting accuracy failures.
+
+The suite has 23 original cases and 5 field development cases. Three reviewed cases remain unscored: 12 original sign cases, 8 controls, and 5 field cases are scored. These cases were used for prompt tuning, so results are regression evidence, not held-out accuracy. This does not exercise shipping message handling or webpage spacing end to end.
+
+## Files and evidence
+
+- `sweep.mjs`: Chrome execution, scoring, and result export.
+- `hyphen-sign/prompts.js`: frozen prompt variants, including rejected candidates.
+- `hyphen-sign/cases.json`, `field-cases.json`: cases and expected labels.
+- `hyphen-sign/build-cases.mjs`: regenerate the original corpus from the built library after rule changes. Run `npm run build:lib` first, then `node scripts/prompt-experiments/hyphen-sign/build-cases.mjs` and review the diff.
+- `hyphen-sign/reports/`: field notes and experiment findings.
+- `hyphen-sign/results/`: original raw exports preserved from `feature/context-aware-spacing` at `0e4bea8`, followed by new runs. Personal profile paths and extension IDs have been removed from saved exports. Field-case IDs and directory names use neutral labels; prompts, responses, scores, and timings are preserved.
+
+Start with the [direct-label comparison](hyphen-sign/reports/2026-09-06-direct-labels.md) and [v26 tuning report](hyphen-sign/reports/2026-09-06-direct-labels-tuning.md). Historical reports describe the branch and runtime used at the time; `shipping` always comes from today's checkout.
