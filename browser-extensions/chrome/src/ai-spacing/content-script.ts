@@ -11,7 +11,7 @@ type LateFix = Parameters<typeof pangu.applyLateFixes>[0][number];
 
 const AMBIGUOUS_SHAPES: AmbiguousShape[] = [hyphenSign];
 
-async function classifyCandidates(kind: string, candidates: ClassifyCandidatesMessage['candidates']): Promise<ClassifyCandidatesResponse> {
+async function requestClassification(kind: string, candidates: ClassifyCandidatesMessage['candidates']): Promise<ClassifyCandidatesResponse> {
   const message: ClassifyCandidatesMessage = { type: 'CLASSIFY_CANDIDATES', kind, candidates };
   try {
     return await chrome.runtime.sendMessage<ClassifyCandidatesMessage, ClassifyCandidatesResponse>(message);
@@ -64,7 +64,7 @@ export function warmUpAiSpacing() {
   for (const ambiguousShape of AMBIGUOUS_SHAPES) {
     if (ambiguousShape.occursIn(pageText)) {
       console.debug(`[pangu] warm up base session: ${ambiguousShape.kind}`);
-      void classifyCandidates(ambiguousShape.kind, []);
+      void requestClassification(ambiguousShape.kind, []);
     }
   }
 }
@@ -79,7 +79,7 @@ export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[
 
   const responses = await Promise.all(
     batches.map(({ ambiguousShape, settledCandidates }) =>
-      classifyCandidates(
+      requestClassification(
         ambiguousShape.kind,
         settledCandidates.map(({ sentence, at }) => ({ sentence, at })),
       ),

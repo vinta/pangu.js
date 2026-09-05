@@ -102,7 +102,7 @@ async function classifyOneCandidate(promptSpec: PromptSpec<CandidateLabel>, base
 }
 
 // A single candidate's failure stays that candidate's failure, so the batch always answers
-export async function classifyWithModel(promptSpec: PromptSpec<CandidateLabel>, candidates: readonly Candidate[]): Promise<(CandidateLabel | null)[]> {
+export async function classifyCandidates(promptSpec: PromptSpec<CandidateLabel>, candidates: readonly Candidate[]): Promise<(CandidateLabel | null)[]> {
   const baseSession = await getBaseSession(promptSpec);
 
   // NOTE: Only one model instance in the browser and it runs one task at a time, so sending prompts in parallel won't make them faster

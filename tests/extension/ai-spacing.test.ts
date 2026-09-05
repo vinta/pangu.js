@@ -5,11 +5,11 @@ async function loadAiSpacing() {
   vi.resetModules();
   const pangu = { onTextNodesSettled: vi.fn(), applyLateFixes: vi.fn() };
   vi.stubGlobal('window', { pangu });
-  const { classifyCandidates } = await import('../../browser-extensions/chrome/src/ai-spacing/service-worker');
-  const sendMessage = vi.fn(({ kind, candidates }: ClassifyCandidatesMessage) => classifyCandidates(kind, candidates));
+  const { handleClassification } = await import('../../browser-extensions/chrome/src/ai-spacing/service-worker');
+  const sendMessage = vi.fn(({ kind, candidates }: ClassifyCandidatesMessage) => handleClassification(kind, candidates));
   vi.stubGlobal('chrome', { runtime: { sendMessage } });
   const { applyAiSpacing } = await import('../../browser-extensions/chrome/src/ai-spacing/content-script');
-  return { pangu, sendMessage, applyAiSpacing, classifyCandidates };
+  return { pangu, sendMessage, applyAiSpacing, handleClassification };
 }
 
 afterEach(() => {
@@ -27,14 +27,14 @@ describe('AI spacing model sessions', () => {
       return { clone };
     });
     vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create });
-    const { classifyCandidates } = await loadAiSpacing();
+    const { handleClassification } = await loadAiSpacing();
 
-    const warmup = classifyCandidates('hyphen-sign', []);
+    const warmup = handleClassification('hyphen-sign', []);
     await Promise.resolve();
     expect(create).toHaveBeenCalledTimes(1);
     expect(clone).not.toHaveBeenCalled();
 
-    const batch = classifyCandidates('hyphen-sign', [{ sentence: '氣溫是-5度', at: 3 }]);
+    const batch = handleClassification('hyphen-sign', [{ sentence: '氣溫是-5度', at: 3 }]);
     finishCreation();
 
     expect(await warmup).toEqual({ ok: true, candidateLabels: [] });
@@ -46,10 +46,10 @@ describe('AI spacing model sessions', () => {
   it('retries session creation after a rejected warmup', async () => {
     const create = vi.fn().mockRejectedValueOnce(new Error('creation failed')).mockResolvedValue({ clone: vi.fn() });
     vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create });
-    const { classifyCandidates } = await loadAiSpacing();
+    const { handleClassification } = await loadAiSpacing();
 
-    expect(await classifyCandidates('hyphen-sign', [])).toEqual({ ok: false, error: 'Error: creation failed' });
-    expect(await classifyCandidates('hyphen-sign', [])).toEqual({ ok: true, candidateLabels: [] });
+    expect(await handleClassification('hyphen-sign', [])).toEqual({ ok: false, error: 'Error: creation failed' });
+    expect(await handleClassification('hyphen-sign', [])).toEqual({ ok: true, candidateLabels: [] });
     expect(create).toHaveBeenCalledTimes(2);
   });
 });

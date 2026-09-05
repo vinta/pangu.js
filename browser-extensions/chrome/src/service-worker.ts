@@ -1,6 +1,6 @@
 // NOTE: In service workers, we can't export directly, everything goes through messages
-import { classifyCandidates } from './ai-spacing/service-worker';
 import type { ClassifyCandidatesResponse, MessageToServiceWorker } from './ai-spacing/messages';
+import { handleClassification } from './ai-spacing/service-worker';
 import type { Settings } from './settings/storage';
 import { getSettings, onSettingsChanged, reconcileSettings } from './settings/storage';
 import { isValidMatchPattern, shouldShowOffIcon } from './settings/urls';
@@ -137,10 +137,10 @@ onSettingsChanged((changedKeys) => {
 });
 
 // AI spacing's only entry point, registered at module scope for the same reason as onSettingsChanged above. It reads no settings: the content script is the gate
-// Chrome closes the message channel when a listener returns a promise, so this stays a plain function that returns true and lets classifyCandidates() call sendResponse. It never rejects
+// Chrome closes the message channel when a listener returns a promise, so this stays a plain function that returns true and lets handleClassification() call sendResponse. It never rejects
 chrome.runtime.onMessage.addListener((message: MessageToServiceWorker, _sender: chrome.runtime.MessageSender, sendResponse: (response: ClassifyCandidatesResponse) => void) => {
   if (message.type === 'CLASSIFY_CANDIDATES') {
-    classifyCandidates(message.kind, message.candidates).then(sendResponse);
+    handleClassification(message.kind, message.candidates).then(sendResponse);
     return true;
   }
 
