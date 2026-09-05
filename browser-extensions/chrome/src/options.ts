@@ -1,4 +1,4 @@
-import { canAiModelRun, getAiModelAvailability, startAiModelDownload } from './ai-spacing/model';
+import { canAiModelRun, downloadModel, getAiModelAvailability } from './ai-spacing/model';
 import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, updateSettings } from './settings/storage';
 import { isValidMatchPattern } from './settings/urls';
 import { translatePage } from './ui/i18n';
@@ -309,7 +309,7 @@ class OptionsController {
     const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
     downloadButton.disabled = true;
     try {
-      await startAiModelDownload();
+      await downloadModel();
     } finally {
       downloadButton.disabled = false;
       await this.renderAiModelStatus();

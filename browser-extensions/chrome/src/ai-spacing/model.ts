@@ -1,15 +1,16 @@
 import type { PromptSpec } from './ambiguous-shape';
 import type { Candidate, CandidateLabel } from './messages';
 
-// We set expectedOutputs here, only to silence the "No output language was specified" warning, which is logged for extension pages only
-// 2026-09-02: we measured that declaring a supported language does not alter the model output
-const PAGE_MODEL_LANGUAGES: LanguageModelExpected[] = [{ type: 'text', languages: ['en'] }];
-
 // One base session per ambiguous shape
 const baseSessions = new Map<string, Promise<LanguageModel>>();
 
 // `unsupported` is ours, not an API value: the browser has no Prompt API at all
 export type AiModelAvailability = Availability | 'unsupported';
+
+// We set expectedOutputs here, only to silence the "No output language was specified" warning, which is logged for extension pages only
+// 2026-09-02: using en here because zh is not supported yet
+// 2026-09-02: we measured that declaring a supported language does not alter the model output
+const PAGE_MODEL_LANGUAGES: LanguageModelExpected[] = [{ type: 'text', languages: ['en'] }];
 
 export async function getAiModelAvailability(): Promise<AiModelAvailability> {
   // The types declare LanguageModel unconditionally, but a browser without the Prompt API has no such global
@@ -23,16 +24,17 @@ export function canAiModelRun(availability: AiModelAvailability) {
   return availability !== 'unsupported' && availability !== 'unavailable';
 }
 
-// The download is browser-wide and outlives this page, so the session only exists to start it
-export async function startAiModelDownload() {
+export async function downloadModel() {
+  // The download is browser-wide and outlives this page, so the session only exists to start it
   const session = await LanguageModel.create({ expectedOutputs: PAGE_MODEL_LANGUAGES });
   session.destroy();
 }
 
-// We cache the promise, not the session, so batches arriving while create() is in flight share it. A rejected create() is dropped, because the model can arrive later (the options-page download)
 function getBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   let session = baseSessions.get(promptSpec.kind);
   if (session === undefined) {
+    // We cache the promise, not the session, so batches arriving while create() is in flight share it
+    // A rejected create() is dropped, because the model can arrive later (the options-page download)
     session = createBaseSession(promptSpec).catch((error: unknown) => {
       baseSessions.delete(promptSpec.kind);
       throw error;
@@ -42,7 +44,6 @@ function getBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   return session;
 }
 
-// create() at availability 'downloadable' silently starts a multi-gigabyte download, so we only create a session once the model is already there
 async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   if (typeof LanguageModel === 'undefined') {
     throw new Error('LanguageModel is not exposed in this context');
@@ -58,7 +59,7 @@ async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
     throw new Error(`model availability is ${availability}`);
   }
 
-  // Deliberately NO expectedInputs/expectedOutputs here: the API supports en/ja/es/de/fr only, declaring zh makes availability() report unavailable and create() reject
+  // create() at availability 'downloadable' silently starts a multi-gigabyte download, so we only create a session once the model is already there
   const session = await LanguageModel.create({
     initialPrompts: [{ role: 'system', content: promptSpec.systemPrompt }],
     // TODO: These two sampling parameters are deprecated, migrate when needed
