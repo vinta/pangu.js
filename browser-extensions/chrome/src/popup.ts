@@ -1,4 +1,4 @@
-import { canModelRun } from './ai-spacing/models';
+import { isModelSupported } from './ai-spacing/models';
 import type { ContentScriptResponse, ManualSpacingMessage, PingMessage } from './messages';
 import type { Settings } from './settings/storage';
 import { getSettings, onSettingsChanged, updateSettings } from './settings/storage';
@@ -75,12 +75,12 @@ class PopupController {
 
   private async renderAiSpacingToggle(settings: Settings) {
     const aiSpacingToggle = document.getElementById('ai-spacing-toggle') as HTMLInputElement;
-    const canRun = await canModelRun();
+    const isSupported = await isModelSupported();
 
     // Display-only off when the model can never run here: never write back, the synced setting still applies on other devices
-    aiSpacingToggle.checked = canRun && settings.is_enable_ai_spacing;
-    aiSpacingToggle.disabled = !canRun;
-    aiSpacingToggle.closest('.toggle')?.classList.toggle('toggle-disabled', !canRun);
+    aiSpacingToggle.checked = isSupported && settings.is_enable_ai_spacing;
+    aiSpacingToggle.disabled = !isSupported;
+    aiSpacingToggle.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
   }
 
   private renderStatus(settings: Settings) {

@@ -1,4 +1,4 @@
-import { canModelRun, downloadModel, getModelAvailability } from './ai-spacing/models';
+import { downloadModel, getModelAvailability, isModelSupported } from './ai-spacing/models';
 import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, updateSettings } from './settings/storage';
 import { isValidMatchPattern } from './settings/urls';
 import { translatePage } from './ui/i18n';
@@ -288,12 +288,12 @@ class OptionsController {
   private async renderAiSpacingCheckbox() {
     const current = await getSettings();
     const checkbox = document.getElementById('ai-spacing-checkbox') as HTMLInputElement;
-    const canRun = await canModelRun();
+    const isSupported = await isModelSupported();
 
     // Display-only off when the model can never run here: never write back, the synced setting still applies on other devices
-    checkbox.checked = canRun && current.is_enable_ai_spacing;
-    checkbox.disabled = !canRun;
-    checkbox.closest('.toggle')?.classList.toggle('toggle-disabled', !canRun);
+    checkbox.checked = isSupported && current.is_enable_ai_spacing;
+    checkbox.disabled = !isSupported;
+    checkbox.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
   }
 
   // The model's state is browser-wide and independent of the toggle: the setting can be on while the model is still absent, and then the page just keeps the rules output

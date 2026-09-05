@@ -20,7 +20,7 @@ export async function getModelAvailability(): Promise<AiModelAvailability> {
   return LanguageModel.availability({ expectedOutputs: PAGE_MODEL_LANGUAGES });
 }
 
-export async function canModelRun() {
+export async function isModelSupported() {
   const availability = await getModelAvailability();
   return availability !== 'unsupported' && availability !== 'unavailable';
 }
