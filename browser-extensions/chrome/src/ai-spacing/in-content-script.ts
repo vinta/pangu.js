@@ -1,7 +1,7 @@
 import type { AmbiguousShape, SettledCandidate, TextEdit } from './ambiguous-shape';
 import { applyTextEdits } from './ambiguous-shape';
 import { hyphenSign } from './hyphen-sign';
-import type { ClassifiedCandidate, ClassifyCandidatesMessage, ClassifyCandidatesResponse } from './messages';
+import type { CandidateLabel, ClassifyCandidatesMessage, ClassifyCandidatesResponse } from './messages';
 
 const pangu = window.pangu;
 
@@ -63,15 +63,14 @@ export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[
     ),
   );
 
-  const classifiedCandidateBatches: ClassifiedCandidate[][] = [];
+  const labelBatches: (CandidateLabel | null)[][] = [];
   for (const [batchIndex, response] of responses.entries()) {
-    // This means ClassifyCandidatesFailed, then we disable AI spacing
     if (!response.ok) {
       pangu.onTextNodesSettled = null;
       console.debug(`[pangu] ${batches[batchIndex]!.ambiguousShape.kind}: disabled for this page (${response.error})`);
       return;
     }
-    classifiedCandidateBatches.push(response.candidates);
+    labelBatches.push(response.candidates);
   }
 
   // Core applies one fix per text node per call, so every edit for one node composes into a single late fix
@@ -79,10 +78,9 @@ export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[
   for (const [batchIndex, { ambiguousShape, settledCandidates }] of batches.entries()) {
     for (const [index, settledCandidate] of settledCandidates.entries()) {
       // Labels zip against the candidates by index
-      const classifiedCandidate = classifiedCandidateBatches[batchIndex]![index];
-      const verdict = classifiedCandidate ? (classifiedCandidate.label ?? `error: ${classifiedCandidate.error}`) : 'error: no label at this index';
-      const isFix = classifiedCandidate?.label != null && ambiguousShape.isFix(classifiedCandidate.label);
-      console.debug(`[pangu] ${ambiguousShape.kind}: "${settledCandidate.sentence}" (symbol at ${settledCandidate.at}) read as ${verdict}${isFix ? ' -> applying its late fix' : ''}`);
+      const label = labelBatches[batchIndex]![index];
+      const isFix = label != null && ambiguousShape.isFix(label);
+      console.debug(`[pangu] ${ambiguousShape.kind}: "${settledCandidate.sentence}" (symbol at ${settledCandidate.at}) read as ${label ?? 'no label'}${isFix ? ' -> applying its late fix' : ''}`);
       if (isFix) {
         const pending = textEditsByNode.get(settledCandidate.node) ?? { settled: settledCandidate.settled, textEdits: [] };
         pending.textEdits.push(...ambiguousShape.edits(settledCandidate.settled, settledCandidate.index));

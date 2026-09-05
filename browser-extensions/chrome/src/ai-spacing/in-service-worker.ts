@@ -1,6 +1,6 @@
 import type { PromptSpec } from './ambiguous-shape';
 import { hyphenPrompt } from './hyphen-prompt';
-import type { Candidate, CandidateLabel, ClassifiedCandidate, ClassifyCandidatesResponse } from './messages';
+import type { Candidate, CandidateLabel, ClassifyCandidatesResponse } from './messages';
 
 const PROMPT_SPECS = new Map<string, PromptSpec<CandidateLabel>>([[hyphenPrompt.kind, hyphenPrompt]]);
 
@@ -51,7 +51,7 @@ async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   return session;
 }
 
-async function classifyOneCandidate(promptSpec: PromptSpec<CandidateLabel>, base: LanguageModel, candidate: Candidate): Promise<ClassifiedCandidate> {
+async function classifyOneCandidate(promptSpec: PromptSpec<CandidateLabel>, base: LanguageModel, candidate: Candidate): Promise<CandidateLabel | null> {
   const question = promptSpec.buildQuestion(candidate.sentence, candidate.at);
   console.debug(`[pangu] ${promptSpec.kind} prompt:\n${question}`);
 
@@ -70,11 +70,10 @@ async function classifyOneCandidate(promptSpec: PromptSpec<CandidateLabel>, base
       throw new TypeError(`response outside the constraint enum: ${raw}`);
     }
     console.debug(`[pangu] ${promptSpec.kind} raw answer: ${raw} -> ${label}`);
-    return { label, error: null };
-  } catch (caught) {
-    const error = String(caught);
-    console.debug(`[pangu] ${promptSpec.kind} error: ${error}`);
-    return { label: null, error };
+    return label;
+  } catch (error) {
+    console.debug(`[pangu] ${promptSpec.kind} error: ${String(error)}`);
+    return null;
   }
 }
 
@@ -96,7 +95,7 @@ export async function classifyCandidates(kind: string, candidates: readonly Cand
   // NOTE: Only one model instance in the browser and it runs one task at a time,
   // so sending prompts in parallel won't make them faster
   // See https://source.chromium.org/chromium/chromium/src/+/main:services/on_device_model/on_device_model_mojom_impl.cc (RunTaskIfPossible)
-  const classifiedCandidates: ClassifiedCandidate[] = [];
+  const classifiedCandidates: (CandidateLabel | null)[] = [];
   for (const candidate of candidates) {
     classifiedCandidates.push(await classifyOneCandidate(promptSpec, base, candidate));
   }
