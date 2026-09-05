@@ -11,7 +11,7 @@ declare global {
 }
 
 // Stands in for the Chrome extension: the settled text nodes are parked on the page instead of being classified
-function collectSettledRuns(page: Page) {
+function collectSettledTextNodes(page: Page) {
   return page.evaluate(() => {
     pangu.onTextNodesSettled = (settledTextNodes) => {
       window.__batchCount++;
@@ -51,7 +51,7 @@ test.describe('onTextNodesSettled', () => {
   test('carry the bytes text spacing read and the bytes it wrote', async ({ page }) => {
     await page.setContent('<div>氣溫是-5度左右</div>');
 
-    expect(await collectSettledRuns(page)).toEqual([{ unspaced: '氣溫是-5度左右', settled: '氣溫是 - 5 度左右' }]);
+    expect(await collectSettledTextNodes(page)).toEqual([{ unspaced: '氣溫是-5度左右', settled: '氣溫是 - 5 度左右' }]);
   });
 
   test('settle a text node a junction space wrote to after its own text spacing ran', async ({ page }) => {
@@ -59,7 +59,7 @@ test.describe('onTextNodesSettled', () => {
     // node settles first. The unchanged node is in the list too: nothing is filtered here
     await page.setContent('<div><b>abc</b><span>氣溫是-5度</span></div>');
 
-    expect(await collectSettledRuns(page)).toEqual([
+    expect(await collectSettledTextNodes(page)).toEqual([
       { unspaced: '氣溫是-5度', settled: ' 氣溫是 - 5 度' },
       { unspaced: 'abc', settled: 'abc' },
     ]);
@@ -70,14 +70,14 @@ test.describe('onTextNodesSettled', () => {
     // The standalone quote node gets prepend-space and nothing else, so it is never captured; the CJK node beside it is
     await page.setContent('<div><b>中文</b>"</div>');
 
-    expect(await collectSettledRuns(page)).toEqual([{ unspaced: '中文', settled: '中文' }]);
+    expect(await collectSettledTextNodes(page)).toEqual([{ unspaced: '中文', settled: '中文' }]);
     expect(await page.evaluate(() => document.body.textContent)).toBe('中文 "');
   });
 
   test('fire once per batch rather than once per text node', async ({ page }) => {
     await page.setContent('<div><b>abc</b><span>氣溫是-5度</span></div>');
 
-    await collectSettledRuns(page);
+    await collectSettledTextNodes(page);
 
     expect(await page.evaluate(() => window.__batchCount)).toBe(1);
   });
