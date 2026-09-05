@@ -1,6 +1,6 @@
 import type { PromptSpec } from './ambiguous-shape';
 
-// Changing the language of these label/enum values affects model output and can reduce accuracy. Re-run model evaluations after changing them.
+// NOTE: Changing the language of these label "values" affects model output and can reduce accuracy. Re-run model evaluations after changing them.
 export const HYPHEN_LABELS = {
   signedNumber: 'signed-number',
   rangeOrSeparator: 'range-or-separator',
