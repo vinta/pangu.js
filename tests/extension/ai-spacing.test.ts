@@ -19,7 +19,7 @@ afterEach(() => {
 describe('AI spacing model sessions', () => {
   it('warms up on an empty batch and shares pending creation with another batch', async () => {
     let finishCreation!: () => void;
-    const clone = vi.fn(async () => ({ prompt: async () => '"signed-number"', destroy: vi.fn() }));
+    const clone = vi.fn(async () => ({ prompt: async () => '"負"', destroy: vi.fn() }));
     const create = vi.fn(async () => {
       await new Promise<void>((resolve) => {
         finishCreation = resolve;
@@ -38,7 +38,7 @@ describe('AI spacing model sessions', () => {
     finishCreation();
 
     expect(await warmup).toEqual({ ok: true, candidateLabels: [] });
-    expect(await batch).toEqual({ ok: true, candidateLabels: ['signed-number'] });
+    expect(await batch).toEqual({ ok: true, candidateLabels: ['負'] });
     expect(create).toHaveBeenCalledTimes(1);
     expect(clone).toHaveBeenCalledTimes(1);
   });
@@ -55,8 +55,8 @@ describe('AI spacing model sessions', () => {
 });
 
 describe('AI spacing message flow', () => {
-  it.each(['"負"', 'null', 'signed-number'])('keeps invalid answer %s in place and composes successful fixes into one write', async (invalidAnswer) => {
-    const answers = ['"signed-number"', invalidAnswer, '"signed-number"', '"range-or-separator"', '"unsure"'];
+  it.each(['"signed-number"', 'null', '負'])('keeps invalid answer %s in place and composes successful fixes into one write', async (invalidAnswer) => {
+    const answers = ['"負"', invalidAnswer, '"負"', '"到或分隔"', '"聽不出來"'];
     const destroy = vi.fn();
     const prompt = vi.fn(async () => answers.shift());
     const clone = vi.fn(async () => ({ prompt, destroy }));
@@ -69,8 +69,8 @@ describe('AI spacing message flow', () => {
     await applyAiSpacing([{ node: textNode, unspaced: '從-5到-3再到-1度。區間-2。未知-4', settled }]);
 
     expect(sendMessage).toHaveBeenCalledTimes(1);
-    expect(await sendMessage.mock.results[0]!.value).toEqual({ ok: true, candidateLabels: ['signed-number', null, 'signed-number', 'range-or-separator', 'unsure'] });
-    expect(prompt).toHaveBeenCalledWith(expect.any(String), { responseConstraint: { type: 'string', enum: ['signed-number', 'range-or-separator', 'unsure'] } });
+    expect(await sendMessage.mock.results[0]!.value).toEqual({ ok: true, candidateLabels: ['負', null, '負', '到或分隔', '聽不出來'] });
+    expect(prompt).toHaveBeenCalledWith(expect.any(String), { responseConstraint: { type: 'string', enum: ['負', '到或分隔', '聽不出來'] } });
     expect(clone).toHaveBeenCalledTimes(5);
     expect(destroy).toHaveBeenCalledTimes(5);
     expect(pangu.onTextNodesSettled).toBe(onTextNodesSettled);
