@@ -305,10 +305,10 @@ export class BrowserPangu extends Pangu {
 
     // At this point, the text nodes in this batch are "settled": the loop above is over, so nothing in this batch writes to them again
     // Settled only means the rules are done with them. A late fix from applyLateFixes() can still change them in a later batch
-    this.flushSettledTextNodes(unsettledTextNodes);
+    this.emitTextNodesSettled(unsettledTextNodes);
   }
 
-  private flushSettledTextNodes(unsettledTextNodes: readonly UnsettledTextNode[]) {
+  private emitTextNodesSettled(unsettledTextNodes: readonly UnsettledTextNode[]) {
     if (unsettledTextNodes.length === 0) {
       return;
     }
