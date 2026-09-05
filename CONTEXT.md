@@ -44,7 +44,7 @@ _Avoid_: revert, external rewrite, overwrite
 
 ## Paranoid Text Spacing Algorithm
 
-The algorithm behind text spacing. It has two stages. First, the rules decide every space. Second, AI spacing corrects the rules output at the few ambiguous shapes the rules cannot read. AI spacing is the Chrome extension's opt-in second stage. The npm package ships the rules only. The shapes below are generic: `CJK` is any CJK character, `A` is any letter, `N` is any digit, and symbols are literal.
+The algorithm behind text spacing. It has two stages. First, the rules decide every space. Second, AI spacing corrects the rules output at the few ambiguous shapes the rules cannot read. AI spacing is the Chrome extension's second stage. It is on by default, and the user can turn it off. The npm package ships the rules only. The shapes below are generic: `CJK` is any CJK character, `A` is any letter, `N` is any digit, and symbols are literal.
 
 ### Rule-based Spacing
 
@@ -90,7 +90,7 @@ _Avoid_: tag-in-prose, prose tag
 Source of truth: `docs/ai-spacing.md`. The decision to build it is ADR 0016.
 
 **AI spacing**:
-The extension's opt-in path. It sends each candidate to a classifier and applies the label as a late fix. It is never required: when the model is absent, off, or slow, the rules output is kept.
+The extension's second stage, on by default with a toggle to turn it off. It sends each candidate to a classifier and applies the label as a late fix. It is never required: when the model is absent, off, or slow, the rules output is kept.
 _Avoid_: model layer, hyphen-sign model layer
 
 **Symbol sense disambiguation**:
