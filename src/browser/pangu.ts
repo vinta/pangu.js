@@ -535,7 +535,7 @@ export class BrowserPangu extends Pangu {
       nodeMaxWaitMs,
     );
 
-    const debouncedSpacingNode = debounce(
+    const debouncedSpacingQueuedNodes = debounce(
       () => {
         // NOTE: a single node could be very big which contains a lot of child nodes
         const nodesToProcess = [...queue];
@@ -652,7 +652,7 @@ export class BrowserPangu extends Pangu {
         debouncedSpacingTitle();
       }
 
-      debouncedSpacingNode();
+      debouncedSpacingQueuedNodes();
     });
 
     // A single MutationObserver can observe multiple targets simultaneously
