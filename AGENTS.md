@@ -44,7 +44,6 @@
 
 ## Workflow
 
-- Before local browser setup or prompt experiments, read `AGENTS.local.md` if present for private machine settings and provenance. Keep that file ignored.
 - For multi-step tasks, first inspect the relevant files, current branch and worktree state, generated-versus-tracked ownership, command availability, and package scripts.
 - Before editing, state a short 3-5 item plan that covers approach, files touched, verification, and any open questions that materially affect correctness.
 - Give Codex enough task context: goal, relevant files or errors, constraints, and what counts as done.
