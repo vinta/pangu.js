@@ -1,4 +1,4 @@
-import type { Candidate } from './messages';
+import type { Candidate } from '../messages';
 
 // One change at one settled index: `remove` characters at `index` become `insert`. Edits stay separate because a text node can carry edits from more than one ambiguous shape
 export interface TextEdit {

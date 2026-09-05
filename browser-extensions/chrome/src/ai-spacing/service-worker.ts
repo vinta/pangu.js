@@ -1,7 +1,7 @@
-import type { PromptSpec } from './ambiguous-shape';
-import { hyphenPrompt } from './hyphen-prompt';
 import type { Candidate, CandidateLabel, ClassifyCandidatesResponse } from './messages';
 import { classifyWithModel } from './models';
+import type { PromptSpec } from './shapes/base';
+import { hyphenPrompt } from './shapes/hyphen-prompt';
 
 const PROMPT_SPECS = new Map<string, PromptSpec<CandidateLabel>>([[hyphenPrompt.kind, hyphenPrompt]]);
 

@@ -1,4 +1,4 @@
-import type { PromptSpec } from './ambiguous-shape';
+import type { PromptSpec } from './base';
 
 // NOTE: Changing the language of these label "values" affects model output and can reduce accuracy. Re-run model evaluations after changing them.
 export const HYPHEN_LABELS = {

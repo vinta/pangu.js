@@ -1,4 +1,4 @@
-import type { AmbiguousShape, CandidateMatch } from './ambiguous-shape';
+import type { AmbiguousShape, CandidateMatch } from './base';
 import { HYPHEN_LABELS } from './hyphen-prompt';
 
 // A copy of CJK in src/shared/index.ts, pinned by a vitest case. The content script is a classic script, so it can neither import the ESM build nor read CJK off the UMD global

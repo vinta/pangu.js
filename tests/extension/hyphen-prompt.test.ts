@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { hyphenPrompt } from '../../browser-extensions/chrome/src/ai-spacing/hyphen-prompt';
+import { hyphenPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-prompt';
 
 it.each([
   ['跌到-20%', 2, '到-20'],

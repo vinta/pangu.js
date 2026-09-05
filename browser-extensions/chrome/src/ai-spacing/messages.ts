@@ -1,4 +1,4 @@
-import type { HyphenLabel } from './hyphen-prompt';
+import type { HyphenLabel } from './shapes/hyphen-prompt';
 
 // One flagged symbol. `at` is its index inside `sentence`, since a sentence can carry the same symbol twice
 export interface Candidate {

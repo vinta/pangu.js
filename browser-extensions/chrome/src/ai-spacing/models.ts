@@ -1,5 +1,5 @@
-import type { PromptSpec } from './ambiguous-shape';
 import type { Candidate, CandidateLabel } from './messages';
+import type { PromptSpec } from './shapes/base';
 
 // One base session per ambiguous shape
 const baseSessions = new Map<string, Promise<LanguageModel>>();

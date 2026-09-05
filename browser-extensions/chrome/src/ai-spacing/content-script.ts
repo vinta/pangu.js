@@ -1,7 +1,7 @@
-import type { AmbiguousShape, SettledCandidate, TextEdit } from './ambiguous-shape';
-import { applyTextEdits } from './ambiguous-shape';
-import { hyphenSign } from './hyphen-sign';
 import type { CandidateLabel, ClassifyCandidatesMessage, ClassifyCandidatesResponse } from './messages';
+import type { AmbiguousShape, SettledCandidate, TextEdit } from './shapes/base';
+import { applyTextEdits } from './shapes/base';
+import { hyphenSign } from './shapes/hyphen-shape';
 
 const pangu = window.pangu;
 

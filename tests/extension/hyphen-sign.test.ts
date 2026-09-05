@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { applyTextEdits, type AmbiguousShape, type TextEdit } from '../../browser-extensions/chrome/src/ai-spacing/ambiguous-shape';
-import { CJK, hasInsertedGap, hyphenSign, indexOfNthHyphen, sliceSentence } from '../../browser-extensions/chrome/src/ai-spacing/hyphen-sign';
+import { applyTextEdits, type AmbiguousShape, type TextEdit } from '../../browser-extensions/chrome/src/ai-spacing/shapes/base';
+import { CJK, hasInsertedGap, hyphenSign, indexOfNthHyphen, sliceSentence } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-shape';
 import { CJK as SHARED_CJK } from '../../src/shared/index';
 
 describe('sliceSentence()', () => {
