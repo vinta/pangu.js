@@ -85,10 +85,15 @@ const runs = variants.map((variant) => {
     .filter((kase) => !diagnosticIds || diagnosticIds.includes(kase.id))
     .map((kase) => {
       const labels = corpus.enums[kase.enum];
-      const tokens = labels.flatMap((label) => [prompt.displayLabels?.[label] ?? label].flat().map((token) => [token, label]));
+      // A variant may reorder the menu/enum (labelOrder), name tokens per case (displayLabels as a function), or wrap the answer in an object schema (constraint + answerKey)
+      const ordered = prompt.labelOrder ?? labels;
+      const displayLabels = typeof prompt.displayLabels === 'function' ? prompt.displayLabels(kase) : prompt.displayLabels;
+      const tokens = ordered.flatMap((label) => [displayLabels?.[label] ?? label].flat().map((token) => [token, label]));
       const question = prompt.build(kase, labels);
       assert(question === null || typeof question === 'string', `invalid prompt for ${variant}/${kase.id}; return a string or null for abstention`);
-      return { ...kase, question, tokens, responseConstraint: { type: 'string', enum: tokens.map(([token]) => token) } };
+      const enumTokens = tokens.map(([token]) => token);
+      assert.equal(new Set(enumTokens).size, enumTokens.length, `duplicate response tokens: ${variant}/${kase.id}`);
+      return { ...kase, question, tokens, answerKey: prompt.answerKey ?? null, responseConstraint: prompt.constraint ? prompt.constraint(enumTokens) : { type: 'string', enum: enumTokens } };
     });
   return { variant, prompt, inputs };
 });
@@ -164,7 +169,8 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
               try {
                 turn = await base.clone();
                 raw = await turn.prompt(input.question, { responseConstraint: input.responseConstraint, signal: AbortSignal.timeout(30000) });
-                answer = input.tokens.find(([token]) => token === JSON.parse(raw))?.[1] ?? null;
+                const parsed = JSON.parse(raw);
+                answer = input.tokens.find(([token]) => token === (input.answerKey ? parsed?.[input.answerKey] : parsed))?.[1] ?? null;
                 if (answer === null) {
                   throw new Error(`response outside constraint enum: ${raw}`);
                 }
@@ -187,6 +193,7 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
           base.destroy();
         }
       }
+      const normalized = (raw) => (raw === null ? null : JSON.stringify(JSON.parse(raw)));
       const results = inputs.map((input) => {
         if (input.question === null) {
           return { ...input, skipped: 'no-unique-target-reference', answers: [], answer: null, correct: false, stable: null };
@@ -197,7 +204,8 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
           answers,
           answer: answers[0].answer,
           correct: answers.every((answer) => answer.answer === input.expected_label),
-          stable: answers.every((answer) => answer.raw === answers[0].raw),
+          // Compare parsed values: an object-schema answer can differ only in JSON whitespace between calls
+          stable: answers.every((answer) => normalized(answer.raw) === normalized(answers[0].raw)),
         };
       });
       return { availability, createMs, results };
