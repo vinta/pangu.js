@@ -17,6 +17,7 @@ const { values, positionals } = parseArgs({
     'profile-path': { type: 'string' },
     'profile-name': { type: 'string' },
     'repeats': { type: 'string', default: '1' },
+    'orders': { type: 'string', default: '2' },
     'check': { type: 'boolean' },
     'require-perfect': { type: 'boolean' },
     'diagnostics': { type: 'string' },
@@ -24,6 +25,8 @@ const { values, positionals } = parseArgs({
 });
 const repeats = Number(values.repeats);
 assert(Number.isSafeInteger(repeats) && repeats > 0, `invalid --repeats ${values.repeats}; use a positive integer`);
+const orderCount = Number(values.orders);
+assert(Number.isSafeInteger(orderCount) && orderCount > 0, `invalid --orders ${values.orders}; use a positive integer`);
 assert(['hyphen-sign', 'plus-sign'].includes(values.experiment), `invalid --experiment ${values.experiment}; use hyphen-sign or plus-sign`);
 const plus = values.experiment === 'plus-sign' ? await import('./plus-sign/experiment.mjs') : null;
 assert(plus || !values.split, '--split is only supported for --experiment plus-sign');
@@ -41,7 +44,25 @@ const corpus = plus ? plus.loadCorpus(split) : JSON.parse(readFileSync(new URL('
 const fields = plus ? [] : JSON.parse(readFileSync(new URL('field-cases.json', root), 'utf8')).cases;
 const cases = [...corpus.cases, ...fields];
 const diagnosticIds = values.diagnostics?.split(',');
-assert(!diagnosticIds || (!values['require-perfect'] && repeats === 1), '--diagnostics requires --repeats 1 and no --require-perfect; diagnostic history is not accuracy evidence');
+assert(
+  !diagnosticIds || (!values['require-perfect'] && repeats === 1 && orderCount === 1),
+  '--diagnostics requires --repeats 1, --orders 1, and no --require-perfect; diagnostic history is not accuracy evidence',
+);
+
+// A label near a tie depends on which questions earlier clones of the same base session answered (plus-sign report, 2026-09-06). Each order gets its own
+// base session; order 0 is corpus order, later orders are seeded shuffles so a rerun replays the same orders
+function caseOrders(count, size) {
+  return Array.from({ length: count }, (_, seed) => {
+    const order = Array.from({ length: size }, (_, index) => index);
+    let state = seed;
+    for (let index = size - 1; index > 0 && seed > 0; index--) {
+      state = (Math.imul(state ^ (state >>> 15), 0x2c1b3c6d) + 0x9e3779b9) >>> 0;
+      const swap = state % (index + 1);
+      [order[index], order[swap]] = [order[swap], order[index]];
+    }
+    return order;
+  });
+}
 for (const id of diagnosticIds ?? []) {
   assert(
     cases.some((kase) => kase.id === id),
@@ -89,7 +110,7 @@ mkdirSync(output, { recursive: false });
 writeFileSync(join(output, 'cases.json'), `${JSON.stringify({ ...corpus, cases }, null, 2)}\n`, { flag: 'wx' });
 
 const extensionURL = `chrome-extension://${values['extension-id']}`;
-async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, repeats, diagnostics }) {
+async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics }) {
   const context = page.context();
   const worker = context.serviceWorkers().find((candidate) => candidate.url() === `${extensionURL}/dist/service-worker.js`);
   if (!worker) {
@@ -112,7 +133,7 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, r
     await worker.evaluate((id) => chrome.tabs.remove(id), infoId);
   }
   const run = await worker.evaluate(
-    async ({ system, initialTurns, inputs, repeats, diagnostics }) => {
+    async ({ system, initialTurns, inputs, orders, repeats, diagnostics }) => {
       if (typeof LanguageModel === 'undefined' || typeof LanguageModel.params !== 'function') {
         throw new Error('extension Prompt API sampling controls unavailable; check Chrome and the extension context');
       }
@@ -120,65 +141,75 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, r
       if (availability !== 'available') {
         throw new Error(`model availability is ${availability}; provision the model in the configured profile before running`);
       }
-      const started = performance.now();
-      const base = await LanguageModel.create({ initialPrompts: [{ role: 'system', content: system }, ...initialTurns], temperature: 0, topK: 1 });
-      const createMs = Math.round(performance.now() - started);
-      const results = [];
-      try {
-        for (const input of inputs) {
-          if (input.question === null) {
-            results.push({ ...input, skipped: 'no-unique-target-reference', answers: [], answer: null, correct: false, stable: null });
-            continue;
-          }
-          const answers = [];
-          for (let repeat = 0; repeat < repeats; repeat++) {
-            const start = performance.now();
-            let raw = null;
-            let answer = null;
-            let error = null;
-            const followups = [];
-            let turn;
-            try {
-              turn = await base.clone();
-              raw = await turn.prompt(input.question, { responseConstraint: input.responseConstraint, signal: AbortSignal.timeout(30000) });
-              answer = input.tokens.find(([token]) => token === JSON.parse(raw))?.[1] ?? null;
-              if (answer === null) {
-                throw new Error(`response outside constraint enum: ${raw}`);
-              }
-              if (diagnostics) {
-                for (const question of ['你剛才判斷的是原句中從左到右第幾個「-」？請把原句中所有「-」都計入，只回答位置。', '請逐字引用你剛才判斷的那個「-」前後的原文，讓我能辨認是哪一處。']) {
-                  const start = performance.now();
-                  const response = await turn.prompt(question, { signal: AbortSignal.timeout(30000) });
-                  followups.push({ question, raw: response, ms: Math.round(performance.now() - start) });
-                }
-              }
-            } catch (caught) {
-              error = String(caught);
-            } finally {
-              turn?.destroy();
+      let createMs = null;
+      const answersById = new Map(inputs.map((input) => [input.id, []]));
+      for (const order of orders) {
+        const started = performance.now();
+        const base = await LanguageModel.create({ initialPrompts: [{ role: 'system', content: system }, ...initialTurns], temperature: 0, topK: 1 });
+        createMs ??= Math.round(performance.now() - started);
+        try {
+          for (const index of order) {
+            const input = inputs[index];
+            if (input.question === null) {
+              continue;
             }
-            answers.push({ answer, raw, error, ms: Math.round(performance.now() - start), ...(diagnostics ? { followups } : {}) });
+            const answers = answersById.get(input.id);
+            for (let repeat = 0; repeat < repeats; repeat++) {
+              const start = performance.now();
+              let raw = null;
+              let answer = null;
+              let error = null;
+              const followups = [];
+              let turn;
+              try {
+                turn = await base.clone();
+                raw = await turn.prompt(input.question, { responseConstraint: input.responseConstraint, signal: AbortSignal.timeout(30000) });
+                answer = input.tokens.find(([token]) => token === JSON.parse(raw))?.[1] ?? null;
+                if (answer === null) {
+                  throw new Error(`response outside constraint enum: ${raw}`);
+                }
+                if (diagnostics) {
+                  for (const question of ['你剛才判斷的是原句中從左到右第幾個「-」？請把原句中所有「-」都計入，只回答位置。', '請逐字引用你剛才判斷的那個「-」前後的原文，讓我能辨認是哪一處。']) {
+                    const start = performance.now();
+                    const response = await turn.prompt(question, { signal: AbortSignal.timeout(30000) });
+                    followups.push({ question, raw: response, ms: Math.round(performance.now() - start) });
+                  }
+                }
+              } catch (caught) {
+                error = String(caught);
+              } finally {
+                turn?.destroy();
+              }
+              answers.push({ answer, raw, error, ms: Math.round(performance.now() - start), order: orders.indexOf(order), ...(diagnostics ? { followups } : {}) });
+            }
           }
-          results.push({
-            ...input,
-            answers,
-            answer: answers[0].answer,
-            correct: answers.every((answer) => answer.answer === input.expected_label),
-            stable: answers.every((answer) => answer.raw === answers[0].raw),
-          });
+        } finally {
+          base.destroy();
         }
-      } finally {
-        base.destroy();
       }
+      const results = inputs.map((input) => {
+        if (input.question === null) {
+          return { ...input, skipped: 'no-unique-target-reference', answers: [], answer: null, correct: false, stable: null };
+        }
+        const answers = answersById.get(input.id);
+        return {
+          ...input,
+          answers,
+          answer: answers[0].answer,
+          correct: answers.every((answer) => answer.answer === input.expected_label),
+          stable: answers.every((answer) => answer.raw === answers[0].raw),
+        };
+      });
       return { availability, createMs, results };
     },
-    { system: prompt.system, initialTurns: prompt.initialTurns ?? [], inputs, repeats, diagnostics },
+    { system: prompt.system, initialTurns: prompt.initialTurns ?? [], inputs, orders, repeats, diagnostics },
   );
   return { ...run, browserVersion: context.browser().version(), profileVerified: true, extensionWorkerVerified: true };
 }
 
 for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
-  const code = `async page => (${runInBrowser.toString()})(page, ${JSON.stringify({ profilePath, extensionURL, prompt, inputs, repeats, diagnostics: Boolean(diagnosticIds) })})`;
+  const orders = caseOrders(orderCount, inputs.length);
+  const code = `async page => (${runInBrowser.toString()})(page, ${JSON.stringify({ profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics: Boolean(diagnosticIds) })})`;
   const run = JSON.parse(
     execFileSync('playwright-cli', ['-s=pangu-eval', '--raw', 'run-code', code], { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024, timeout: 120000, stdio: ['ignore', 'pipe', 'inherit'] }),
   );
@@ -191,6 +222,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     variant,
     promptVersion: variant === 'shipping' ? hyphenPrompt.version : variant,
     repeats,
+    orders: orders.map((order) => order.map((index) => inputs[index].id)),
     sampling: 'temperature 0, topK 1',
     shuffle: false,
     timestamp: new Date().toISOString(),
@@ -198,7 +230,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     system: prompt.system,
     initialTurns: prompt.initialTurns ?? [],
     ...run,
-    ...(plus ? { evaluation: plus.score(run, corpus, repeats) } : {}),
+    ...(plus ? { evaluation: plus.score(run, corpus, repeats * orders.length) } : {}),
   };
   const file = join(output, `${runIndex + 1}-${variant}.json`);
   writeFileSync(file, `${JSON.stringify(result, null, 2)}\n`, { flag: 'wx' });
@@ -227,6 +259,13 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
         .map((kase) => `${kase.id}=${kase.answer}`)
         .join(', ') || 'none',
     );
+    console.log(
+      'Unstable across orders/repeats:',
+      scored
+        .filter((kase) => kase.stable === false)
+        .map((kase) => kase.id)
+        .join(', ') || 'none',
+    );
     if (errors.length || (values['require-perfect'] && (scored.some((kase) => !kase.correct) || sentences.some((sentence) => !sentence.review && !sentence.correct)))) {
       process.exitCode = 1;
     }
@@ -240,6 +279,13 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     scored
       .filter((kase) => !kase.correct)
       .map((kase) => `${kase.id}=${kase.answer}`)
+      .join(', ') || 'none',
+  );
+  console.log(
+    'Unstable across orders/repeats:',
+    scored
+      .filter((kase) => kase.stable === false)
+      .map((kase) => kase.id)
       .join(', ') || 'none',
   );
   if (errors.length || (values['require-perfect'] && scored.some((kase) => !kase.correct))) {

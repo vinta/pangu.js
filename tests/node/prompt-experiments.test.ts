@@ -91,6 +91,13 @@ new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context 
   const skipped = result.results.filter((kase: { skipped?: string }) => kase.skipped);
   expect(skipped).toHaveLength(2);
   expect(skipped).toEqual(expect.arrayContaining([expect.objectContaining({ answer: null, correct: false, stable: null, answers: [] })]));
-  expect(result.testCalls).toBe((result.results.length - skipped.length) * 3);
+  // Default 2 orders, each with its own base session, times 3 repeats
+  expect(result.testCalls).toBe((result.results.length - skipped.length) * 3 * 2);
+  expect(result.orders).toHaveLength(2);
+  expect([...result.orders[1]].sort()).toEqual([...result.orders[0]].sort());
+  expect(result.orders[1]).not.toEqual(result.orders[0]);
+  for (const kase of result.results.filter((kase: { skipped?: string }) => !kase.skipped)) {
+    expect(kase.answers.map((answer: { order: number }) => answer.order)).toEqual([0, 0, 0, 1, 1, 1]);
+  }
   expect(result.results.filter((kase: { skipped?: string; correct: boolean }) => !kase.skipped).every((kase: { correct: boolean }) => kase.correct)).toBe(true);
 });

@@ -51,7 +51,8 @@ Add candidates to `hyphen-sign/prompts.js`. Keep measured variants unchanged and
 
 - Original sign accuracy, control flips, and field accuracy, reported separately. Any wrong repeat makes that case fail.
 - Exact system/user prompts, response schemas, token-to-label mappings, every raw response, errors, timings, browser user agent and prompt version in each new export.
-- Fixed `temperature: 0`, `topK: 1`, canonical menu order, and no language declaration. Each variant gets a fresh base session; each case/repeat gets a fresh clone.
+- Fixed `temperature: 0`, `topK: 1`, canonical menu order, and no language declaration. Each case/repeat gets a fresh clone.
+- `--orders N` (default 2) runs the cases in N orders per variant: corpus order, then seeded shuffles. Each order gets its own base session. A label near a tie depends on which questions earlier clones of the same base answered, so agreement within one order is not stability; the export lists the orders and tags every answer with its order index, and any disagreement marks the case unstable and wrong. Use `--orders 1` only for diagnostics.
 
 The runner verifies the configured profile before each variant. Inference errors make the command fail; `--require-perfect` also fails if any scored case is wrong. A normal comparison can finish successfully while reporting accuracy failures.
 
