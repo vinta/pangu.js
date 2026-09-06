@@ -7,15 +7,8 @@ describe('Symbol +', () => {
   // When CJK touches the + directly
   it('handle + symbol as operator', () => {
     expect(pangu.spacingText('前面+後面')).toBe('前面 + 後面');
-    // expect(pangu.spacingText('Vinta+陳上進')).toBe('Vinta + 陳上進'); // Rare cases (basically a typo), ignore
     expect(pangu.spacingText('陳上進+Vinta')).toBe('陳上進 + Vinta');
     expect(pangu.spacingText('你+我=我們')).toBe('你 + 我 = 我們');
-
-    // NOTE: fixed by AI spacing, see browser-extensions/chrome/src/ai-spacing/shapes/brand-suffix-shape.ts
-    expect(pangu.spacingText('公視+上架了新片')).toBe('公視 + 上架了新片');
-    expect(pangu.spacingText('MOD影劇館+上架了新片')).toBe('MOD 影劇館 + 上架了新片');
-    // expect(pangu.spacingText('公視+上架了新片')).toBe('公視+ 上架了新片');
-    // expect(pangu.spacingText('MOD影劇館+上架了新片')).toBe('MOD 影劇館+ 上架了新片');
 
     // DO NOT change if already spacing
     expect(pangu.spacingText('前面 + 後面')).toBe('前面 + 後面');
@@ -23,6 +16,9 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('Vinta + 陳上進')).toBe('Vinta + 陳上進');
     expect(pangu.spacingText('陳上進 + Vinta')).toBe('陳上進 + Vinta');
     expect(pangu.spacingText('得到一個 A + B 的結果')).toBe('得到一個 A + B 的結果');
+
+    // Rare cases, ignore
+    // expect(pangu.spacingText('Vinta+陳上進')).toBe('Vinta + 陳上進');
   });
 
   // A plus with half-width characters on both sides binds them into one token,
@@ -45,18 +41,17 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('打+886這個號碼')).toBe('打 +886 這個號碼');
     expect(pangu.spacingText('氣溫是+5度左右')).toBe('氣溫是 +5 度左右');
 
-    expect(pangu.spacingText('Disney+上架了新片')).toBe('Disney+ 上架了新片');
-    expect(pangu.spacingText('Apple TV+上架了新片')).toBe('Apple TV+ 上架了新片');
     expect(pangu.spacingText('有100+的選擇')).toBe('有 100+ 的選擇');
     expect(pangu.spacingText('這裡有18+的內容')).toBe('這裡有 18+ 的內容');
   });
 
-  // FIXME
-  // it('handle + symbol in real-world bundle plans', () => {
-  //   // prettier-ignore
-  //   expect(pangu.spacingText('【速在必行方案】HiNet光世代+Wi-Fi全屋通1台+MOD影劇館+(300M/300M)')).toBe('【速在必行方案】HiNet 光世代 + Wi-Fi 全屋通 1 台 + MOD 影劇館+ (300M/300M)');
+  it('handle + symbol as real-world brand suffix', () => {
+    expect(pangu.spacingText('Disney+上架了新片')).toBe('Disney+ 上架了新片');
+    expect(pangu.spacingText('Apple TV+上架了新片')).toBe('Apple TV+ 上架了新片');
 
-  //   // prettier-ignore
-  //   expect(pangu.spacingText('HiNet光世代+MOD+影劇館+/全選/自選20/特選餐/豪華餐(5選1)+Wi-Fi全屋通(1台)')).toBe('HiNet 光世代 + MOD + 影劇館+/全選/自選 20/特選餐/豪華餐 (5 選 1) + Wi-Fi 全屋通 (1 台)');
-  // });
+    // NOTE: fixed by AI spacing, see browser-extensions/chrome/src/ai-spacing/shapes/brand-suffix-shape.ts
+    // expect(pangu.spacingText('公視+上架了新片')).toBe('公視+ 上架了新片');
+    // expect(pangu.spacingText('MOD影劇館+上架了新片')).toBe('MOD 影劇館+ 上架了新片');
+    // expect(pangu.spacingText('【速在必行方案】HiNet光世代+Wi-Fi全屋通1台+MOD影劇館+(300M/300M)')).toBe('【速在必行方案】HiNet 光世代 + Wi-Fi 全屋通 1 台 + MOD 影劇館+ (300M/300M)');
+  });
 });

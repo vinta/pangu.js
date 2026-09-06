@@ -14,6 +14,8 @@ describe('Symbol , only add space on the right', () => {
     // DO NOT change if already spacing
     expect(pangu.spacingText('前面 , 後面')).toBe('前面 , 後面');
     expect(pangu.spacingText('前面, 後面')).toBe('前面, 後面');
-    // expect(pangu.spacingText('前面 ,後面')).toBe('前面 ,後面'); // Rare cases (basically a typo), ignore
+
+    // Rare cases, ignore
+    // expect(pangu.spacingText('前面 ,後面')).toBe('前面 ,後面');
   });
 });

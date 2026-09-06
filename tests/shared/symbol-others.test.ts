@@ -59,10 +59,4 @@ describe('Other Symbols', () => {
     expect(pangu.spacingText('完成✅了')).toBe('完成 ✅ 了');
     expect(pangu.spacingText('愛心❤符號')).toBe('愛心 ❤ 符號');
   });
-
-  // FIXME
-  // // \ufffd
-  // it('handle Specials symbols, add space between them and CJK', () => {
-  //   expect(pangu.spacingText('我喜歡在填表單的時候故意加幾個� (U+FFFD)字元，好讓那些工程師懷疑系統有bug')).toBe('我喜歡在填表單的時候故意加幾個 � (U+FFFD) 字元，好讓那些工程師懷疑系統有 bug');
-  // });
 });

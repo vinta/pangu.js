@@ -74,9 +74,5 @@ describe('Symbol -', () => {
     // The hyphen sign reading was dropped, CJK-N reads as an operator, see ADR 0015
     // expect(pangu.spacingText('氣溫是-5度左右')).toBe('氣溫是 -5 度左右');
     // expect(pangu.spacingText('Nasdaq-100本週下跌-13.44%')).toBe('Nasdaq-100 本週下跌 -13.44%');
-
-    // FIXME
-    // expect(pangu.spacingText('陳上進--Vinta')).toBe('陳上進 -- Vinta');
-    // expect(pangu.spacingText('陳上進---Vinta')).toBe('陳上進 --- Vinta');
   });
 });
