@@ -51,6 +51,7 @@
 - Search usages with `rg` before removing or renaming public APIs, imports, functions, commands, config keys, dependencies, docs references, or files.
 - Keep behavior changes, refactors, generated-output updates, and documentation cleanups separate unless the request explicitly combines them.
 - When coding against dependencies, tools, browser APIs, extension APIs, or release machinery, check current docs or local source before relying on memory.
+- When improving a prompt, ask the model follow-up questions to understand how it interprets the instructions, then use its answers to guide experiments.
 
 ## Coding Conventions
 
