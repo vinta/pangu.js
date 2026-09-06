@@ -20,7 +20,7 @@ export const brandSuffix: AmbiguousShape = {
       const unspacedIndex = brandMatch.index + brandMatch[0].length - 1;
       const index = indexOfNthSymbol(settled, '+', unspaced.slice(0, unspacedIndex).split('+').length - 1);
       // The brand was tight against the plus, so a space between them can only be one the rules inserted
-      if (index !== -1 && settled[index - 1] === ' ' && settled[index - 2] === unspaced[unspacedIndex - 1]) {
+      if (index !== -1 && settled[index - 1] === ' ') {
         // The sentence is the brand, its plus, and the one character after it, which edits() reads to decide the second gap
         candidateMatches.push({ sentence: unspaced.slice(brandMatch.index, unspacedIndex + 2), at: unspacedIndex - brandMatch.index, index });
       }
