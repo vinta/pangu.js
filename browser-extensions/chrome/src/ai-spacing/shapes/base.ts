@@ -1,4 +1,4 @@
-import type { Candidate } from '../messages';
+import type { Candidate, CandidateLabel } from '../messages';
 
 // One change at one settled index: `remove` characters at `index` become `insert`. Edits stay separate because a text node can carry edits from more than one ambiguous shape
 export interface TextEdit {
@@ -22,6 +22,7 @@ export interface AmbiguousShape {
   readonly kind: string; // joins this half to its PromptSpec
   occursIn(text: string): boolean; // the warm-up's page-level gate: a yes/no scan, cheaper than find()
   find(unspaced: string, settled: string): CandidateMatch[]; // tight-shape scan on the unspaced text, resolved only where the inserted gap is present
+  classify?(candidates: readonly Candidate[]): (CandidateLabel | null)[]; // present when the shape labels its candidates on the page; absent, the worker's model does
   isFix(candidateLabel: string): boolean;
   edits(settledCandidate: SettledCandidate): TextEdit[];
 }

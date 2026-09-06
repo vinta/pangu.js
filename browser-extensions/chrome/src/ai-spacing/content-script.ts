@@ -1,6 +1,7 @@
 import type { CandidateLabel, ClassifyCandidatesMessage, ClassifyCandidatesResponse } from './messages';
 import type { AmbiguousShape, SettledCandidate, TextEdit } from './shapes/base';
 import { applyTextEdits } from './shapes/base';
+import { brandSuffix } from './shapes/brand-suffix';
 import { hyphenSign } from './shapes/hyphen-shape';
 
 const pangu = window.pangu;
@@ -9,7 +10,7 @@ const pangu = window.pangu;
 type SettledTextNode = Parameters<NonNullable<typeof pangu.onTextNodesSettled>>[0][number];
 type LateFix = Parameters<typeof pangu.applyLateFixes>[0][number];
 
-const AMBIGUOUS_SHAPES: AmbiguousShape[] = [hyphenSign];
+const AMBIGUOUS_SHAPES: AmbiguousShape[] = [hyphenSign, brandSuffix];
 
 async function requestClassification(kind: string, candidates: ClassifyCandidatesMessage['candidates']): Promise<ClassifyCandidatesResponse> {
   const message: ClassifyCandidatesMessage = { type: 'CLASSIFY_CANDIDATES', kind, candidates };
@@ -61,39 +62,41 @@ export function warmUpAiSpacing() {
   const pageText = document.documentElement.textContent ?? '';
   // The loop is not redundant: we create base sessions per ambiguous shape
   for (const ambiguousShape of AMBIGUOUS_SHAPES) {
-    if (ambiguousShape.occursIn(pageText)) {
+    if (!ambiguousShape.classify && ambiguousShape.occursIn(pageText)) {
       console.debug(`[pangu] warm up base session: ${ambiguousShape.kind}`);
       void requestClassification(ambiguousShape.kind, []);
     }
   }
 }
 
-export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[]) {
-  const batches = AMBIGUOUS_SHAPES.map((ambiguousShape) => ({ ambiguousShape, settledCandidates: findCandidates(ambiguousShape, settledTextNodes) })).filter(
-    (batch) => batch.settledCandidates.length > 0,
-  );
+// Once the worker fails to answer, this page's model shapes stay off; shapes that label on the page keep running
+let modelFailed = false;
+
+// A shape that labels its own candidates runs whether or not the model is enabled; the toggle governs the shapes that need the worker's model
+export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[], modelEnabled: boolean) {
+  const useModel = modelEnabled && !modelFailed;
+  const batches = AMBIGUOUS_SHAPES.filter((ambiguousShape) => useModel || ambiguousShape.classify)
+    .map((ambiguousShape) => ({ ambiguousShape, settledCandidates: findCandidates(ambiguousShape, settledTextNodes) }))
+    .filter((batch) => batch.settledCandidates.length > 0);
   if (batches.length === 0) {
     return;
   }
 
   const responses = await Promise.all(
-    batches.map(({ ambiguousShape, settledCandidates }) =>
-      requestClassification(
-        ambiguousShape.kind,
-        settledCandidates.map(({ sentence, at }) => ({ sentence, at })),
-      ),
-    ),
+    batches.map(({ ambiguousShape, settledCandidates }): Promise<ClassifyCandidatesResponse> | ClassifyCandidatesResponse => {
+      const candidates = settledCandidates.map(({ sentence, at }) => ({ sentence, at }));
+      return ambiguousShape.classify ? { ok: true, candidateLabels: ambiguousShape.classify(candidates) } : requestClassification(ambiguousShape.kind, candidates);
+    }),
   );
 
-  const candidateLabelsByBatch: (CandidateLabel | null)[][] = [];
-  for (const [batchIndex, response] of responses.entries()) {
-    if (!response.ok) {
-      pangu.onTextNodesSettled = null;
-      console.debug(`[pangu] ${batches[batchIndex]!.ambiguousShape.kind}: disabled for this page (${response.error})`);
-      return;
+  const candidateLabelsByBatch: (CandidateLabel | null)[][] = responses.map((response, batchIndex) => {
+    if (response.ok) {
+      return response.candidateLabels;
     }
-    candidateLabelsByBatch.push(response.candidateLabels);
-  }
+    modelFailed = true;
+    console.debug(`[pangu] ${batches[batchIndex]!.ambiguousShape.kind}: disabled for this page (${response.error})`);
+    return batches[batchIndex]!.settledCandidates.map(() => null);
+  });
 
   const lateFixes = collectLateFixes(batches, candidateLabelsByBatch);
   if (lateFixes.length > 0) {

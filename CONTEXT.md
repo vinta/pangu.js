@@ -35,7 +35,7 @@ The gap that the browser renders between CJK and ANS letters or digits through t
 _Avoid_: native autospacing, text autospace, CSS spacing, autospace mode, text-autospace (bare, in prose)
 
 **Late fix**:
-A correction to the rules output. It is applied after the rules run, and something other than the rules decides it, such as a classifier. A late fix only inserts or removes spaces. It never rewrites the author's characters. When no classifier is present, the rules output is kept. A late fix goes through the same scheduling path as text spacing, never as a separate write, so on a hidden page it waits with everything else. Today, the only late fix removes the space that the rules inserted at a candidate that is read as a signed number (`CJK - N` becomes `CJK -N`).
+A correction to the rules output. It is applied after the rules run, and something other than the rules decides it, such as a classifier. A late fix only inserts or removes spaces. It never rewrites the author's characters. When no classifier is present, the rules output is kept. A late fix goes through the same scheduling path as text spacing, never as a separate write, so on a hidden page it waits with everything else. Today there are two late fixes: one removes the space that the rules inserted at a candidate that is read as a signed number (`CJK - N` becomes `CJK -N`), the other removes the space the rules inserted before a brand suffix (`公視 + 上架` becomes `公視+ 上架`).
 _Avoid_: un-insert (in prose), model fix
 
 **Page re-render**:
@@ -86,7 +86,7 @@ _Avoid_: tag-in-prose, prose tag
 ### AI Spacing
 
 **AI spacing**:
-The extension's second stage, on by default with a toggle to turn it off. It sends each candidate to a classifier and applies the label as a late fix. It is never required: when the model is absent, off, or slow, the rules output is kept.
+The extension's second stage, on by default with a toggle to turn it off. It sends each candidate to a classifier and applies the label as a late fix. It is never required: when the model is absent, off, or slow, the rules output is kept. The toggle governs the shapes whose classifier is the model; a shape whose classifier is a list on the page runs either way.
 _Avoid_: model layer, hyphen-sign model layer
 
 **Symbol sense disambiguation**:
@@ -94,8 +94,12 @@ Deciding which reading a symbol carries from the context around it, not from the
 _Avoid_: symbol WSD, symbol disambiguation
 
 **Ambiguous shape**:
-A shape where the rules cannot derive the symbol's reading, so a classifier decides it. An ambiguous shape defines three things: what to flag, the menu of labels, and the fix for each label. Today, the only ambiguous shape is the hyphen sign: a hyphen-minus tight between CJK and a digit, which is read as a signed number or as a range or separator.
+A shape where the rules cannot derive the symbol's reading, so a classifier decides it. An ambiguous shape defines three things: what to flag, the menu of labels, and the fix for each label. Today there are two ambiguous shapes: the hyphen sign, a hyphen-minus tight between CJK and a digit, which is read as a signed number or as a range or separator; and the brand suffix.
 _Avoid_: symbol class, ambiguity, shape (bare, for this sense)
+
+**Brand suffix**:
+A plus that is part of a CJK brand name, from a fixed list in the extension: today `公視+` and `影劇館+`. The rules read it as an operator (ADR 0013); the extension restores the suffix reading as a late fix, deciding by the list instead of the model (ADR 0018).
+_Avoid_: protected word, brand lexicon, whitelist
 
 **Candidate**:
 One occurrence of an ambiguous shape, flagged on the text before spacing. It carries the sentence around it and the symbol's position in that sentence, which is all the classifier reads.
@@ -105,9 +109,9 @@ _Avoid_: hyphen-sign candidate (as a term), span, ambiguous span, model span
 A candidate bound to the text node it came from, with the symbol's index in the settled text, so a late fix edits only bytes the batch settled on.
 
 **Classifier**:
-The component that reads one candidate and answers with one label from a fixed menu. It never answers with text, so it can never rewrite an author's characters.
+The component that reads one candidate and answers with one label from a fixed menu. It never answers with text, so it can never rewrite an author's characters. The hyphen sign's classifier is the model in the service worker; the brand suffix's classifier is its list, on the page.
 _Avoid_: LLM, AI (for the component)
 
 **Label**:
-The classifier's answer for one candidate. It is one of the fixed menu for its ambiguous shape: today, signed number, range or separator, or unsure.
+The classifier's answer for one candidate. It is one of the fixed menu for its ambiguous shape: today, signed number, range or separator, or unsure for the hyphen sign, and brand suffix for the brand suffix.
 _Avoid_: verdict (the rules' word), answer

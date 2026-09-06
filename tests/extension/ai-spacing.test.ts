@@ -66,7 +66,7 @@ describe('AI spacing message flow', () => {
     const textNode = {} as Text;
     const settled = '從 - 5 到 - 3 再到 - 1 度。區間 - 2。未知 - 4';
 
-    await applyAiSpacing([{ node: textNode, unspaced: '從-5到-3再到-1度。區間-2。未知-4', settled }]);
+    await applyAiSpacing([{ node: textNode, unspaced: '從-5到-3再到-1度。區間-2。未知-4', settled }], true);
 
     expect(sendMessage).toHaveBeenCalledTimes(1);
     expect(await sendMessage.mock.results[0]!.value).toEqual({ ok: true, candidateLabels: ['signed-number', null, 'signed-number', 'range-or-separator', 'unsure'] });
@@ -78,14 +78,55 @@ describe('AI spacing message flow', () => {
     expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node: textNode, settled, data: '從 -5 到 - 3 再到 -1 度。區間 - 2。未知 - 4' }]);
   });
 
-  it('disables AI spacing without writing when the model is absent', async () => {
+  it('stops asking the worker for this page without writing when the model is absent', async () => {
     vi.stubGlobal('LanguageModel', undefined);
     const { pangu, sendMessage, applyAiSpacing } = await loadAiSpacing();
+    const onTextNodesSettled = pangu.onTextNodesSettled;
 
-    await applyAiSpacing([{ node: {} as Text, unspaced: '氣溫是-5度', settled: '氣溫是 - 5 度' }]);
+    await applyAiSpacing([{ node: {} as Text, unspaced: '氣溫是-5度', settled: '氣溫是 - 5 度' }], true);
+    await applyAiSpacing([{ node: {} as Text, unspaced: '從-3度', settled: '從 - 3 度' }], true);
 
+    expect(sendMessage).toHaveBeenCalledTimes(1);
     expect(await sendMessage.mock.results[0]!.value).toEqual({ ok: false, error: 'Error: LanguageModel is not exposed in this context' });
-    expect(pangu.onTextNodesSettled).toBeNull();
+    expect(pangu.onTextNodesSettled).toBe(onTextNodesSettled);
     expect(pangu.applyLateFixes).not.toHaveBeenCalled();
+  });
+
+  it('still applies a brand suffix fix when the model is enabled but absent', async () => {
+    vi.stubGlobal('LanguageModel', undefined);
+    const { pangu, sendMessage, applyAiSpacing } = await loadAiSpacing();
+    const textNode = {} as Text;
+    const settled = '公視 + 上架了新片，氣溫是 - 5 度';
+
+    await applyAiSpacing([{ node: textNode, unspaced: '公視+上架了新片，氣溫是-5度', settled }], true);
+
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node: textNode, settled, data: '公視+ 上架了新片，氣溫是 - 5 度' }]);
+  });
+
+  it('fixes a brand suffix on the page without the worker, even with the model disabled', async () => {
+    vi.stubGlobal('LanguageModel', undefined);
+    const { pangu, sendMessage, applyAiSpacing } = await loadAiSpacing();
+    const textNode = {} as Text;
+    const settled = '公視 + 上架了新片，氣溫是 - 5 度';
+
+    await applyAiSpacing([{ node: textNode, unspaced: '公視+上架了新片，氣溫是-5度', settled }], false);
+
+    expect(sendMessage).not.toHaveBeenCalled();
+    expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node: textNode, settled, data: '公視+ 上架了新片，氣溫是 - 5 度' }]);
+  });
+
+  it('composes a brand suffix fix with a model fix on the same text node', async () => {
+    const clone = vi.fn(async () => ({ prompt: async () => '"signed-number"', destroy: vi.fn() }));
+    vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create: async () => ({ clone }) });
+    const { pangu, sendMessage, applyAiSpacing } = await loadAiSpacing();
+    const textNode = {} as Text;
+    const settled = '公視 + 上架了新片，氣溫是 - 5 度';
+
+    await applyAiSpacing([{ node: textNode, unspaced: '公視+上架了新片，氣溫是-5度', settled }], true);
+
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(sendMessage.mock.calls[0]![0].kind).toBe('hyphen-sign');
+    expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node: textNode, settled, data: '公視+ 上架了新片，氣溫是 -5 度' }]);
   });
 });
