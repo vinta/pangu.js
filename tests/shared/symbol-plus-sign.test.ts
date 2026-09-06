@@ -45,6 +45,10 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('Disney+上架了新片')).toBe('Disney+ 上架了新片');
     expect(pangu.spacingText('Apple TV+上架了新片')).toBe('Apple TV+ 上架了新片');
 
+    // NOTE: not expected, but cannot fix with rules, see below
+    expect(pangu.spacingText('公視+上架了新片')).toBe('公視 + 上架了新片');
+    expect(pangu.spacingText('MOD影劇館+上架了新片')).toBe('MOD 影劇館 + 上架了新片');
+
     // NOTE: fixed by AI spacing, see browser-extensions/chrome/src/ai-spacing/shapes/brand-suffix-shape.ts
     // expect(pangu.spacingText('公視+上架了新片')).toBe('公視+ 上架了新片');
     // expect(pangu.spacingText('MOD影劇館+上架了新片')).toBe('MOD 影劇館+ 上架了新片');
