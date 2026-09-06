@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "^apply_patch$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/build-if-needed.mjs\"",
+            "timeout": 60,
+            "statusMessage": "Building..."
+          }
+        ]
+      }
+    ]
+  }
+}
