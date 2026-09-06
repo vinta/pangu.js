@@ -46,43 +46,43 @@
               <button id="filter_mode_btn" class="btn btn-primary-black btn-lg btn-block" data-i18n="blacklist">不要在這些網頁召喚空格之神</button>
             </div>
             <div class="url-list-section">
+              <!-- Template elements (hidden by default) -->
+              <template id="url-display-template">
+                <li class="animate-repeat">
+                  <input type="text" class="url-display-input" readonly />
+                  <button class="btn btn-sm remove-url-btn"></button>
+                </li>
+              </template>
+
+              <template id="url-edit-template">
+                <li>
+                  <input type="text" class="url-edit-input" />
+                  <button class="btn btn-sm save-edit-url-btn"></button>
+                  <button class="btn btn-sm cancel-edit-btn"></button>
+                </li>
+              </template>
+
+              <template id="url-new-template">
+                <li>
+                  <input type="text" class="url-edit-input" id="new-url-input" />
+                  <button class="btn btn-sm save-new-url-btn" id="save-new-url-btn"></button>
+                  <button class="btn btn-sm cancel-edit-btn" id="cancel-new-url-btn"></button>
+                </li>
+              </template>
+
+              <template id="url-list-template">
+                <ul id="url-list" class="filter_mode_list"></ul>
+                <div class="mt-6">
+                  <a href="#" id="add-url-btn"></a>
+                  <br />
+                  <a href="#" id="restore-defaults-btn" class="mt-2"></a>
+                </div>
+                <div id="url-list-help" class="url-list-help">
+                  <a href="https://developer.chrome.com/docs/extensions/develop/concepts/match-patterns" target="_blank"></a>
+                </div>
+              </template>
+
               <div id="url-list-container">
-                <!-- Template elements (hidden by default) -->
-                <template id="url-display-template">
-                  <li class="animate-repeat">
-                    <input type="text" class="url-display-input" readonly />
-                    <button class="btn btn-sm remove-url-btn"></button>
-                  </li>
-                </template>
-
-                <template id="url-edit-template">
-                  <li>
-                    <input type="text" class="url-edit-input" />
-                    <button class="btn btn-sm save-edit-url-btn"></button>
-                    <button class="btn btn-sm cancel-edit-btn"></button>
-                  </li>
-                </template>
-
-                <template id="url-new-template">
-                  <li>
-                    <input type="text" class="url-edit-input" id="new-url-input" />
-                    <button class="btn btn-sm save-new-url-btn" id="save-new-url-btn"></button>
-                    <button class="btn btn-sm cancel-edit-btn" id="cancel-new-url-btn"></button>
-                  </li>
-                </template>
-
-                <template id="url-list-template">
-                  <ul id="url-list" class="filter_mode_list"></ul>
-                  <div class="mt-6">
-                    <a href="#" id="add-url-btn"></a>
-                    <br />
-                    <a href="#" id="restore-defaults-btn" class="mt-2"></a>
-                  </div>
-                  <div id="url-list-help" class="url-list-help">
-                    <a href="https://developer.chrome.com/docs/extensions/develop/concepts/match-patterns" target="_blank"></a>
-                  </div>
-                </template>
-
                 <!-- URL list will be rendered below -->
               </div>
             </div>

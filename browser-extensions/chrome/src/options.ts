@@ -168,19 +168,6 @@ class OptionsController {
     const urls = settings[settings.filter_mode];
     const container = document.getElementById('url-list-container') as HTMLDivElement;
 
-    // Save templates before clearing
-    const templates = container.querySelectorAll('template');
-    const templateFragment = document.createDocumentFragment();
-    for (const template of templates) {
-      templateFragment.appendChild(template);
-    }
-
-    // Clear container
-    container.innerHTML = '';
-
-    // Restore templates
-    container.appendChild(templateFragment);
-
     // Clone the url-list template
     const listTemplate = document.getElementById('url-list-template') as HTMLTemplateElement;
     const listFragment = listTemplate.content.cloneNode(true) as DocumentFragment;
@@ -261,7 +248,7 @@ class OptionsController {
       addButton.parentElement.style.display = 'none';
     }
 
-    container.appendChild(listFragment);
+    container.replaceChildren(listFragment);
 
     this.setupNewUrlInputListeners();
   }
