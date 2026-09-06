@@ -23,7 +23,7 @@ async function loadContentScript(readyState = 'complete') {
     pangu.onTextNodesSettled?.([{ node, unspaced: '氣溫是-5度', settled: '氣溫是 - 5 度' }]);
   });
   const addListener = vi.fn<(listener: (message: MessageToContentScript, sender: chrome.runtime.MessageSender, sendResponse: (response: ContentScriptResponse) => void) => unknown) => void>();
-  const sendMessage = vi.fn(async () => ({ ok: true, candidateLabels: ['負'] }));
+  const sendMessage = vi.fn(async () => ({ ok: true, candidateLabels: ['signed-number'] }));
   vi.stubGlobal('document', document);
   vi.stubGlobal('window', { pangu });
   vi.stubGlobal('chrome', { storage: { sync: { get } }, runtime: { onMessage: { addListener }, sendMessage } });

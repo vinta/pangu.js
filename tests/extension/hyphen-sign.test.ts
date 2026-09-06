@@ -143,11 +143,11 @@ describe('hyphenSign.occursIn()', () => {
 });
 
 describe('hyphenSign.isFix()', () => {
-  it('fix only the 負 label', () => {
-    expect(hyphenSign.isFix('負')).toBe(true);
-    expect(hyphenSign.isFix('到或分隔')).toBe(false);
-    expect(hyphenSign.isFix('聽不出來')).toBe(false);
-    expect(hyphenSign.isFix('signed-number')).toBe(false);
+  it('fix only the signed-number label', () => {
+    expect(hyphenSign.isFix('signed-number')).toBe(true);
+    expect(hyphenSign.isFix('range-or-separator')).toBe(false);
+    expect(hyphenSign.isFix('unsure')).toBe(false);
+    expect(hyphenSign.isFix('負')).toBe(false);
   });
 });
 

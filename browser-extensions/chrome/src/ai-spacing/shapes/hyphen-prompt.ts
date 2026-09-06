@@ -2,14 +2,14 @@ import type { PromptSpec } from './base';
 
 // NOTE: Changing the language of these label "values" affects model output and can reduce accuracy. Re-run model evaluations after changing them.
 export const HYPHEN_LABELS = {
-  signedNumber: '負',
-  rangeOrSeparator: '到或分隔',
-  unsure: '聽不出來',
+  signedNumber: 'signed-number',
+  rangeOrSeparator: 'range-or-separator',
+  unsure: 'unsure',
 } as const;
 
 export type HyphenLabel = (typeof HYPHEN_LABELS)[keyof typeof HYPHEN_LABELS];
 
-const PROMPT_VERSION = 'v26-zh-chinese-labels';
+const PROMPT_VERSION = 'v26-zh';
 
 const SYSTEM_PROMPT = '你是中文數字判讀助手。判斷句子裡指定的「-」是負號還是分隔符號。只判斷指定符號，不要改寫句子，不要解釋，只回答一個選項名稱。';
 
