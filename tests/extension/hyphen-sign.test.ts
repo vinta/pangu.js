@@ -75,7 +75,6 @@ describe('hyphenSign.find()', () => {
   });
 
   it('ignore shapes outside the tight CJK-digit form', () => {
-    // Half-width left side, non-digit right side, and an already-spaced original are all out of scope
     expect(hyphenSign.find('abc-5', 'abc-5')).toEqual([]);
     expect(hyphenSign.find('中文-abc', '中文 - abc')).toEqual([]);
     expect(hyphenSign.find('氣溫是 -5度', '氣溫是 - 5 度')).toEqual([]);
@@ -106,7 +105,6 @@ describe('hasInsertedGap()', () => {
   });
 
   it('reject a gap the rules did not insert', () => {
-    // No space at all, a space the author put on the other side only, and a non-digit after the gap
     expect(hasInsertedGap('氣溫是 -5 度左右', 4)).toBe(false);
     expect(hasInsertedGap('氣溫是 - 五度', 4)).toBe(false);
     expect(hasInsertedGap('氣溫是 - ', 4)).toBe(false);
@@ -152,7 +150,6 @@ describe('hyphenSign.isFix()', () => {
 });
 
 describe('hyphenSign.edits()', () => {
-  // The whole page-side pipeline for one text node whose every candidate came back as a fix: find, edit, compose
   function fixAll(unspaced: string, settled: string) {
     const textEdits = hyphenSign.find(unspaced, settled).flatMap(({ index }) => hyphenSign.edits(settled, index));
     return applyTextEdits(settled, textEdits);

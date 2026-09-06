@@ -17,7 +17,6 @@ export function translatePage() {
     }
   }
 
-  // Translate tooltips
   for (const element of document.querySelectorAll('[data-i18n-title]')) {
     const messageKey = element.getAttribute('data-i18n-title');
     if (messageKey) {

@@ -13,10 +13,8 @@ export interface ClassifyCandidatesMessage {
   candidates: Candidate[];
 }
 
-// Messages sent TO the service worker (via chrome.runtime.sendMessage)
 export type MessageToServiceWorker = ClassifyCandidatesMessage;
 
-// One member per registered ambiguous shape
 export type CandidateLabel = HyphenLabel;
 
 // Labels zip against the request array by index. null skips one candidate; ok: false disables AI spacing for the page

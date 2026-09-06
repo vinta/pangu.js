@@ -22,8 +22,8 @@ export interface AmbiguousShape {
   readonly kind: string; // joins this half to its PromptSpec
   occursIn(text: string): boolean; // the warm-up's page-level gate: a yes/no scan, cheaper than find()
   find(unspaced: string, settled: string): CandidateMatch[]; // tight-shape scan on the unspaced text, resolved only where the inserted gap is present
-  isFix(candidateLabel: string): boolean; // which label triggers the fix
-  edits(settled: string, index: number): TextEdit[]; // what to change at one settled index
+  isFix(candidateLabel: string): boolean;
+  edits(settled: string, index: number): TextEdit[];
 }
 
 export interface PromptSpec<Label extends string> {

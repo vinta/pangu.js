@@ -134,11 +134,9 @@ export class BrowserPangu extends Pangu {
     return this.visibilityDetector.isElementVisuallyHidden(element);
   }
 
-  // Late fixes go through schedule() like every other spacing write
   public applyLateFixes(lateFixes: readonly LateFix[]) {
     this.schedule(() => {
       for (const lateFix of lateFixes) {
-        // Skip if the node is no longer in the document or changed since the fix was computed
         if (!lateFix.node.isConnected || lateFix.node.data !== lateFix.settled) {
           continue;
         }

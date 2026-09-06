@@ -36,7 +36,6 @@ function collectLateFixes(batches: readonly { ambiguousShape: AmbiguousShape; se
   const textEditsByNode = new Map<Text, { settled: string; textEdits: TextEdit[] }>();
   for (const [batchIndex, { ambiguousShape, settledCandidates }] of batches.entries()) {
     for (const [index, settledCandidate] of settledCandidates.entries()) {
-      // Labels zip against the candidates by index
       const candidateLabel = candidateLabelsByBatch[batchIndex]![index];
       const isFix = candidateLabel != null && ambiguousShape.isFix(candidateLabel);
       console.debug(

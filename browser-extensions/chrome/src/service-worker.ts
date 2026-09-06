@@ -132,6 +132,5 @@ chrome.runtime.onMessage.addListener((message: MessageToServiceWorker, _sender: 
     return true;
   }
 
-  // A message this worker does not answer closes its channel normally
   return false;
 });
