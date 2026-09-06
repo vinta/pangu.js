@@ -1,7 +1,8 @@
-import { translatePage } from './utils/i18n';
-import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, updateSettings } from './utils/settings';
-import { playSound } from './utils/sounds';
-import { isValidMatchPattern } from './utils/urls';
+import { downloadModel, getModelAvailability, isModelSupported } from './ai-spacing/models';
+import { DEFAULT_SETTINGS, getSettings, onSettingsChanged, updateSettings } from './settings/storage';
+import { isValidMatchPattern } from './settings/urls';
+import { translatePage } from './ui/i18n';
+import { playSound } from './ui/sounds';
 
 // Builds a Partial<Settings> for the list picked by filter mode without a computed-key cast
 function listPatch(key: 'blacklist' | 'whitelist', urls: string[]) {
@@ -10,7 +11,7 @@ function listPatch(key: 'blacklist' | 'whitelist', urls: string[]) {
 
 class OptionsController {
   private editingUrls: Map<number, string> = new Map();
-  private addUrlInput: HTMLInputElement | null = null;
+  private isAddingUrl = false;
 
   constructor() {
     this.initialize();
@@ -42,6 +43,10 @@ class OptionsController {
       if (changedKeys.includes('is_enable_text_autospace')) {
         this.renderTextAutospaceCheckbox().catch(console.error);
       }
+
+      if (changedKeys.includes('is_enable_ai_spacing')) {
+        this.renderAiSpacingCheckbox().catch(console.error);
+      }
     });
 
     document.addEventListener('click', (e) => {
@@ -59,13 +64,26 @@ class OptionsController {
       } else if (target.classList.contains('save-edit-url-btn')) {
         const index = parseInt(target.dataset.index || '0');
         this.saveEditingUrl(index);
+      } else if (target.id === 'save-new-url-btn') {
+        this.saveNewUrl();
+      } else if (target.id === 'cancel-new-url-btn') {
+        this.cancelNewUrl();
       } else if (target.classList.contains('cancel-edit-btn')) {
         const index = parseInt(target.dataset.index || '0');
         this.cancelEditingUrl(index);
       } else if (target.id === 'add-url-btn') {
         this.showAddUrlInput();
       } else if (target.id === 'restore-defaults-btn') {
-        this.restoreDefaults();
+        this.handleRestoreListDefaults();
+      } else if (target.id === 'ai-model-download-btn') {
+        this.handleModelDownload().catch(console.error);
+      }
+    });
+
+    document.addEventListener('keypress', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.id === 'new-url-input' && e.key === 'Enter') {
+        this.saveNewUrl();
       }
     });
 
@@ -88,29 +106,16 @@ class OptionsController {
           console.error('Failed to save settings:', error);
           await this.renderTextAutospaceCheckbox();
         }
+      } else if (target.id === 'ai-spacing-checkbox') {
+        const aiSpacingCheckbox = target as HTMLInputElement;
+        try {
+          await updateSettings({ is_enable_ai_spacing: aiSpacingCheckbox.checked });
+        } catch (error) {
+          console.error('Failed to save settings:', error);
+          await this.renderAiSpacingCheckbox();
+        }
       }
     });
-  }
-
-  private setupNewUrlInputListeners() {
-    const newUrlInput = document.getElementById('new-url-input') as HTMLInputElement;
-    if (newUrlInput) {
-      newUrlInput.focus();
-
-      document.getElementById('save-new-url-btn')?.addEventListener('click', () => {
-        this.saveNewUrl();
-      });
-
-      document.getElementById('cancel-new-url-btn')?.addEventListener('click', () => {
-        this.cancelNewUrl();
-      });
-
-      newUrlInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          this.saveNewUrl();
-        }
-      });
-    }
   }
 
   private async render() {
@@ -118,6 +123,9 @@ class OptionsController {
     await this.renderFilterMode();
     await this.renderMuteCheckbox();
     await this.renderTextAutospaceCheckbox();
+    await this.renderAiSpacingCheckbox();
+    // Last, because it is the only render that waits on something outside storage
+    await this.renderAiModelStatus();
   }
 
   private async renderSpacingMode() {
@@ -149,19 +157,6 @@ class OptionsController {
     const settings = await getSettings();
     const urls = settings[settings.filter_mode];
     const container = document.getElementById('url-list-container') as HTMLDivElement;
-
-    // Save templates before clearing
-    const templates = container.querySelectorAll('template');
-    const templateFragment = document.createDocumentFragment();
-    for (const template of templates) {
-      templateFragment.appendChild(template);
-    }
-
-    // Clear container
-    container.innerHTML = '';
-
-    // Restore templates
-    container.appendChild(templateFragment);
 
     // Clone the url-list template
     const listTemplate = document.getElementById('url-list-template') as HTMLTemplateElement;
@@ -223,7 +218,7 @@ class OptionsController {
     }
 
     // Add new URL input if shown
-    if (this.addUrlInput) {
+    if (this.isAddingUrl) {
       const newTemplate = document.getElementById('url-new-template') as HTMLTemplateElement;
       const newItem = newTemplate.content.cloneNode(true) as DocumentFragment;
 
@@ -239,13 +234,13 @@ class OptionsController {
     }
 
     // Hide add button if showing new URL input
-    if (this.addUrlInput && addButton.parentElement) {
+    if (this.isAddingUrl && addButton.parentElement) {
       addButton.parentElement.style.display = 'none';
     }
 
-    container.appendChild(listFragment);
+    container.replaceChildren(listFragment);
 
-    this.setupNewUrlInputListeners();
+    document.getElementById('new-url-input')?.focus();
   }
 
   private async renderMuteCheckbox() {
@@ -258,12 +253,49 @@ class OptionsController {
     const current = await getSettings();
     const checkbox = document.getElementById('text-autospace-checkbox') as HTMLInputElement;
     const isSupported = CSS.supports('text-autospace', 'normal');
+
     // Display-only off when unsupported: never write back, the synced setting still applies on other devices
     checkbox.checked = isSupported && current.is_enable_text_autospace;
     checkbox.disabled = !isSupported;
     checkbox.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
     const notSupportedMessage = document.getElementById('text-autospace-not-supported-msg') as HTMLElement;
     notSupportedMessage.style.display = isSupported ? 'none' : 'block';
+  }
+
+  private async renderAiSpacingCheckbox() {
+    const current = await getSettings();
+    const checkbox = document.getElementById('ai-spacing-checkbox') as HTMLInputElement;
+    const isSupported = await isModelSupported();
+
+    // Display-only off when the model can never run here: never write back, the synced setting still applies on other devices
+    checkbox.checked = isSupported && current.is_enable_ai_spacing;
+    checkbox.disabled = !isSupported;
+    checkbox.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
+  }
+
+  // The model's state is browser-wide and independent of the toggle: the setting can be on while the model is still absent, and then the page just keeps the rules output
+  private async renderAiModelStatus() {
+    const statusText = document.getElementById('ai-model-status') as HTMLElement;
+    const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
+
+    const availability = await getModelAvailability();
+    statusText.textContent = chrome.i18n.getMessage(`ai_model_${availability}`);
+    // Only an absent model can be fetched, and a multi-gigabyte download is the user's call
+    downloadButton.style.display = availability === 'downloadable' ? 'block' : 'none';
+  }
+
+  private async handleModelDownload() {
+    const statusText = document.getElementById('ai-model-status') as HTMLElement;
+    const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
+    downloadButton.disabled = true;
+    // downloadModel() resolves only after the whole download, so the status line switches now rather than at the re-render below
+    statusText.textContent = chrome.i18n.getMessage('ai_model_downloading');
+    try {
+      await downloadModel();
+    } finally {
+      downloadButton.disabled = false;
+      await this.renderAiModelStatus();
+    }
   }
 
   private async toggleSpacingMode() {
@@ -283,7 +315,7 @@ class OptionsController {
   }
 
   private showAddUrlInput() {
-    this.addUrlInput = document.createElement('input');
+    this.isAddingUrl = true;
     this.renderUrlList();
   }
 
@@ -292,18 +324,18 @@ class OptionsController {
     const newUrl = input.value.trim();
 
     // Optimistically close the input: on 'added' the subscription re-renders with it already gone, so the list paints exactly once
-    this.addUrlInput = null;
+    this.isAddingUrl = false;
     let outcome: 'added' | 'duplicate' | 'invalid';
     try {
       outcome = newUrl ? await this.addToActiveList(newUrl) : 'invalid';
     } catch (error) {
       console.error('Failed to save URL:', error);
-      this.addUrlInput = input;
+      this.isAddingUrl = true;
       return;
     }
 
     if (outcome === 'invalid') {
-      this.addUrlInput = input;
+      this.isAddingUrl = true;
       alert(chrome.i18n.getMessage('error_invalid_match_pattern'));
       return;
     }
@@ -315,7 +347,7 @@ class OptionsController {
   }
 
   private cancelNewUrl() {
-    this.addUrlInput = null;
+    this.isAddingUrl = false;
     this.renderUrlList();
   }
 
@@ -370,7 +402,7 @@ class OptionsController {
     }
   }
 
-  private async restoreDefaults() {
+  private async handleRestoreListDefaults() {
     if (confirm(chrome.i18n.getMessage('confirm_restore_defaults'))) {
       try {
         // Restore only the current filter mode list to its default value

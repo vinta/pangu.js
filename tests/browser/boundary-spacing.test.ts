@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { BoundarySpacingContext, BoundarySpacingVerdict, TextRunSpacingContext, TextRunSpacingVerdict } from '../../src/browser/boundary-spacing';
-import { decideBoundarySpacing, decideTextRunSpacing, respaceCurrentTail } from '../../src/browser/boundary-spacing';
+import type { BoundarySpacingContext, BoundarySpacingVerdict, TextNodeSpacingContext, TextNodeSpacingVerdict } from '../../src/browser/boundary-spacing';
+import { decideBoundarySpacing, decideTextNodeSpacing, respaceCurrentTail } from '../../src/browser/boundary-spacing';
 
 // A boundary that the spacing engine wants a space at, with every veto turned off
 const spacingBoundary: BoundarySpacingContext = {
@@ -31,13 +31,13 @@ function neverConsulted(name: string): () => boolean {
   };
 }
 
-// The next boundary is space-sensitive, so the space goes onto the current text run
+// The next boundary is space-sensitive, so the space goes onto the current text node
 const appendCurrentBoundary: Partial<BoundarySpacingContext> = { nextBoundaryIsSpaceSensitive: true };
 
-// Neither text run may be modified, so the space needs a <pangu> element
+// Neither text node may be modified, so the space needs a <pangu> element
 const insertElementBoundary: Partial<BoundarySpacingContext> = { nextBoundaryIsSpaceSensitive: true, currentBoundaryIsSpaceSensitive: true };
 
-const textRun: TextRunSpacingContext = {
+const textNode: TextNodeSpacingContext = {
   text: '中文abc',
   previousElementLastChar: null,
   hiddenBoundaryBefore: () => false,
@@ -49,27 +49,27 @@ interface BoundaryCase {
   verdict: BoundarySpacingVerdict;
 }
 
-interface TextRunCase {
+interface TextNodeCase {
   name: string;
-  context: Partial<TextRunSpacingContext>;
-  verdicts: TextRunSpacingVerdict[];
+  context: Partial<TextNodeSpacingContext>;
+  verdicts: TextNodeSpacingVerdict[];
 }
 
 function boundaryContext(overrides: Partial<BoundarySpacingContext>) {
   return { ...spacingBoundary, ...overrides };
 }
 
-function textRunContext(overrides: Partial<TextRunSpacingContext>) {
-  return { ...textRun, ...overrides };
+function textNodeContext(overrides: Partial<TextNodeSpacingContext>) {
+  return { ...textNode, ...overrides };
 }
 
 describe('decideBoundarySpacing()', () => {
   const verdictCases: BoundaryCase[] = [
-    { name: 'prepends to the next text run when neither boundary is space-sensitive', context: {}, verdict: 'prepend-next' },
-    { name: 'appends to the current text run when only the next boundary is space-sensitive', context: appendCurrentBoundary, verdict: 'append-current' },
+    { name: 'prepends to the next text node when neither boundary is space-sensitive', context: {}, verdict: 'prepend-next' },
+    { name: 'appends to the current text node when only the next boundary is space-sensitive', context: appendCurrentBoundary, verdict: 'append-current' },
     { name: 'inserts an element when both boundaries are space-sensitive', context: insertElementBoundary, verdict: 'insert-element' },
-    { name: 'does nothing when collectable text sits between the runs', context: { contentBetween: true }, verdict: 'none' },
-    { name: 'does nothing when collectable text sits between space-sensitive runs', context: { ...insertElementBoundary, contentBetween: true }, verdict: 'none' },
+    { name: 'does nothing when collectable text sits between the nodes', context: { contentBetween: true }, verdict: 'none' },
+    { name: 'does nothing when collectable text sits between space-sensitive nodes', context: { ...insertElementBoundary, contentBetween: true }, verdict: 'none' },
     { name: 'does nothing when the current boundary is a block', context: { currentBoundaryIsBlock: true }, verdict: 'none' },
     { name: 'does nothing when the next boundary is ignored', context: { nextBoundaryIsIgnored: true }, verdict: 'none' },
     { name: 'does nothing when the next boundary is a block', context: { nextBoundaryIsBlock: true }, verdict: 'none' },
@@ -80,12 +80,12 @@ describe('decideBoundarySpacing()', () => {
   });
 
   const existingSpaceCases: BoundaryCase[] = [
-    { name: 'the current text run already ends with a space', context: { currentEndsWithSpace: true }, verdict: 'none' },
-    { name: 'the next text run already starts with a space', context: { nextStartsWithSpace: true }, verdict: 'none' },
-    { name: 'whitespace sits between the two text runs', context: { whitespaceBetween: true }, verdict: 'none' },
-    { name: 'a space-like sibling follows the current text run', context: { spaceLikeSiblingAfterCurrent: true }, verdict: 'none' },
+    { name: 'the current text node already ends with a space', context: { currentEndsWithSpace: true }, verdict: 'none' },
+    { name: 'the next text node already starts with a space', context: { nextStartsWithSpace: true }, verdict: 'none' },
+    { name: 'whitespace sits between the two text nodes', context: { whitespaceBetween: true }, verdict: 'none' },
+    { name: 'a space-like sibling follows the current text node', context: { spaceLikeSiblingAfterCurrent: true }, verdict: 'none' },
     { name: 'a space-like sibling follows the current boundary', context: { spaceLikeSiblingAfterCurrentBoundary: true }, verdict: 'none' },
-    { name: 'a space-like sibling precedes the next text run', context: { spaceLikeSiblingBeforeNext: true }, verdict: 'none' },
+    { name: 'a space-like sibling precedes the next text node', context: { spaceLikeSiblingBeforeNext: true }, verdict: 'none' },
   ];
 
   it.each(existingSpaceCases)('does nothing when $name', ({ context, verdict }) => {
@@ -172,18 +172,18 @@ describe('respaceCurrentTail()', () => {
   });
 });
 
-describe('decideTextRunSpacing()', () => {
-  const trimCases: TextRunCase[] = [
+describe('decideTextNodeSpacing()', () => {
+  const trimCases: TextNodeCase[] = [
     { name: 'trims a leading space that comes after a hidden element', context: { text: ' 中文abc', hiddenBoundaryBefore: () => true }, verdicts: ['trim-leading-space', 'apply-text-spacing'] },
     { name: 'keeps a leading space that comes after a visible element', context: { text: ' 中文abc', hiddenBoundaryBefore: () => false }, verdicts: ['apply-text-spacing'] },
     { name: 'has nothing to trim after a hidden element', context: { text: '中文abc', hiddenBoundaryBefore: () => true }, verdicts: ['apply-text-spacing'] },
   ];
 
   it.each(trimCases)('$name', ({ context, verdicts }) => {
-    expect(decideTextRunSpacing(textRunContext(context))).toEqual(verdicts);
+    expect(decideTextNodeSpacing(textNodeContext(context))).toEqual(verdicts);
   });
 
-  const standaloneQuoteCases: TextRunCase[] = [
+  const standaloneQuoteCases: TextNodeCase[] = [
     { name: 'a straight quote after CJK', context: { text: '"', previousElementLastChar: '中' }, verdicts: ['prepend-space'] },
     { name: 'a left curly quote after CJK', context: { text: '“', previousElementLastChar: '中' }, verdicts: ['prepend-space'] },
     { name: 'a right curly quote after CJK', context: { text: '”', previousElementLastChar: '中' }, verdicts: ['prepend-space'] },
@@ -191,33 +191,33 @@ describe('decideTextRunSpacing()', () => {
   ];
 
   it.each(standaloneQuoteCases)('prepends a space to $name', ({ context, verdicts }) => {
-    expect(decideTextRunSpacing(textRunContext(context))).toEqual(verdicts);
+    expect(decideTextNodeSpacing(textNodeContext(context))).toEqual(verdicts);
   });
 
-  const quoteSkipCases: TextRunCase[] = [
+  const quoteSkipCases: TextNodeCase[] = [
     { name: 'the previous element ends with half-width', context: { text: '"', previousElementLastChar: 'a' }, verdicts: [] },
     { name: 'there is no previous element', context: { text: '"', previousElementLastChar: null }, verdicts: [] },
   ];
 
   it.each(quoteSkipCases)('leaves a standalone quote alone when $name', ({ context, verdicts }) => {
-    expect(decideTextRunSpacing(textRunContext(context))).toEqual(verdicts);
+    expect(decideTextNodeSpacing(textNodeContext(context))).toEqual(verdicts);
   });
 
-  const textSpacingCases: TextRunCase[] = [
+  const textSpacingCases: TextNodeCase[] = [
     { name: 'more than one character', context: { text: '""', previousElementLastChar: '中' }, verdicts: ['apply-text-spacing'] },
     { name: 'a single character that is not a quote', context: { text: 'a', previousElementLastChar: '中' }, verdicts: ['apply-text-spacing'] },
   ];
 
-  it.each(textSpacingCases)('applies text spacing to a text run of $name', ({ context, verdicts }) => {
-    expect(decideTextRunSpacing(textRunContext(context))).toEqual(verdicts);
+  it.each(textSpacingCases)('applies text spacing to a text node of $name', ({ context, verdicts }) => {
+    expect(decideTextNodeSpacing(textNodeContext(context))).toEqual(verdicts);
   });
 
   it('trims a leading space before deciding that the rest is a standalone quote', () => {
-    expect(decideTextRunSpacing(textRunContext({ text: ' "', previousElementLastChar: '中', hiddenBoundaryBefore: () => true }))).toEqual(['trim-leading-space', 'prepend-space']);
+    expect(decideTextNodeSpacing(textNodeContext({ text: ' "', previousElementLastChar: '中', hiddenBoundaryBefore: () => true }))).toEqual(['trim-leading-space', 'prepend-space']);
   });
 
-  it('treats an untrimmed leading space as part of the text run', () => {
-    expect(decideTextRunSpacing(textRunContext({ text: ' "', previousElementLastChar: '中', hiddenBoundaryBefore: () => false }))).toEqual(['apply-text-spacing']);
+  it('treats an untrimmed leading space as part of the text node', () => {
+    expect(decideTextNodeSpacing(textNodeContext({ text: ' "', previousElementLastChar: '中', hiddenBoundaryBefore: () => false }))).toEqual(['apply-text-spacing']);
   });
 });
 
@@ -228,7 +228,7 @@ describe('layout-dependent facts are consulted lazily', () => {
     inGridOrFlexContainer: neverConsulted('inGridOrFlexContainer'),
   };
 
-  it('consults no layout fact when the text runs are already spaced', () => {
+  it('consults no layout fact when the text nodes are already spaced', () => {
     expect(decideBoundarySpacing(boundaryContext({ ...layoutFactsUnavailable, currentEndsWithSpace: true }))).toBe('none');
   });
 
@@ -267,7 +267,7 @@ describe('layout-dependent facts are consulted lazily', () => {
     expect(decideBoundarySpacing(context)).toBe('append-current');
   });
 
-  it('leaves the hidden boundary unconsulted for a text run with no leading space', () => {
-    expect(decideTextRunSpacing(textRunContext({ hiddenBoundaryBefore: neverConsulted('hiddenBoundaryBefore') }))).toEqual(['apply-text-spacing']);
+  it('leaves the hidden boundary unconsulted for a text node with no leading space', () => {
+    expect(decideTextNodeSpacing(textNodeContext({ hiddenBoundaryBefore: neverConsulted('hiddenBoundaryBefore') }))).toEqual(['apply-text-spacing']);
   });
 });

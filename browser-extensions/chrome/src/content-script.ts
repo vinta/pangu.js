@@ -1,45 +1,33 @@
-import type { ContentScriptLoadedMessage, ContentScriptResponse, MessageToContentScript } from './utils/types';
+import { applyAiSpacing, warmUpAiSpacing } from './ai-spacing/content-script';
+import type { ContentScriptResponse, MessageToContentScript } from './messages';
+import { getSettings } from './settings/storage';
 
-// `Window.pangu` is declared globally in src/browser/pangu.umd.ts
-// The pangu object is injected by pangu.umd.js which loads before this script
+const pangu = window.pangu;
 
-async function autoSpacingPage() {
-  const pangu = window.pangu;
-  if (pangu) {
-    pangu.autoSpacingPage();
+// This content script is only injected and run once per webpage:
+// - when spacing_mode === 'spacing_when_load'
+// - when the user clicks the manual spacing button in popup
+async function init() {
+  // Assigned before the sweep starts, so the initial pass is captured too
+  const settings = await getSettings();
+  if (settings.is_enable_ai_spacing) {
+    pangu.onTextNodesSettled = (settledTextNodes) => {
+      void applyAiSpacing(settledTextNodes);
+    };
+    warmUpAiSpacing();
   }
 }
 
-function spacingPage() {
-  const pangu = window.pangu;
-  if (pangu) {
-    pangu.spacingPage();
-  }
-}
+void init().then(() => pangu.autoSpacingPage());
 
-const loadedMessage: ContentScriptLoadedMessage = { type: 'CONTENT_SCRIPT_LOADED' };
-chrome.runtime.sendMessage(loadedMessage);
-
-// Document Loading Lifecycle:
-// loading → (DOM parsing completes) → DOMContentLoaded event fires →
-// interactive → (resources load) → load event fires → complete
-if (document.readyState === 'loading') {
-  // DOMContentLoaded only fires once -> autoSpacingPage() only runs once
-  document.addEventListener('DOMContentLoaded', autoSpacingPage);
-} else {
-  // this content script only runs once -> autoSpacingPage() only runs once
-  autoSpacingPage();
-}
-
-// Listen for messages from the popup
-// This allows manual spacing even when auto-spacing is disabled
+// This allows manual spacing from popup when spacing_mode === 'spacing_when_click'
 chrome.runtime.onMessage.addListener((message: MessageToContentScript, _sender: chrome.runtime.MessageSender, sendResponse: (response: ContentScriptResponse) => void) => {
   if (message.action === 'PING') {
     // PING is used by popup to check if content script is already loaded
     sendResponse({ success: true });
   } else if (message.action === 'MANUAL_SPACING') {
     // MANUAL_SPACING is requested by user clicking button in popup
-    spacingPage();
+    pangu.spacingPage();
     sendResponse({ success: true });
   }
 

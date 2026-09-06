@@ -82,7 +82,7 @@ test.describe('BrowserPangu', () => {
 
       await page.waitForTimeout(50);
 
-      // The two queued spans sandwich an untouched sibling, so their text runs are not adjacent
+      // The two queued spans sandwich an untouched sibling, so their text nodes are not adjacent
       await page.evaluate(() => {
         const container = document.getElementById('container')!;
         const existing = document.getElementById('existing')!;
@@ -740,7 +740,7 @@ test.describe('BrowserPangu', () => {
       expect(result).toBe('字 x tail');
     });
 
-    test('should not add a redundant space when real whitespace separates a link from the next run', async ({ page }) => {
+    test('should not add a redundant space when real whitespace separates a link from the next text node', async ({ page }) => {
       await page.setContent('<p id="test"><a href="#">字</a> <b>x</b></p>');
 
       await page.evaluate(() => {
@@ -751,7 +751,7 @@ test.describe('BrowserPangu', () => {
       expect(html).toBe('<a href="#">字</a> <b>x</b>');
     });
 
-    test('should not add a redundant space when whitespace separates a wrapped link from the next run', async ({ page }) => {
+    test('should not add a redundant space when whitespace separates a wrapped link from the next text node', async ({ page }) => {
       // The boundary climb stops on <a>, so the scan has to exit the wrapping
       // <span> to see the whitespace-only text node
       await page.setContent('<p id="test"><span><a href="#">字</a></span>\n<b>x</b></p>');
@@ -764,7 +764,7 @@ test.describe('BrowserPangu', () => {
       expect(result).toBe('x');
     });
 
-    test('should space across a wrapped link when no whitespace separates the runs', async ({ page }) => {
+    test('should space across a wrapped link when no whitespace separates the nodes', async ({ page }) => {
       await page.setContent('<p id="test"><span><a href="#">字</a></span>x</p>');
 
       await page.evaluate(() => {
@@ -775,8 +775,8 @@ test.describe('BrowserPangu', () => {
       expect(result).toBe('字 x');
     });
 
-    test('should not add a space when a whitespace-only wrapper separates the runs', async ({ page }) => {
-      // The wrapper renders a space, so the runs are already separated
+    test('should not add a space when a whitespace-only wrapper separates the nodes', async ({ page }) => {
+      // The wrapper renders a space, so the nodes are already separated
       await page.setContent('<p id="test">甲<span> </span>abc</p>');
 
       await page.evaluate(() => {
@@ -787,7 +787,7 @@ test.describe('BrowserPangu', () => {
       expect(html).toBe('甲<span> </span>abc');
     });
 
-    test('should see whitespace wrapped in nested elements between the runs', async ({ page }) => {
+    test('should see whitespace wrapped in nested elements between the nodes', async ({ page }) => {
       await page.setContent('<p id="test">字<span><em> </em></span>x</p>');
 
       await page.evaluate(() => {
@@ -858,7 +858,7 @@ test.describe('BrowserPangu', () => {
     });
 
     test('should space both sides of a slash junction that a <wbr> splits across text nodes (real-world case)', async ({ page }) => {
-      // A <wbr> splits 蒸馏/训练 across text nodes, so each run alone shows the slash rule only one side: the junction reads 蒸馏 / 训, and the space before the slash belongs inside the current run,
+      // A <wbr> splits 蒸馏/训练 across text nodes, so each node alone shows the slash rule only one side: the junction reads 蒸馏 / 训, and the space before the slash belongs inside the current node,
       // not at the boundary
       await page.setContent('<li>贼喊捉贼：Anthropic 自己的所有模型内容，<wbr>其实都是从全人类的知识以及相当多的版权内容上蒸馏/<wbr>训练出来的，现在他们却不允许其他人来蒸馏自己的模型。</li>');
 
