@@ -87,7 +87,7 @@ _Avoid_: tag-in-prose, prose tag
 
 ### AI Spacing
 
-Source of truth: `docs/ai-spacing.md`. The decision to build it is ADR 0016.
+Decisions: [ADR 0016](docs/adr/0016-hyphen-before-digit-gets-a-model-layer.md) introduces AI spacing; [ADR 0017](docs/adr/0017-ai-spacing-policy-stays-in-the-extension.md) defines the core/extension boundary.
 
 **AI spacing**:
 The extension's second stage, on by default with a toggle to turn it off. It sends each candidate to a classifier and applies the label as a late fix. It is never required: when the model is absent, off, or slow, the rules output is kept.
