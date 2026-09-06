@@ -86,7 +86,7 @@ _Avoid_: tag-in-prose, prose tag
 ### AI Spacing
 
 **AI spacing**:
-The extension's second stage, on by default with a toggle to turn it off. It sends each candidate to a classifier and applies the label as a late fix. It is never required: when the model is absent, off, or slow, the rules output is kept. The toggle governs the shapes whose classifier is the model; a shape whose classifier is a list on the page runs either way.
+The extension's second stage, on by default with a toggle to turn it off. It sends each candidate to a classifier and applies the label as a late fix. It is never required: when the model is absent, off, or slow, the rules output is kept.
 _Avoid_: model layer, hyphen-sign model layer
 
 **Symbol sense disambiguation**:

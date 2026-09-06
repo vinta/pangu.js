@@ -10,10 +10,10 @@ const pangu = window.pangu;
 async function init() {
   // Assigned before the sweep starts, so the initial pass is captured too
   const settings = await getSettings();
-  pangu.onTextNodesSettled = (settledTextNodes) => {
-    void applyAiSpacing(settledTextNodes, settings.is_enable_ai_spacing);
-  };
   if (settings.is_enable_ai_spacing) {
+    pangu.onTextNodesSettled = (settledTextNodes) => {
+      void applyAiSpacing(settledTextNodes);
+    };
     warmUpAiSpacing();
   }
 }

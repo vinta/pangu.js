@@ -72,10 +72,8 @@ export function warmUpAiSpacing() {
 // Once the worker fails to answer, this page's model shapes stay off; shapes that label on the page keep running
 let modelFailed = false;
 
-// A shape that labels its own candidates runs whether or not the model is enabled; the toggle governs the shapes that need the worker's model
-export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[], modelEnabled: boolean) {
-  const useModel = modelEnabled && !modelFailed;
-  const batches = AMBIGUOUS_SHAPES.filter((ambiguousShape) => useModel || ambiguousShape.classify)
+export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[]) {
+  const batches = AMBIGUOUS_SHAPES.filter((ambiguousShape) => !modelFailed || ambiguousShape.classify)
     .map((ambiguousShape) => ({ ambiguousShape, settledCandidates: findCandidates(ambiguousShape, settledTextNodes) }))
     .filter((batch) => batch.settledCandidates.length > 0);
   if (batches.length === 0) {
