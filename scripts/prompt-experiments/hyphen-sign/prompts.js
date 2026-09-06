@@ -559,6 +559,12 @@ export const PROMPTS = {
       return `句子：${kase.input}\n\n「${kase.input[kase.at - 1]}${kase.symbol}${number}」裡的「${kase.symbol}」是哪一種符號？\n${menu}\n\n用選項的名稱回答。`;
     },
   },
+  'v26-zh-chinese-labels': {
+    label: 'v26 numeric classification, Chinese labels',
+    system: '你是中文數字判讀助手。判斷句子裡指定的「-」是負號還是分隔符號。只判斷指定符號，不要改寫句子，不要解釋，只回答一個選項名稱。',
+    displayLabels: DISPLAY_ZH_V7,
+    build: (kase, labels) => PROMPTS['v26-zh'].build(kase, labels).replace(/signed-number|range-or-separator|unsure/g, (label) => DISPLAY_ZH_V7[label]),
+  },
 };
 
 export const SHOT_SENTENCES = Object.values(SHOTS)
