@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { hyphenPrompt } from '../../browser-extensions/chrome/src/ai-spacing/hyphen-prompt.ts';
+import { hyphenPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-prompt.ts';
 import { PROMPTS, SHOT_SENTENCES } from './hyphen-sign/prompts.js';
 
 const { values, positionals } = parseArgs({

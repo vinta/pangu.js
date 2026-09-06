@@ -43,7 +43,7 @@ node scripts/prompt-experiments/sweep.mjs --extension-id "$PANGU_EXTENSION_ID" -
 playwright-cli -s=pangu-eval detach
 ```
 
-With no variant arguments, the runner uses `shipping`. This imports `hyphenPrompt` from `browser-extensions/chrome/src/ai-spacing/hyphen-prompt.ts` in the current checkout. It measures those source bytes even if the installed extension was built from an older checkout. The installed worker provides the execution context; its classifier and cached sessions are not used by the sweep.
+With no variant arguments, the runner uses `shipping`. This imports `hyphenPrompt` from `browser-extensions/chrome/src/ai-spacing/shapes/hyphen-prompt.ts` in the current checkout. It measures those source bytes even if the installed extension was built from an older checkout. The installed worker provides the execution context; its classifier and cached sessions are not used by the sweep.
 
 Add candidates to `hyphen-sign/prompts.js`. Keep measured variants unchanged and give revised prompts new IDs. Keep glosses generic; never describe control-specific cases or copy evaluation sentences into examples. To promote a winner, update the shipping prompt and compare `shipping` with the measured candidate.
 
