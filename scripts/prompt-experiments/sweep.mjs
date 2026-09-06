@@ -19,6 +19,7 @@ const { values, positionals } = parseArgs({
     'repeats': { type: 'string', default: '1' },
     'check': { type: 'boolean' },
     'require-perfect': { type: 'boolean' },
+    'diagnostics': { type: 'string' },
   },
 });
 const repeats = Number(values.repeats);
@@ -26,6 +27,7 @@ assert(Number.isSafeInteger(repeats) && repeats > 0, `invalid --repeats ${values
 assert(['hyphen-sign', 'plus-sign'].includes(values.experiment), `invalid --experiment ${values.experiment}; use hyphen-sign or plus-sign`);
 const plus = values.experiment === 'plus-sign' ? await import('./plus-sign/experiment.mjs') : null;
 assert(plus || !values.split, '--split is only supported for --experiment plus-sign');
+assert(!plus || !values.diagnostics, '--diagnostics is only supported for --experiment hyphen-sign');
 const split = values.split ?? 'development';
 const variants = positionals.length ? positionals : plus ? ['v1-zh', 'v2-zh'] : ['shipping'];
 const prompts = plus
@@ -38,6 +40,14 @@ const root = new URL('./hyphen-sign/', import.meta.url);
 const corpus = plus ? plus.loadCorpus(split) : JSON.parse(readFileSync(new URL('cases.json', root), 'utf8'));
 const fields = plus ? [] : JSON.parse(readFileSync(new URL('field-cases.json', root), 'utf8')).cases;
 const cases = [...corpus.cases, ...fields];
+const diagnosticIds = values.diagnostics?.split(',');
+assert(!diagnosticIds || (!values['require-perfect'] && repeats === 1), '--diagnostics requires --repeats 1 and no --require-perfect; diagnostic history is not accuracy evidence');
+for (const id of diagnosticIds ?? []) {
+  assert(
+    cases.some((kase) => kase.id === id),
+    `unknown diagnostic case: ${id}; use a corpus case ID`,
+  );
+}
 assert.equal(new Set(cases.map((kase) => kase.id)).size, cases.length, 'duplicate case IDs');
 for (const kase of cases) {
   assert.equal(kase.input[kase.at], plus ? '+' : '-', `invalid symbol offset: ${kase.id}`);
@@ -50,11 +60,15 @@ if (!plus) {
 const runs = variants.map((variant) => {
   assert(Object.hasOwn(prompts, variant), `unknown variant ${variant}; add it to scripts/prompt-experiments/${values.experiment}/prompts.js`);
   const prompt = prompts[variant];
-  const inputs = cases.map((kase) => {
-    const labels = corpus.enums[kase.enum];
-    const tokens = labels.flatMap((label) => [prompt.displayLabels?.[label] ?? label].flat().map((token) => [token, label]));
-    return { ...kase, question: prompt.build(kase, labels), tokens, responseConstraint: { type: 'string', enum: tokens.map(([token]) => token) } };
-  });
+  const inputs = cases
+    .filter((kase) => !diagnosticIds || diagnosticIds.includes(kase.id))
+    .map((kase) => {
+      const labels = corpus.enums[kase.enum];
+      const tokens = labels.flatMap((label) => [prompt.displayLabels?.[label] ?? label].flat().map((token) => [token, label]));
+      const question = prompt.build(kase, labels);
+      assert(question === null || typeof question === 'string', `invalid prompt for ${variant}/${kase.id}; return a string or null for abstention`);
+      return { ...kase, question, tokens, responseConstraint: { type: 'string', enum: tokens.map(([token]) => token) } };
+    });
   return { variant, prompt, inputs };
 });
 if (values.check) {
@@ -75,7 +89,7 @@ mkdirSync(output, { recursive: false });
 writeFileSync(join(output, 'cases.json'), `${JSON.stringify({ ...corpus, cases }, null, 2)}\n`, { flag: 'wx' });
 
 const extensionURL = `chrome-extension://${values['extension-id']}`;
-async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, repeats }) {
+async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, repeats, diagnostics }) {
   const context = page.context();
   const worker = context.serviceWorkers().find((candidate) => candidate.url() === `${extensionURL}/dist/service-worker.js`);
   if (!worker) {
@@ -97,8 +111,8 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, r
   } finally {
     await worker.evaluate((id) => chrome.tabs.remove(id), infoId);
   }
-  return await worker.evaluate(
-    async ({ system, initialTurns, inputs, repeats }) => {
+  const run = await worker.evaluate(
+    async ({ system, initialTurns, inputs, repeats, diagnostics }) => {
       if (typeof LanguageModel === 'undefined' || typeof LanguageModel.params !== 'function') {
         throw new Error('extension Prompt API sampling controls unavailable; check Chrome and the extension context');
       }
@@ -112,12 +126,17 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, r
       const results = [];
       try {
         for (const input of inputs) {
+          if (input.question === null) {
+            results.push({ ...input, skipped: 'no-unique-target-reference', answers: [], answer: null, correct: false, stable: null });
+            continue;
+          }
           const answers = [];
           for (let repeat = 0; repeat < repeats; repeat++) {
             const start = performance.now();
             let raw = null;
             let answer = null;
             let error = null;
+            const followups = [];
             let turn;
             try {
               turn = await base.clone();
@@ -126,12 +145,19 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, r
               if (answer === null) {
                 throw new Error(`response outside constraint enum: ${raw}`);
               }
+              if (diagnostics) {
+                for (const question of ['你剛才判斷的是原句中從左到右第幾個「-」？請把原句中所有「-」都計入，只回答位置。', '請逐字引用你剛才判斷的那個「-」前後的原文，讓我能辨認是哪一處。']) {
+                  const start = performance.now();
+                  const response = await turn.prompt(question, { signal: AbortSignal.timeout(30000) });
+                  followups.push({ question, raw: response, ms: Math.round(performance.now() - start) });
+                }
+              }
             } catch (caught) {
               error = String(caught);
             } finally {
               turn?.destroy();
             }
-            answers.push({ answer, raw, error, ms: Math.round(performance.now() - start) });
+            answers.push({ answer, raw, error, ms: Math.round(performance.now() - start), ...(diagnostics ? { followups } : {}) });
           }
           results.push({
             ...input,
@@ -146,12 +172,13 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, r
       }
       return { availability, createMs, results };
     },
-    { system: prompt.system, initialTurns: prompt.initialTurns ?? [], inputs, repeats },
+    { system: prompt.system, initialTurns: prompt.initialTurns ?? [], inputs, repeats, diagnostics },
   );
+  return { ...run, browserVersion: context.browser().version(), profileVerified: true, extensionWorkerVerified: true };
 }
 
 for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
-  const code = `async page => (${runInBrowser.toString()})(page, ${JSON.stringify({ profilePath, extensionURL, prompt, inputs, repeats })})`;
+  const code = `async page => (${runInBrowser.toString()})(page, ${JSON.stringify({ profilePath, extensionURL, prompt, inputs, repeats, diagnostics: Boolean(diagnosticIds) })})`;
   const run = JSON.parse(
     execFileSync('playwright-cli', ['-s=pangu-eval', '--raw', 'run-code', code], { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024, timeout: 120000, stdio: ['ignore', 'pipe', 'inherit'] }),
   );
@@ -167,6 +194,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     sampling: 'temperature 0, topK 1',
     shuffle: false,
     timestamp: new Date().toISOString(),
+    purpose: diagnosticIds ? 'interpretation-diagnostics-not-accuracy' : 'accuracy',
     system: prompt.system,
     initialTurns: prompt.initialTurns ?? [],
     ...run,
@@ -178,8 +206,17 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
   const original = scored.filter((kase) => !kase.id.startsWith('field-'));
   const ambiguous = original.filter((kase) => kase.type === 'ambiguous');
   const controls = original.filter((kase) => kase.type === 'control');
-  const field = scored.filter((kase) => kase.id.startsWith('field-'));
+  const field = scored.filter((kase) => kase.id.startsWith('field-') && !kase.id.startsWith('field-collision-'));
+  const synthetic = scored.filter((kase) => kase.id.startsWith('field-collision-'));
+  const skipped = scored.filter((kase) => kase.skipped);
   const errors = run.results.flatMap((kase) => kase.answers).filter((answer) => answer.error);
+  if (diagnosticIds) {
+    console.log(`${variant}: diagnostics for ${run.results.length} cases; errors ${errors.length}; ${file}`);
+    if (errors.length) {
+      process.exitCode = 1;
+    }
+    continue;
+  }
   if (plus) {
     const { sentences, ...summary } = result.evaluation;
     console.log(`${variant}: ${JSON.stringify(summary)}; errors ${errors.length}; ${file}`);
@@ -196,7 +233,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     continue;
   }
   console.log(
-    `${variant}: original ${ambiguous.filter((kase) => kase.correct).length}/${ambiguous.length}; control flips ${controls.filter((kase) => !kase.correct).length}/${controls.length}; field ${field.filter((kase) => kase.correct).length}/${field.length}; errors ${errors.length}; ${file}`,
+    `${variant}: original ${ambiguous.filter((kase) => kase.correct).length}/${ambiguous.length}; control flips ${controls.filter((kase) => !kase.correct).length}/${controls.length}; field ${field.filter((kase) => kase.correct).length}/${field.length}; synthetic ${synthetic.filter((kase) => kase.correct).length}/${synthetic.length}; skipped ${skipped.length} (${skipped.filter((kase) => kase.expected_label === 'signed-number').length} missed corrections); errors ${errors.length}; ${file}`,
   );
   console.log(
     'Misses:',

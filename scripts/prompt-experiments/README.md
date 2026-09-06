@@ -55,7 +55,13 @@ Add candidates to `hyphen-sign/prompts.js`. Keep measured variants unchanged and
 
 The runner verifies the configured profile before each variant. Inference errors make the command fail; `--require-perfect` also fails if any scored case is wrong. A normal comparison can finish successfully while reporting accuracy failures.
 
-The suite has 23 original cases and 5 field development cases. Three reviewed cases remain unscored: 12 original sign cases, 8 controls, and 5 field cases are scored. These cases were used for prompt tuning, so results are regression evidence, not held-out accuracy. This does not exercise shipping message handling or webpage spacing end to end.
+The hyphen suite has 23 original cases, 5 field development cases, and 12 synthetic collision targets from review. Three original cases remain unscored: 12 original sign cases, 8 controls, 5 field cases, and 12 synthetic targets are scored. Synthetic IDs start with `field-collision-`; their scores are separate from the 5 webpage cases. These cases were used for prompt tuning, so results are regression evidence, not held-out accuracy. This does not exercise shipping message handling or webpage spacing end to end.
+
+A prompt builder can return `null` to abstain before inference. Exports retain the target with `skipped`, no answers, and `correct: false`. Every scored skip fails `--require-perfect`; a skipped sign is a missed correction. Skips are never counted as correct classifications.
+
+Use `--diagnostics <case-id,case-id>` with `--repeats 1` for separate interpretation sessions. After the constrained answer, the runner asks which occurrence the model understood and requests an exact surrounding quote. Diagnostic exports carry `purpose: interpretation-diagnostics-not-accuracy`; they are clues, not accuracy measurements. The flag cannot be combined with `--require-perfect`. Normal runs never include diagnostic history.
+
+Run `node scripts/prompt-experiments/hyphen-sign/check-targets.mjs` to assert the baseline collision, target identities, unchanged sentences, and impossible quotes. Pass the intended shipping prompt's absolute path as the first argument to verify v26 parity too. The [target experiment report](hyphen-sign/reports/2026-09-06-target-identification.md) records the source commit used for this comparison.
 
 ## Files and evidence
 

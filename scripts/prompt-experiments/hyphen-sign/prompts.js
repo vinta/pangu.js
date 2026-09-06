@@ -368,6 +368,23 @@ function renderQuestionSections(kase, labels, lang) {
     : `## Sentence\n${mark(kase.input, kase.at)}\n\n## Question\nWhat is the marked "${kase.symbol}" doing here?\n\n## Labels\n${menu}\n\n## Answer`;
 }
 
+export function uniqueTargetQuote({ input, at }) {
+  const number = input.slice(at + 1).match(/^\d+(?:\.\d+)?/)?.[0] ?? '';
+  const left = input.lastIndexOf('-', at - 1) + 1;
+  const next = input.indexOf('-', at + 1);
+  const right = next === -1 ? input.length : next;
+  // Exhaust right context before expanding left; crossing another hyphen would make the quote ambiguous again.
+  for (let start = Math.max(left, at - 1); start >= left; start--) {
+    for (let end = at + 1 + number.length; end <= right; end++) {
+      const quote = input.slice(start, end);
+      if (input.indexOf(quote) === input.lastIndexOf(quote)) {
+        return quote;
+      }
+    }
+  }
+  return null;
+}
+
 export const PROMPTS = {
   'v1-en': {
     label: 'v1 zero-shot (English)',
@@ -564,6 +581,59 @@ export const PROMPTS = {
     system: '你是中文數字判讀助手。判斷句子裡指定的「-」是負號還是分隔符號。只判斷指定符號，不要改寫句子，不要解釋，只回答一個選項名稱。',
     displayLabels: DISPLAY_ZH_V7,
     build: (kase, labels) => PROMPTS['v26-zh'].build(kase, labels).replace(/signed-number|range-or-separator|unsure/g, (label) => DISPLAY_ZH_V7[label]),
+  },
+  'v27-zh-unique-quote': {
+    label: 'v27 v26 with collision-only unique quote expansion',
+    get system() {
+      return PROMPTS['v26-zh'].system;
+    },
+    build: (kase, labels) => {
+      const quote = uniqueTargetQuote(kase);
+      if (quote === null) {
+        return null;
+      }
+      const question = PROMPTS['v26-zh'].build(kase, labels);
+      const pointerStart = `句子：${kase.input}\n\n`.length;
+      return question.slice(0, pointerStart) + question.slice(pointerStart).replace(/^「[^」]*」/, `「${quote}」`);
+    },
+  },
+  'v28-zh-ordinal': {
+    label: 'v28 v26 with ordinal counting all sentence hyphens',
+    get system() {
+      return PROMPTS['v26-zh'].system;
+    },
+    build: (kase, labels) => {
+      const question = PROMPTS['v26-zh'].build(kase, labels);
+      const pointerStart = `句子：${kase.input}\n\n`.length;
+      const ordinal = kase.input.slice(0, kase.at).split('-').length;
+      return question.slice(0, pointerStart) + question.slice(pointerStart).replace(/^「[^」]*」裡的「-」/, `第${ordinal}個「-」`);
+    },
+  },
+  'v29-zh-context-excerpts': {
+    label: 'v29 v26 with separate full preceding/following excerpts on collisions',
+    get system() {
+      return PROMPTS['v26-zh'].system;
+    },
+    build: (kase, labels) => {
+      const question = PROMPTS['v26-zh'].build(kase, labels);
+      const prefix = `句子：${kase.input}\n\n`;
+      const local = question.slice(prefix.length).match(/^「([^」]*)」/)[1];
+      if (kase.input.indexOf(local) === kase.input.lastIndexOf(local)) {
+        return question;
+      }
+      return `${prefix}目標「-」前面的原文：「${kase.input.slice(0, kase.at)}」\n目標「-」後面的原文：「${kase.input.slice(kase.at + 1)}」\n這個「-」${question.slice(question.indexOf('是哪一種符號？'))}`;
+    },
+  },
+  'v30-zh-skip-collisions': {
+    label: 'v30 v26, abstain when the original local phrase repeats',
+    get system() {
+      return PROMPTS['v26-zh'].system;
+    },
+    build: (kase, labels) => {
+      const question = PROMPTS['v26-zh'].build(kase, labels);
+      const local = question.slice(`句子：${kase.input}\n\n`.length).match(/^「([^」]*)」/)[1];
+      return kase.input.indexOf(local) === kase.input.lastIndexOf(local) ? question : null;
+    },
   },
 };
 
