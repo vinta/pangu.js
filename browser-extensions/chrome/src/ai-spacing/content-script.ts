@@ -80,21 +80,21 @@ export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[
     return;
   }
 
-  const responses = await Promise.all(
-    batches.map(({ ambiguousShape, settledCandidates }): Promise<ClassifyCandidatesResponse> | ClassifyCandidatesResponse => {
+  const candidateLabelsByBatch = await Promise.all(
+    batches.map(async ({ ambiguousShape, settledCandidates }) => {
       const candidates = settledCandidates.map(({ sentence, at }) => ({ sentence, at }));
-      return ambiguousShape.classify ? { ok: true, candidateLabels: ambiguousShape.classify(candidates) } : requestClassification(ambiguousShape.kind, candidates);
+      if (ambiguousShape.classify) {
+        return ambiguousShape.classify(candidates);
+      }
+      const response = await requestClassification(ambiguousShape.kind, candidates);
+      if (response.ok) {
+        return response.candidateLabels;
+      }
+      modelFailed = true;
+      console.debug(`[pangu] ${ambiguousShape.kind}: disabled for this page (${response.error})`);
+      return [];
     }),
   );
-
-  const candidateLabelsByBatch: (CandidateLabel | null)[][] = responses.map((response, batchIndex) => {
-    if (response.ok) {
-      return response.candidateLabels;
-    }
-    modelFailed = true;
-    console.debug(`[pangu] ${batches[batchIndex]!.ambiguousShape.kind}: disabled for this page (${response.error})`);
-    return batches[batchIndex]!.settledCandidates.map(() => null);
-  });
 
   const lateFixes = collectLateFixes(batches, candidateLabelsByBatch);
   if (lateFixes.length > 0) {

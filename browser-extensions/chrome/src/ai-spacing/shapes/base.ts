@@ -39,39 +39,21 @@ const MAX_SENTENCE_SIDE = 120;
 // The sentence the symbol sits in, cut at the nearest terminator on each side or at MAX_SENTENCE_SIDE. Terminators are excluded, so a slice reads like the bare sentences in the measured corpus
 // The character before the symbol is CJK, never a terminator, so it is always inside the slice
 export function sliceSentence(text: string, at: number) {
-  const leftLimit = Math.max(0, at - MAX_SENTENCE_SIDE);
-  let start = leftLimit;
-  for (let index = at - 1; index >= leftLimit; index--) {
-    if (SENTENCE_TERMINATOR.test(text[index]!)) {
-      start = index + 1;
-      break;
-    }
-  }
-
-  const rightLimit = Math.min(text.length, at + 1 + MAX_SENTENCE_SIDE);
-  let end = rightLimit;
-  for (let index = at + 1; index < rightLimit; index++) {
-    if (SENTENCE_TERMINATOR.test(text[index]!)) {
-      end = index;
-      break;
-    }
-  }
-
-  return { sentence: text.slice(start, end), at: at - start };
+  const before = text.slice(Math.max(0, at - MAX_SENTENCE_SIDE), at).split(SENTENCE_TERMINATOR).at(-1)!;
+  const after = text.slice(at + 1, at + 1 + MAX_SENTENCE_SIDE).split(SENTENCE_TERMINATOR, 1)[0]!;
+  return { sentence: before + text[at] + after, at: before.length };
 }
 
 // Spacing never adds or removes a symbol, so its ordinal in the unspaced text finds it again in the settled text. A missing ordinal answers -1
 export function indexOfNthSymbol(text: string, symbol: string, ordinal: number) {
-  let seen = 0;
-  for (let index = 0; index < text.length; index++) {
-    if (text[index] === symbol) {
-      if (seen === ordinal) {
-        return index;
-      }
-      seen++;
+  let index = -1;
+  for (let seen = 0; seen <= ordinal; seen++) {
+    index = text.indexOf(symbol, index + 1);
+    if (index === -1) {
+      return -1;
     }
   }
-  return -1;
+  return index;
 }
 
 export interface PromptSpec<Label extends string> {

@@ -6,9 +6,7 @@ export const BRAND_SUFFIX_LABEL = 'brand-suffix';
 export type BrandSuffixLabel = typeof BRAND_SUFFIX_LABEL;
 
 // The CJK brand names whose plus is part of the name. The rules read `CJK+` as an operator (ADR 0013); this list restores the suffix reading in the extension (ADR 0018)
-const BRAND_NAMES = ['公視', '影劇館'];
-
-const BRAND_PLUS = new RegExp(`(?:${BRAND_NAMES.join('|')})\\+`, 'g');
+const BRAND_SUFFIX = /(?:公視|影劇館)\+/g;
 
 // After a brand suffix, a slash, a closing bracket or quote, or pause and end punctuation follows tight; a word or an opening bracket keeps the boundary space
 const CLOSING_AFTER_PLUS = /[/)\]}\uff09\u3011\u3015\u3009\u300b\u300d\u300f\uff0c\u3002\u3001\uff1b\uff1a\uff01\uff1f]/;
@@ -17,12 +15,12 @@ export const brandSuffix: AmbiguousShape = {
   kind: 'brand-suffix',
 
   occursIn(text: string) {
-    return text.search(BRAND_PLUS) !== -1;
+    return text.search(BRAND_SUFFIX) !== -1;
   },
 
   find(unspaced: string, settled: string) {
     const candidateMatches: CandidateMatch[] = [];
-    for (const brandMatch of unspaced.matchAll(BRAND_PLUS)) {
+    for (const brandMatch of unspaced.matchAll(BRAND_SUFFIX)) {
       const unspacedIndex = brandMatch.index + brandMatch[0].length - 1;
       const index = indexOfNthSymbol(settled, '+', unspaced.slice(0, unspacedIndex).split('+').length - 1);
       // The brand was tight against the plus, so a space between them can only be one the rules inserted
