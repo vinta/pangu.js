@@ -46,9 +46,7 @@ _Avoid_: revert, external rewrite, overwrite
 
 The algorithm behind text spacing. It has two stages. First, the rules decide every space. Second, AI spacing corrects the rules output at the few ambiguous shapes the rules cannot read. AI spacing is the Chrome extension's second stage. It is on by default, and the user can turn it off. The npm package ships the rules only. The shapes below are generic: `CJK` is any CJK character, `A` is any letter, `N` is any digit, and symbols are literal.
 
-### Rule-based Spacing
-
-Source of truth: `src/shared/index.ts`. Exhaustive examples: the per-symbol files in `tests/shared/`.
+### Rule Spacing
 
 **Symbol handling**:
 A symbol between two ANS characters binds them into a joiner token, and the symbol never gets spaces. A symbol in direct contact with CJK reads as an operator and gets spaces, unless an affix reading attaches it to its ANS side. `/` also follows slash reading. `|` follows pipe reading. `+` follows plus reading. The separator `_` never gets spaces.
@@ -86,8 +84,6 @@ A bare tag with no attributes, a non-void name, and no closing counterpart anywh
 _Avoid_: tag-in-prose, prose tag
 
 ### AI Spacing
-
-Decisions: [ADR 0016](docs/adr/0016-hyphen-before-digit-gets-a-model-layer.md) introduces AI spacing; [ADR 0017](docs/adr/0017-ai-spacing-policy-stays-in-the-extension.md) defines the core/extension boundary.
 
 **AI spacing**:
 The extension's second stage, on by default with a toggle to turn it off. It sends each candidate to a classifier and applies the label as a late fix. It is never required: when the model is absent, off, or slow, the rules output is kept.
