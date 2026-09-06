@@ -11,7 +11,7 @@ function listPatch(key: 'blacklist' | 'whitelist', urls: string[]) {
 
 class OptionsController {
   private editingUrls: Map<number, string> = new Map();
-  private addUrlInput: HTMLInputElement | null = null;
+  private isAddingUrl = false;
 
   constructor() {
     this.initialize();
@@ -64,6 +64,10 @@ class OptionsController {
       } else if (target.classList.contains('save-edit-url-btn')) {
         const index = parseInt(target.dataset.index || '0');
         this.saveEditingUrl(index);
+      } else if (target.id === 'save-new-url-btn') {
+        this.saveNewUrl();
+      } else if (target.id === 'cancel-new-url-btn') {
+        this.cancelNewUrl();
       } else if (target.classList.contains('cancel-edit-btn')) {
         const index = parseInt(target.dataset.index || '0');
         this.cancelEditingUrl(index);
@@ -73,6 +77,13 @@ class OptionsController {
         this.handleRestoreListDefaults();
       } else if (target.id === 'ai-model-download-btn') {
         this.handleModelDownload().catch(console.error);
+      }
+    });
+
+    document.addEventListener('keypress', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.id === 'new-url-input' && e.key === 'Enter') {
+        this.saveNewUrl();
       }
     });
 
@@ -105,27 +116,6 @@ class OptionsController {
         }
       }
     });
-  }
-
-  private setupNewUrlInputListeners() {
-    const newUrlInput = document.getElementById('new-url-input') as HTMLInputElement;
-    if (newUrlInput) {
-      newUrlInput.focus();
-
-      document.getElementById('save-new-url-btn')?.addEventListener('click', () => {
-        this.saveNewUrl();
-      });
-
-      document.getElementById('cancel-new-url-btn')?.addEventListener('click', () => {
-        this.cancelNewUrl();
-      });
-
-      newUrlInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          this.saveNewUrl();
-        }
-      });
-    }
   }
 
   private async render() {
@@ -228,7 +218,7 @@ class OptionsController {
     }
 
     // Add new URL input if shown
-    if (this.addUrlInput) {
+    if (this.isAddingUrl) {
       const newTemplate = document.getElementById('url-new-template') as HTMLTemplateElement;
       const newItem = newTemplate.content.cloneNode(true) as DocumentFragment;
 
@@ -244,13 +234,13 @@ class OptionsController {
     }
 
     // Hide add button if showing new URL input
-    if (this.addUrlInput && addButton.parentElement) {
+    if (this.isAddingUrl && addButton.parentElement) {
       addButton.parentElement.style.display = 'none';
     }
 
     container.replaceChildren(listFragment);
 
-    this.setupNewUrlInputListeners();
+    document.getElementById('new-url-input')?.focus();
   }
 
   private async renderMuteCheckbox() {
@@ -325,7 +315,7 @@ class OptionsController {
   }
 
   private showAddUrlInput() {
-    this.addUrlInput = document.createElement('input');
+    this.isAddingUrl = true;
     this.renderUrlList();
   }
 
@@ -334,18 +324,18 @@ class OptionsController {
     const newUrl = input.value.trim();
 
     // Optimistically close the input: on 'added' the subscription re-renders with it already gone, so the list paints exactly once
-    this.addUrlInput = null;
+    this.isAddingUrl = false;
     let outcome: 'added' | 'duplicate' | 'invalid';
     try {
       outcome = newUrl ? await this.addToActiveList(newUrl) : 'invalid';
     } catch (error) {
       console.error('Failed to save URL:', error);
-      this.addUrlInput = input;
+      this.isAddingUrl = true;
       return;
     }
 
     if (outcome === 'invalid') {
-      this.addUrlInput = input;
+      this.isAddingUrl = true;
       alert(chrome.i18n.getMessage('error_invalid_match_pattern'));
       return;
     }
@@ -357,7 +347,7 @@ class OptionsController {
   }
 
   private cancelNewUrl() {
-    this.addUrlInput = null;
+    this.isAddingUrl = false;
     this.renderUrlList();
   }
 
