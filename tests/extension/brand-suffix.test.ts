@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { applyTextEdits } from '../../browser-extensions/chrome/src/ai-spacing/shapes/base';
-import { brandSuffix } from '../../browser-extensions/chrome/src/ai-spacing/shapes/brand-suffix';
+import { brandSuffix } from '../../browser-extensions/chrome/src/ai-spacing/shapes/brand-suffix-shape';
 
 function fixAll(unspaced: string, settled: string) {
   const textEdits = brandSuffix.find(unspaced, settled).flatMap((candidateMatch) => brandSuffix.edits({ ...candidateMatch, node: {} as Text, settled }));

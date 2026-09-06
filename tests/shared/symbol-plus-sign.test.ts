@@ -11,8 +11,7 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('陳上進+Vinta')).toBe('陳上進 + Vinta');
     expect(pangu.spacingText('你+我=我們')).toBe('你 + 我 = 我們');
 
-    // FIXME
-    // CJK brand suffixes (公視+, 影劇館+) read as operators too, see ADR 0013. The Chrome extension restores the suffix reading as a late fix, see ADR 0018
+    // NOTE: fixed by AI spacing, see browser-extensions/chrome/src/ai-spacing/shapes/brand-suffix-shape.ts
     expect(pangu.spacingText('公視+上架了新片')).toBe('公視 + 上架了新片');
     expect(pangu.spacingText('MOD影劇館+上架了新片')).toBe('MOD 影劇館 + 上架了新片');
     // expect(pangu.spacingText('公視+上架了新片')).toBe('公視+ 上架了新片');
