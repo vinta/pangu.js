@@ -4,7 +4,6 @@ import { Pangu } from '../../dist/shared/index.js';
 const pangu = new Pangu();
 
 describe('Symbol /', () => {
-  // When CJK touches the only slash in one line
   it('handle / symbol as operator', () => {
     expect(pangu.spacingText('前面/後面')).toBe('前面 / 後面');
     expect(pangu.spacingText('Mollie/陳上進')).toBe('Mollie / 陳上進');
@@ -21,9 +20,7 @@ describe('Symbol /', () => {
     expect(pangu.spacingText('吃apple / banana')).toBe('吃 apple / banana');
   });
 
-  // A slash with half-width characters on both sides binds them into one token,
-  // spaced from CJK as a unit and never split
-  it('handle / symbol as slash token', () => {
+  it('handle / symbol as joiner token', () => {
     expect(pangu.spacingText('Vinta/Mollie')).toBe('Vinta/Mollie'); // If no CJK, DO NOT change
     expect(pangu.spacingText('得到一個A/B的結果')).toBe('得到一個 A/B 的結果');
     expect(pangu.spacingText('他要做A/B測試')).toBe('他要做 A/B 測試');
@@ -32,16 +29,15 @@ describe('Symbol /', () => {
     expect(pangu.spacingText('吃apple/banana')).toBe('吃 apple/banana');
     expect(pangu.spacingText('選A/B其中一個')).toBe('選 A/B 其中一個');
     expect(pangu.spacingText('答案是6/2的商數')).toBe('答案是 6/2 的商數');
+    expect(pangu.spacingText('安装指令：npx skills add vinta/hal-9000')).toBe('安装指令：npx skills add vinta/hal-9000');
   });
 
-  // Slash reading never crosses lines: each line counts its own slashes
   it('handle / symbol per line', () => {
     expect(pangu.spacingText('我/你\n他/她')).toBe('我 / 你\n他 / 她');
     expect(pangu.spacingText('歡迎光臨/再見\n參考 https://example.com/docs')).toBe('歡迎光臨 / 再見\n參考 https://example.com/docs');
   });
 
-  // When the symbol appears 2+ times or more in one line
-  it('handle / symbol as separator, DO NOT spacing', () => {
+  it('handle / symbol as list', () => {
     expect(pangu.spacingText('陳上進/貓咪/Mollie')).toBe('陳上進/貓咪/Mollie');
     expect(pangu.spacingText('陳上進/Mollie/貓咪')).toBe('陳上進/Mollie/貓咪');
     expect(pangu.spacingText('Mollie/Vinta/貓咪')).toBe('Mollie/Vinta/貓咪');
@@ -56,15 +52,15 @@ describe('Symbol /', () => {
     expect(pangu.spacingText("after 80'/气象工作者/不苟同/关注abc天气变化/向往123自由/热爱科学、互联网、编程Node.js Web C++ Julia Python"))
                        .toBe("after 80'/气象工作者/不苟同/关注 abc 天气变化/向往 123 自由/热爱科学、互联网、编程 Node.js Web C++ Julia Python");
 
-    // prettier-ignore
-    expect(pangu.spacingText('2016-12-26(奇幻电影节) / 2017-01-20(美国) / 詹姆斯麦卡沃伊'))
-                       .toBe('2016-12-26 (奇幻电影节) / 2017-01-20 (美国) / 詹姆斯麦卡沃伊');
-
     // DO NOT change if already spacing
     expect(pangu.spacingText('陳上進 / 貓咪 / Mollie')).toBe('陳上進 / 貓咪 / Mollie');
     expect(pangu.spacingText('陳上進 / Mollie / 貓咪')).toBe('陳上進 / Mollie / 貓咪');
     expect(pangu.spacingText('Mollie / Vinta / 貓咪')).toBe('Mollie / Vinta / 貓咪');
     expect(pangu.spacingText('Mollie / 陳上進 / 貓咪')).toBe('Mollie / 陳上進 / 貓咪');
+
+    // prettier-ignore
+    expect(pangu.spacingText('2016-12-26(奇幻电影节) / 2017-01-20(美国) / 詹姆斯麦卡沃伊'))
+                       .toBe('2016-12-26 (奇幻电影节) / 2017-01-20 (美国) / 詹姆斯麦卡沃伊');
   });
 
   it('handle / symbol as Unix absolute file path', () => {
@@ -120,9 +116,6 @@ describe('Symbol /', () => {
     // Paths ending with slash before CJK
     expect(pangu.spacingText('目錄/usr/bin/包含執行檔')).toBe('目錄 /usr/bin/ 包含執行檔');
     expect(pangu.spacingText('資料夾/etc/nginx/存放設定')).toBe('資料夾 /etc/nginx/ 存放設定');
-
-    // Glob pattern
-    expect(pangu.spacingText('聽說桐島rm -rf /*了')).toBe('聽說桐島 rm -rf /* 了');
   });
 
   it('handle / symbol as Unix relative file path', () => {
@@ -131,7 +124,6 @@ describe('Symbol /', () => {
     expect(pangu.spacingText('構建dist/index.js完成')).toBe('構建 dist/index.js 完成');
     expect(pangu.spacingText('運行test/spec.js測試')).toBe('運行 test/spec.js 測試');
     expect(pangu.spacingText('編輯docs/README.md文檔')).toBe('編輯 docs/README.md 文檔');
-    expect(pangu.spacingText('安装指令：npx skills add vinta/hal-9000')).toBe('安装指令：npx skills add vinta/hal-9000');
 
     // Project directories
     expect(pangu.spacingText('查看templates/base.html模板')).toBe('查看 templates/base.html 模板');
@@ -154,10 +146,6 @@ describe('Symbol /', () => {
     expect(pangu.spacingText('執行./scripts/test.sh腳本')).toBe('執行 ./scripts/test.sh 腳本');
     expect(pangu.spacingText('查看./.claude/CLAUDE.md說明')).toBe('查看 ./.claude/CLAUDE.md 說明');
 
-    // Wildcard patterns
-    expect(pangu.spacingText('模板在templates/*.html裡')).toBe('模板在 templates/*.html 裡');
-    expect(pangu.spacingText('測試所有test/**/*.js檔案')).toBe('測試所有 test/**/*.js 檔案');
-
     // Nested paths
     expect(pangu.spacingText('位於src/components/Button/index.tsx')).toBe('位於 src/components/Button/index.tsx');
     expect(pangu.spacingText('存放在assets/fonts/Inter/Regular.woff2')).toBe('存放在 assets/fonts/Inter/Regular.woff2');
@@ -165,5 +153,11 @@ describe('Symbol /', () => {
     // Multiple file paths in one sentence
     expect(pangu.spacingText('從src/utils.js複製到dist/utils.js')).toBe('從 src/utils.js 複製到 dist/utils.js');
     expect(pangu.spacingText('比較test/fixtures/input.txt和test/fixtures/output.txt')).toBe('比較 test/fixtures/input.txt 和 test/fixtures/output.txt');
+  });
+
+  it('handle / symbol as glob pattern', () => {
+    expect(pangu.spacingText('聽說桐島rm -rf /*了')).toBe('聽說桐島 rm -rf /* 了');
+    expect(pangu.spacingText('模板在templates/*.html裡')).toBe('模板在 templates/*.html 裡');
+    expect(pangu.spacingText('測試所有test/**/*.js檔案')).toBe('測試所有 test/**/*.js 檔案');
   });
 });

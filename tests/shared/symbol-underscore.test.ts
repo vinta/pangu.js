@@ -4,7 +4,7 @@ import { Pangu } from '../../dist/shared/index.js';
 const pangu = new Pangu();
 
 describe('Symbol _', () => {
-  it('handle _ symbol as separator, DO NOT spacing', () => {
+  it('handle _ symbol as separator', () => {
     expect(pangu.spacingText('前面_後面')).toBe('前面_後面');
     expect(pangu.spacingText('Vinta_Mollie')).toBe('Vinta_Mollie');
     expect(pangu.spacingText('Vinta_Mollie_Kitten')).toBe('Vinta_Mollie_Kitten');

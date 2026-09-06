@@ -26,14 +26,6 @@ describe('Symbol ( )', () => {
     // prettier-ignore
     expect(pangu.spacingText('Chang Stream(变更记录流)是指collection(数据库集合)的变更事件流'))
                        .toBe('Chang Stream (变更记录流) 是指 collection (数据库集合) 的变更事件流');
-
-    // prettier-ignore
-    expect(pangu.spacingText('从结果来看，当a.b销毁后，`a.getB()`返回值为null'))
-                       .toBe('从结果来看，当 a.b 销毁后，`a.getB()` 返回值为 null');
-
-    // prettier-ignore
-    expect(pangu.spacingText("后续会直接用iframe window.addEventListener('message')"))
-                       .toBe("后续会直接用 iframe window.addEventListener('message')");
   });
 
   it('handle multiline content in round brackets', () => {

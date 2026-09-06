@@ -3,7 +3,7 @@ import { Pangu } from '../../dist/shared/index.js';
 
 const pangu = new Pangu();
 
-describe('Symbol , only add space on the right', () => {
+describe('Symbol ,', () => {
   it('handle , symbol', () => {
     expect(pangu.spacingText('前面,後面')).toBe('前面, 後面');
 
