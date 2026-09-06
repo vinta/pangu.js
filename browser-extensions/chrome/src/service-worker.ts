@@ -14,18 +14,6 @@ const TEXT_AUTOSPACE_SCRIPT_ID = 'text-autospace';
 const DEFAULT_ICON_PATHS = { '16': '../icons/icon-16.png', '24': '../icons/icon-24.png', '32': '../icons/icon-32.png' };
 const OFF_ICON_PATHS = { '16': '../icons/off-icon-16.png', '24': '../icons/off-icon-24.png', '32': '../icons/off-icon-32.png' };
 
-async function unregisterAllContentScripts() {
-  try {
-    const existingScripts = await chrome.scripting.getRegisteredContentScripts();
-    if (existingScripts.length > 0) {
-      const scriptIds = existingScripts.map((script) => script.id);
-      await chrome.scripting.unregisterContentScripts({ ids: scriptIds });
-    }
-  } catch (error) {
-    console.warn('Failed to unregister existing scripts:', error);
-  }
-}
-
 // One call per script: registerContentScripts() is all-or-nothing across its array, so a pattern Chrome rejects must not take down the other script
 async function registerOneContentScript(contentScript: chrome.scripting.RegisteredContentScript) {
   try {
@@ -40,7 +28,7 @@ async function registerOneContentScript(contentScript: chrome.scripting.Register
 }
 
 async function registerContentScripts() {
-  await unregisterAllContentScripts();
+  await chrome.scripting.unregisterContentScripts().catch((error) => console.warn('Failed to unregister existing scripts:', error));
 
   const settings = await getSettings();
 
