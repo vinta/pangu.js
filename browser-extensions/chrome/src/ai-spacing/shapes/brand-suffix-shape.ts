@@ -14,10 +14,6 @@ const CLOSING_AFTER_PLUS = /[/)\]}\uff09\u3011\u3015\u3009\u300b\u300d\u300f\uff
 export const brandSuffix: AmbiguousShape = {
   kind: 'brand-suffix',
 
-  occursIn(text: string) {
-    return text.search(BRAND_SUFFIX) !== -1;
-  },
-
   find(unspaced: string, settled: string) {
     const candidateMatches: CandidateMatch[] = [];
     for (const brandMatch of unspaced.matchAll(BRAND_SUFFIX)) {

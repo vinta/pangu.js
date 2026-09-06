@@ -123,19 +123,19 @@ describe('CJK', () => {
 
 describe('hyphenSign.occursIn()', () => {
   it('answer yes when the tight shape occurs anywhere in the text', () => {
-    expect(hyphenSign.occursIn('前面一句。氣溫是-5度左右')).toBe(true);
+    expect(hyphenSign.occursIn!('前面一句。氣溫是-5度左右')).toBe(true);
   });
 
   it('answer no when only looser shapes occur', () => {
-    expect(hyphenSign.occursIn('abc-5')).toBe(false);
-    expect(hyphenSign.occursIn('氣溫是 -5度')).toBe(false);
-    expect(hyphenSign.occursIn('沒有連字號')).toBe(false);
+    expect(hyphenSign.occursIn!('abc-5')).toBe(false);
+    expect(hyphenSign.occursIn!('氣溫是 -5度')).toBe(false);
+    expect(hyphenSign.occursIn!('沒有連字號')).toBe(false);
   });
 
   it('leave the shared scan regex where a repeat and find() expect it', () => {
     const text = '氣溫是-5度左右';
-    expect(hyphenSign.occursIn(text)).toBe(true);
-    expect(hyphenSign.occursIn(text)).toBe(true);
+    expect(hyphenSign.occursIn!(text)).toBe(true);
+    expect(hyphenSign.occursIn!(text)).toBe(true);
     expect(hyphenSign.find(text, '氣溫是 - 5 度左右')).toHaveLength(1);
   });
 });

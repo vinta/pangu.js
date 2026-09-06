@@ -42,21 +42,6 @@ describe('brandSuffix.find()', () => {
   });
 });
 
-describe('brandSuffix.occursIn()', () => {
-  it('answer yes only when a listed brand is tight against a plus', () => {
-    expect(brandSuffix.occursIn('前一句。公視+上架了新片')).toBe(true);
-    expect(brandSuffix.occursIn('公視 +上架了新片')).toBe(false);
-    expect(brandSuffix.occursIn('Disney+上架了新片')).toBe(false);
-  });
-
-  it('leave the shared scan regex where a repeat and find() expect it', () => {
-    const text = '公視+上架了新片';
-    expect(brandSuffix.occursIn(text)).toBe(true);
-    expect(brandSuffix.occursIn(text)).toBe(true);
-    expect(brandSuffix.find(text, '公視 + 上架了新片')).toHaveLength(1);
-  });
-});
-
 describe('brandSuffix.classify() and isFix()', () => {
   it('label every candidate on the page as a brand suffix and fix it', () => {
     const candidateLabels = brandSuffix.classify!([

@@ -62,7 +62,7 @@ export function warmUpAiSpacing() {
   const pageText = document.documentElement.textContent ?? '';
   // The loop is not redundant: we create base sessions per ambiguous shape
   for (const ambiguousShape of AMBIGUOUS_SHAPES) {
-    if (!ambiguousShape.classify && ambiguousShape.occursIn(pageText)) {
+    if (ambiguousShape.occursIn?.(pageText)) {
       console.debug(`[pangu] warm up base session: ${ambiguousShape.kind}`);
       void requestClassification(ambiguousShape.kind, []);
     }
