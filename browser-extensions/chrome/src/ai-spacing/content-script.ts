@@ -43,7 +43,7 @@ function collectLateFixes(batches: readonly { ambiguousShape: AmbiguousShape; se
       );
       if (isFix) {
         const textNodeEdits = textEditsByNode.get(settledCandidate.node) ?? { settled: settledCandidate.settled, textEdits: [] };
-        textNodeEdits.textEdits.push(...ambiguousShape.edits(settledCandidate.settled, settledCandidate.index));
+        textNodeEdits.textEdits.push(...ambiguousShape.edits(settledCandidate));
         textEditsByNode.set(settledCandidate.node, textNodeEdits);
       }
     }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { applyTextEdits, type AmbiguousShape, type TextEdit } from '../../browser-extensions/chrome/src/ai-spacing/shapes/base';
-import { CJK, hasInsertedGap, hyphenSign, indexOfNthHyphen, sliceSentence } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-shape';
+import { applyTextEdits, CJK, indexOfNthSymbol, sliceSentence, type AmbiguousShape, type SettledCandidate, type TextEdit } from '../../browser-extensions/chrome/src/ai-spacing/shapes/base';
+import { hasInsertedGap, hyphenSign } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-shape';
 import { CJK as SHARED_CJK } from '../../src/shared/index';
 
 describe('sliceSentence()', () => {
@@ -87,15 +87,15 @@ describe('hyphenSign.find()', () => {
   });
 });
 
-describe('indexOfNthHyphen()', () => {
+describe('indexOfNthSymbol()', () => {
   it('find the nth hyphen-minus', () => {
-    expect(indexOfNthHyphen('Nasdaq-100 本週下跌 - 13.44%', 1)).toBe(16);
-    expect(indexOfNthHyphen('Nasdaq-100 本週下跌 - 13.44%', 0)).toBe(6);
+    expect(indexOfNthSymbol('Nasdaq-100 本週下跌 - 13.44%', '-', 1)).toBe(16);
+    expect(indexOfNthSymbol('Nasdaq-100 本週下跌 - 13.44%', '-', 0)).toBe(6);
   });
 
   it('report a missing ordinal rather than guessing', () => {
-    expect(indexOfNthHyphen('氣溫是 - 5 度左右', 1)).toBe(-1);
-    expect(indexOfNthHyphen('沒有連字號', 0)).toBe(-1);
+    expect(indexOfNthSymbol('氣溫是 - 5 度左右', '-', 1)).toBe(-1);
+    expect(indexOfNthSymbol('沒有連字號', '-', 0)).toBe(-1);
   });
 });
 
@@ -151,7 +151,7 @@ describe('hyphenSign.isFix()', () => {
 
 describe('hyphenSign.edits()', () => {
   function fixAll(unspaced: string, settled: string) {
-    const textEdits = hyphenSign.find(unspaced, settled).flatMap(({ index }) => hyphenSign.edits(settled, index));
+    const textEdits = hyphenSign.find(unspaced, settled).flatMap((candidateMatch) => hyphenSign.edits({ ...candidateMatch, node: {} as Text, settled }));
     return applyTextEdits(settled, textEdits);
   }
 
@@ -175,12 +175,13 @@ describe('applyTextEdits()', () => {
     occursIn: () => false,
     find: () => [],
     isFix: (candidateLabel) => candidateLabel === 'insert',
-    edits: (_settled, index) => [{ index, remove: 0, insert: ' ' }],
+    edits: ({ index }) => [{ index, remove: 0, insert: ' ' }],
   };
 
   it('apply edits from two ambiguous shapes to one text node', () => {
     const settled = '氣溫是 - 5 度 A+B';
-    const textEdits: TextEdit[] = [...hyphenSign.edits(settled, 4), ...spaceInserter.edits(settled, 11)];
+    const settledCandidate = (index: number): SettledCandidate => ({ sentence: '', at: 0, index, node: {} as Text, settled });
+    const textEdits: TextEdit[] = [...hyphenSign.edits(settledCandidate(4)), ...spaceInserter.edits(settledCandidate(11))];
 
     // Descending index order keeps the insert from shifting the delete, whichever order the shapes were asked in
     expect(applyTextEdits(settled, textEdits)).toBe('氣溫是 -5 度 A +B');
