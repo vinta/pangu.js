@@ -5,10 +5,6 @@ import { getSettings } from './settings/storage';
 const pangu = window.pangu;
 
 async function autoSpacingPage() {
-  if (document.readyState === 'loading') {
-    await new Promise<void>((resolve) => document.addEventListener('DOMContentLoaded', () => resolve(), { once: true }));
-  }
-
   // Assigned before the sweep starts, so the initial pass is captured too
   const settings = await getSettings();
   if (settings.is_enable_ai_spacing) {
@@ -21,13 +17,18 @@ async function autoSpacingPage() {
   pangu.autoSpacingPage();
 }
 
-// Manual spacing must wait too, or its first sweep loses the original text before the AI callback can capture it
-const initialization = autoSpacingPage();
-void initialization.catch((error: unknown) => console.error('Spacing initialization failed:', error));
-
-async function spacingPage() {
-  await initialization;
+function spacingPage() {
   pangu.spacingPage();
+}
+
+// Document Loading Lifecycle:
+// loading → (DOM parsing completes) → DOMContentLoaded event fires → interactive → (resources load) → load event fires → complete
+if (document.readyState === 'loading') {
+  // DOMContentLoaded only fires once -> autoSpacingPage() only runs once
+  document.addEventListener('DOMContentLoaded', autoSpacingPage);
+} else {
+  // this content script only runs once -> autoSpacingPage() only runs once
+  autoSpacingPage();
 }
 
 // Listen for messages from the popup
@@ -38,17 +39,12 @@ chrome.runtime.onMessage.addListener((message: MessageToContentScript, _sender: 
     sendResponse({ success: true });
   } else if (message.action === 'MANUAL_SPACING') {
     // MANUAL_SPACING is requested by user clicking button in popup
-    void spacingPage().then(
-      () => sendResponse({ success: true }),
-      (error: unknown) => {
-        console.error('Manual spacing failed:', error);
-        sendResponse({ success: false });
-      },
-    );
-    return true;
+    spacingPage();
+    sendResponse({ success: true });
   }
 
-  return false;
+  // Return true only when sending response asynchronously
+  // Return nothing (or false) when sending response synchronously
 });
 
 // Make this file a module to enable global type declarations
