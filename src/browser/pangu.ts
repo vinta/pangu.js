@@ -19,15 +19,12 @@ export interface SettledTextNode extends UnsettledTextNode {
   readonly settled: string;
 }
 
-// A late fix: a correction to the rules output, anything that comes from a non-rules spacing engine like an LLM (the Chrome Prompt API)
 export interface LateFix {
   readonly node: Text;
   readonly settled: string;
   readonly data: string;
 }
 
-// Any whitespace at a text node's edge already separates it from its neighbor, matching the /\s/ that scanBetweenTextNodes() uses on the gap
-// \s covers NBSP, which spacingText() never rewrites, so an author's NBSP still counts as a space here
 const TRAILING_WHITESPACE = /\s$/;
 const LEADING_WHITESPACE = /^\s/;
 
@@ -70,54 +67,6 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mu
   };
 }
 
-// Main call flows from autoSpacingPage() to requestIdleCallback():
-//
-// Entry A and Entry B are independent. The observer is live at once while the sweep waits pageDelayMs, so a mutation in that window is spaced before the sweep. Both land in the same
-// FIFO queue. A second pass over spaced text is a no-op, so the order only costs duplicate work.
-//
-//                          autoSpacingPage()
-//                                  ↓
-//     ┌────────────────────────────┴────────────────────────────┐
-//     |                                                         |
-// Entry A: initial page sweep                               Entry B: dynamic content (MutationObserver)
-//     |                                                         |
-// 1a. waitForVideosToLoad(pageDelayMs)                      1b. setupAutoSpacingPageObserver()
-//     ↓                                                         ↓
-// 2a. spacingPage()                                         2b. observer fires on characterData/childList
-//     ├─ spacingNode(<title>)                                   ├─ a page re-render (the page writes its own unspaced data over a text node we spaced, in place or by replacing the node)
-//     └─ spacingNode(<body>)                                    │  runs spacingNodeSync() before paint, unless the subtree exceeds maxSyncTextNodes (then it is queued like everything else)
-//     ↓                                                         ↓ push affected nodes onto queue
-// 3a. spacingNode(node)                                         ↓ debounce(nodeDelayMs, max nodeMaxWaitMs)
-//     - DomWalker.collectTextNodes(node, true)              3b. sort queued nodes into document order, dedupe, merge all their text nodes via DomWalker.collectTextNodes(), reverse
-//       (reverse document order, skips                          ↓
-//       whitespace-only and ignored tags)                       (title changes take their own debounce → spacingNode(<title>))
-//     ↓                                                         ↓
-//     └────────────────────────────┬────────────────────────────┘
-//                                  ↓
-// 4. schedule(task)
-//    - Spacing callers pass () => spacingTextNodes(textNodes): always ONE task holding the whole list, never chunked. applyLateFixes() (step 7) goes through the same path
-//    - taskScheduler.config.enabled && requestIdleCallback supported?
-//      ├─ NO  → task() - synchronous
-//      └─ YES (default) → taskScheduler.queue.add(task) - asynchronous
-// ↓
-// 5. TaskQueue.add() → scheduleProcessing() → requestIdleCallback(process, { timeout: 5000 })
-//    - process(deadline): runs queued tasks while deadline.timeRemaining() > 0, then re-arms requestIdleCallback for the rest
-// ↓
-// 6. spacingTextNodes(textNodes)
-//    - per text node: decideTextNodeSpacing() → trim-leading-space / prepend-space / apply-text-spacing (spacingText)
-//    - per adjacent text node pair: decideBoundarySpacing() → prepend-next / append-current / insert <pangu> element / none. A non-none verdict first writes back the respaced
-//      current tail (respaceCurrentTail) when the boundary needs one
-//    - visibility detection happens here, lazily per boundary (hiddenBoundaryBefore / hiddenBoundaryAfter). It is not a scheduling decision
-//    - batch tail: onTextNodesSettled fires once with every settled text node. Only the extension assigns it, the package alone captures nothing
-// ↓
-// 7. applyLateFixes(fixes)   (Chrome extension only, from its onTextNodesSettled handler)
-//    - the extension decides AI spacing fixes off the settled nodes and hands them back as LateFix { node, settled, data }
-//    - schedule(() => write each fix only if its node is still connected and still holds settled) → back to step 4, so the fix lands together with any pending spacing, even on a hidden tab
-//
-// Summary of paths to requestIdleCallback():
-// - taskScheduler.enabled=true + requestIdleCallback available → one task per schedule() call (a spacing batch or a late-fix batch), drained in idle slices
-// - taskScheduler.enabled=false, or no requestIdleCallback (stock Safari) → never (fully synchronous)
-// - pre-paint re-space inside the observer callback (2b) → never; it calls spacingTextNodes() directly and bypasses schedule()
 export class BrowserPangu extends Pangu {
   // Pre-paint re-space stays bounded: subtrees with more text nodes than this fall back to the queue
   private static readonly maxSyncTextNodes = 256;
