@@ -10,6 +10,10 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('陳上進+Vinta')).toBe('陳上進 + Vinta');
     expect(pangu.spacingText('你+我=我們')).toBe('你 + 我 = 我們');
 
+    expect(pangu.spacingText('Vinta+Mollie')).toBe('Vinta+Mollie'); // If no CJK, DO NOT change
+    expect(pangu.spacingText('得到一個A+B的結果')).toBe('得到一個 A+B 的結果');
+    expect(pangu.spacingText('答案是5+5的和')).toBe('答案是 5+5 的和');
+
     // DO NOT change if already spacing
     expect(pangu.spacingText('前面 + 後面')).toBe('前面 + 後面');
     expect(pangu.spacingText('Vinta + Mollie')).toBe('Vinta + Mollie');
@@ -19,14 +23,6 @@ describe('Symbol +', () => {
 
     // Rare cases, ignore
     // expect(pangu.spacingText('Vinta+陳上進')).toBe('Vinta + 陳上進');
-  });
-
-  // A plus with half-width characters on both sides binds them into one token,
-  // spaced from CJK as a unit and never split
-  it('handle + symbol as plus token', () => {
-    expect(pangu.spacingText('Vinta+Mollie')).toBe('Vinta+Mollie'); // If no CJK, DO NOT change
-    expect(pangu.spacingText('得到一個A+B的結果')).toBe('得到一個 A+B 的結果');
-    expect(pangu.spacingText('答案是5+5的和')).toBe('答案是 5+5 的和');
   });
 
   it('handle + symbol as special case', () => {

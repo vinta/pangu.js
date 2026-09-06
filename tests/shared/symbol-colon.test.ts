@@ -17,12 +17,13 @@ describe('Symbol :', () => {
     expect(pangu.spacingText('電話:123456789')).toBe('電話: 123456789');
     expect(pangu.spacingText('前面:I have no idea後面')).toBe('前面: I have no idea 後面');
     expect(pangu.spacingText('前面: I have no idea後面')).toBe('前面: I have no idea 後面');
-
-    // FIXME
-    // expect(pangu.spacingText('前面:)後面')).toBe('前面 :) 後面');
   });
 
-  // When the symbol appears 2+ times or more in one line
+  // FIXME
+  // it('handle : symbol as emoticon', () => {
+  //   expect(pangu.spacingText('前面:)後面')).toBe('前面 :) 後面');
+  // });
+
   // FIXME
   // it('handle : symbol as separator', () => {
   //   expect(pangu.spacingText('前面:後面:再後面')).toBe('前面:後面:再後面');
