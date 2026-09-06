@@ -16,4 +16,4 @@ Consequences:
 - `公視+上架了新片` renders as `公視+ 上架了新片` in the extension and as `公視 + 上架了新片` in the npm package. The FIXME in `symbol-plus-sign.test.ts` stays for the package.
 - The first bundle-plan FIXME passes in the extension. The second still needs `MOD+影劇館+` read as `MOD + 影劇館+`, which means turning a plus before a listed brand into a separator; that edit is not made, as ADR 0013 accepted.
 - Author-written spaces are never removed: a candidate exists only where the unspaced text had the brand tight against the plus, and the second edit checks the author's next character, not the settled one.
-- The glossary gains the brand suffix as a second ambiguous shape and `brand-suffix` as a label.
+- The glossary stays generic: it describes ambiguous shapes, classifiers, and labels without naming this one. The shape, its list, and its `brand-suffix` label live in the code and this ADR.
