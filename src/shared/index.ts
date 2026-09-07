@@ -32,7 +32,7 @@ export const UPPER_AN = 'A-Z0-9'; // For FIX_CJK_COLON_ANS
 // Operators. Each rule uses a different set
 export const OPERATORS_BASE = '\\+\\*=&';
 export const OPERATORS_WITH_HYPHEN = `${OPERATORS_BASE}\\-`; // For CJK_OPERATOR_ANS
-export const OPERATORS_NO_PLUS = '\\*=&\\-'; // For ANS_OPERATOR_CJK only. No + because + attaches to the preceding half-width run as a suffix (Disney+, 18+)
+export const OPERATORS_NO_PLUS = '\\*=&\\-'; // For ANS_OPERATOR_CJK only. No + because the digit suffix (18+) and plus reading decide a plus after a half-width run
 export const GRADE_OPERATORS = '\\+\\-\\*'; // For single letter grades
 
 export const QUOTES = '\`"\u05f4'; // Backtick, straight quote, Hebrew punctuation
@@ -130,8 +130,6 @@ export const PIPE_SEPARATOR = /([^\s|])[ ]*(\|+)[ ]*(?=[^\s|])/g;
 // pattern (C++, i++)
 export const PLUS_CJK_CONTACT = new RegExp(`[${CJK}]\\+|\\+[${CJK}]`);
 export const PLUS_SEPARATOR = /(?<=[^\s+])\+(?=[^\s+])/g;
-// Solitary pluses in direct CJK contact, counted per line: two or more read the line as a bundle plan, where the plus after a word is a separator, not a suffix (see LETTER_PLUS_CJK)
-export const SOLITARY_PLUS_CJK_CONTACT = new RegExp(`[${CJK}]\\+(?!\\+)|(?<!\\+)\\+[${CJK}]`, 'g');
 
 // Single-letter grades (A+, B-, C*) before CJK get the space after the symbol, not before. The \b keeps the letter single, not the tail of a longer word
 export const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([${A}])([${GRADE_OPERATORS}])([${CJK}])`, 'g');
@@ -142,9 +140,9 @@ export const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([${A}])([${GRADE_OPERATOR
 export const CJK_SIGN_DIGIT = new RegExp(`([${CJK}])(\\+)([0-9])`, 'g');
 // Flag: - attaches to a following single lowercase letter (-m). [a-z] keeps a capitalized word on the operator reading, and the trailing \b keeps a longer lowercase word there too
 export const CJK_HYPHEN_FLAG = new RegExp(`([${CJK}])(\\-)([a-z])\\b`, 'g');
-// Suffix: + attaches to preceding digits (18+, 100+) or a preceding word (Disney+)
-export const DIGIT_PLUS_CJK = new RegExp(`([0-9])(\\+)([${CJK}])`, 'g');
-export const LETTER_PLUS_CJK = new RegExp(`([${A}])(\\+)([${CJK}])`, 'g');
+// Suffix: + attaches to a preceding whole digit run (18+, 100+, 3.5+). The \b keeps a digit that ends a word (S24+, HDR10+) on the separator reading, see plus reading. A plus after a word
+// (Disney+, MOD+) is never a suffix here: plus reading spaces it as a separator, and the extension's name-suffix list restores listed names. See ADR 0019
+export const DIGIT_PLUS_CJK = new RegExp(`\\b([0-9]+)(\\+)([${CJK}])`, 'g');
 
 // < and > as comparison operators, not brackets
 export const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([${AN}])`, 'g');
@@ -371,11 +369,6 @@ export class Pangu {
     newText = newText.replace(CJK_SIGN_DIGIT, '$1 $2$3');
     newText = newText.replace(CJK_HYPHEN_FLAG, '$1 $2$3');
     newText = newText.replace(DIGIT_PLUS_CJK, '$1$2 $3');
-    // The word suffix reads on a line with one plus in CJK contact (Disney+ CJK). Two or more make a bundle plan (CJK+A+CJK+), and the plus after the word stays undecided for plus reading below
-    newText = newText
-      .split('\n')
-      .map((line) => ((line.match(SOLITARY_PLUS_CJK_CONTACT) || []).length === 1 ? line.replace(LETTER_PLUS_CJK, '$1$2 $3') : line))
-      .join('\n');
 
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
@@ -420,7 +413,7 @@ export class Pangu {
       .join('\n');
 
     // Plus reading is per line: a plus in direct contact with CJK makes every undecided plus on the line a separator with spaces on both sides, as in telecom bundle plans that chain products with +
-    // A decided plus keeps its reading: space-adjacent, affix-attached (Disney+, +886), or in a ++ run (C++). A line with no CJK contact keeps its joiner tokens tight (A+B, 5+5)
+    // A decided plus keeps its reading: space-adjacent, affix-attached (100+, +886), or in a ++ run (C++). A line with no CJK contact keeps its joiner tokens tight (A+B, 5+5)
     newText = newText
       .split('\n')
       .map((line) => {
