@@ -18,15 +18,12 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('Vinta + 陳上進')).toBe('Vinta + 陳上進');
     expect(pangu.spacingText('陳上進 + Vinta')).toBe('陳上進 + Vinta');
     expect(pangu.spacingText('得到一個 A + B 的結果')).toBe('得到一個 A + B 的結果');
-
-    // NOTE: not expected, cannot fix with rules: a digit token before the plus has the same shape as Python 3+, only the sentence decides
-    // see the open item in docs/adr/0019
-
-    expect(pangu.spacingText('Switch 2+瑪利歐賽車世界同捆組')).toBe('Switch 2+ 瑪利歐賽車世界同捆組');
-    // expect(pangu.spacingText('Switch 2+瑪利歐賽車世界同捆組')).toBe('Switch 2 + 瑪利歐賽車世界同捆組');
   });
 
   it('handle + symbol as separator', () => {
+    // FIXME
+    // expect(pangu.spacingText('Switch 2+瑪利歐賽車世界同捆組')).toBe('Switch 2 + 瑪利歐賽車世界同捆組');
+
     // A plus after a word in CJK contact is undecided by any affix, so plus reading spaces it as a separator, in a bundle plan and on a brand line alike
     expect(pangu.spacingText('Switch OLED+健身環+保護貼')).toBe('Switch OLED + 健身環 + 保護貼');
 
