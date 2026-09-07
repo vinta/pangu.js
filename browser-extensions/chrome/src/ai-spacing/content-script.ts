@@ -32,12 +32,14 @@ function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readon
   return settledCandidates;
 }
 
-function collectLateFixes(batches: readonly { ambiguousShape: AmbiguousShape; settledCandidates: SettledCandidate[] }[], candidateLabelsByBatch: readonly (CandidateLabel | null)[][]) {
+type ShapeCandidates = { ambiguousShape: AmbiguousShape; settledCandidates: SettledCandidate[] };
+
+function collectLateFixes(labeledShapeCandidates: readonly (ShapeCandidates & { candidateLabels: readonly (CandidateLabel | null)[] })[]) {
   // Core applies one fix per text node per call, so every edit for one node composes into a single late fix
   const textEditsByNode = new Map<Text, { settled: string; textEdits: TextEdit[] }>();
-  for (const [batchIndex, { ambiguousShape, settledCandidates }] of batches.entries()) {
+  for (const { ambiguousShape, settledCandidates, candidateLabels } of labeledShapeCandidates) {
     for (const [index, settledCandidate] of settledCandidates.entries()) {
-      const candidateLabel = candidateLabelsByBatch[batchIndex]![index] ?? null;
+      const candidateLabel = candidateLabels[index] ?? null;
       // Do not skip missing labels here: shapes without a model still need to produce their edits
       const textEdits = ambiguousShape.edits(settledCandidate, candidateLabel);
       console.debug(
@@ -75,31 +77,31 @@ export function warmUpAiSpacing() {
 // Once the worker fails to answer, this page's model shapes stay off; shapes resolved by rules keep running
 let modelFailed = false;
 
+async function classifyShapeCandidates({ ambiguousShape, settledCandidates }: ShapeCandidates): Promise<readonly (CandidateLabel | null)[]> {
+  if (!ambiguousShape.needsModel) {
+    return [];
+  }
+  const candidates = settledCandidates.map(({ sentence, at }) => ({ sentence, at }));
+  const response = await requestClassification(ambiguousShape.kind, candidates);
+  if (response.ok) {
+    return response.candidateLabels;
+  }
+  modelFailed = true;
+  console.debug(`[pangu] ${ambiguousShape.kind}: disabled for this page (${response.error})`);
+  return [];
+}
+
 export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[]) {
-  const batches = AMBIGUOUS_SHAPES.filter((ambiguousShape) => !modelFailed || !ambiguousShape.needsModel)
+  const shapeCandidates: ShapeCandidates[] = AMBIGUOUS_SHAPES.filter((ambiguousShape) => !modelFailed || !ambiguousShape.needsModel)
     .map((ambiguousShape) => ({ ambiguousShape, settledCandidates: findCandidates(ambiguousShape, settledTextNodes) }))
-    .filter((batch) => batch.settledCandidates.length > 0);
-  if (batches.length === 0) {
+    .filter(({ settledCandidates }) => settledCandidates.length > 0);
+  if (shapeCandidates.length === 0) {
     return;
   }
 
-  const candidateLabelsByBatch = await Promise.all(
-    batches.map(async ({ ambiguousShape, settledCandidates }) => {
-      if (!ambiguousShape.needsModel) {
-        return [];
-      }
-      const candidates = settledCandidates.map(({ sentence, at }) => ({ sentence, at }));
-      const response = await requestClassification(ambiguousShape.kind, candidates);
-      if (response.ok) {
-        return response.candidateLabels;
-      }
-      modelFailed = true;
-      console.debug(`[pangu] ${ambiguousShape.kind}: disabled for this page (${response.error})`);
-      return [];
-    }),
-  );
+  const labeledShapeCandidates = await Promise.all(shapeCandidates.map(async (shapeCandidate) => ({ ...shapeCandidate, candidateLabels: await classifyShapeCandidates(shapeCandidate) })));
 
-  const lateFixes = collectLateFixes(batches, candidateLabelsByBatch);
+  const lateFixes = collectLateFixes(labeledShapeCandidates);
   if (lateFixes.length > 0) {
     pangu.applyLateFixes(lateFixes);
   }
