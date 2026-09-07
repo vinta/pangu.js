@@ -130,6 +130,8 @@ export const PIPE_SEPARATOR = /([^\s|])[ ]*(\|+)[ ]*(?=[^\s|])/g;
 // pattern (C++, i++)
 export const PLUS_CJK_CONTACT = new RegExp(`[${CJK}]\\+|\\+[${CJK}]`);
 export const PLUS_SEPARATOR = /(?<=[^\s+])\+(?=[^\s+])/g;
+// Solitary pluses in direct CJK contact, counted per line: two or more read the line as a bundle plan, where the plus after a word is a separator, not a suffix (see LETTER_PLUS_CJK)
+export const SOLITARY_PLUS_CJK_CONTACT = new RegExp(`[${CJK}]\\+(?!\\+)|(?<!\\+)\\+[${CJK}]`, 'g');
 
 // Single-letter grades (A+, B-, C*) before CJK get the space after the symbol, not before. The \b keeps the letter single, not the tail of a longer word
 export const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([${A}])([${GRADE_OPERATORS}])([${CJK}])`, 'g');
@@ -369,7 +371,11 @@ export class Pangu {
     newText = newText.replace(CJK_SIGN_DIGIT, '$1 $2$3');
     newText = newText.replace(CJK_HYPHEN_FLAG, '$1 $2$3');
     newText = newText.replace(DIGIT_PLUS_CJK, '$1$2 $3');
-    newText = newText.replace(LETTER_PLUS_CJK, '$1$2 $3');
+    // The word suffix reads on a line with one plus in CJK contact (Disney+ CJK). Two or more make a bundle plan (CJK+A+CJK+), and the plus after the word stays undecided for plus reading below
+    newText = newText
+      .split('\n')
+      .map((line) => ((line.match(SOLITARY_PLUS_CJK_CONTACT) || []).length === 1 ? line.replace(LETTER_PLUS_CJK, '$1$2 $3') : line))
+      .join('\n');
 
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');

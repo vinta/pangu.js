@@ -20,6 +20,27 @@ describe('Symbol +', () => {
     // expect(pangu.spacingText('Vinta+陳上進')).toBe('Vinta + 陳上進');
   });
 
+  it('handle + symbol as separator', () => {
+    // Two or more pluses in CJK contact read the line as a bundle plan, so the plus after a word is a separator, not a suffix
+    expect(pangu.spacingText('MOD+影劇館+上架')).toBe('MOD + 影劇館 + 上架');
+    expect(pangu.spacingText('Switch OLED+健身環+保護貼')).toBe('Switch OLED + 健身環 + 保護貼');
+    expect(pangu.spacingText('HiNet光世代+MOD+影劇館+/全選/自選20/特選餐/豪華餐(5選1)+Wi-Fi全屋通(1台)')).toBe(
+      'HiNet 光世代 + MOD + 影劇館 + /全選/自選 20/特選餐/豪華餐 (5 選 1) + Wi-Fi 全屋通 (1 台)',
+    );
+
+    // One plus in CJK contact keeps the suffix reading: an enumeration plus touches punctuation, a ++ run never counts, a joiner token has no contact
+    expect(pangu.spacingText('Netflix、Disney+、Apple TV+等串流平台')).toBe('Netflix、Disney+、Apple TV+ 等串流平台');
+    expect(pangu.spacingText('Disney+上架了C++課程')).toBe('Disney+ 上架了 C++ 課程');
+    expect(pangu.spacingText('Disney+上架了A+B')).toBe('Disney+ 上架了 A+B');
+
+    // NOTE: not expected, but cannot fix with rules, see below
+    expect(pangu.spacingText('Disney+和Apple TV+都上架了')).toBe('Disney + 和 Apple TV + 都上架了');
+
+    // NOTE: fixed by AI spacing, see browser-extensions/chrome/src/ai-spacing/shapes/brand-suffix-shape.ts
+    // expect(pangu.spacingText('Disney+和Apple TV+都上架了')).toBe('Disney+ 和 Apple TV+ 都上架了');
+    // expect(pangu.spacingText('HiNet光世代+MOD+影劇館+/全選/自選20/特選餐/豪華餐(5選1)+Wi-Fi全屋通(1台)')).toBe('HiNet 光世代 + MOD + 影劇館+/全選/自選 20/特選餐/豪華餐 (5 選 1) + Wi-Fi 全屋通 (1 台)');
+  });
+
   it('handle + symbol as joiner token', () => {
     expect(pangu.spacingText('Vinta+Mollie')).toBe('Vinta+Mollie'); // If no CJK, DO NOT change
     expect(pangu.spacingText('得到一個A+B的結果')).toBe('得到一個 A+B 的結果');
