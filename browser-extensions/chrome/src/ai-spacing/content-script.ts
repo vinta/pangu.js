@@ -63,6 +63,8 @@ export function warmUpAiSpacing() {
   const pageText = document.documentElement.textContent ?? '';
   // The loop is not redundant: we create base sessions per ambiguous shape
   for (const ambiguousShape of AMBIGUOUS_SHAPES) {
+    // A shape needs the model doesn't always mean we need to warm up the model on every webpage
+    // We only warm up when the webpage contains certain texts => needsModel() returns true
     if (ambiguousShape.needsModel?.(pageText)) {
       console.debug(`[pangu] warm up base session: ${ambiguousShape.kind}`);
       void requestClassification(ambiguousShape.kind, []);
