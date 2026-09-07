@@ -3,13 +3,15 @@ import { Pangu } from '../../dist/shared/index.js';
 
 const pangu = new Pangu();
 
-describe('Symbol ; only add space on the right', () => {
+describe('Symbol ;', () => {
   it('handle ; symbol', () => {
     expect(pangu.spacingText('前面;後面')).toBe('前面; 後面');
 
     // DO NOT change if already spacing
     expect(pangu.spacingText('前面 ; 後面')).toBe('前面 ; 後面');
     expect(pangu.spacingText('前面; 後面')).toBe('前面; 後面');
-    // expect(pangu.spacingText('前面 ;後面')).toBe('前面 ;後面'); // Rare cases (basically a typo), ignore
+
+    // Rare cases, ignore
+    // expect(pangu.spacingText('前面 ;後面')).toBe('前面 ;後面');
   });
 });

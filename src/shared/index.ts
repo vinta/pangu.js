@@ -29,10 +29,8 @@ export const AN = 'A-Za-z0-9';
 export const A = 'A-Za-z';
 export const UPPER_AN = 'A-Z0-9'; // For FIX_CJK_COLON_ANS
 
-// Operators. Each rule uses a different set
-export const OPERATORS_BASE = '\\+\\*=&';
-export const OPERATORS_WITH_HYPHEN = `${OPERATORS_BASE}\\-`; // For CJK_OPERATOR_ANS
-export const OPERATORS_NO_PLUS = '\\*=&\\-'; // For ANS_OPERATOR_CJK only. No + because + attaches to the preceding half-width run as a suffix (Disney+, 18+)
+// Operators. No + because every plus in CJK contact is decided by an affix or by plus reading, which both run before the operator rules
+export const OPERATORS = '\\*=&\\-';
 export const GRADE_OPERATORS = '\\+\\-\\*'; // For single letter grades
 
 export const QUOTES = '\`"\u05f4'; // Backtick, straight quote, Hebrew punctuation
@@ -111,11 +109,11 @@ export const HASH_CJK = new RegExp(`(([^ \\u00a0])#)([${CJK}])`, 'g');
 // In file path context (multiple slashes), only a final hashtag not preceded by a slash gets a space
 export const CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
 
-// The operator set is + - * = & only (no | / < >). Only direct CJK contact makes a symbol an operator: a symbol between two half-width characters binds them into a joiner token (A+B, a=1, S&P)
+// The operator set is - * = & only (no + | / < >). Only direct CJK contact makes a symbol an operator: a symbol between two half-width characters binds them into a joiner token (A-B, a=1, S&P)
 // and never gets spaces, so there is deliberately no between-half-width rule here
 // On the left, a closing bracket also counts as the half-width side: ]-CJK reads as an operator whose operand is the bracketed run
-export const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS_WITH_HYPHEN}])([${AN}])`, 'g');
-export const ANS_OPERATOR_CJK = new RegExp(`([${AN}${RIGHT_BRACKETS_BASIC}])([${OPERATORS_NO_PLUS}])([${CJK}])`, 'g');
+export const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS}])([${AN}])`, 'g');
+export const ANS_OPERATOR_CJK = new RegExp(`([${AN}${RIGHT_BRACKETS_BASIC}])([${OPERATORS}])([${CJK}])`, 'g');
 
 // Slash patterns for operator vs separator behavior
 export const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
@@ -127,9 +125,9 @@ export const PIPE_CJK_CONTACT = new RegExp(`[${CJK}]\\||\\|[${CJK}]`);
 export const PIPE_SEPARATOR = /([^\s|])[ ]*(\|+)[ ]*(?=[^\s|])/g;
 
 // Plus patterns for separator vs joiner-token behavior, decided per line like the pipe. The separator matches a solitary plus only: a space-adjacent plus is decided and a ++ run is a preserved
-// pattern (C++, i++)
+// pattern (C++, i++). Common Chinese full-width punctuation also keeps an adjacent plus tight, even when another plus flips the line
 export const PLUS_CJK_CONTACT = new RegExp(`[${CJK}]\\+|\\+[${CJK}]`);
-export const PLUS_SEPARATOR = /(?<=[^\s+])\+(?=[^\s+])/g;
+export const PLUS_SEPARATOR = /(?<=[^\s+，。；：！？、（）「」『』【】《》])\+(?=[^\s+，。；：！？、（）「」『』【】《》])/g;
 
 // Single-letter grades (A+, B-, C*) before CJK get the space after the symbol, not before. The \b keeps the letter single, not the tail of a longer word
 export const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([${A}])([${GRADE_OPERATORS}])([${CJK}])`, 'g');
@@ -140,8 +138,9 @@ export const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([${A}])([${GRADE_OPERATOR
 export const CJK_SIGN_DIGIT = new RegExp(`([${CJK}])(\\+)([0-9])`, 'g');
 // Flag: - attaches to a following single lowercase letter (-m). [a-z] keeps a capitalized word on the operator reading, and the trailing \b keeps a longer lowercase word there too
 export const CJK_HYPHEN_FLAG = new RegExp(`([${CJK}])(\\-)([a-z])\\b`, 'g');
-// Suffix: + attaches to a preceding half-width run (Disney+, 18+)
-export const AN_PLUS_CJK = new RegExp(`([${AN}])(\\+)([${CJK}])`, 'g');
+// Suffix: + attaches to a preceding whole digit run (18+, 100+, 3.5+). The \b keeps a digit that ends a word (S24+, HDR10+) on the separator reading, see plus reading. A plus after a word
+// (Disney+, MOD+) is never a suffix here: plus reading spaces it as a separator, and the extension's name-suffix list restores listed names. See ADR 0019
+export const DIGIT_PLUS_CJK = new RegExp(`\\b([0-9]+)(\\+)([${CJK}])`, 'g');
 
 // < and > as comparison operators, not brackets
 export const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([${AN}])`, 'g');
@@ -188,9 +187,9 @@ export const VOID_HTML_TAGS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr
 export const BARE_HTML_TAG = /^<([a-zA-Z][a-zA-Z0-9]*)\s*\/?>$/;
 export const CLOSING_HTML_TAG = /<\/([a-zA-Z][a-zA-Z0-9]*)/g;
 
-// Spacing at direct CJK contact with a tag mention placeholder (\uE002...\uE003)
-export const CJK_HTML_TAG_MENTION = new RegExp(`([${CJK}])(?=\uE002)`, 'g');
-export const HTML_TAG_MENTION_CJK = new RegExp(`(?<=\uE003)([${CJK}])`, 'g');
+// Spacing at direct CJK contact with a tag mention placeholder (\uE004...\uE005)
+export const CJK_HTML_TAG_MENTION = new RegExp(`([${CJK}])(?=\uE004)`, 'g');
+export const HTML_TAG_MENTION_CJK = new RegExp(`(?<=\uE005)([${CJK}])`, 'g');
 
 // Used by fixBracketSpacing to strip the spaces just inside a bracket pair; everything else between the brackets stays unchanged
 export const BRACKET_PATTERNS = [
@@ -200,6 +199,7 @@ export const BRACKET_PATTERNS = [
   { pattern: /\{([^{}]*)\}/g, open: '{', close: '}' },
 ];
 
+// We use characters from Unicode's Private Use Area (U+E000-U+F8FF) as delimiters to make placeholders unlikely to collide with ordinary text
 export class PlaceholderReplacer {
   // Every spacingText() call creates instances from the same few fixed configs, so compiled patterns are cached and shared across instances
   private static patternCache = new Map<string, RegExp>();
@@ -259,13 +259,13 @@ export class Pangu {
     let newText = text;
 
     // Hide backtick content from the quote rules; the backticks themselves still get spacing
-    const backtickManager = new PlaceholderReplacer('BACKTICK_CONTENT_', '\uE004', '\uE005');
+    const backtickManager = new PlaceholderReplacer('BACKTICK_CONTENT_', '\uE000', '\uE001');
     newText = newText.replace(/`([^`]+)`/g, (_match, content) => {
       return `\`${backtickManager.store(content)}\``;
     });
 
-    const htmlTagManager = new PlaceholderReplacer('HTML_TAG_PLACEHOLDER_', '\uE000', '\uE001');
-    const mentionedTagManager = new PlaceholderReplacer('HTML_TAG_MENTION_', '\uE002', '\uE003');
+    const htmlTagManager = new PlaceholderReplacer('HTML_TAG_PLACEHOLDER_', '\uE002', '\uE003');
+    const mentionedTagManager = new PlaceholderReplacer('HTML_TAG_MENTION_', '\uE004', '\uE005');
     let hasHtmlTags = false;
 
     if (newText.includes('<')) {
@@ -319,7 +319,7 @@ export class Pangu {
     newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
 
     // Quoted pure-CJK content keeps its quotes tight, so hide it before the single-quote rules run
-    const singleQuoteCJKManager = new PlaceholderReplacer('SINGLE_QUOTE_CJK_PLACEHOLDER_', '\uE030', '\uE031');
+    const singleQuoteCJKManager = new PlaceholderReplacer('SINGLE_QUOTE_CJK_PLACEHOLDER_', '\uE006', '\uE007');
 
     newText = newText.replace(SINGLE_QUOTE_PURE_CJK, (match) => {
       return singleQuoteCJKManager.store(match);
@@ -350,7 +350,7 @@ export class Pangu {
       .join('\n');
 
     // Protect compound words from operator spacing
-    const compoundWordManager = new PlaceholderReplacer('COMPOUND_WORD_PLACEHOLDER_', '\uE010', '\uE011');
+    const compoundWordManager = new PlaceholderReplacer('COMPOUND_WORD_PLACEHOLDER_', '\uE008', '\uE009');
 
     // Hyphen-joined alphanumeric runs that read as one name, for example state-of-the-art, GPT-4o, claude-4-opus. Qualifies when a part carries a lowercase letter, or when the hyphen joins an
     // all-letters part to an all-digits part (GPT-5), or a letters-plus-digits part to anything (GPT4o-mini). An all-uppercase pair like ABC-DEF does not qualify
@@ -366,7 +366,20 @@ export class Pangu {
     // Affix readings run before the operator rules so the symbol stays attached to its half-width side
     newText = newText.replace(CJK_SIGN_DIGIT, '$1 $2$3');
     newText = newText.replace(CJK_HYPHEN_FLAG, '$1 $2$3');
-    newText = newText.replace(AN_PLUS_CJK, '$1$2 $3');
+    newText = newText.replace(DIGIT_PLUS_CJK, '$1$2 $3');
+
+    // Plus reading is per line: a plus in direct contact with CJK makes every undecided plus on the line a separator with spaces on both sides, as in telecom bundle plans that chain products with +
+    // A decided plus keeps its reading: space-adjacent, affix-attached (100+, +886), or in a ++ run (C++). A line with no CJK contact keeps its joiner tokens tight (A+B, 5+5)
+    // It runs right after the affixes and before the operator rules, so a CJK+A contact flips the line's joiners like a CJK+CJK contact does (CJK+A+A reads CJK + A + A)
+    newText = newText
+      .split('\n')
+      .map((line) => {
+        if (!PLUS_CJK_CONTACT.test(line)) {
+          return line;
+        }
+        return line.replace(PLUS_SEPARATOR, ' + ');
+      })
+      .join('\n');
 
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
@@ -407,18 +420,6 @@ export class Pangu {
           return line;
         }
         return line.replace(PIPE_SEPARATOR, '$1 $2 ');
-      })
-      .join('\n');
-
-    // Plus reading is per line: a plus in direct contact with CJK makes every undecided plus on the line a separator with spaces on both sides, as in telecom bundle plans that chain products with +
-    // A decided plus keeps its reading: space-adjacent, affix-attached (Disney+, +886), or in a ++ run (C++). A line with no CJK contact keeps its joiner tokens tight (A+B, 5+5)
-    newText = newText
-      .split('\n')
-      .map((line) => {
-        if (!PLUS_CJK_CONTACT.test(line)) {
-          return line;
-        }
-        return line.replace(PLUS_SEPARATOR, ' + ');
       })
       .join('\n');
 

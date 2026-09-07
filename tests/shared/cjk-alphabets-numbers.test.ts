@@ -3,7 +3,7 @@ import { Pangu } from '../../dist/shared/index.js';
 
 const pangu = new Pangu();
 
-describe('CJK A N add space on both sides', () => {
+describe('CJK A N', () => {
   it('handle short text', () => {
     expect(pangu.spacingText('中a')).toBe('中 a');
     expect(pangu.spacingText('a中')).toBe('a 中');

@@ -4,8 +4,6 @@ import { Pangu } from '../../dist/shared/index.js';
 const pangu = new Pangu();
 
 describe('Symbol |', () => {
-  // A pipe in direct CJK contact makes every pipe on the line a separator,
-  // decided per line like slash reading
   it('handle | symbol as separator', () => {
     expect(pangu.spacingText('前面|後面')).toBe('前面 | 後面');
     expect(pangu.spacingText('Mollie|陳上進')).toBe('Mollie | 陳上進');
@@ -28,9 +26,7 @@ describe('Symbol |', () => {
     expect(pangu.spacingText('Mollie | 陳上進 | 貓咪')).toBe('Mollie | 陳上進 | 貓咪');
   });
 
-  // On a line where no pipe touches CJK, a pipe binds half-width characters
-  // into one token, spaced from CJK as a unit and never split
-  it('handle | symbol as pipe token', () => {
+  it('handle | symbol as joiner token', () => {
     expect(pangu.spacingText('Vinta|Mollie')).toBe('Vinta|Mollie'); // If no CJK, DO NOT change
     expect(pangu.spacingText('Vinta|Mollie|Kitten')).toBe('Vinta|Mollie|Kitten');
     expect(pangu.spacingText('ps aux|grep node')).toBe('ps aux|grep node');

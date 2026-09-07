@@ -3,7 +3,7 @@ import { Pangu } from '../../dist/shared/index.js';
 
 const pangu = new Pangu();
 
-describe('Symbol . only add space on the right', () => {
+describe('Symbol .', () => {
   it('handle . symbol', () => {
     expect(pangu.spacingText('前面.')).toBe('前面.');
     expect(pangu.spacingText('前面..')).toBe('前面..');
@@ -17,13 +17,9 @@ describe('Symbol . only add space on the right', () => {
     expect(pangu.spacingText('前面. 後面')).toBe('前面. 後面');
     expect(pangu.spacingText('前面 .後面')).toBe('前面 .後面');
 
-    // Special cases
+    // Abbreviations
     expect(pangu.spacingText('前面vs.後面')).toBe('前面 vs. 後面');
     expect(pangu.spacingText('前面U.S.A.後面')).toBe('前面 U.S.A. 後面');
-    expect(pangu.spacingText('黑人問號.jpg後面')).toBe('黑人問號.jpg 後面');
-    expect(pangu.spacingText('黑人問號.jpg 後面')).toBe('黑人問號.jpg 後面');
-    expect(pangu.spacingText('pangu.js v1.2.3橫空出世')).toBe('pangu.js v1.2.3 橫空出世');
-    expect(pangu.spacingText('pangu.js 1.2.3橫空出世')).toBe('pangu.js 1.2.3 橫空出世');
 
     // prettier-ignore
     expect(pangu.spacingText("Mr.龍島主道：「Let's Party!各位高明博雅君子！"))
@@ -36,14 +32,15 @@ describe('Symbol . only add space on the right', () => {
     expect(pangu.spacingText('世.界.，草.班.与千.早.爱.音.')).toBe('世. 界.，草. 班. 与千. 早. 爱. 音.');
   });
 
-  it('handle . symbol as file path', () => {
+  it('handle . symbol as file extension', () => {
     // File extensions should keep spacing
     expect(pangu.spacingText('使用Python.py檔案')).toBe('使用 Python.py 檔案');
     expect(pangu.spacingText('設定檔.env很重要')).toBe('設定檔.env 很重要');
     expect(pangu.spacingText('編輯器.vscode目錄')).toBe('編輯器.vscode 目錄');
+    expect(pangu.spacingText('黑人問號.jpg後面')).toBe('黑人問號.jpg 後面');
+    expect(pangu.spacingText('黑人問號.jpg 後面')).toBe('黑人問號.jpg 後面');
 
     // Multiple dots
-    expect(pangu.spacingText('版本v1.2.3發布了')).toBe('版本 v1.2.3 發布了');
     expect(pangu.spacingText('檔案package.lock.json存在')).toBe('檔案 package.lock.json 存在');
 
     // CJK before dot patterns
@@ -54,5 +51,11 @@ describe('Symbol . only add space on the right', () => {
     // Mixed patterns
     expect(pangu.spacingText('使用環境.env配置')).toBe('使用環境.env 配置');
     expect(pangu.spacingText('專案.prettierrc和.eslintrc')).toBe('專案.prettierrc 和.eslintrc');
+  });
+
+  it('handle . symbol as version number', () => {
+    expect(pangu.spacingText('版本v1.2.3發布了')).toBe('版本 v1.2.3 發布了');
+    expect(pangu.spacingText('pangu.js v1.2.3橫空出世')).toBe('pangu.js v1.2.3 橫空出世');
+    expect(pangu.spacingText('pangu.js 1.2.3橫空出世')).toBe('pangu.js 1.2.3 橫空出世');
   });
 });

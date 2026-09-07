@@ -4,7 +4,7 @@ import { Pangu } from '../../dist/shared/index.js';
 const pangu = new Pangu();
 
 describe('Symbol _', () => {
-  it('handle _ symbol as separator, DO NOT spacing', () => {
+  it('handle _ symbol as separator', () => {
     expect(pangu.spacingText('前面_後面')).toBe('前面_後面');
     expect(pangu.spacingText('Vinta_Mollie')).toBe('Vinta_Mollie');
     expect(pangu.spacingText('Vinta_Mollie_Kitten')).toBe('Vinta_Mollie_Kitten');
@@ -20,7 +20,7 @@ describe('Symbol _', () => {
     expect(pangu.spacingText('為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip'))
                        .toBe('為什麼你們就是不能加個空格呢？_20771210_最終版_v365.7.24.zip');
 
-    // Rare cases (basically a typo), ignore
+    // Rare cases, ignore
     // expect(pangu.spacingText('前面 _ 後面')).toBe('前面 _ 後面');
     // expect(pangu.spacingText('Vinta _ Mollie')).toBe('Vinta _ Mollie');
     // expect(pangu.spacingText('Vinta _ Mollie _ Kitten')).toBe('Vinta _ Mollie _ Kitten');

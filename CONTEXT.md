@@ -35,7 +35,7 @@ The gap that the browser renders between CJK and ANS letters or digits through t
 _Avoid_: native autospacing, text autospace, CSS spacing, autospace mode, text-autospace (bare, in prose)
 
 **Late fix**:
-A correction to the rules output. It is applied after the rules run, and something other than the rules decides it, such as a classifier. A late fix only inserts or removes spaces. It never rewrites the author's characters. When no classifier is present, the rules output is kept. A late fix goes through the same scheduling path as text spacing, never as a separate write, so on a hidden page it waits with everything else. Today, the only late fix removes the space that the rules inserted at a candidate that is read as a signed number (`CJK - N` becomes `CJK -N`).
+A correction to the rules output. It is applied after the rules run, and something other than the rules decides it, such as a fixed list or a classifier. A late fix only inserts or removes spaces. It never rewrites the author's characters. A late fix goes through the same scheduling path as text spacing, never as a separate write, so on a hidden page it waits with everything else.
 _Avoid_: un-insert (in prose), model fix
 
 **Page re-render**:
@@ -59,13 +59,13 @@ _Avoid_: slash token, slash operand pair, &-token
 Decided per line, never across lines. A slash with ANS characters on both sides forms a joiner token. If a line has only one slash and that slash is in direct contact with CJK, the slash acts as an operator. If a line has repeated slashes, they read as a file path or a list and stay unspaced.
 
 **Pipe reading**:
-Decided per line, never across lines. If one pipe is in direct contact with CJK, every pipe on the line becomes a separator with spaces on both sides. This covers concatenated page titles (`CJK | A+ CJK | A`) and credit lines (`CJK | CJK`). If no pipe on the line is in direct contact with CJK, the pipes stay tight as joiner tokens (`CJK A|A CJK`, `ps aux|grep node`).
+Decided per line, never across lines. If one pipe is in direct contact with CJK, every pipe on the line becomes a separator with spaces on both sides. This covers concatenated page titles (`CJK | A CJK | A`) and credit lines (`CJK | CJK`). If no pipe on the line is in direct contact with CJK, the pipes stay tight as joiner tokens (`CJK A|A CJK`, `ps aux|grep node`).
 
 **Plus reading**:
-Decided per line, never across lines. If one plus is in direct contact with CJK, every undecided plus on the line becomes a separator with spaces on both sides. This covers bundle plans (`A CJK + A`). A plus is already decided in three cases: it is adjacent to a space, an affix reading attaches it (`A+ CJK`, `CJK +N`), or it sits inside a preserved pattern (`C++`). If no plus on the line is in direct contact with CJK, the pluses stay tight as joiner tokens (`CJK A+A CJK`, `CJK N+N CJK`).
+Decided per line, never across lines. If one plus is in direct contact with CJK, every undecided plus on the line becomes a separator with spaces on both sides. This covers bundle plans (`A CJK + A`). A plus is already decided in three cases: it is adjacent to a space, an affix reading attaches it (`N+ CJK`, `CJK +N`), or it sits inside a preserved pattern (`C++`). A plus after a word is never attached, so it is a separator (`CJK+A+CJK` reads `CJK + A + CJK`, `A+CJK` reads `A + CJK`). Plus reading runs before the operator rules, so a `CJK+A` contact flips the line's joiners too. If no plus on the line is in direct contact with CJK, the pluses stay tight as joiner tokens (`CJK A+A CJK`, `CJK N+N CJK`).
 
 **Affix reading**:
-A symbol that attaches to its ANS side at a CJK boundary instead of reading as an operator. Four cases: `+` before digits as a sign (`CJK +N`), `-` before a lowercase flag (`CJK -m CJK`), `+` after ANS characters as a suffix (`A+ CJK`, `CJK N+ CJK`), and single-letter grades (`A+`, `D-`). A hyphen before digits is not an affix: `CJK-N` reads as an operator (`N CJK - N CJK`, `CJK - N CJK`); see ADR 0015. A capitalized word after a hyphen keeps the operator reading (`CJK - Vinta`).
+A symbol that attaches to its ANS side at a CJK boundary instead of reading as an operator. Four cases: `+` before digits as a sign (`CJK +N`), `-` before a lowercase flag (`CJK -m CJK`), `+` after a whole digit run as a suffix (`CJK N+ CJK`, never `AN+ CJK`), and single-letter grades (`A+`, `D-`). A plus after a word is not an affix: `A+CJK` reads as a separator (`A + CJK`); see plus reading and ADR 0019. A hyphen before digits is not an affix: `CJK-N` reads as an operator (`N CJK - N CJK`, `CJK - N CJK`); see ADR 0015. A capitalized word after a hyphen keeps the operator reading (`CJK - Vinta`).
 
 **No CJK contact, no change**:
 The invariant behind every symbol rule. ANS text that has no contact with CJK is never modified. A symbol must be in direct contact with CJK to read as an operator. So CJK elsewhere in the line or text never allows spacing between ANS characters.
@@ -86,20 +86,20 @@ _Avoid_: tag-in-prose, prose tag
 ### AI Spacing
 
 **AI spacing**:
-The extension's second stage, on by default with a toggle to turn it off. It sends each candidate to a classifier and applies the label as a late fix. It is never required: when the model is absent, off, or slow, the rules output is kept.
-_Avoid_: model layer, hyphen-sign model layer
+The extension's second stage, on by default with a toggle to turn it off. It resolves candidates with a fixed list or a classifier and applies corrections as late fixes. If the model cannot answer, candidates that need it keep the rules output.
+_Avoid_: model layer
 
 **Symbol sense disambiguation**:
-Deciding which reading a symbol carries from the context around it, not from the symbol alone. It is the natural language processing (NLP) task of the same name. Slash, pipe, plus, and affix reading do it with heuristics. AI spacing does it with a classifier. Use this term to relate pangu to outside work. Name the specific reading when you describe the algorithm.
+Deciding which reading a symbol carries from the context around it, not from the symbol alone. It is the natural language processing (NLP) task of the same name. Slash, pipe, plus, and affix reading do it with heuristics. AI spacing does it with a fixed list or a classifier. Use this term to relate pangu to outside work. Name the specific reading when you describe the algorithm.
 _Avoid_: symbol WSD, symbol disambiguation
 
 **Ambiguous shape**:
-A shape where the rules cannot derive the symbol's reading, so a classifier decides it. An ambiguous shape defines three things: what to flag, the menu of labels, and the fix for each label. Today, the only ambiguous shape is the hyphen sign: a hyphen-minus tight between CJK and a digit, which is read as a signed number or as a range or separator.
+A shape where the rules cannot derive the symbol's reading, so a fixed list or a classifier decides it. It defines what to flag and which late fix to apply, with labels only when a model is needed.
 _Avoid_: symbol class, ambiguity, shape (bare, for this sense)
 
 **Candidate**:
 One occurrence of an ambiguous shape, flagged on the text before spacing. It carries the sentence around it and the symbol's position in that sentence, which is all the classifier reads.
-_Avoid_: hyphen-sign candidate (as a term), span, ambiguous span, model span
+_Avoid_: span, ambiguous span, model span
 
 **Settled candidate**:
 A candidate bound to the text node it came from, with the symbol's index in the settled text, so a late fix edits only bytes the batch settled on.
@@ -109,5 +109,5 @@ The component that reads one candidate and answers with one label from a fixed m
 _Avoid_: LLM, AI (for the component)
 
 **Label**:
-The classifier's answer for one candidate. It is one of the fixed menu for its ambiguous shape: today, signed number, range or separator, or unsure.
+The classifier's answer for one candidate. It is one of the fixed menu for its ambiguous shape.
 _Avoid_: verdict (the rules' word), answer
