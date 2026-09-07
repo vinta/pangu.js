@@ -31,8 +31,12 @@ test.skipIf(!process.features.typescript)('requires an explicit matching Chrome 
   expect(run.stderr).toContain('EEXIST');
 });
 
-for (const experiment of ['hyphen-sign', 'spacing-rewrite']) {
-  test.skipIf(!process.features.typescript)(`${experiment}: scored failures fail require-perfect and preserve raw answers`, () => {
+for (const [experiment, variant] of [
+  ['hyphen-sign', 'v27-zh-unique-quote'],
+  ['spacing-rewrite', 'v1-zh'],
+  ['spacing-rewrite', 'v1-zh-omit-constraint-input'],
+] as const) {
+  test.skipIf(!process.features.typescript)(`${experiment}/${variant}: scored failures fail require-perfect and preserve raw answers`, () => {
     const root = mkdtempSync(join(tmpdir(), 'pangu-abstention-'));
     onTestFinished(() => rmSync(root, { recursive: true, force: true }));
     const profile = join(root, 'Test Profile');
@@ -50,8 +54,9 @@ const worker = {
     if (typeof args === 'number') return;
     globalThis.LanguageModel = {
       params: () => ({}), availability: async () => 'available',
-      create: async () => ({ destroy() {}, clone: async () => ({ destroy() {}, prompt: async question => {
+      create: async () => ({ destroy() {}, clone: async () => ({ destroy() {}, prompt: async (question, options) => {
         assert.equal(typeof question, 'string');
+        assert.equal(options.omitResponseConstraintInput, process.env.TEST_OMIT_CONSTRAINT_INPUT === 'true');
         calls++;
         const input = args.inputs.find(input => input.question === question);
         if (args.rewrite && input === args.inputs[0]) return JSON.stringify(input.expected_label + '\\n');
@@ -85,15 +90,16 @@ new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context 
         '--repeats',
         '3',
         '--require-perfect',
-        experiment === 'spacing-rewrite' ? 'v1-zh' : 'v27-zh-unique-quote',
+        variant,
       ],
       {
         encoding: 'utf8',
-        env: { ...process.env, PATH: `${root}:${process.env.PATH}`, TEST_PROFILE: profile },
+        env: { ...process.env, PATH: `${root}:${process.env.PATH}`, TEST_PROFILE: profile, TEST_OMIT_CONSTRAINT_INPUT: String(variant === 'v1-zh-omit-constraint-input') },
       },
     );
     expect(run.status, run.stderr).toBe(1);
-    const result = JSON.parse(readFileSync(join(output, experiment === 'spacing-rewrite' ? '1-v1-zh.json' : '1-v27-zh-unique-quote.json'), 'utf8'));
+    const result = JSON.parse(readFileSync(join(output, `1-${variant}.json`), 'utf8'));
+    expect(result.omitResponseConstraintInput).toBe(variant === 'v1-zh-omit-constraint-input');
     if (experiment === 'spacing-rewrite') {
       expect(result.evaluation.exact).toEqual({ passed: result.results.length - 2, total: result.results.length });
       expect(result.evaluation.nonSpaceChanges).toBe(6);

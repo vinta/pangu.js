@@ -147,7 +147,7 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
     await worker.evaluate((id) => chrome.tabs.remove(id), infoId);
   }
   const run = await worker.evaluate(
-    async ({ system, initialTurns, inputs, orders, repeats, diagnostics, rewrite }) => {
+    async ({ system, initialTurns, inputs, orders, repeats, diagnostics, rewrite, omitResponseConstraintInput }) => {
       if (typeof LanguageModel === 'undefined' || typeof LanguageModel.params !== 'function') {
         throw new Error('extension Prompt API sampling controls unavailable; check Chrome and the extension context');
       }
@@ -177,7 +177,7 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
               let turn;
               try {
                 turn = await base.clone();
-                raw = await turn.prompt(input.question, { responseConstraint: input.responseConstraint, signal: AbortSignal.timeout(30000) });
+                raw = await turn.prompt(input.question, { responseConstraint: input.responseConstraint, omitResponseConstraintInput, signal: AbortSignal.timeout(30000) });
                 const parsed = JSON.parse(raw);
                 answer = rewrite ? (typeof parsed === 'string' ? parsed : null) : (input.tokens.find(([token]) => token === (input.answerKey ? parsed?.[input.answerKey] : parsed))?.[1] ?? null);
                 if (answer === null) {
@@ -228,7 +228,7 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
       });
       return { availability, createMs, results };
     },
-    { system: prompt.system, initialTurns: prompt.initialTurns ?? [], inputs, orders, repeats, diagnostics, rewrite },
+    { system: prompt.system, initialTurns: prompt.initialTurns ?? [], inputs, orders, repeats, diagnostics, rewrite, omitResponseConstraintInput: prompt.omitResponseConstraintInput ?? false },
   );
   return { ...run, browserVersion: context.browser().version(), profileVerified: true, extensionWorkerVerified: true };
 }
@@ -259,6 +259,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     timestamp: new Date().toISOString(),
     purpose: diagnosticIds ? 'interpretation-diagnostics-not-accuracy' : 'accuracy',
     system: prompt.system,
+    omitResponseConstraintInput: prompt.omitResponseConstraintInput ?? false,
     initialTurns: prompt.initialTurns ?? [],
     ...run,
     ...(plus ? { evaluation: plus.score(run, corpus, repeats * orders.length) } : {}),
