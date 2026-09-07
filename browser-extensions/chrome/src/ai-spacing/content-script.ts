@@ -37,14 +37,15 @@ function collectLateFixes(batches: readonly { ambiguousShape: AmbiguousShape; se
   const textEditsByNode = new Map<Text, { settled: string; textEdits: TextEdit[] }>();
   for (const [batchIndex, { ambiguousShape, settledCandidates }] of batches.entries()) {
     for (const [index, settledCandidate] of settledCandidates.entries()) {
-      const candidateLabel = candidateLabelsByBatch[batchIndex]![index];
-      const isFix = candidateLabel != null && ambiguousShape.isFix(candidateLabel);
+      const candidateLabel = candidateLabelsByBatch[batchIndex]![index] ?? null;
+      // Do not skip missing labels here: shapes without a model still need to produce their edits
+      const textEdits = ambiguousShape.edits(settledCandidate, candidateLabel);
       console.debug(
-        `[pangu] ${ambiguousShape.kind}: "${settledCandidate.sentence}" (symbol at ${settledCandidate.at}) read as ${candidateLabel ?? 'no label'}${isFix ? ' -> applying its late fix' : ''}`,
+        `[pangu] ${ambiguousShape.kind}: "${settledCandidate.sentence}" (symbol at ${settledCandidate.at}, label: ${candidateLabel ?? 'none'})${textEdits.length > 0 ? ' -> applying its late fix' : ''}`,
       );
-      if (isFix) {
+      if (textEdits.length > 0) {
         const textNodeEdits = textEditsByNode.get(settledCandidate.node) ?? { settled: settledCandidate.settled, textEdits: [] };
-        textNodeEdits.textEdits.push(...ambiguousShape.edits(settledCandidate));
+        textNodeEdits.textEdits.push(...textEdits);
         textEditsByNode.set(settledCandidate.node, textNodeEdits);
       }
     }
@@ -62,18 +63,18 @@ export function warmUpAiSpacing() {
   const pageText = document.documentElement.textContent ?? '';
   // The loop is not redundant: we create base sessions per ambiguous shape
   for (const ambiguousShape of AMBIGUOUS_SHAPES) {
-    if (ambiguousShape.occursIn?.(pageText)) {
+    if (ambiguousShape.needsModel?.(pageText)) {
       console.debug(`[pangu] warm up base session: ${ambiguousShape.kind}`);
       void requestClassification(ambiguousShape.kind, []);
     }
   }
 }
 
-// Once the worker fails to answer, this page's model shapes stay off; shapes that label on the page keep running
+// Once the worker fails to answer, this page's model shapes stay off; shapes resolved by rules keep running
 let modelFailed = false;
 
 export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[]) {
-  const batches = AMBIGUOUS_SHAPES.filter((ambiguousShape) => !modelFailed || ambiguousShape.classify)
+  const batches = AMBIGUOUS_SHAPES.filter((ambiguousShape) => !modelFailed || !ambiguousShape.needsModel)
     .map((ambiguousShape) => ({ ambiguousShape, settledCandidates: findCandidates(ambiguousShape, settledTextNodes) }))
     .filter((batch) => batch.settledCandidates.length > 0);
   if (batches.length === 0) {
@@ -82,10 +83,10 @@ export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[
 
   const candidateLabelsByBatch = await Promise.all(
     batches.map(async ({ ambiguousShape, settledCandidates }) => {
-      const candidates = settledCandidates.map(({ sentence, at }) => ({ sentence, at }));
-      if (ambiguousShape.classify) {
-        return ambiguousShape.classify(candidates);
+      if (!ambiguousShape.needsModel) {
+        return [];
       }
+      const candidates = settledCandidates.map(({ sentence, at }) => ({ sentence, at }));
       const response = await requestClassification(ambiguousShape.kind, candidates);
       if (response.ok) {
         return response.candidateLabels;

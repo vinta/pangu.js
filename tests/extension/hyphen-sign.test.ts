@@ -121,39 +121,38 @@ describe('CJK', () => {
   });
 });
 
-describe('hyphenSign.occursIn()', () => {
+describe('hyphenSign.needsModel()', () => {
   it('answer yes when the tight shape occurs anywhere in the text', () => {
-    expect(hyphenSign.occursIn!('前面一句。氣溫是-5度左右')).toBe(true);
+    expect(hyphenSign.needsModel!('前面一句。氣溫是-5度左右')).toBe(true);
   });
 
   it('answer no when only looser shapes occur', () => {
-    expect(hyphenSign.occursIn!('abc-5')).toBe(false);
-    expect(hyphenSign.occursIn!('氣溫是 -5度')).toBe(false);
-    expect(hyphenSign.occursIn!('沒有連字號')).toBe(false);
+    expect(hyphenSign.needsModel!('abc-5')).toBe(false);
+    expect(hyphenSign.needsModel!('氣溫是 -5度')).toBe(false);
+    expect(hyphenSign.needsModel!('沒有連字號')).toBe(false);
   });
 
   it('leave the shared scan regex where a repeat and find() expect it', () => {
     const text = '氣溫是-5度左右';
-    expect(hyphenSign.occursIn!(text)).toBe(true);
-    expect(hyphenSign.occursIn!(text)).toBe(true);
+    expect(hyphenSign.needsModel!(text)).toBe(true);
+    expect(hyphenSign.needsModel!(text)).toBe(true);
     expect(hyphenSign.find(text, '氣溫是 - 5 度左右')).toHaveLength(1);
-  });
-});
-
-describe('hyphenSign.isFix()', () => {
-  it('fix only the signed-number label', () => {
-    expect(hyphenSign.isFix('signed-number')).toBe(true);
-    expect(hyphenSign.isFix('range-or-separator')).toBe(false);
-    expect(hyphenSign.isFix('unsure')).toBe(false);
-    expect(hyphenSign.isFix('負')).toBe(false);
   });
 });
 
 describe('hyphenSign.edits()', () => {
   function fixAll(unspaced: string, settled: string) {
-    const textEdits = hyphenSign.find(unspaced, settled).flatMap((candidateMatch) => hyphenSign.edits({ ...candidateMatch, node: {} as Text, settled }));
+    const textEdits = hyphenSign.find(unspaced, settled).flatMap((candidateMatch) => hyphenSign.edits({ ...candidateMatch, node: {} as Text, settled }, 'signed-number'));
     return applyTextEdits(settled, textEdits);
   }
+
+  it('leave other labels and missing answers unchanged', () => {
+    const settled = '氣溫是 - 5 度左右';
+    const candidate = { ...hyphenSign.find('氣溫是-5度左右', settled)[0]!, node: {} as Text, settled };
+    for (const candidateLabel of ['range-or-separator', 'unsure', null] as const) {
+      expect(hyphenSign.edits(candidate, candidateLabel)).toEqual([]);
+    }
+  });
 
   it('delete only the space the rules inserted after the hyphen', () => {
     expect(fixAll('氣溫是-5度左右', '氣溫是 - 5 度左右')).toBe('氣溫是 -5 度左右');
@@ -172,16 +171,14 @@ describe('applyTextEdits()', () => {
   // A stand-in second ambiguous shape that inserts a space rather than removing one, so one text node composes edits in both directions
   const spaceInserter: AmbiguousShape = {
     kind: 'space-inserter',
-    occursIn: () => false,
     find: () => [],
-    isFix: (candidateLabel) => candidateLabel === 'insert',
     edits: ({ index }) => [{ index, remove: 0, insert: ' ' }],
   };
 
   it('apply edits from two ambiguous shapes to one text node', () => {
     const settled = '氣溫是 - 5 度 A+B';
     const settledCandidate = (index: number): SettledCandidate => ({ sentence: '', at: 0, index, node: {} as Text, settled });
-    const textEdits: TextEdit[] = [...hyphenSign.edits(settledCandidate(4)), ...spaceInserter.edits(settledCandidate(11))];
+    const textEdits: TextEdit[] = [...hyphenSign.edits(settledCandidate(4), 'signed-number'), ...spaceInserter.edits(settledCandidate(11), null)];
 
     // Descending index order keeps the insert from shifting the delete, whichever order the shapes were asked in
     expect(applyTextEdits(settled, textEdits)).toBe('氣溫是 -5 度 A +B');

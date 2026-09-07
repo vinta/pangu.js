@@ -17,7 +17,7 @@ export const hyphenSign: AmbiguousShape = {
   kind: 'hyphen-sign',
 
   // search() ignores lastIndex, so the g regex is safe to reuse here; test() would advance it
-  occursIn(text: string) {
+  needsModel(text: string) {
     return text.search(CJK_HYPHEN_DIGIT) !== -1;
   },
 
@@ -35,12 +35,8 @@ export const hyphenSign: AmbiguousShape = {
     return candidateMatches;
   },
 
-  isFix(candidateLabel: string) {
-    return candidateLabel === HYPHEN_LABELS.signedNumber;
-  },
-
   // Only the space after the hyphen goes. The space before it is a boundary the rules got right
-  edits({ index }: SettledCandidate) {
-    return [{ index: index + 1, remove: 1, insert: '' }];
+  edits({ index }: SettledCandidate, candidateLabel) {
+    return candidateLabel === HYPHEN_LABELS.signedNumber ? [{ index: index + 1, remove: 1, insert: '' }] : [];
   },
 };

@@ -1,10 +1,6 @@
 import type { AmbiguousShape, CandidateMatch, SettledCandidate } from './base';
 import { indexOfNthSymbol } from './base';
 
-export const BRAND_SUFFIX_LABEL = 'brand-suffix';
-
-export type BrandSuffixLabel = typeof BRAND_SUFFIX_LABEL;
-
 // The CJK brand names whose plus is part of the name. The rules read `CJK+` as an operator (ADR 0013); this list restores the suffix reading in the extension (ADR 0018)
 const BRAND_SUFFIX = /(?:公視|影劇館)\+/g;
 
@@ -26,15 +22,6 @@ export const brandSuffix: AmbiguousShape = {
       }
     }
     return candidateMatches;
-  },
-
-  // Every candidate is a listed brand, so the label is decided on the page and never sent to the worker
-  classify(candidates) {
-    return candidates.map(() => BRAND_SUFFIX_LABEL);
-  },
-
-  isFix(candidateLabel: string) {
-    return candidateLabel === BRAND_SUFFIX_LABEL;
   },
 
   // The space before the plus always goes. The space after it goes only when the author's next character closes the phrase; before a word or an opening bracket it is a boundary the rules got right

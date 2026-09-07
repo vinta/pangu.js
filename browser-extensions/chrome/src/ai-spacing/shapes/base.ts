@@ -19,12 +19,11 @@ export interface SettledCandidate extends CandidateMatch {
 }
 
 export interface AmbiguousShape {
-  readonly kind: string; // joins this half to its PromptSpec
-  occursIn?(text: string): boolean; // the warm-up's page-level gate: a yes/no scan, cheaper than find(). Absent when the shape labels on the page: nothing to warm up
+  readonly kind: string; // model shapes join to their PromptSpec through this identifier
+  needsModel?(text: string): boolean; // present for model shapes; the text scan decides whether to warm up. Absent when find() resolves the match without a model
   find(unspaced: string, settled: string): CandidateMatch[]; // tight-shape scan on the unspaced text, resolved only where the inserted gap is present
-  classify?(candidates: readonly Candidate[]): (CandidateLabel | null)[]; // present when the shape labels its candidates on the page; absent, the worker's model does
-  isFix(candidateLabel: string): boolean;
-  edits(settledCandidate: SettledCandidate): TextEdit[];
+  // Model shapes must return [] for null or rejected labels. Shapes without needsModel can ignore the label
+  edits(settledCandidate: SettledCandidate, candidateLabel: CandidateLabel | null): TextEdit[];
 }
 
 // A copy of CJK in src/shared/index.ts, pinned by a vitest case. The content script is a classic script, so it can neither import the ESM build nor read CJK off the UMD global
@@ -39,7 +38,10 @@ const MAX_SENTENCE_SIDE = 120;
 // The sentence the symbol sits in, cut at the nearest terminator on each side or at MAX_SENTENCE_SIDE. Terminators are excluded, so a slice reads like the bare sentences in the measured corpus
 // The character before the symbol is CJK, never a terminator, so it is always inside the slice
 export function sliceSentence(text: string, at: number) {
-  const before = text.slice(Math.max(0, at - MAX_SENTENCE_SIDE), at).split(SENTENCE_TERMINATOR).at(-1)!;
+  const before = text
+    .slice(Math.max(0, at - MAX_SENTENCE_SIDE), at)
+    .split(SENTENCE_TERMINATOR)
+    .at(-1)!;
   const after = text.slice(at + 1, at + 1 + MAX_SENTENCE_SIDE).split(SENTENCE_TERMINATOR, 1)[0]!;
   return { sentence: before + text[at] + after, at: before.length };
 }

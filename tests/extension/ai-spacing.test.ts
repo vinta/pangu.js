@@ -8,12 +8,34 @@ async function loadAiSpacing() {
   const { handleClassification } = await import('../../browser-extensions/chrome/src/ai-spacing/service-worker');
   const sendMessage = vi.fn(({ kind, candidates }: ClassifyCandidatesMessage) => handleClassification(kind, candidates));
   vi.stubGlobal('chrome', { runtime: { sendMessage } });
-  const { applyAiSpacing } = await import('../../browser-extensions/chrome/src/ai-spacing/content-script');
-  return { pangu, sendMessage, applyAiSpacing, handleClassification };
+  const { applyAiSpacing, warmUpAiSpacing } = await import('../../browser-extensions/chrome/src/ai-spacing/content-script');
+  return { pangu, sendMessage, applyAiSpacing, warmUpAiSpacing, handleClassification };
 }
 
 afterEach(() => {
   vi.unstubAllGlobals();
+});
+
+describe('AI spacing warm-up', () => {
+  it('warms the model when a tight hyphen shape appears in the page', async () => {
+    vi.stubGlobal('LanguageModel', undefined);
+    vi.stubGlobal('document', { documentElement: { textContent: '公視+上架了新片，氣溫是-5度' } });
+    const { sendMessage, warmUpAiSpacing } = await loadAiSpacing();
+
+    warmUpAiSpacing();
+
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(sendMessage).toHaveBeenCalledWith({ type: 'CLASSIFY_CANDIDATES', kind: 'hyphen-sign', candidates: [] });
+  });
+
+  it.each(['公視+上架了新片', 'abc-5，氣溫是 -5度', '沒有連字號'])('skips model warm-up for %s', async (textContent) => {
+    vi.stubGlobal('document', { documentElement: { textContent } });
+    const { sendMessage, warmUpAiSpacing } = await loadAiSpacing();
+
+    warmUpAiSpacing();
+
+    expect(sendMessage).not.toHaveBeenCalled();
+  });
 });
 
 describe('AI spacing model sessions', () => {
@@ -92,7 +114,19 @@ describe('AI spacing message flow', () => {
     expect(pangu.applyLateFixes).not.toHaveBeenCalled();
   });
 
-  it('still applies a brand suffix fix when the model is absent', async () => {
+  it('applies a brand suffix fix without asking the worker', async () => {
+    vi.stubGlobal('LanguageModel', undefined);
+    const { pangu, sendMessage, applyAiSpacing } = await loadAiSpacing();
+    const textNode = {} as Text;
+    const settled = '公視 + 上架了新片';
+
+    await applyAiSpacing([{ node: textNode, unspaced: '公視+上架了新片', settled }]);
+
+    expect(sendMessage).not.toHaveBeenCalled();
+    expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node: textNode, settled, data: '公視+ 上架了新片' }]);
+  });
+
+  it('keeps applying brand suffix fixes after the model fails', async () => {
     vi.stubGlobal('LanguageModel', undefined);
     const { pangu, sendMessage, applyAiSpacing } = await loadAiSpacing();
     const textNode = {} as Text;
@@ -100,8 +134,14 @@ describe('AI spacing message flow', () => {
 
     await applyAiSpacing([{ node: textNode, unspaced: '公視+上架了新片，氣溫是-5度', settled }]);
 
+    const nextTextNode = {} as Text;
+    const nextSettled = '影劇館 + /全選，從 - 3 度';
+    await applyAiSpacing([{ node: nextTextNode, unspaced: '影劇館+/全選，從-3度', settled: nextSettled }]);
+
     expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(pangu.applyLateFixes).toHaveBeenCalledTimes(2);
     expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node: textNode, settled, data: '公視+ 上架了新片，氣溫是 - 5 度' }]);
+    expect(pangu.applyLateFixes).toHaveBeenNthCalledWith(2, [{ node: nextTextNode, settled: nextSettled, data: '影劇館+/全選，從 - 3 度' }]);
   });
 
   it('composes a brand suffix fix with a model fix on the same text node', async () => {

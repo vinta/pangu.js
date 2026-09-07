@@ -3,7 +3,7 @@ import { applyTextEdits } from '../../browser-extensions/chrome/src/ai-spacing/s
 import { brandSuffix } from '../../browser-extensions/chrome/src/ai-spacing/shapes/brand-suffix-shape';
 
 function fixAll(unspaced: string, settled: string) {
-  const textEdits = brandSuffix.find(unspaced, settled).flatMap((candidateMatch) => brandSuffix.edits({ ...candidateMatch, node: {} as Text, settled }));
+  const textEdits = brandSuffix.find(unspaced, settled).flatMap((candidateMatch) => brandSuffix.edits({ ...candidateMatch, node: {} as Text, settled }, null));
   return applyTextEdits(settled, textEdits);
 }
 
@@ -39,18 +39,6 @@ describe('brandSuffix.find()', () => {
   it('drop a match when the settled text has no rules-inserted gap', () => {
     expect(brandSuffix.find('公視+上架了新片', '公視+ 上架了新片')).toEqual([]);
     expect(brandSuffix.find('公視+上架了新片', '公視上架了新片')).toEqual([]);
-  });
-});
-
-describe('brandSuffix.classify() and isFix()', () => {
-  it('label every candidate on the page as a brand suffix and fix it', () => {
-    const candidateLabels = brandSuffix.classify!([
-      { sentence: '公視+上', at: 2 },
-      { sentence: '影劇館+/', at: 3 },
-    ]);
-    expect(candidateLabels).toEqual(['brand-suffix', 'brand-suffix']);
-    expect(brandSuffix.isFix('brand-suffix')).toBe(true);
-    expect(brandSuffix.isFix('signed-number')).toBe(false);
   });
 });
 

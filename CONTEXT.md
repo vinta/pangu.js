@@ -35,7 +35,7 @@ The gap that the browser renders between CJK and ANS letters or digits through t
 _Avoid_: native autospacing, text autospace, CSS spacing, autospace mode, text-autospace (bare, in prose)
 
 **Late fix**:
-A correction to the rules output. It is applied after the rules run, and something other than the rules decides it, such as a classifier. A late fix only inserts or removes spaces. It never rewrites the author's characters. When no classifier is present, the rules output is kept. A late fix goes through the same scheduling path as text spacing, never as a separate write, so on a hidden page it waits with everything else.
+A correction to the rules output. It is applied after the rules run, and something other than the rules decides it, such as a fixed list or a classifier. A late fix only inserts or removes spaces. It never rewrites the author's characters. A late fix goes through the same scheduling path as text spacing, never as a separate write, so on a hidden page it waits with everything else.
 _Avoid_: un-insert (in prose), model fix
 
 **Page re-render**:
@@ -86,15 +86,15 @@ _Avoid_: tag-in-prose, prose tag
 ### AI Spacing
 
 **AI spacing**:
-The extension's second stage, on by default with a toggle to turn it off. It sends each candidate to a classifier and applies the label as a late fix. It is never required: when the model is absent, off, or slow, the rules output is kept.
+The extension's second stage, on by default with a toggle to turn it off. It resolves candidates with a fixed list or a classifier and applies corrections as late fixes. If the model cannot answer, candidates that need it keep the rules output.
 _Avoid_: model layer
 
 **Symbol sense disambiguation**:
-Deciding which reading a symbol carries from the context around it, not from the symbol alone. It is the natural language processing (NLP) task of the same name. Slash, pipe, plus, and affix reading do it with heuristics. AI spacing does it with a classifier. Use this term to relate pangu to outside work. Name the specific reading when you describe the algorithm.
+Deciding which reading a symbol carries from the context around it, not from the symbol alone. It is the natural language processing (NLP) task of the same name. Slash, pipe, plus, and affix reading do it with heuristics. AI spacing does it with a fixed list or a classifier. Use this term to relate pangu to outside work. Name the specific reading when you describe the algorithm.
 _Avoid_: symbol WSD, symbol disambiguation
 
 **Ambiguous shape**:
-A shape where the rules cannot derive the symbol's reading, so a classifier decides it. An ambiguous shape defines three things: what to flag, the menu of labels, and the fix for each label.
+A shape where the rules cannot derive the symbol's reading, so a fixed list or a classifier decides it. It defines what to flag and which late fix to apply, with labels only when a model is needed.
 _Avoid_: symbol class, ambiguity, shape (bare, for this sense)
 
 **Candidate**:
@@ -105,7 +105,7 @@ _Avoid_: span, ambiguous span, model span
 A candidate bound to the text node it came from, with the symbol's index in the settled text, so a late fix edits only bytes the batch settled on.
 
 **Classifier**:
-The component that reads one candidate and answers with one label from a fixed menu. It never answers with text, so it can never rewrite an author's characters. It is either the on-device model in the service worker or a fixed list on the page.
+The component that reads one candidate and answers with one label from a fixed menu. It never answers with text, so it can never rewrite an author's characters.
 _Avoid_: LLM, AI (for the component)
 
 **Label**:
