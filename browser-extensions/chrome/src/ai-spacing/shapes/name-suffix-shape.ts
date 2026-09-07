@@ -1,16 +1,12 @@
 import type { AmbiguousShape, CandidateMatch, SettledCandidate } from './base';
 import { indexOfNthSymbol } from './base';
 
-// Four closed sets of names whose trailing symbol is part of the name. The rules read `A+CJK` and `A-CJK` as operators (ADR 0019, ADR 0003); this list restores the suffix in the extension.
-// A Latin entry needs a left boundary so a longer word never matches. Single letters (A+, O-) stay out: the grade rule already keeps them, and a listed letter would turn a flipped joiner
-// `A + B` into `A+ B`
 const PRODUCT_NAME = 'Apple TV|CATCHPLAY|[Dd]iscovery|Disney|ESPN|Fitness|iCloud|Paramount|PS';
-// A CJK entry carries no left boundary, so it also matches tight after a Latin code (`A` + CJK name + `+`)
 const CJK_PRODUCT_NAME = '公視|影劇館';
 const PRODUCT_TIER = 'Pro';
-// The S&P and Fitch scale, and Taiwan Ratings' tw prefix. AAA is the top and has no sign
 const CREDIT_RATING = '(?:tw)?(?:AA|BBB|BB|CCC)|tw[AB]';
 const BLOOD_TYPE = 'AB|RhD|Rh';
+
 // Product names and tiers take + only; credit ratings and blood types take + or -, since the same scale has both forms
 const NAME_SUFFIX = new RegExp(`(?:(?<![A-Za-z0-9])(?:(?:${PRODUCT_NAME}|${PRODUCT_TIER})\\+|(?:${CREDIT_RATING}|${BLOOD_TYPE})[+-])|(?:${CJK_PRODUCT_NAME})\\+)`, 'g');
 
