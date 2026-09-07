@@ -14,7 +14,10 @@ describe('brandSuffix.find()', () => {
   });
 
   it('count earlier pluses into the ordinal', () => {
-    expect(brandSuffix.find('公視+與Disney+都上架了新片', '公視 + 與 Disney+ 都上架了新片')).toEqual([{ sentence: '公視+與', at: 2, index: 3 }]);
+    expect(brandSuffix.find('公視+與Disney+都上架了新片', '公視 + 與 Disney + 都上架了新片')).toEqual([
+      { sentence: '公視+與', at: 2, index: 3 },
+      { sentence: 'Disney+都', at: 6, index: 14 },
+    ]);
     expect(brandSuffix.find('HiNet光世代+Wi-Fi全屋通1台+MOD影劇館+(300M/300M)', 'HiNet 光世代 + Wi-Fi 全屋通 1 台 + MOD 影劇館 + (300M/300M)')).toEqual([{ sentence: '影劇館+(', at: 3, index: 36 }]);
   });
 
@@ -29,14 +32,16 @@ describe('brandSuffix.find()', () => {
     expect(brandSuffix.find('今天來看公視+', '今天來看公視 +')).toEqual([{ sentence: '公視+', at: 2, index: 7 }]);
   });
 
-  it('ignore an author-written space and unlisted brands', () => {
+  it('ignore an author-written space, an unlisted brand, and a longer Latin word', () => {
     expect(brandSuffix.find('公視 +上架了新片', '公視 + 上架了新片')).toEqual([]);
     expect(brandSuffix.find('公視 + 上架了新片', '公視 + 上架了新片')).toEqual([]);
     expect(brandSuffix.find('星河+上線', '星河 + 上線')).toEqual([]);
-    expect(brandSuffix.find('Disney+上架了新片', 'Disney+ 上架了新片')).toEqual([]);
+    expect(brandSuffix.find('Fitness+和Disney+都上架了', 'Fitness + 和 Disney + 都上架了')).toEqual([{ sentence: 'Disney+都', at: 6, index: 19 }]);
+    expect(brandSuffix.find('NotDisney+和Disney+都上架了', 'NotDisney + 和 Disney + 都上架了')).toEqual([{ sentence: 'Disney+都', at: 6, index: 21 }]);
   });
 
   it('drop a match when the settled text has no rules-inserted gap', () => {
+    expect(brandSuffix.find('Disney+上架了新片', 'Disney+ 上架了新片')).toEqual([]);
     expect(brandSuffix.find('公視+上架了新片', '公視+ 上架了新片')).toEqual([]);
     expect(brandSuffix.find('公視+上架了新片', '公視上架了新片')).toEqual([]);
   });
@@ -46,7 +51,13 @@ describe('brandSuffix.edits()', () => {
   it('delete the space before the plus and keep the boundary before a word', () => {
     expect(fixAll('公視+上架了新片', '公視 + 上架了新片')).toBe('公視+ 上架了新片');
     expect(fixAll('MOD影劇館+上架了新片', 'MOD 影劇館 + 上架了新片')).toBe('MOD 影劇館+ 上架了新片');
-    expect(fixAll('公視+與Disney+都上架了新片', '公視 + 與 Disney+ 都上架了新片')).toBe('公視+ 與 Disney+ 都上架了新片');
+    expect(fixAll('公視+與Disney+都上架了新片', '公視 + 與 Disney + 都上架了新片')).toBe('公視+ 與 Disney+ 都上架了新片');
+  });
+
+  it('restore Latin brands the rules spaced as separators on a bundle-plan line', () => {
+    expect(fixAll('Disney+和Apple TV+都上架了', 'Disney + 和 Apple TV + 都上架了')).toBe('Disney+ 和 Apple TV+ 都上架了');
+    expect(fixAll('公視+、Disney+、Apple TV+等平台', '公視 + 、Disney + 、Apple TV + 等平台')).toBe('公視+、Disney+、Apple TV+ 等平台');
+    expect(fixAll('Discovery+和discovery+都上架了', 'Discovery + 和 discovery + 都上架了')).toBe('Discovery+ 和 discovery+ 都上架了');
   });
 
   it('keep the boundary before an opening bracket', () => {
@@ -58,6 +69,9 @@ describe('brandSuffix.edits()', () => {
 
   it('delete both spaces before a slash, a closing bracket, or punctuation', () => {
     expect(fixAll('影劇館+/全選', '影劇館 + /全選')).toBe('影劇館+/全選');
+    expect(fixAll('HiNet光世代+MOD+影劇館+/全選/自選20/特選餐/豪華餐(5選1)+Wi-Fi全屋通(1台)', 'HiNet 光世代 + MOD + 影劇館 + /全選/自選 20/特選餐/豪華餐 (5 選 1) + Wi-Fi 全屋通 (1 台)')).toBe(
+      'HiNet 光世代 + MOD + 影劇館+/全選/自選 20/特選餐/豪華餐 (5 選 1) + Wi-Fi 全屋通 (1 台)',
+    );
     expect(fixAll('公視+，今天有新片', '公視 + ，今天有新片')).toBe('公視+，今天有新片');
     expect(fixAll('公視+。', '公視 + 。')).toBe('公視+。');
     expect(fixAll('公視+）', '公視 + ）')).toBe('公視+）');

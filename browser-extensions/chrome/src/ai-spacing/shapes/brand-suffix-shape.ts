@@ -1,8 +1,9 @@
 import type { AmbiguousShape, CandidateMatch, SettledCandidate } from './base';
 import { indexOfNthSymbol } from './base';
 
-// The CJK brand names whose plus is part of the name. The rules read `CJK+` as an operator (ADR 0013); this list restores the suffix reading in the extension (ADR 0018)
-const BRAND_SUFFIX = /(?:公視|影劇館)\+/g;
+// The brand names whose plus is part of the name. The rules read `CJK+` as an operator (ADR 0013) and, on a bundle-plan line, `A+` as a separator (ADR 0019); this list restores the suffix
+// reading in the extension (ADR 0018). A Latin entry needs a left boundary so a longer word never matches; a CJK entry keeps none, since `MOD影劇館+` must match
+const BRAND_SUFFIX = /(?:(?<![A-Za-z0-9])(?:Disney|Apple TV|iCloud|CATCHPLAY|Paramount|[Dd]iscovery|ESPN)|公視|影劇館)\+/g;
 
 // After a brand suffix, a slash, a closing bracket or quote, or pause and end punctuation follows tight; a word or an opening bracket keeps the boundary space
 const CLOSING_AFTER_PLUS = /[/)\]}\uff09\u3011\u3015\u3009\u300b\u300d\u300f\uff0c\u3002\u3001\uff1b\uff1a\uff01\uff1f]/;
