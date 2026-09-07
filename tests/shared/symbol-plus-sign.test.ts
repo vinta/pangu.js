@@ -35,6 +35,11 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('Disney+上架了C++課程')).toBe('Disney + 上架了 C++ 課程');
     expect(pangu.spacingText('Disney+上架了A+B')).toBe('Disney + 上架了 A + B');
 
+    // Plus reading runs before the operator rules, so a CJK+A contact flips the line's later joiners too; a line with no contact keeps them
+    expect(pangu.spacingText('HiNet光世代+MOD+Wi-Fi全屋通')).toBe('HiNet 光世代 + MOD + Wi-Fi 全屋通');
+    expect(pangu.spacingText('陳上進+Vinta+Mollie')).toBe('陳上進 + Vinta + Mollie');
+    expect(pangu.spacingText('套餐含MOD+Netflix+Disney')).toBe('套餐含 MOD+Netflix+Disney');
+
     // NOTE: not expected, cannot fix with rules, but fixed by AI spacing
     // see browser-extensions/chrome/src/ai-spacing/shapes/brand-suffix-shape.ts
 

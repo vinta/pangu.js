@@ -29,10 +29,8 @@ export const AN = 'A-Za-z0-9';
 export const A = 'A-Za-z';
 export const UPPER_AN = 'A-Z0-9'; // For FIX_CJK_COLON_ANS
 
-// Operators. Each rule uses a different set
-export const OPERATORS_BASE = '\\+\\*=&';
-export const OPERATORS_WITH_HYPHEN = `${OPERATORS_BASE}\\-`; // For CJK_OPERATOR_ANS
-export const OPERATORS_NO_PLUS = '\\*=&\\-'; // For ANS_OPERATOR_CJK only. No + because the digit suffix (18+) and plus reading decide a plus after a half-width run
+// Operators. No + because every plus in CJK contact is decided by an affix or by plus reading, which both run before the operator rules
+export const OPERATORS = '\\*=&\\-';
 export const GRADE_OPERATORS = '\\+\\-\\*'; // For single letter grades
 
 export const QUOTES = '\`"\u05f4'; // Backtick, straight quote, Hebrew punctuation
@@ -111,11 +109,11 @@ export const HASH_CJK = new RegExp(`(([^ \\u00a0])#)([${CJK}])`, 'g');
 // In file path context (multiple slashes), only a final hashtag not preceded by a slash gets a space
 export const CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
 
-// The operator set is + - * = & only (no | / < >). Only direct CJK contact makes a symbol an operator: a symbol between two half-width characters binds them into a joiner token (A+B, a=1, S&P)
+// The operator set is - * = & only (no + | / < >). Only direct CJK contact makes a symbol an operator: a symbol between two half-width characters binds them into a joiner token (A-B, a=1, S&P)
 // and never gets spaces, so there is deliberately no between-half-width rule here
 // On the left, a closing bracket also counts as the half-width side: ]-CJK reads as an operator whose operand is the bracketed run
-export const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS_WITH_HYPHEN}])([${AN}])`, 'g');
-export const ANS_OPERATOR_CJK = new RegExp(`([${AN}${RIGHT_BRACKETS_BASIC}])([${OPERATORS_NO_PLUS}])([${CJK}])`, 'g');
+export const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS}])([${AN}])`, 'g');
+export const ANS_OPERATOR_CJK = new RegExp(`([${AN}${RIGHT_BRACKETS_BASIC}])([${OPERATORS}])([${CJK}])`, 'g');
 
 // Slash patterns for operator vs separator behavior
 export const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
@@ -370,6 +368,19 @@ export class Pangu {
     newText = newText.replace(CJK_HYPHEN_FLAG, '$1 $2$3');
     newText = newText.replace(DIGIT_PLUS_CJK, '$1$2 $3');
 
+    // Plus reading is per line: a plus in direct contact with CJK makes every undecided plus on the line a separator with spaces on both sides, as in telecom bundle plans that chain products with +
+    // A decided plus keeps its reading: space-adjacent, affix-attached (100+, +886), or in a ++ run (C++). A line with no CJK contact keeps its joiner tokens tight (A+B, 5+5)
+    // It runs right after the affixes and before the operator rules, so a CJK+A contact flips the line's joiners like a CJK+CJK contact does (CJK+A+A reads CJK + A + A)
+    newText = newText
+      .split('\n')
+      .map((line) => {
+        if (!PLUS_CJK_CONTACT.test(line)) {
+          return line;
+        }
+        return line.replace(PLUS_SEPARATOR, ' + ');
+      })
+      .join('\n');
+
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
 
@@ -409,18 +420,6 @@ export class Pangu {
           return line;
         }
         return line.replace(PIPE_SEPARATOR, '$1 $2 ');
-      })
-      .join('\n');
-
-    // Plus reading is per line: a plus in direct contact with CJK makes every undecided plus on the line a separator with spaces on both sides, as in telecom bundle plans that chain products with +
-    // A decided plus keeps its reading: space-adjacent, affix-attached (100+, +886), or in a ++ run (C++). A line with no CJK contact keeps its joiner tokens tight (A+B, 5+5)
-    newText = newText
-      .split('\n')
-      .map((line) => {
-        if (!PLUS_CJK_CONTACT.test(line)) {
-          return line;
-        }
-        return line.replace(PLUS_SEPARATOR, ' + ');
       })
       .join('\n');
 
