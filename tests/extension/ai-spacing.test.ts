@@ -1,19 +1,90 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ClassifyCandidatesMessage } from '../../browser-extensions/chrome/src/ai-spacing/messages';
+import type { LateFix } from '../../src/browser/pangu';
+import { pangu as corePangu } from '../../src/shared/index';
 
 async function loadAiSpacing() {
   vi.resetModules();
-  const pangu = { onTextNodesSettled: vi.fn(), applyLateFixes: vi.fn() };
+  const pangu = {
+    onTextNodesSettled: vi.fn(),
+    applyLateFixes: vi.fn((fixes: readonly LateFix[]) => {
+      for (const { node, data } of fixes) {
+        node.data = data;
+      }
+    }),
+  };
   vi.stubGlobal('window', { pangu });
   const { handleClassification } = await import('../../browser-extensions/chrome/src/ai-spacing/service-worker');
   const sendMessage = vi.fn(({ kind, candidates }: ClassifyCandidatesMessage) => handleClassification(kind, candidates));
   vi.stubGlobal('chrome', { runtime: { sendMessage } });
   const { applyAiSpacing, warmUpAiSpacing } = await import('../../browser-extensions/chrome/src/ai-spacing/content-script');
-  return { pangu, sendMessage, applyAiSpacing, warmUpAiSpacing, handleClassification };
+  async function spacingTextWithAi(unspaced: string) {
+    const settled = corePangu.spacingText(unspaced);
+    const node = { data: settled } as Text;
+    await applyAiSpacing([{ node, unspaced, settled }]);
+    return node.data;
+  }
+
+  return { pangu, sendMessage, applyAiSpacing, warmUpAiSpacing, handleClassification, spacingTextWithAi };
 }
 
 afterEach(() => {
   vi.unstubAllGlobals();
+});
+
+describe('AI spacing results', () => {
+  it('joins negative signs when the model answers signed-number', async () => {
+    const clone = async () => ({ prompt: async () => '"signed-number"', destroy: vi.fn() });
+    vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create: async () => ({ clone }) });
+    const { spacingTextWithAi } = await loadAiSpacing();
+
+    expect(await spacingTextWithAi('氣溫是-5度左右')).toBe('氣溫是 -5 度左右');
+    expect(await spacingTextWithAi('從-5到-3度')).toBe('從 -5 到 -3 度');
+    expect(await spacingTextWithAi('Nasdaq-100本週下跌-13.44%')).toBe('Nasdaq-100 本週下跌 -13.44%');
+    expect(await spacingTextWithAi('公視+上架了新片，氣溫是-5度')).toBe('公視+ 上架了新片，氣溫是 -5 度');
+  });
+
+  it('keeps separators and uncertain readings spaced', async () => {
+    const prompt = vi.fn().mockResolvedValueOnce('"range-or-separator"').mockResolvedValueOnce('"unsure"');
+    const clone = async () => ({ prompt, destroy: vi.fn() });
+    vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create: async () => ({ clone }) });
+    const { spacingTextWithAi } = await loadAiSpacing();
+
+    expect(await spacingTextWithAi('早鳥票-2張')).toBe('早鳥票 - 2 張');
+    expect(await spacingTextWithAi('未知-4')).toBe('未知 - 4');
+    expect(prompt).toHaveBeenCalledTimes(2);
+  });
+
+  it('restores name suffixes without a model', async () => {
+    vi.stubGlobal('LanguageModel', undefined);
+    const { spacingTextWithAi, sendMessage } = await loadAiSpacing();
+
+    expect(await spacingTextWithAi('Disney+上架了新片')).toBe('Disney+ 上架了新片');
+    expect(await spacingTextWithAi('公視+上架了新片')).toBe('公視+ 上架了新片');
+    expect(await spacingTextWithAi('MOD+影劇館+上架')).toBe('MOD + 影劇館+ 上架');
+    expect(await spacingTextWithAi('Netflix、Disney+、Apple TV+等串流平台')).toBe('Netflix、Disney+、Apple TV+ 等串流平台');
+    expect(await spacingTextWithAi('影劇館+/全選')).toBe('影劇館+/全選');
+    expect(await spacingTextWithAi('公視+(免費平台)')).toBe('公視+ (免費平台)');
+    expect(await spacingTextWithAi('「公視+」')).toBe('「公視+」');
+    expect(await spacingTextWithAi('今天來看公視+')).toBe('今天來看公視+');
+    expect(await spacingTextWithAi('vivo X70 Pro+開賣')).toBe('vivo X70 Pro+ 開賣');
+    expect(await spacingTextWithAi('評等介於AA-和AA+之間')).toBe('評等介於 AA- 和 AA+ 之間');
+    expect(await spacingTextWithAi('血型是AB-的人')).toBe('血型是 AB- 的人');
+    expect(sendMessage).not.toHaveBeenCalled();
+  });
+
+  it('preserves core spacing and author-written gaps without a model', async () => {
+    vi.stubGlobal('LanguageModel', undefined);
+    const { spacingTextWithAi, sendMessage } = await loadAiSpacing();
+
+    expect(await spacingTextWithAi('打+886這個號碼')).toBe('打 +886 這個號碼');
+    expect(await spacingTextWithAi('Disney+上架了C++課程')).toBe('Disney+ 上架了 C++ 課程');
+    expect(await spacingTextWithAi('Disney+上架了A+B')).toBe('Disney+ 上架了 A + B');
+    expect(await spacingTextWithAi('Switch+健身環套組')).toBe('Switch + 健身環套組');
+    expect(await spacingTextWithAi('公視 +上架了新片')).toBe('公視 + 上架了新片');
+    expect(await spacingTextWithAi('氣溫是 - 5度')).toBe('氣溫是 - 5 度');
+    expect(sendMessage).not.toHaveBeenCalled();
+  });
 });
 
 describe('AI spacing warm-up', () => {
