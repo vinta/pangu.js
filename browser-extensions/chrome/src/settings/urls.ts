@@ -69,8 +69,5 @@ export function shouldShowOffIcon(settings: Settings, url: string | undefined) {
   }
 
   // The off icon only shows when:
-  if (settings.spacing_mode === 'spacing_when_load') {
-    return true;
-  }
-  return isUrlExcludedByFilter(settings, url);
+  return settings.spacing_mode === 'spacing_when_load' || isUrlExcludedByFilter(settings, url);
 }
