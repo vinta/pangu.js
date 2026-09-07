@@ -140,8 +140,9 @@ export const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([${A}])([${GRADE_OPERATOR
 export const CJK_SIGN_DIGIT = new RegExp(`([${CJK}])(\\+)([0-9])`, 'g');
 // Flag: - attaches to a following single lowercase letter (-m). [a-z] keeps a capitalized word on the operator reading, and the trailing \b keeps a longer lowercase word there too
 export const CJK_HYPHEN_FLAG = new RegExp(`([${CJK}])(\\-)([a-z])\\b`, 'g');
-// Suffix: + attaches to a preceding half-width run (Disney+, 18+)
-export const AN_PLUS_CJK = new RegExp(`([${AN}])(\\+)([${CJK}])`, 'g');
+// Suffix: + attaches to preceding digits (18+, 100+) or a preceding word (Disney+)
+export const DIGIT_PLUS_CJK = new RegExp(`([0-9])(\\+)([${CJK}])`, 'g');
+export const LETTER_PLUS_CJK = new RegExp(`([${A}])(\\+)([${CJK}])`, 'g');
 
 // < and > as comparison operators, not brackets
 export const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([${AN}])`, 'g');
@@ -367,7 +368,8 @@ export class Pangu {
     // Affix readings run before the operator rules so the symbol stays attached to its half-width side
     newText = newText.replace(CJK_SIGN_DIGIT, '$1 $2$3');
     newText = newText.replace(CJK_HYPHEN_FLAG, '$1 $2$3');
-    newText = newText.replace(AN_PLUS_CJK, '$1$2 $3');
+    newText = newText.replace(DIGIT_PLUS_CJK, '$1$2 $3');
+    newText = newText.replace(LETTER_PLUS_CJK, '$1$2 $3');
 
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');
     newText = newText.replace(ANS_OPERATOR_CJK, '$1 $2 $3');
