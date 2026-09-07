@@ -4,7 +4,7 @@ import { indexOfNthSymbol } from './base';
 // Four closed sets of names whose trailing symbol is part of the name. The rules read `A+CJK` and `A-CJK` as operators (ADR 0019, ADR 0003); this list restores the suffix in the extension.
 // A Latin entry needs a left boundary so a longer word never matches. Single letters (A+, O-) stay out: the grade rule already keeps them, and a listed letter would turn a flipped joiner
 // `A + B` into `A+ B`
-const PRODUCT_NAME = 'Disney|Apple TV|iCloud|CATCHPLAY|Paramount|[Dd]iscovery|ESPN|Fitness|PS';
+const PRODUCT_NAME = 'Apple TV|CATCHPLAY|[Dd]iscovery|Disney|ESPN|Fitness|iCloud|Paramount|PS';
 // A CJK entry carries no left boundary, so it also matches tight after a Latin code (`A` + CJK name + `+`)
 const CJK_PRODUCT_NAME = '公視|影劇館';
 const PRODUCT_TIER = 'Pro';
