@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS, type Settings } from '../../browser-extensions/chrome/src/settings/storage';
-import { isValidUrl, shouldShowActiveStatus, shouldShowOffIcon } from '../../browser-extensions/chrome/src/settings/urls';
+import { isValidUrl, shouldAutoSpace, shouldShowActiveStatus, shouldShowOffIcon } from '../../browser-extensions/chrome/src/settings/urls';
 
 function makeSettings(overrides: Partial<Settings> = {}): Settings {
   return { ...DEFAULT_SETTINGS, ...overrides };
@@ -87,5 +87,27 @@ describe('shouldShowOffIcon', () => {
     const current = makeSettings({ filter_mode: 'whitelist', whitelist: ['https://example.com/*'] });
     expect(shouldShowOffIcon(current, 'https://example.com/foo')).toBe(false);
     expect(shouldShowOffIcon(current, 'https://other.com/')).toBe(true);
+  });
+});
+
+describe('shouldAutoSpace', () => {
+  it('spaces everywhere in manual mode, where only the popup injects the script', () => {
+    const current = makeSettings({ spacing_mode: 'spacing_when_click' });
+    expect(shouldAutoSpace(current, 'https://docs.google.com/document/d/abc')).toBe(true);
+  });
+
+  it('spaces pages not matching the blacklist', () => {
+    expect(shouldAutoSpace(makeSettings(), 'https://github.com/vinta/pangu.js')).toBe(true);
+  });
+
+  it('stops on blacklisted pages', () => {
+    expect(shouldAutoSpace(makeSettings(), 'https://github.com/vinta/pangu.js/issues/316')).toBe(false);
+    expect(shouldAutoSpace(makeSettings(), 'https://github.com/vinta/pangu.js/blob/master/README.md')).toBe(false);
+  });
+
+  it('spaces only whitelisted pages in whitelist mode', () => {
+    const current = makeSettings({ filter_mode: 'whitelist', whitelist: ['https://example.com/*'] });
+    expect(shouldAutoSpace(current, 'https://example.com/foo')).toBe(true);
+    expect(shouldAutoSpace(current, 'https://other.com/')).toBe(false);
   });
 });

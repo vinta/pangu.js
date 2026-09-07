@@ -44,6 +44,15 @@ function isUrlExcludedByFilter(settings: Settings, url: string) {
   return settings.filter_mode === 'whitelist';
 }
 
+// Gates the content script's automatic spacing, at load and again on every same-document navigation. Manual mode passes unconditionally: the script is registered only in
+// spacing_when_load mode, so in spacing_when_click mode the popup's manual button injected it on purpose
+export function shouldAutoSpace(settings: Settings, url: string) {
+  if (settings.spacing_mode === 'spacing_when_click') {
+    return true;
+  }
+  return !isUrlExcludedByFilter(settings, url);
+}
+
 // Drives the popup status row (顯靈中/神隱中): stricter than shouldShowOffIcon below, it also reports pages the extension cannot run on as inactive
 export function shouldShowActiveStatus(settings: Settings, url: string | undefined) {
   if (!url || !isValidUrl(url)) {
