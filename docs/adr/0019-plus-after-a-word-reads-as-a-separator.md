@@ -11,12 +11,11 @@ The decision:
 3. **Plus reading runs before the operator rules.** Every plus in CJK contact is then decided by an affix or by plus reading, never by the operator rules, so `+` leaves the operator class. A `CJK+A` contact now flips the line's later joiners like a `CJK+CJK` contact already did: `HiNet 光世代 + MOD + Wi-Fi 全屋通`, `陳上進 + Vinta + Mollie`. The glossary promised this; the operator rule ran first and hid the contact. Four of the measured cases change, all `CJK+A` lines with a later joiner.
 4. **The extension's name-suffix list restores four closed sets.** Product names (`Disney+`, `Apple TV+`, `iCloud+`, `CATCHPLAY+`, `Paramount+`, `discovery+`, `ESPN+`, `Fitness+`, `PS+`, `公視+`, `影劇館+`), product tiers (`Pro+`), credit ratings (`AA`, `BBB`, `BB`, `CCC`, each with or without Taiwan Ratings' `tw` prefix, and `twA`, `twB`), and blood types (`AB`, `Rh`, `RhD`). Ratings and blood types take `+` or `-`, since the same scale has both forms and the rules already read `AB-的人` as an operator (ADR 0003): the list restores `AB- 的人` with no rule change. A Latin entry carries a left boundary so a longer word never matches; a CJK entry keeps none, since `MOD影劇館+` must match. Single letters (`A+`, `O-`) stay out: the grade rule keeps them, and a listed letter would turn a flipped joiner `A + B` into `A+ B`.
 
-Alternatives rejected, measured on the same 113 cases:
+Alternatives rejected:
 
-- **Count contacts.** Keep the word suffix on a line with one plus in CJK contact and drop it on a line with two or more. This reached the branch and was reversed before release. Its one advantage: `Disney+ 上架` right in the npm package with no list. Its costs: every two-item combo misreads (`Switch+ 健身環`, `AI+ 製造`, `MOD+ 寬頻`), and those outnumber listed names in CJK contact; and it needs a per-line contact count, a solitary-plus regex, and a suffix rule that applies only sometimes.
+- **Count contacts.** Keep the word suffix on a line with one plus in CJK contact and drop it on a line with two or more. This reached the branch and was reversed before release. Its one advantage: `Disney+ 上架` right in the npm package with no list. Its costs: every two-item combo misreads (`Switch+ 健身環`, `AI+ 製造`, `MOD+ 寬頻`), and it needs a per-line contact count, a solitary-plus regex, and a suffix rule that applies only sometimes.
 - **Count every solitary plus on the line, not only the contacts.** Reads an enumeration as a bundle (`Netflix、Disney + 、Apple TV + 等`) and still keeps `Switch+ 健身環`.
 - **Flip in the extension only.** Keeps the package unchanged but needs an insert-direction edit and a second contract, and the package would still misread every bundle plan and two-item combo.
-- **Keep `S24+` as a suffix.** `[0-9]\+CJK` with no boundary. It also keeps `M2+` in `MacBook Air M2+滑鼠組合`, a bundle; a device name with a trailing plus is rarer than a bundle whose last token ends in a digit.
 
 ## Consequences
 
