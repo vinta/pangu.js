@@ -2,6 +2,8 @@
 
 For direct text output from explicit spacing rules, see [the spacing rewrite experiment](spacing-rewrite/README.md).
 
+For `omitResponseConstraintInput` on the hyphen classifier, see [the v26 comparison](hyphen-sign/reports/2026-09-07-omit-constraint-input.md).
+
 Run Gemini Nano experiments alongside the shipping code. The CLI sends evaluation code through Playwright to the installed pangu extension's service worker. No extra extension, eval page, or extension rebuild is needed to compare prompts.
 
 Requires Node 22.18+ and `playwright-cli` on PATH. The model must already be available in the configured Chrome profile. The runner does not download it.

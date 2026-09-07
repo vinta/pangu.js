@@ -637,6 +637,8 @@ export const PROMPTS = {
   },
 };
 
+PROMPTS['v26-zh-omit-constraint-input'] = { ...PROMPTS['v26-zh'], omitResponseConstraintInput: true };
+
 export const SHOT_SENTENCES = Object.values(SHOTS)
   .flat()
   .map(([s]) => s);
