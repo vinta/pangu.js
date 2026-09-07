@@ -42,6 +42,20 @@ _Avoid_: un-insert (in prose), model fix
 The page writes its own data over a text node that pangu already spaced. The page does this in one of two ways: it sets the `Text` node's data again, or it removes the node and inserts a fresh one. For example, the page has `CJKA`. Pangu spaces it to `CJK A`. Then the page writes `CJKA` into the same node again, or replaces the node with one that holds `CJKA`. The page did not intend to remove the space. It only rendered its own data again, and its data never had the space. From pangu's view, the write undid its work. Common causes: a second render pass in React or Vue, a script that sets `textContent` from a variable, or a live region that refreshes on a timer. Pangu detects a page re-render by comparing the new data against the last data that pangu wrote to that node. Pangu then re-spaces the node inside the observer callback, before the browser paints. If the subtree is too large to re-space before paint, the node queues like other dynamic content.
 _Avoid_: revert, external rewrite, overwrite
 
+## Chrome Extension
+
+**Automatic spacing mode**:
+The mode that starts spacing on page load when URL filters allow it. URL changes reapply these filters, even without a page reload.
+
+**Manual spacing mode**:
+The mode that waits for the user to click the manual spacing button, regardless of the saved URL filters. A URL change or page reload ends manual activation until the user click again.
+
+**Manual spacing button**:
+Starts ongoing spacing for the current URL in either mode, ignoring URL filters and including AI spacing when enabled. The manual override ends when the URL changes or the page reloads.
+
+**URL filters**:
+The blacklist and whitelist that decide where automatic spacing is allowed. They are hidden in manual spacing mode, but stay saved when you switch modes.
+
 ## Paranoid Text Spacing Algorithm
 
 The algorithm behind text spacing. It has two stages. First, the rules decide every space. Second, AI spacing corrects the rules output at the few ambiguous shapes the rules cannot read. AI spacing is the Chrome extension's second stage. It is on by default, and the user can turn it off. The npm package ships the rules only. The shapes below are generic: `CJK` is any CJK character, `A` is any letter, `N` is any digit, and symbols are literal.
