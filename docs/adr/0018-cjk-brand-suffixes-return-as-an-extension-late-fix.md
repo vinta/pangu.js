@@ -1,6 +1,6 @@
 # CJK brand suffixes return as a two-entry late fix in the extension
 
-**Partially superseded by [ADR 0019](0019-two-plus-contacts-read-as-a-bundle-plan.md): the second bundle-plan FIXME now passes, since plus reading reads `MOD+影劇館+` as `MOD + 影劇館 +` and the list tightens the brand. The list also carries Latin entries (`Disney+`, `Apple TV+`, and five more) for lines where the rules space a listed brand as a separator.**
+**Partially superseded by [ADR 0019](0019-plus-after-a-word-reads-as-a-separator.md): the list widens beyond `CJK+` and beyond `+`. It carries Latin product names, product tiers, credit ratings, and blood types, the last two with `-` too, and is named the name-suffix list. The second bundle-plan FIXME passes, since plus reading reads `MOD+影劇館+` as `MOD + 影劇館 +` and the list tightens the name. The package now reads every plus after a word as a separator (`Disney + 上架`), so the list restores single Latin names as well.**
 
 [ADR 0013](0013-protected-word-list-removed.md) removed the protected word list, so `公視+` and `影劇館+` read as operators (`公視 + 上架`). Its condition for bringing a lexicon back was that it earn its keep against the machinery it needs. [ADR 0016](0016-hyphen-before-digit-gets-a-model-layer.md) deferred brand suffixes to a model layer, with each shape earning its own decision on its own measurements.
 
