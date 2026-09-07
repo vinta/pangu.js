@@ -41,7 +41,7 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('套餐含MOD+Netflix+Disney')).toBe('套餐含 MOD+Netflix+Disney');
 
     // NOTE: not expected, cannot fix with rules, but fixed by AI spacing
-    // see browser-extensions/chrome/src/ai-spacing/shapes/brand-suffix-shape.ts
+    // see browser-extensions/chrome/src/ai-spacing/shapes/name-suffix-shape.ts
 
     expect(pangu.spacingText('Netflix、Disney+、Apple TV+等串流平台')).toBe('Netflix、Disney + 、Apple TV + 等串流平台');
     // expect(pangu.spacingText('Netflix、Disney+、Apple TV+等串流平台')).toBe('Netflix、Disney+、Apple TV+ 等串流平台');
@@ -89,7 +89,7 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('Python 3+的版本')).toBe('Python 3+ 的版本');
 
     // NOTE: not expected, cannot fix with rules, but fixed by AI spacing
-    // see browser-extensions/chrome/src/ai-spacing/shapes/brand-suffix-shape.ts
+    // see browser-extensions/chrome/src/ai-spacing/shapes/name-suffix-shape.ts
 
     expect(pangu.spacingText('Disney+上架了新片')).toBe('Disney + 上架了新片');
     // expect(pangu.spacingText('Disney+上架了新片')).toBe('Disney+ 上架了新片');

@@ -1,53 +1,53 @@
 import { describe, expect, it } from 'vitest';
 import { applyTextEdits } from '../../browser-extensions/chrome/src/ai-spacing/shapes/base';
-import { brandSuffix } from '../../browser-extensions/chrome/src/ai-spacing/shapes/brand-suffix-shape';
+import { nameSuffix } from '../../browser-extensions/chrome/src/ai-spacing/shapes/name-suffix-shape';
 
 function fixAll(unspaced: string, settled: string) {
-  const textEdits = brandSuffix.find(unspaced, settled).flatMap((candidateMatch) => brandSuffix.edits({ ...candidateMatch, node: {} as Text, settled }, null));
+  const textEdits = nameSuffix.find(unspaced, settled).flatMap((candidateMatch) => nameSuffix.edits({ ...candidateMatch, node: {} as Text, settled }, null));
   return applyTextEdits(settled, textEdits);
 }
 
-describe('brandSuffix.find()', () => {
+describe('nameSuffix.find()', () => {
   it('flag a listed brand tight against its plus', () => {
-    expect(brandSuffix.find('公視+上架了新片', '公視 + 上架了新片')).toEqual([{ sentence: '公視+上', at: 2, index: 3 }]);
-    expect(brandSuffix.find('MOD影劇館+上架了新片', 'MOD 影劇館 + 上架了新片')).toEqual([{ sentence: '影劇館+上', at: 3, index: 8 }]);
+    expect(nameSuffix.find('公視+上架了新片', '公視 + 上架了新片')).toEqual([{ sentence: '公視+上', at: 2, index: 3 }]);
+    expect(nameSuffix.find('MOD影劇館+上架了新片', 'MOD 影劇館 + 上架了新片')).toEqual([{ sentence: '影劇館+上', at: 3, index: 8 }]);
   });
 
   it('count earlier pluses into the ordinal', () => {
-    expect(brandSuffix.find('公視+與Disney+都上架了新片', '公視 + 與 Disney + 都上架了新片')).toEqual([
+    expect(nameSuffix.find('公視+與Disney+都上架了新片', '公視 + 與 Disney + 都上架了新片')).toEqual([
       { sentence: '公視+與', at: 2, index: 3 },
       { sentence: 'Disney+都', at: 6, index: 14 },
     ]);
-    expect(brandSuffix.find('HiNet光世代+Wi-Fi全屋通1台+MOD影劇館+(300M/300M)', 'HiNet 光世代 + Wi-Fi 全屋通 1 台 + MOD 影劇館 + (300M/300M)')).toEqual([{ sentence: '影劇館+(', at: 3, index: 36 }]);
+    expect(nameSuffix.find('HiNet光世代+Wi-Fi全屋通1台+MOD影劇館+(300M/300M)', 'HiNet 光世代 + Wi-Fi 全屋通 1 台 + MOD 影劇館 + (300M/300M)')).toEqual([{ sentence: '影劇館+(', at: 3, index: 36 }]);
   });
 
   it('flag every listed brand in one text node', () => {
-    expect(brandSuffix.find('公視+上架新片，公視+也有紀錄片', '公視 + 上架新片，公視 + 也有紀錄片')).toEqual([
+    expect(nameSuffix.find('公視+上架新片，公視+也有紀錄片', '公視 + 上架新片，公視 + 也有紀錄片')).toEqual([
       { sentence: '公視+上', at: 2, index: 3 },
       { sentence: '公視+也', at: 2, index: 13 },
     ]);
   });
 
   it('keep the end of the text as an empty next character', () => {
-    expect(brandSuffix.find('今天來看公視+', '今天來看公視 +')).toEqual([{ sentence: '公視+', at: 2, index: 7 }]);
+    expect(nameSuffix.find('今天來看公視+', '今天來看公視 +')).toEqual([{ sentence: '公視+', at: 2, index: 7 }]);
   });
 
   it('ignore an author-written space, an unlisted brand, and a longer Latin word', () => {
-    expect(brandSuffix.find('公視 +上架了新片', '公視 + 上架了新片')).toEqual([]);
-    expect(brandSuffix.find('公視 + 上架了新片', '公視 + 上架了新片')).toEqual([]);
-    expect(brandSuffix.find('星河+上線', '星河 + 上線')).toEqual([]);
-    expect(brandSuffix.find('Fitness+和Disney+都上架了', 'Fitness + 和 Disney + 都上架了')).toEqual([{ sentence: 'Disney+都', at: 6, index: 19 }]);
-    expect(brandSuffix.find('NotDisney+和Disney+都上架了', 'NotDisney + 和 Disney + 都上架了')).toEqual([{ sentence: 'Disney+都', at: 6, index: 21 }]);
+    expect(nameSuffix.find('公視 +上架了新片', '公視 + 上架了新片')).toEqual([]);
+    expect(nameSuffix.find('公視 + 上架了新片', '公視 + 上架了新片')).toEqual([]);
+    expect(nameSuffix.find('星河+上線', '星河 + 上線')).toEqual([]);
+    expect(nameSuffix.find('Fitness+和Disney+都上架了', 'Fitness + 和 Disney + 都上架了')).toEqual([{ sentence: 'Disney+都', at: 6, index: 19 }]);
+    expect(nameSuffix.find('NotDisney+和Disney+都上架了', 'NotDisney + 和 Disney + 都上架了')).toEqual([{ sentence: 'Disney+都', at: 6, index: 21 }]);
   });
 
   it('drop a match when the settled text has no rules-inserted gap', () => {
-    expect(brandSuffix.find('Disney+上架了新片', 'Disney+ 上架了新片')).toEqual([]);
-    expect(brandSuffix.find('公視+上架了新片', '公視+ 上架了新片')).toEqual([]);
-    expect(brandSuffix.find('公視+上架了新片', '公視上架了新片')).toEqual([]);
+    expect(nameSuffix.find('Disney+上架了新片', 'Disney+ 上架了新片')).toEqual([]);
+    expect(nameSuffix.find('公視+上架了新片', '公視+ 上架了新片')).toEqual([]);
+    expect(nameSuffix.find('公視+上架了新片', '公視上架了新片')).toEqual([]);
   });
 });
 
-describe('brandSuffix.edits()', () => {
+describe('nameSuffix.edits()', () => {
   it('delete the space before the plus and keep the boundary before a word', () => {
     expect(fixAll('公視+上架了新片', '公視 + 上架了新片')).toBe('公視+ 上架了新片');
     expect(fixAll('MOD影劇館+上架了新片', 'MOD 影劇館 + 上架了新片')).toBe('MOD 影劇館+ 上架了新片');

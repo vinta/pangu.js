@@ -1,8 +1,8 @@
 import type { CandidateLabel, ClassifyCandidatesMessage, ClassifyCandidatesResponse } from './messages';
 import type { AmbiguousShape, SettledCandidate, TextEdit } from './shapes/base';
 import { applyTextEdits } from './shapes/base';
-import { brandSuffix } from './shapes/brand-suffix-shape';
 import { hyphenSign } from './shapes/hyphen-shape';
+import { nameSuffix } from './shapes/name-suffix-shape';
 
 const pangu = window.pangu;
 
@@ -10,7 +10,7 @@ const pangu = window.pangu;
 type SettledTextNode = Parameters<NonNullable<typeof pangu.onTextNodesSettled>>[0][number];
 type LateFix = Parameters<typeof pangu.applyLateFixes>[0][number];
 
-const AMBIGUOUS_SHAPES: AmbiguousShape[] = [hyphenSign, brandSuffix];
+const AMBIGUOUS_SHAPES: AmbiguousShape[] = [hyphenSign, nameSuffix];
 
 async function requestClassification(kind: string, candidates: ClassifyCandidatesMessage['candidates']): Promise<ClassifyCandidatesResponse> {
   const message: ClassifyCandidatesMessage = { type: 'CLASSIFY_CANDIDATES', kind, candidates };
