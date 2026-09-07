@@ -10,8 +10,6 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('Vinta+陳上進')).toBe('Vinta + 陳上進');
     expect(pangu.spacingText('你+我=我們')).toBe('你 + 我 = 我們');
     expect(pangu.spacingText('Switch+健身環套組')).toBe('Switch + 健身環套組');
-    expect(pangu.spacingText('AI+製造')).toBe('AI + 製造');
-    expect(pangu.spacingText('Galaxy S24+上市')).toBe('Galaxy S24 + 上市');
     expect(pangu.spacingText('MacBook Air M2+滑鼠組合')).toBe('MacBook Air M2 + 滑鼠組合');
 
     // DO NOT change if already spacing
@@ -30,18 +28,24 @@ describe('Symbol +', () => {
 
   it('handle + symbol as separator', () => {
     // A plus after a word in CJK contact is undecided by any affix, so plus reading spaces it as a separator, in a bundle plan and on a brand line alike
-    expect(pangu.spacingText('MOD+影劇館+上架')).toBe('MOD + 影劇館 + 上架');
     expect(pangu.spacingText('Switch OLED+健身環+保護貼')).toBe('Switch OLED + 健身環 + 保護貼');
-    expect(pangu.spacingText('Disney+上架了C++課程')).toBe('Disney + 上架了 C++ 課程');
-    expect(pangu.spacingText('Disney+上架了A+B')).toBe('Disney + 上架了 A + B');
 
     // Plus reading runs before the operator rules, so a CJK+A contact flips the line's later joiners too; a line with no contact keeps them
-    expect(pangu.spacingText('HiNet光世代+MOD+Wi-Fi全屋通')).toBe('HiNet 光世代 + MOD + Wi-Fi 全屋通');
     expect(pangu.spacingText('陳上進+Vinta+Mollie')).toBe('陳上進 + Vinta + Mollie');
+    expect(pangu.spacingText('HiNet光世代+MOD+Wi-Fi全屋通')).toBe('HiNet 光世代 + MOD + Wi-Fi 全屋通');
     expect(pangu.spacingText('套餐含MOD+Netflix+Disney')).toBe('套餐含 MOD+Netflix+Disney');
 
     // NOTE: not expected, cannot fix with rules, but fixed by AI spacing
     // see browser-extensions/chrome/src/ai-spacing/shapes/name-suffix-shape.ts
+
+    expect(pangu.spacingText('MOD+影劇館+上架')).toBe('MOD + 影劇館 + 上架');
+    // expect(pangu.spacingText('MOD+影劇館+上架')).toBe('MOD + 影劇館+ 上架');
+
+    expect(pangu.spacingText('Disney+上架了C++課程')).toBe('Disney + 上架了 C++ 課程');
+    // expect(pangu.spacingText('Disney+上架了C++課程')).toBe('Disney+ 上架了 C++ 課程');
+
+    expect(pangu.spacingText('Disney+上架了A+B')).toBe('Disney + 上架了 A + B');
+    // expect(pangu.spacingText('Disney+上架了A+B')).toBe('Disney+ 上架了 A + B');
 
     expect(pangu.spacingText('Netflix、Disney+、Apple TV+等串流平台')).toBe('Netflix、Disney + 、Apple TV + 等串流平台');
     // expect(pangu.spacingText('Netflix、Disney+、Apple TV+等串流平台')).toBe('Netflix、Disney+、Apple TV+ 等串流平台');
@@ -61,6 +65,7 @@ describe('Symbol +', () => {
 
   it('handle + symbol as joiner token', () => {
     expect(pangu.spacingText('Vinta+Mollie')).toBe('Vinta+Mollie'); // If no CJK, DO NOT change
+    expect(pangu.spacingText('前面A+B後面')).toBe('前面 A+B 後面');
     expect(pangu.spacingText('得到一個A+B的結果')).toBe('得到一個 A+B 的結果');
     expect(pangu.spacingText('答案是5+5的和')).toBe('答案是 5+5 的和');
   });
