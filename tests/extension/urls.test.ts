@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS, type Settings } from '../../browser-extensions/chrome/src/settings/storage';
-import { isValidUrl, shouldAutoSpace, shouldShowActiveStatus, shouldShowOffIcon } from '../../browser-extensions/chrome/src/settings/urls';
+import { isValidUrl, shouldAutoSpacing, shouldShowActiveStatus, shouldShowOffIcon } from '../../browser-extensions/chrome/src/settings/urls';
 
 function makeSettings(overrides: Partial<Settings> = {}): Settings {
   return { ...DEFAULT_SETTINGS, ...overrides };
@@ -90,24 +90,25 @@ describe('shouldShowOffIcon', () => {
   });
 });
 
-describe('shouldAutoSpace', () => {
-  it('spaces everywhere in manual mode, where only the popup injects the script', () => {
+describe('shouldAutoSpacing', () => {
+  it('waits for a click in manual mode, regardless of URL filters', () => {
     const current = makeSettings({ spacing_mode: 'spacing_when_click' });
-    expect(shouldAutoSpace(current, 'https://docs.google.com/document/d/abc')).toBe(true);
+    expect(shouldAutoSpacing(current, 'https://example.com/')).toBe(false);
+    expect(shouldAutoSpacing(current, 'https://docs.google.com/document/d/abc')).toBe(false);
   });
 
   it('spaces pages not matching the blacklist', () => {
-    expect(shouldAutoSpace(makeSettings(), 'https://github.com/vinta/pangu.js')).toBe(true);
+    expect(shouldAutoSpacing(makeSettings(), 'https://github.com/vinta/pangu.js')).toBe(true);
   });
 
   it('stops on blacklisted pages', () => {
-    expect(shouldAutoSpace(makeSettings(), 'https://github.com/vinta/pangu.js/issues/316')).toBe(false);
-    expect(shouldAutoSpace(makeSettings(), 'https://github.com/vinta/pangu.js/blob/master/README.md')).toBe(false);
+    expect(shouldAutoSpacing(makeSettings(), 'https://github.com/vinta/pangu.js/issues/316')).toBe(false);
+    expect(shouldAutoSpacing(makeSettings(), 'https://github.com/vinta/pangu.js/blob/master/README.md')).toBe(false);
   });
 
   it('spaces only whitelisted pages in whitelist mode', () => {
     const current = makeSettings({ filter_mode: 'whitelist', whitelist: ['https://example.com/*'] });
-    expect(shouldAutoSpace(current, 'https://example.com/foo')).toBe(true);
-    expect(shouldAutoSpace(current, 'https://other.com/')).toBe(false);
+    expect(shouldAutoSpacing(current, 'https://example.com/foo')).toBe(true);
+    expect(shouldAutoSpacing(current, 'https://other.com/')).toBe(false);
   });
 });

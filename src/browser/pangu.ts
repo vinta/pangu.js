@@ -98,10 +98,17 @@ export class BrowserPangu extends Pangu {
     }
 
     this.isAutoSpacingPageExecuted = true;
-
-    // prettier-ignore
-    this.waitForVideosToLoad(pageDelayMs, once(() => this.spacingPage()));
     this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
+
+    const observer = this.autoSpacingPageObserver;
+    this.waitForVideosToLoad(
+      pageDelayMs,
+      once(() => {
+        if (this.autoSpacingPageObserver === observer) {
+          this.spacingPage();
+        }
+      }),
+    );
   }
 
   public spacingPage() {
@@ -473,6 +480,9 @@ export class BrowserPangu extends Pangu {
 
     const debouncedSpacingTitle = debounce(
       () => {
+        if (this.autoSpacingPageObserver !== observer) {
+          return;
+        }
         const titleElement = document.querySelector('head > title');
         if (titleElement) {
           this.spacingNode(titleElement);
@@ -484,6 +494,9 @@ export class BrowserPangu extends Pangu {
 
     const debouncedSpacingQueuedNodes = debounce(
       () => {
+        if (this.autoSpacingPageObserver !== observer) {
+          return;
+        }
         // NOTE: a single node could be very big which contains a lot of child nodes
         const nodesToProcess = [...queue];
         queue.length = 0; // Clear the queue
@@ -522,7 +535,7 @@ export class BrowserPangu extends Pangu {
     );
 
     // See: https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-    this.autoSpacingPageObserver = new MutationObserver((mutations) => {
+    const observer = new MutationObserver((mutations) => {
       let titleChanged = false;
 
       // If this batch removed content we already spaced, there is usually a page re-render
@@ -601,6 +614,7 @@ export class BrowserPangu extends Pangu {
 
       debouncedSpacingQueuedNodes();
     });
+    this.autoSpacingPageObserver = observer;
 
     // A single MutationObserver can observe multiple targets simultaneously
     this.autoSpacingPageObserver.observe(document.head, {

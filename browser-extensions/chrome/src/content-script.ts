@@ -1,7 +1,7 @@
 import { applyAiSpacing, warmUpAiSpacing } from './ai-spacing/content-script';
 import type { ContentScriptResponse, MessageToContentScript } from './messages';
 import { getSettings } from './settings/storage';
-import { shouldAutoSpace } from './settings/urls';
+import { shouldAutoSpacing } from './settings/urls';
 
 const pangu = window.pangu;
 
@@ -17,40 +17,60 @@ async function init() {
     };
   }
 
-  // Chrome matches the registration's url patterns only when a document is created, and single-page apps like GitHub change the url without creating one, so the blacklist and whitelist
-  // are applied here instead: at load and on every same-document navigation (see docs/adr/0020). Both core calls are idempotent, so the same-url replace events some pages fire are harmless.
-  // The model warms up once, on the first url that spaces: an excluded page never needs it
   let warmedUp = false;
-  const followUrl = () => {
-    if (!shouldAutoSpace(settings, location.href)) {
-      pangu.stopAutoSpacingPage();
-      return;
-    }
+  const startAutoSpacing = () => {
     if (settings.is_enable_ai_spacing && !warmedUp) {
       warmedUp = true;
       warmUpAiSpacing();
     }
     pangu.autoSpacingPage();
   };
-  navigation.addEventListener('currententrychange', followUrl);
-  followUrl();
+
+  // Registration only handles page loads. A URL change ends the manual override and restores the configured mode (see docs/adr/0020).
+  const applyAutoSpacingUrlPolicy = () => {
+    if (shouldAutoSpacing(settings, location.href)) {
+      startAutoSpacing();
+    } else {
+      pangu.stopAutoSpacingPage();
+    }
+  };
+  navigation.addEventListener('currententrychange', (event) => {
+    // Same-URL history updates must not cancel manual activation.
+    if (event.from.url !== location.href) {
+      applyAutoSpacingUrlPolicy();
+    }
+  });
+  applyAutoSpacingUrlPolicy();
+  return startAutoSpacing;
 }
 
-void init();
+const initialization = init();
+void initialization.catch((error) => console.error('Failed to initialize auto spacing', error));
 
-// This allows manual spacing from popup when spacing_mode === 'spacing_when_click'
 chrome.runtime.onMessage.addListener((message: MessageToContentScript, _sender: chrome.runtime.MessageSender, sendResponse: (response: ContentScriptResponse) => void) => {
   if (message.action === 'PING') {
     // PING is used by popup to check if content script is already loaded
     sendResponse({ success: true });
   } else if (message.action === 'MANUAL_SPACING') {
-    // MANUAL_SPACING is requested by user clicking button in popup
-    pangu.spacingPage();
-    sendResponse({ success: true });
+    // The manual spacing button runs auto spacing unconditionally, until the URL changes.
+    const url = location.href;
+    initialization
+      .then((startAutoSpacing) => {
+        if (location.href !== url) {
+          sendResponse({ success: false });
+          return;
+        }
+        startAutoSpacing();
+        sendResponse({ success: true });
+      })
+      .catch((error) => {
+        console.error(`Failed to start auto spacing on ${url}:`, error);
+        sendResponse({ success: false });
+      });
+    return true;
   }
 
-  // Return true only when sending response asynchronously
-  // Return nothing (or false) when sending response synchronously
+  return false;
 });
 
 // Make this file a module to enable global type declarations
