@@ -1,12 +1,19 @@
 import type { AmbiguousShape, CandidateMatch, SettledCandidate } from './base';
 import { indexOfNthSymbol } from './base';
 
-// The brand names whose plus is part of the name. The rules read `CJK+` as an operator (ADR 0013) and, on a bundle-plan line, `A+` as a separator (ADR 0019); this list restores the suffix
-// reading in the extension (ADR 0018). A Latin entry needs a left boundary so a longer word never matches; a CJK entry keeps none, since `MOD影劇館+` must match
-const NAME_SUFFIX = /(?:(?<![A-Za-z0-9])(?:Disney|Apple TV|iCloud|CATCHPLAY|Paramount|[Dd]iscovery|ESPN)|公視|影劇館)\+/g;
+// Four closed sets of names whose trailing symbol is part of the name. The rules read `A+CJK` and `A-CJK` as operators (ADR 0019, ADR 0003); this list restores the suffix in the extension.
+// A Latin entry needs a left boundary so a longer word never matches; a CJK entry keeps none, so it also matches tight after a Latin code. Single letters (A+, O-) stay out: the grade rule
+// already keeps them, and a listed letter would turn a flipped joiner `A + B` into `A+ B`
+const PRODUCT_NAME = 'Disney|Apple TV|iCloud|CATCHPLAY|Paramount|[Dd]iscovery|ESPN|Fitness|PS';
+const PRODUCT_TIER = 'Pro';
+// The S&P and Fitch scale, and Taiwan Ratings' tw prefix. AAA is the top and has no sign
+const CREDIT_RATING = '(?:tw)?(?:AA|BBB|BB|CCC)|tw[AB]';
+const BLOOD_TYPE = 'AB|RhD|Rh';
+// Product names and tiers take + only; credit ratings and blood types take + or -, since the same scale has both forms
+const NAME_SUFFIX = new RegExp(`(?:(?<![A-Za-z0-9])(?:(?:${PRODUCT_NAME}|${PRODUCT_TIER})\\+|(?:${CREDIT_RATING}|${BLOOD_TYPE})[+-])|(?:公視|影劇館)\\+)`, 'g');
 
-// After a brand suffix, a slash, a closing bracket or quote, or pause and end punctuation follows tight; a word or an opening bracket keeps the boundary space
-const CLOSING_AFTER_PLUS = /[/)\]}\uff09\u3011\u3015\u3009\u300b\u300d\u300f\uff0c\u3002\u3001\uff1b\uff1a\uff01\uff1f]/;
+// After a name suffix, a slash, a closing bracket or quote, or pause and end punctuation follows tight; a word or an opening bracket keeps the boundary space
+const CLOSING_AFTER_SUFFIX = /[/)\]}\uff09\u3011\u3015\u3009\u300b\u300d\u300f\uff0c\u3002\u3001\uff1b\uff1a\uff01\uff1f]/;
 
 export const nameSuffix: AmbiguousShape = {
   kind: 'name-suffix',
@@ -15,21 +22,23 @@ export const nameSuffix: AmbiguousShape = {
     const candidateMatches: CandidateMatch[] = [];
     for (const nameMatch of unspaced.matchAll(NAME_SUFFIX)) {
       const unspacedIndex = nameMatch.index + nameMatch[0].length - 1;
-      const index = indexOfNthSymbol(settled, '+', unspaced.slice(0, unspacedIndex).split('+').length - 1);
-      // The brand was tight against the plus, so a space between them can only be one the rules inserted
+      // The ordinal counts the matched symbol only, since a line can carry both a + and a - name
+      const symbol = nameMatch[0].slice(-1);
+      const index = indexOfNthSymbol(settled, symbol, unspaced.slice(0, unspacedIndex).split(symbol).length - 1);
+      // The name was tight against the symbol, so a space between them can only be one the rules inserted
       if (index !== -1 && settled[index - 1] === ' ') {
-        // The sentence is the brand, its plus, and the one character after it, which edits() reads to decide the second gap
+        // The sentence is the name, its symbol, and the one character after it, which edits() reads to decide the second gap
         candidateMatches.push({ sentence: unspaced.slice(nameMatch.index, unspacedIndex + 2), at: unspacedIndex - nameMatch.index, index });
       }
     }
     return candidateMatches;
   },
 
-  // The space before the plus always goes. The space after it goes only when the author's next character closes the phrase; before a word or an opening bracket it is a boundary the rules got right
+  // The space before the symbol always goes. The space after it goes only when the author's next character closes the phrase; before a word or an opening bracket it is a boundary the rules got right
   edits({ sentence, at, settled, index }: SettledCandidate) {
     const textEdits = [{ index: index - 1, remove: 1, insert: '' }];
     const after = sentence[at + 1];
-    if (after !== undefined && CLOSING_AFTER_PLUS.test(after) && settled[index + 1] === ' ') {
+    if (after !== undefined && CLOSING_AFTER_SUFFIX.test(after) && settled[index + 1] === ' ') {
       textEdits.push({ index: index + 1, remove: 1, insert: '' });
     }
     return textEdits;
