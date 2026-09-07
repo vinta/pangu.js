@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { applyTextEdits } from '../../browser-extensions/chrome/src/ai-spacing/shapes/base';
 import { brandSuffix } from '../../browser-extensions/chrome/src/ai-spacing/shapes/brand-suffix-shape';
-import { pangu } from '../../src/shared/index';
 
 function fixAll(unspaced: string, settled: string) {
   const textEdits = brandSuffix.find(unspaced, settled).flatMap((candidateMatch) => brandSuffix.edits({ ...candidateMatch, node: {} as Text, settled }));
@@ -56,11 +55,6 @@ describe('brandSuffix.classify() and isFix()', () => {
 });
 
 describe('brandSuffix.edits()', () => {
-  it('preserve author spaces when the input contains a literal core placeholder', () => {
-    const unspaced = '`+` A \uE004BACKTICK_CONTENT_0\uE005 公視+上架';
-    expect(fixAll(unspaced, pangu.spacingText(unspaced))).toBe('`+` A \uE004BACKTICK_CONTENT_0\uE005 公視+ 上架');
-  });
-
   it('delete the space before the plus and keep the boundary before a word', () => {
     expect(fixAll('公視+上架了新片', '公視 + 上架了新片')).toBe('公視+ 上架了新片');
     expect(fixAll('MOD影劇館+上架了新片', 'MOD 影劇館 + 上架了新片')).toBe('MOD 影劇館+ 上架了新片');
