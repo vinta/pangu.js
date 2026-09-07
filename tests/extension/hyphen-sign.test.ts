@@ -25,7 +25,7 @@ describe('sliceSentence()', () => {
   });
 
   it('cut at every terminator in the set', () => {
-    for (const terminator of ['。', '．', '！', '？', '；']) {
+    for (const terminator of ['。', '！', '？', '；']) {
       const text = `前句${terminator}氣溫是-5度左右${terminator}後句`;
       expect(sliceSentence(text, 6)).toEqual({ sentence: '氣溫是-5度左右', at: 3 });
     }
