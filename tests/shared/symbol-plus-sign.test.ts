@@ -31,6 +31,7 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('陳上進+Vinta+Mollie')).toBe('陳上進 + Vinta + Mollie');
     expect(pangu.spacingText('HiNet光世代+MOD+Wi-Fi全屋通')).toBe('HiNet 光世代 + MOD + Wi-Fi 全屋通');
     expect(pangu.spacingText('套餐含MOD+Netflix+Disney')).toBe('套餐含 MOD+Netflix+Disney');
+    expect(pangu.spacingText('如何使用PTS+（公視+）註冊與觀看？')).toBe('如何使用 PTS+（公視 +）註冊與觀看？');
 
     // NOTE: not expected, cannot fix with rules, but fixed by AI spacing
     // see browser-extensions/chrome/src/ai-spacing/shapes/name-suffix-shape.ts
@@ -44,7 +45,7 @@ describe('Symbol +', () => {
     expect(pangu.spacingText('Disney+上架了A+B')).toBe('Disney + 上架了 A + B');
     // expect(pangu.spacingText('Disney+上架了A+B')).toBe('Disney+ 上架了 A + B');
 
-    expect(pangu.spacingText('Netflix、Disney+、Apple TV+等串流平台')).toBe('Netflix、Disney + 、Apple TV + 等串流平台');
+    expect(pangu.spacingText('Netflix、Disney+、Apple TV+等串流平台')).toBe('Netflix、Disney+、Apple TV + 等串流平台');
     // expect(pangu.spacingText('Netflix、Disney+、Apple TV+等串流平台')).toBe('Netflix、Disney+、Apple TV+ 等串流平台');
 
     // prettier-ignore

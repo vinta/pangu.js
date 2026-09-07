@@ -61,6 +61,7 @@ describe('AI spacing results', () => {
 
     expect(await spacingTextWithAi('Disney+上架了新片')).toBe('Disney+ 上架了新片');
     expect(await spacingTextWithAi('公視+上架了新片')).toBe('公視+ 上架了新片');
+    expect(await spacingTextWithAi('如何使用PTS+（公視+）註冊與觀看？')).toBe('如何使用 PTS+（公視+）註冊與觀看？');
     expect(await spacingTextWithAi('MOD+影劇館+上架')).toBe('MOD + 影劇館+ 上架');
     expect(await spacingTextWithAi('Netflix、Disney+、Apple TV+等串流平台')).toBe('Netflix、Disney+、Apple TV+ 等串流平台');
     expect(await spacingTextWithAi('影劇館+/全選')).toBe('影劇館+/全選');
