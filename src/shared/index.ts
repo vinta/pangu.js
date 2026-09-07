@@ -188,9 +188,9 @@ export const VOID_HTML_TAGS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr
 export const BARE_HTML_TAG = /^<([a-zA-Z][a-zA-Z0-9]*)\s*\/?>$/;
 export const CLOSING_HTML_TAG = /<\/([a-zA-Z][a-zA-Z0-9]*)/g;
 
-// Spacing at direct CJK contact with a tag mention placeholder (\uE002...\uE003)
-export const CJK_HTML_TAG_MENTION = new RegExp(`([${CJK}])(?=\uE002)`, 'g');
-export const HTML_TAG_MENTION_CJK = new RegExp(`(?<=\uE003)([${CJK}])`, 'g');
+// Spacing at direct CJK contact with a tag mention placeholder (\uE004...\uE005)
+export const CJK_HTML_TAG_MENTION = new RegExp(`([${CJK}])(?=\uE004)`, 'g');
+export const HTML_TAG_MENTION_CJK = new RegExp(`(?<=\uE005)([${CJK}])`, 'g');
 
 // Used by fixBracketSpacing to strip the spaces just inside a bracket pair; everything else between the brackets stays unchanged
 export const BRACKET_PATTERNS = [
@@ -200,6 +200,7 @@ export const BRACKET_PATTERNS = [
   { pattern: /\{([^{}]*)\}/g, open: '{', close: '}' },
 ];
 
+// We use characters from Unicode's Private Use Area (U+E000-U+F8FF) as delimiters to make placeholders unlikely to collide with ordinary text
 export class PlaceholderReplacer {
   // Every spacingText() call creates instances from the same few fixed configs, so compiled patterns are cached and shared across instances
   private static patternCache = new Map<string, RegExp>();
@@ -259,13 +260,13 @@ export class Pangu {
     let newText = text;
 
     // Hide backtick content from the quote rules; the backticks themselves still get spacing
-    const backtickManager = new PlaceholderReplacer('BACKTICK_CONTENT_', '\uE004', '\uE005');
+    const backtickManager = new PlaceholderReplacer('BACKTICK_CONTENT_', '\uE000', '\uE001');
     newText = newText.replace(/`([^`]+)`/g, (_match, content) => {
       return `\`${backtickManager.store(content)}\``;
     });
 
-    const htmlTagManager = new PlaceholderReplacer('HTML_TAG_PLACEHOLDER_', '\uE000', '\uE001');
-    const mentionedTagManager = new PlaceholderReplacer('HTML_TAG_MENTION_', '\uE002', '\uE003');
+    const htmlTagManager = new PlaceholderReplacer('HTML_TAG_PLACEHOLDER_', '\uE002', '\uE003');
+    const mentionedTagManager = new PlaceholderReplacer('HTML_TAG_MENTION_', '\uE004', '\uE005');
     let hasHtmlTags = false;
 
     if (newText.includes('<')) {
@@ -319,7 +320,7 @@ export class Pangu {
     newText = newText.replace(FIX_POSSESSIVE_SINGLE_QUOTE, "$1's");
 
     // Quoted pure-CJK content keeps its quotes tight, so hide it before the single-quote rules run
-    const singleQuoteCJKManager = new PlaceholderReplacer('SINGLE_QUOTE_CJK_PLACEHOLDER_', '\uE030', '\uE031');
+    const singleQuoteCJKManager = new PlaceholderReplacer('SINGLE_QUOTE_CJK_PLACEHOLDER_', '\uE006', '\uE007');
 
     newText = newText.replace(SINGLE_QUOTE_PURE_CJK, (match) => {
       return singleQuoteCJKManager.store(match);
@@ -350,7 +351,7 @@ export class Pangu {
       .join('\n');
 
     // Protect compound words from operator spacing
-    const compoundWordManager = new PlaceholderReplacer('COMPOUND_WORD_PLACEHOLDER_', '\uE010', '\uE011');
+    const compoundWordManager = new PlaceholderReplacer('COMPOUND_WORD_PLACEHOLDER_', '\uE008', '\uE009');
 
     // Hyphen-joined alphanumeric runs that read as one name, for example state-of-the-art, GPT-4o, claude-4-opus. Qualifies when a part carries a lowercase letter, or when the hyphen joins an
     // all-letters part to an all-digits part (GPT-5), or a letters-plus-digits part to anything (GPT4o-mini). An all-uppercase pair like ABC-DEF does not qualify
