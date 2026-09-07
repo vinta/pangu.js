@@ -27,21 +27,23 @@ const repeats = Number(values.repeats);
 assert(Number.isSafeInteger(repeats) && repeats > 0, `invalid --repeats ${values.repeats}; use a positive integer`);
 const orderCount = Number(values.orders);
 assert(Number.isSafeInteger(orderCount) && orderCount > 0, `invalid --orders ${values.orders}; use a positive integer`);
-assert(['hyphen-sign', 'plus-sign'].includes(values.experiment), `invalid --experiment ${values.experiment}; use hyphen-sign or plus-sign`);
+assert(['hyphen-sign', 'plus-sign', 'spacing-rewrite'].includes(values.experiment), `invalid --experiment ${values.experiment}; use hyphen-sign, plus-sign, or spacing-rewrite`);
 const plus = values.experiment === 'plus-sign' ? await import('./plus-sign/experiment.mjs') : null;
+const rewrite = values.experiment === 'spacing-rewrite' ? await import('./spacing-rewrite/experiment.mjs') : null;
 assert(plus || !values.split, '--split is only supported for --experiment plus-sign');
-assert(!plus || !values.diagnostics, '--diagnostics is only supported for --experiment hyphen-sign');
+assert(!plus || !values.diagnostics, '--diagnostics is only supported for --experiment hyphen-sign or spacing-rewrite');
 const split = values.split ?? 'development';
-const variants = positionals.length ? positionals : plus ? ['v1-zh', 'v2-zh'] : ['shipping'];
-const prompts = plus
-  ? (await import('./plus-sign/prompts.js')).PROMPTS
-  : {
-      ...PROMPTS,
-      shipping: { system: hyphenPrompt.systemPrompt, build: (kase) => hyphenPrompt.buildQuestion(kase.input, kase.at) },
-    };
+const variants = positionals.length ? positionals : rewrite ? ['v1-zh'] : plus ? ['v1-zh', 'v2-zh'] : ['shipping'];
+const prompts =
+  plus || rewrite
+    ? (await import(`./${values.experiment}/prompts.js`)).PROMPTS
+    : {
+        ...PROMPTS,
+        shipping: { system: hyphenPrompt.systemPrompt, build: (kase) => hyphenPrompt.buildQuestion(kase.input, kase.at) },
+      };
 const root = new URL('./hyphen-sign/', import.meta.url);
-const corpus = plus ? plus.loadCorpus(split) : JSON.parse(readFileSync(new URL('cases.json', root), 'utf8'));
-const fields = plus ? [] : JSON.parse(readFileSync(new URL('field-cases.json', root), 'utf8')).cases;
+const corpus = rewrite ? rewrite.loadCorpus() : plus ? plus.loadCorpus(split) : JSON.parse(readFileSync(new URL('cases.json', root), 'utf8'));
+const fields = plus || rewrite ? [] : JSON.parse(readFileSync(new URL('field-cases.json', root), 'utf8')).cases;
 const cases = [...corpus.cases, ...fields];
 const diagnosticIds = values.diagnostics?.split(',');
 assert(
@@ -71,11 +73,14 @@ for (const id of diagnosticIds ?? []) {
 }
 assert.equal(new Set(cases.map((kase) => kase.id)).size, cases.length, 'duplicate case IDs');
 for (const kase of cases) {
+  if (rewrite) {
+    continue;
+  }
   assert.equal(kase.input[kase.at], plus ? '+' : '-', `invalid symbol offset: ${kase.id}`);
   assert(corpus.enums[kase.enum].includes(kase.expected_label), `unknown expected label: ${kase.id}`);
   assert(!SHOT_SENTENCES.includes(kase.input), `few-shot leakage: ${kase.id}`);
 }
-if (!plus) {
+if (!plus && !rewrite) {
   assert.deepEqual(corpus.enums.hyphen, hyphenPrompt.candidateLabels, 'shipping labels differ from the corpus; update the cases before comparing prompts');
 }
 const runs = variants.map((variant) => {
@@ -84,6 +89,9 @@ const runs = variants.map((variant) => {
   const inputs = cases
     .filter((kase) => !diagnosticIds || diagnosticIds.includes(kase.id))
     .map((kase) => {
+      if (rewrite) {
+        return { ...kase, question: prompt.build(kase), responseConstraint: { type: 'string' }, expected_label: kase.expected_output };
+      }
       const labels = corpus.enums[kase.enum];
       // A variant may reorder the menu/enum (labelOrder), name tokens per case (displayLabels as a function), or wrap the answer in an object schema (constraint + answerKey)
       const ordered = prompt.labelOrder ?? labels;
@@ -99,7 +107,8 @@ const runs = variants.map((variant) => {
 });
 if (values.check) {
   plus?.check(corpus);
-  console.log(`Checked ${cases.length} cases; rendered variants: ${variants.join(', ')}${plus ? '' : `; shipping source version: ${hyphenPrompt.version}`}`);
+  rewrite?.check();
+  console.log(`Checked ${cases.length} cases; rendered variants: ${variants.join(', ')}${plus || rewrite ? '' : `; shipping source version: ${hyphenPrompt.version}`}`);
   process.exit(0);
 }
 assert(/^[a-p]{32}$/.test(values['extension-id'] ?? ''), `invalid --extension-id ${values['extension-id'] ?? '(missing)'}; copy the shipping extension ID from chrome://extensions/`);
@@ -115,7 +124,7 @@ mkdirSync(output, { recursive: false });
 writeFileSync(join(output, 'cases.json'), `${JSON.stringify({ ...corpus, cases }, null, 2)}\n`, { flag: 'wx' });
 
 const extensionURL = `chrome-extension://${values['extension-id']}`;
-async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics }) {
+async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics, rewrite }) {
   const context = page.context();
   const worker = context.serviceWorkers().find((candidate) => candidate.url() === `${extensionURL}/dist/service-worker.js`);
   if (!worker) {
@@ -138,7 +147,7 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
     await worker.evaluate((id) => chrome.tabs.remove(id), infoId);
   }
   const run = await worker.evaluate(
-    async ({ system, initialTurns, inputs, orders, repeats, diagnostics }) => {
+    async ({ system, initialTurns, inputs, orders, repeats, diagnostics, rewrite }) => {
       if (typeof LanguageModel === 'undefined' || typeof LanguageModel.params !== 'function') {
         throw new Error('extension Prompt API sampling controls unavailable; check Chrome and the extension context');
       }
@@ -170,12 +179,15 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
                 turn = await base.clone();
                 raw = await turn.prompt(input.question, { responseConstraint: input.responseConstraint, signal: AbortSignal.timeout(30000) });
                 const parsed = JSON.parse(raw);
-                answer = input.tokens.find(([token]) => token === (input.answerKey ? parsed?.[input.answerKey] : parsed))?.[1] ?? null;
+                answer = rewrite ? (typeof parsed === 'string' ? parsed : null) : (input.tokens.find(([token]) => token === (input.answerKey ? parsed?.[input.answerKey] : parsed))?.[1] ?? null);
                 if (answer === null) {
-                  throw new Error(`response outside constraint enum: ${raw}`);
+                  throw new Error(`response outside constraint: ${raw}`);
                 }
                 if (diagnostics) {
-                  for (const question of ['你剛才判斷的是原句中從左到右第幾個「-」？請把原句中所有「-」都計入，只回答位置。', '請逐字引用你剛才判斷的那個「-」前後的原文，讓我能辨認是哪一處。']) {
+                  const questions = rewrite
+                    ? ['請列出你剛才插入或刪除空格的位置，以及各自使用哪一條規則。', '原文中哪些空格是作者輸入的？你是否保留了它們？請引用原文說明。']
+                    : ['你剛才判斷的是原句中從左到右第幾個「-」？請把原句中所有「-」都計入，只回答位置。', '請逐字引用你剛才判斷的那個「-」前後的原文，讓我能辨認是哪一處。'];
+                  for (const question of questions) {
                     const start = performance.now();
                     const response = await turn.prompt(question, { signal: AbortSignal.timeout(30000) });
                     followups.push({ question, raw: response, ms: Math.round(performance.now() - start) });
@@ -193,7 +205,13 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
           base.destroy();
         }
       }
-      const normalized = (raw) => (raw === null ? null : JSON.stringify(JSON.parse(raw)));
+      const normalized = (raw) => {
+        try {
+          return raw === null ? null : JSON.stringify(JSON.parse(raw));
+        } catch {
+          return raw;
+        }
+      };
       const results = inputs.map((input) => {
         if (input.question === null) {
           return { ...input, skipped: 'no-unique-target-reference', answers: [], answer: null, correct: false, stable: null };
@@ -210,20 +228,25 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
       });
       return { availability, createMs, results };
     },
-    { system: prompt.system, initialTurns: prompt.initialTurns ?? [], inputs, orders, repeats, diagnostics },
+    { system: prompt.system, initialTurns: prompt.initialTurns ?? [], inputs, orders, repeats, diagnostics, rewrite },
   );
   return { ...run, browserVersion: context.browser().version(), profileVerified: true, extensionWorkerVerified: true };
 }
 
 for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
   const orders = caseOrders(orderCount, inputs.length);
-  const code = `async page => (${runInBrowser.toString()})(page, ${JSON.stringify({ profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics: Boolean(diagnosticIds) })})`;
+  const code = `async page => (${runInBrowser.toString()})(page, ${JSON.stringify({ profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics: Boolean(diagnosticIds), rewrite: Boolean(rewrite) })})`;
   const run = JSON.parse(
-    execFileSync('playwright-cli', ['-s=pangu-eval', '--raw', 'run-code', code], { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024, timeout: 120000, stdio: ['ignore', 'pipe', 'inherit'] }),
+    execFileSync('playwright-cli', ['-s=pangu-eval', '--raw', 'run-code', code], {
+      encoding: 'utf8',
+      maxBuffer: 10 * 1024 * 1024,
+      timeout: rewrite ? 600000 : 120000,
+      stdio: ['ignore', 'pipe', 'inherit'],
+    }),
   );
 
   const result = {
-    set: plus ? `plus-sign:${split}` : 'hyphen-sign+field',
+    set: rewrite ? 'spacing-rewrite:development' : plus ? `plus-sign:${split}` : 'hyphen-sign+field',
     backend: 'prompt-api',
     model: 'gemini-nano',
     context: 'extension-sw',
@@ -239,6 +262,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     initialTurns: prompt.initialTurns ?? [],
     ...run,
     ...(plus ? { evaluation: plus.score(run, corpus, repeats * orders.length) } : {}),
+    ...(rewrite ? { evaluation: rewrite.score(run) } : {}),
   };
   const file = join(output, `${runIndex + 1}-${variant}.json`);
   writeFileSync(file, `${JSON.stringify(result, null, 2)}\n`, { flag: 'wx' });
@@ -253,6 +277,13 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
   if (diagnosticIds) {
     console.log(`${variant}: diagnostics for ${run.results.length} cases; errors ${errors.length}; ${file}`);
     if (errors.length) {
+      process.exitCode = 1;
+    }
+    continue;
+  }
+  if (rewrite) {
+    console.log(`${variant}: ${JSON.stringify(result.evaluation)}; errors ${errors.length}; ${file}`);
+    if (errors.length || (values['require-perfect'] && scored.some((kase) => !kase.correct))) {
       process.exitCode = 1;
     }
     continue;

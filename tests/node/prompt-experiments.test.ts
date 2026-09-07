@@ -31,15 +31,16 @@ test.skipIf(!process.features.typescript)('requires an explicit matching Chrome 
   expect(run.stderr).toContain('EEXIST');
 });
 
-test.skipIf(!process.features.typescript)('abstentions bypass inference and fail require-perfect even when every model answer is correct', () => {
-  const root = mkdtempSync(join(tmpdir(), 'pangu-abstention-'));
-  onTestFinished(() => rmSync(root, { recursive: true, force: true }));
-  const profile = join(root, 'Test Profile');
-  const output = join(root, 'results');
-  writeFileSync(join(root, 'Local State'), JSON.stringify({ profile: { info_cache: { 'Test Profile': { name: 'Experiment' } } } }));
-  writeFileSync(
-    join(root, 'playwright-cli'),
-    `#!/usr/bin/env node
+for (const experiment of ['hyphen-sign', 'spacing-rewrite']) {
+  test.skipIf(!process.features.typescript)(`${experiment}: scored failures fail require-perfect and preserve raw answers`, () => {
+    const root = mkdtempSync(join(tmpdir(), 'pangu-abstention-'));
+    onTestFinished(() => rmSync(root, { recursive: true, force: true }));
+    const profile = join(root, 'Test Profile');
+    const output = join(root, 'results');
+    writeFileSync(join(root, 'Local State'), JSON.stringify({ profile: { info_cache: { 'Test Profile': { name: 'Experiment' } } } }));
+    writeFileSync(
+      join(root, 'playwright-cli'),
+      `#!/usr/bin/env node
 const assert = require('node:assert/strict');
 let calls = 0;
 const worker = {
@@ -52,7 +53,10 @@ const worker = {
       create: async () => ({ destroy() {}, clone: async () => ({ destroy() {}, prompt: async question => {
         assert.equal(typeof question, 'string');
         calls++;
-        return JSON.stringify(args.inputs.find(input => input.question === question).expected_label);
+        const input = args.inputs.find(input => input.question === question);
+        if (args.rewrite && input === args.inputs[0]) return JSON.stringify(input.expected_label + '\\n');
+        if (args.rewrite && input === args.inputs[1]) return 'invalid JSON';
+        return JSON.stringify(input.expected_label);
       } }) })
     };
     return fn(args);
@@ -62,42 +66,54 @@ const info = { waitForURL: async () => {}, locator: () => ({ innerText: async ()
 const context = { serviceWorkers: () => [worker], waitForEvent: async () => info, browser: () => ({ version: () => 'test' }) };
 new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context }).then(run => console.log(JSON.stringify({ ...run, testCalls: calls })));
 `,
-    { mode: 0o755 },
-  );
-  const run = spawnSync(
-    process.execPath,
-    [
-      'scripts/prompt-experiments/sweep.mjs',
-      '--extension-id',
-      'a'.repeat(32),
-      '--profile-path',
-      profile,
-      '--profile-name',
-      'Experiment',
-      '--out',
-      output,
-      '--repeats',
-      '3',
-      '--require-perfect',
-      'v27-zh-unique-quote',
-    ],
-    {
-      encoding: 'utf8',
-      env: { ...process.env, PATH: `${root}:${process.env.PATH}`, TEST_PROFILE: profile },
-    },
-  );
-  expect(run.status, run.stderr).toBe(1);
-  const result = JSON.parse(readFileSync(join(output, '1-v27-zh-unique-quote.json'), 'utf8'));
-  const skipped = result.results.filter((kase: { skipped?: string }) => kase.skipped);
-  expect(skipped).toHaveLength(2);
-  expect(skipped).toEqual(expect.arrayContaining([expect.objectContaining({ answer: null, correct: false, stable: null, answers: [] })]));
-  // Default 2 orders, each with its own base session, times 3 repeats
-  expect(result.testCalls).toBe((result.results.length - skipped.length) * 3 * 2);
-  expect(result.orders).toHaveLength(2);
-  expect([...result.orders[1]].sort()).toEqual([...result.orders[0]].sort());
-  expect(result.orders[1]).not.toEqual(result.orders[0]);
-  for (const kase of result.results.filter((kase: { skipped?: string }) => !kase.skipped)) {
-    expect(kase.answers.map((answer: { order: number }) => answer.order)).toEqual([0, 0, 0, 1, 1, 1]);
-  }
-  expect(result.results.filter((kase: { skipped?: string; correct: boolean }) => !kase.skipped).every((kase: { correct: boolean }) => kase.correct)).toBe(true);
-});
+      { mode: 0o755 },
+    );
+    const run = spawnSync(
+      process.execPath,
+      [
+        'scripts/prompt-experiments/sweep.mjs',
+        '--experiment',
+        experiment,
+        '--extension-id',
+        'a'.repeat(32),
+        '--profile-path',
+        profile,
+        '--profile-name',
+        'Experiment',
+        '--out',
+        output,
+        '--repeats',
+        '3',
+        '--require-perfect',
+        experiment === 'spacing-rewrite' ? 'v1-zh' : 'v27-zh-unique-quote',
+      ],
+      {
+        encoding: 'utf8',
+        env: { ...process.env, PATH: `${root}:${process.env.PATH}`, TEST_PROFILE: profile },
+      },
+    );
+    expect(run.status, run.stderr).toBe(1);
+    const result = JSON.parse(readFileSync(join(output, experiment === 'spacing-rewrite' ? '1-v1-zh.json' : '1-v27-zh-unique-quote.json'), 'utf8'));
+    if (experiment === 'spacing-rewrite') {
+      expect(result.evaluation.exact).toEqual({ passed: result.results.length - 2, total: result.results.length });
+      expect(result.evaluation.nonSpaceChanges).toBe(6);
+      expect(result.results[0].answers[0].answer).toBe(result.results[0].expected_output + '\n');
+      expect(result.results[1].answers[0]).toMatchObject({ raw: 'invalid JSON', answer: null, error: expect.any(String) });
+      expect(result.results.every((kase: { responseConstraint: unknown }) => JSON.stringify(kase.responseConstraint) === '{"type":"string"}')).toBe(true);
+      expect(result.testCalls).toBe(result.results.length * 6);
+      return;
+    }
+    const skipped = result.results.filter((kase: { skipped?: string }) => kase.skipped);
+    expect(skipped).toHaveLength(2);
+    expect(skipped).toEqual(expect.arrayContaining([expect.objectContaining({ answer: null, correct: false, stable: null, answers: [] })]));
+    // Default 2 orders, each with its own base session, times 3 repeats
+    expect(result.testCalls).toBe((result.results.length - skipped.length) * 3 * 2);
+    expect(result.orders).toHaveLength(2);
+    expect([...result.orders[1]].sort()).toEqual([...result.orders[0]].sort());
+    expect(result.orders[1]).not.toEqual(result.orders[0]);
+    for (const kase of result.results.filter((kase: { skipped?: string }) => !kase.skipped)) {
+      expect(kase.answers.map((answer: { order: number }) => answer.order)).toEqual([0, 0, 0, 1, 1, 1]);
+    }
+    expect(result.results.filter((kase: { skipped?: string; correct: boolean }) => !kase.skipped).every((kase: { correct: boolean }) => kase.correct)).toBe(true);
+  });
+}
