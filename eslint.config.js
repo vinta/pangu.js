@@ -2,10 +2,8 @@ import { defineConfig } from 'eslint/config';
 import { builtinModules } from 'node:module';
 import tseslint from 'typescript-eslint';
 
-// Derived from the running Node rather than hand-listed so a newly added builtin cannot slip through unprefixed. Names that are already namespaced (`node:test`, `node:sea`) are unreachable without the prefix, so they need no rule.
 const bareBuiltinModules = builtinModules.filter((name) => !name.startsWith('node:'));
 
-// Core-rule equivalents of eslint-plugin-unicorn's `prefer-node-protocol` and `no-for-each`. The plugin cost 36 transitive packages to supply just these two checks, so it was dropped in favour of the built-ins.
 const styleRules = {
   'no-restricted-imports': [
     'error',
@@ -27,6 +25,12 @@ const styleRules = {
   ],
 };
 
+// One project service serves every block, and typescript-eslint reads its options from the first block that runs, so the blocks must share them. eslint.config.js is outside tsconfig.json, so the service types it in a default project instead
+const parserOptions = {
+  projectService: { allowDefaultProject: ['eslint.config.js'] },
+  tsconfigRootDir: import.meta.dirname,
+};
+
 export default defineConfig(
   {
     // Global ignores
@@ -34,15 +38,11 @@ export default defineConfig(
   },
   {
     // TypeScript files and the root configs, so type-aware rules such as no-deprecated cover them too
-    files: ['src/**/*.ts', 'browser-extensions/chrome/src/**/*.ts', 'tests/**/*.ts', 'eslint.config.js', 'vite.config.ts', 'playwright.config.ts'],
+    files: ['src/**/*.ts', 'browser-extensions/chrome/src/**/*.ts', 'tests/**/*.ts', 'vite.config.ts', 'playwright.config.ts'],
     extends: [...tseslint.configs.recommendedTypeChecked],
     languageOptions: {
       parser: tseslint.parser,
-      parserOptions: {
-        // eslint.config.js is outside tsconfig.json, so the project service types it in a default project instead
-        projectService: { allowDefaultProject: ['eslint.config.js'] },
-        tsconfigRootDir: import.meta.dirname,
-      },
+      parserOptions,
     },
     rules: {
       ...styleRules,
@@ -72,6 +72,18 @@ export default defineConfig(
       '@typescript-eslint/prefer-for-of': 'error',
       '@typescript-eslint/prefer-optional-chain': 'error',
       '@typescript-eslint/require-await': 'off',
+    },
+  },
+  {
+    // This config: typed just enough for no-deprecated to see a deprecated API
+    files: ['eslint.config.js'],
+    plugins: { '@typescript-eslint': tseslint.plugin },
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions,
+    },
+    rules: {
+      '@typescript-eslint/no-deprecated': 'error',
     },
   },
   {
