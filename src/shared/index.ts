@@ -37,12 +37,15 @@ export const UPPER_AN = 'A-Z0-9'; // For FIX_CJK_COLON_ANS
 export const OPERATORS = '\\*=&\\-';
 export const GRADE_OPERATORS = '\\+\\-\\*'; // For single letter grades
 
+// Characters: ` " ״
 export const QUOTES = '\`"\u05f4'; // Backtick, straight quote, Hebrew punctuation
 
 // Brackets. Each rule uses a different set
 export const LEFT_BRACKETS_BASIC = '\\(\\[\\{'; // For AN_LEFT_BRACKET
 export const RIGHT_BRACKETS_BASIC = '\\)\\]\\}'; // For RIGHT_BRACKET_AN and ANS_OPERATOR_CJK
+// Characters: ( [ { < > “
 export const LEFT_BRACKETS_EXTENDED = '\\(\\[\\{<>\u201c'; // For CJK_LEFT_BRACKET (includes angle brackets + curly quote)
+// Characters: ) ] } < > ”
 export const RIGHT_BRACKETS_EXTENDED = '\\)\\]\\}<>\u201d'; // For RIGHT_BRACKET_CJK
 
 // ANS extended sets. The two sets are not identical, see the inline notes
@@ -72,18 +75,23 @@ export const CJK_PUNCTUATION = new RegExp(`([${CJK}])([!;,\\?:]+)(?=[${CJK}${AN}
 // A punctuation run directly before CJK gets a space after it, whatever sits on its left (no left anchor). An already-typed 'CJK ,CJK' shape is a typo, not preserved. See ADR 0007
 // CJK_PUNCTUATION still owns colon and punctuation before letters and digits
 export const PUNCTUATION_CJK = new RegExp(`([!;,\\?]+)(?=[${CJK}])`, 'g');
+
 // Tilde has its own rule so ~= stays intact. Space only when CJK, a letter, or a digit follows
 export const CJK_TILDE = new RegExp(`([${CJK}])(~+)(?!=)(?=[${CJK}${AN}])`, 'g');
 export const CJK_TILDE_EQUALS = new RegExp(`([${CJK}])(~=)`, 'g');
+
 // Period has its own rule so file extensions, dot runs, and file paths stay intact; DOTS_CJK handles runs of dots first. Space only when CJK follows: the negative lookahead rejects a letter or digit,
 // which reads as a file extension and stays intact
 export const CJK_PERIOD = new RegExp(`([${CJK}])(\\.)(?![${AN}\\./])(?=[${CJK}${AN}])`, 'g');
 export const AN_PERIOD_CJK = new RegExp(`([${AN}])(\\.)([${CJK}])`, 'g');
+
 export const AN_COLON_CJK = new RegExp(`([${AN}])(:)([${CJK}])`, 'g');
-export const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, 'g');
 // The only case where a colon converts to full-width: after CJK, directly before a parenthesis. The A-Z0-9 half of the class is unreachable, because CJK_PUNCTUATION runs first and owns colon before
 // letters and digits, leaving a half-width colon plus a space
 export const FIX_CJK_COLON_ANS = new RegExp(`([${CJK}])\\:([${UPPER_AN}\\(\\)])`, 'g');
+
+// Characters: . …
+export const DOTS_CJK = new RegExp(`([\\.]{2,}|\u2026)([${CJK}])`, 'g');
 
 // The quote class deliberately excludes ' because single quotes have their own rules
 export const CJK_QUOTE = new RegExp(`([${CJK}])([${QUOTES}])`, 'g');
@@ -91,8 +99,8 @@ export const QUOTE_CJK = new RegExp(`([${QUOTES}])([${CJK}])`, 'g');
 // The content class is [\s\S] rather than . so a quoted segment that spans a line break still pairs with its own closing quote. HTML source wrapping puts newlines mid-sentence, and with . that
 // closing quote is unreachable, so the scan resyncs on the next quote, pairs closing-to-opening and strips the spaces outside the quotes instead of inside
 export const FIX_QUOTE_ANY_QUOTE = new RegExp(`([${QUOTES}]+)[ ]*([\\s\\S]+?)[ ]*([${QUOTES}]+)`, 'g');
-
 // Curly quotes only: CJK_QUOTE, QUOTE_CJK, and FIX_QUOTE_ANY_QUOTE already handle straight quotes
+// Quote: ”
 export const QUOTE_AN = new RegExp(`([\u201d])([${AN}])`, 'g');
 
 // A straight quote between CJK and AN (CJK"AN) reads as closing a quoted CJK phrase, so the space goes after the quote
@@ -108,7 +116,9 @@ export const SINGLE_QUOTE_PURE_CJK = new RegExp(`(')([${CJK}]+)(')`, 'g');
 export const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}])`, 'g');
 // The negated class is the "something is glued to this #, so it is a hashtag" guard, so it has to reject an NBSP the same way it rejects a space. It stays a literal pair rather than \S because \S
 // also excludes zero-width characters like U+FEFF, and treating those as a gap would drop the space entirely and leave the runs flush
+// Non-breaking space: [ ] (U+00A0)
 export const CJK_HASH = new RegExp(`([${CJK}])(#([^ \\u00a0]))`, 'g');
+// Non-breaking space: [ ] (U+00A0)
 export const HASH_CJK = new RegExp(`(([^ \\u00a0])#)([${CJK}])`, 'g');
 // In file path context (multiple slashes), only a final hashtag not preceded by a slash gets a space
 export const CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
@@ -131,7 +141,9 @@ export const PIPE_SEPARATOR = /([^\s|])[ ]*(\|+)[ ]*(?=[^\s|])/g;
 // Plus patterns for separator vs joiner-token behavior, decided per line like the pipe. The separator matches a solitary plus only: a space-adjacent plus is decided and a ++ run is a preserved
 // pattern (C++, i++). Common Chinese full-width punctuation also keeps an adjacent plus tight, even when another plus flips the line
 export const PLUS_CJK_CONTACT = new RegExp(`[${CJK}]\\+|\\+[${CJK}]`);
-export const PLUS_SEPARATOR = /(?<=[^\s+，。；：！？、（）「」『』【】《》])\+(?=[^\s+，。；：！？、（）「」『』【】《》])/g;
+// Characters: ，。；：！？、（）「」『』【】《》
+// prettier-ignore
+export const PLUS_SEPARATOR = /(?<=[^\s+\uff0c\u3002\uff1b\uff1a\uff01\uff1f\u3001\uff08\uff09\u300c\u300d\u300e\u300f\u3010\u3011\u300a\u300b])\+(?=[^\s+\uff0c\u3002\uff1b\uff1a\uff01\uff1f\u3001\uff08\uff09\u300c\u300d\u300e\u300f\u3010\u3011\u300a\u300b])/g;
 
 // Single-letter grades (A+, B-, C*) before CJK get the space after the symbol, not before. The \b keeps the letter single, not the tail of a longer word
 export const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([${A}])([${GRADE_OPERATORS}])([${CJK}])`, 'g');
@@ -158,12 +170,15 @@ export const GREATER_THAN_CJK = new RegExp(`([${AN}])(>)([${CJK}])`, 'g');
 // RIGHT_BRACKET_CJK, AN_LEFT_BRACKET, and RIGHT_BRACKET_AN
 export const CJK_LEFT_BRACKET = new RegExp(`([${CJK}])([${LEFT_BRACKETS_EXTENDED}])`, 'g');
 export const RIGHT_BRACKET_CJK = new RegExp(`([${RIGHT_BRACKETS_EXTENDED}])([${CJK}])`, 'g');
+// Quotes: “ ”
 export const ANS_CJK_LEFT_BRACKET_ANY_RIGHT_BRACKET = new RegExp(`([${AN}${CJK}])[ ]*([\u201c])([${AN}${CJK}\\-_ ]+)([\u201d])`, 'g');
+// Quotes: “ ”
 export const LEFT_BRACKET_ANY_RIGHT_BRACKET_ANS_CJK = new RegExp(`([\u201c])([${AN}${CJK}\\-_ ]+)([\u201d])[ ]*([${AN}${CJK}])`, 'g');
 // Some input habits type both quotes of a pair as closing curly quotes (\u201d): the shape CJK\u201dCJK\u201d appears where CJK\u201cCJK\u201d was meant
 // A \u201d only opens a \u201d...\u201d pair when no unclosed \u201c precedes it on the line (the lookbehind), otherwise it closes that \u201c
 // Runs after RIGHT_BRACKET_CJK, so the [ ]* after the opener strips the space that rule just added inside the pair
 // Not portable as a plain regex: the lookbehind is variable-length, which Python `re` and Go `regexp` reject. A port to those engines has to track the unclosed \u201c in code instead
+// Quotes: “ ”
 export const ANS_CJK_RIGHT_QUOTE_ANY_RIGHT_QUOTE = new RegExp(`([${AN}${CJK}])[ ]*(?<![\u201c][^\u201c\u201d\n]*)([\u201d])[ ]*([${AN}${CJK}\\-_ ]+?)[ ]*([\u201d])`, 'g');
 
 // A dotted name keeps its call parenthesis tight (`Math.floor(x)`, `array.map(fn)`), a bare name does not (`foo (x)`)
@@ -183,6 +198,7 @@ export const ANS_CJK = new RegExp(`([${ANS_BEFORE_CJK}])([${CJK}])`, 'g');
 
 export const S_A = new RegExp(`(%)([${A}])`, 'g');
 
+// Characters: · • ‧
 export const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
 // A bare unpaired non-void tag amid prose is a tag mention, not markup: it reads as one unit and is spaced from CJK it directly touches
