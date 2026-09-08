@@ -97,19 +97,24 @@ test.describe('AI spacing DOM context', () => {
     expect(await classify(page, '<div style="white-space: pre-wrap">前一行\n<a id="candidate">運-12</a>\n後一行</div>', true)).toEqual([{ sentence: '運-12', at: 1 }]);
   });
 
-  test('stop at block, line break, ignored and hidden content in both directions', async ({ page }) => {
-    for (const boundary of [
-      '<p><b>區塊文字</b></p>',
-      '<br>',
+  test('stop at a block edge or line break in both directions', async ({ page }) => {
+    for (const edge of ['<p><b>區塊文字</b></p>', '<br>']) {
+      expect(await classify(page, `<section>外側${edge}<span>前<a id="candidate">運-12</a>後</span>${edge}外側</section>`, true), edge).toEqual([{ sentence: '前運-12後', at: 2 }]);
+    }
+    expect(await classify(page, '<section>外側<p><b>前<a id="candidate">運-12</a>後</b></p>外側</section>', true)).toEqual([{ sentence: '前運-12後', at: 2 }]);
+  });
+
+  test('step past ignored and hidden siblings in both directions', async ({ page }) => {
+    for (const skipped of [
       '<code>程式碼</code>',
       '<span class="no-pangu-spacing">略過</span>',
       '<span contenteditable="true">編輯中</span>',
       '<span hidden>隱藏</span>',
       '<span style="display: none">隱藏</span>',
       '<span style="visibility: hidden">隱藏</span>',
+      '<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0)">僅供螢幕閱讀器</span>',
     ]) {
-      expect(await classify(page, `<section>外側${boundary}<span>前<a id="candidate">運-12</a>後</span>${boundary}外側</section>`, true), boundary).toEqual([{ sentence: '前運-12後', at: 2 }]);
+      expect(await classify(page, `<section>外側${skipped}<span>前<a id="candidate">運-12</a>後</span>${skipped}外側</section>`, true), skipped).toEqual([{ sentence: '外側前運-12後外側', at: 4 }]);
     }
-    expect(await classify(page, '<section>外側<p><b>前<a id="candidate">運-12</a>後</b></p>外側</section>', true)).toEqual([{ sentence: '前運-12後', at: 2 }]);
   });
 });

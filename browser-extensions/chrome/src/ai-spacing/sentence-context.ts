@@ -28,9 +28,16 @@ function keepsNewlines(textNode: Text) {
 }
 
 export function readSentence(node: Text, unspaced: string, at: number, unspacedByNode: ReadonlyMap<Text, string>) {
-  function isBoundary(element: Element) {
+  // A hidden or ignored element stays out of the sentence without ending it, the way core's scanBetweenTextNodes() treats an ignored island as invisible. Checked before display: display:none and
+  // absolutely positioned screen-reader text are blockified
+  function isSkipped(element: Element) {
+    return pangu.isIgnoredElement(element) || pangu.visibilityDetector.shouldSkipSpacingAfterNode(element);
+  }
+
+  // Where the line of text ends: a line break or an element that is not inline-level
+  function isBlockEdge(element: Element) {
     const display = getComputedStyle(element).display;
-    return element.tagName === 'BR' || (!display.startsWith('inline') && display !== 'contents') || pangu.isIgnoredElement(element) || pangu.visibilityDetector.shouldSkipSpacingAfterNode(element);
+    return element.tagName === 'BR' || (!display.startsWith('inline') && display !== 'contents');
   }
 
   // The part of a text node's data on this side of its nearest line break, or null when the node keeps no newline as a line break
@@ -53,16 +60,20 @@ export function readSentence(node: Text, unspaced: string, at: number, unspacedB
     while (text.length < MAX_SENTENCE_SIDE && !SENTENCE_TERMINATOR.test(text)) {
       while (!current[sibling]) {
         const parent = current.parentElement;
-        if (!parent || isBoundary(parent)) {
+        if (!parent || isSkipped(parent) || isBlockEdge(parent)) {
           return text;
         }
         current = parent;
       }
       current = current[sibling]!;
 
-      // Check an element before descending in either direction, so a previous block's last text never leaks into this sentence
+      // Check an element before descending in either direction, so a previous block's last text never leaks into this sentence. A skipped element is left as is, so the loop steps past it to the next
+      // sibling
       while (current instanceof Element) {
-        if (isBoundary(current)) {
+        if (isSkipped(current)) {
+          break;
+        }
+        if (isBlockEdge(current)) {
           return text;
         }
         if (!current[child]) {
