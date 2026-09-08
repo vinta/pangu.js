@@ -1,9 +1,8 @@
+import pangu from '../../../src/browser/pangu';
 import { applyAiSpacing, warmUpAiSpacing } from './ai-spacing/content-script';
 import type { ContentScriptResponse, MessageToContentScript } from './messages';
 import { getSettings, type Settings } from './settings/storage';
 import { shouldAutoSpacing } from './settings/urls';
-
-const pangu = window.pangu;
 
 function startAutoSpacing(settings: Settings) {
   if (settings.is_enable_ai_spacing) {
@@ -73,14 +72,13 @@ async function startManualSpacing() {
 }
 
 chrome.runtime.onMessage.addListener((message: MessageToContentScript, _sender: chrome.runtime.MessageSender, sendResponse: (response: ContentScriptResponse) => void) => {
-  if (message.action === 'PING') {
-    // PING is used by popup to check if content script is already loaded
-    sendResponse({ success: true });
-  } else if (message.action === 'MANUAL_SPACING') {
+  if (message.action === 'MANUAL_SPACING') {
     // Chrome closes the message channel when a listener returns a promise, so return true and let startManualSpacing() answer
     void startManualSpacing().then(sendResponse);
     return true;
   }
 
+  // PING is used by popup to check if content script is already loaded
+  sendResponse({ success: true });
   return false;
 });

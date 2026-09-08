@@ -10,12 +10,12 @@ function listPatch(key: 'blacklist' | 'whitelist', urls: string[]) {
 }
 
 class OptionsController {
-  private editingUrls: Map<number, string> = new Map();
+  private editingUrls = new Map<number, string>();
   private statusPollTimer: number | undefined;
   private isAddingUrl = false;
 
   constructor() {
-    this.initialize();
+    void this.initialize();
   }
 
   private async initialize() {
@@ -58,15 +58,15 @@ class OptionsController {
         this.toggleFilterMode().catch(console.error);
       } else if (target.classList.contains('url-display-input')) {
         const index = parseInt(target.dataset.index || '0');
-        this.startEditingUrl(index);
+        void this.startEditingUrl(index);
       } else if (target.classList.contains('remove-url-btn')) {
         const index = parseInt(target.dataset.index || '0');
-        this.removeUrl(index);
+        void this.removeUrl(index);
       } else if (target.classList.contains('save-edit-url-btn')) {
         const index = parseInt(target.dataset.index || '0');
-        this.saveEditingUrl(index);
+        void this.saveEditingUrl(index);
       } else if (target.id === 'save-new-url-btn') {
-        this.saveNewUrl();
+        void this.saveNewUrl();
       } else if (target.id === 'cancel-new-url-btn') {
         this.cancelNewUrl();
       } else if (target.classList.contains('cancel-edit-btn')) {
@@ -75,7 +75,7 @@ class OptionsController {
       } else if (target.id === 'add-url-btn') {
         this.showAddUrlInput();
       } else if (target.id === 'restore-defaults-btn') {
-        this.handleRestoreListDefaults();
+        void this.handleRestoreListDefaults();
       } else if (target.id === 'ai-model-download-btn') {
         this.handleModelDownload().catch(console.error);
       }
@@ -84,7 +84,7 @@ class OptionsController {
     document.addEventListener('keypress', (e) => {
       const target = e.target as HTMLElement;
       if (target.id === 'new-url-input' && e.key === 'Enter') {
-        this.saveNewUrl();
+        void this.saveNewUrl();
       }
     });
 
@@ -314,7 +314,7 @@ class OptionsController {
 
   private showAddUrlInput() {
     this.isAddingUrl = true;
-    this.renderUrlList();
+    void this.renderUrlList();
   }
 
   private async saveNewUrl() {
@@ -346,7 +346,7 @@ class OptionsController {
 
   private cancelNewUrl() {
     this.isAddingUrl = false;
-    this.renderUrlList();
+    void this.renderUrlList();
   }
 
   private async startEditingUrl(index: number) {
@@ -354,7 +354,7 @@ class OptionsController {
     this.editingUrls.set(index, settings[settings.filter_mode][index]!);
     await this.renderUrlList();
 
-    const input = document.querySelector(`input[data-index="${index}"]`) as HTMLInputElement;
+    const input = document.querySelector<HTMLInputElement>(`input[data-index="${index}"]`);
     if (input) {
       input.focus();
       input.select();
@@ -362,7 +362,7 @@ class OptionsController {
   }
 
   private async saveEditingUrl(index: number) {
-    const input = document.querySelector(`input[data-index="${index}"]`) as HTMLInputElement;
+    const input = document.querySelector<HTMLInputElement>(`input[data-index="${index}"]`);
     if (!input) {
       return;
     }
@@ -388,7 +388,7 @@ class OptionsController {
 
   private cancelEditingUrl(index: number) {
     this.editingUrls.delete(index);
-    this.renderUrlList();
+    void this.renderUrlList();
   }
 
   private async removeUrl(index: number) {

@@ -63,6 +63,7 @@ async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   }
 
   // NOTE: no params() means we cannot control (temperature, topK) which means the model output could be unpredictable, and we disable AI spacing
+  // eslint-disable-next-line @typescript-eslint/no-deprecated -- params() is restricted to extension contexts, which this is
   if (typeof LanguageModel.params !== 'function') {
     throw new Error('sampling cannot be pinned in this context');
   }

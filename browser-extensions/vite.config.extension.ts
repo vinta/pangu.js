@@ -3,8 +3,7 @@ import { defineConfig } from 'vite';
 
 const extensionRoot = import.meta.dirname;
 
-// One environment per bundler pass. `consumer: 'client'` is load-bearing rather than cosmetic: an environment defaults to the server consumer, which ignores `build.lib.fileName` and names outputs after
-// the entry instead
+// We set `consumer: 'client'` because an environment defaults to the server consumer, which ignores `build.lib.fileName` and names outputs after the entry instead
 export default defineConfig({
   build: {
     outDir: resolve(extensionRoot, 'chrome/dist'),
@@ -40,7 +39,7 @@ export default defineConfig({
         emptyOutDir: false,
         lib: {
           entry: resolve(extensionRoot, 'chrome/src/content-script.ts'),
-          name: 'PanguContentScript',
+          name: 'PanguContentScript', // Vite requires a global name for iife, but the entry exports nothing, so the built file never assigns it
           formats: ['iife'],
           fileName: () => 'content-script.js',
         },

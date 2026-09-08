@@ -10,7 +10,7 @@
 - Runtime package: zero runtime dependencies, published as `pangu` for Node.js and browser use.
 - Build outputs: ESM, CommonJS, and UMD library bundles under `dist/`.
 - Browser extension: Chrome Manifest V3 extension under `browser-extensions/chrome/`.
-- Generated files: `dist/`, `browser-extensions/chrome/dist/` and `browser-extensions/chrome/vendors/pangu/` are build or test output; avoid hand-editing them unless the task explicitly targets generated artifacts.
+- Generated files: `dist/` and `browser-extensions/chrome/dist/` are build or test output; avoid hand-editing them unless the task explicitly targets generated artifacts.
 
 ## Important Paths
 

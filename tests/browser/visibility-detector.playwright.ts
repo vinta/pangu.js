@@ -85,7 +85,7 @@ test.describe('Visibility Detector', () => {
         hiddenText: hiddenSpan.textContent,
         visibleText: visibleSpan.textContent,
         // Should not start with space since previous element is hidden
-        startsWithSpace: visibleSpan.textContent?.startsWith(' ') || false,
+        startsWithSpace: visibleSpan.textContent.startsWith(' '),
       };
     });
 
@@ -136,7 +136,7 @@ test.describe('Visibility Detector', () => {
             hiddenText: hiddenSpan.textContent,
             visibleText: visibleSpan.textContent,
             // Should not start with space since previous element is hidden
-            startsWithSpace: visibleSpan.textContent?.startsWith(' ') || false,
+            startsWithSpace: visibleSpan.textContent.startsWith(' '),
           });
         }, 150); // Wait for initial pageDelayMs + idle callback processing
       });
@@ -167,7 +167,7 @@ test.describe('Visibility Detector', () => {
         firstText: spans[0]!.textContent,
         secondText: spans[1]!.textContent,
         // Second span should start with space since first is visible
-        secondStartsWithSpace: spans[1]!.textContent?.startsWith(' ') || false,
+        secondStartsWithSpace: spans[1]!.textContent.startsWith(' '),
       };
     });
 
@@ -219,8 +219,8 @@ test.describe('Visibility Detector', () => {
         visibleAfterHiddenText: visibleAfterHidden.textContent,
         visibleNestedText: visibleNested?.textContent || '',
         // Neither should start with space due to hidden adjacent elements
-        afterHiddenStartsWithSpace: visibleAfterHidden.textContent?.startsWith(' ') || false,
-        nestedStartsWithSpace: visibleNested?.textContent?.startsWith(' ') || false,
+        afterHiddenStartsWithSpace: visibleAfterHidden.textContent.startsWith(' '),
+        nestedStartsWithSpace: visibleNested?.textContent.startsWith(' ') || false,
       };
     });
 
@@ -275,7 +275,7 @@ test.describe('Visibility Detector', () => {
 
       return {
         text: result,
-        startsWithSpace: result?.startsWith(' ') || false,
+        startsWithSpace: result.startsWith(' '),
       };
     });
 
@@ -324,7 +324,7 @@ test.describe('Visibility Detector', () => {
 
       return {
         text: result,
-        startsWithSpace: result?.startsWith(' ') || false,
+        startsWithSpace: result.startsWith(' '),
       };
     });
 
@@ -396,11 +396,11 @@ test.describe('Visibility Detector', () => {
       return {
         case1: {
           text: case1Result,
-          startsWithSpace: case1Result?.startsWith(' ') || false,
+          startsWithSpace: case1Result.startsWith(' '),
         },
         case2: {
           text: case2Result,
-          startsWithSpace: case2Result?.startsWith(' ') || false,
+          startsWithSpace: case2Result.startsWith(' '),
         },
       };
     });
@@ -479,8 +479,8 @@ test.describe('Visibility Detector', () => {
       return {
         syncResult,
         asyncResult,
-        syncStartsWithSpace: syncResult?.startsWith(' ') || false,
-        asyncStartsWithSpace: asyncResult?.startsWith(' ') || false,
+        syncStartsWithSpace: syncResult.startsWith(' '),
+        asyncStartsWithSpace: asyncResult.startsWith(' '),
       };
     });
 
@@ -563,7 +563,7 @@ test.describe('Visibility Detector', () => {
 
       return {
         finalText,
-        startsWithSpace: finalText?.startsWith(' ') || false,
+        startsWithSpace: finalText.startsWith(' '),
       };
     });
 

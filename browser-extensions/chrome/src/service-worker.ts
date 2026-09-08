@@ -46,7 +46,7 @@ async function registerContentScripts() {
     // Registered on every page: the content script applies the blacklist and whitelist itself, so they follow same-document navigation (see docs/adr/0020)
     await registerOneContentScript({
       id: SCRIPT_ID,
-      js: ['vendors/pangu/pangu.umd.js', 'dist/content-script.js'],
+      js: ['dist/content-script.js'],
       matches: ['http://*/*', 'https://*/*'],
       runAt: 'document_idle',
     });
@@ -74,7 +74,7 @@ async function updateTabIcon(tabId: number, url: string | undefined, settings: S
 async function updateAllTabIcons() {
   const settings = await getSettings();
   const tabs = await chrome.tabs.query({});
-  await Promise.all(tabs.map((tab) => (tab.id === undefined ? undefined : updateTabIcon(tab.id, tab.url, settings))));
+  await Promise.all(tabs.flatMap((tab) => (tab.id === undefined ? [] : [updateTabIcon(tab.id, tab.url, settings)])));
 }
 
 chrome.runtime.onInstalled.addListener(async () => {
@@ -107,7 +107,7 @@ const REGISTRATION_KEYS: (keyof Settings)[] = ['spacing_mode', 'is_enable_text_a
 const ICON_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist'];
 onSettingsChanged((changedKeys) => {
   if (changedKeys.some((key) => REGISTRATION_KEYS.includes(key))) {
-    queueRegisterContentScripts();
+    void queueRegisterContentScripts();
   }
   if (changedKeys.some((key) => ICON_KEYS.includes(key))) {
     updateAllTabIcons().catch(console.error);
@@ -117,10 +117,6 @@ onSettingsChanged((changedKeys) => {
 // AI spacing's only entry point, registered at module scope for the same reason as onSettingsChanged above. It reads no settings: the content script is the gate
 // Chrome closes the message channel when a listener returns a promise, so this stays a plain function that returns true and lets handleClassification() call sendResponse. It never rejects
 chrome.runtime.onMessage.addListener((message: MessageToServiceWorker, _sender: chrome.runtime.MessageSender, sendResponse: (response: ClassifyCandidatesResponse) => void) => {
-  if (message.type === 'CLASSIFY_CANDIDATES') {
-    handleClassification(message.kind, message.candidates).then(sendResponse);
-    return true;
-  }
-
-  return false;
+  void handleClassification(message.kind, message.candidates).then(sendResponse);
+  return true;
 });

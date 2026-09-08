@@ -14,7 +14,7 @@ test.describe('Browser UMD imports', () => {
         hasGlobalPangu: typeof window.pangu !== 'undefined',
         hasAutoSpacingPage: typeof window.pangu.autoSpacingPage === 'function',
         hasBrowserPanguClass: typeof window.pangu.BrowserPangu === 'function',
-        canCreateInstance: window.pangu?.BrowserPangu ? new window.pangu.BrowserPangu() instanceof window.pangu.BrowserPangu : false,
+        canCreateInstance: new window.pangu.BrowserPangu() instanceof window.pangu.BrowserPangu,
       };
     });
 

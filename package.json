@@ -65,7 +65,7 @@
     "build": "npm run clean && npm run build:lib && npm run build:extension",
     "build:lib": "vite build && npm run build:types",
     "build:types": "tsc -p src/browser/tsconfig.json --emitDeclarationOnly --declarationDir dist && tsc -p src/node/tsconfig.json --emitDeclarationOnly --declarationDir dist",
-    "build:extension": "mkdir -p browser-extensions/chrome/vendors/pangu && cp -f dist/browser/pangu.umd.js browser-extensions/chrome/vendors/pangu/ && vite build --config browser-extensions/vite.config.extension.ts && cp -f browser-extensions/chrome/src/content-script.css browser-extensions/chrome/dist/",
+    "build:extension": "vite build --config browser-extensions/vite.config.extension.ts && cp -f browser-extensions/chrome/src/content-script.css browser-extensions/chrome/dist/",
     "test": "npm run build && vitest run && playwright test --reporter=list",
     "test:shared": "npm run build && vitest run tests/shared/",
     "test:node": "npm run build && vitest run tests/node/",

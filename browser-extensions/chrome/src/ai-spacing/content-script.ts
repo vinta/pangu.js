@@ -1,15 +1,10 @@
+import pangu, { type LateFix, type SettledTextNode } from '../../../../src/browser/pangu';
 import type { CandidateLabel, ClassifyCandidatesMessage, ClassifyCandidatesResponse } from './messages';
 import { readSentence } from './sentence-context';
 import type { AmbiguousShape, SettledCandidate, TextEdit } from './shapes/base';
 import { applyTextEdits } from './shapes/base';
 import { hyphenSign } from './shapes/hyphen-shape';
 import { nameSuffix } from './shapes/name-suffix-shape';
-
-const pangu = window.pangu;
-
-// Read off the singleton rather than imported: pangu.umd.js loads as its own content script, so anything imported from src/ here would bundle a second copy of core
-type SettledTextNode = Parameters<NonNullable<typeof pangu.onTextNodesSettled>>[0][number];
-type LateFix = Parameters<typeof pangu.applyLateFixes>[0][number];
 
 const AMBIGUOUS_SHAPES: AmbiguousShape[] = [hyphenSign, nameSuffix];
 
@@ -34,7 +29,10 @@ function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readon
   return settledCandidates;
 }
 
-type ShapeCandidates = { ambiguousShape: AmbiguousShape; settledCandidates: SettledCandidate[] };
+interface ShapeCandidates {
+  ambiguousShape: AmbiguousShape;
+  settledCandidates: SettledCandidate[];
+}
 
 function collectLateFixes(labeledShapeCandidates: readonly (ShapeCandidates & { candidateLabels: readonly (CandidateLabel | null)[] })[]) {
   // Core applies one fix per text node per call, so every edit for one node composes into a single late fix
@@ -71,7 +69,7 @@ export function warmUpAiSpacing() {
     return;
   }
   warmedUp = true;
-  const pageText = document.documentElement.textContent ?? '';
+  const pageText = document.documentElement.textContent;
   // The loop is not redundant: we create base sessions per ambiguous shape
   for (const ambiguousShape of AMBIGUOUS_SHAPES) {
     // A shape needs the model doesn't always mean we need to warm up the model on every webpage

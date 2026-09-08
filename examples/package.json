@@ -4,16 +4,18 @@
   "description": "pangu.js Example app",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "npm run test:commonjs && npm run test:esm && npm run test:cli && npm run typecheck",
+    "test": "npm run test:commonjs && npm run test:esm && npm run test:cli && npm run test:browser && npm run typecheck",
     "test:commonjs": "node test-commonjs.js",
     "test:esm": "node test-esm.mjs",
     "test:cli": "node test-cli.js",
-    "server": "node server.js"
+    "server": "node server.js",
+    "test:browser": "node test-browser.js"
   },
   "dependencies": {
     "pangu": "10.0.0"
   },
   "devDependencies": {
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "playwright": "1.61.1"
   }
 }

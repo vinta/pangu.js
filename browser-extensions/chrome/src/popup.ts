@@ -13,7 +13,7 @@ class PopupController {
   private notificationCallback: (() => void) | undefined;
 
   constructor() {
-    this.initialize();
+    void this.initialize();
   }
 
   private async initialize() {
@@ -184,15 +184,16 @@ class PopupController {
       if (!isContentScriptLoaded) {
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
-          files: ['vendors/pangu/pangu.umd.js', 'dist/content-script.js'],
+          files: ['dist/content-script.js'],
         });
       }
 
       // Apply spacing
       const message: ManualSpacingMessage = { action: 'MANUAL_SPACING' };
-      const response = await chrome.tabs.sendMessage<ManualSpacingMessage, ContentScriptResponse>(this.currentTabId, message);
+      // The response is undefined when the tab has no listener, so the generic says so
+      const response = await chrome.tabs.sendMessage<ManualSpacingMessage, ContentScriptResponse | undefined>(this.currentTabId, message);
 
-      if (response && response.success) {
+      if (response?.success) {
         await this.showSuccessMessage(() => {
           button.disabled = false;
         });

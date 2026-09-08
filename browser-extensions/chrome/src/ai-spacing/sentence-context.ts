@@ -1,6 +1,6 @@
+import { DomWalker } from '../../../../src/browser/dom-walker';
+import pangu from '../../../../src/browser/pangu';
 import { MAX_SENTENCE_SIDE, SENTENCE_TERMINATOR, sliceSentence } from './shapes/base';
-
-const pangu = window.pangu;
 
 // A newline with the collapsible white space around it: spaces, tabs, and other segment breaks. NBSP never collapses. Chrome renders it as one space, even between two CJK characters where CSS Text would remove it
 const SEGMENT_BREAK = /[ \t\r\f]*\n[ \t\r\f\n]*/g;
@@ -29,7 +29,7 @@ export function readSentence(node: Text, unspaced: string, at: number, unspacedB
   }
 
   function isSkipped(element: Element) {
-    return SUPERSCRIPT_OR_SUBSCRIPT.test(element.nodeName) || pangu.isIgnoredElement(element);
+    return SUPERSCRIPT_OR_SUBSCRIPT.test(element.nodeName) || DomWalker.isIgnoredElement(element);
   }
 
   // Where the line of text ends: a line break or an element that is not inline-level

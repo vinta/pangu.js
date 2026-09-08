@@ -25,6 +25,7 @@ export class VisibilityDetector {
 
     // Check clip: rect patterns (screen reader only content)
     // Common patterns: rect(1px, 1px, 1px, 1px) or rect(0, 0, 0, 0)
+    // eslint-disable-next-line @typescript-eslint/no-deprecated -- legacy screen-reader-only CSS still uses clip
     const clip = style.clip;
     if (clip && (clip.includes('rect(1px, 1px, 1px, 1px)') || clip.includes('rect(0px, 0px, 0px, 0px)') || clip.includes('rect(0, 0, 0, 0)'))) {
       return true;
