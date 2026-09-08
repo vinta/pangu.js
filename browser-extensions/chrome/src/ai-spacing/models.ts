@@ -30,15 +30,7 @@ export async function downloadModel() {
   // The download is browser-wide and outlives this page, so the session only exists to start it
   // TODO: 2026-09-08: after On-device AI is toggled off and on in chrome://settings/ai, availability stays 'downloading' and downloadprogress never moves past 0 until Chrome restarts; consider telling the user to restart Chrome when the download stays at 0
   console.debug(`Model download requested at ${new Date().toISOString()}`);
-  const session = await LanguageModel.create({
-    expectedOutputs: PAGE_MODEL_LANGUAGES,
-    monitor(monitor) {
-      // Chrome fires only the terminal 0 and 1 events (measured 2026-09-08 on a fresh 4 GB download), so progress is logged, never shown
-      monitor.addEventListener('downloadprogress', (event) => {
-        console.debug(`Model download progress: loaded ${event.loaded} of ${event.total} at ${new Date().toISOString()}`);
-      });
-    },
-  });
+  const session = await LanguageModel.create({ expectedOutputs: PAGE_MODEL_LANGUAGES });
   console.debug(`Model download finished at ${new Date().toISOString()}`);
   session.destroy();
 }
