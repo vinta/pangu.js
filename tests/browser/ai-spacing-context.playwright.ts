@@ -2,12 +2,15 @@ import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
 import type { CandidateLabel, ClassifyCandidatesMessage } from '../../browser-extensions/chrome/src/ai-spacing/messages';
+import type { BrowserPangu } from '../../src/browser/pangu';
 
 declare global {
   interface Window {
     __aiClassifications: ClassifyCandidatesMessage[];
     __aiLabels: CandidateLabel[];
   }
+  // The content script IIFE global: the bundled pangu instance the script hooks, not the UMD one
+  const PanguContentScript: BrowserPangu;
 }
 
 async function classify(page: Page, html: string, candidateOnly = false) {
@@ -17,10 +20,10 @@ async function classify(page: Page, html: string, candidateOnly = false) {
     if (candidateOnly) {
       const node = document.querySelector('#candidate')!.firstChild as Text;
       const unspaced = node.data;
-      node.data = pangu.spacingText(unspaced);
-      pangu.onTextNodesSettled!([{ node, unspaced, settled: node.data }]);
+      node.data = PanguContentScript.spacingText(unspaced);
+      PanguContentScript.onTextNodesSettled!([{ node, unspaced, settled: node.data }]);
     } else {
-      pangu.spacingNode(document.body);
+      PanguContentScript.spacingNode(document.body);
     }
   }, candidateOnly);
   await page.waitForFunction(() => window.__aiClassifications.length > 0);
@@ -29,9 +32,7 @@ async function classify(page: Page, html: string, candidateOnly = false) {
 
 test.describe('AI spacing DOM context', () => {
   test.beforeEach(async ({ page }) => {
-    await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
     await page.evaluate(() => {
-      pangu.taskScheduler.config.enabled = false;
       window.__aiClassifications = [];
       window.__aiLabels = [];
       Object.defineProperty(window, 'chrome', {
@@ -51,7 +52,10 @@ test.describe('AI spacing DOM context', () => {
       }
     });
     await page.addScriptTag({ path: 'browser-extensions/chrome/dist/content-script.js' });
-    await page.waitForFunction(() => pangu.onTextNodesSettled !== null);
+    await page.evaluate(() => {
+      PanguContentScript.taskScheduler.config.enabled = false;
+    });
+    await page.waitForFunction(() => PanguContentScript.onTextNodesSettled !== null);
   });
 
   test('plain text and nested inline elements provide the same sentence and symbol position', async ({ page }) => {
@@ -59,7 +63,13 @@ test.describe('AI spacing DOM context', () => {
     expect(await classify(page, '<p>目前已經發展成為一個擁有運-12輕型多用途飛機</p>')).toEqual(expected);
     expect(await classify(page, '<p>目前已經<span>發展成為一個擁有<a id="candidate">運-12</a></span><b>輕型多用途飛機</b></p>')).toEqual(expected);
     expect(await classify(page, '<p>目前已經<span>發展成為一個擁有<a id="candidate">運-12</a></span><b>輕型多用途飛機</b></p>', true)).toEqual(expected);
-    expect(await classify(page, '<p>目前已經<span style="display: inline-block">發展成為一個擁有<a id="candidate" style="display: inline-block">運-12</a></span><b style="display: inline-flex">輕型多用途飛機</b></p>', true)).toEqual(expected);
+    expect(
+      await classify(
+        page,
+        '<p>目前已經<span style="display: inline-block">發展成為一個擁有<a id="candidate" style="display: inline-block">運-12</a></span><b style="display: inline-flex">輕型多用途飛機</b></p>',
+        true,
+      ),
+    ).toEqual(expected);
   });
 
   test('read neighboring original snapshots before the rules inserted spaces', async ({ page }) => {
@@ -91,7 +101,9 @@ test.describe('AI spacing DOM context', () => {
     const expected = [{ sentence: '目前已經發展成為一個擁有 運-12 輕型多用途飛機', at: 14 }];
     expect(await classify(page, '<p>目前已經發展成為一個擁有\n<a id="candidate">運-12</a>\n輕型多用途飛機</p>')).toEqual(expected);
     expect(await classify(page, '<p>\n  目前已經發展成為一個擁有\n  <a id="candidate">運-12</a>\n  輕型多用途飛機\n</p>', true)).toEqual(expected);
-    expect(await classify(page, '<p>目前已經發展成為一個擁有，\n<a id="candidate">運-12</a>輕型多用途飛機</p>', true)).toEqual([{ sentence: '目前已經發展成為一個擁有， 運-12輕型多用途飛機', at: 15 }]);
+    expect(await classify(page, '<p>目前已經發展成為一個擁有，\n<a id="candidate">運-12</a>輕型多用途飛機</p>', true)).toEqual([
+      { sentence: '目前已經發展成為一個擁有， 運-12輕型多用途飛機', at: 15 },
+    ]);
     expect(await classify(page, '<p>代號Y12\n<a id="candidate">運-12</a>\n輕型多用途飛機</p>', true)).toEqual([{ sentence: '代號Y12 運-12 輕型多用途飛機', at: 7 }]);
     expect(await classify(page, '<div style="white-space: pre-wrap">前一行\n氣溫是-5度\n後一行</div>')).toEqual([{ sentence: '氣溫是-5度', at: 3 }]);
     expect(await classify(page, '<div style="white-space: pre-wrap">前一行\n<a id="candidate">運-12</a>\n後一行</div>', true)).toEqual([{ sentence: '運-12', at: 1 }]);
@@ -118,6 +130,8 @@ test.describe('AI spacing DOM context', () => {
     ]) {
       expect(await classify(page, `<section>外側${skipped}<span>前<a id="candidate">運-12</a>後</span>${skipped}外側</section>`, true), skipped).toEqual([{ sentence: '外側前運-12後外側', at: 4 }]);
     }
-    expect(await classify(page, '<p>目前已經發展成為一個擁有<a>運-12</a><sup class="reference"><a href="#cite_note-1">[1]</a></sup>輕型多用途飛機</p>')).toEqual([{ sentence: '目前已經發展成為一個擁有運-12輕型多用途飛機', at: 13 }]);
+    expect(await classify(page, '<p>目前已經發展成為一個擁有<a>運-12</a><sup class="reference"><a href="#cite_note-1">[1]</a></sup>輕型多用途飛機</p>')).toEqual([
+      { sentence: '目前已經發展成為一個擁有運-12輕型多用途飛機', at: 13 },
+    ]);
   });
 });
