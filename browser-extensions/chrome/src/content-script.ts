@@ -47,26 +47,29 @@ async function init() {
 const initialization = init();
 void initialization.catch((error) => console.error('Failed to initialize auto spacing', error));
 
+// The manual spacing button runs auto spacing unconditionally, until the URL changes. Never rejects: the popup reports { success: false } as a failed click
+async function startManualSpacing() {
+  const url = location.href;
+  try {
+    const startAutoSpacing = await initialization;
+    if (location.href !== url) {
+      return { success: false };
+    }
+    startAutoSpacing();
+    return { success: true };
+  } catch (error) {
+    console.error(`Failed to start auto spacing on ${url}:`, error);
+    return { success: false };
+  }
+}
+
 chrome.runtime.onMessage.addListener((message: MessageToContentScript, _sender: chrome.runtime.MessageSender, sendResponse: (response: ContentScriptResponse) => void) => {
   if (message.action === 'PING') {
     // PING is used by popup to check if content script is already loaded
     sendResponse({ success: true });
   } else if (message.action === 'MANUAL_SPACING') {
-    // The manual spacing button runs auto spacing unconditionally, until the URL changes.
-    const url = location.href;
-    initialization
-      .then((startAutoSpacing) => {
-        if (location.href !== url) {
-          sendResponse({ success: false });
-          return;
-        }
-        startAutoSpacing();
-        sendResponse({ success: true });
-      })
-      .catch((error) => {
-        console.error(`Failed to start auto spacing on ${url}:`, error);
-        sendResponse({ success: false });
-      });
+    // Chrome closes the message channel when a listener returns a promise, so return true and let startManualSpacing() answer
+    void startManualSpacing().then(sendResponse);
     return true;
   }
 
