@@ -35,7 +35,7 @@ The gap that the browser renders between CJK and ANS letters or digits through t
 _Avoid_: native autospacing, text autospace, CSS spacing, autospace mode, text-autospace (bare, in prose)
 
 **Late fix**:
-A correction to the rules output. It is applied after the rules run, and something other than the rules decides it, such as a fixed list or a classifier. A late fix only inserts or removes spaces. It never rewrites the author's characters. A late fix goes through the same scheduling path as text spacing, never as a separate write, so on a hidden page it waits with everything else.
+A correction to the rules output. It is applied after the rules run, and something other than the rules decides it, such as a fixed list or a classifier. A late fix only inserts or removes spaces. It never rewrites the author's characters. A late fix goes through the same scheduling path as text spacing, never as a separate write, so on a hidden page it waits with everything else. While a text node still holds a late fix, text spacing leaves it alone and only boundary spacing touches it; a page re-render of that node hands it back to the rules.
 _Avoid_: un-insert (in prose), model fix
 
 **Page re-render**:

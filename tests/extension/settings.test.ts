@@ -75,9 +75,9 @@ describe('getSettings', () => {
     expect(result.spacing_mode).toBe('spacing_when_load');
     expect(result.filter_mode).toBe('blacklist');
     expect(result.whitelist).toEqual([]);
-    expect(result.is_mute_sound_effects).toBe(false);
-    expect(result.is_enable_text_autospace).toBe(true);
-    expect(result.is_enable_ai_spacing).toBe(true);
+    expect(result.is_sound_effects_muted).toBe(false);
+    expect(result.is_text_autospace_enabled).toBe(true);
+    expect(result.is_ai_spacing_enabled).toBe(true);
     expect(result.blacklist).toContain('https://docs.google.com/*');
   });
 

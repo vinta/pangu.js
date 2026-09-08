@@ -13,31 +13,25 @@ export class DomWalker {
       return nodes;
     }
 
-    const walker = document.createTreeWalker(contextNode, NodeFilter.SHOW_TEXT, {
-      acceptNode: (node) => {
-        if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
-          return NodeFilter.FILTER_REJECT;
-        }
-
-        // Skip nodes that should be ignored
-        // We need to check the node itself and its ancestors
-        let currentNode: Node | null = node;
-        while (currentNode) {
-          if (currentNode instanceof Element && this.isIgnoredElement(currentNode)) {
-            return NodeFilter.FILTER_REJECT;
-          }
-          currentNode = currentNode.parentNode;
-        }
-
-        return NodeFilter.FILTER_ACCEPT;
-      },
-    });
+    const walker = this.createTextWalker(contextNode);
 
     while (walker.nextNode()) {
       nodes.push(walker.currentNode as Text);
     }
 
     return reverse ? nodes.reverse() : nodes;
+  }
+
+  // The nearest text node collectTextNodes() would return before or after the given one, across inline ancestors. The search stops at the closest block ancestor, since boundary spacing never crosses
+  // a block edge, and at <body>, so a body text node never pairs with the title
+  public static findAdjacentTextNode(textNode: Text, direction: 'previous' | 'next') {
+    let root: Node = textNode;
+    while (root.parentNode && root !== document.body && !this.blockTags.test(root.nodeName)) {
+      root = root.parentNode;
+    }
+    const walker = this.createTextWalker(root);
+    walker.currentNode = textNode;
+    return (direction === 'previous' ? walker.previousNode() : walker.nextNode()) as Text | null;
   }
 
   // The highest ancestor that starts (edge 'first') or ends (edge 'last') with the
@@ -76,6 +70,29 @@ export class DomWalker {
       }
     }
     return false;
+  }
+
+  // Walks the non-whitespace text nodes under root that are not inside an ignored element
+  private static createTextWalker(root: Node) {
+    return document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) => {
+        if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
+          return NodeFilter.FILTER_REJECT;
+        }
+
+        // Skip nodes that should be ignored
+        // We need to check the node itself and its ancestors
+        let currentNode: Node | null = node;
+        while (currentNode) {
+          if (currentNode instanceof Element && this.isIgnoredElement(currentNode)) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          currentNode = currentNode.parentNode;
+        }
+
+        return NodeFilter.FILTER_ACCEPT;
+      },
+    });
   }
 
   public static isIgnoredElement(element: Element) {

@@ -32,7 +32,7 @@ async function registerContentScripts() {
 
   const settings = await getSettings();
 
-  if (settings.is_enable_text_autospace) {
+  if (settings.is_text_autospace_enabled) {
     // Visual-only native autospacing, deliberately not gated by spacing_mode, filter_mode, blacklist, or whitelist (see docs/adr/0008)
     await registerOneContentScript({
       id: TEXT_AUTOSPACE_SCRIPT_ID,
@@ -103,7 +103,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 });
 
 // Registered synchronously at module scope, as MV3 requires for storage events to wake this worker. The event payload alone says what changed, so a cold-started worker needs no cached state
-const REGISTRATION_KEYS: (keyof Settings)[] = ['spacing_mode', 'is_enable_text_autospace'];
+const REGISTRATION_KEYS: (keyof Settings)[] = ['spacing_mode', 'is_text_autospace_enabled'];
 const ICON_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist'];
 onSettingsChanged((changedKeys) => {
   if (changedKeys.some((key) => REGISTRATION_KEYS.includes(key))) {

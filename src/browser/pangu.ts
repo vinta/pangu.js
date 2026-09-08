@@ -1,8 +1,8 @@
 import { Pangu } from '../shared/index.js';
 import { decideBoundarySpacing, decideTextNodeSpacing, respaceCurrentTail } from './boundary-spacing.js';
-import { DomWalker } from './dom-walker.js';
-import { TaskScheduler } from './task-scheduler.js';
-import { VisibilityDetector } from './visibility-detector.js';
+import { DomWalker } from './dom/dom-walker.js';
+import { VisibilityDetector } from './dom/visibility-detector.js';
+import { TaskScheduler } from './scheduling/task-scheduler.js';
 
 export interface AutoSpacingPageConfig {
   pageDelayMs?: number;
@@ -79,6 +79,9 @@ export class BrowserPangu extends Pangu {
   // (data differs, re-space before the next paint)
   private readonly lastWrittenData = new WeakMap<Text, string>();
 
+  // Text nodes a late fix wrote. While such a node still holds what pangu last wrote, the rules leave its text alone and only pair its boundaries
+  private readonly lateFixedTextNodes = new WeakSet<Text>();
+
   public readonly taskScheduler = new TaskScheduler();
   public readonly visibilityDetector = new VisibilityDetector();
 
@@ -137,10 +140,6 @@ export class BrowserPangu extends Pangu {
     this.isAutoSpacingPageExecuted = false;
   }
 
-  public isElementVisuallyHidden(element: Element) {
-    return this.visibilityDetector.isElementVisuallyHidden(element);
-  }
-
   public applyLateFixes(lateFixes: readonly LateFix[]) {
     this.schedule(() => {
       for (const lateFix of lateFixes) {
@@ -150,6 +149,7 @@ export class BrowserPangu extends Pangu {
 
         lateFix.node.data = lateFix.data;
         this.lastWrittenData.set(lateFix.node, lateFix.data);
+        this.lateFixedTextNodes.add(lateFix.node);
       }
     });
   }
@@ -181,7 +181,14 @@ export class BrowserPangu extends Pangu {
     // Process nodes in the order provided
     for (const currentTextNode of textNodes) {
       if (currentTextNode instanceof Text) {
-        this.applyTextNodeSpacing(currentTextNode, unsettledTextNodes);
+        // A node holding a late fix takes part in boundary spacing only: text spacing would undo the fix. The host still gets it at the batch tail, since a boundary can rewrite it
+        if (this.holdsLateFix(currentTextNode)) {
+          if (this.onTextNodesSettled) {
+            unsettledTextNodes.push({ node: currentTextNode, unspaced: currentTextNode.data });
+          }
+        } else {
+          this.applyTextNodeSpacing(currentTextNode, unsettledTextNodes);
+        }
       }
 
       // Boundary between this text node and the following one, for every adjacent pair rather than only nested tags. The list is in reverse document order, so nextTextNode is the previously visited node
@@ -230,7 +237,7 @@ export class BrowserPangu extends Pangu {
         });
 
         // A junction space can come with a second space that belongs inside the current text node's tail (CJK/ + CJK reads CJK / CJK): write the respaced tail back before placing the junction space
-        if (boundarySpacingVerdict !== 'none') {
+        if (boundarySpacingVerdict !== 'none' && !this.holdsLateFix(currentTextNode)) {
           const respacedTail = respaceCurrentTail(currentTail, nextFirst);
           if (respacedTail !== null) {
             currentTextNode.data = currentTextNode.data.slice(0, currentTextNode.data.length - currentTail.length) + respacedTail;
@@ -263,6 +270,11 @@ export class BrowserPangu extends Pangu {
     this.emitTextNodesSettled(unsettledTextNodes);
   }
 
+  // A page rewrite breaks the equality, so the node is spaced by the rules again until the host fixes it again
+  private holdsLateFix(textNode: Text) {
+    return this.lateFixedTextNodes.has(textNode) && this.lastWrittenData.get(textNode) === textNode.data;
+  }
+
   private emitTextNodesSettled(unsettledTextNodes: readonly UnsettledTextNode[]) {
     if (unsettledTextNodes.length === 0) {
       return;
@@ -273,6 +285,8 @@ export class BrowserPangu extends Pangu {
   }
 
   private applyTextNodeSpacing(textNode: Text, unsettledTextNodes: UnsettledTextNode[]) {
+    // A node the rules space again no longer holds a late fix
+    this.lateFixedTextNodes.delete(textNode);
     const textNodeSpacingVerdicts = decideTextNodeSpacing({
       text: textNode.data,
       previousElementLastChar: this.findPreviousElementLastChar(textNode),
@@ -308,12 +322,25 @@ export class BrowserPangu extends Pangu {
   // inside the MutationObserver callback. Returns false when the subtree exceeds
   // maxTextNodes, so the caller can fall back to the debounced queue
   private spacingNodeSync(contextNode: Node, maxTextNodes: number) {
-    const textNodes = DomWalker.collectTextNodes(contextNode, true);
+    const textNodes = DomWalker.collectTextNodes(contextNode);
     if (textNodes.length > maxTextNodes) {
       return false;
     }
-    this.spacingTextNodes(textNodes);
+    this.spacingTextNodes(this.withNeighborTextNodes(textNodes).reverse());
     return true;
+  }
+
+  // A mutated node's text nodes plus the text node on each side, so the junction with an unchanged sibling is paired too: a placeholder span filled after the page was spaced sits tight against
+  // text the page pass already settled
+  private withNeighborTextNodes(textNodes: Text[]) {
+    const firstTextNode = textNodes[0];
+    const lastTextNode = textNodes[textNodes.length - 1];
+    if (!firstTextNode || !lastTextNode) {
+      return textNodes;
+    }
+    const previousTextNode = DomWalker.findAdjacentTextNode(firstTextNode, 'previous');
+    const nextTextNode = DomWalker.findAdjacentTextNode(lastTextNode, 'next');
+    return [...(previousTextNode ? [previousTextNode] : []), ...textNodes, ...(nextTextNode ? [nextTextNode] : [])];
   }
 
   private hasSpacedTextInSubtree(node: Node) {
@@ -521,7 +548,8 @@ export class BrowserPangu extends Pangu {
         const seenTextNodes = new Set<Node>();
         const allTextNodes: Node[] = [];
         for (const node of nodesToProcess) {
-          for (const textNode of DomWalker.collectTextNodes(node)) {
+          const textNodes = DomWalker.collectTextNodes(node);
+          for (const textNode of this.withNeighborTextNodes(textNodes)) {
             if (!seenTextNodes.has(textNode)) {
               seenTextNodes.add(textNode);
               allTextNodes.push(textNode);

@@ -39,7 +39,7 @@ test.describe('Visibility Detector', () => {
       const visibilityResults = Array.from(spans).map((span) => ({
         className: span.className,
         text: span.textContent,
-        isHidden: pangu.isElementVisuallyHidden(span),
+        isHidden: pangu.visibilityDetector.isElementVisuallyHidden(span),
       }));
 
       return visibilityResults;

@@ -5,7 +5,7 @@ import { getSettings, type Settings } from './settings/storage';
 import { shouldAutoSpacing } from './settings/urls';
 
 function startAutoSpacing(settings: Settings) {
-  if (settings.is_enable_ai_spacing) {
+  if (settings.is_ai_spacing_enabled) {
     warmUpAiSpacing();
   }
   pangu.autoSpacingPage();
@@ -26,7 +26,7 @@ function applyAutoSpacingUrlPolicy(settings: Settings) {
 async function init() {
   // Assigned before the sweep starts, so the initial pass is captured too
   const settings = await getSettings();
-  if (settings.is_enable_ai_spacing) {
+  if (settings.is_ai_spacing_enabled) {
     pangu.onTextNodesSettled = (settledTextNodes) => {
       void applyAiSpacing(settledTextNodes);
     };

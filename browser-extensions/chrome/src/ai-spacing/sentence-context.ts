@@ -1,4 +1,4 @@
-import { DomWalker } from '../../../../src/browser/dom-walker';
+import { DomWalker } from '../../../../src/browser/dom/dom-walker';
 import pangu from '../../../../src/browser/pangu';
 import { MAX_SENTENCE_SIDE, SENTENCE_TERMINATOR, sliceSentence } from './shapes/base';
 
