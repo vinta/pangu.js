@@ -44,8 +44,16 @@ describe('Symbol " "', () => {
     expect(pangu.spacingText(text)).toBe(text);
   });
 
-  // \u201c
-  // \u201d
+  // Rare cases, ignore
+  // See https://github.com/vinta/pangu.js/issues/287
+  // it('handle " " mis-pairing (known limitation)', () => {
+  //   expect(pangu.spacingText('Darling." 或 "We')).toBe('Darling." 或 "We');
+  // });
+});
+
+// \u201c
+// \u201d
+describe('Symbol “ ”', () => {
   it('handle “ ” symbols as quotes', () => {
     // prettier-ignore
     expect(pangu.spacingText('阿里云开源“计算王牌”Blink，实时计算时代已来'))
@@ -67,10 +75,4 @@ describe('Symbol " "', () => {
     expect(pangu.spacingText('《战斧骨》里还有个镜头挺有意思，就是男主”见路不走”，不从峡谷入口走，而选择了从侧面翻越，还顺便借着口哨吸引出来一个食人族给杀了。'))
                        .toBe('《战斧骨》里还有个镜头挺有意思，就是男主 ”见路不走”，不从峡谷入口走，而选择了从侧面翻越，还顺便借着口哨吸引出来一个食人族给杀了。');
   });
-
-  // Rare cases, ignore
-  // See https://github.com/vinta/pangu.js/issues/287
-  // it('handle " " mis-pairing (known limitation)', () => {
-  //   expect(pangu.spacingText('Darling." 或 "We')).toBe('Darling." 或 "We');
-  // });
 });

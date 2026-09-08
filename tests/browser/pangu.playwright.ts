@@ -593,7 +593,7 @@ test.describe('BrowserPangu', () => {
     // FIXME: Spaces belong around an inline <code> element between CJK (https://github.com/vinta/pangu.js/issues/97).
     // The presentationalTags rule that once did this was retired in 50cfcf3;
     // Reviving it belongs to Markdown support (https://github.com/vinta/pangu.js/issues/127)
-    test.skip('handle spacing around inline code elements', async ({ page }) => {
+    test.fixme('handle spacing around inline code elements', async ({ page }) => {
       await page.setContent('<p>中文<code>English</code>中文</p>');
       await page.evaluate(() => {
         pangu.spacingNode(document.body);

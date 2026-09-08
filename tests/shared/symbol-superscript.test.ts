@@ -14,3 +14,18 @@ describe('Superscripts', () => {
     expect(pangu.spacingText('甲⁽註⁾乙')).toBe('甲⁽註⁾ 乙');
   });
 });
+
+// \u2122 reads as a superscript suffix, so it stays attached on the left
+describe('Symbol ™', () => {
+  it('handle ™ symbol', () => {
+    expect(pangu.spacingText('iPhone™手機')).toBe('iPhone™ 手機');
+    expect(pangu.spacingText('微軟™公司')).toBe('微軟™ 公司');
+  });
+});
+
+// \u2120 reads as a superscript suffix, so it stays attached on the left
+describe('Symbol ℠', () => {
+  it('handle ℠ symbol', () => {
+    expect(pangu.spacingText('Coca-Cola℠飲料')).toBe('Coca-Cola℠ 飲料');
+  });
+});

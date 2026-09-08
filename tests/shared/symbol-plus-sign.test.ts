@@ -21,9 +21,6 @@ describe('Symbol +', () => {
   });
 
   it('handle + symbol as separator', () => {
-    // FIXME
-    // expect(pangu.spacingText('Switch 2+瑪利歐賽車世界同捆組')).toBe('Switch 2 + 瑪利歐賽車世界同捆組');
-
     // A plus after a word in CJK contact is undecided by any affix, so plus reading spaces it as a separator, in a bundle plan and on a brand line alike
     expect(pangu.spacingText('Switch OLED+健身環+保護貼')).toBe('Switch OLED + 健身環 + 保護貼');
 
@@ -66,9 +63,16 @@ describe('Symbol +', () => {
                        .toBe('HiNet 光世代 + MOD + 自選餐 (全選) +「影劇館 +」');
     // expect(pangu.spacingText('HiNet光世代+MOD+自選餐(全選)+「影劇館+」'))
     //                    .toBe('HiNet 光世代 + MOD + 自選餐 (全選) +「影劇館+」');
+  });
 
-    // FIXME
-    // expect(pangu.spacingText('自選餐(全選)+「影劇館」')).toBe('自選餐 (全選)+「影劇館」');
+  // FIXME
+  it.todo('handle + symbol as separator after a closing bracket on a single-plus line', () => {
+    expect(pangu.spacingText('自選餐(全選)+「影劇館」')).toBe('自選餐 (全選) +「影劇館」');
+  });
+
+  // FIXME
+  it.todo('handle + symbol as separator after a product name ending in a digit', () => {
+    expect(pangu.spacingText('Switch 2+瑪利歐賽車世界同捆組')).toBe('Switch 2 + 瑪利歐賽車世界同捆組');
   });
 
   it('handle + symbol as joiner token', () => {

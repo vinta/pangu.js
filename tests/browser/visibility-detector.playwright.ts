@@ -97,7 +97,7 @@ test.describe('Visibility Detector', () => {
   test('should skip spacing between hidden element and CJK with taskScheduler enabled', async ({ page }) => {
     await page.setContent('<div id="content"></div>');
 
-    const result = await page.evaluate(() => {
+    await page.evaluate(() => {
       const content = document.getElementById('content')!;
       content.innerHTML = `
         <style>
@@ -120,26 +120,23 @@ test.describe('Visibility Detector', () => {
       // Process with both visibility checking and async task scheduling
       // Use minimal delays for testing
       pangu.autoSpacingPage({ pageDelayMs: 10, nodeDelayMs: 10, nodeMaxWaitMs: 50 });
+    });
 
-      // Since autoSpacingPage has an initial delay and task scheduling is async,
-      // we need to wait for both the initial processing and any queued tasks
-      return new Promise<{
-        hiddenText: string | null;
-        visibleText: string | null;
-        startsWithSpace: boolean;
-      }>((resolve) => {
-        setTimeout(() => {
-          const hiddenSpan = content.querySelector('.sr-only')!;
-          const visibleSpan = content.querySelector('span:not(.sr-only)')!;
+    // Spacing lands in an idle callback, which a loaded CI box can starve for
+    // longer than any fixed wait, so poll for the write instead
+    await page.waitForFunction(() => document.querySelector('#content span:not(.sr-only)')!.textContent !== '測試visibility check功能');
 
-          resolve({
-            hiddenText: hiddenSpan.textContent,
-            visibleText: visibleSpan.textContent,
-            // Should not start with space since previous element is hidden
-            startsWithSpace: visibleSpan.textContent.startsWith(' '),
-          });
-        }, 150); // Wait for initial pageDelayMs + idle callback processing
-      });
+    const result = await page.evaluate(() => {
+      const content = document.getElementById('content')!;
+      const hiddenSpan = content.querySelector('.sr-only')!;
+      const visibleSpan = content.querySelector('span:not(.sr-only)')!;
+
+      return {
+        hiddenText: hiddenSpan.textContent,
+        visibleText: visibleSpan.textContent,
+        // Should not start with space since previous element is hidden
+        startsWithSpace: visibleSpan.textContent.startsWith(' '),
+      };
     });
 
     expect(result.hiddenText).toBe('Description:');

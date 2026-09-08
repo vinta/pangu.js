@@ -20,11 +20,13 @@ export const CJK_COMPATIBILITY_IDEOGRAPHS = '\uf900-\ufaff';
 export const GREEK_AND_COPTIC = '\u0370-\u03ff';
 export const LATIN_1_SUPPLEMENT_AFTER_NBSP = '\u00a1-\u00ff'; // The Latin-1 Supplement block starts at \u0080, but this range starts one past NBSP (\u00a0) so an NBSP lands in no character class at all. See ADR 0009
 export const NUMBER_FORMS = '\u2150-\u218f';
+export const LETTERLIKE_SYMBOLS = '\u2100-\u214f';
 export const DINGBATS = '\u2700-\u27bf';
 
 // Superscript suffixes stay attached on the left. Exclude ⁽ so the following space never lands inside an opening parenthesis
-// Characters: ⁰ ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ ⁱ ⁿ ⁺ ⁻ ⁼ ⁾
-export const SUPERSCRIPT_SUFFIXES = '\u00b2\u00b3\u00b9\u2070\u2071\u2074-\u207c\u207e\u207f';
+// \u2120 and \u2122 (SM, TM) belong here too: their NFKD decomposition is tagged <super>
+// Characters: ⁰ ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ ⁱ ⁿ ⁺ ⁻ ⁼ ⁾ ℠ ™
+export const SUPERSCRIPT_SUFFIXES = '\u00b2\u00b3\u00b9\u2070\u2071\u2074-\u207c\u207e\u207f\u2120\u2122';
 
 export const CJK = `${CJK_RADICALS_SUPPLEMENT}${KANGXI_RADICALS}${HIRAGANA}${KATAKANA_NO_MIDDLE_DOT}${BOPOMOFO}${ENCLOSED_CJK_LETTERS_AND_MONTHS}${CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A}${CJK_UNIFIED_IDEOGRAPHS}${CJK_COMPATIBILITY_IDEOGRAPHS}`;
 
@@ -51,8 +53,8 @@ export const RIGHT_BRACKETS_EXTENDED = '\\)\\]\\}<>\u201d'; // For RIGHT_BRACKET
 // ANS extended sets. The two sets are not identical, see the inline notes
 // Both ranges start at \u00a1, one past NBSP (\u00a0), so an NBSP is in no character class at all. That inertness is load-bearing: an NBSP already separates the runs it sits between,
 // so no rule matches across it and none fires. pangu therefore never rewrites an author's NBSP, it only inserts a space where one is genuinely missing. See ADR 0009
-export const ANS_CJK_AFTER = `${A}${GREEK_AND_COPTIC}0-9@\\$%\\^&\\*\\-\\+\\\\=${LATIN_1_SUPPLEMENT_AFTER_NBSP}${NUMBER_FORMS}${DINGBATS}`; // Has @, no punctuation
-export const ANS_BEFORE_CJK = `${A}${GREEK_AND_COPTIC}0-9\\$%\\^&\\*\\-\\+\\\\=${LATIN_1_SUPPLEMENT_AFTER_NBSP}${NUMBER_FORMS}${DINGBATS}${SUPERSCRIPT_SUFFIXES}`; // No @ symbol
+export const ANS_CJK_AFTER = `${A}${GREEK_AND_COPTIC}0-9@\\$%\\^&\\*\\-\\+\\\\=${LATIN_1_SUPPLEMENT_AFTER_NBSP}${NUMBER_FORMS}${DINGBATS}${LETTERLIKE_SYMBOLS}`; // Has @, no punctuation
+export const ANS_BEFORE_CJK = `${A}${GREEK_AND_COPTIC}0-9\\$%\\^&\\*\\-\\+\\\\=${LATIN_1_SUPPLEMENT_AFTER_NBSP}${NUMBER_FORMS}${DINGBATS}${LETTERLIKE_SYMBOLS}${SUPERSCRIPT_SUFFIXES}`; // No @ symbol
 
 // Common directory names in Unix and project paths
 // prettier-ignore
