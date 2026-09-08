@@ -29,7 +29,7 @@ const TRAILING_WHITESPACE = /\s$/;
 const LEADING_WHITESPACE = /^\s/;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function once<T extends (...args: any[]) => any>(func: T) {
+function once<T extends (...args: any[]) => unknown>(func: T) {
   let executed = false;
   return function (...args: Parameters<T>) {
     if (executed) {

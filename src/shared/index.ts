@@ -256,7 +256,7 @@ export class PlaceholderReplacer {
     if (this.index === 0) {
       return text;
     }
-    return text.replace(this.pattern, (_match, index) => {
+    return text.replace(this.pattern, (_match, index: string) => {
       return this.items[parseInt(index, 10)] || '';
     });
   }
@@ -283,7 +283,7 @@ export class Pangu {
 
     // Hide backtick content from the quote rules; the backticks themselves still get spacing
     const backtickManager = new PlaceholderReplacer('BACKTICK_CONTENT_', '\uE000', '\uE001');
-    newText = newText.replace(/`([^`]+)`/g, (_match, content) => {
+    newText = newText.replace(/`([^`]+)`/g, (_match, content: string) => {
       return `\`${backtickManager.store(content)}\``;
     });
 
@@ -311,7 +311,7 @@ export class Pangu {
             return mentionedTagManager.store(match);
           }
         }
-        const processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName, attrValue) => {
+        const processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName: string, attrValue: string) => {
           const processedValue = this.spacingText(attrValue);
           return `${attrName}="${processedValue}"`;
         });
@@ -489,7 +489,7 @@ export class Pangu {
   // Strip the spaces that earlier rules left just inside a bracket pair: no space after an opening bracket or before a closing bracket
   private fixBracketSpacing(text: string) {
     for (const { pattern, open, close } of BRACKET_PATTERNS) {
-      text = text.replace(pattern, (_match, innerContent) => {
+      text = text.replace(pattern, (_match, innerContent: string) => {
         if (!innerContent) {
           return `${open}${close}`;
         }
