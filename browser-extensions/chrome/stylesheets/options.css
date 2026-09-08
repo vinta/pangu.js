@@ -98,10 +98,24 @@
   text-align: right;
 }
 
-/* Model status under the AI spacing toggle, aligned like the URL list help but quieter since it is not a link */
+/* Download button on the left, model status on the right; margin-left auto keeps the status right when the button is hidden */
+.ai-model-row {
+  display: flex;
+  align-items: center;
+  margin-top: var(--spacing-4);
+}
+
+/* Same box as #add-url-btn: its padding, weight, and the line-height it inherits */
+#ai-model-download-btn {
+  padding: var(--spacing-2) var(--spacing-3);
+  font-weight: normal;
+  line-height: inherit;
+}
+
+/* Aligned like the URL list help but quieter since it is not a link */
 .ai-model-status {
-  margin-top: var(--spacing-3);
-  text-align: right;
+  margin-top: 0;
+  margin-left: auto;
   color: var(--color-text-tertiary);
 }
 
