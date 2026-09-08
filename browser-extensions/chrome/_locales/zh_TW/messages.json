@@ -210,7 +210,7 @@
     "description": ""
   },
   "ai_model_unavailable": {
-    "message": "你的電腦跑不動內建的模型，可憐吶",
+    "message": "模型無法運作",
     "description": ""
   },
   "ai_model_downloadable": {
