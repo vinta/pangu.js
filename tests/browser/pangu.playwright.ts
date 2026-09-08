@@ -96,8 +96,7 @@ test.describe('BrowserPangu', () => {
 
       await page.waitForTimeout(600);
 
-      // No space may appear between X and abc. The unqueued X is paired with each queued
-      // neighbor, so 甲 X gets its space while Xabc stays tight as two ANS tokens
+      // No space may appear between X and abc. The unqueued X is paired with each queued neighbor, so 甲 X gets its space while Xabc stays tight as two ANS tokens
       const result = await page.evaluate(() => document.getElementById('container')!.textContent);
       expect(result).toBe('甲 Xabc');
     });

@@ -22,7 +22,8 @@ export class DomWalker {
     return reverse ? nodes.reverse() : nodes;
   }
 
-  // The nearest text node collectTextNodes() would return before or after the given one, across inline ancestors. The search stops at the closest block ancestor, since boundary spacing never crosses a block edge, and at <body>, so a body text node never pairs with the title
+  // The nearest text node collectTextNodes() would return before or after the given one, across inline ancestors. The search stops at the closest block ancestor, since boundary spacing never crosses
+  // a block edge, and at <body>, so a body text node never pairs with the title
   public static findAdjacentTextNode(textNode: Text, direction: 'previous' | 'next') {
     let root: Node = textNode;
     while (root.parentNode && root !== document.body && !this.blockTags.test(root.nodeName)) {
