@@ -1,3 +1,4 @@
+import { defineConfig } from 'eslint/config';
 import { builtinModules } from 'node:module';
 import tseslint from 'typescript-eslint';
 
@@ -26,10 +27,10 @@ const styleRules = {
   ],
 };
 
-export default tseslint.config(
+export default defineConfig(
   {
     // Global ignores
-    ignores: ['node_modules/', 'dist/', 'browser-extensions/chrome/dist/', '.worktrees/'],
+    ignores: ['dist/', 'browser-extensions/chrome/dist/', '.worktrees/'],
   },
   {
     // TypeScript files
