@@ -15,7 +15,7 @@ async function loadContentScript(settings: Settings | Promise<Settings>, url = '
     onTextNodesSettled: null as ((nodes: SettledTextNode[]) => void) | null,
   };
   const addMessageListener = vi.fn<typeof chrome.runtime.onMessage.addListener>();
-  const addNavigationListener = vi.fn();
+  const addNavigationListener = vi.fn<(type: string, listener: (event: { from: { url: string } }) => void) => void>();
   const location = { href: url };
   vi.doMock('../../src/browser/pangu', () => ({ default: pangu }));
   vi.stubGlobal('location', location);
