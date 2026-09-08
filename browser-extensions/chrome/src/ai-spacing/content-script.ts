@@ -43,7 +43,7 @@ function collectLateFixes(labeledShapeCandidates: readonly (ShapeCandidates & { 
       // Do not skip missing labels here: shapes without a model still need to produce their edits
       const textEdits = ambiguousShape.edits(settledCandidate, candidateLabel);
       console.debug(
-        `[pangu] ${ambiguousShape.kind}: "${settledCandidate.sentence}" (symbol at ${settledCandidate.at}, label: ${candidateLabel ?? 'none'})${textEdits.length > 0 ? ' -> applying its late fix' : ''}`,
+        `[pangu] Shape ${ambiguousShape.kind}: "${settledCandidate.sentence}" (symbol at ${settledCandidate.at}, label: ${candidateLabel ?? 'none'})${textEdits.length > 0 ? ' -> applying its late fix' : ''}`,
       );
       if (textEdits.length > 0) {
         const textNodeEdits = textEditsByNode.get(settledCandidate.node) ?? { settled: settledCandidate.settled, textEdits: [] };
@@ -75,7 +75,7 @@ export function warmUpAiSpacing() {
     // A shape needs the model doesn't always mean we need to warm up the model on every webpage
     // We only warm up when the webpage contains certain texts => needsModel() returns true
     if (ambiguousShape.needsModel?.(pageText)) {
-      console.debug(`[pangu] warm up base session: ${ambiguousShape.kind}`);
+      console.debug(`[pangu] Shape ${ambiguousShape.kind} warms up its base session`);
       void requestClassification(ambiguousShape.kind, []);
     }
   }
@@ -94,7 +94,7 @@ async function classifyShapeCandidates({ ambiguousShape, settledCandidates }: Sh
     return response.candidateLabels;
   }
   modelFailed = true;
-  console.debug(`[pangu] ${ambiguousShape.kind}: disabled for this page (${response.error})`);
+  console.debug(`[pangu] Shape ${ambiguousShape.kind} disabled for this page (${response.error})`);
   return [];
 }
 
