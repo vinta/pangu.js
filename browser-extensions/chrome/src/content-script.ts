@@ -50,7 +50,7 @@ async function startAutoSpacingByUrlPolicy() {
     const settings = await initialization;
     applyAutoSpacingUrlPolicy(settings);
   } catch (error) {
-    console.error('Failed to initialize auto spacing', error);
+    console.error('[pangu] Failed to initialize auto spacing', error);
   }
 }
 
@@ -67,7 +67,7 @@ async function startManualSpacing() {
     startAutoSpacing(settings);
     return { success: true };
   } catch (error) {
-    console.error('Failed to start auto spacing on %s:', url, error);
+    console.error('[pangu] Failed to start auto spacing on %s:', url, error);
     return { success: false };
   }
 }

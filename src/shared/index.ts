@@ -248,7 +248,7 @@ export class Pangu {
 
   public spacingText(text: string) {
     if (typeof text !== 'string') {
-      console.warn(`spacingText(text) only accepts string but got ${typeof text}`);
+      console.warn(`[pangu] spacingText(text) only accepts string but got ${typeof text}`);
       return text;
     }
 
