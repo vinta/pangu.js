@@ -194,7 +194,7 @@
     "description": ""
   },
   "ai_spacing_description_2": {
-    "message": "使用瀏覽器內建的 $link_open$Prompt API$link_close$，所有的操作只在你的電腦上運行（完全離線，沒有任何資料會被上傳到雲端），更重要的是：不用錢。",
+    "message": "使用瀏覽器內建的 $link_open$Prompt API$link_close$ 模型，所有的操作只在你的電腦上運行（完全離線，沒有任何資料會被上傳到雲端），更重要的是：不用錢，所以就不要期待這個模型有多強了。",
     "description": "",
     "placeholders": {
       "link_open": {
@@ -214,7 +214,7 @@
     "description": ""
   },
   "ai_model_downloadable": {
-    "message": "模型還沒下載，是在等什麼？",
+    "message": "模型還沒下載",
     "description": ""
   },
   "ai_model_downloading": {
