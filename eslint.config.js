@@ -35,7 +35,7 @@ export default defineConfig(
   {
     // TypeScript files, plus this config so type-aware rules such as no-deprecated cover it too
     files: ['src/**/*.ts', 'browser-extensions/chrome/src/**/*.ts', 'tests/**/*.ts', 'eslint.config.js'],
-    extends: [...tseslint.configs.recommended],
+    extends: [...tseslint.configs.recommendedTypeChecked],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
@@ -47,6 +47,8 @@ export default defineConfig(
     rules: {
       ...styleRules,
       '@typescript-eslint/no-deprecated': 'error',
+      // Mostly flags test stubs (async () => ({...})) that need the async signature but nothing to await
+      '@typescript-eslint/require-await': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
