@@ -22,7 +22,7 @@ async function registerOneContentScript(contentScript: chrome.scripting.Register
     if (error instanceof Error && error.message.includes('Duplicate script ID')) {
       console.warn('Script already registered, skipping:', contentScript.id);
     } else {
-      console.error(`Error registering content script ${contentScript.id}:`, error);
+      console.error(`Failed to register content script ${contentScript.id}:`, error);
     }
   }
 }

@@ -10,11 +10,10 @@ export default defineConfig({
     outDir: resolve(extensionRoot, 'chrome/dist'),
     target: 'chrome99',
     minify: false,
-    sourcemap: false,
+    sourcemap: true,
   },
   environments: {
-    // Only the entry points Chrome loads directly. Vite handles shared dependencies on its own: modules used by more than one entry become a chunk under utils/, modules used by a single entry are
-    // inlined into it
+    // Only the entry points Chrome loads directly. preserveModules keeps one output file per source module, so dist/ mirrors src/ and DevTools names the real file instead of a merged chunk
     modules: {
       consumer: 'client',
       build: {
@@ -27,7 +26,8 @@ export default defineConfig({
           },
           output: {
             entryFileNames: '[name].js',
-            chunkFileNames: 'utils/[name].js',
+            preserveModules: true,
+            preserveModulesRoot: resolve(extensionRoot, 'chrome/src'),
             format: 'es',
           },
         },

@@ -100,6 +100,17 @@ describe('AI spacing warm-up', () => {
     expect(sendMessage).toHaveBeenCalledWith({ type: 'CLASSIFY_CANDIDATES', kind: 'hyphen-sign', candidates: [] });
   });
 
+  it('warms up only once per page', async () => {
+    vi.stubGlobal('LanguageModel', undefined);
+    vi.stubGlobal('document', { documentElement: { textContent: '公視+上架了新片，氣溫是-5度' } });
+    const { sendMessage, warmUpAiSpacing } = await loadAiSpacing();
+
+    warmUpAiSpacing();
+    warmUpAiSpacing();
+
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+  });
+
   it.each(['公視+上架了新片', 'abc-5，氣溫是 -5度', '沒有連字號'])('skips model warm-up for %s', async (textContent) => {
     vi.stubGlobal('document', { documentElement: { textContent } });
     const { sendMessage, warmUpAiSpacing } = await loadAiSpacing();

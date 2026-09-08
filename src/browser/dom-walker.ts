@@ -8,14 +8,12 @@ export class DomWalker {
   public static collectTextNodes(contextNode: Node, reverse = false) {
     const nodes: Text[] = [];
 
-    // Handle edge cases
     if (!contextNode || contextNode instanceof DocumentFragment) {
       return nodes;
     }
 
     const walker = document.createTreeWalker(contextNode, NodeFilter.SHOW_TEXT, {
       acceptNode: (node) => {
-        // Skip whitespace-only nodes
         if (!node.nodeValue || !/\S/.test(node.nodeValue)) {
           return NodeFilter.FILTER_REJECT;
         }
@@ -34,12 +32,10 @@ export class DomWalker {
       },
     });
 
-    // Collect all text nodes
     while (walker.nextNode()) {
       nodes.push(walker.currentNode as Text);
     }
 
-    // Return in reverse order if requested
     return reverse ? nodes.reverse() : nodes;
   }
 

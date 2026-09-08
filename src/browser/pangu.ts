@@ -141,6 +141,10 @@ export class BrowserPangu extends Pangu {
     return this.visibilityDetector.isElementVisuallyHidden(element);
   }
 
+  public isIgnoredElement(element: Element) {
+    return DomWalker.isIgnoredElement(element);
+  }
+
   public applyLateFixes(lateFixes: readonly LateFix[]) {
     this.schedule(() => {
       for (const lateFix of lateFixes) {
@@ -196,6 +200,13 @@ export class BrowserPangu extends Pangu {
           continue;
         }
 
+        // Superscripts attach to their base, including when their text is wrapped in a link or another inline element
+        const nextSuperscript: Element | null | undefined = nextTextNode.parentElement?.closest('sup');
+        if (nextSuperscript && !nextSuperscript.contains(currentTextNode)) {
+          nextTextNode = currentTextNode;
+          continue;
+        }
+
         const currentBoundaryNode = DomWalker.findBoundaryNode(currentTextNode, 'last');
         const nextBoundaryNode = DomWalker.findBoundaryNode(nextTextNode, 'first');
         const { whitespaceBetween, contentBetween } = this.scanBetweenTextNodes(currentBoundaryNode, nextBoundaryNode);
@@ -219,7 +230,7 @@ export class BrowserPangu extends Pangu {
           spaceLikeSiblingBeforeNext: this.isSpaceLikeSibling(nextTextNode.previousSibling),
           spaceLikeSiblingBeforeNextBoundary: this.isSpaceLikeSibling(nextBoundaryNode.previousSibling),
           currentBoundaryIsBlock: DomWalker.blockTags.test(currentBoundaryNode.nodeName),
-          currentBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(currentBoundaryNode.nodeName),
+          currentBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(currentBoundaryNode.nodeName) || currentTextNode.parentElement?.closest('sup')?.contains(nextTextNode) === false,
           nextBoundaryIsBlock: DomWalker.blockTags.test(nextBoundaryNode.nodeName),
           nextBoundaryIsIgnored: DomWalker.ignoredTags.test(nextBoundaryNode.nodeName),
           nextBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(nextBoundaryNode.nodeName),

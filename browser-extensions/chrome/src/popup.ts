@@ -202,7 +202,7 @@ class PopupController {
         });
       }
     } catch (error) {
-      console.error('Manual spacing error:', error);
+      console.error('Failed to run manual spacing:', error);
       await this.showErrorMessage(() => {
         button.disabled = false;
       });

@@ -1,4 +1,5 @@
 import type { CandidateLabel, ClassifyCandidatesMessage, ClassifyCandidatesResponse } from './messages';
+import { readSentence } from './sentence-context';
 import type { AmbiguousShape, SettledCandidate, TextEdit } from './shapes/base';
 import { applyTextEdits } from './shapes/base';
 import { hyphenSign } from './shapes/hyphen-shape';
@@ -6,7 +7,7 @@ import { nameSuffix } from './shapes/name-suffix-shape';
 
 const pangu = window.pangu;
 
-// Read off the singleton rather than imported: the content script is a classic script and cannot import the package
+// Read off the singleton rather than imported: pangu.umd.js loads as its own content script, so anything imported from src/ here would bundle a second copy of core
 type SettledTextNode = Parameters<NonNullable<typeof pangu.onTextNodesSettled>>[0][number];
 type LateFix = Parameters<typeof pangu.applyLateFixes>[0][number];
 
@@ -22,10 +23,11 @@ async function requestClassification(kind: string, candidates: ClassifyCandidate
   }
 }
 
-function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readonly SettledTextNode[]) {
+function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readonly SettledTextNode[], unspacedByNode: ReadonlyMap<Text, string>) {
   const settledCandidates: SettledCandidate[] = [];
   for (const settledTextNode of settledTextNodes) {
-    for (const candidateMatch of ambiguousShape.find(settledTextNode.unspaced, settledTextNode.settled)) {
+    const sentenceAt = (at: number) => readSentence(settledTextNode.node, settledTextNode.unspaced, at, unspacedByNode);
+    for (const candidateMatch of ambiguousShape.find(settledTextNode.unspaced, settledTextNode.settled, sentenceAt)) {
       settledCandidates.push({ ...candidateMatch, node: settledTextNode.node, settled: settledTextNode.settled });
     }
   }
@@ -43,7 +45,7 @@ function collectLateFixes(labeledShapeCandidates: readonly (ShapeCandidates & { 
       // Do not skip missing labels here: shapes without a model still need to produce their edits
       const textEdits = ambiguousShape.edits(settledCandidate, candidateLabel);
       console.debug(
-        `[pangu] ${ambiguousShape.kind}: "${settledCandidate.sentence}" (symbol at ${settledCandidate.at}, label: ${candidateLabel ?? 'none'})${textEdits.length > 0 ? ' -> applying its late fix' : ''}`,
+        `[pangu] Shape ${ambiguousShape.kind}: "${settledCandidate.sentence}" (symbol at ${settledCandidate.at}, label: ${candidateLabel ?? 'none'})${textEdits.length > 0 ? ' -> applying its late fix' : ''}`,
       );
       if (textEdits.length > 0) {
         const textNodeEdits = textEditsByNode.get(settledCandidate.node) ?? { settled: settledCandidate.settled, textEdits: [] };
@@ -60,15 +62,22 @@ function collectLateFixes(labeledShapeCandidates: readonly (ShapeCandidates & { 
   return lateFixes;
 }
 
+// Auto spacing restarts on every URL change and manual click, but the page text only needs scanning once
+let warmedUp = false;
+
 // Warm up the service worker's base sessions to mitigate cold start, which takes seconds on the first LanguageModel.create()
 export function warmUpAiSpacing() {
+  if (warmedUp) {
+    return;
+  }
+  warmedUp = true;
   const pageText = document.documentElement.textContent ?? '';
   // The loop is not redundant: we create base sessions per ambiguous shape
   for (const ambiguousShape of AMBIGUOUS_SHAPES) {
     // A shape needs the model doesn't always mean we need to warm up the model on every webpage
     // We only warm up when the webpage contains certain texts => needsModel() returns true
     if (ambiguousShape.needsModel?.(pageText)) {
-      console.debug(`[pangu] warm up base session: ${ambiguousShape.kind}`);
+      console.debug(`[pangu] Shape ${ambiguousShape.kind} warms up its base session`);
       void requestClassification(ambiguousShape.kind, []);
     }
   }
@@ -87,13 +96,14 @@ async function classifyShapeCandidates({ ambiguousShape, settledCandidates }: Sh
     return response.candidateLabels;
   }
   modelFailed = true;
-  console.debug(`[pangu] ${ambiguousShape.kind}: disabled for this page (${response.error})`);
+  console.debug(`[pangu] Shape ${ambiguousShape.kind} disabled for this page (${response.error})`);
   return [];
 }
 
 export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[]) {
+  const unspacedByNode = new Map(settledTextNodes.map(({ node, unspaced }) => [node, unspaced]));
   const shapeCandidates: ShapeCandidates[] = AMBIGUOUS_SHAPES.filter((ambiguousShape) => !modelFailed || !ambiguousShape.needsModel)
-    .map((ambiguousShape) => ({ ambiguousShape, settledCandidates: findCandidates(ambiguousShape, settledTextNodes) }))
+    .map((ambiguousShape) => ({ ambiguousShape, settledCandidates: findCandidates(ambiguousShape, settledTextNodes, unspacedByNode) }))
     .filter(({ settledCandidates }) => settledCandidates.length > 0);
   if (shapeCandidates.length === 0) {
     return;

@@ -73,10 +73,13 @@ Decided per line, never across lines. A slash with ANS characters on both sides 
 Decided per line, never across lines. If one pipe is in direct contact with CJK, every pipe on the line becomes a separator with spaces on both sides. This covers concatenated page titles (`CJK | A CJK | A`) and credit lines (`CJK | CJK`). If no pipe on the line is in direct contact with CJK, the pipes stay tight as joiner tokens (`CJK A|A CJK`, `ps aux|grep node`).
 
 **Plus reading**:
-Decided per line, never across lines. If one plus is in direct contact with CJK, every undecided plus on the line becomes a separator with spaces on both sides. This covers bundle plans (`A CJK + A`). A plus is already decided in three cases: it is adjacent to a space, an affix reading attaches it (`N+ CJK`, `CJK +N`), or it sits inside a preserved pattern (`C++`). A plus after a word is never attached, so it is a separator (`CJK+A+CJK` reads `CJK + A + CJK`, `A+CJK` reads `A + CJK`). Plus reading runs before the operator rules, so a `CJK+A` contact flips the line's joiners too. If no plus on the line is in direct contact with CJK, the pluses stay tight as joiner tokens (`CJK A+A CJK`, `CJK N+N CJK`).
+Decided per line, never across lines. If one plus is in direct contact with CJK, every undecided plus on the line becomes a separator with spaces on both sides. This covers bundle plans (`A CJK + A`). A plus is already decided in three cases: it is adjacent to a space, an affix reading attaches it (`N+ CJK`, `CJK +N`), or it sits inside a preserved pattern (`C++`). A plus after a word is never attached, so it is a separator (`CJK+A+CJK` reads `CJK + A + CJK`, `A+CJK` reads `A + CJK`). Plus reading runs before the operator rules, so a `CJK+A` contact flips the line's joiners too. If no plus on the line is in direct contact with CJK, the pluses stay tight as joiner tokens (`CJK A+A CJK`, `CJK N+N CJK`). A plus touching full-width punctuation stays tight on that side. On a line with two or more solitary pluses, a plus after a closing bracket is still a separator before an opening full-width bracket or quote, and gets the space on the bracket side only. See ADR 0022.
 
 **Affix reading**:
 A symbol that attaches to its ANS side at a CJK boundary instead of reading as an operator. Four cases: `+` before digits as a sign (`CJK +N`), `-` before a lowercase flag (`CJK -m CJK`), `+` after a whole digit run as a suffix (`CJK N+ CJK`, never `AN+ CJK`), and single-letter grades (`A+`, `D-`). A plus after a word is not an affix: `A+CJK` reads as a separator (`A + CJK`); see plus reading and ADR 0019. A hyphen before digits is not an affix: `CJK-N` reads as an operator (`N CJK - N CJK`, `CJK - N CJK`); see ADR 0015. A capitalized word after a hyphen keeps the operator reading (`CJK - Vinta`).
+
+**Superscript suffix**:
+A Unicode superscript character that attaches to whatever is on its left, CJK or ANS, and is spaced from CJK on its right (`CJK² CJK`, `A² CJK`). It is not an affix reading, since it attaches to either side. `⁽` is not a suffix, so the space never lands inside a superscript parenthesis (`CJK⁽CJK⁾ CJK`). On a page, a `<sup>` element follows the same reading: no space before it, and the space after it goes outside the element. See ADR 0021.
 
 **No CJK contact, no change**:
 The invariant behind every symbol rule. ANS text that has no contact with CJK is never modified. A symbol must be in direct contact with CJK to read as an operator. So CJK elsewhere in the line or text never allows spacing between ANS characters.
@@ -109,7 +112,7 @@ A shape where the rules cannot derive the symbol's reading, so a fixed list or a
 _Avoid_: symbol class, ambiguity, shape (bare, for this sense)
 
 **Candidate**:
-One occurrence of an ambiguous shape, flagged on the text before spacing. It carries the sentence around it and the symbol's position in that sentence, which is all the classifier reads.
+One occurrence of an ambiguous shape, flagged on the text before spacing. It carries the sentence around it and the symbol's position in that sentence, which is all the classifier reads. On a page, the sentence is the inline text around the symbol as a reader sees it: it continues across inline elements, ends at a block edge, a `<br>`, or sentence-ending punctuation, steps past hidden and ignored elements, `<sup>`, and `<sub>`, and treats a newline the way the browser renders it.
 _Avoid_: span, ambiguous span, model span
 
 **Settled candidate**:

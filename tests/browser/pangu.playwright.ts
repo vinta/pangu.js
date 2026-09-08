@@ -791,6 +791,56 @@ test.describe('BrowserPangu', () => {
       expect(html).toBe('<a href="#">abc</a><pangu> </pangu><a href="#">漢字</a>');
     });
 
+    test('should keep superscript attached to preceding text and space after it', async ({ page }) => {
+      await page.setContent(
+        '<div id="exact"><span style="color: #ff874d;">影劇館<sup>+</sup></span></div>' +
+          '<div id="following"><span>影劇館<sup>+</sup>中文</span></div>' +
+          '<div id="nested"><span>中文<span><sup><b>1</b></sup></span>中文</span></div>' +
+          '<div id="normal"><span>中文<span>1</span>中文</span></div>' +
+          '<div id="block"><div>中文<sup>1</sup></div><span>中文</span></div>' +
+          '<div id="internal"><sup>中文<a>1</a></sup></div>' +
+          '<p id="centeredDiv"><span style="color: #000000;"><strong>優惠方案：</strong>影劇館<sup>+</sup>收視費用為月繳費用，不含HiNet光世代及MOD平臺服務等費用</span></p>',
+      );
+
+      await page.evaluate(() => pangu.spacingPage());
+
+      expect(await page.locator('#exact').innerHTML()).toBe('<span style="color: #ff874d;">影劇館<sup>+</sup></span>');
+      expect(await page.locator('#following').innerHTML()).toBe('<span>影劇館<sup>+</sup> 中文</span>');
+      expect(await page.locator('#nested').innerHTML()).toBe('<span>中文<span><sup><b>1</b></sup></span> 中文</span>');
+      expect(await page.locator('#normal').textContent()).toBe('中文 1 中文');
+      expect(await page.locator('#block').innerHTML()).toBe('<div>中文<sup>1</sup></div><span>中文</span>');
+      expect(await page.locator('#internal').innerHTML()).toBe('<sup>中文 <a>1</a></sup>');
+      expect(await page.evaluate(() => document.getElementById('centeredDiv')!.outerHTML)).toBe(
+        '<p id="centeredDiv"><span style="color: #000000;"><strong>優惠方案：</strong>影劇館<sup>+</sup> 收視費用為月繳費用，不含 HiNet 光世代及 MOD 平臺服務等費用</span></p>',
+      );
+    });
+
+    test('should keep superscript attached across links and put following spaces outside it', async ({ page }) => {
+      await page.setContent(
+        '<div id="footnote"><span>中文<sup><a>1</a></sup>中文</span></div>' +
+          '<div id="preceding"><a>中文</a><sup>1</sup>中文</div>' +
+          '<div id="both"><a>中文</a><sup><a>1</a></sup>中文</div>' +
+          '<div id="following"><span>影劇館<sup>+</sup><a>中文</a></span></div>',
+      );
+
+      await page.evaluate(() => pangu.spacingPage());
+
+      expect(await page.locator('#footnote').innerHTML()).toBe('<span>中文<sup><a>1</a></sup> 中文</span>');
+      expect(await page.locator('#preceding').innerHTML()).toBe('<a>中文</a><sup>1</sup> 中文');
+      expect(await page.locator('#both').innerHTML()).toBe('<a>中文</a><sup><a>1</a></sup> 中文');
+      expect(await page.locator('#following').innerHTML()).toBe('<span>影劇館<sup>+</sup><pangu> </pangu><a>中文</a></span>');
+    });
+
+    test('should preserve author spaces around superscript', async ({ page }) => {
+      await page.setContent('<div id="before">影劇館 <sup>+</sup></div><div id="inside">影劇館<sup> +</sup></div><div id="after">影劇館<sup>+</sup> CJK</div>');
+
+      await page.evaluate(() => pangu.spacingPage());
+
+      expect(await page.locator('#before').innerHTML()).toBe('影劇館 <sup>+</sup>');
+      expect(await page.locator('#inside').innerHTML()).toBe('影劇館<sup> +</sup>');
+      expect(await page.locator('#after').innerHTML()).toBe('影劇館<sup>+</sup> CJK');
+    });
+
     test('should space across a nested link when trailing whitespace sits past the boundary', async ({ page }) => {
       // The whitespace after </span> is beyond the boundary between 字 and x,
       // so it must not veto the missing space

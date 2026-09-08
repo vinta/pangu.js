@@ -62,7 +62,7 @@ describe('manual spacing activation', () => {
     expect(aiSpacing.applyAiSpacing).toHaveBeenCalledWith(nodes);
     expect(pangu.autoSpacingPage).toHaveBeenCalledTimes(1);
     expect(await click()).toEqual({ success: true });
-    expect(aiSpacing.warmUpAiSpacing).toHaveBeenCalledTimes(1);
+    expect(aiSpacing.warmUpAiSpacing).toHaveBeenCalledTimes(2);
     expect(pangu.spacingPage).not.toHaveBeenCalled();
   });
 
@@ -129,7 +129,7 @@ describe('manual spacing activation', () => {
 });
 
 describe('automatic spacing activation', () => {
-  it('reapplies URL filters after a manual override and warms AI only once', async () => {
+  it('reapplies URL filters after a manual override', async () => {
     const { pangu, click, navigate } = await loadContentScript(DEFAULT_SETTINGS, 'https://example.com/');
     expect(pangu.autoSpacingPage).toHaveBeenCalledTimes(1);
     expect(pangu.onTextNodesSettled).toBeTypeOf('function');
@@ -145,6 +145,6 @@ describe('automatic spacing activation', () => {
     expect(pangu.stopAutoSpacingPage).toHaveBeenCalledTimes(2);
     navigate('https://example.com/next');
     expect(pangu.autoSpacingPage).toHaveBeenCalledTimes(3);
-    expect(aiSpacing.warmUpAiSpacing).toHaveBeenCalledTimes(1);
+    expect(aiSpacing.warmUpAiSpacing).toHaveBeenCalledTimes(3);
   });
 });

@@ -11,6 +11,7 @@ function listPatch(key: 'blacklist' | 'whitelist', urls: string[]) {
 
 class OptionsController {
   private editingUrls: Map<number, string> = new Map();
+  private statusPollTimer: number | undefined;
   private isAddingUrl = false;
 
   constructor() {
@@ -133,7 +134,6 @@ class OptionsController {
     const button = document.getElementById('spacing_mode_btn') as HTMLButtonElement;
     button.textContent = chrome.i18n.getMessage(current.spacing_mode);
 
-    // Show/hide filter mode section
     const ruleSection = document.getElementById('filter_mode_section') as HTMLElement;
     const clickMessage = document.getElementById('spacing_when_click_msg') as HTMLElement;
     if (current.spacing_mode === 'spacing_when_load') {
@@ -158,7 +158,6 @@ class OptionsController {
     const urls = settings[settings.filter_mode];
     const container = document.getElementById('url-list-container') as HTMLDivElement;
 
-    // Clone the url-list template
     const listTemplate = document.getElementById('url-list-template') as HTMLTemplateElement;
     const listFragment = listTemplate.content.cloneNode(true) as DocumentFragment;
 
@@ -167,12 +166,10 @@ class OptionsController {
     const restoreButton = listFragment.querySelector('#restore-defaults-btn') as HTMLAnchorElement;
     const helpLink = listFragment.querySelector('#url-list-help a') as HTMLAnchorElement;
 
-    // Set text content for localized elements
     addButton.textContent = chrome.i18n.getMessage('button_add_new_url');
     restoreButton.textContent = chrome.i18n.getMessage('button_restore_defaults');
     helpLink.textContent = chrome.i18n.getMessage('link_learn_match_patterns');
 
-    // Show "沒有東西" if the list is empty
     if (urls.length === 0) {
       const emptyItem = document.createElement('li');
       emptyItem.className = 'empty-list-message';
@@ -184,7 +181,6 @@ class OptionsController {
       const editingUrl = this.editingUrls.get(index);
 
       if (editingUrl !== undefined) {
-        // Use edit template
         const editTemplate = document.getElementById('url-edit-template') as HTMLTemplateElement;
         const editItem = editTemplate.content.cloneNode(true) as DocumentFragment;
 
@@ -201,7 +197,6 @@ class OptionsController {
 
         urlList.appendChild(editItem);
       } else {
-        // Use display template
         const displayTemplate = document.getElementById('url-display-template') as HTMLTemplateElement;
         const displayItem = displayTemplate.content.cloneNode(true) as DocumentFragment;
 
@@ -217,7 +212,6 @@ class OptionsController {
       }
     }
 
-    // Add new URL input if shown
     if (this.isAddingUrl) {
       const newTemplate = document.getElementById('url-new-template') as HTMLTemplateElement;
       const newItem = newTemplate.content.cloneNode(true) as DocumentFragment;
@@ -233,7 +227,6 @@ class OptionsController {
       urlList.appendChild(newItem);
     }
 
-    // Hide add button if showing new URL input
     if (this.isAddingUrl && addButton.parentElement) {
       addButton.parentElement.style.display = 'none';
     }
@@ -279,9 +272,14 @@ class OptionsController {
     const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
 
     const availability = await getModelAvailability();
-    statusText.textContent = chrome.i18n.getMessage(`ai_model_${availability}`);
     // Only an absent model can be fetched, and a multi-gigabyte download is the user's call
     downloadButton.style.display = availability === 'downloadable' ? 'block' : 'none';
+    statusText.textContent = chrome.i18n.getMessage(`ai_model_${availability}`);
+    // A download Chrome started itself ends without any event for us (a create() joined to it reported no progress and then rejected), so we poll until the state moves
+    clearTimeout(this.statusPollTimer);
+    if (availability === 'downloading') {
+      this.statusPollTimer = window.setTimeout(() => this.renderAiModelStatus().catch(console.error), 5000);
+    }
   }
 
   private async handleModelDownload() {
@@ -356,7 +354,6 @@ class OptionsController {
     this.editingUrls.set(index, settings[settings.filter_mode][index]!);
     await this.renderUrlList();
 
-    // Focus on the input
     const input = document.querySelector(`input[data-index="${index}"]`) as HTMLInputElement;
     if (input) {
       input.focus();
@@ -459,7 +456,6 @@ class OptionsController {
   }
 }
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   new OptionsController();
 });
