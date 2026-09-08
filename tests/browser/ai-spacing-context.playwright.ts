@@ -104,7 +104,7 @@ test.describe('AI spacing DOM context', () => {
     expect(await classify(page, '<section>外側<p><b>前<a id="candidate">運-12</a>後</b></p>外側</section>', true)).toEqual([{ sentence: '前運-12後', at: 2 }]);
   });
 
-  test('step past ignored and hidden siblings in both directions', async ({ page }) => {
+  test('step past ignored, hidden, superscript and subscript siblings in both directions', async ({ page }) => {
     for (const skipped of [
       '<code>程式碼</code>',
       '<span class="no-pangu-spacing">略過</span>',
@@ -113,8 +113,11 @@ test.describe('AI spacing DOM context', () => {
       '<span style="display: none">隱藏</span>',
       '<span style="visibility: hidden">隱藏</span>',
       '<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0)">僅供螢幕閱讀器</span>',
+      '<sup class="reference"><a href="#cite_note-1">[1]</a></sup>',
+      '<sub>2</sub>',
     ]) {
       expect(await classify(page, `<section>外側${skipped}<span>前<a id="candidate">運-12</a>後</span>${skipped}外側</section>`, true), skipped).toEqual([{ sentence: '外側前運-12後外側', at: 4 }]);
     }
+    expect(await classify(page, '<p>目前已經發展成為一個擁有<a>運-12</a><sup class="reference"><a href="#cite_note-1">[1]</a></sup>輕型多用途飛機</p>')).toEqual([{ sentence: '目前已經發展成為一個擁有運-12輕型多用途飛機', at: 13 }]);
   });
 });

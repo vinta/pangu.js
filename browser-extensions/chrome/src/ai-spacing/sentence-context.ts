@@ -12,6 +12,9 @@ const SEGMENT_BREAK = /[ \t\r\f]*\n[ \t\r\f\n]*/g;
 const PRESERVES_BREAKS = /^(preserve|preserve-breaks|break-spaces)$/;
 const LEGACY_PRESERVES_BREAKS = /^(pre|pre-wrap|pre-line|break-spaces)$/;
 
+// A superscript or subscript annotates its base and is never prose: a citation marker like [1] would glue to the digits the classifier reads
+const SUPERSCRIPT_OR_SUBSCRIPT = /^(sup|sub)$/i;
+
 // A soft line break renders as the browser does (CSS Text, segment break transformation): gone between two wide characters, one space elsewhere
 function collapseSegmentBreaks(text: string) {
   return text.replace(SEGMENT_BREAK, '\n').replace(/\n/g, (_, offset: number, whole: string) => (WIDE.test(whole[offset - 1] ?? '') && WIDE.test(whole[offset + 1] ?? '') ? '' : ' '));
@@ -28,9 +31,9 @@ function keepsNewlines(textNode: Text) {
 }
 
 export function readSentence(node: Text, unspaced: string, at: number, unspacedByNode: ReadonlyMap<Text, string>) {
-  // A hidden or ignored sibling is stepped past without ending the sentence, the way core's scanBetweenTextNodes() treats an ignored island as invisible; a hidden or ignored ancestor of the candidate ends its side. Checked before display, since display:none and absolutely positioned screen-reader text are blockified
+  // A hidden, ignored, superscript, or subscript sibling is stepped past without ending the sentence, the way core's scanBetweenTextNodes() treats an ignored island as invisible; such an ancestor of the candidate ends its side. Checked before display, since display:none and absolutely positioned screen-reader text are blockified
   function isSkipped(element: Element) {
-    return pangu.isIgnoredElement(element) || pangu.visibilityDetector.shouldSkipSpacingAfterNode(element);
+    return SUPERSCRIPT_OR_SUBSCRIPT.test(element.nodeName) || pangu.isIgnoredElement(element) || pangu.visibilityDetector.shouldSkipSpacingAfterNode(element);
   }
 
   // Where the line of text ends: a line break or an element that is not inline-level
