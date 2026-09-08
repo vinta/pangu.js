@@ -190,10 +190,9 @@ class PopupController {
 
       // Apply spacing
       const message: ManualSpacingMessage = { action: 'MANUAL_SPACING' };
-      // The response is undefined when the tab has no listener, so the generic says so
-      const response = await chrome.tabs.sendMessage<ManualSpacingMessage, ContentScriptResponse | undefined>(this.currentTabId, message);
+      const response = await chrome.tabs.sendMessage<ManualSpacingMessage, ContentScriptResponse>(this.currentTabId, message);
 
-      if (response?.success) {
+      if (response.success) {
         await this.showSuccessMessage(() => {
           button.disabled = false;
         });
