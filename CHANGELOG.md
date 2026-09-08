@@ -5,9 +5,17 @@
 ### pangu.js
 
 - 各位觀眾！Paranoid Text Spacing 演算法 v10 橫空出世！
+  - 英文單字後面緊接著 `+` 再接中文時，`+` 不再當成單字的後綴，而是當成分隔符號
+  - 同一行只要有 `+` 直接碰到中文，這一行其他的 `+` 也會一起加空格
+  - `+` 碰到全形標點的那一邊不加空格
 
 ### 為什麼你們就是不能加個空格呢？
 
+- 新功能：使用 Chrome 的 [Prompt API](https://developer.chrome.com/docs/ai/prompt-api) 來處理 pangu.js 的規則難以判斷的加空格情境
+  - 中文後面緊接著 `-` 再接數字時，由模型判斷 `-` 是負號還是分隔符號：`氣溫是-5度` 會變成 `氣溫是 -5 度`
+  - `Disney+`、`Apple TV+`、`公視+`、`AA+`、`AB+` 這類名字後面的 `+` 和 `-` 會黏回去
+  - 所有的操作只在你的電腦上運行（完全離線，沒有任何資料會被上傳到雲端）
+  - 缺點是 Prompt API 只能用 on-device 模型：Gemini Nano，現階段的效果差強人意。不過總比沒有好，而且不用錢的東西就不要要求太多了
 - 修正在 GitHub 這類不重新載入頁面就換網址的網站上的黑名單和白名單不會跟著網址生效的問題
 - Chrome extension 支援的最低版本改成 Chrome 102
   - 為了用 `window.navigation` API
@@ -19,6 +27,7 @@
 - 修正 `dist/browser/pangu.js` 會 import 其他檔案的問題，現在是獨立的單一檔案了，可以直接用 `<script type="module">` 載入
   - v8.1.0 到 v9.1.0 都有這個問題，在只複製 `dist/browser/` 目錄的 CDN 上（例如 cdnjs）會因為找不到檔案而載入失敗
 - Chrome extension 支援的最低版本改成 Chrome 99
+  - 為了用 Promise 版的 `chrome.tabs.sendMessage()`
 
 ## v9.1.0 / 2026-08-01
 
