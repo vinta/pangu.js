@@ -29,7 +29,7 @@ const styleRules = {
 export default tseslint.config(
   {
     // Global ignores
-    ignores: ['node_modules/', 'dist/', 'browser-extensions/chrome/dist/', 'browser-extensions/chrome/vendors/', '.worktrees/'],
+    ignores: ['node_modules/', 'dist/', 'browser-extensions/chrome/dist/', '.worktrees/'],
   },
   {
     // TypeScript files

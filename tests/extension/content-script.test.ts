@@ -17,7 +17,7 @@ async function loadContentScript(settings: Settings | Promise<Settings>, url = '
   const addMessageListener = vi.fn<typeof chrome.runtime.onMessage.addListener>();
   const addNavigationListener = vi.fn();
   const location = { href: url };
-  vi.stubGlobal('window', { pangu });
+  vi.doMock('../../src/browser/pangu', () => ({ default: pangu }));
   vi.stubGlobal('location', location);
   vi.stubGlobal('navigation', { addEventListener: addNavigationListener });
   vi.stubGlobal('chrome', { storage: { sync: { get: async () => settings } }, runtime: { onMessage: { addListener: addMessageListener } } });

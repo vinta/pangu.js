@@ -141,10 +141,6 @@ export class BrowserPangu extends Pangu {
     return this.visibilityDetector.isElementVisuallyHidden(element);
   }
 
-  public isIgnoredElement(element: Element) {
-    return DomWalker.isIgnoredElement(element);
-  }
-
   public applyLateFixes(lateFixes: readonly LateFix[]) {
     this.schedule(() => {
       for (const lateFix of lateFixes) {

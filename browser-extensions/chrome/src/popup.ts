@@ -184,7 +184,7 @@ class PopupController {
       if (!isContentScriptLoaded) {
         await chrome.scripting.executeScript({
           target: { tabId: this.currentTabId },
-          files: ['vendors/pangu/pangu.umd.js', 'dist/content-script.js'],
+          files: ['dist/content-script.js'],
         });
       }
 

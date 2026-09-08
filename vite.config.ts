@@ -37,7 +37,7 @@ export default defineConfig({
         lib: { entry: 'src/browser/pangu.ts', formats: ['es'], fileName: () => 'browser/pangu.js' },
       },
     },
-    // Loaded by a plain <script> tag, and copied into the Chrome extension's vendors/ by build:extension. cdnjs pins this exact path too: its config (cdnjs/packages packages/p/pangu.json) mirrors it from the npm tarball and serves the generated browser/pangu.umd.min.js as pangu's default file, so renaming/moving pangu.umd.js breaks cdnjs
+    // Loaded by a plain <script> tag. cdnjs pins this exact path: its config (cdnjs/packages packages/p/pangu.json) mirrors it from the npm tarball and serves the generated browser/pangu.umd.min.js as pangu's default file, so renaming/moving pangu.umd.js breaks cdnjs
     browserUmd: {
       consumer: 'client',
       build: {

@@ -46,7 +46,7 @@ async function registerContentScripts() {
     // Registered on every page: the content script applies the blacklist and whitelist itself, so they follow same-document navigation (see docs/adr/0020)
     await registerOneContentScript({
       id: SCRIPT_ID,
-      js: ['vendors/pangu/pangu.umd.js', 'dist/content-script.js'],
+      js: ['dist/content-script.js'],
       matches: ['http://*/*', 'https://*/*'],
       runAt: 'document_idle',
     });

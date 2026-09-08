@@ -13,7 +13,7 @@ async function loadAiSpacing() {
       }
     }),
   };
-  vi.stubGlobal('window', { pangu });
+  vi.doMock('../../src/browser/pangu', () => ({ default: pangu }));
   const { handleClassification } = await import('../../browser-extensions/chrome/src/ai-spacing/service-worker');
   const sendMessage = vi.fn(({ kind, candidates }: ClassifyCandidatesMessage) => handleClassification(kind, candidates));
   vi.stubGlobal('chrome', { runtime: { sendMessage } });

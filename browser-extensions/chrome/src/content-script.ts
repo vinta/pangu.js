@@ -1,9 +1,8 @@
+import pangu from '../../../src/browser/pangu';
 import { applyAiSpacing, warmUpAiSpacing } from './ai-spacing/content-script';
 import type { ContentScriptResponse, MessageToContentScript } from './messages';
 import { getSettings, type Settings } from './settings/storage';
 import { shouldAutoSpacing } from './settings/urls';
-
-const pangu = window.pangu;
 
 function startAutoSpacing(settings: Settings) {
   if (settings.is_enable_ai_spacing) {

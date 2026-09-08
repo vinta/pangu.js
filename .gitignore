@@ -6,7 +6,6 @@ node_modules/
 # Build output
 /dist/
 browser-extensions/chrome/dist/
-browser-extensions/chrome/vendors/pangu/
 
 # Test results
 test-results/
