@@ -31,7 +31,7 @@
 - Install dependencies with `npm install` when needed; this repo uses `package-lock.json`.
 - Build everything with `npm run build`.
 - Build only the library with `npm run build:lib`.
-- Build only the Chrome extension with `npm run build:extension`; it expects the browser UMD bundle to exist in `dist/browser/`.
+- Build only the Chrome extension with `npm run build:extension`.
 - Run all tests with `npm run test`.
 - Run shared logic tests with `npm run test:shared`.
 - Run Node.js tests with `npm run test:node`.
