@@ -131,6 +131,70 @@ test.describe('BrowserPangu', () => {
     });
   });
 
+  test.describe('stopAutoSpacingPage()', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
+      await page.clock.pauseAt(new Date('2026-01-01T00:00:01Z'));
+      await page.setContent('<title>Title</title><p>Content</p>');
+    });
+
+    test('skip the delayed initial sweep after stopping', async ({ page }) => {
+      await page.evaluate(() => {
+        pangu.autoSpacingPage({ pageDelayMs: 100 });
+        pangu.stopAutoSpacingPage();
+        document.title = '新title';
+        document.querySelector('p')!.textContent = '新content';
+      });
+
+      await page.clock.runFor(500);
+
+      expect(await page.title()).toBe('新title');
+      expect(await page.locator('p').textContent()).toBe('新content');
+    });
+
+    test('skip pending title and body debounces after stopping', async ({ page }) => {
+      await page.evaluate(async () => {
+        pangu.autoSpacingPage({ pageDelayMs: 60000, nodeDelayMs: 100 });
+        document.title = '舊title';
+        document.querySelector('p')!.textContent = '舊content';
+        await Promise.resolve();
+
+        pangu.stopAutoSpacingPage();
+        document.title = '新title';
+        document.querySelector('p')!.textContent = '新content';
+      });
+
+      await page.clock.runFor(500);
+
+      expect(await page.title()).toBe('新title');
+      expect(await page.locator('p').textContent()).toBe('新content');
+    });
+
+    test('skip callbacks from the previous activation after restarting', async ({ page }) => {
+      await page.evaluate(async () => {
+        pangu.autoSpacingPage({ pageDelayMs: 100, nodeDelayMs: 100 });
+        document.title = '舊title';
+        document.querySelector('p')!.textContent = '舊content';
+        await Promise.resolve();
+
+        pangu.stopAutoSpacingPage();
+        document.title = '新title';
+        document.querySelector('p')!.textContent = '新content';
+        pangu.autoSpacingPage({ pageDelayMs: 1000 });
+      });
+
+      await page.clock.runFor(500);
+
+      expect(await page.title()).toBe('新title');
+      expect(await page.locator('p').textContent()).toBe('新content');
+
+      await page.clock.runFor(500);
+
+      expect(await page.title()).toBe('新 title');
+      expect(await page.locator('p').textContent()).toBe('新 content');
+    });
+  });
+
   test.describe('spacingNode()', () => {
     test('handle text node', async ({ page }) => {
       // spacingNode() works on element nodes, not directly on text nodes

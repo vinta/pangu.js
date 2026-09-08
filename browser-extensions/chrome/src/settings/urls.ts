@@ -44,6 +44,10 @@ function isUrlExcludedByFilter(settings: Settings, url: string) {
   return settings.filter_mode === 'whitelist';
 }
 
+export function shouldAutoSpacing(settings: Settings, url: string) {
+  return settings.spacing_mode === 'spacing_when_load' && !isUrlExcludedByFilter(settings, url);
+}
+
 // Drives the popup status row (顯靈中/神隱中): stricter than shouldShowOffIcon below, it also reports pages the extension cannot run on as inactive
 export function shouldShowActiveStatus(settings: Settings, url: string | undefined) {
   if (!url || !isValidUrl(url)) {
@@ -58,13 +62,16 @@ export function shouldShowActiveStatus(settings: Settings, url: string | undefin
   return !isUrlExcludedByFilter(settings, url);
 }
 
-// The off icon only calls out spacing the user turned off themselves: manual mode, or a url excluded by their blacklist/whitelist. Pages the extension merely cannot run on (chrome://, new tab pages, urls it cannot read) keep the default icon.
 export function shouldShowOffIcon(settings: Settings, url: string | undefined) {
-  if (settings.spacing_mode !== 'spacing_when_load') {
+  // Manual mode turns spacing off on every tab, including pages without a url
+  if (settings.spacing_mode === 'spacing_when_click') {
     return true;
   }
+
+  // Pages the extension merely cannot run on (chrome://, new tab pages, urls it cannot read) show the default icon.
   if (!url) {
     return false;
   }
+
   return isUrlExcludedByFilter(settings, url);
 }

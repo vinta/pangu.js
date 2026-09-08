@@ -3,7 +3,7 @@ import type { ClassifyCandidatesResponse, MessageToServiceWorker } from './ai-sp
 import { handleClassification } from './ai-spacing/service-worker';
 import type { Settings } from './settings/storage';
 import { getSettings, onSettingsChanged, reconcileSettings } from './settings/storage';
-import { isValidMatchPattern, shouldShowOffIcon } from './settings/urls';
+import { shouldShowOffIcon } from './settings/urls';
 
 const SCRIPT_ID = 'paranoid-auto-spacing';
 const TEXT_AUTOSPACE_SCRIPT_ID = 'text-autospace';
@@ -14,7 +14,7 @@ const TEXT_AUTOSPACE_SCRIPT_ID = 'text-autospace';
 const DEFAULT_ICON_PATHS = { '16': '../icons/icon-16.png', '24': '../icons/icon-24.png', '32': '../icons/icon-32.png' };
 const OFF_ICON_PATHS = { '16': '../icons/off-icon-16.png', '24': '../icons/off-icon-24.png', '32': '../icons/off-icon-32.png' };
 
-// One call per script: registerContentScripts() is all-or-nothing across its array, so a pattern Chrome rejects must not take down the other script
+// One call per script: registerContentScripts() is all-or-nothing across its array, so a failure in one must not take down the other
 async function registerOneContentScript(contentScript: chrome.scripting.RegisteredContentScript) {
   try {
     await chrome.scripting.registerContentScripts([contentScript]);
@@ -43,23 +43,13 @@ async function registerContentScripts() {
   }
 
   if (settings.spacing_mode === 'spacing_when_load') {
-    const contentScript: chrome.scripting.RegisteredContentScript = {
+    // Registered on every page: the content script applies the blacklist and whitelist itself, so they follow same-document navigation (see docs/adr/0020)
+    await registerOneContentScript({
       id: SCRIPT_ID,
       js: ['vendors/pangu/pangu.umd.js', 'dist/content-script.js'],
       matches: ['http://*/*', 'https://*/*'],
       runAt: 'document_idle',
-    };
-
-    // Just in case there are invalid match patterns from old settings
-    const validBlacklist = settings.blacklist.filter((pattern) => isValidMatchPattern(pattern));
-    const validWhitelist = settings.whitelist.filter((pattern) => isValidMatchPattern(pattern));
-    if (settings.filter_mode === 'blacklist' && validBlacklist.length > 0) {
-      contentScript.excludeMatches = validBlacklist;
-    } else if (settings.filter_mode === 'whitelist' && validWhitelist.length > 0) {
-      contentScript.matches = validWhitelist;
-    }
-
-    await registerOneContentScript(contentScript);
+    });
   }
 }
 
@@ -113,7 +103,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 });
 
 // Registered synchronously at module scope, as MV3 requires for storage events to wake this worker. The event payload alone says what changed, so a cold-started worker needs no cached state
-const REGISTRATION_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist', 'is_enable_text_autospace'];
+const REGISTRATION_KEYS: (keyof Settings)[] = ['spacing_mode', 'is_enable_text_autospace'];
 const ICON_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist'];
 onSettingsChanged((changedKeys) => {
   if (changedKeys.some((key) => REGISTRATION_KEYS.includes(key))) {
