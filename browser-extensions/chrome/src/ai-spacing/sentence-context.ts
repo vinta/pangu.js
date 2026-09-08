@@ -1,11 +1,48 @@
-import { MAX_SENTENCE_SIDE, SENTENCE_TERMINATOR, sliceSentence } from './shapes/base';
+import { CJK, MAX_SENTENCE_SIDE, SENTENCE_TERMINATOR, sliceSentence } from './shapes/base';
 
 const pangu = window.pangu;
+
+// The wide class of the segment-break rule: CJK plus CJK punctuation and full-width forms
+const WIDE = new RegExp(`[${CJK}\\u3000-\\u303f\\uff00-\\uffef]`);
+
+// A newline with the collapsible white space around it: spaces, tabs, and other segment breaks. NBSP never collapses
+const SEGMENT_BREAK = /[ \t\r\f]*\n[ \t\r\f\n]*/g;
+
+// white-space values under which the browser keeps a newline as a line break. The longhand exists from Chrome 114; older builds answer through the shorthand's legacy keywords
+const PRESERVES_BREAKS = /^(preserve|preserve-breaks|break-spaces)$/;
+const LEGACY_PRESERVES_BREAKS = /^(pre|pre-wrap|pre-line|break-spaces)$/;
+
+// A soft line break renders as the browser does (CSS Text, segment break transformation): gone between two wide characters, one space elsewhere
+function collapseSegmentBreaks(text: string) {
+  return text.replace(SEGMENT_BREAK, '\n').replace(/\n/g, (_, offset: number, whole: string) => (WIDE.test(whole[offset - 1] ?? '') && WIDE.test(whole[offset + 1] ?? '') ? '' : ' '));
+}
+
+// The computed value is inherited, so the parent element answers for its text node
+function keepsNewlines(textNode: Text) {
+  const parent = textNode.parentElement;
+  if (!parent) {
+    return false;
+  }
+  const style = getComputedStyle(parent);
+  return style.whiteSpaceCollapse ? PRESERVES_BREAKS.test(style.whiteSpaceCollapse) : LEGACY_PRESERVES_BREAKS.test(style.whiteSpace);
+}
 
 export function readSentence(node: Text, unspaced: string, at: number, unspacedByNode: ReadonlyMap<Text, string>) {
   function isBoundary(element: Element) {
     const display = getComputedStyle(element).display;
     return element.tagName === 'BR' || (!display.startsWith('inline') && display !== 'contents') || pangu.isIgnoredElement(element) || pangu.visibilityDetector.shouldSkipSpacingAfterNode(element);
+  }
+
+  // The part of a text node's data on this side of its nearest line break, or null when the node keeps no newline as a line break
+  function lineTowards(textNode: Text, data: string, backwards: boolean) {
+    if (!keepsNewlines(textNode)) {
+      return null;
+    }
+    const newline = backwards ? data.lastIndexOf('\n') : data.indexOf('\n');
+    if (newline === -1) {
+      return null;
+    }
+    return backwards ? data.slice(newline + 1) : data.slice(0, newline);
   }
 
   function readSide(text: string, backwards: boolean) {
@@ -36,14 +73,23 @@ export function readSentence(node: Text, unspaced: string, at: number, unspacedB
 
       if (current instanceof Text) {
         const data = unspacedByNode.get(current) ?? current.data;
+        const line = lineTowards(current, data, backwards);
         const remaining = MAX_SENTENCE_SIDE - text.length;
-        text = backwards ? data.slice(-remaining) + text : text + data.slice(0, remaining);
+        text = backwards ? (line ?? data).slice(-remaining) + text : text + (line ?? data).slice(0, remaining);
+        if (line !== null) {
+          return text;
+        }
       }
     }
     return text;
   }
 
-  const before = readSide(unspaced.slice(Math.max(0, at - MAX_SENTENCE_SIDE), at), true);
-  const after = readSide(unspaced.slice(at + 1, at + 1 + MAX_SENTENCE_SIDE), false);
+  // The candidate node's own line break closes its side before any neighbor is read
+  function readFrom(own: string, backwards: boolean) {
+    return lineTowards(node, own, backwards) ?? readSide(own, backwards);
+  }
+
+  const before = collapseSegmentBreaks(readFrom(unspaced.slice(Math.max(0, at - MAX_SENTENCE_SIDE), at), true)).trimStart();
+  const after = collapseSegmentBreaks(readFrom(unspaced.slice(at + 1, at + 1 + MAX_SENTENCE_SIDE), false)).trimEnd();
   return sliceSentence(before + unspaced[at] + after, before.length);
 }

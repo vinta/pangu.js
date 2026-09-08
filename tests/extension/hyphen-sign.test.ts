@@ -19,9 +19,9 @@ describe('sliceSentence()', () => {
     expect(sliceSentence(text, 3)).toEqual({ sentence: '氣溫是-5度左右', at: 3 });
   });
 
-  it('cut at a newline on either side', () => {
+  it('keep a newline: a page line break is read from white-space, never from the string', () => {
     const text = '前一行\n氣溫是-5度左右\n後一行';
-    expect(sliceSentence(text, 7)).toEqual({ sentence: '氣溫是-5度左右', at: 3 });
+    expect(sliceSentence(text, 7)).toEqual({ sentence: text, at: 7 });
   });
 
   it('cut at every terminator in the set', () => {

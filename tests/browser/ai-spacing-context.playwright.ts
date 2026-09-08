@@ -87,6 +87,16 @@ test.describe('AI spacing DOM context', () => {
     expect(await classify(page, `<p>${'甲'.repeat(130)}<a id="candidate">運-12</a>${'乙'.repeat(130)}</p>`, true)).toEqual([{ sentence: `${'甲'.repeat(119)}運-12${'乙'.repeat(118)}`, at: 120 }]);
   });
 
+  test('collapse soft line breaks the way the browser renders them and keep hard breaks under a white-space value that preserves them', async ({ page }) => {
+    const expected = [{ sentence: '目前已經發展成為一個擁有運-12 輕型多用途飛機', at: 13 }];
+    expect(await classify(page, '<p>目前已經發展成為一個擁有\n<a id="candidate">運-12</a>\n輕型多用途飛機</p>')).toEqual(expected);
+    expect(await classify(page, '<p>\n  目前已經發展成為一個擁有\n  <a id="candidate">運-12</a>\n  輕型多用途飛機\n</p>', true)).toEqual(expected);
+    expect(await classify(page, '<p>目前已經發展成為一個擁有，\n<a id="candidate">運-12</a>輕型多用途飛機</p>', true)).toEqual([{ sentence: '目前已經發展成為一個擁有，運-12輕型多用途飛機', at: 14 }]);
+    expect(await classify(page, '<p>代號Y12\n<a id="candidate">運-12</a>\n輕型多用途飛機</p>', true)).toEqual([{ sentence: '代號Y12 運-12 輕型多用途飛機', at: 7 }]);
+    expect(await classify(page, '<div style="white-space: pre-wrap">前一行\n氣溫是-5度\n後一行</div>')).toEqual([{ sentence: '氣溫是-5度', at: 3 }]);
+    expect(await classify(page, '<div style="white-space: pre-wrap">前一行\n<a id="candidate">運-12</a>\n後一行</div>', true)).toEqual([{ sentence: '運-12', at: 1 }]);
+  });
+
   test('stop at block, line break, ignored and hidden content in both directions', async ({ page }) => {
     for (const boundary of [
       '<p><b>區塊文字</b></p>',
