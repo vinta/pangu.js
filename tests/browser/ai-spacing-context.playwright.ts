@@ -59,6 +59,7 @@ test.describe('AI spacing DOM context', () => {
     expect(await classify(page, '<p>目前已經發展成為一個擁有運-12輕型多用途飛機</p>')).toEqual(expected);
     expect(await classify(page, '<p>目前已經<span>發展成為一個擁有<a id="candidate">運-12</a></span><b>輕型多用途飛機</b></p>')).toEqual(expected);
     expect(await classify(page, '<p>目前已經<span>發展成為一個擁有<a id="candidate">運-12</a></span><b>輕型多用途飛機</b></p>', true)).toEqual(expected);
+    expect(await classify(page, '<p>目前已經<span style="display: inline-block">發展成為一個擁有<a id="candidate" style="display: inline-block">運-12</a></span><b style="display: inline-flex">輕型多用途飛機</b></p>', true)).toEqual(expected);
   });
 
   test('read neighboring original snapshots before the rules inserted spaces', async ({ page }) => {

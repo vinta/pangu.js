@@ -5,7 +5,7 @@ const pangu = window.pangu;
 export function readSentence(node: Text, unspaced: string, at: number, unspacedByNode: ReadonlyMap<Text, string>) {
   function isBoundary(element: Element) {
     const display = getComputedStyle(element).display;
-    return element.tagName === 'BR' || (display !== 'inline' && display !== 'contents') || pangu.isIgnoredElement(element) || pangu.visibilityDetector.shouldSkipSpacingAfterNode(element);
+    return element.tagName === 'BR' || (!display.startsWith('inline') && display !== 'contents') || pangu.isIgnoredElement(element) || pangu.visibilityDetector.shouldSkipSpacingAfterNode(element);
   }
 
   function readSide(text: string, backwards: boolean) {
