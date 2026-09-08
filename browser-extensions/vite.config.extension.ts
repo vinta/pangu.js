@@ -10,7 +10,7 @@ export default defineConfig({
     outDir: resolve(extensionRoot, 'chrome/dist'),
     target: 'chrome99',
     minify: false,
-    sourcemap: false,
+    sourcemap: true,
   },
   environments: {
     // Only the entry points Chrome loads directly. Vite handles shared dependencies on its own: modules used by more than one entry become a chunk under utils/, modules used by a single entry are
