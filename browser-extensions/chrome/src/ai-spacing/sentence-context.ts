@@ -1,11 +1,11 @@
-import { DomWalker } from '../../../../src/browser/dom-walker';
-import type { VisibilityDetector } from '../../../../src/browser/visibility-detector';
 import { MAX_SENTENCE_SIDE, SENTENCE_TERMINATOR, sliceSentence } from './shapes/base';
 
-export function readSentence(node: Text, unspaced: string, at: number, unspacedByNode: ReadonlyMap<Text, string>, visibility: VisibilityDetector) {
+const pangu = window.pangu;
+
+export function readSentence(node: Text, unspaced: string, at: number, unspacedByNode: ReadonlyMap<Text, string>) {
   function isBoundary(element: Element) {
     const display = getComputedStyle(element).display;
-    return element.tagName === 'BR' || (display !== 'inline' && display !== 'contents') || DomWalker.isIgnoredElement(element) || visibility.shouldSkipSpacingAfterNode(element);
+    return element.tagName === 'BR' || (display !== 'inline' && display !== 'contents') || pangu.isIgnoredElement(element) || pangu.visibilityDetector.shouldSkipSpacingAfterNode(element);
   }
 
   function readSide(text: string, backwards: boolean) {

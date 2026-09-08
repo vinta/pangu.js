@@ -1,4 +1,3 @@
-import { VisibilityDetector } from '../../../../src/browser/visibility-detector';
 import type { CandidateLabel, ClassifyCandidatesMessage, ClassifyCandidatesResponse } from './messages';
 import { readSentence } from './sentence-context';
 import type { AmbiguousShape, SettledCandidate, TextEdit } from './shapes/base';
@@ -8,7 +7,7 @@ import { nameSuffix } from './shapes/name-suffix-shape';
 
 const pangu = window.pangu;
 
-// Read off the singleton rather than imported: the content script is a classic script and cannot import the package
+// Read off the singleton rather than imported: pangu.umd.js loads as its own content script, so anything imported from src/ here would bundle a second copy of core
 type SettledTextNode = Parameters<NonNullable<typeof pangu.onTextNodesSettled>>[0][number];
 type LateFix = Parameters<typeof pangu.applyLateFixes>[0][number];
 
@@ -24,10 +23,10 @@ async function requestClassification(kind: string, candidates: ClassifyCandidate
   }
 }
 
-function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readonly SettledTextNode[], unspacedByNode: ReadonlyMap<Text, string>, visibility: VisibilityDetector) {
+function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readonly SettledTextNode[], unspacedByNode: ReadonlyMap<Text, string>) {
   const settledCandidates: SettledCandidate[] = [];
   for (const settledTextNode of settledTextNodes) {
-    const sentenceAt = (at: number) => readSentence(settledTextNode.node, settledTextNode.unspaced, at, unspacedByNode, visibility);
+    const sentenceAt = (at: number) => readSentence(settledTextNode.node, settledTextNode.unspaced, at, unspacedByNode);
     for (const candidateMatch of ambiguousShape.find(settledTextNode.unspaced, settledTextNode.settled, sentenceAt)) {
       settledCandidates.push({ ...candidateMatch, node: settledTextNode.node, settled: settledTextNode.settled });
     }
@@ -103,9 +102,8 @@ async function classifyShapeCandidates({ ambiguousShape, settledCandidates }: Sh
 
 export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[]) {
   const unspacedByNode = new Map(settledTextNodes.map(({ node, unspaced }) => [node, unspaced]));
-  const visibility = new VisibilityDetector();
   const shapeCandidates: ShapeCandidates[] = AMBIGUOUS_SHAPES.filter((ambiguousShape) => !modelFailed || !ambiguousShape.needsModel)
-    .map((ambiguousShape) => ({ ambiguousShape, settledCandidates: findCandidates(ambiguousShape, settledTextNodes, unspacedByNode, visibility) }))
+    .map((ambiguousShape) => ({ ambiguousShape, settledCandidates: findCandidates(ambiguousShape, settledTextNodes, unspacedByNode) }))
     .filter(({ settledCandidates }) => settledCandidates.length > 0);
   if (shapeCandidates.length === 0) {
     return;
