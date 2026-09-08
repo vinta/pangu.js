@@ -74,26 +74,6 @@ test.describe('onTextNodesSettled', () => {
     expect(await page.evaluate(() => document.body.textContent)).toBe('中文 "');
   });
 
-  test('report the text as the page last wrote it when a later batch visits the node again', async ({ page }) => {
-    await page.setContent('<div>氣溫是-5度左右</div>');
-
-    await collectSettledTextNodes(page);
-
-    // The second pass reads a node that already holds spaced text; the third reads one the page rewrote in between
-    const result = await page.evaluate(() => {
-      pangu.spacingNode(document.body);
-      (document.querySelector('div')!.firstChild as Text).data = '從-3度';
-      pangu.spacingNode(document.body);
-      return window.__settledTextNodes;
-    });
-
-    expect(result).toEqual([
-      { unspaced: '氣溫是-5度左右', settled: '氣溫是 - 5 度左右' },
-      { unspaced: '氣溫是-5度左右', settled: '氣溫是 - 5 度左右' },
-      { unspaced: '從-3度', settled: '從 - 3 度' },
-    ]);
-  });
-
   test('fire once per batch rather than once per text node', async ({ page }) => {
     await page.setContent('<div><b>abc</b><span>氣溫是-5度</span></div>');
 

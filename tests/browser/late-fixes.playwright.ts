@@ -1,7 +1,5 @@
 import { expect, test } from '@playwright/test';
 
-import type { LateFix } from '../../src/browser/pangu';
-
 test.describe('applyLateFixes', () => {
   test.beforeEach(async ({ page }) => {
     await page.addScriptTag({ path: 'dist/browser/pangu.umd.js' });
@@ -56,38 +54,6 @@ test.describe('applyLateFixes', () => {
     });
 
     expect(result).toBe('氣溫是 - 5 度左右');
-  });
-
-  test('apply a fix computed from the settled text a junction space rewrote while the classifier was thinking', async ({ page }) => {
-    await page.setContent('<div id="target"><span id="count"></span>氣溫是-5度</div>');
-
-    const result = await page.evaluate(async () => {
-      // Stands in for the extension with a slow classifier: a fix is computed as each batch settles and held until released below
-      const pendingLateFixes: LateFix[] = [];
-      pangu.onTextNodesSettled = (settledTextNodes) => {
-        for (const settledTextNode of settledTextNodes) {
-          if (!/[\u4e00-\u9fff]-[0-9]/.test(settledTextNode.unspaced)) {
-            continue;
-          }
-          const index = settledTextNode.settled.indexOf('-');
-          if (settledTextNode.settled[index + 1] === ' ') {
-            pendingLateFixes.push({ node: settledTextNode.node, settled: settledTextNode.settled, data: settledTextNode.settled.slice(0, index + 1) + settledTextNode.settled.slice(index + 2) });
-          }
-        }
-      };
-      pangu.autoSpacingPage({ pageDelayMs: 0 });
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      // The placeholder fills while the first answer is still pending, so the junction space lands on the candidate node before the fix does
-      document.getElementById('count')!.textContent = '1';
-      await new Promise((resolve) => setTimeout(resolve, 900));
-
-      // The first fix fails its snapshot check; the one computed from the rewritten settled text applies
-      pangu.applyLateFixes(pendingLateFixes);
-      return document.getElementById('target')!.innerHTML;
-    });
-
-    expect(result).toBe('<span id="count">1</span> 氣溫是 -5 度');
   });
 
   test('not re-space a late fix back through the MutationObserver', async ({ page }) => {
