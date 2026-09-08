@@ -112,7 +112,7 @@ A shape where the rules cannot derive the symbol's reading, so a fixed list or a
 _Avoid_: symbol class, ambiguity, shape (bare, for this sense)
 
 **Candidate**:
-One occurrence of an ambiguous shape, flagged on the text before spacing. It carries the sentence around it and the symbol's position in that sentence, which is all the classifier reads.
+One occurrence of an ambiguous shape, flagged on the text before spacing. It carries the sentence around it and the symbol's position in that sentence, which is all the classifier reads. On a page, the sentence is the inline text around the symbol as a reader sees it: it continues across inline elements, ends at a block edge, a `<br>`, or sentence-ending punctuation, steps past hidden and ignored elements, and treats a newline the way the browser renders it.
 _Avoid_: span, ambiguous span, model span
 
 **Settled candidate**:
