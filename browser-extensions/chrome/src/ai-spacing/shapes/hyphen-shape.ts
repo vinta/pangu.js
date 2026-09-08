@@ -1,5 +1,6 @@
+import { CJK } from '../../../../../src/shared/index';
 import type { AmbiguousShape, CandidateMatch, SettledCandidate } from './base';
-import { CJK, indexOfNthSymbol, sliceSentence } from './base';
+import { indexOfNthSymbol, sliceSentence } from './base';
 import { HYPHEN_LABELS } from './hyphen-prompt';
 
 // The hyphen-sign ambiguous shape: a hyphen-minus tight between a CJK character and a digit. Flagged on the unspaced text, because after spacing a rules-written `CJK - digit` is byte-identical

@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { applyTextEdits, CJK, indexOfNthSymbol, sliceSentence, type AmbiguousShape, type SettledCandidate, type TextEdit } from '../../browser-extensions/chrome/src/ai-spacing/shapes/base';
+import { applyTextEdits, indexOfNthSymbol, sliceSentence, type AmbiguousShape, type SettledCandidate, type TextEdit } from '../../browser-extensions/chrome/src/ai-spacing/shapes/base';
 import { hasInsertedGap, hyphenSign } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-shape';
-import { CJK as SHARED_CJK } from '../../src/shared/index';
 
 describe('sliceSentence()', () => {
   it('keep a text with no terminator whole', () => {
@@ -112,12 +111,6 @@ describe('hasInsertedGap()', () => {
 
   it('reject an index that is not a hyphen', () => {
     expect(hasInsertedGap('氣溫是 - 5 度左右', 3)).toBe(false);
-  });
-});
-
-describe('CJK', () => {
-  it('match the shared character class the rules read, byte for byte', () => {
-    expect(CJK).toBe(SHARED_CJK);
   });
 });
 
