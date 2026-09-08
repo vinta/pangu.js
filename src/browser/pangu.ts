@@ -12,7 +12,7 @@ export interface AutoSpacingPageConfig {
 
 interface UnsettledTextNode {
   readonly node: Text; // the spaced but unsettled text is in node.data
-  readonly unspaced: string;
+  readonly unspaced: string; // the data as the page last wrote it, the same in every later batch that visits the node again
 }
 
 export interface SettledTextNode extends UnsettledTextNode {
@@ -81,6 +81,9 @@ export class BrowserPangu extends Pangu {
 
   // Text nodes a late fix wrote. While such a node still holds what pangu last wrote, the rules leave its text alone and only pair its boundaries
   private readonly lateFixedTextNodes = new WeakSet<Text>();
+
+  // The data as the page last wrote it per text node. A later batch that visits the node again reports it as unspaced, so the host can still find the author's shape there
+  private readonly unspacedData = new WeakMap<Text, string>();
 
   public readonly taskScheduler = new TaskScheduler();
   public readonly visibilityDetector = new VisibilityDetector();
@@ -188,7 +191,7 @@ export class BrowserPangu extends Pangu {
         // A node holding a late fix takes part in boundary spacing only: text spacing would undo the fix. The host still gets it at the batch tail, since a boundary can rewrite it
         if (this.holdsLateFix(currentTextNode)) {
           if (this.onTextNodesSettled) {
-            unsettledTextNodes.push({ node: currentTextNode, unspaced: currentTextNode.data });
+            unsettledTextNodes.push({ node: currentTextNode, unspaced: this.unspacedData.get(currentTextNode) ?? currentTextNode.data });
           }
         } else {
           this.applyTextNodeSpacing(currentTextNode, unsettledTextNodes);
@@ -309,7 +312,10 @@ export class BrowserPangu extends Pangu {
           break;
         case 'apply-text-spacing': {
           if (this.onTextNodesSettled) {
-            unsettledTextNodes.push({ node: textNode, unspaced: textNode.data });
+            if (textNode.data !== this.lastWrittenData.get(textNode)) {
+              this.unspacedData.set(textNode, textNode.data);
+            }
+            unsettledTextNodes.push({ node: textNode, unspaced: this.unspacedData.get(textNode) ?? textNode.data });
           }
           const newText = this.spacingText(textNode.data);
           if (textNode.data !== newText) {

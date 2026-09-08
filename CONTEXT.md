@@ -23,7 +23,7 @@ Deciding whether whitespace goes between two adjacent text nodes on a page, and 
 _Avoid_: pair spacing, adjacent-node spacing
 
 **Settle**:
-A text node settles when nothing will rewrite it again in this batch. Text spacing runs first, then boundary spacing rewrites tails of nodes it already visited, so a node is spaced before it is settled. Pangu hands settled nodes to the host at the batch tail, never per node.
+A text node settles when nothing will rewrite it again in this batch. Text spacing runs first, then boundary spacing rewrites tails of nodes it already visited, so a node is spaced before it is settled. Pangu hands settled nodes to the host at the batch tail, never per node, each with its settled text and its unspaced text as the page last wrote it.
 _Avoid_: finished, done, final
 
 **Pangu element**:
