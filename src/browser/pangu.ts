@@ -140,10 +140,6 @@ export class BrowserPangu extends Pangu {
     this.isAutoSpacingPageExecuted = false;
   }
 
-  public isElementVisuallyHidden(element: Element) {
-    return this.visibilityDetector.isElementVisuallyHidden(element);
-  }
-
   public applyLateFixes(lateFixes: readonly LateFix[]) {
     this.schedule(() => {
       for (const lateFix of lateFixes) {
