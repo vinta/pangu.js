@@ -10,7 +10,7 @@ export default defineConfig({
     target: 'es2022',
   },
   environments: {
-    shared: {
+    sharedEsm: {
       consumer: 'client',
       build: {
         emptyOutDir: true,
@@ -61,9 +61,9 @@ export default defineConfig({
     },
   },
   builder: {
-    // Defining `builder` is what makes a plain `vite build` build every environment. They run in order, and shared has to go first because it is the only one that empties dist/
+    // Defining `builder` is what makes a plain `vite build` build every environment. They run in order, and sharedEsm has to go first because it is the only one that empties dist/
     buildApp: async (builder) => {
-      for (const name of ['shared', 'nodeEsm', 'nodeCli', 'browserEsm', 'browserUmd', 'nodeCjs']) {
+      for (const name of ['sharedEsm', 'nodeEsm', 'nodeCli', 'browserEsm', 'browserUmd', 'nodeCjs']) {
         await builder.build(builder.environments[name]!);
       }
     },
