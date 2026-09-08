@@ -17,10 +17,8 @@ async function init() {
     };
   }
 
-  let warmedUp = false;
   const startAutoSpacing = () => {
-    if (settings.is_enable_ai_spacing && !warmedUp) {
-      warmedUp = true;
+    if (settings.is_enable_ai_spacing) {
       warmUpAiSpacing();
     }
     pangu.autoSpacingPage();

@@ -60,8 +60,15 @@ function collectLateFixes(labeledShapeCandidates: readonly (ShapeCandidates & { 
   return lateFixes;
 }
 
+// Auto spacing restarts on every URL change and manual click, but the page text only needs scanning once
+let warmedUp = false;
+
 // Warm up the service worker's base sessions to mitigate cold start, which takes seconds on the first LanguageModel.create()
 export function warmUpAiSpacing() {
+  if (warmedUp) {
+    return;
+  }
+  warmedUp = true;
   const pageText = document.documentElement.textContent ?? '';
   // The loop is not redundant: we create base sessions per ambiguous shape
   for (const ambiguousShape of AMBIGUOUS_SHAPES) {
