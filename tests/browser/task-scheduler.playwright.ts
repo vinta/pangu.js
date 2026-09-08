@@ -285,6 +285,31 @@ test.describe('TaskScheduler Enabled', () => {
     expect(result.atNextPaint).toBe('測試中文 abc 混合內容 123');
   });
 
+  test('should re-space both text nodes before the next paint when a re-render writes two adjacent ones in one task', async ({ page }) => {
+    await page.setContent('<p id="content"><span>甲1</span><span>乙2</span></p>');
+
+    const result = await page.evaluate(async () => {
+      pangu.taskScheduler.config.enabled = true;
+
+      // Huge nodeDelayMs keeps the debounced queue path out of the assertion window
+      pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 60000, nodeMaxWaitMs: 120000 });
+
+      // Wait for the initial sweep's idle processing
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // A framework re-render writes nodeValue on both text nodes in one task. Re-spacing the first pairs it with the second, whose own mutation record is still pending
+      const content = document.getElementById('content')!;
+      const spans = content.querySelectorAll('span');
+      spans[0]!.firstChild!.nodeValue = '丙3';
+      spans[1]!.firstChild!.nodeValue = '丁4';
+
+      const atNextPaint = await new Promise<string | null>((resolve) => requestAnimationFrame(() => resolve(content.innerHTML)));
+      return { atNextPaint };
+    });
+
+    expect(result.atNextPaint).toBe('<span>丙 3</span><span> 丁 4</span>');
+  });
+
   test('should converge after a pre-paint re-space without write loops', async ({ page }) => {
     await page.setContent('<div id="content">測試中文abc混合內容123</div>');
 

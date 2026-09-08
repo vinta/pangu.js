@@ -149,6 +149,115 @@ test.describe('BrowserPangu', () => {
       expect(result).toBe('公視+ 的節目<span id="count"> 1</span>');
     });
 
+    test('space both text nodes when a re-render writes two adjacent ones in one task', async ({ page }) => {
+      await page.setContent('<p id="container"><span>甲1</span><span>乙2</span></p>');
+
+      await page.evaluate(() => {
+        pangu.autoSpacingPage({ pageDelayMs: 50 });
+      });
+
+      await page.waitForTimeout(600);
+
+      // A framework re-render writes nodeValue on both text nodes in one task. Re-spacing the first pairs it with the second, whose own mutation record is still pending
+      await page.evaluate(() => {
+        const spans = document.querySelectorAll('#container span');
+        spans[0]!.firstChild!.nodeValue = '丙3';
+        spans[1]!.firstChild!.nodeValue = '丁4';
+      });
+
+      await page.waitForTimeout(600);
+
+      const result = await page.evaluate(() => document.getElementById('container')!.innerHTML);
+      expect(result).toBe('<span>丙 3</span><span> 丁 4</span>');
+    });
+
+    test('keep a late fix at the tail of the unchanged sibling when a placeholder after it is filled', async ({ page }) => {
+      await page.setContent('<p id="container">公視+<span id="count"></span></p>');
+
+      await page.evaluate(() => {
+        pangu.autoSpacingPage({ pageDelayMs: 50 });
+      });
+
+      await page.waitForTimeout(600);
+
+      // The late fix sits right at the tail, where the junction reading would put the space back
+      await page.evaluate(() => {
+        const textNode = document.getElementById('container')!.firstChild as Text;
+        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '公視+' }]);
+      });
+
+      await page.waitForTimeout(100);
+
+      await page.evaluate(() => {
+        document.getElementById('count')!.textContent = '上架';
+      });
+
+      await page.waitForTimeout(600);
+
+      const result = await page.evaluate(() => document.getElementById('container')!.innerHTML);
+      expect(result).toBe('公視+<span id="count"> 上架</span>');
+    });
+
+    test('keep a late fix on a text node re-collected with its parent when a sibling text node is appended', async ({ page }) => {
+      await page.setContent('<p id="container">公視+的節目</p>');
+
+      await page.evaluate(() => {
+        pangu.autoSpacingPage({ pageDelayMs: 50 });
+      });
+
+      await page.waitForTimeout(600);
+
+      await page.evaluate(() => {
+        const textNode = document.getElementById('container')!.firstChild as Text;
+        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '公視+ 的節目' }]);
+      });
+
+      await page.waitForTimeout(100);
+
+      // The parent is queued, so the fixed node is in the mutated subtree itself rather than a neighbor of it
+      await page.evaluate(() => {
+        document.getElementById('container')!.appendChild(document.createTextNode('1'));
+      });
+
+      await page.waitForTimeout(600);
+
+      const result = await page.evaluate(() => document.getElementById('container')!.textContent);
+      expect(result).toBe('公視+ 的節目 1');
+    });
+
+    test('keep a late fix after a junction space was written into the fixed node', async ({ page }) => {
+      await page.setContent('<p id="container"><span id="count"></span>公視+的節目</p>');
+
+      await page.evaluate(() => {
+        pangu.autoSpacingPage({ pageDelayMs: 50 });
+      });
+
+      await page.waitForTimeout(600);
+
+      await page.evaluate(() => {
+        const textNode = document.getElementById('container')!.lastChild as Text;
+        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '公視+ 的節目' }]);
+      });
+
+      await page.waitForTimeout(100);
+
+      // The first fill prepends the junction space to the fixed node, so it no longer holds the bytes the late fix wrote
+      await page.evaluate(() => {
+        document.getElementById('count')!.textContent = '1';
+      });
+
+      await page.waitForTimeout(600);
+
+      await page.evaluate(() => {
+        document.getElementById('count')!.firstChild!.nodeValue = '2';
+      });
+
+      await page.waitForTimeout(600);
+
+      const result = await page.evaluate(() => document.getElementById('container')!.innerHTML);
+      expect(result).toBe('<span id="count">2</span> 公視+ 的節目');
+    });
+
     test('not pair body text with the title when a placeholder has no block ancestor', async ({ page }) => {
       await page.setContent('<html><head><title>中文</title></head><body><nav><span id="count"></span>abc</nav></body></html>');
 
