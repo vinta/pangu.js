@@ -96,10 +96,76 @@ test.describe('BrowserPangu', () => {
 
       await page.waitForTimeout(600);
 
-      // No space may appear between X and abc. The missing space in 甲X is a known
-      // pre-existing gap: boundaries against unqueued neighbors are never re-evaluated
+      // No space may appear between X and abc. The unqueued X is paired with each queued
+      // neighbor, so 甲 X gets its space while Xabc stays tight as two ANS tokens
       const result = await page.evaluate(() => document.getElementById('container')!.textContent);
-      expect(result).toBe('甲Xabc');
+      expect(result).toBe('甲 Xabc');
+    });
+
+    test('handle boundary against an unchanged sibling when a placeholder is filled after the page pass', async ({ page }) => {
+      // An empty inline placeholder the page fills later, tight against text the page pass already settled
+      await page.setContent('<p id="container">（<span id="count"></span>人的回答統計）</p>');
+
+      await page.evaluate(() => {
+        pangu.autoSpacingPage({ pageDelayMs: 50 });
+      });
+
+      await page.waitForTimeout(600);
+
+      await page.evaluate(() => {
+        document.getElementById('count')!.textContent = '1';
+      });
+
+      await page.waitForTimeout(600);
+
+      const result = await page.evaluate(() => document.getElementById('container')!.innerHTML);
+      expect(result).toBe('（<span id="count">1</span> 人的回答統計）');
+    });
+
+    test('keep a late fix on the unchanged sibling when a placeholder next to it is filled', async ({ page }) => {
+      await page.setContent('<p id="container">公視+的節目<span id="count"></span></p>');
+
+      await page.evaluate(() => {
+        pangu.autoSpacingPage({ pageDelayMs: 50 });
+      });
+
+      await page.waitForTimeout(600);
+
+      // The host's late fix glues the CJK brand suffix back, as the extension does
+      await page.evaluate(() => {
+        const textNode = document.getElementById('container')!.firstChild as Text;
+        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '公視+ 的節目' }]);
+      });
+
+      await page.waitForTimeout(100);
+
+      await page.evaluate(() => {
+        document.getElementById('count')!.textContent = '1';
+      });
+
+      await page.waitForTimeout(600);
+
+      const result = await page.evaluate(() => document.getElementById('container')!.innerHTML);
+      expect(result).toBe('公視+ 的節目<span id="count"> 1</span>');
+    });
+
+    test('not pair body text with the title when a placeholder has no block ancestor', async ({ page }) => {
+      await page.setContent('<html><head><title>中文</title></head><body><nav><span id="count"></span>abc</nav></body></html>');
+
+      await page.evaluate(() => {
+        pangu.autoSpacingPage({ pageDelayMs: 50 });
+      });
+
+      await page.waitForTimeout(600);
+
+      await page.evaluate(() => {
+        document.getElementById('count')!.textContent = '甲';
+      });
+
+      await page.waitForTimeout(600);
+
+      const result = await page.evaluate(() => [document.title, document.querySelector('nav')!.innerHTML]);
+      expect(result).toEqual(['中文', '<span id="count">甲</span> abc']);
     });
 
     test('not add a space across an unchanged whitespace wrapper between nodes added in one mutation batch', async ({ page }) => {

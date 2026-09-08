@@ -169,7 +169,8 @@ export class BrowserPangu extends Pangu {
     return display === 'grid' || display === 'inline-grid' || display === 'flex' || display === 'inline-flex';
   }
 
-  private spacingTextNodes(textNodes: Node[]) {
+  // settledNeighbors are the unchanged text nodes on each side of a mutation: they take part in boundary spacing only, since their own text was spaced already, possibly with a late fix that text spacing would undo. The host still gets them at the batch tail, since a boundary can rewrite them
+  private spacingTextNodes(textNodes: Node[], settledNeighbors: ReadonlySet<Node> = new Set()) {
     // Visibility verdicts are memoized per batch; styles may change between batches
     this.visibilityDetector.clearCache();
 
@@ -181,7 +182,11 @@ export class BrowserPangu extends Pangu {
     // Process nodes in the order provided
     for (const currentTextNode of textNodes) {
       if (currentTextNode instanceof Text) {
-        this.applyTextNodeSpacing(currentTextNode, unsettledTextNodes);
+        if (!settledNeighbors.has(currentTextNode)) {
+          this.applyTextNodeSpacing(currentTextNode, unsettledTextNodes);
+        } else if (this.onTextNodesSettled) {
+          unsettledTextNodes.push({ node: currentTextNode, unspaced: currentTextNode.data });
+        }
       }
 
       // Boundary between this text node and the following one, for every adjacent pair rather than only nested tags. The list is in reverse document order, so nextTextNode is the previously visited node
@@ -308,12 +313,31 @@ export class BrowserPangu extends Pangu {
   // inside the MutationObserver callback. Returns false when the subtree exceeds
   // maxTextNodes, so the caller can fall back to the debounced queue
   private spacingNodeSync(contextNode: Node, maxTextNodes: number) {
-    const textNodes = DomWalker.collectTextNodes(contextNode, true);
+    const textNodes = DomWalker.collectTextNodes(contextNode);
     if (textNodes.length > maxTextNodes) {
       return false;
     }
-    this.spacingTextNodes(textNodes);
+    const settledNeighbors = new Set<Node>();
+    this.spacingTextNodes(this.withNeighborTextNodes(textNodes, settledNeighbors).reverse(), settledNeighbors);
     return true;
+  }
+
+  // A mutated node's text nodes plus the settled text node on each side, so the junction with an unchanged sibling is paired too: a placeholder span filled after the page was spaced sits tight against text the page pass already settled. The neighbors are also added to settledNeighbors
+  private withNeighborTextNodes(textNodes: Text[], settledNeighbors: Set<Node>) {
+    const firstTextNode = textNodes[0];
+    const lastTextNode = textNodes[textNodes.length - 1];
+    if (!firstTextNode || !lastTextNode) {
+      return textNodes;
+    }
+    const previousTextNode = DomWalker.findAdjacentTextNode(firstTextNode, 'previous');
+    const nextTextNode = DomWalker.findAdjacentTextNode(lastTextNode, 'next');
+    if (previousTextNode) {
+      settledNeighbors.add(previousTextNode);
+    }
+    if (nextTextNode) {
+      settledNeighbors.add(nextTextNode);
+    }
+    return [...(previousTextNode ? [previousTextNode] : []), ...textNodes, ...(nextTextNode ? [nextTextNode] : [])];
   }
 
   private hasSpacedTextInSubtree(node: Node) {
@@ -520,17 +544,25 @@ export class BrowserPangu extends Pangu {
 
         const seenTextNodes = new Set<Node>();
         const allTextNodes: Node[] = [];
+        const settledNeighbors = new Set<Node>();
+        const queuedTextNodes: Text[] = [];
         for (const node of nodesToProcess) {
-          for (const textNode of DomWalker.collectTextNodes(node)) {
+          const textNodes = DomWalker.collectTextNodes(node);
+          queuedTextNodes.push(...textNodes);
+          for (const textNode of this.withNeighborTextNodes(textNodes, settledNeighbors)) {
             if (!seenTextNodes.has(textNode)) {
               seenTextNodes.add(textNode);
               allTextNodes.push(textNode);
             }
           }
         }
+        // A neighbor of one queued node can sit inside another queued node, and then it is not settled
+        for (const textNode of queuedTextNodes) {
+          settledNeighbors.delete(textNode);
+        }
         allTextNodes.reverse();
 
-        this.schedule(() => this.spacingTextNodes(allTextNodes));
+        this.schedule(() => this.spacingTextNodes(allTextNodes, settledNeighbors));
       },
       nodeDelayMs,
       nodeMaxWaitMs,

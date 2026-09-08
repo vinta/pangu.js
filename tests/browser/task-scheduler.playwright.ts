@@ -201,8 +201,8 @@ test.describe('TaskScheduler Enabled', () => {
       return container.textContent;
     });
 
-    // No space may appear between X and abc; the missing space in 甲X is a pre-existing gap
-    expect(result).toBe('甲Xabc');
+    // No space may appear between X and abc: the unqueued X is paired with each queued neighbor, so 甲 X is spaced and Xabc stays tight
+    expect(result).toBe('甲 Xabc');
   });
 
   test('should not add a space across an unchanged whitespace wrapper between nodes added in one mutation batch', async ({ page }) => {
