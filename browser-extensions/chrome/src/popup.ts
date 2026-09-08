@@ -13,7 +13,7 @@ class PopupController {
   private notificationCallback: (() => void) | undefined;
 
   constructor() {
-    this.initialize();
+    this.initialize().catch(console.error);
   }
 
   private async initialize() {
@@ -28,12 +28,24 @@ class PopupController {
   }
 
   private setupEventListeners() {
-    document.getElementById('spacing-mode-toggle')!.addEventListener('change', () => this.handleSpacingModeToggleChange());
-    document.getElementById('mute-toggle')!.addEventListener('change', () => this.handleMuteToggleChange());
-    document.getElementById('text-autospace-toggle')!.addEventListener('change', () => this.handleTextAutospaceToggleChange());
-    document.getElementById('ai-spacing-toggle')!.addEventListener('change', () => this.handleAiSpacingToggleChange());
-    document.getElementById('manual-spacing-btn')!.addEventListener('click', () => this.handleManualSpacing());
-    document.getElementById('add-to-blacklist-btn')!.addEventListener('click', () => this.handleAddToBlacklist());
+    document.getElementById('spacing-mode-toggle')!.addEventListener('change', () => {
+      this.handleSpacingModeToggleChange().catch(console.error);
+    });
+    document.getElementById('mute-toggle')!.addEventListener('change', () => {
+      this.handleMuteToggleChange().catch(console.error);
+    });
+    document.getElementById('text-autospace-toggle')!.addEventListener('change', () => {
+      this.handleTextAutospaceToggleChange().catch(console.error);
+    });
+    document.getElementById('ai-spacing-toggle')!.addEventListener('change', () => {
+      this.handleAiSpacingToggleChange().catch(console.error);
+    });
+    document.getElementById('manual-spacing-btn')!.addEventListener('click', () => {
+      this.handleManualSpacing().catch(console.error);
+    });
+    document.getElementById('add-to-blacklist-btn')!.addEventListener('click', () => {
+      this.handleAddToBlacklist().catch(console.error);
+    });
     document.getElementById('notification')!.addEventListener('click', () => this.hideNotification());
 
     // Any settings change repaints the whole popup: it is small, and this keeps the status row honest after toggling spacing mode. Handlers never

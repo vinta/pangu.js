@@ -74,32 +74,48 @@ async function updateTabIcon(tabId: number, url: string | undefined, settings: S
 async function updateAllTabIcons() {
   const settings = await getSettings();
   const tabs = await chrome.tabs.query({});
-  await Promise.all(tabs.map((tab) => (tab.id === undefined ? undefined : updateTabIcon(tab.id, tab.url, settings))));
+  await Promise.all(tabs.flatMap((tab) => (tab.id === undefined ? [] : [updateTabIcon(tab.id, tab.url, settings)])));
 }
 
-chrome.runtime.onInstalled.addListener(async () => {
+async function onInstalled() {
   await reconcileSettings();
   await queueRegisterContentScripts();
   await updateAllTabIcons();
-});
+}
 
-chrome.runtime.onStartup.addListener(async () => {
+async function onStartup() {
   // Also register content scripts when extension starts
   await queueRegisterContentScripts();
   await updateAllTabIcons();
-});
+}
 
-// The url is often not set yet on onCreated (new tab pages never get one), so onUpdated below refines it as soon as navigation commits
-chrome.tabs.onCreated.addListener(async (tab) => {
+async function onTabCreated(tab: chrome.tabs.Tab) {
   if (tab.id !== undefined) {
     await updateTabIcon(tab.id, tab.url || tab.pendingUrl, await getSettings());
   }
-});
+}
 
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+async function onTabUpdated(tabId: number, changeInfo: chrome.tabs.OnUpdatedInfo, tab: chrome.tabs.Tab) {
   if (changeInfo.status === 'loading' || changeInfo.url) {
     await updateTabIcon(tabId, tab.url, await getSettings());
   }
+}
+
+chrome.runtime.onInstalled.addListener(() => {
+  onInstalled().catch(console.error);
+});
+
+chrome.runtime.onStartup.addListener(() => {
+  onStartup().catch(console.error);
+});
+
+// The url is often not set yet on onCreated (new tab pages never get one), so onUpdated below refines it as soon as navigation commits
+chrome.tabs.onCreated.addListener((tab) => {
+  onTabCreated(tab).catch(console.error);
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  onTabUpdated(tabId, changeInfo, tab).catch(console.error);
 });
 
 // Registered synchronously at module scope, as MV3 requires for storage events to wake this worker. The event payload alone says what changed, so a cold-started worker needs no cached state
@@ -107,7 +123,7 @@ const REGISTRATION_KEYS: (keyof Settings)[] = ['spacing_mode', 'is_enable_text_a
 const ICON_KEYS: (keyof Settings)[] = ['spacing_mode', 'filter_mode', 'blacklist', 'whitelist'];
 onSettingsChanged((changedKeys) => {
   if (changedKeys.some((key) => REGISTRATION_KEYS.includes(key))) {
-    queueRegisterContentScripts();
+    queueRegisterContentScripts().catch(console.error);
   }
   if (changedKeys.some((key) => ICON_KEYS.includes(key))) {
     updateAllTabIcons().catch(console.error);
@@ -118,7 +134,7 @@ onSettingsChanged((changedKeys) => {
 // Chrome closes the message channel when a listener returns a promise, so this stays a plain function that returns true and lets handleClassification() call sendResponse. It never rejects
 chrome.runtime.onMessage.addListener((message: MessageToServiceWorker, _sender: chrome.runtime.MessageSender, sendResponse: (response: ClassifyCandidatesResponse) => void) => {
   if (message.type === 'CLASSIFY_CANDIDATES') {
-    handleClassification(message.kind, message.candidates).then(sendResponse);
+    void handleClassification(message.kind, message.candidates).then(sendResponse);
     return true;
   }
 
