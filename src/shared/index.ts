@@ -139,11 +139,16 @@ export const PIPE_CJK_CONTACT = new RegExp(`[${CJK}]\\||\\|[${CJK}]`);
 export const PIPE_SEPARATOR = /([^\s|])[ ]*(\|+)[ ]*(?=[^\s|])/g;
 
 // Plus patterns for separator vs joiner-token behavior, decided per line like the pipe. The separator matches a solitary plus only: a space-adjacent plus is decided and a ++ run is a preserved
-// pattern (C++, i++). Common Chinese full-width punctuation also keeps an adjacent plus tight, even when another plus flips the line
+// pattern (C++, i++). Common Chinese full-width punctuation also keeps an adjacent plus tight, even when another plus flips the line, since a word before an opening one may be a name (A+\uff08CJK+\uff09)
 export const PLUS_CJK_CONTACT = new RegExp(`[${CJK}]\\+|\\+[${CJK}]`);
 // Characters: ，。；：！？、（）「」『』【】《》
 // prettier-ignore
 export const PLUS_SEPARATOR = /(?<=[^\s+\uff0c\u3002\uff1b\uff1a\uff01\uff1f\u3001\uff08\uff09\u300c\u300d\u300e\u300f\u3010\u3011\u300a\u300b])\+(?=[^\s+\uff0c\u3002\uff1b\uff1a\uff01\uff1f\u3001\uff08\uff09\u300c\u300d\u300e\u300f\u3010\u3011\u300a\u300b])/g;
+// A closing bracket carries no name, so on a line with two or more solitary pluses a plus after it is a separator even before an opening full-width bracket or quote; only the bracket side
+// gets the space ((CJK) +\u300cCJK+\u300d). A line with one plus keeps it tight, since one plus is no bundle plan
+// Characters: （「『【《
+export const SOLITARY_PLUS = /(?<!\+)\+(?!\+)/g;
+export const RIGHT_BRACKET_PLUS_FULL_WIDTH_LEFT_BRACKET = new RegExp(`(?<=[${RIGHT_BRACKETS_BASIC}])\\+(?=[\\uff08\\u300c\\u300e\\u3010\\u300a])`, 'g');
 
 // Single-letter grades (A+, B-, C*) before CJK get the space after the symbol, not before. The \b keeps the letter single, not the tail of a longer word
 export const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([${A}])([${GRADE_OPERATORS}])([${CJK}])`, 'g');
@@ -392,10 +397,11 @@ export class Pangu {
     newText = newText
       .split('\n')
       .map((line) => {
-        if (!PLUS_CJK_CONTACT.test(line)) {
-          return line;
+        const spaced = PLUS_CJK_CONTACT.test(line) ? line.replace(PLUS_SEPARATOR, ' + ') : line;
+        if ((spaced.match(SOLITARY_PLUS) ?? []).length < 2) {
+          return spaced;
         }
-        return line.replace(PLUS_SEPARATOR, ' + ');
+        return spaced.replace(RIGHT_BRACKET_PLUS_FULL_WIDTH_LEFT_BRACKET, ' +');
       })
       .join('\n');
 
