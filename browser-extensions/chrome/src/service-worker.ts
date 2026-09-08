@@ -62,17 +62,13 @@ function queueRegisterContentScripts() {
 
 // The paper bag only marks spacing the user turned off: manual mode bags every tab, a filter-excluded url bags its tab (#296). Pages the extension cannot run on (chrome://, new tab pages) keep
 // the face, unlike the popup status row, which reports them as inactive
-function updateTabIcon(tabId: number, url: string | undefined, settings: Settings) {
+async function updateTabIcon(tabId: number, url: string | undefined, settings: Settings) {
   const path = shouldShowOffIcon(settings, url) ? OFF_ICON_PATHS : DEFAULT_ICON_PATHS;
-  return new Promise<void>((resolve) => {
-    chrome.action.setIcon({ tabId, path }, () => {
-      const error = chrome.runtime.lastError;
-      if (error && error.message !== `No tab with id: ${tabId}.`) {
-        console.warn(`Failed to updateTabIcon for tab ${tabId}:`, error.message);
-      }
-      resolve();
-    });
-  });
+  try {
+    await chrome.action.setIcon({ tabId, path });
+  } catch {
+    // The tab can be closed between the triggering event and this write
+  }
 }
 
 async function updateAllTabIcons() {
