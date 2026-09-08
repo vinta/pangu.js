@@ -3,9 +3,9 @@ export interface Settings {
   filter_mode: 'blacklist' | 'whitelist';
   blacklist: string[];
   whitelist: string[];
-  is_mute_sound_effects: boolean;
-  is_enable_text_autospace: boolean;
-  is_enable_ai_spacing: boolean;
+  is_sound_effects_muted: boolean;
+  is_text_autospace_enabled: boolean;
+  is_ai_spacing_enabled: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -22,9 +22,9 @@ export const DEFAULT_SETTINGS: Settings = {
     'https://www.netflix.com/*',
   ],
   whitelist: [],
-  is_mute_sound_effects: false,
-  is_enable_text_autospace: true,
-  is_enable_ai_spacing: true,
+  is_sound_effects_muted: false,
+  is_text_autospace_enabled: true,
+  is_ai_spacing_enabled: true,
 };
 
 const SETTINGS_KEYS = Object.keys(DEFAULT_SETTINGS) as (keyof Settings)[];

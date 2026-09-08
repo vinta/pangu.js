@@ -61,14 +61,14 @@ class PopupController {
 
   private renderMuteToggle(settings: Settings) {
     const muteToggle = document.getElementById('mute-toggle') as HTMLInputElement;
-    muteToggle.checked = settings.is_mute_sound_effects;
+    muteToggle.checked = settings.is_sound_effects_muted;
   }
 
   private renderTextAutospaceToggle(settings: Settings) {
     const textAutospaceToggle = document.getElementById('text-autospace-toggle') as HTMLInputElement;
     const isSupported = CSS.supports('text-autospace', 'normal');
     // Display-only off when unsupported: never write back, the synced setting still applies on other devices
-    textAutospaceToggle.checked = isSupported && settings.is_enable_text_autospace;
+    textAutospaceToggle.checked = isSupported && settings.is_text_autospace_enabled;
     textAutospaceToggle.disabled = !isSupported;
     textAutospaceToggle.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
   }
@@ -78,7 +78,7 @@ class PopupController {
     const isSupported = await isModelSupported();
 
     // Display-only off when the model can never run here: never write back, the synced setting still applies on other devices
-    aiSpacingToggle.checked = isSupported && settings.is_enable_ai_spacing;
+    aiSpacingToggle.checked = isSupported && settings.is_ai_spacing_enabled;
     aiSpacingToggle.disabled = !isSupported;
     aiSpacingToggle.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
   }
@@ -130,7 +130,7 @@ class PopupController {
   private async handleMuteToggleChange() {
     const toggle = document.getElementById('mute-toggle') as HTMLInputElement;
     try {
-      await updateSettings({ is_mute_sound_effects: toggle.checked });
+      await updateSettings({ is_sound_effects_muted: toggle.checked });
     } catch (error) {
       console.error('Failed to save settings:', error);
       await this.render();
@@ -141,7 +141,7 @@ class PopupController {
   private async handleTextAutospaceToggleChange() {
     const toggle = document.getElementById('text-autospace-toggle') as HTMLInputElement;
     try {
-      await updateSettings({ is_enable_text_autospace: toggle.checked });
+      await updateSettings({ is_text_autospace_enabled: toggle.checked });
     } catch (error) {
       console.error('Failed to save settings:', error);
       await this.render();
@@ -154,7 +154,7 @@ class PopupController {
   private async handleAiSpacingToggleChange() {
     const toggle = document.getElementById('ai-spacing-toggle') as HTMLInputElement;
     try {
-      await updateSettings({ is_enable_ai_spacing: toggle.checked });
+      await updateSettings({ is_ai_spacing_enabled: toggle.checked });
     } catch (error) {
       console.error('Failed to save settings:', error);
       await this.render();

@@ -137,7 +137,7 @@
     "message": "其他設定",
     "description": ""
   },
-  "label_is_mute_sound_effects": {
+  "label_is_sound_effects_muted": {
     "message": "太吵了，靜音",
     "description": ""
   },
@@ -145,7 +145,7 @@
     "message": "隱藏設定",
     "description": ""
   },
-  "label_is_enable_text_autospace": {
+  "label_is_text_autospace_enabled": {
     "message": "佛系空格",
     "description": ""
   },
@@ -173,7 +173,7 @@
     "message": "你的瀏覽器不支援這個功能，需要 Chrome v140 以上版本。",
     "description": ""
   },
-  "label_is_enable_ai_spacing": {
+  "label_is_ai_spacing_enabled": {
     "message": "威力加強版 AI 空格之神",
     "description": ""
   },

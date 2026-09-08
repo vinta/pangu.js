@@ -25,7 +25,7 @@ async function loadContentScript(page: Page, html: string, candidateLabels: Cand
     window.__aiLabels = candidateLabels;
     Object.defineProperty(window, 'chrome', {
       value: {
-        storage: { sync: { get: async (defaults: Settings) => ({ ...defaults, spacing_mode: 'spacing_when_load', is_enable_ai_spacing: true }) } },
+        storage: { sync: { get: async (defaults: Settings) => ({ ...defaults, spacing_mode: 'spacing_when_load', is_ai_spacing_enabled: true }) } },
         runtime: {
           onMessage: { addListener: () => {} },
           sendMessage: async (message: ClassifyCandidatesMessage) => {

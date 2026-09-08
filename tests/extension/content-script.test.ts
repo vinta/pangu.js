@@ -67,7 +67,7 @@ describe('manual spacing activation', () => {
   });
 
   it.each(['spacing_when_load', 'spacing_when_click'] as const)('starts on an excluded URL in %s without enabling disabled AI', async (spacing_mode) => {
-    const { pangu, click } = await loadContentScript({ ...DEFAULT_SETTINGS, spacing_mode, is_enable_ai_spacing: false });
+    const { pangu, click } = await loadContentScript({ ...DEFAULT_SETTINGS, spacing_mode, is_ai_spacing_enabled: false });
     expect(pangu.autoSpacingPage).not.toHaveBeenCalled();
     expect(await click()).toEqual({ success: true });
     expect(pangu.autoSpacingPage).toHaveBeenCalledTimes(1);

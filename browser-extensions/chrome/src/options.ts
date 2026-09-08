@@ -37,15 +37,15 @@ class OptionsController {
         this.renderFilterMode().catch(console.error);
       }
 
-      if (changedKeys.includes('is_mute_sound_effects')) {
+      if (changedKeys.includes('is_sound_effects_muted')) {
         this.renderMuteCheckbox().catch(console.error);
       }
 
-      if (changedKeys.includes('is_enable_text_autospace')) {
+      if (changedKeys.includes('is_text_autospace_enabled')) {
         this.renderTextAutospaceCheckbox().catch(console.error);
       }
 
-      if (changedKeys.includes('is_enable_ai_spacing')) {
+      if (changedKeys.includes('is_ai_spacing_enabled')) {
         this.renderAiSpacingCheckbox().catch(console.error);
       }
     });
@@ -93,7 +93,7 @@ class OptionsController {
       if (target.id === 'mute-checkbox') {
         const muteCheckbox = target as HTMLInputElement;
         try {
-          await updateSettings({ is_mute_sound_effects: muteCheckbox.checked });
+          await updateSettings({ is_sound_effects_muted: muteCheckbox.checked });
         } catch (error) {
           // The checkbox already flipped visually: repaint it from confirmed settings
           console.error('Failed to save settings:', error);
@@ -102,7 +102,7 @@ class OptionsController {
       } else if (target.id === 'text-autospace-checkbox') {
         const textAutospaceCheckbox = target as HTMLInputElement;
         try {
-          await updateSettings({ is_enable_text_autospace: textAutospaceCheckbox.checked });
+          await updateSettings({ is_text_autospace_enabled: textAutospaceCheckbox.checked });
         } catch (error) {
           console.error('Failed to save settings:', error);
           await this.renderTextAutospaceCheckbox();
@@ -110,7 +110,7 @@ class OptionsController {
       } else if (target.id === 'ai-spacing-checkbox') {
         const aiSpacingCheckbox = target as HTMLInputElement;
         try {
-          await updateSettings({ is_enable_ai_spacing: aiSpacingCheckbox.checked });
+          await updateSettings({ is_ai_spacing_enabled: aiSpacingCheckbox.checked });
         } catch (error) {
           console.error('Failed to save settings:', error);
           await this.renderAiSpacingCheckbox();
@@ -239,7 +239,7 @@ class OptionsController {
   private async renderMuteCheckbox() {
     const current = await getSettings();
     const checkbox = document.getElementById('mute-checkbox') as HTMLInputElement;
-    checkbox.checked = current.is_mute_sound_effects;
+    checkbox.checked = current.is_sound_effects_muted;
   }
 
   private async renderTextAutospaceCheckbox() {
@@ -248,7 +248,7 @@ class OptionsController {
     const isSupported = CSS.supports('text-autospace', 'normal');
 
     // Display-only off when unsupported: never write back, the synced setting still applies on other devices
-    checkbox.checked = isSupported && current.is_enable_text_autospace;
+    checkbox.checked = isSupported && current.is_text_autospace_enabled;
     checkbox.disabled = !isSupported;
     checkbox.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
     const notSupportedMessage = document.getElementById('text-autospace-not-supported-msg') as HTMLElement;
@@ -261,7 +261,7 @@ class OptionsController {
     const isSupported = await isModelSupported();
 
     // Display-only off when the model can never run here: never write back, the synced setting still applies on other devices
-    checkbox.checked = isSupported && current.is_enable_ai_spacing;
+    checkbox.checked = isSupported && current.is_ai_spacing_enabled;
     checkbox.disabled = !isSupported;
     checkbox.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
   }

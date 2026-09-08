@@ -13,7 +13,7 @@ let currentAudio: HTMLAudioElement | null = null;
 
 export async function playSound(soundName: SoundName) {
   const settings = await getSettings();
-  if (!settings.is_mute_sound_effects) {
+  if (!settings.is_sound_effects_muted) {
     stopSound();
 
     const audio = new Audio(chrome.runtime.getURL(SOUND_FILES[soundName]));
