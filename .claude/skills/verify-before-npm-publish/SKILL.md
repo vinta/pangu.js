@@ -69,3 +69,7 @@ To read the shipped artifact directly, unpack the tarball: `tar -xzf "$TGZ" -C "
 ## What the run exercises
 
 `npm test` in `examples/` chains the runtime entrypoints (`test:commonjs`, `test:esm`, `test:cli`) and the type check (`typecheck`, whose `tsconfig.json` checks `test-types.ts` under the `require` condition and `test-types.mts` under the `import` condition, covering both branches of the dual-package `exports` map). Every one runs against the installed tarball, not the published pin.
+
+## What the run does not exercise
+
+`examples/test-browser.html` (the UMD `<script>` tag and the browser ESM `import`) is not in `examples/` `npm test`; it needs `npm run server` and a real browser. Check it by hand, or with a throwaway Playwright script that loads `http://localhost:8080/`, clicks each button, and waits for the spaced text: `spacingNode()` and `autoSpacingPage()` schedule their work, so reading the DOM right after the click still shows the unspaced text.
