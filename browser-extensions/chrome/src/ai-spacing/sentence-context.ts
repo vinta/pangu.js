@@ -28,8 +28,7 @@ function keepsNewlines(textNode: Text) {
 }
 
 export function readSentence(node: Text, unspaced: string, at: number, unspacedByNode: ReadonlyMap<Text, string>) {
-  // A hidden or ignored element stays out of the sentence without ending it, the way core's scanBetweenTextNodes() treats an ignored island as invisible. Checked before display: display:none and
-  // absolutely positioned screen-reader text are blockified
+  // A hidden or ignored sibling is stepped past without ending the sentence, the way core's scanBetweenTextNodes() treats an ignored island as invisible; a hidden or ignored ancestor of the candidate ends its side. Checked before display, since display:none and absolutely positioned screen-reader text are blockified
   function isSkipped(element: Element) {
     return pangu.isIgnoredElement(element) || pangu.visibilityDetector.shouldSkipSpacingAfterNode(element);
   }
@@ -67,8 +66,7 @@ export function readSentence(node: Text, unspaced: string, at: number, unspacedB
       }
       current = current[sibling]!;
 
-      // Check an element before descending in either direction, so a previous block's last text never leaks into this sentence. A skipped element is left as is, so the loop steps past it to the next
-      // sibling
+      // Check an element before descending in either direction, so a previous block's last text never leaks into this sentence. A skipped element is left as is, so the loop steps past it to the next sibling
       while (current instanceof Element) {
         if (isSkipped(current)) {
           break;
