@@ -29,7 +29,10 @@ function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readon
   return settledCandidates;
 }
 
-type ShapeCandidates = { ambiguousShape: AmbiguousShape; settledCandidates: SettledCandidate[] };
+interface ShapeCandidates {
+  ambiguousShape: AmbiguousShape;
+  settledCandidates: SettledCandidate[];
+}
 
 function collectLateFixes(labeledShapeCandidates: readonly (ShapeCandidates & { candidateLabels: readonly (CandidateLabel | null)[] })[]) {
   // Core applies one fix per text node per call, so every edit for one node composes into a single late fix

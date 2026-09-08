@@ -41,7 +41,7 @@ function once<T extends (...args: any[]) => unknown>(func: T) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mustRunDelay: number = Infinity) {
+function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mustRunDelay = Infinity) {
   let timer: number | null = null;
   let startTime: number | null = null;
 
@@ -176,16 +176,10 @@ export class BrowserPangu extends Pangu {
     // Text nodes waiting for the batch to settle: unspaced text captured now, settled text read at the batch tail
     const unsettledTextNodes: UnsettledTextNode[] = [];
 
-    let currentTextNode: Node | undefined;
     let nextTextNode: Node | null = null;
 
     // Process nodes in the order provided
-    for (let i = 0; i < textNodes.length; i++) {
-      currentTextNode = textNodes[i];
-      if (!currentTextNode) {
-        continue;
-      }
-
+    for (const currentTextNode of textNodes) {
       if (currentTextNode instanceof Text) {
         this.applyTextNodeSpacing(currentTextNode, unsettledTextNodes);
       }
@@ -353,7 +347,7 @@ export class BrowserPangu extends Pangu {
 
   private findPreviousElementLastChar(textNode: Node) {
     const previousNode = textNode.previousSibling;
-    if (previousNode && previousNode.nodeType === Node.ELEMENT_NODE && previousNode.textContent) {
+    if (previousNode?.nodeType === Node.ELEMENT_NODE && previousNode.textContent) {
       return previousNode.textContent.slice(-1);
     }
     return null;

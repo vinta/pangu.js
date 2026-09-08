@@ -192,7 +192,7 @@ class PopupController {
       const message: ManualSpacingMessage = { action: 'MANUAL_SPACING' };
       const response = await chrome.tabs.sendMessage<ManualSpacingMessage, ContentScriptResponse>(this.currentTabId, message);
 
-      if (response && response.success) {
+      if (response?.success) {
         await this.showSuccessMessage(() => {
           button.disabled = false;
         });

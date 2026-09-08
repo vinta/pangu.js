@@ -10,7 +10,7 @@ function listPatch(key: 'blacklist' | 'whitelist', urls: string[]) {
 }
 
 class OptionsController {
-  private editingUrls: Map<number, string> = new Map();
+  private editingUrls = new Map<number, string>();
   private statusPollTimer: number | undefined;
   private isAddingUrl = false;
 
