@@ -25,9 +25,15 @@ export async function isModelSupported() {
   return availability !== 'unsupported' && availability !== 'unavailable';
 }
 
-export async function downloadModel() {
-  // The download is browser-wide and outlives this page, so the session only exists to start it
-  const session = await LanguageModel.create({ expectedOutputs: PAGE_MODEL_LANGUAGES });
+// Resolves when the model is ready; onProgress gets a fraction 0..1
+export async function downloadModel(onProgress: (loaded: number) => void) {
+  // The download is browser-wide and outlives this page, so the session only exists to start it, or to follow one Chrome already started
+  const session = await LanguageModel.create({
+    expectedOutputs: PAGE_MODEL_LANGUAGES,
+    monitor(monitor) {
+      monitor.addEventListener('downloadprogress', (event) => onProgress(event.loaded));
+    },
+  });
   session.destroy();
 }
 

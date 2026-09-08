@@ -218,8 +218,13 @@
     "description": ""
   },
   "ai_model_downloading": {
-    "message": "模型下載中",
-    "description": ""
+    "message": "模型下載中 ($PERCENT$%)",
+    "description": "",
+    "placeholders": {
+      "percent": {
+        "content": "$1"
+      }
+    }
   },
   "ai_model_available": {
     "message": "模型運作中",

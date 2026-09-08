@@ -11,6 +11,7 @@ function listPatch(key: 'blacklist' | 'whitelist', urls: string[]) {
 
 class OptionsController {
   private editingUrls: Map<number, string> = new Map();
+  private modelDownload: Promise<void> | undefined;
   private isAddingUrl = false;
 
   constructor() {
@@ -279,23 +280,41 @@ class OptionsController {
     const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
 
     const availability = await getModelAvailability();
-    statusText.textContent = chrome.i18n.getMessage(`ai_model_${availability}`);
     // Only an absent model can be fetched, and a multi-gigabyte download is the user's call
     downloadButton.style.display = availability === 'downloadable' ? 'block' : 'none';
+    if (availability === 'downloading') {
+      // Chrome started this download itself, so we only follow it for the progress, then show what it left behind
+      await this.trackModelDownload().catch(console.error);
+      await this.renderAiModelStatus();
+      return;
+    }
+    statusText.textContent = chrome.i18n.getMessage(`ai_model_${availability}`);
   }
 
   private async handleModelDownload() {
-    const statusText = document.getElementById('ai-model-status') as HTMLElement;
     const downloadButton = document.getElementById('ai-model-download-btn') as HTMLButtonElement;
     downloadButton.disabled = true;
-    // downloadModel() resolves only after the whole download, so the status line switches now rather than at the re-render below
-    statusText.textContent = chrome.i18n.getMessage('ai_model_downloading');
     try {
-      await downloadModel();
+      await this.trackModelDownload();
     } finally {
       downloadButton.disabled = false;
       await this.renderAiModelStatus();
     }
+  }
+
+  // One tracker per download: every render during it (each storage echo re-renders) would otherwise attach another monitor to the same download
+  private trackModelDownload() {
+    if (this.modelDownload === undefined) {
+      const statusText = document.getElementById('ai-model-status') as HTMLElement;
+      const renderProgress = (loaded: number) => {
+        statusText.textContent = chrome.i18n.getMessage('ai_model_downloading', [String(Math.floor(loaded * 100))]);
+      };
+      renderProgress(0);
+      this.modelDownload = downloadModel(renderProgress).finally(() => {
+        this.modelDownload = undefined;
+      });
+    }
+    return this.modelDownload;
   }
 
   private async toggleSpacingMode() {
