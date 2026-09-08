@@ -1,8 +1,6 @@
 #!/bin/bash
 echo "Building Chrome Extension..."
-
-echo "Building library and extension..."
-npm run build
+npm run build:extension
 
 echo "Creating extension package..."
 cd browser-extensions/chrome/
