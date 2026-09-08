@@ -98,9 +98,9 @@ export class BrowserPangu extends Pangu {
     }
 
     this.isAutoSpacingPageExecuted = true;
-    this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
+    const observer = this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
 
-    const observer = this.autoSpacingPageObserver;
+    // Skipped once stopAutoSpacingPage() dropped this observer before the delay elapsed
     this.waitForVideosToLoad(
       pageDelayMs,
       once(() => {
@@ -478,6 +478,7 @@ export class BrowserPangu extends Pangu {
 
     const queue: Node[] = [];
 
+    // Debounce timers outlive disconnect(): both callbacks bail once stopAutoSpacingPage() dropped this observer
     const debouncedSpacingTitle = debounce(
       () => {
         if (this.autoSpacingPageObserver !== observer) {
@@ -617,17 +618,19 @@ export class BrowserPangu extends Pangu {
     this.autoSpacingPageObserver = observer;
 
     // A single MutationObserver can observe multiple targets simultaneously
-    this.autoSpacingPageObserver.observe(document.head, {
+    observer.observe(document.head, {
       characterData: true,
       childList: true,
       subtree: true,
     });
 
-    this.autoSpacingPageObserver.observe(document.body, {
+    observer.observe(document.body, {
       characterData: true,
       childList: true,
       subtree: true,
     });
+
+    return observer;
   }
 }
 
