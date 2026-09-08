@@ -1,8 +1,8 @@
 import { Pangu } from '../shared/index.js';
 import { decideBoundarySpacing, decideTextNodeSpacing, respaceCurrentTail } from './boundary-spacing.js';
-import { DomWalker } from './dom-walker.js';
-import { TaskScheduler } from './task-scheduler.js';
-import { VisibilityDetector } from './visibility-detector.js';
+import { DomWalker } from './dom/dom-walker.js';
+import { VisibilityDetector } from './dom/visibility-detector.js';
+import { TaskScheduler } from './scheduling/task-scheduler.js';
 
 export interface AutoSpacingPageConfig {
   pageDelayMs?: number;
