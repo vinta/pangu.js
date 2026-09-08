@@ -44,17 +44,14 @@ _Avoid_: revert, external rewrite, overwrite
 
 ## Chrome Extension
 
-**Automatic spacing mode**:
-The mode that starts spacing on page load when URL filters allow it. URL changes reapply these filters, even without a page reload.
+**Auto spacing mode**:
+The mode that starts ongoing spacing on page load when URL filters allow it, including AI spacing when enabled. A URL change reapplies the filters: an excluded URL stops spacing, and text already spaced stays. On an excluded URL, the manual spacing button still starts ongoing spacing until the URL changes.
 
 **Manual spacing mode**:
-The mode that waits for the user to click the manual spacing button, regardless of the saved URL filters. A URL change or page reload ends manual activation until the user click again.
-
-**Manual spacing button**:
-Starts ongoing spacing for the current URL in either mode, ignoring URL filters and including AI spacing when enabled. The manual override ends when the URL changes or the page reloads.
+The mode that spaces nothing until the user clicks the manual spacing button. The click starts ongoing spacing for the current URL, ignoring URL filters and including AI spacing when enabled. A URL change or page reload ends it until the user clicks again.
 
 **URL filters**:
-The blacklist and whitelist that decide where automatic spacing is allowed. They are hidden in manual spacing mode, but stay saved when you switch modes.
+The blacklist and whitelist that decide where auto spacing is allowed. They are hidden in manual spacing mode, but stay saved when you switch modes.
 
 ## Paranoid Text Spacing Algorithm
 
