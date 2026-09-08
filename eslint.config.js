@@ -32,7 +32,7 @@ const parserOptions = {
 
 export default defineConfig(
   {
-    ignores: ['dist/', 'browser-extensions/chrome/dist/', '.worktrees/'],
+    ignores: ['dist/', 'browser-extensions/chrome/dist/'],
   },
   {
     files: ['src/**/*.ts', 'browser-extensions/chrome/src/**/*.ts', 'tests/**/*.ts', 'vite.config.ts', 'playwright.config.ts'],
