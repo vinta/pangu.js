@@ -35,6 +35,9 @@ TARBALL_DIR="$(mktemp -d)"
 npm pack --pack-destination "$TARBALL_DIR"
 TGZ="$(ls "$TARBALL_DIR"/pangu-*.tgz)"
 
+# Every file under dist/ lives in an entry folder. A file directly in dist/ is a code-split chunk that a build config change let back in
+if tar -tzf "$TGZ" | grep -E '^package/dist/[^/]+$'; then echo "VERIFY FAILED (stray file in dist/)"; exit 1; fi
+
 # From here the examples pin is modified, so guarantee its restoration on any exit
 cp examples/package.json "$TARBALL_DIR/package.json.orig"
 trap 'cp "$TARBALL_DIR/package.json.orig" examples/package.json; rm -rf "$TARBALL_DIR" examples/node_modules examples/package-lock.json' EXIT
@@ -58,11 +61,12 @@ Either way, confirm the pin came back before moving on: `git diff --quiet exampl
 
 ## What each failure means
 
-| Symptom                          | Cause                                                                                   |
-| -------------------------------- | --------------------------------------------------------------------------------------- |
-| `TS2834` in a `dist/**/*.d.ts`   | a relative import in `src/` is missing its `.js` extension                              |
-| `TS2339` on an inherited method  | a base-class `.d.ts` import failed to resolve, collapsing the subclass to an error type |
-| `Cannot find module` at run time | `package.json` `files` doesn't ship the referenced file, or an `exports` path is wrong  |
+| Symptom                          | Cause                                                                                    |
+| -------------------------------- | ---------------------------------------------------------------------------------------- |
+| `TS2834` in a `dist/**/*.d.ts`   | a relative import in `src/` is missing its `.js` extension                               |
+| `TS2339` on an inherited method  | a base-class `.d.ts` import failed to resolve, collapsing the subclass to an error type  |
+| `Cannot find module` at run time | `package.json` `files` doesn't ship the referenced file, or an `exports` path is wrong   |
+| `stray file in dist/`            | a multi-entry `vite.config.ts` pass emitted a shared chunk; give each entry its own pass |
 
 To read the shipped artifact directly, unpack the tarball: `tar -xzf "$TGZ" -C "$TARBALL_DIR"` exposes `package/dist/**/*.d.ts` and `package/package.json`.
 
