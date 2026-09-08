@@ -26,7 +26,7 @@ async function init() {
     pangu.autoSpacingPage();
   };
 
-  // Registration only handles page loads. A URL change ends the manual override and restores the configured mode (see docs/adr/0020).
+  // Content script registration only applies at page load, so the navigation listener must check the URL policy when the URL changes as well
   const applyAutoSpacingUrlPolicy = () => {
     if (shouldAutoSpacing(settings, location.href)) {
       startAutoSpacing();
