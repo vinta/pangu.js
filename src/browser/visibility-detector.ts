@@ -11,17 +11,14 @@ export class VisibilityDetector {
   public isElementVisuallyHidden(element: Element) {
     const style = getComputedStyle(element);
 
-    // Check display: none
     if (style.display === 'none') {
       return true;
     }
 
-    // Check visibility: hidden
     if (style.visibility === 'hidden') {
       return true;
     }
 
-    // Check opacity: 0
     if (parseFloat(style.opacity) === 0) {
       return true;
     }

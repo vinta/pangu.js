@@ -1,5 +1,4 @@
 export function translatePage() {
-  // Translate all elements with data-i18n attribute
   for (const element of document.querySelectorAll('[data-i18n]')) {
     const messageKey = element.getAttribute('data-i18n');
     if (messageKey) {

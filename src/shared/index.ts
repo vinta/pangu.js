@@ -207,7 +207,6 @@ export const VOID_HTML_TAGS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr
 export const BARE_HTML_TAG = /^<([a-zA-Z][a-zA-Z0-9]*)\s*\/?>$/;
 export const CLOSING_HTML_TAG = /<\/([a-zA-Z][a-zA-Z0-9]*)/g;
 
-// Spacing at direct CJK contact with a tag mention placeholder (\uE004...\uE005)
 export const CJK_HTML_TAG_MENTION = new RegExp(`([${CJK}])(?=\uE004)`, 'g');
 export const HTML_TAG_MENTION_CJK = new RegExp(`(?<=\uE005)([${CJK}])`, 'g');
 
@@ -221,7 +220,6 @@ export const BRACKET_PATTERNS = [
 
 // We use characters from Unicode's Private Use Area (U+E000-U+F8FF) as delimiters to make placeholders unlikely to collide with ordinary text
 export class PlaceholderReplacer {
-  // Every spacingText() call creates instances from the same few fixed configs, so compiled patterns are cached and shared across instances
   private static patternCache = new Map<string, RegExp>();
 
   private items: string[] = [];
@@ -467,7 +465,6 @@ export class Pangu {
     newText = this.fixBracketSpacing(newText);
 
     if (hasHtmlTags) {
-      // A tag mention reads as one unit: space it from CJK it directly touches
       newText = newText.replace(CJK_HTML_TAG_MENTION, '$1 ');
       newText = newText.replace(HTML_TAG_MENTION_CJK, ' $1');
       newText = mentionedTagManager.restore(newText);
