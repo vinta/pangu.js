@@ -31,9 +31,13 @@ function keepsNewlines(textNode: Text) {
 }
 
 export function readSentence(node: Text, unspaced: string, at: number, unspacedByNode: ReadonlyMap<Text, string>) {
-  // A hidden, ignored, superscript, or subscript sibling is stepped past without ending the sentence, the way core's scanBetweenTextNodes() treats an ignored island as invisible; such an ancestor of the candidate ends its side. Checked before display, since display:none and absolutely positioned screen-reader text are blockified
+  // A hidden, ignored, superscript, or subscript sibling is stepped past without ending the sentence, the way core's scanBetweenTextNodes() treats an ignored island as invisible; such an ancestor of the candidate ends its side
+  function isHidden(element: Element) {
+    return pangu.visibilityDetector.shouldSkipSpacingAfterNode(element);
+  }
+
   function isSkipped(element: Element) {
-    return SUPERSCRIPT_OR_SUBSCRIPT.test(element.nodeName) || pangu.isIgnoredElement(element) || pangu.visibilityDetector.shouldSkipSpacingAfterNode(element);
+    return SUPERSCRIPT_OR_SUBSCRIPT.test(element.nodeName) || pangu.isIgnoredElement(element);
   }
 
   // Where the line of text ends: a line break or an element that is not inline-level
@@ -62,20 +66,23 @@ export function readSentence(node: Text, unspaced: string, at: number, unspacedB
     while (text.length < MAX_SENTENCE_SIDE && !SENTENCE_TERMINATOR.test(text)) {
       while (!current[sibling]) {
         const parent = current.parentElement;
-        if (!parent || isSkipped(parent) || isBlockEdge(parent)) {
+        if (!parent || isHidden(parent) || isSkipped(parent) || isBlockEdge(parent)) {
           return text;
         }
         current = parent;
       }
       current = current[sibling]!;
 
-      // Check an element before descending in either direction, so a previous block's last text never leaks into this sentence. A skipped element is left as is, so the loop steps past it to the next sibling
+      // Check an element before descending in either direction, so a previous block's last text never leaks into this sentence. A hidden or skipped element is left as is, so the loop steps past it to the next sibling. Hidden comes before display, since display:none and absolutely positioned screen-reader text are blockified; a visible ignored block such as <pre> stays a block edge
       while (current instanceof Element) {
-        if (isSkipped(current)) {
+        if (isHidden(current)) {
           break;
         }
         if (isBlockEdge(current)) {
           return text;
+        }
+        if (isSkipped(current)) {
+          break;
         }
         if (!current[child]) {
           break;

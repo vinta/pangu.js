@@ -97,8 +97,8 @@ test.describe('AI spacing DOM context', () => {
     expect(await classify(page, '<div style="white-space: pre-wrap">前一行\n<a id="candidate">運-12</a>\n後一行</div>', true)).toEqual([{ sentence: '運-12', at: 1 }]);
   });
 
-  test('stop at a block edge or line break in both directions', async ({ page }) => {
-    for (const edge of ['<p><b>區塊文字</b></p>', '<br>']) {
+  test('stop at a block edge, ignored or not, or a line break in both directions', async ({ page }) => {
+    for (const edge of ['<p><b>區塊文字</b></p>', '<br>', '<pre>程式碼</pre>', '<div class="no-pangu-spacing">略過</div>']) {
       expect(await classify(page, `<section>外側${edge}<span>前<a id="candidate">運-12</a>後</span>${edge}外側</section>`, true), edge).toEqual([{ sentence: '前運-12後', at: 2 }]);
     }
     expect(await classify(page, '<section>外側<p><b>前<a id="candidate">運-12</a>後</b></p>外側</section>', true)).toEqual([{ sentence: '前運-12後', at: 2 }]);
