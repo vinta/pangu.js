@@ -25,7 +25,6 @@ const styleRules = {
   ],
 };
 
-// One project service serves every block, and typescript-eslint reads its options from the first block that runs, so the blocks must share them. eslint.config.js is outside tsconfig.json, so the service types it in a default project instead
 const parserOptions = {
   projectService: { allowDefaultProject: ['eslint.config.js'] },
   tsconfigRootDir: import.meta.dirname,
@@ -33,11 +32,9 @@ const parserOptions = {
 
 export default defineConfig(
   {
-    // Global ignores
     ignores: ['dist/', 'browser-extensions/chrome/dist/', '.worktrees/'],
   },
   {
-    // TypeScript files and the root configs, so type-aware rules such as no-deprecated cover them too
     files: ['src/**/*.ts', 'browser-extensions/chrome/src/**/*.ts', 'tests/**/*.ts', 'vite.config.ts', 'playwright.config.ts'],
     extends: [...tseslint.configs.recommendedTypeChecked],
     languageOptions: {
@@ -87,7 +84,6 @@ export default defineConfig(
     },
   },
   {
-    // JavaScript files
     files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
     rules: {
       ...styleRules,
