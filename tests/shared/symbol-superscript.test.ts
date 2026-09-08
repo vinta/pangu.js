@@ -13,4 +13,11 @@ describe('Superscripts', () => {
     expect(pangu.spacingText('甲ⁱ乙、甲ⁿ乙、甲⁺乙、甲⁻乙、甲⁼乙')).toBe('甲ⁱ 乙、甲ⁿ 乙、甲⁺ 乙、甲⁻ 乙、甲⁼ 乙');
     expect(pangu.spacingText('甲⁽註⁾乙')).toBe('甲⁽註⁾ 乙');
   });
+
+  // \u2122 and \u2120 read as superscript suffixes, so they stay attached on the left
+  it('handle ™ and ℠ symbols', () => {
+    expect(pangu.spacingText('iPhone™手機')).toBe('iPhone™ 手機');
+    expect(pangu.spacingText('微軟™公司')).toBe('微軟™ 公司');
+    expect(pangu.spacingText('Coca-Cola℠飲料')).toBe('Coca-Cola℠ 飲料');
+  });
 });
