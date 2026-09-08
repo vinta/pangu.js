@@ -84,6 +84,3 @@ chrome.runtime.onMessage.addListener((message: MessageToContentScript, _sender: 
 
   return false;
 });
-
-// Make this file a module to enable global type declarations
-export {};
