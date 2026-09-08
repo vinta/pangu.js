@@ -4,7 +4,7 @@ The DOM content script used to carry the blacklist as `excludeMatches` (or the w
 
 The decisions:
 
-1. **In automatic mode, the DOM script registers on every http(s) page and applies the filters itself.** `shouldAutoSpace()` runs at load and when `currententrychange` reports a different URL. Same-URL history updates preserve manual activation. On an excluded page the script is present but idle until the user clicks the manual button.
+1. **In automatic mode, the DOM script registers on every http(s) page and applies the filters itself.** `shouldAutoSpacing()` runs at load and when `currententrychange` reports a different URL. Same-URL history updates preserve manual activation. On an excluded page the script is present but idle until the user clicks the manual button.
 2. **The Navigation API is the change signal.** It fires in the isolated world for push, replace, and traverse, with `location.href` already updated, and needs no permission. `webNavigation` would add a "Read your browsing history" warning, which disables a published extension until each user re-approves. Patching `history.pushState` needs a MAIN-world script plus a bridge, because an isolated-world patch never sees the page's calls. `popstate` and `hashchange` do not fire on `pushState`. The Chrome floor moves from 99 to 102 for it.
 3. **One matcher.** The popup status row, the icon, and the content script all decide through `URLPattern` now. Registration no longer carries user patterns, so the concern in [ADR 0008](0008-text-autospace-default-on-ignores-filters.md) about a rejected pattern taking down a batched registration no longer applies.
 
