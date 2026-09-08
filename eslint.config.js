@@ -46,29 +46,8 @@ export default defineConfig(
     },
     rules: {
       ...styleRules,
-      '@typescript-eslint/no-deprecated': 'error',
-      // Async listeners are fine for chrome and DOM events (the return value is ignored); the check only forces wrapper boilerplate
-      '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { arguments: false } }],
-      // Mostly flags test stubs (async () => ({...})) that need the async signature but nothing to await
-      '@typescript-eslint/require-await': 'off',
-      '@typescript-eslint/no-explicit-any': 'warn',
-      // From strictTypeChecked: a check the types already decide is either dead or hides a lying cast
-      '@typescript-eslint/no-unnecessary-condition': 'error',
-      // Hand-picked from stylisticTypeChecked: each one shortens code, the rest of that preset is churn
       '@typescript-eslint/consistent-generic-constructors': 'error',
       '@typescript-eslint/consistent-type-definitions': 'error',
-      '@typescript-eslint/no-inferrable-types': 'error',
-      '@typescript-eslint/prefer-for-of': 'error',
-      '@typescript-eslint/prefer-optional-chain': 'error',
-      '@typescript-eslint/no-non-null-assertion': 'off',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-        },
-      ],
       '@typescript-eslint/consistent-type-imports': [
         'error',
         {
@@ -76,6 +55,23 @@ export default defineConfig(
           fixStyle: 'separate-type-imports',
         },
       ],
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/no-deprecated': 'error',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-inferrable-types': 'error',
+      '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { arguments: false } }],
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
+      '@typescript-eslint/prefer-for-of': 'error',
+      '@typescript-eslint/prefer-optional-chain': 'error',
+      '@typescript-eslint/require-await': 'off',
     },
   },
   {
