@@ -798,7 +798,8 @@ test.describe('BrowserPangu', () => {
           '<div id="nested"><span>中文<span><sup><b>1</b></sup></span>中文</span></div>' +
           '<div id="normal"><span>中文<span>1</span>中文</span></div>' +
           '<div id="block"><div>中文<sup>1</sup></div><span>中文</span></div>' +
-          '<div id="internal"><sup>中文<a>1</a></sup></div>',
+          '<div id="internal"><sup>中文<a>1</a></sup></div>' +
+          '<p id="centeredDiv"><span style="color: #000000;"><strong>優惠方案：</strong>影劇館<sup>+</sup>收視費用為月繳費用，不含HiNet光世代及MOD平臺服務等費用</span></p>',
       );
 
       await page.evaluate(() => pangu.spacingPage());
@@ -809,6 +810,9 @@ test.describe('BrowserPangu', () => {
       expect(await page.locator('#normal').textContent()).toBe('中文 1 中文');
       expect(await page.locator('#block').innerHTML()).toBe('<div>中文<sup>1</sup></div><span>中文</span>');
       expect(await page.locator('#internal').innerHTML()).toBe('<sup>中文 <a>1</a></sup>');
+      expect(await page.evaluate(() => document.getElementById('centeredDiv')!.outerHTML)).toBe(
+        '<p id="centeredDiv"><span style="color: #000000;"><strong>優惠方案：</strong>影劇館<sup>+</sup> 收視費用為月繳費用，不含 HiNet 光世代及 MOD 平臺服務等費用</span></p>',
+      );
     });
 
     test('should keep superscript attached across links and put following spaces outside it', async ({ page }) => {
