@@ -8,6 +8,7 @@ export class DomWalker {
   public static collectTextNodes(contextNode: Node, reverse = false) {
     const nodes: Text[] = [];
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- JS callers can pass a missing element
     if (!contextNode || contextNode instanceof DocumentFragment) {
       return nodes;
     }
@@ -20,12 +21,12 @@ export class DomWalker {
 
         // Skip nodes that should be ignored
         // We need to check the node itself and its ancestors
-        let currentNode = node;
+        let currentNode: Node | null = node;
         while (currentNode) {
           if (currentNode instanceof Element && this.isIgnoredElement(currentNode)) {
             return NodeFilter.FILTER_REJECT;
           }
-          currentNode = currentNode.parentNode as Node;
+          currentNode = currentNode.parentNode;
         }
 
         return NodeFilter.FILTER_ACCEPT;

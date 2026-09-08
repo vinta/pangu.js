@@ -69,7 +69,7 @@ export function warmUpAiSpacing() {
     return;
   }
   warmedUp = true;
-  const pageText = document.documentElement.textContent ?? '';
+  const pageText = document.documentElement.textContent;
   // The loop is not redundant: we create base sessions per ambiguous shape
   for (const ambiguousShape of AMBIGUOUS_SHAPES) {
     // A shape needs the model doesn't always mean we need to warm up the model on every webpage

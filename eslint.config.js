@@ -52,6 +52,8 @@ export default defineConfig(
       // Mostly flags test stubs (async () => ({...})) that need the async signature but nothing to await
       '@typescript-eslint/require-await': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
+      // From strictTypeChecked: a check the types already decide is either dead or hides a lying cast
+      '@typescript-eslint/no-unnecessary-condition': 'error',
       // Hand-picked from stylisticTypeChecked: each one shortens code, the rest of that preset is churn
       '@typescript-eslint/consistent-generic-constructors': 'error',
       '@typescript-eslint/consistent-type-definitions': 'error',

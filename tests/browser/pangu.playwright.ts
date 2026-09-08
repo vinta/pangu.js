@@ -686,7 +686,7 @@ test.describe('BrowserPangu', () => {
 
         // Verify overall spacing is maintained
         const fullText = await page.evaluate(() => {
-          return document.body.textContent?.replace(/\s+/g, ' ').trim();
+          return document.body.textContent.replace(/\s+/g, ' ').trim();
         });
         expect(fullText).toBe('測試 文字');
       }
@@ -702,7 +702,7 @@ test.describe('BrowserPangu', () => {
 
       // Currently this doesn't work as expected - no space is added
       const noSpaceResult = await page.evaluate(() => {
-        return document.body.textContent?.trim();
+        return document.body.textContent.trim();
       });
 
       // This is a known limitation - when spans are directly adjacent with no whitespace
@@ -718,7 +718,7 @@ test.describe('BrowserPangu', () => {
       });
 
       const withSpaceResult = await page.evaluate(() => {
-        return document.body.textContent?.trim();
+        return document.body.textContent.trim();
       });
 
       // This case works because the first text node is not wrapped in a span

@@ -354,7 +354,7 @@ class OptionsController {
     this.editingUrls.set(index, settings[settings.filter_mode][index]!);
     await this.renderUrlList();
 
-    const input = document.querySelector(`input[data-index="${index}"]`) as HTMLInputElement;
+    const input = document.querySelector<HTMLInputElement>(`input[data-index="${index}"]`);
     if (input) {
       input.focus();
       input.select();
@@ -362,7 +362,7 @@ class OptionsController {
   }
 
   private async saveEditingUrl(index: number) {
-    const input = document.querySelector(`input[data-index="${index}"]`) as HTMLInputElement;
+    const input = document.querySelector<HTMLInputElement>(`input[data-index="${index}"]`);
     if (!input) {
       return;
     }

@@ -117,10 +117,6 @@ onSettingsChanged((changedKeys) => {
 // AI spacing's only entry point, registered at module scope for the same reason as onSettingsChanged above. It reads no settings: the content script is the gate
 // Chrome closes the message channel when a listener returns a promise, so this stays a plain function that returns true and lets handleClassification() call sendResponse. It never rejects
 chrome.runtime.onMessage.addListener((message: MessageToServiceWorker, _sender: chrome.runtime.MessageSender, sendResponse: (response: ClassifyCandidatesResponse) => void) => {
-  if (message.type === 'CLASSIFY_CANDIDATES') {
-    void handleClassification(message.kind, message.candidates).then(sendResponse);
-    return true;
-  }
-
-  return false;
+  void handleClassification(message.kind, message.candidates).then(sendResponse);
+  return true;
 });
