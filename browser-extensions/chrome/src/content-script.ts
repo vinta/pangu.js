@@ -1,9 +1,25 @@
 import { applyAiSpacing, warmUpAiSpacing } from './ai-spacing/content-script';
 import type { ContentScriptResponse, MessageToContentScript } from './messages';
-import { getSettings } from './settings/storage';
+import { getSettings, type Settings } from './settings/storage';
 import { shouldAutoSpacing } from './settings/urls';
 
 const pangu = window.pangu;
+
+function startAutoSpacing(settings: Settings) {
+  if (settings.is_enable_ai_spacing) {
+    warmUpAiSpacing();
+  }
+  pangu.autoSpacingPage();
+}
+
+// Content script registration only applies at page load, so the navigation listener must check the URL policy when the URL changes as well
+function applyAutoSpacingUrlPolicy(settings: Settings) {
+  if (shouldAutoSpacing(settings, location.href)) {
+    startAutoSpacing(settings);
+  } else {
+    pangu.stopAutoSpacingPage();
+  }
+}
 
 // This content script is only injected and run once per webpage:
 // - when spacing_mode === 'spacing_when_load'
@@ -17,43 +33,38 @@ async function init() {
     };
   }
 
-  const startAutoSpacing = () => {
-    if (settings.is_enable_ai_spacing) {
-      warmUpAiSpacing();
-    }
-    pangu.autoSpacingPage();
-  };
-
-  // Content script registration only applies at page load, so the navigation listener must check the URL policy when the URL changes as well
-  const applyAutoSpacingUrlPolicy = () => {
-    if (shouldAutoSpacing(settings, location.href)) {
-      startAutoSpacing();
-    } else {
-      pangu.stopAutoSpacingPage();
-    }
-  };
   navigation.addEventListener('currententrychange', (event) => {
     // Same-URL history updates must not cancel manual activation.
     if (event.from.url !== location.href) {
-      applyAutoSpacingUrlPolicy();
+      applyAutoSpacingUrlPolicy(settings);
     }
   });
-  applyAutoSpacingUrlPolicy();
-  return startAutoSpacing;
+  return settings;
 }
 
 const initialization = init();
-void initialization.catch((error) => console.error('Failed to initialize auto spacing', error));
 
-// The manual spacing button runs auto spacing unconditionally, until the URL changes. Never rejects: the popup reports { success: false } as a failed click
+// spacing_when_load: registration injected this script, so apply the URL policy once at load
+async function startAutoSpacingByUrlPolicy() {
+  try {
+    const settings = await initialization;
+    applyAutoSpacingUrlPolicy(settings);
+  } catch (error) {
+    console.error('Failed to initialize auto spacing', error);
+  }
+}
+
+void startAutoSpacingByUrlPolicy();
+
+// spacing_when_click: the popup injected this script and sends MANUAL_SPACING. Runs auto spacing unconditionally, until the URL changes. Never rejects: the popup reports { success: false } as a failed click
 async function startManualSpacing() {
   const url = location.href;
   try {
-    const startAutoSpacing = await initialization;
+    const settings = await initialization;
     if (location.href !== url) {
       return { success: false };
     }
-    startAutoSpacing();
+    startAutoSpacing(settings);
     return { success: true };
   } catch (error) {
     console.error('Failed to start auto spacing on %s:', url, error);
