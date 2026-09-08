@@ -63,11 +63,15 @@ export function shouldShowActiveStatus(settings: Settings, url: string | undefin
 }
 
 export function shouldShowOffIcon(settings: Settings, url: string | undefined) {
+  // Manual mode turns spacing off on every tab, including pages without a url
+  if (settings.spacing_mode === 'spacing_when_click') {
+    return true;
+  }
+
   // Pages the extension merely cannot run on (chrome://, new tab pages, urls it cannot read) show the default icon.
   if (!url) {
     return false;
   }
 
-  // The off icon only shows when:
-  return settings.spacing_mode === 'spacing_when_load' || isUrlExcludedByFilter(settings, url);
+  return isUrlExcludedByFilter(settings, url);
 }
