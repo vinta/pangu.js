@@ -58,7 +58,7 @@ async function startManualSpacing() {
     startAutoSpacing();
     return { success: true };
   } catch (error) {
-    console.error(`Failed to start auto spacing on ${url}:`, error);
+    console.error('Failed to start auto spacing on %s:', url, error);
     return { success: false };
   }
 }
