@@ -21,7 +21,7 @@ export const hyphenSign: AmbiguousShape = {
     return text.search(CJK_HYPHEN_DIGIT) !== -1;
   },
 
-  find(unspaced: string, settled: string) {
+  find(unspaced: string, settled: string, sentenceAt = (at: number) => sliceSentence(unspaced, at)) {
     const candidateMatches: CandidateMatch[] = [];
     for (const hyphenMatch of unspaced.matchAll(CJK_HYPHEN_DIGIT)) {
       // Every code point in the CJK class is a single UTF-16 unit, so the hyphen is one past the match
@@ -29,7 +29,7 @@ export const hyphenSign: AmbiguousShape = {
       // A missing ordinal answers -1 and fails hasInsertedGap()
       const index = indexOfNthSymbol(settled, '-', unspaced.slice(0, unspacedIndex).split('-').length - 1);
       if (hasInsertedGap(settled, index)) {
-        candidateMatches.push({ ...sliceSentence(unspaced, unspacedIndex), index });
+        candidateMatches.push({ ...sentenceAt(unspacedIndex), index });
       }
     }
     return candidateMatches;

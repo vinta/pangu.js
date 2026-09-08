@@ -1,4 +1,6 @@
+import { VisibilityDetector } from '../../../../src/browser/visibility-detector';
 import type { CandidateLabel, ClassifyCandidatesMessage, ClassifyCandidatesResponse } from './messages';
+import { readSentence } from './sentence-context';
 import type { AmbiguousShape, SettledCandidate, TextEdit } from './shapes/base';
 import { applyTextEdits } from './shapes/base';
 import { hyphenSign } from './shapes/hyphen-shape';
@@ -22,10 +24,11 @@ async function requestClassification(kind: string, candidates: ClassifyCandidate
   }
 }
 
-function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readonly SettledTextNode[]) {
+function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readonly SettledTextNode[], unspacedByNode: ReadonlyMap<Text, string>, visibility: VisibilityDetector) {
   const settledCandidates: SettledCandidate[] = [];
   for (const settledTextNode of settledTextNodes) {
-    for (const candidateMatch of ambiguousShape.find(settledTextNode.unspaced, settledTextNode.settled)) {
+    const sentenceAt = (at: number) => readSentence(settledTextNode.node, settledTextNode.unspaced, at, unspacedByNode, visibility);
+    for (const candidateMatch of ambiguousShape.find(settledTextNode.unspaced, settledTextNode.settled, sentenceAt)) {
       settledCandidates.push({ ...candidateMatch, node: settledTextNode.node, settled: settledTextNode.settled });
     }
   }
@@ -99,8 +102,10 @@ async function classifyShapeCandidates({ ambiguousShape, settledCandidates }: Sh
 }
 
 export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[]) {
+  const unspacedByNode = new Map(settledTextNodes.map(({ node, unspaced }) => [node, unspaced]));
+  const visibility = new VisibilityDetector();
   const shapeCandidates: ShapeCandidates[] = AMBIGUOUS_SHAPES.filter((ambiguousShape) => !modelFailed || !ambiguousShape.needsModel)
-    .map((ambiguousShape) => ({ ambiguousShape, settledCandidates: findCandidates(ambiguousShape, settledTextNodes) }))
+    .map((ambiguousShape) => ({ ambiguousShape, settledCandidates: findCandidates(ambiguousShape, settledTextNodes, unspacedByNode, visibility) }))
     .filter(({ settledCandidates }) => settledCandidates.length > 0);
   if (shapeCandidates.length === 0) {
     return;
