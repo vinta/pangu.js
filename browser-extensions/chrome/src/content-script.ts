@@ -82,6 +82,3 @@ chrome.runtime.onMessage.addListener((message: MessageToContentScript, _sender: 
   sendResponse({ success: true });
   return false;
 });
-
-// Exposed as the IIFE global (PanguContentScript) so browser tests can drive the bundled instance
-export default pangu;
