@@ -1,11 +1,8 @@
-import { CJK, MAX_SENTENCE_SIDE, SENTENCE_TERMINATOR, sliceSentence } from './shapes/base';
+import { MAX_SENTENCE_SIDE, SENTENCE_TERMINATOR, sliceSentence } from './shapes/base';
 
 const pangu = window.pangu;
 
-// The wide class of the segment-break rule: CJK plus CJK punctuation and full-width forms
-const WIDE = new RegExp(`[${CJK}\\u3000-\\u303f\\uff00-\\uffef]`);
-
-// A newline with the collapsible white space around it: spaces, tabs, and other segment breaks. NBSP never collapses
+// A newline with the collapsible white space around it: spaces, tabs, and other segment breaks. NBSP never collapses. Chrome renders it as one space, even between two CJK characters where CSS Text would remove it
 const SEGMENT_BREAK = /[ \t\r\f]*\n[ \t\r\f\n]*/g;
 
 // white-space values under which the browser keeps a newline as a line break. The longhand exists from Chrome 114; older builds answer through the shorthand's legacy keywords
@@ -14,11 +11,6 @@ const LEGACY_PRESERVES_BREAKS = /^(pre|pre-wrap|pre-line|break-spaces)$/;
 
 // A superscript or subscript annotates its base and is never prose: a citation marker like [1] would glue to the digits the classifier reads
 const SUPERSCRIPT_OR_SUBSCRIPT = /^(sup|sub)$/i;
-
-// A soft line break renders as the browser does (CSS Text, segment break transformation): gone between two wide characters, one space elsewhere
-function collapseSegmentBreaks(text: string) {
-  return text.replace(SEGMENT_BREAK, '\n').replace(/\n/g, (_, offset: number, whole: string) => (WIDE.test(whole[offset - 1] ?? '') && WIDE.test(whole[offset + 1] ?? '') ? '' : ' '));
-}
 
 // The computed value is inherited, so the parent element answers for its text node
 function keepsNewlines(textNode: Text) {
@@ -108,7 +100,7 @@ export function readSentence(node: Text, unspaced: string, at: number, unspacedB
     return lineTowards(node, own, backwards) ?? readSide(own, backwards);
   }
 
-  const before = collapseSegmentBreaks(readFrom(unspaced.slice(Math.max(0, at - MAX_SENTENCE_SIDE), at), true)).trimStart();
-  const after = collapseSegmentBreaks(readFrom(unspaced.slice(at + 1, at + 1 + MAX_SENTENCE_SIDE), false)).trimEnd();
+  const before = readFrom(unspaced.slice(Math.max(0, at - MAX_SENTENCE_SIDE), at), true).replace(SEGMENT_BREAK, ' ').trimStart();
+  const after = readFrom(unspaced.slice(at + 1, at + 1 + MAX_SENTENCE_SIDE), false).replace(SEGMENT_BREAK, ' ').trimEnd();
   return sliceSentence(before + unspaced[at] + after, before.length);
 }
