@@ -83,7 +83,7 @@
     "@playwright/test": "1.61.1",
     "@types/chrome": "0.2.2",
     "@types/dom-chromium-ai": "0.0.17",
-    "@types/node": "26.1.1",
+    "@types/node": "20.19.43",
     "eslint": "10.7.0",
     "prettier": "3.9.6",
     "prettier-plugin-organize-imports": "4.3.0",
