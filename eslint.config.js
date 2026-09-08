@@ -33,8 +33,8 @@ export default defineConfig(
     ignores: ['dist/', 'browser-extensions/chrome/dist/', '.worktrees/'],
   },
   {
-    // TypeScript files, plus this config so type-aware rules such as no-deprecated cover it too
-    files: ['src/**/*.ts', 'browser-extensions/chrome/src/**/*.ts', 'tests/**/*.ts', 'eslint.config.js'],
+    // TypeScript files and the root configs, so type-aware rules such as no-deprecated cover them too
+    files: ['src/**/*.ts', 'browser-extensions/chrome/src/**/*.ts', 'tests/**/*.ts', 'eslint.config.js', 'vite.config.ts', 'playwright.config.ts'],
     extends: [...tseslint.configs.recommendedTypeChecked],
     languageOptions: {
       parser: tseslint.parser,
