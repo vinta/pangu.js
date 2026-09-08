@@ -47,6 +47,8 @@ export default defineConfig(
     rules: {
       ...styleRules,
       '@typescript-eslint/no-deprecated': 'error',
+      // Async listeners are fine for chrome and DOM events (the return value is ignored); the check only forces wrapper boilerplate
+      '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { arguments: false } }],
       // Mostly flags test stubs (async () => ({...})) that need the async signature but nothing to await
       '@typescript-eslint/require-await': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',

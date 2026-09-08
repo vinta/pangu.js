@@ -15,7 +15,7 @@ class OptionsController {
   private isAddingUrl = false;
 
   constructor() {
-    this.initialize().catch(console.error);
+    void this.initialize();
   }
 
   private async initialize() {
@@ -58,15 +58,15 @@ class OptionsController {
         this.toggleFilterMode().catch(console.error);
       } else if (target.classList.contains('url-display-input')) {
         const index = parseInt(target.dataset.index || '0');
-        this.startEditingUrl(index).catch(console.error);
+        void this.startEditingUrl(index);
       } else if (target.classList.contains('remove-url-btn')) {
         const index = parseInt(target.dataset.index || '0');
-        this.removeUrl(index).catch(console.error);
+        void this.removeUrl(index);
       } else if (target.classList.contains('save-edit-url-btn')) {
         const index = parseInt(target.dataset.index || '0');
-        this.saveEditingUrl(index).catch(console.error);
+        void this.saveEditingUrl(index);
       } else if (target.id === 'save-new-url-btn') {
-        this.saveNewUrl().catch(console.error);
+        void this.saveNewUrl();
       } else if (target.id === 'cancel-new-url-btn') {
         this.cancelNewUrl();
       } else if (target.classList.contains('cancel-edit-btn')) {
@@ -75,7 +75,7 @@ class OptionsController {
       } else if (target.id === 'add-url-btn') {
         this.showAddUrlInput();
       } else if (target.id === 'restore-defaults-btn') {
-        this.handleRestoreListDefaults().catch(console.error);
+        void this.handleRestoreListDefaults();
       } else if (target.id === 'ai-model-download-btn') {
         this.handleModelDownload().catch(console.error);
       }
@@ -84,43 +84,39 @@ class OptionsController {
     document.addEventListener('keypress', (e) => {
       const target = e.target as HTMLElement;
       if (target.id === 'new-url-input' && e.key === 'Enter') {
-        this.saveNewUrl().catch(console.error);
+        void this.saveNewUrl();
       }
     });
 
-    document.addEventListener('change', (e) => {
-      this.handleCheckboxChange(e).catch(console.error);
+    document.addEventListener('change', async (e) => {
+      const target = e.target as HTMLElement;
+      if (target.id === 'mute-checkbox') {
+        const muteCheckbox = target as HTMLInputElement;
+        try {
+          await updateSettings({ is_mute_sound_effects: muteCheckbox.checked });
+        } catch (error) {
+          // The checkbox already flipped visually: repaint it from confirmed settings
+          console.error('Failed to save settings:', error);
+          await this.renderMuteCheckbox();
+        }
+      } else if (target.id === 'text-autospace-checkbox') {
+        const textAutospaceCheckbox = target as HTMLInputElement;
+        try {
+          await updateSettings({ is_enable_text_autospace: textAutospaceCheckbox.checked });
+        } catch (error) {
+          console.error('Failed to save settings:', error);
+          await this.renderTextAutospaceCheckbox();
+        }
+      } else if (target.id === 'ai-spacing-checkbox') {
+        const aiSpacingCheckbox = target as HTMLInputElement;
+        try {
+          await updateSettings({ is_enable_ai_spacing: aiSpacingCheckbox.checked });
+        } catch (error) {
+          console.error('Failed to save settings:', error);
+          await this.renderAiSpacingCheckbox();
+        }
+      }
     });
-  }
-
-  private async handleCheckboxChange(e: Event) {
-    const target = e.target as HTMLElement;
-    if (target.id === 'mute-checkbox') {
-      const muteCheckbox = target as HTMLInputElement;
-      try {
-        await updateSettings({ is_mute_sound_effects: muteCheckbox.checked });
-      } catch (error) {
-        // The checkbox already flipped visually: repaint it from confirmed settings
-        console.error('Failed to save settings:', error);
-        await this.renderMuteCheckbox();
-      }
-    } else if (target.id === 'text-autospace-checkbox') {
-      const textAutospaceCheckbox = target as HTMLInputElement;
-      try {
-        await updateSettings({ is_enable_text_autospace: textAutospaceCheckbox.checked });
-      } catch (error) {
-        console.error('Failed to save settings:', error);
-        await this.renderTextAutospaceCheckbox();
-      }
-    } else if (target.id === 'ai-spacing-checkbox') {
-      const aiSpacingCheckbox = target as HTMLInputElement;
-      try {
-        await updateSettings({ is_enable_ai_spacing: aiSpacingCheckbox.checked });
-      } catch (error) {
-        console.error('Failed to save settings:', error);
-        await this.renderAiSpacingCheckbox();
-      }
-    }
   }
 
   private async render() {
@@ -282,9 +278,7 @@ class OptionsController {
     // A download Chrome started itself ends without any event for us (a create() joined to it reported no progress and then rejected), so we poll until the state moves
     clearTimeout(this.statusPollTimer);
     if (availability === 'downloading') {
-      this.statusPollTimer = window.setTimeout(() => {
-        this.renderAiModelStatus().catch(console.error);
-      }, 5000);
+      this.statusPollTimer = window.setTimeout(() => this.renderAiModelStatus().catch(console.error), 5000);
     }
   }
 
@@ -320,7 +314,7 @@ class OptionsController {
 
   private showAddUrlInput() {
     this.isAddingUrl = true;
-    this.renderUrlList().catch(console.error);
+    void this.renderUrlList();
   }
 
   private async saveNewUrl() {
@@ -352,7 +346,7 @@ class OptionsController {
 
   private cancelNewUrl() {
     this.isAddingUrl = false;
-    this.renderUrlList().catch(console.error);
+    void this.renderUrlList();
   }
 
   private async startEditingUrl(index: number) {
@@ -394,7 +388,7 @@ class OptionsController {
 
   private cancelEditingUrl(index: number) {
     this.editingUrls.delete(index);
-    this.renderUrlList().catch(console.error);
+    void this.renderUrlList();
   }
 
   private async removeUrl(index: number) {
