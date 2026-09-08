@@ -33,18 +33,20 @@ export default defineConfig(
     ignores: ['dist/', 'browser-extensions/chrome/dist/', '.worktrees/'],
   },
   {
-    // TypeScript files
-    files: ['src/**/*.ts', 'browser-extensions/chrome/src/**/*.ts', 'tests/**/*.ts'],
+    // TypeScript files, plus this config so type-aware rules such as no-deprecated cover it too
+    files: ['src/**/*.ts', 'browser-extensions/chrome/src/**/*.ts', 'tests/**/*.ts', 'eslint.config.js'],
     extends: [...tseslint.configs.recommended],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
-        project: './tsconfig.json',
+        // eslint.config.js is outside tsconfig.json, so the project service types it in a default project instead
+        projectService: { allowDefaultProject: ['eslint.config.js'] },
         tsconfigRootDir: import.meta.dirname,
       },
     },
     rules: {
       ...styleRules,
+      '@typescript-eslint/no-deprecated': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
