@@ -106,9 +106,9 @@ describe('decideBoundarySpacing()', () => {
     { name: 'colon without context then CJK', context: { currentTail: ':', nextFirst: '低' }, verdict: 'none' },
     // The probe spaces inside the tail here (中 g), never at the junction
     { name: 'a space that belongs inside the tail', context: { currentTail: '中g', nextFirst: 'x' }, verdict: 'none' },
-    // FIXME: Reverted with the flush-boundary spacing feature; needs the nextHead context field back. Re-enable with the feature.
-    // The junction alone has no CJK, but nextHead reaches the 十 inside the
-    // brackets, so AN_LEFT_BRACKET gets its context (the Google Calendar case)
+
+    // FIXME: Reverted with the flush-boundary spacing feature; needs the nextHead context field back. Re-enable with the feature
+    // The junction alone has no CJK, but nextHead reaches the 十 inside the brackets, so AN_LEFT_BRACKET gets its context (the Google Calendar case)
     // { name: 'a CJK just past the junction window', context: { currentTail: 'g 1', nextFirst: '(', nextHead: '(十九)' }, verdict: 'prepend-next' },
     // { name: 'no CJK anywhere near the junction', context: { currentTail: 'g 1', nextFirst: '(', nextHead: '(999' }, verdict: 'none' },
   ];
@@ -124,8 +124,7 @@ describe('decideBoundarySpacing()', () => {
     { name: 'CJK before a curly quote', context: { currentTail: '中', nextFirst: '”' }, verdict: 'none' },
     { name: 'kana before a straight quote', context: { currentTail: 'の', nextFirst: '"' }, verdict: 'none' },
     { name: 'a straight quote before kana', context: { currentTail: '"', nextFirst: 'の' }, verdict: 'none' },
-    // The veto reads the last character of the tail, not the whole tail
-    { name: 'a quote at the tail end before CJK', context: { currentTail: '文"', nextFirst: '中' }, verdict: 'none' },
+    { name: 'a quote at the tail end before CJK', context: { currentTail: '文"', nextFirst: '中' }, verdict: 'none' }, // The veto reads the last character of the tail, not the whole tail
   ];
 
   it.each(quoteCases)('skips spacing for $name', ({ context, verdict }) => {
@@ -240,22 +239,17 @@ describe('layout-dependent facts are consulted lazily', () => {
     expect(decideBoundarySpacing(boundaryContext({ ...layoutFactsUnavailable, currentBoundaryIsBlock: true }))).toBe('none');
   });
 
-  // FIXME: Reverted with the flush-boundary spacing feature. When it returns,
-  // block boundaries consult the hidden and flush facts, so this replaces the
-  // test above (and the flush facts join layoutFactsUnavailable plus the
-  // prepend-next/append-current neverConsulted sets).
-  //
-  // it('consults only hidden and flush facts when the current boundary is a block', () => {
-  //   const context = boundaryContext({
-  //     ...layoutFactsUnavailable,
-  //     currentBoundaryIsBlock: true,
-  //     hiddenBoundaryBefore: () => false,
-  //     hiddenBoundaryAfter: () => false,
-  //     flexRowFlushBoundary: () => false,
-  //     inlineBlockFlushBoundary: () => false,
-  //   });
-  //   expect(decideBoundarySpacing(context)).toBe('none');
-  // });
+  // FIXME: Reverted with the flush-boundary spacing feature. When it returns, block boundaries consult the hidden and flush facts,
+  // so this replaces the test above (and the flush facts join layoutFactsUnavailable plus the prepend-next/append-current neverConsulted sets).
+  it.todo('consults only hidden and flush facts when the current boundary is a block', () => {
+    const context = boundaryContext({
+      ...layoutFactsUnavailable,
+      currentBoundaryIsBlock: true,
+      hiddenBoundaryBefore: () => false,
+      hiddenBoundaryAfter: () => false,
+    });
+    expect(decideBoundarySpacing(context)).toBe('none');
+  });
 
   it('leaves hidden-after and grid/flex unconsulted on the prepend-next path', () => {
     const context = boundaryContext({ hiddenBoundaryAfter: neverConsulted('hiddenBoundaryAfter'), inGridOrFlexContainer: neverConsulted('inGridOrFlexContainer') });

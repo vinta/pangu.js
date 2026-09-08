@@ -17,14 +17,14 @@ describe('Symbol :', () => {
   });
 
   // FIXME
-  // it('handle : symbol as emoticon', () => {
-  //   expect(pangu.spacingText('前面:)後面')).toBe('前面 :) 後面');
-  // });
+  it.todo('handle : symbol as emoticon', () => {
+    expect(pangu.spacingText('前面:)後面')).toBe('前面 :) 後面');
+  });
 
   // FIXME
-  // it('handle : symbol as separator', () => {
-  //   expect(pangu.spacingText('前面:後面:再後面')).toBe('前面:後面:再後面');
-  //   expect(pangu.spacingText('前面:後面:再後面:更後面')).toBe('前面:後面:再後面:更後面');
-  //   expect(pangu.spacingText('前面:後面:再後面:更後面:超後面')).toBe('前面:後面:再後面:更後面:超後面');
-  // });
+  it.todo('handle : symbol as separator', () => {
+    expect(pangu.spacingText('前面:後面:再後面')).toBe('前面:後面:再後面');
+    expect(pangu.spacingText('前面:後面:再後面:更後面')).toBe('前面:後面:再後面:更後面');
+    expect(pangu.spacingText('前面:後面:再後面:更後面:超後面')).toBe('前面:後面:再後面:更後面:超後面');
+  });
 });

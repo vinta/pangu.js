@@ -42,9 +42,8 @@ describe('Symbol < >', () => {
     expect(pangu.spacingText('<img src="photo.jpg">上面是圖片')).toBe('<img src="photo.jpg">上面是圖片');
 
     // prettier-ignore
-    // FIXME
-    // expect(pangu.spacingText('<attackOnJava>那一天，人類終於回想起了，曾經一度被XML所支配的恐懼</attackOnJava> <!-- 進擊的Java -->'))
-    //                    .toBe('<attackOnJava>那一天，人類終於回想起了，曾經一度被 XML 所支配的恐懼</attackOnJava> <!-- 進擊的 Java -->');
+    expect(pangu.spacingText('<attackOnJava>那一天，人類終於回想起了，曾經一度被XML所支配的恐懼</attackOnJava> <!-- 進擊的Java -->'))
+                       .toBe('<attackOnJava>那一天，人類終於回想起了，曾經一度被 XML 所支配的恐懼</attackOnJava> <!-- 進擊的 Java -->');
   });
 
   it('handle < > symbols as tag mention', () => {
