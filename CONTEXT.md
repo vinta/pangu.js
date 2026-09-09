@@ -124,4 +124,4 @@ _Avoid_: LLM, AI (for the component)
 
 **Label**:
 The classifier's answer for one candidate. It is one of the fixed menu for its ambiguous shape.
-_Avoid_: verdict (the rules' word), answer
+_Avoid_: decision (the rules' word), answer

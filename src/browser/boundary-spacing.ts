@@ -3,10 +3,10 @@ import { ANY_CJK, pangu } from '../shared/index.js';
 const QUOTE = /["\u201c\u201d]/;
 
 // Where the space goes at the boundary between two adjacent text nodes
-export type BoundarySpacingVerdict = 'none' | 'prepend-next' | 'append-current' | 'insert-element';
+export type BoundarySpacingDecision = 'none' | 'prepend-next' | 'append-current' | 'insert-element';
 
 // What a single text node needs before its boundaries are considered
-export type TextNodeSpacingVerdict = 'trim-leading-space' | 'prepend-space' | 'apply-text-spacing';
+export type TextNodeSpacingDecision = 'trim-leading-space' | 'prepend-space' | 'apply-text-spacing';
 
 export interface BoundarySpacingContext {
   // Up to three trailing characters of the current text node, not just the last
@@ -100,24 +100,24 @@ export function decideBoundarySpacing(boundarySpacingContext: BoundarySpacingCon
 }
 
 export function decideTextNodeSpacing(textNodeSpacingContext: TextNodeSpacingContext) {
-  const textNodeSpacingVerdicts: TextNodeSpacingVerdict[] = [];
+  const textNodeSpacingDecisions: TextNodeSpacingDecision[] = [];
 
   // The standalone quote rule reads the text left by the trim rule
   let { text } = textNodeSpacingContext;
   if (text.startsWith(' ') && textNodeSpacingContext.hiddenBoundaryBefore()) {
-    textNodeSpacingVerdicts.push('trim-leading-space');
+    textNodeSpacingDecisions.push('trim-leading-space');
     text = text.substring(1);
   }
 
   if (isStandaloneQuote(text)) {
     if (textNodeSpacingContext.previousElementLastChar !== null && ANY_CJK.test(textNodeSpacingContext.previousElementLastChar)) {
-      textNodeSpacingVerdicts.push('prepend-space');
+      textNodeSpacingDecisions.push('prepend-space');
     }
   } else {
-    textNodeSpacingVerdicts.push('apply-text-spacing');
+    textNodeSpacingDecisions.push('apply-text-spacing');
   }
 
-  return textNodeSpacingVerdicts;
+  return textNodeSpacingDecisions;
 }
 
 // spaceJunction is pure and a page repeats the same few junction windows at
@@ -149,7 +149,7 @@ function needsBoundarySpace(currentTail: string, nextFirst: string) {
 }
 
 // The junction reading can put a second space inside the tail itself: CJK/ + CJK reads CJK / CJK, because the slash rule needs both sides of the slash in view. Returns the tail with its interior
-// spaces written in, or null when the tail already reads right. Only meaningful when the boundary verdict is a spacing action; on 'none' the tail must stay untouched
+// spaces written in, or null when the tail already reads right. Only meaningful when the boundary decision is a spacing action; on 'none' the tail must stay untouched
 export function respaceCurrentTail(currentTail: string, nextFirst: string) {
   const spacedJunction = spaceJunction(currentTail, nextFirst);
   if (!spacedJunction.endsWith(` ${nextFirst}`)) {

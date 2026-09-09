@@ -1,11 +1,11 @@
 export class VisibilityDetector {
-  // Verdicts repeat heavily within one spacing batch: every boundary re-checks
+  // Answers repeat heavily within one spacing batch: every boundary re-checks
   // the same ancestor chain (p → body → html). Scoped to a batch via clearCache()
   // because page styles can change between batches
-  private verdictCache = new WeakMap<Element, boolean>();
+  private cache = new WeakMap<Element, boolean>();
 
   public clearCache() {
-    this.verdictCache = new WeakMap();
+    this.cache = new WeakMap();
   }
 
   public isElementVisuallyHidden(element: Element) {
@@ -100,12 +100,12 @@ export class VisibilityDetector {
   }
 
   private isElementVisuallyHiddenCached(element: Element) {
-    const cached = this.verdictCache.get(element);
+    const cached = this.cache.get(element);
     if (cached !== undefined) {
       return cached;
     }
-    const verdict = this.isElementVisuallyHidden(element);
-    this.verdictCache.set(element, verdict);
-    return verdict;
+    const hidden = this.isElementVisuallyHidden(element);
+    this.cache.set(element, hidden);
+    return hidden;
   }
 }

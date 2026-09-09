@@ -170,7 +170,7 @@ export class BrowserPangu extends Pangu {
   }
 
   private spaceTextNodes(textNodes: Node[]) {
-    // Visibility verdicts are memoized per batch; styles may change between batches
+    // Visibility answers are memoized per batch; styles may change between batches
     this.visibilityDetector.clearCache();
 
     // Text nodes waiting for the batch to settle: unspaced text captured now, settled text read at the batch tail
@@ -215,7 +215,7 @@ export class BrowserPangu extends Pangu {
         const currentTail = currentTextNode.data.slice(-3);
         const nextFirst = nextTextNode.data.slice(0, 1);
 
-        const boundarySpacingVerdict = decideBoundarySpacing({
+        const boundarySpacingDecision = decideBoundarySpacing({
           currentTail,
           nextFirst,
           currentEndsWithSpace: TRAILING_WHITESPACE.test(currentTextNode.data),
@@ -237,7 +237,7 @@ export class BrowserPangu extends Pangu {
         });
 
         // A junction space can come with a second space that belongs inside the current text node's tail (CJK/ + CJK reads CJK / CJK): write the respaced tail back before placing the junction space
-        if (boundarySpacingVerdict !== 'none' && !this.holdsLateFix(currentTextNode)) {
+        if (boundarySpacingDecision !== 'none' && !this.holdsLateFix(currentTextNode)) {
           const respacedTail = respaceCurrentTail(currentTail, nextFirst);
           if (respacedTail !== null) {
             currentTextNode.data = currentTextNode.data.slice(0, currentTextNode.data.length - currentTail.length) + respacedTail;
@@ -245,7 +245,7 @@ export class BrowserPangu extends Pangu {
           }
         }
 
-        switch (boundarySpacingVerdict) {
+        switch (boundarySpacingDecision) {
           case 'prepend-next':
             nextTextNode.data = ` ${nextTextNode.data}`;
             this.lastWrittenData.set(nextTextNode, nextTextNode.data);
@@ -287,14 +287,14 @@ export class BrowserPangu extends Pangu {
   private applyTextNodeSpacing(textNode: Text, unsettledTextNodes: UnsettledTextNode[]) {
     // A node the rules space again no longer holds a late fix
     this.lateFixedTextNodes.delete(textNode);
-    const textNodeSpacingVerdicts = decideTextNodeSpacing({
+    const textNodeSpacingDecisions = decideTextNodeSpacing({
       text: textNode.data,
       previousElementLastChar: this.findPreviousElementLastChar(textNode),
       hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(textNode),
     });
 
-    for (const textNodeSpacingVerdict of textNodeSpacingVerdicts) {
-      switch (textNodeSpacingVerdict) {
+    for (const textNodeSpacingDecision of textNodeSpacingDecisions) {
+      switch (textNodeSpacingDecision) {
         case 'trim-leading-space':
           textNode.data = textNode.data.substring(1);
           this.lastWrittenData.set(textNode, textNode.data);

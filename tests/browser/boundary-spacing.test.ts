@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { BoundarySpacingContext, BoundarySpacingVerdict, TextNodeSpacingContext, TextNodeSpacingVerdict } from '../../src/browser/boundary-spacing';
+import type { BoundarySpacingContext, BoundarySpacingDecision, TextNodeSpacingContext, TextNodeSpacingDecision } from '../../src/browser/boundary-spacing';
 import { decideBoundarySpacing, decideTextNodeSpacing, respaceCurrentTail } from '../../src/browser/boundary-spacing';
 
 // A boundary that the spacing engine wants a space at, with every veto turned off
@@ -24,7 +24,7 @@ const boundarySpacingContext: BoundarySpacingContext = {
   inGridOrFlexContainer: () => false,
 };
 
-// A layout-dependent fact that the verdict must not need on this path
+// A layout-dependent fact that the decision must not need on this path
 function neverConsulted(name: string): () => boolean {
   return () => {
     throw new Error(`${name} must not be consulted`);
@@ -46,13 +46,13 @@ const textNode: TextNodeSpacingContext = {
 interface BoundaryCase {
   name: string;
   context: Partial<BoundarySpacingContext>;
-  verdict: BoundarySpacingVerdict;
+  decision: BoundarySpacingDecision;
 }
 
 interface TextNodeCase {
   name: string;
   context: Partial<TextNodeSpacingContext>;
-  verdicts: TextNodeSpacingVerdict[];
+  decisions: TextNodeSpacingDecision[];
 }
 
 function boundaryContext(overrides: Partial<BoundarySpacingContext>) {
@@ -64,96 +64,96 @@ function textNodeContext(overrides: Partial<TextNodeSpacingContext>) {
 }
 
 describe('decideBoundarySpacing()', () => {
-  const verdictCases: BoundaryCase[] = [
-    { name: 'prepends to the next text node when neither boundary is space-sensitive', context: {}, verdict: 'prepend-next' },
-    { name: 'appends to the current text node when only the next boundary is space-sensitive', context: appendCurrentBoundary, verdict: 'append-current' },
-    { name: 'inserts an element when both boundaries are space-sensitive', context: insertElementBoundary, verdict: 'insert-element' },
-    { name: 'does nothing when collectable text sits between the nodes', context: { contentBetween: true }, verdict: 'none' },
-    { name: 'does nothing when collectable text sits between space-sensitive nodes', context: { ...insertElementBoundary, contentBetween: true }, verdict: 'none' },
-    { name: 'does nothing when the current boundary is a block', context: { currentBoundaryIsBlock: true }, verdict: 'none' },
-    { name: 'does nothing when the next boundary is ignored', context: { nextBoundaryIsIgnored: true }, verdict: 'none' },
-    { name: 'does nothing when the next boundary is a block', context: { nextBoundaryIsBlock: true }, verdict: 'none' },
+  const decisionCases: BoundaryCase[] = [
+    { name: 'prepends to the next text node when neither boundary is space-sensitive', context: {}, decision: 'prepend-next' },
+    { name: 'appends to the current text node when only the next boundary is space-sensitive', context: appendCurrentBoundary, decision: 'append-current' },
+    { name: 'inserts an element when both boundaries are space-sensitive', context: insertElementBoundary, decision: 'insert-element' },
+    { name: 'does nothing when collectable text sits between the nodes', context: { contentBetween: true }, decision: 'none' },
+    { name: 'does nothing when collectable text sits between space-sensitive nodes', context: { ...insertElementBoundary, contentBetween: true }, decision: 'none' },
+    { name: 'does nothing when the current boundary is a block', context: { currentBoundaryIsBlock: true }, decision: 'none' },
+    { name: 'does nothing when the next boundary is ignored', context: { nextBoundaryIsIgnored: true }, decision: 'none' },
+    { name: 'does nothing when the next boundary is a block', context: { nextBoundaryIsBlock: true }, decision: 'none' },
   ];
 
-  it.each(verdictCases)('$name', ({ context, verdict }) => {
-    expect(decideBoundarySpacing(boundaryContext(context))).toBe(verdict);
+  it.each(decisionCases)('$name', ({ context, decision }) => {
+    expect(decideBoundarySpacing(boundaryContext(context))).toBe(decision);
   });
 
   const existingSpaceCases: BoundaryCase[] = [
-    { name: 'the current text node already ends with a space', context: { currentEndsWithSpace: true }, verdict: 'none' },
-    { name: 'the next text node already starts with a space', context: { nextStartsWithSpace: true }, verdict: 'none' },
-    { name: 'whitespace sits between the two text nodes', context: { whitespaceBetween: true }, verdict: 'none' },
-    { name: 'a space-like sibling follows the current text node', context: { spaceLikeSiblingAfterCurrent: true }, verdict: 'none' },
-    { name: 'a space-like sibling follows the current boundary', context: { spaceLikeSiblingAfterCurrentBoundary: true }, verdict: 'none' },
-    { name: 'a space-like sibling precedes the next text node', context: { spaceLikeSiblingBeforeNext: true }, verdict: 'none' },
+    { name: 'the current text node already ends with a space', context: { currentEndsWithSpace: true }, decision: 'none' },
+    { name: 'the next text node already starts with a space', context: { nextStartsWithSpace: true }, decision: 'none' },
+    { name: 'whitespace sits between the two text nodes', context: { whitespaceBetween: true }, decision: 'none' },
+    { name: 'a space-like sibling follows the current text node', context: { spaceLikeSiblingAfterCurrent: true }, decision: 'none' },
+    { name: 'a space-like sibling follows the current boundary', context: { spaceLikeSiblingAfterCurrentBoundary: true }, decision: 'none' },
+    { name: 'a space-like sibling precedes the next text node', context: { spaceLikeSiblingBeforeNext: true }, decision: 'none' },
   ];
 
-  it.each(existingSpaceCases)('does nothing when $name', ({ context, verdict }) => {
-    expect(decideBoundarySpacing(boundaryContext(context))).toBe(verdict);
+  it.each(existingSpaceCases)('does nothing when $name', ({ context, decision }) => {
+    expect(decideBoundarySpacing(boundaryContext(context))).toBe(decision);
   });
 
   const probeCases: BoundaryCase[] = [
-    { name: 'CJK then half-width', context: { currentTail: '中', nextFirst: 'a' }, verdict: 'prepend-next' },
-    { name: 'half-width then CJK', context: { currentTail: 'a', nextFirst: '中' }, verdict: 'prepend-next' },
-    { name: 'kana then half-width', context: { currentTail: 'の', nextFirst: 'a' }, verdict: 'prepend-next' },
-    { name: 'CJK then CJK', context: { currentTail: '中', nextFirst: '文' }, verdict: 'none' },
-    { name: 'half-width then half-width', context: { currentTail: 'a', nextFirst: 'b' }, verdict: 'none' },
+    { name: 'CJK then half-width', context: { currentTail: '中', nextFirst: 'a' }, decision: 'prepend-next' },
+    { name: 'half-width then CJK', context: { currentTail: 'a', nextFirst: '中' }, decision: 'prepend-next' },
+    { name: 'kana then half-width', context: { currentTail: 'の', nextFirst: 'a' }, decision: 'prepend-next' },
+    { name: 'CJK then CJK', context: { currentTail: '中', nextFirst: '文' }, decision: 'none' },
+    { name: 'half-width then half-width', context: { currentTail: 'a', nextFirst: 'b' }, decision: 'none' },
     // Hangul is outside the CJK class of shared, so the probe reports no spacing
-    { name: 'hangul then half-width', context: { currentTail: '한', nextFirst: 'a' }, verdict: 'none' },
+    { name: 'hangul then half-width', context: { currentTail: '한', nextFirst: 'a' }, decision: 'none' },
     // AN_COLON_CJK needs the alphanumeric character before the colon, so the
-    // verdict flips with the tail context
-    { name: 'colon with alphanumeric context then CJK', context: { currentTail: 'g:', nextFirst: '低' }, verdict: 'prepend-next' },
-    { name: 'colon without context then CJK', context: { currentTail: ':', nextFirst: '低' }, verdict: 'none' },
+    // decision flips with the tail context
+    { name: 'colon with alphanumeric context then CJK', context: { currentTail: 'g:', nextFirst: '低' }, decision: 'prepend-next' },
+    { name: 'colon without context then CJK', context: { currentTail: ':', nextFirst: '低' }, decision: 'none' },
     // The probe spaces inside the tail here (中 g), never at the junction
-    { name: 'a space that belongs inside the tail', context: { currentTail: '中g', nextFirst: 'x' }, verdict: 'none' },
+    { name: 'a space that belongs inside the tail', context: { currentTail: '中g', nextFirst: 'x' }, decision: 'none' },
 
     // FIXME: Reverted with the flush-boundary spacing feature; needs the nextHead context field back. Re-enable with the feature
     // The junction alone has no CJK, but nextHead reaches the 十 inside the brackets, so AN_LEFT_BRACKET gets its context (the Google Calendar case)
-    // { name: 'a CJK just past the junction window', context: { currentTail: 'g 1', nextFirst: '(', nextHead: '(十九)' }, verdict: 'prepend-next' },
-    // { name: 'no CJK anywhere near the junction', context: { currentTail: 'g 1', nextFirst: '(', nextHead: '(999' }, verdict: 'none' },
+    // { name: 'a CJK just past the junction window', context: { currentTail: 'g 1', nextFirst: '(', nextHead: '(十九)' }, decision: 'prepend-next' },
+    // { name: 'no CJK anywhere near the junction', context: { currentTail: 'g 1', nextFirst: '(', nextHead: '(999' }, decision: 'none' },
   ];
 
-  it.each(probeCases)('probes the spacing engine with $name', ({ context, verdict }) => {
-    expect(decideBoundarySpacing(boundaryContext(context))).toBe(verdict);
+  it.each(probeCases)('probes the spacing engine with $name', ({ context, decision }) => {
+    expect(decideBoundarySpacing(boundaryContext(context))).toBe(decision);
   });
 
   const quoteCases: BoundaryCase[] = [
-    { name: 'a straight quote before CJK', context: { currentTail: '"', nextFirst: '中' }, verdict: 'none' },
-    { name: 'CJK before a straight quote', context: { currentTail: '中', nextFirst: '"' }, verdict: 'none' },
-    { name: 'a curly quote before CJK', context: { currentTail: '“', nextFirst: '中' }, verdict: 'none' },
-    { name: 'CJK before a curly quote', context: { currentTail: '中', nextFirst: '”' }, verdict: 'none' },
-    { name: 'kana before a straight quote', context: { currentTail: 'の', nextFirst: '"' }, verdict: 'none' },
-    { name: 'a straight quote before kana', context: { currentTail: '"', nextFirst: 'の' }, verdict: 'none' },
-    { name: 'a quote at the tail end before CJK', context: { currentTail: '文"', nextFirst: '中' }, verdict: 'none' }, // The veto reads the last character of the tail, not the whole tail
+    { name: 'a straight quote before CJK', context: { currentTail: '"', nextFirst: '中' }, decision: 'none' },
+    { name: 'CJK before a straight quote', context: { currentTail: '中', nextFirst: '"' }, decision: 'none' },
+    { name: 'a curly quote before CJK', context: { currentTail: '“', nextFirst: '中' }, decision: 'none' },
+    { name: 'CJK before a curly quote', context: { currentTail: '中', nextFirst: '”' }, decision: 'none' },
+    { name: 'kana before a straight quote', context: { currentTail: 'の', nextFirst: '"' }, decision: 'none' },
+    { name: 'a straight quote before kana', context: { currentTail: '"', nextFirst: 'の' }, decision: 'none' },
+    { name: 'a quote at the tail end before CJK', context: { currentTail: '文"', nextFirst: '中' }, decision: 'none' }, // The veto reads the last character of the tail, not the whole tail
   ];
 
-  it.each(quoteCases)('skips spacing for $name', ({ context, verdict }) => {
-    expect(decideBoundarySpacing(boundaryContext(context))).toBe(verdict);
+  it.each(quoteCases)('skips spacing for $name', ({ context, decision }) => {
+    expect(decideBoundarySpacing(boundaryContext(context))).toBe(decision);
   });
 
   const visibilityCases: BoundaryCase[] = [
-    { name: 'a hidden boundary before vetoes prepend-next', context: { hiddenBoundaryBefore: () => true }, verdict: 'none' },
-    { name: 'a hidden boundary after vetoes append-current', context: { ...appendCurrentBoundary, hiddenBoundaryAfter: () => true }, verdict: 'none' },
-    { name: 'a hidden boundary after vetoes insert-element', context: { ...insertElementBoundary, hiddenBoundaryAfter: () => true }, verdict: 'none' },
-    { name: 'a hidden boundary after leaves prepend-next alone', context: { hiddenBoundaryAfter: () => true }, verdict: 'prepend-next' },
-    { name: 'a hidden boundary before leaves append-current alone', context: { ...appendCurrentBoundary, hiddenBoundaryBefore: () => true }, verdict: 'append-current' },
-    { name: 'a hidden boundary before leaves insert-element alone', context: { ...insertElementBoundary, hiddenBoundaryBefore: () => true }, verdict: 'insert-element' },
+    { name: 'a hidden boundary before vetoes prepend-next', context: { hiddenBoundaryBefore: () => true }, decision: 'none' },
+    { name: 'a hidden boundary after vetoes append-current', context: { ...appendCurrentBoundary, hiddenBoundaryAfter: () => true }, decision: 'none' },
+    { name: 'a hidden boundary after vetoes insert-element', context: { ...insertElementBoundary, hiddenBoundaryAfter: () => true }, decision: 'none' },
+    { name: 'a hidden boundary after leaves prepend-next alone', context: { hiddenBoundaryAfter: () => true }, decision: 'prepend-next' },
+    { name: 'a hidden boundary before leaves append-current alone', context: { ...appendCurrentBoundary, hiddenBoundaryBefore: () => true }, decision: 'append-current' },
+    { name: 'a hidden boundary before leaves insert-element alone', context: { ...insertElementBoundary, hiddenBoundaryBefore: () => true }, decision: 'insert-element' },
   ];
 
-  it.each(visibilityCases)('$name', ({ context, verdict }) => {
-    expect(decideBoundarySpacing(boundaryContext(context))).toBe(verdict);
+  it.each(visibilityCases)('$name', ({ context, decision }) => {
+    expect(decideBoundarySpacing(boundaryContext(context))).toBe(decision);
   });
 
   const insertElementCases: BoundaryCase[] = [
-    { name: 'a Grid/Flexbox container downgrades insert-element', context: { ...insertElementBoundary, inGridOrFlexContainer: () => true }, verdict: 'none' },
-    { name: 'a space-like sibling before the next boundary downgrades insert-element', context: { ...insertElementBoundary, spaceLikeSiblingBeforeNextBoundary: true }, verdict: 'none' },
-    { name: 'a Grid/Flexbox container leaves prepend-next alone', context: { inGridOrFlexContainer: () => true }, verdict: 'prepend-next' },
-    { name: 'a Grid/Flexbox container leaves append-current alone', context: { ...appendCurrentBoundary, inGridOrFlexContainer: () => true }, verdict: 'append-current' },
-    { name: 'a space-like sibling before the next boundary leaves prepend-next alone', context: { spaceLikeSiblingBeforeNextBoundary: true }, verdict: 'prepend-next' },
+    { name: 'a Grid/Flexbox container downgrades insert-element', context: { ...insertElementBoundary, inGridOrFlexContainer: () => true }, decision: 'none' },
+    { name: 'a space-like sibling before the next boundary downgrades insert-element', context: { ...insertElementBoundary, spaceLikeSiblingBeforeNextBoundary: true }, decision: 'none' },
+    { name: 'a Grid/Flexbox container leaves prepend-next alone', context: { inGridOrFlexContainer: () => true }, decision: 'prepend-next' },
+    { name: 'a Grid/Flexbox container leaves append-current alone', context: { ...appendCurrentBoundary, inGridOrFlexContainer: () => true }, decision: 'append-current' },
+    { name: 'a space-like sibling before the next boundary leaves prepend-next alone', context: { spaceLikeSiblingBeforeNextBoundary: true }, decision: 'prepend-next' },
   ];
 
-  it.each(insertElementCases)('$name', ({ context, verdict }) => {
-    expect(decideBoundarySpacing(boundaryContext(context))).toBe(verdict);
+  it.each(insertElementCases)('$name', ({ context, decision }) => {
+    expect(decideBoundarySpacing(boundaryContext(context))).toBe(decision);
   });
 });
 
@@ -173,42 +173,42 @@ describe('respaceCurrentTail()', () => {
 
 describe('decideTextNodeSpacing()', () => {
   const trimCases: TextNodeCase[] = [
-    { name: 'trims a leading space that comes after a hidden element', context: { text: ' 中文abc', hiddenBoundaryBefore: () => true }, verdicts: ['trim-leading-space', 'apply-text-spacing'] },
-    { name: 'keeps a leading space that comes after a visible element', context: { text: ' 中文abc', hiddenBoundaryBefore: () => false }, verdicts: ['apply-text-spacing'] },
-    { name: 'has nothing to trim after a hidden element', context: { text: '中文abc', hiddenBoundaryBefore: () => true }, verdicts: ['apply-text-spacing'] },
+    { name: 'trims a leading space that comes after a hidden element', context: { text: ' 中文abc', hiddenBoundaryBefore: () => true }, decisions: ['trim-leading-space', 'apply-text-spacing'] },
+    { name: 'keeps a leading space that comes after a visible element', context: { text: ' 中文abc', hiddenBoundaryBefore: () => false }, decisions: ['apply-text-spacing'] },
+    { name: 'has nothing to trim after a hidden element', context: { text: '中文abc', hiddenBoundaryBefore: () => true }, decisions: ['apply-text-spacing'] },
   ];
 
-  it.each(trimCases)('$name', ({ context, verdicts }) => {
-    expect(decideTextNodeSpacing(textNodeContext(context))).toEqual(verdicts);
+  it.each(trimCases)('$name', ({ context, decisions }) => {
+    expect(decideTextNodeSpacing(textNodeContext(context))).toEqual(decisions);
   });
 
   const standaloneQuoteCases: TextNodeCase[] = [
-    { name: 'a straight quote after CJK', context: { text: '"', previousElementLastChar: '中' }, verdicts: ['prepend-space'] },
-    { name: 'a left curly quote after CJK', context: { text: '“', previousElementLastChar: '中' }, verdicts: ['prepend-space'] },
-    { name: 'a right curly quote after CJK', context: { text: '”', previousElementLastChar: '中' }, verdicts: ['prepend-space'] },
-    { name: 'a straight quote after kana', context: { text: '"', previousElementLastChar: 'の' }, verdicts: ['prepend-space'] },
+    { name: 'a straight quote after CJK', context: { text: '"', previousElementLastChar: '中' }, decisions: ['prepend-space'] },
+    { name: 'a left curly quote after CJK', context: { text: '“', previousElementLastChar: '中' }, decisions: ['prepend-space'] },
+    { name: 'a right curly quote after CJK', context: { text: '”', previousElementLastChar: '中' }, decisions: ['prepend-space'] },
+    { name: 'a straight quote after kana', context: { text: '"', previousElementLastChar: 'の' }, decisions: ['prepend-space'] },
   ];
 
-  it.each(standaloneQuoteCases)('prepends a space to $name', ({ context, verdicts }) => {
-    expect(decideTextNodeSpacing(textNodeContext(context))).toEqual(verdicts);
+  it.each(standaloneQuoteCases)('prepends a space to $name', ({ context, decisions }) => {
+    expect(decideTextNodeSpacing(textNodeContext(context))).toEqual(decisions);
   });
 
   const quoteSkipCases: TextNodeCase[] = [
-    { name: 'the previous element ends with half-width', context: { text: '"', previousElementLastChar: 'a' }, verdicts: [] },
-    { name: 'there is no previous element', context: { text: '"', previousElementLastChar: null }, verdicts: [] },
+    { name: 'the previous element ends with half-width', context: { text: '"', previousElementLastChar: 'a' }, decisions: [] },
+    { name: 'there is no previous element', context: { text: '"', previousElementLastChar: null }, decisions: [] },
   ];
 
-  it.each(quoteSkipCases)('leaves a standalone quote alone when $name', ({ context, verdicts }) => {
-    expect(decideTextNodeSpacing(textNodeContext(context))).toEqual(verdicts);
+  it.each(quoteSkipCases)('leaves a standalone quote alone when $name', ({ context, decisions }) => {
+    expect(decideTextNodeSpacing(textNodeContext(context))).toEqual(decisions);
   });
 
   const textSpacingCases: TextNodeCase[] = [
-    { name: 'more than one character', context: { text: '""', previousElementLastChar: '中' }, verdicts: ['apply-text-spacing'] },
-    { name: 'a single character that is not a quote', context: { text: 'a', previousElementLastChar: '中' }, verdicts: ['apply-text-spacing'] },
+    { name: 'more than one character', context: { text: '""', previousElementLastChar: '中' }, decisions: ['apply-text-spacing'] },
+    { name: 'a single character that is not a quote', context: { text: 'a', previousElementLastChar: '中' }, decisions: ['apply-text-spacing'] },
   ];
 
-  it.each(textSpacingCases)('applies text spacing to a text node of $name', ({ context, verdicts }) => {
-    expect(decideTextNodeSpacing(textNodeContext(context))).toEqual(verdicts);
+  it.each(textSpacingCases)('applies text spacing to a text node of $name', ({ context, decisions }) => {
+    expect(decideTextNodeSpacing(textNodeContext(context))).toEqual(decisions);
   });
 
   it('trims a leading space before deciding that the rest is a standalone quote', () => {
