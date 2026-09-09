@@ -4,6 +4,9 @@ import type { PromptSpec } from './shapes/base';
 // One base session per ambiguous shape
 const baseSessions = new Map<string, Promise<LanguageModel>>();
 
+// The promise, not the label, so batches in flight at the same time share one prompt. Unbounded on purpose, since the service worker is killed after idle and the map dies with it
+const cachedAnswers = new Map<string, Promise<CandidateLabel | null>>();
+
 // `unsupported` is ours, not an API value: the browser has no Prompt API at all
 export type AiModelAvailability = Availability | 'unsupported';
 
@@ -25,7 +28,6 @@ export async function isModelSupported() {
   return availability !== 'unsupported' && availability !== 'unavailable';
 }
 
-// Resolves when the model is ready
 export async function downloadModel() {
   // The download is browser-wide and outlives this page, so the session only exists to start it
   // TODO: 2026-09-08: after On-device AI is toggled off and on in chrome://settings/ai, availability stays 'downloading' and downloadprogress never moves past 0 until Chrome restarts; consider telling the user to restart Chrome when the download stays at 0
@@ -79,8 +81,23 @@ async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   return baseSession;
 }
 
-async function classifyOneCandidate(promptSpec: PromptSpec<CandidateLabel>, baseSession: LanguageModel, candidate: Candidate): Promise<CandidateLabel | null> {
+function classifyOneCandidate(promptSpec: PromptSpec<CandidateLabel>, baseSession: LanguageModel, candidate: Candidate) {
   const question = promptSpec.buildQuestion(candidate.sentence, candidate.at);
+  let answer = cachedAnswers.get(question);
+  if (answer === undefined) {
+    // A null is a failure, not an answer, so the next batch asks again
+    answer = promptOneCandidate(promptSpec, baseSession, question).then((candidateLabel) => {
+      if (candidateLabel === null) {
+        cachedAnswers.delete(question);
+      }
+      return candidateLabel;
+    });
+    cachedAnswers.set(question, answer);
+  }
+  return answer;
+}
+
+async function promptOneCandidate(promptSpec: PromptSpec<CandidateLabel>, baseSession: LanguageModel, question: string): Promise<CandidateLabel | null> {
   console.debug(`Shape ${promptSpec.kind} prompt:\n${question}`);
 
   try {
