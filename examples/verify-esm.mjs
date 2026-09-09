@@ -4,8 +4,8 @@ import { unlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import pangu, { NodePangu, pangu as namedPangu } from 'pangu';
 import * as panguNamespace from 'pangu';
+import pangu, { NodePangu, pangu as namedPangu } from 'pangu';
 // The browser entry is importable in plain Node: the spacing engine is platform-free and DOM APIs are only touched inside the DOM-walking methods, never at module scope
 import browserPangu, { BrowserPangu, pangu as namedBrowserPangu } from 'pangu/browser';
 
