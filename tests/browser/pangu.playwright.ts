@@ -23,15 +23,15 @@ test.describe('BrowserPangu', () => {
     });
   });
 
-  test.describe('autoSpacingPage()', () => {
+  test.describe('autoSpacePage()', () => {
     test('handle dynamic content with MutationObserver', async ({ page }) => {
       await page.evaluate(() => {
-        pangu.autoSpacingPage();
+        pangu.autoSpacePage();
       });
 
       await page.waitForTimeout(50);
 
-      // Dynamically add content after autoSpacingPage is active
+      // Dynamically add content after autoSpacePage is active
       await page.evaluate(() => {
         const div = document.createElement('div');
         div.textContent = '小明在開發軟體時總是嚴格地遵循各項協定與標準，直到他看了ISO 3166-1';
@@ -49,7 +49,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<div id="container"></div>');
 
       await page.evaluate(() => {
-        pangu.autoSpacingPage();
+        pangu.autoSpacePage();
       });
 
       await page.waitForTimeout(50);
@@ -77,7 +77,7 @@ test.describe('BrowserPangu', () => {
       // Large pageDelayMs keeps the initial page sweep out of the assertion window,
       // so only the MutationObserver drain acts
       await page.evaluate(() => {
-        pangu.autoSpacingPage({ pageDelayMs: 60000 });
+        pangu.autoSpacePage({ pageDelayMs: 60000 });
       });
 
       await page.waitForTimeout(50);
@@ -106,7 +106,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<p id="container">（<span id="count"></span>人的回答統計）</p>');
 
       await page.evaluate(() => {
-        pangu.autoSpacingPage({ pageDelayMs: 50 });
+        pangu.autoSpacePage({ pageDelayMs: 50 });
       });
 
       await page.waitForTimeout(600);
@@ -125,7 +125,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<p id="container">公視+的節目<span id="count"></span></p>');
 
       await page.evaluate(() => {
-        pangu.autoSpacingPage({ pageDelayMs: 50 });
+        pangu.autoSpacePage({ pageDelayMs: 50 });
       });
 
       await page.waitForTimeout(600);
@@ -152,7 +152,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<p id="container"><span>甲1</span><span>乙2</span></p>');
 
       await page.evaluate(() => {
-        pangu.autoSpacingPage({ pageDelayMs: 50 });
+        pangu.autoSpacePage({ pageDelayMs: 50 });
       });
 
       await page.waitForTimeout(600);
@@ -174,7 +174,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<p id="container">公視+<span id="count"></span></p>');
 
       await page.evaluate(() => {
-        pangu.autoSpacingPage({ pageDelayMs: 50 });
+        pangu.autoSpacePage({ pageDelayMs: 50 });
       });
 
       await page.waitForTimeout(600);
@@ -201,7 +201,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<p id="container">公視+的節目</p>');
 
       await page.evaluate(() => {
-        pangu.autoSpacingPage({ pageDelayMs: 50 });
+        pangu.autoSpacePage({ pageDelayMs: 50 });
       });
 
       await page.waitForTimeout(600);
@@ -228,7 +228,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<p id="container"><span id="count"></span>公視+的節目</p>');
 
       await page.evaluate(() => {
-        pangu.autoSpacingPage({ pageDelayMs: 50 });
+        pangu.autoSpacePage({ pageDelayMs: 50 });
       });
 
       await page.waitForTimeout(600);
@@ -261,7 +261,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<html><head><title>中文</title></head><body><nav><span id="count"></span>abc</nav></body></html>');
 
       await page.evaluate(() => {
-        pangu.autoSpacingPage({ pageDelayMs: 50 });
+        pangu.autoSpacePage({ pageDelayMs: 50 });
       });
 
       await page.waitForTimeout(600);
@@ -281,7 +281,7 @@ test.describe('BrowserPangu', () => {
 
       // Large pageDelayMs keeps the initial page sweep out of the assertion window
       await page.evaluate(() => {
-        pangu.autoSpacingPage({ pageDelayMs: 60000 });
+        pangu.autoSpacePage({ pageDelayMs: 60000 });
       });
 
       await page.waitForTimeout(50);
@@ -305,7 +305,7 @@ test.describe('BrowserPangu', () => {
     });
   });
 
-  test.describe('stopAutoSpacingPage()', () => {
+  test.describe('stopAutoSpacePage()', () => {
     test.beforeEach(async ({ page }) => {
       await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') });
       await page.clock.pauseAt(new Date('2026-01-01T00:00:01Z'));
@@ -314,8 +314,8 @@ test.describe('BrowserPangu', () => {
 
     test('skip the delayed initial sweep after stopping', async ({ page }) => {
       await page.evaluate(() => {
-        pangu.autoSpacingPage({ pageDelayMs: 100 });
-        pangu.stopAutoSpacingPage();
+        pangu.autoSpacePage({ pageDelayMs: 100 });
+        pangu.stopAutoSpacePage();
         document.title = '新title';
         document.querySelector('p')!.textContent = '新content';
       });
@@ -328,12 +328,12 @@ test.describe('BrowserPangu', () => {
 
     test('skip pending title and body debounces after stopping', async ({ page }) => {
       await page.evaluate(async () => {
-        pangu.autoSpacingPage({ pageDelayMs: 60000, nodeDelayMs: 100 });
+        pangu.autoSpacePage({ pageDelayMs: 60000, nodeDelayMs: 100 });
         document.title = '舊title';
         document.querySelector('p')!.textContent = '舊content';
         await Promise.resolve();
 
-        pangu.stopAutoSpacingPage();
+        pangu.stopAutoSpacePage();
         document.title = '新title';
         document.querySelector('p')!.textContent = '新content';
       });
@@ -346,15 +346,15 @@ test.describe('BrowserPangu', () => {
 
     test('skip callbacks from the previous activation after restarting', async ({ page }) => {
       await page.evaluate(async () => {
-        pangu.autoSpacingPage({ pageDelayMs: 100, nodeDelayMs: 100 });
+        pangu.autoSpacePage({ pageDelayMs: 100, nodeDelayMs: 100 });
         document.title = '舊title';
         document.querySelector('p')!.textContent = '舊content';
         await Promise.resolve();
 
-        pangu.stopAutoSpacingPage();
+        pangu.stopAutoSpacePage();
         document.title = '新title';
         document.querySelector('p')!.textContent = '新content';
-        pangu.autoSpacingPage({ pageDelayMs: 1000 });
+        pangu.autoSpacePage({ pageDelayMs: 1000 });
       });
 
       await page.clock.runFor(500);
@@ -369,14 +369,14 @@ test.describe('BrowserPangu', () => {
     });
   });
 
-  test.describe('spacingNode()', () => {
+  test.describe('spaceNode()', () => {
     test('handle text node', async ({ page }) => {
-      // spacingNode() works on element nodes, not directly on text nodes
+      // spaceNode() works on element nodes, not directly on text nodes
       // So we need to wrap the text node in an element
       await page.setContent('<div id="test">你可以使用uname -m指令來檢查你的Linux作業系統是32位元或是[敏感词已被屏蔽]位元</div>');
       const result = await page.evaluate(() => {
         const div = document.getElementById('test')!;
-        pangu.spacingNode(div);
+        pangu.spaceNode(div);
         return div.textContent;
       });
       expect(result).toBe('你可以使用 uname -m 指令來檢查你的 Linux 作業系統是 32 位元或是 [敏感词已被屏蔽] 位元');
@@ -388,7 +388,7 @@ test.describe('BrowserPangu', () => {
       );
       const result = await page.evaluate(() => {
         const div = document.getElementById('test')!;
-        pangu.spacingNode(div);
+        pangu.spaceNode(div);
         return div.textContent;
       });
       expect(result).toBe(
@@ -403,7 +403,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<p id="test">Rev. (Reverend；牧師的尊稱) \n    這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用：&quot;We \n    invited the Rev. Alan Darling.&quot; 或&nbsp; &quot;We&nbsp; invited the Rev. Mr. \n    Darling.&quot; ，而非 &quot;We invited the Rev. Darling.&quot; 我們也不可以說&nbsp; \n    &quot;We invited the reverend to dinner.&quot; -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 \n    rev. 是 review 的縮寫，算是雙關語) </p>');
       const result = await page.evaluate(() => {
         const div = document.getElementById('test')!;
-        pangu.spacingNode(div);
+        pangu.spaceNode(div);
         return div.textContent;
       });
       // prettier-ignore
@@ -411,7 +411,7 @@ test.describe('BrowserPangu', () => {
     });
   });
 
-  test.describe('spacingNode() with getElementById', () => {
+  test.describe('spaceNode() with getElementById', () => {
     test('handle elements by ID', async ({ page }) => {
       const htmlContent = loadFixture('id-name.html');
       const expected = loadFixture('id-name.expected.html').trim();
@@ -420,7 +420,7 @@ test.describe('BrowserPangu', () => {
       await page.evaluate(() => {
         const element = document.getElementById('e1');
         if (element) {
-          pangu.spacingNode(element);
+          pangu.spaceNode(element);
         }
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
@@ -428,7 +428,7 @@ test.describe('BrowserPangu', () => {
     });
   });
 
-  test.describe('spacingNode() with getElementsByClassName', () => {
+  test.describe('spaceNode() with getElementsByClassName', () => {
     test('handle elements by class name (single element)', async ({ page }) => {
       const htmlContent = loadFixture('class-name-1.html');
       const expected = loadFixture('class-name-1.expected.html').trim();
@@ -437,7 +437,7 @@ test.describe('BrowserPangu', () => {
       await page.evaluate(() => {
         const elements = document.getElementsByClassName('e2');
         for (const element of elements) {
-          pangu.spacingNode(element);
+          pangu.spaceNode(element);
         }
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
@@ -452,7 +452,7 @@ test.describe('BrowserPangu', () => {
       await page.evaluate(() => {
         const elements = document.getElementsByClassName('e4');
         for (const element of elements) {
-          pangu.spacingNode(element);
+          pangu.spaceNode(element);
         }
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
@@ -467,7 +467,7 @@ test.describe('BrowserPangu', () => {
       await page.evaluate(() => {
         const elements = document.getElementsByClassName('e5');
         for (const element of elements) {
-          pangu.spacingNode(element);
+          pangu.spaceNode(element);
         }
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
@@ -475,7 +475,7 @@ test.describe('BrowserPangu', () => {
     });
   });
 
-  test.describe('spacingNode() with getElementsByTagName', () => {
+  test.describe('spaceNode() with getElementsByTagName', () => {
     test('handle elements by tag name', async ({ page }) => {
       const htmlContent = loadFixture('tag-name.html');
       const expected = loadFixture('tag-name.expected.html').trim();
@@ -484,7 +484,7 @@ test.describe('BrowserPangu', () => {
       await page.evaluate(() => {
         const elements = document.getElementsByTagName('article');
         for (const element of elements) {
-          pangu.spacingNode(element);
+          pangu.spaceNode(element);
         }
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
@@ -492,13 +492,13 @@ test.describe('BrowserPangu', () => {
     });
   });
 
-  test.describe('spacingNode() with querySelector()', () => {
+  test.describe('spaceNode() with querySelector()', () => {
     test('handle page title', async ({ page }) => {
       await page.evaluate(() => {
         document.title = "Mr.龍島主道：「Let's Party!各位高明博雅君子！」";
         const titleElement = document.querySelector('head > title');
         if (titleElement) {
-          pangu.spacingNode(titleElement);
+          pangu.spaceNode(titleElement);
         }
       });
 
@@ -512,14 +512,14 @@ test.describe('BrowserPangu', () => {
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
-        pangu.spacingNode(document.body);
+        pangu.spaceNode(document.body);
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);
     });
   });
 
-  test.describe('spacingPage()', () => {
+  test.describe('spacePage()', () => {
     test('handle entire page (title and body)', async ({ page }) => {
       const htmlContent = loadFixture('body.html');
       const expected = loadFixture('body.expected.html').trim();
@@ -527,7 +527,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent(htmlContent);
       await page.evaluate(() => {
         document.title = '花學姊的梅杜莎';
-        pangu.spacingPage();
+        pangu.spacePage();
       });
 
       const title = await page.title();
@@ -545,7 +545,7 @@ test.describe('BrowserPangu', () => {
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
-        pangu.spacingNode(document.body);
+        pangu.spaceNode(document.body);
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);
@@ -555,7 +555,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent(`<div id="test"><h2 class="bgr6M8LczKBmaAn4sO0X UlmxiRo0duAvtZZW__30 zW32yWxwexOf03jBk4S7" id=":r31s:">Remove '铁蕾' from 1 Folder?</h2></div>`);
       const result = await page.evaluate(() => {
         const element = document.getElementById('test')!;
-        pangu.spacingNode(element);
+        pangu.spaceNode(element);
         return element.textContent;
       });
       expect(result).toBe(`Remove '铁蕾' from 1 Folder?`);
@@ -564,7 +564,7 @@ test.describe('BrowserPangu', () => {
     test('handle contenteditable elements by skipping them', async ({ page }) => {
       await page.setContent('<div contenteditable="true">abc漢字1</div>');
       await page.evaluate(() => {
-        pangu.spacingNode(document.body);
+        pangu.spaceNode(document.body);
       });
       const content = await page.content();
       expect(content).toContain('<div contenteditable="true">abc漢字1</div>');
@@ -573,7 +573,7 @@ test.describe('BrowserPangu', () => {
     test('skip spacing inside elements with no-pangu-spacing class', async ({ page }) => {
       await page.setContent('<p>漢字<span class="no-pangu-spacing">abc漢字1</span>漢字</p>');
       await page.evaluate(() => {
-        pangu.spacingNode(document.body);
+        pangu.spaceNode(document.body);
       });
       const result = await page.evaluate(() => document.querySelector('p')!.innerHTML);
       // Text inside no-pangu-spacing should be untouched, but outer text nodes should still get spacing
@@ -584,7 +584,7 @@ test.describe('BrowserPangu', () => {
       // code tag is in ignoredTags - text inside should not be spaced
       await page.setContent('<p>漢字<code>abc漢字1</code>漢字</p>');
       await page.evaluate(() => {
-        pangu.spacingNode(document.body);
+        pangu.spaceNode(document.body);
       });
       const result = await page.evaluate(() => document.querySelector('p')!.innerHTML);
       expect(result).toContain('<code>abc漢字1</code>');
@@ -596,7 +596,7 @@ test.describe('BrowserPangu', () => {
     test.fixme('handle spacing around inline code elements', async ({ page }) => {
       await page.setContent('<p>中文<code>English</code>中文</p>');
       await page.evaluate(() => {
-        pangu.spacingNode(document.body);
+        pangu.spaceNode(document.body);
       });
       const result = await page.evaluate(() => document.querySelector('p')!.innerHTML);
       expect(result).toBe('中文 <code>English</code> 中文');
@@ -607,7 +607,7 @@ test.describe('BrowserPangu', () => {
       // This validates that the TreeWalker filter is sufficient without canIgnoreNode
       await page.setContent('<div>漢字abc<pre><code>漢字def</code></pre>漢字ghi</div>');
       await page.evaluate(() => {
-        pangu.spacingNode(document.body);
+        pangu.spaceNode(document.body);
       });
       const result = await page.evaluate(() => document.querySelector('div')!.innerHTML);
       // Text outside ignored containers gets spaced
@@ -622,7 +622,7 @@ test.describe('BrowserPangu', () => {
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
-        pangu.spacingPage();
+        pangu.spacePage();
       });
 
       // Check that input values are unchanged
@@ -646,7 +646,7 @@ test.describe('BrowserPangu', () => {
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
-        pangu.spacingPage();
+        pangu.spacePage();
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);
@@ -661,7 +661,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<div id="test1"><span>社</span>"<span>DF</span></div>');
       const result1 = await page.evaluate(() => {
         const element = document.getElementById('test1')!;
-        pangu.spacingNode(element);
+        pangu.spaceNode(element);
         return element.textContent;
       });
       expect(result1).toBe('社 "DF');
@@ -670,7 +670,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<div id="test2">前面的文字"<span>中间的内容</span>"后面的文字</div>');
       const result2 = await page.evaluate(() => {
         const element = document.getElementById('test2')!;
-        pangu.spacingNode(element);
+        pangu.spaceNode(element);
         return element.textContent;
       });
       expect(result2).toBe('前面的文字 "中间的内容" 后面的文字');
@@ -679,7 +679,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<div id="test3">【UCG中字】"數毛社"DF的《戰神4》全新演示解析</div>');
       const result3 = await page.evaluate(() => {
         const element = document.getElementById('test3')!;
-        pangu.spacingNode(element);
+        pangu.spaceNode(element);
         return element.textContent;
       });
       expect(result3).toBe('【UCG 中字】"數毛社" DF 的《戰神 4》全新演示解析');
@@ -705,7 +705,7 @@ test.describe('BrowserPangu', () => {
       );
 
       await page.evaluate(() => {
-        pangu.spacingPage();
+        pangu.spacePage();
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);
@@ -727,7 +727,7 @@ test.describe('BrowserPangu', () => {
 
       const afterText = await page.evaluate(() => {
         const element = document.getElementById('test')!;
-        pangu.spacingNode(element);
+        pangu.spaceNode(element);
         return element.textContent;
       });
 
@@ -753,7 +753,7 @@ test.describe('BrowserPangu', () => {
 
       await page.evaluate(() => {
         const element = document.getElementById('test')!;
-        pangu.spacingNode(element);
+        pangu.spaceNode(element);
       });
 
       const result = await page.evaluate(() => document.getElementById('test')!.textContent);
@@ -769,7 +769,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent(`<div id="test1">${properlySpacedText}</div>`);
       const result1 = await page.evaluate(() => {
         const element = document.getElementById('test1')!;
-        pangu.spacingNode(element);
+        pangu.spaceNode(element);
         return element.textContent;
       });
       expect(result1).toBe(properlySpacedText);
@@ -783,7 +783,7 @@ test.describe('BrowserPangu', () => {
         div.appendChild(document.createTextNode(' EAS'));
         div.appendChild(document.createTextNode('  build')); // Double space at start
 
-        pangu.spacingNode(div);
+        pangu.spaceNode(div);
         return div.textContent;
       });
       expect(result2).not.toContain('   ');
@@ -798,7 +798,7 @@ test.describe('BrowserPangu', () => {
 
       // Apply spacing
       await page.evaluate(() => {
-        pangu.spacingNode(document.body);
+        pangu.spaceNode(document.body);
       });
 
       // Check that we don't add extra space inside the second span
@@ -846,7 +846,7 @@ test.describe('BrowserPangu', () => {
         await page.setContent(testCase.html);
 
         await page.evaluate(() => {
-          pangu.spacingNode(document.body);
+          pangu.spaceNode(document.body);
         });
 
         // Check that the second span content remains unchanged (no space added)
@@ -871,7 +871,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<div><span>測試</span><span>文字</span></div>');
 
       await page.evaluate(() => {
-        pangu.spacingNode(document.body);
+        pangu.spaceNode(document.body);
       });
 
       // Currently this doesn't work as expected - no space is added
@@ -888,7 +888,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<div>測試<span>文字</span></div>');
 
       await page.evaluate(() => {
-        pangu.spacingNode(document.body);
+        pangu.spaceNode(document.body);
       });
 
       const withSpaceResult = await page.evaluate(() => {
@@ -908,7 +908,7 @@ test.describe('BrowserPangu', () => {
 
       await page.evaluate(() => {
         const element = document.getElementById('grid-container')!;
-        pangu.spacingNode(element);
+        pangu.spaceNode(element);
       });
 
       const panguCount = await page.evaluate(() => document.querySelectorAll('pangu').length);
@@ -924,7 +924,7 @@ test.describe('BrowserPangu', () => {
 
       await page.evaluate(() => {
         const element = document.getElementById('flex-container')!;
-        pangu.spacingNode(element);
+        pangu.spaceNode(element);
       });
 
       const panguCount = await page.evaluate(() => document.querySelectorAll('pangu').length);
@@ -942,7 +942,7 @@ test.describe('BrowserPangu', () => {
       `);
 
       await page.evaluate(() => {
-        pangu.spacingNode(document.body);
+        pangu.spaceNode(document.body);
       });
 
       const panguCount = await page.evaluate(() => document.querySelectorAll('pangu').length);
@@ -955,7 +955,7 @@ test.describe('BrowserPangu', () => {
 
       await page.evaluate(() => {
         const element = document.getElementById('normal')!;
-        pangu.spacingNode(element);
+        pangu.spaceNode(element);
       });
 
       const panguCount = await page.evaluate(() => document.querySelectorAll('pangu').length);
@@ -976,7 +976,7 @@ test.describe('BrowserPangu', () => {
           '<p id="centeredDiv"><span style="color: #000000;"><strong>優惠方案：</strong>影劇館<sup>+</sup>收視費用為月繳費用，不含HiNet光世代及MOD平臺服務等費用</span></p>',
       );
 
-      await page.evaluate(() => pangu.spacingPage());
+      await page.evaluate(() => pangu.spacePage());
 
       expect(await page.locator('#exact').innerHTML()).toBe('<span style="color: #ff874d;">影劇館<sup>+</sup></span>');
       expect(await page.locator('#following').innerHTML()).toBe('<span>影劇館<sup>+</sup> 中文</span>');
@@ -997,7 +997,7 @@ test.describe('BrowserPangu', () => {
           '<div id="following"><span>影劇館<sup>+</sup><a>中文</a></span></div>',
       );
 
-      await page.evaluate(() => pangu.spacingPage());
+      await page.evaluate(() => pangu.spacePage());
 
       expect(await page.locator('#footnote').innerHTML()).toBe('<span>中文<sup><a>1</a></sup> 中文</span>');
       expect(await page.locator('#preceding').innerHTML()).toBe('<a>中文</a><sup>1</sup> 中文');
@@ -1008,7 +1008,7 @@ test.describe('BrowserPangu', () => {
     test('should preserve author spaces around superscript', async ({ page }) => {
       await page.setContent('<div id="before">影劇館 <sup>+</sup></div><div id="inside">影劇館<sup> +</sup></div><div id="after">影劇館<sup>+</sup> CJK</div>');
 
-      await page.evaluate(() => pangu.spacingPage());
+      await page.evaluate(() => pangu.spacePage());
 
       expect(await page.locator('#before').innerHTML()).toBe('影劇館 <sup>+</sup>');
       expect(await page.locator('#inside').innerHTML()).toBe('影劇館<sup> +</sup>');
@@ -1021,7 +1021,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<p id="test">字<span><a href="#">x</a></span> tail</p>');
 
       await page.evaluate(() => {
-        pangu.spacingNode(document.getElementById('test')!);
+        pangu.spaceNode(document.getElementById('test')!);
       });
 
       const result = await page.evaluate(() => document.getElementById('test')!.textContent);
@@ -1032,7 +1032,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<p id="test"><a href="#">字</a> <b>x</b></p>');
 
       await page.evaluate(() => {
-        pangu.spacingNode(document.getElementById('test')!);
+        pangu.spaceNode(document.getElementById('test')!);
       });
 
       const html = await page.evaluate(() => document.getElementById('test')!.innerHTML);
@@ -1045,7 +1045,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<p id="test"><span><a href="#">字</a></span>\n<b>x</b></p>');
 
       await page.evaluate(() => {
-        pangu.spacingNode(document.getElementById('test')!);
+        pangu.spaceNode(document.getElementById('test')!);
       });
 
       const result = await page.evaluate(() => document.querySelector('#test b')!.textContent);
@@ -1056,7 +1056,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<p id="test"><span><a href="#">字</a></span>x</p>');
 
       await page.evaluate(() => {
-        pangu.spacingNode(document.getElementById('test')!);
+        pangu.spaceNode(document.getElementById('test')!);
       });
 
       const result = await page.evaluate(() => document.getElementById('test')!.textContent);
@@ -1068,7 +1068,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<p id="test">甲<span> </span>abc</p>');
 
       await page.evaluate(() => {
-        pangu.spacingNode(document.getElementById('test')!);
+        pangu.spaceNode(document.getElementById('test')!);
       });
 
       const html = await page.evaluate(() => document.getElementById('test')!.innerHTML);
@@ -1079,7 +1079,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<p id="test">字<span><em> </em></span>x</p>');
 
       await page.evaluate(() => {
-        pangu.spacingNode(document.getElementById('test')!);
+        pangu.spaceNode(document.getElementById('test')!);
       });
 
       const html = await page.evaluate(() => document.getElementById('test')!.innerHTML);
@@ -1091,7 +1091,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<p id="test">字<code>a b</code>x</p>');
 
       await page.evaluate(() => {
-        pangu.spacingNode(document.getElementById('test')!);
+        pangu.spaceNode(document.getElementById('test')!);
       });
 
       const html = await page.evaluate(() => document.getElementById('test')!.innerHTML);
@@ -1106,7 +1106,7 @@ test.describe('BrowserPangu', () => {
       </div>`);
 
       await page.evaluate(() => {
-        pangu.spacingPage();
+        pangu.spacePage();
       });
 
       const paragraphs = await page.evaluate(() => Array.from(document.querySelectorAll('p'), (p) => p.textContent));
@@ -1124,7 +1124,7 @@ test.describe('BrowserPangu', () => {
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
-        pangu.spacingPage();
+        pangu.spacePage();
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);
@@ -1139,7 +1139,7 @@ test.describe('BrowserPangu', () => {
 
       await page.setContent(htmlContent);
       await page.evaluate(() => {
-        pangu.spacingPage();
+        pangu.spacePage();
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);
@@ -1151,7 +1151,7 @@ test.describe('BrowserPangu', () => {
       await page.setContent('<li>贼喊捉贼：Anthropic 自己的所有模型内容，<wbr>其实都是从全人类的知识以及相当多的版权内容上蒸馏/<wbr>训练出来的，现在他们却不允许其他人来蒸馏自己的模型。</li>');
 
       await page.evaluate(() => {
-        pangu.spacingPage();
+        pangu.spacePage();
       });
 
       const result = await page.evaluate(() => document.querySelector('li')!.textContent);
@@ -1176,7 +1176,7 @@ test.describe('BrowserPangu', () => {
       `);
 
       await page.evaluate(() => {
-        pangu.spacingNode(document.body);
+        pangu.spaceNode(document.body);
       });
 
       // No <pangu> should be inserted between grid items
@@ -1218,7 +1218,7 @@ test.describe('BrowserPangu', () => {
 
       // Apply spacing
       await page.evaluate(() => {
-        pangu.spacingNode(document.body);
+        pangu.spaceNode(document.body);
       });
 
       // Check what the visible text looks like AFTER spacing

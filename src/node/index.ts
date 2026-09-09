@@ -3,13 +3,13 @@ import { readFile } from 'node:fs/promises';
 import { Pangu } from '../shared/index.js';
 
 export class NodePangu extends Pangu {
-  async spacingFile(path: string) {
+  async spaceFile(path: string) {
     const data = await readFile(path, 'utf8');
-    return this.spacingText(data);
+    return this.spaceText(data);
   }
 
-  spacingFileSync(path: string) {
-    return this.spacingText(readFileSync(path, 'utf8'));
+  spaceFileSync(path: string) {
+    return this.spaceText(readFileSync(path, 'utf8'));
   }
 }
 

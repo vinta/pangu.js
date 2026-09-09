@@ -53,22 +53,22 @@ Learn more in the [changelog](CHANGELOG.md) or on [npm](https://www.npmjs.com/pa
 
 ### Browser
 
-**Make sure to import from `pangu/browser`** in ESM, which is the DOM-aware build (`spacingNode()`, `autoSpacingPage()`) with matching TypeScript types and resolves correctly across all bundlers.
+**Make sure to import from `pangu/browser`** in ESM, which is the DOM-aware build (`spaceNode()`, `autoSpacePage()`) with matching TypeScript types and resolves correctly across all bundlers.
 
 ```js
 import pangu from 'pangu/browser';
 // or
 // <script src="https://cdn.jsdelivr.net/npm/pangu@latest/dist/browser/pangu.umd.js"></script>
 
-const text = pangu.spacingText('當你凝視著bug，bug也凝視著你');
+const text = pangu.spaceText('當你凝視著bug，bug也凝視著你');
 // text = '當你凝視著 bug，bug 也凝視著你'
 
-pangu.spacingNode(document.getElementById('main'));
-document.querySelectorAll('.comment').forEach((el) => pangu.spacingNode(el));
-document.querySelectorAll('p').forEach((el) => pangu.spacingNode(el));
+pangu.spaceNode(document.getElementById('main'));
+document.querySelectorAll('.comment').forEach((el) => pangu.spaceNode(el));
+document.querySelectorAll('p').forEach((el) => pangu.spaceNode(el));
 
 // Listen to any DOM change and automatically perform spacing via MutationObserver()
-document.addEventListener('DOMContentLoaded', () => pangu.autoSpacingPage());
+document.addEventListener('DOMContentLoaded', () => pangu.autoSpacePage());
 ```
 
 Also on:
@@ -89,13 +89,13 @@ import pangu from 'pangu';
 // or
 // const pangu = require('pangu');
 
-const text = pangu.spacingText('與PM戰鬥的人，應當小心自己不要成為PM');
+const text = pangu.spaceText('與PM戰鬥的人，應當小心自己不要成為PM');
 // text = '與 PM 戰鬥的人，應當小心自己不要成為 PM'
 
-const content = await pangu.spacingFile('/path/to/text.txt');
+const content = await pangu.spaceFile('/path/to/text.txt');
 ```
 
-You **SHOULD NOT** use `pangu.js` to spacing Markdown documents, this library is specially designed for HTML webpages and plain texts without any markup language. See [issue #127](https://github.com/vinta/pangu.js/issues/127).
+You **SHOULD NOT** use `pangu.js` to space Markdown documents, this library is specially designed for HTML webpages and plain texts without any markup language. See [issue #127](https://github.com/vinta/pangu.js/issues/127).
 
 ### CLI
 

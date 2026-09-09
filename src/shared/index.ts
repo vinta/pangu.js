@@ -274,9 +274,9 @@ export class Pangu {
     this.version = '10.0.0';
   }
 
-  public spacingText(text: string) {
+  public spaceText(text: string) {
     if (typeof text !== 'string') {
-      console.warn(`[pangu] spacingText(text) only accepts string but got ${typeof text}`);
+      console.warn(`[pangu] spaceText(text) only accepts string but got ${typeof text}`);
       return text;
     }
 
@@ -317,7 +317,7 @@ export class Pangu {
           }
         }
         const processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName: string, attrValue: string) => {
-          const processedValue = this.spacingText(attrValue);
+          const processedValue = this.spaceText(attrValue);
           return `${attrName}="${processedValue}"`;
         });
 
@@ -489,7 +489,7 @@ export class Pangu {
   }
 
   public hasProperSpacing(text: string) {
-    return this.spacingText(text) === text;
+    return this.spaceText(text) === text;
   }
 
   // Strip the spaces that earlier rules left just inside a bracket pair: no space after an opening bracket or before a closing bracket

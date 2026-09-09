@@ -5,49 +5,49 @@ const pangu = new Pangu();
 
 describe('Symbol " "', () => {
   it('handle " " symbols as quotes around CJK', () => {
-    expect(pangu.spacingText('前面"中文123漢字"後面')).toBe('前面 "中文 123 漢字" 後面');
-    expect(pangu.spacingText('前面"中文123"後面')).toBe('前面 "中文 123" 後面');
-    expect(pangu.spacingText('前面"中文abc"後面')).toBe('前面 "中文 abc" 後面');
-    expect(pangu.spacingText('前面"123漢字"後面')).toBe('前面 "123 漢字" 後面');
-    expect(pangu.spacingText('前面"中文123" tail')).toBe('前面 "中文 123" tail');
-    expect(pangu.spacingText('head "中文123漢字"後面')).toBe('head "中文 123 漢字" 後面');
-    expect(pangu.spacingText('head "中文123漢字" tail')).toBe('head "中文 123 漢字" tail');
+    expect(pangu.spaceText('前面"中文123漢字"後面')).toBe('前面 "中文 123 漢字" 後面');
+    expect(pangu.spaceText('前面"中文123"後面')).toBe('前面 "中文 123" 後面');
+    expect(pangu.spaceText('前面"中文abc"後面')).toBe('前面 "中文 abc" 後面');
+    expect(pangu.spaceText('前面"123漢字"後面')).toBe('前面 "123 漢字" 後面');
+    expect(pangu.spaceText('前面"中文123" tail')).toBe('前面 "中文 123" tail');
+    expect(pangu.spaceText('head "中文123漢字"後面')).toBe('head "中文 123 漢字" 後面');
+    expect(pangu.spaceText('head "中文123漢字" tail')).toBe('head "中文 123 漢字" tail');
   });
 
   it('handle separator spacing inside quotes', () => {
-    expect(pangu.spacingText('"字+"')).toBe('"字 +"');
-    expect(pangu.spacingText('"字|"')).toBe('"字 |"');
-    expect(pangu.spacingText('你好"字+"世界')).toBe('你好 "字 +" 世界');
-    expect(pangu.spacingText('前面"字|"後面')).toBe('前面 "字 |" 後面');
-    expect(pangu.spacingText('多行"字+"\n下行"字|"')).toBe('多行 "字 +"\n下行 "字 |"');
+    expect(pangu.spaceText('"字+"')).toBe('"字 +"');
+    expect(pangu.spaceText('"字|"')).toBe('"字 |"');
+    expect(pangu.spaceText('你好"字+"世界')).toBe('你好 "字 +" 世界');
+    expect(pangu.spaceText('前面"字|"後面')).toBe('前面 "字 |" 後面');
+    expect(pangu.spaceText('多行"字+"\n下行"字|"')).toBe('多行 "字 +"\n下行 "字 |"');
   });
 
   it('handle " " symbols as quotes around English', () => {
-    expect(pangu.spacingText('我們也不可以說"We invited the reverend to dinner."')).toBe('我們也不可以說 "We invited the reverend to dinner."');
-    expect(pangu.spacingText('"We invited the Rev. Darling."我們也不可以說')).toBe('"We invited the Rev. Darling." 我們也不可以說');
-    expect(pangu.spacingText('它應該這樣使用："We invited"')).toBe('它應該這樣使用："We invited"');
+    expect(pangu.spaceText('我們也不可以說"We invited the reverend to dinner."')).toBe('我們也不可以說 "We invited the reverend to dinner."');
+    expect(pangu.spaceText('"We invited the Rev. Darling."我們也不可以說')).toBe('"We invited the Rev. Darling." 我們也不可以說');
+    expect(pangu.spaceText('它應該這樣使用："We invited"')).toBe('它應該這樣使用："We invited"');
 
     // prettier-ignore
-    expect(pangu.spacingText('"! git commit -a -m \'蛤\'"'))
+    expect(pangu.spaceText('"! git commit -a -m \'蛤\'"'))
                        .toBe('"! git commit -a -m \'蛤\'"');
 
     // prettier-ignore
-    expect(pangu.spacingText('Rev. (Reverend；牧師的尊稱)這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We invited the Rev. Alan Darling." 或\u00a0 "We\u00a0invited the Rev. Mr. Darling."，而非"We invited the Rev. Darling."我們也不可以說"We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 rev. 是 review 的縮寫，算是雙關語)'))
+    expect(pangu.spaceText('Rev. (Reverend；牧師的尊稱)這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We invited the Rev. Alan Darling." 或\u00a0 "We\u00a0invited the Rev. Mr. Darling."，而非"We invited the Rev. Darling."我們也不可以說"We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 rev. 是 review 的縮寫，算是雙關語)'))
                        .toBe('Rev. (Reverend；牧師的尊稱) 這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We invited the Rev. Alan Darling." 或\u00a0 "We\u00a0invited the Rev. Mr. Darling."，而非 "We invited the Rev. Darling." 我們也不可以說 "We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 rev. 是 review 的縮寫，算是雙關語)');
   });
 
   it('handle " " across the line breaks of a wrapped HTML source', () => {
-    expect(pangu.spacingText('使用："We\ninvited Darling." 或 "We invited."')).toBe('使用："We\ninvited Darling." 或 "We invited."');
+    expect(pangu.spaceText('使用："We\ninvited Darling." 或 "We invited."')).toBe('使用："We\ninvited Darling." 或 "We invited."');
 
     // prettier-ignore
     const text = 'Rev. (Reverend；牧師的尊稱) \n    這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We \n    invited the Rev. Alan Darling." 或\u00a0 "We\u00a0 invited the Rev. Mr. \n    Darling." ，而非 "We invited the Rev. Darling." 我們也不可以說\u00a0 \n    "We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 \n    rev. 是 review 的縮寫，算是雙關語) ';
-    expect(pangu.spacingText(text)).toBe(text);
+    expect(pangu.spaceText(text)).toBe(text);
   });
 
   // Rare cases, ignore
   // See https://github.com/vinta/pangu.js/issues/287
   // it('handle " " mis-pairing (known limitation)', () => {
-  //   expect(pangu.spacingText('Darling." 或 "We')).toBe('Darling." 或 "We');
+  //   expect(pangu.spaceText('Darling." 或 "We')).toBe('Darling." 或 "We');
   // });
 });
 
@@ -56,23 +56,23 @@ describe('Symbol " "', () => {
 describe('Symbol “ ”', () => {
   it('handle “ ” symbols as quotes', () => {
     // prettier-ignore
-    expect(pangu.spacingText('阿里云开源“计算王牌”Blink，实时计算时代已来'))
+    expect(pangu.spaceText('阿里云开源“计算王牌”Blink，实时计算时代已来'))
                        .toBe('阿里云开源 “计算王牌” Blink，实时计算时代已来');
 
     // prettier-ignore
-    expect(pangu.spacingText('苹果撤销Facebook“企业证书”后者股价一度短线走低'))
+    expect(pangu.spaceText('苹果撤销Facebook“企业证书”后者股价一度短线走低'))
                        .toBe('苹果撤销 Facebook “企业证书” 后者股价一度短线走低');
 
     // prettier-ignore
-    expect(pangu.spacingText('【UCG中字】“數毛社”DF的《戰神4》全新演示解析'))
+    expect(pangu.spaceText('【UCG中字】“數毛社”DF的《戰神4》全新演示解析'))
                        .toBe('【UCG 中字】“數毛社” DF 的《戰神 4》全新演示解析');
   });
 
   it('handle misused ” ” quote pairs', () => {
-    expect(pangu.spacingText('他说”你好”啊')).toBe('他说 ”你好” 啊');
+    expect(pangu.spaceText('他说”你好”啊')).toBe('他说 ”你好” 啊');
 
     // prettier-ignore
-    expect(pangu.spacingText('《战斧骨》里还有个镜头挺有意思，就是男主”见路不走”，不从峡谷入口走，而选择了从侧面翻越，还顺便借着口哨吸引出来一个食人族给杀了。'))
+    expect(pangu.spaceText('《战斧骨》里还有个镜头挺有意思，就是男主”见路不走”，不从峡谷入口走，而选择了从侧面翻越，还顺便借着口哨吸引出来一个食人族给杀了。'))
                        .toBe('《战斧骨》里还有个镜头挺有意思，就是男主 ”见路不走”，不从峡谷入口走，而选择了从侧面翻越，还顺便借着口哨吸引出来一个食人族给杀了。');
   });
 });

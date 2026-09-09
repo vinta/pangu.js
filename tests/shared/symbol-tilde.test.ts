@@ -5,23 +5,23 @@ const pangu = new Pangu();
 
 describe('Symbol ~', () => {
   it('handle ~ symbol', () => {
-    expect(pangu.spacingText('前面~')).toBe('前面~');
-    expect(pangu.spacingText('前面~~')).toBe('前面~~');
-    expect(pangu.spacingText('前面~~~')).toBe('前面~~~');
-    expect(pangu.spacingText('前面~後面')).toBe('前面~ 後面');
-    expect(pangu.spacingText('前面~~後面')).toBe('前面~~ 後面');
-    expect(pangu.spacingText('前面~~~後面')).toBe('前面~~~ 後面');
-    expect(pangu.spacingText('前面~abc')).toBe('前面~ abc');
-    expect(pangu.spacingText('前面~123')).toBe('前面~ 123');
+    expect(pangu.spaceText('前面~')).toBe('前面~');
+    expect(pangu.spaceText('前面~~')).toBe('前面~~');
+    expect(pangu.spaceText('前面~~~')).toBe('前面~~~');
+    expect(pangu.spaceText('前面~後面')).toBe('前面~ 後面');
+    expect(pangu.spaceText('前面~~後面')).toBe('前面~~ 後面');
+    expect(pangu.spaceText('前面~~~後面')).toBe('前面~~~ 後面');
+    expect(pangu.spaceText('前面~abc')).toBe('前面~ abc');
+    expect(pangu.spaceText('前面~123')).toBe('前面~ 123');
 
     // DO NOT change if already spacing
-    expect(pangu.spacingText('前面 ~ 後面')).toBe('前面 ~ 後面');
-    expect(pangu.spacingText('前面~ 後面')).toBe('前面~ 後面');
-    expect(pangu.spacingText('前面 ~後面')).toBe('前面 ~後面');
+    expect(pangu.spaceText('前面 ~ 後面')).toBe('前面 ~ 後面');
+    expect(pangu.spaceText('前面~ 後面')).toBe('前面~ 後面');
+    expect(pangu.spaceText('前面 ~後面')).toBe('前面 ~後面');
   });
 
   it('handle ~ symbol as preserved pattern', () => {
-    expect(pangu.spacingText('前面~=後面')).toBe('前面 ~= 後面');
-    expect(pangu.spacingText('前面 ~= 後面')).toBe('前面 ~= 後面');
+    expect(pangu.spaceText('前面~=後面')).toBe('前面 ~= 後面');
+    expect(pangu.spaceText('前面 ~= 後面')).toBe('前面 ~= 後面');
   });
 });

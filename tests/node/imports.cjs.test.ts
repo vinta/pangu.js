@@ -11,19 +11,19 @@ describe('Node.js CommonJS imports', () => {
   it('handle direct require imports', () => {
     const pangu = require('../../dist/node/index.cjs') as NodeCjsModule;
 
-    expect(pangu.spacingText('Hello世界')).toBe('Hello 世界');
+    expect(pangu.spaceText('Hello世界')).toBe('Hello 世界');
 
     // NodePangu is available as a property on pangu
     const anotherPangu = new pangu.NodePangu();
-    expect(anotherPangu.spacingText('Hello世界')).toBe('Hello 世界');
+    expect(anotherPangu.spaceText('Hello世界')).toBe('Hello 世界');
   });
 
   it('handle destructured require imports', () => {
     const { NodePangu, pangu } = require('../../dist/node/index.cjs') as NodeCjsModule;
 
-    expect(pangu.spacingText('Hello世界')).toBe('Hello 世界');
+    expect(pangu.spaceText('Hello世界')).toBe('Hello 世界');
 
     const anotherPangu = new NodePangu();
-    expect(anotherPangu.spacingText('Hello世界')).toBe('Hello 世界');
+    expect(anotherPangu.spaceText('Hello世界')).toBe('Hello 世界');
   });
 });

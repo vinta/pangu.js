@@ -17,7 +17,7 @@ function collectSettledTextNodes(page: Page) {
       window.__batchCount++;
       window.__settledTextNodes.push(...settledTextNodes.map(({ unspaced, settled }) => ({ unspaced, settled })));
     };
-    pangu.spacingNode(document.body);
+    pangu.spaceNode(document.body);
     return window.__settledTextNodes;
   });
 }
@@ -39,7 +39,7 @@ test.describe('onTextNodesSettled', () => {
 
     const result = await page.evaluate(() => {
       const unassigned = pangu.onTextNodesSettled === null;
-      pangu.spacingNode(document.body);
+      pangu.spaceNode(document.body);
       return { unassigned, text: document.body.textContent, captured: window.__settledTextNodes.length };
     });
 
@@ -55,7 +55,7 @@ test.describe('onTextNodesSettled', () => {
   });
 
   test('settle a text node a junction space wrote to after its own text spacing ran', async ({ page }) => {
-    // Boundary spacing prepends a space to a node text spacing already visited, so its settled text is not what spacingText() alone gave. The list is in reverse document order, so the second
+    // Boundary spacing prepends a space to a node text spacing already visited, so its settled text is not what spaceText() alone gave. The list is in reverse document order, so the second
     // node settles first. The unchanged node is in the list too: nothing is filtered here
     await page.setContent('<div><b>abc</b><span>氣溫是-5度</span></div>');
 

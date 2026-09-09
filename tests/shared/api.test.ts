@@ -4,22 +4,22 @@ import { Pangu } from '../../dist/shared/index.js';
 const pangu = new Pangu();
 
 describe('API', () => {
-  describe('spacingText()', () => {
-    it('spacing text', () => {
+  describe('spaceText()', () => {
+    it('space text', () => {
       // prettier-ignore
-      expect(pangu.spacingText('聽說Hadoop工程師睡不著的時候都會MapReduce羊'))
+      expect(pangu.spaceText('聽說Hadoop工程師睡不著的時候都會MapReduce羊'))
                          .toBe('聽說 Hadoop 工程師睡不著的時候都會 MapReduce 羊');
 
       // prettier-ignore
-      expect(pangu.spacingText('遇到了一個問題，決定用 thread 來解決，嗯，在現有我兩個問了題'))
+      expect(pangu.spaceText('遇到了一個問題，決定用 thread 來解決，嗯，在現有我兩個問了題'))
                          .toBe('遇到了一個問題，決定用 thread 來解決，嗯，在現有我兩個問了題');
     });
 
-    it('spacing text is idempotent', () => {
+    it('space text is idempotent', () => {
       // Formatter contract: a second pass never changes the output, so format-then-check always passes
       for (const text of ['"字+"', '"字|"', '你好"字+"世界', '多行"字+"\n下行"字|"', '聽說Hadoop工程師睡不著的時候都會MapReduce羊']) {
-        const once = pangu.spacingText(text);
-        expect(pangu.spacingText(once)).toBe(once);
+        const once = pangu.spaceText(text);
+        expect(pangu.spaceText(once)).toBe(once);
         expect(pangu.hasProperSpacing(once)).toBe(true);
       }
     });

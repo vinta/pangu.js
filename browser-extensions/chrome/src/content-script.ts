@@ -2,21 +2,21 @@ import pangu from '../../../src/browser/pangu';
 import { applyAiSpacing, warmUpAiSpacing } from './ai-spacing/content-script';
 import type { ContentScriptResponse, MessageToContentScript } from './messages';
 import { getSettings, type Settings } from './settings/storage';
-import { shouldAutoSpacing } from './settings/urls';
+import { shouldAutoSpace } from './settings/urls';
 
 function startAutoSpacing(settings: Settings) {
   if (settings.is_ai_spacing_enabled) {
     warmUpAiSpacing();
   }
-  pangu.autoSpacingPage();
+  pangu.autoSpacePage();
 }
 
 // Content script registration only applies at page load, so the navigation listener must check the URL policy when the URL changes as well
 function applyAutoSpacingUrlPolicy(settings: Settings) {
-  if (shouldAutoSpacing(settings, location.href)) {
+  if (shouldAutoSpace(settings, location.href)) {
     startAutoSpacing(settings);
   } else {
-    pangu.stopAutoSpacingPage();
+    pangu.stopAutoSpacePage();
   }
 }
 

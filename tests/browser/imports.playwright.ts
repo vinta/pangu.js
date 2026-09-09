@@ -12,14 +12,14 @@ test.describe('Browser UMD imports', () => {
     const result = await page.evaluate(() => {
       return {
         hasGlobalPangu: typeof window.pangu !== 'undefined',
-        hasAutoSpacingPage: typeof window.pangu.autoSpacingPage === 'function',
+        hasAutoSpacePage: typeof window.pangu.autoSpacePage === 'function',
         hasBrowserPanguClass: typeof window.pangu.BrowserPangu === 'function',
         canCreateInstance: new window.pangu.BrowserPangu() instanceof window.pangu.BrowserPangu,
       };
     });
 
     expect(result.hasGlobalPangu).toBe(true);
-    expect(result.hasAutoSpacingPage).toBe(true);
+    expect(result.hasAutoSpacePage).toBe(true);
     expect(result.hasBrowserPanguClass).toBe(true);
     expect(result.canCreateInstance).toBe(true);
   });
@@ -27,7 +27,7 @@ test.describe('Browser UMD imports', () => {
   test('handle text with spacing functionality', async ({ page }) => {
     const result = await page.evaluate(() => {
       const text = 'Hello世界';
-      const spaced = pangu.spacingText(text);
+      const spaced = pangu.spaceText(text);
       return { original: text, spaced };
     });
 

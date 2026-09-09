@@ -5,26 +5,26 @@ const pangu = new Pangu();
 
 describe('Symbol :', () => {
   it('handle : symbol', () => {
-    expect(pangu.spacingText('前面:後面')).toBe('前面: 後面');
-    expect(pangu.spacingText('電話:123456789')).toBe('電話: 123456789');
-    expect(pangu.spacingText('前面:I have no idea後面')).toBe('前面: I have no idea 後面');
+    expect(pangu.spaceText('前面:後面')).toBe('前面: 後面');
+    expect(pangu.spaceText('電話:123456789')).toBe('電話: 123456789');
+    expect(pangu.spaceText('前面:I have no idea後面')).toBe('前面: I have no idea 後面');
 
     // DO NOT change if already spacing
-    expect(pangu.spacingText('前面 : 後面')).toBe('前面 : 後面');
-    expect(pangu.spacingText('前面: 後面')).toBe('前面: 後面');
-    expect(pangu.spacingText('前面 :後面')).toBe('前面 :後面');
-    expect(pangu.spacingText('前面: I have no idea後面')).toBe('前面: I have no idea 後面');
+    expect(pangu.spaceText('前面 : 後面')).toBe('前面 : 後面');
+    expect(pangu.spaceText('前面: 後面')).toBe('前面: 後面');
+    expect(pangu.spaceText('前面 :後面')).toBe('前面 :後面');
+    expect(pangu.spaceText('前面: I have no idea後面')).toBe('前面: I have no idea 後面');
   });
 
   // FIXME
   it.todo('handle : symbol as emoticon', () => {
-    expect(pangu.spacingText('前面:)後面')).toBe('前面 :) 後面');
+    expect(pangu.spaceText('前面:)後面')).toBe('前面 :) 後面');
   });
 
   // FIXME
   it.todo('handle : symbol as separator', () => {
-    expect(pangu.spacingText('前面:後面:再後面')).toBe('前面:後面:再後面');
-    expect(pangu.spacingText('前面:後面:再後面:更後面')).toBe('前面:後面:再後面:更後面');
-    expect(pangu.spacingText('前面:後面:再後面:更後面:超後面')).toBe('前面:後面:再後面:更後面:超後面');
+    expect(pangu.spaceText('前面:後面:再後面')).toBe('前面:後面:再後面');
+    expect(pangu.spaceText('前面:後面:再後面:更後面')).toBe('前面:後面:再後面:更後面');
+    expect(pangu.spaceText('前面:後面:再後面:更後面:超後面')).toBe('前面:後面:再後面:更後面:超後面');
   });
 });

@@ -81,7 +81,7 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
     "@playwright/test": "1.61.1",
-    "@types/chrome": "0.2.2",
+    "@types/chrome": "0.2.9",
     "@types/dom-chromium-ai": "0.0.17",
     "@types/node": "20.19.43",
     "eslint": "10.7.0",

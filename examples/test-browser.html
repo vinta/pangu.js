@@ -64,7 +64,7 @@
         <h2>Auto-spacing Entire Page</h2>
         <p>這段文字包含English和中文mixed在一起，還有numbers123。</p>
         <p>pangu.js會自動在CJK字元和half-width characters之間加入空白。</p>
-        <button onclick="autoSpacingPage()">Run</button>
+        <button onclick="autoSpacePage()">Run</button>
     </div>
 
     <div id="result"></div>
@@ -75,13 +75,13 @@
         function spacingDemo1() {
             const elem = document.getElementById('demo1');
             const original = elem.textContent;
-            pangu.spacingNode(elem);
+            pangu.spaceNode(elem);
             const result = document.getElementById('result');
             result.textContent = `UMD Version Result:\nOriginal: ${original}\nProcessed: ${elem.textContent}`;
         }
 
-        function autoSpacingPage() {
-            pangu.autoSpacingPage();
+        function autoSpacePage() {
+            pangu.autoSpacePage();
             document.getElementById('result').textContent = 'Auto-spacing enabled! Try editing the text on the page.';
         }
     </script>
@@ -93,7 +93,7 @@
         document.getElementById('esmButton').addEventListener('click', () => {
             const elem = document.getElementById('demo2');
             const original = elem.textContent;
-            const spaced = pangu.spacingText(original);
+            const spaced = pangu.spaceText(original);
             elem.textContent = spaced;
 
             const result = document.getElementById('result');

@@ -9,9 +9,9 @@ vi.mock('../../browser-extensions/chrome/src/ai-spacing/content-script', () => a
 async function loadContentScript(settings: Settings | Promise<Settings>, url = 'https://docs.google.com/document/d/abc') {
   vi.resetModules();
   const pangu = {
-    autoSpacingPage: vi.fn(),
-    stopAutoSpacingPage: vi.fn(),
-    spacingPage: vi.fn(),
+    autoSpacePage: vi.fn(),
+    stopAutoSpacePage: vi.fn(),
+    spacePage: vi.fn(),
     onTextNodesSettled: null as ((nodes: SettledTextNode[]) => void) | null,
   };
   const addMessageListener = vi.fn<typeof chrome.runtime.onMessage.addListener>();
@@ -53,43 +53,43 @@ describe('manual spacing activation', () => {
     const manualResponse = vi.fn();
     expect(receiveMessage({ action: 'MANUAL_SPACING' }, {}, manualResponse)).toBe(true);
     expect(manualResponse).not.toHaveBeenCalled();
-    expect(pangu.autoSpacingPage).not.toHaveBeenCalled();
+    expect(pangu.autoSpacePage).not.toHaveBeenCalled();
     const nodes: SettledTextNode[] = [{ node: {} as Text, unspaced: '公視+上架', settled: '公視 + 上架' }];
-    pangu.autoSpacingPage.mockImplementation(() => pangu.onTextNodesSettled?.(nodes));
+    pangu.autoSpacePage.mockImplementation(() => pangu.onTextNodesSettled?.(nodes));
 
     finishSettings({ ...DEFAULT_SETTINGS, spacing_mode: 'spacing_when_click' });
     await vi.waitFor(() => expect(manualResponse).toHaveBeenCalledWith({ success: true }));
     expect(aiSpacing.applyAiSpacing).toHaveBeenCalledWith(nodes);
-    expect(pangu.autoSpacingPage).toHaveBeenCalledTimes(1);
+    expect(pangu.autoSpacePage).toHaveBeenCalledTimes(1);
     expect(await click()).toEqual({ success: true });
     expect(aiSpacing.warmUpAiSpacing).toHaveBeenCalledTimes(2);
-    expect(pangu.spacingPage).not.toHaveBeenCalled();
+    expect(pangu.spacePage).not.toHaveBeenCalled();
   });
 
   it.each(['spacing_when_load', 'spacing_when_click'] as const)('starts on an excluded URL in %s without enabling disabled AI', async (spacing_mode) => {
     const { pangu, click } = await loadContentScript({ ...DEFAULT_SETTINGS, spacing_mode, is_ai_spacing_enabled: false });
-    expect(pangu.autoSpacingPage).not.toHaveBeenCalled();
+    expect(pangu.autoSpacePage).not.toHaveBeenCalled();
     expect(await click()).toEqual({ success: true });
-    expect(pangu.autoSpacingPage).toHaveBeenCalledTimes(1);
+    expect(pangu.autoSpacePage).toHaveBeenCalledTimes(1);
     expect(pangu.onTextNodesSettled).toBeNull();
     expect(aiSpacing.warmUpAiSpacing).not.toHaveBeenCalled();
-    expect(pangu.spacingPage).not.toHaveBeenCalled();
+    expect(pangu.spacePage).not.toHaveBeenCalled();
   });
 
   it('keeps manual activation on same-URL history updates but stops when the URL changes, even to an allowed URL', async () => {
     const url = 'https://example.com/';
     const { pangu, click, navigate } = await loadContentScript({ ...DEFAULT_SETTINGS, spacing_mode: 'spacing_when_click' }, url);
-    expect(pangu.autoSpacingPage).not.toHaveBeenCalled();
+    expect(pangu.autoSpacePage).not.toHaveBeenCalled();
     await click();
-    pangu.stopAutoSpacingPage.mockClear();
+    pangu.stopAutoSpacePage.mockClear();
 
     navigate(url);
-    expect(pangu.stopAutoSpacingPage).not.toHaveBeenCalled();
+    expect(pangu.stopAutoSpacePage).not.toHaveBeenCalled();
     navigate(`${url}#next`);
-    expect(pangu.stopAutoSpacingPage).toHaveBeenCalledTimes(1);
-    expect(pangu.autoSpacingPage).toHaveBeenCalledTimes(1);
+    expect(pangu.stopAutoSpacePage).toHaveBeenCalledTimes(1);
+    expect(pangu.autoSpacePage).toHaveBeenCalledTimes(1);
     await click();
-    expect(pangu.autoSpacingPage).toHaveBeenCalledTimes(2);
+    expect(pangu.autoSpacePage).toHaveBeenCalledTimes(2);
   });
 
   it('reports failed initialization instead of spacing before settings are available', async () => {
@@ -102,7 +102,7 @@ describe('manual spacing activation', () => {
     const response = click();
     failSettings(new Error('Storage is unavailable'));
     expect(await response).toEqual({ success: false });
-    expect(pangu.autoSpacingPage).not.toHaveBeenCalled();
+    expect(pangu.autoSpacePage).not.toHaveBeenCalled();
   });
 
   it('does not carry a pending manual click to a different URL', async () => {
@@ -115,13 +115,13 @@ describe('manual spacing activation', () => {
     location.href = 'https://example.com/next';
     finishSettings({ ...DEFAULT_SETTINGS, spacing_mode: 'spacing_when_click' });
     expect(await response).toEqual({ success: false });
-    expect(pangu.autoSpacingPage).not.toHaveBeenCalled();
+    expect(pangu.autoSpacePage).not.toHaveBeenCalled();
   });
 
   it('reports a failed manual start', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     const { pangu, click } = await loadContentScript({ ...DEFAULT_SETTINGS, spacing_mode: 'spacing_when_click' });
-    pangu.autoSpacingPage.mockImplementation(() => {
+    pangu.autoSpacePage.mockImplementation(() => {
       throw new Error('Spacing failed');
     });
     expect(await click()).toEqual({ success: false });
@@ -131,20 +131,20 @@ describe('manual spacing activation', () => {
 describe('automatic spacing activation', () => {
   it('reapplies URL filters after a manual override', async () => {
     const { pangu, click, navigate } = await loadContentScript(DEFAULT_SETTINGS, 'https://example.com/');
-    expect(pangu.autoSpacingPage).toHaveBeenCalledTimes(1);
+    expect(pangu.autoSpacePage).toHaveBeenCalledTimes(1);
     expect(pangu.onTextNodesSettled).toBeTypeOf('function');
 
     const excludedUrl = 'https://docs.google.com/document/d/abc';
     navigate(excludedUrl);
-    expect(pangu.stopAutoSpacingPage).toHaveBeenCalledTimes(1);
+    expect(pangu.stopAutoSpacePage).toHaveBeenCalledTimes(1);
     await click();
-    expect(pangu.autoSpacingPage).toHaveBeenCalledTimes(2);
+    expect(pangu.autoSpacePage).toHaveBeenCalledTimes(2);
     navigate(excludedUrl);
-    expect(pangu.stopAutoSpacingPage).toHaveBeenCalledTimes(1);
+    expect(pangu.stopAutoSpacePage).toHaveBeenCalledTimes(1);
     navigate(`${excludedUrl}?next`);
-    expect(pangu.stopAutoSpacingPage).toHaveBeenCalledTimes(2);
+    expect(pangu.stopAutoSpacePage).toHaveBeenCalledTimes(2);
     navigate('https://example.com/next');
-    expect(pangu.autoSpacingPage).toHaveBeenCalledTimes(3);
+    expect(pangu.autoSpacePage).toHaveBeenCalledTimes(3);
     expect(aiSpacing.warmUpAiSpacing).toHaveBeenCalledTimes(3);
   });
 });
