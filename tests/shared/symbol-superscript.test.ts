@@ -38,3 +38,12 @@ describe('Symbol ®', () => {
   });
 });
 
+// \u00a9
+describe('Symbol ©', () => {
+  it('handle © symbol', () => {
+    expect(pangu.spacingText('版權所有©2026東亞重工')).toBe('版權所有 © 2026 東亞重工');
+    expect(pangu.spacingText('版權所有©2012-2026東亞重工')).toBe('版權所有 © 2012-2026 東亞重工');
+    expect(pangu.spacingText('Copyright © 2026東亞重工')).toBe('Copyright © 2026 東亞重工');
+    expect(pangu.spacingText('Copyright © 2012-2026東亞重工')).toBe('Copyright © 2012-2026 東亞重工');
+  });
+});

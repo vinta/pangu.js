@@ -205,6 +205,9 @@ export const ANS_CJK = new RegExp(`([${ANS_BEFORE_CJK}])([${CJK}])`, 'g');
 
 export const S_A = new RegExp(`(%)([${A}])`, 'g');
 
+// \u00a9 is a sign before a year, not a prefix on it: `\u00a9` + digits reads with a space after the sign
+export const COPYRIGHT_DIGIT = /(\u00a9)([0-9])/g;
+
 // Characters: · • ‧
 export const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
@@ -467,6 +470,7 @@ export class Pangu {
     newText = newText.replace(ANS_CJK, '$1 $2');
 
     newText = newText.replace(S_A, '$1 $2');
+    newText = newText.replace(COPYRIGHT_DIGIT, '$1 $2');
 
     newText = newText.replace(MIDDLE_DOT, '・');
 
