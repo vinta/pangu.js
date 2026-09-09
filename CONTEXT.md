@@ -22,6 +22,10 @@ _Avoid_: paranoid spacing
 Deciding whether whitespace goes between two adjacent text nodes on a page, and where it goes. `CJK<b>A</b>` gets the space at the start of the `A` node. `CJK<a>A</a>` gets the space at the end of the `CJK` node, because a link, underline, or strike-through would render a space that is added inside it. `<a>A</a><a>CJK</a>` gets a pangu element between the links. In three cases, nothing is added: whitespace or a block edge already separates the nodes, an ignored tag such as `<code>` sits between them, or one node is hidden.
 _Avoid_: pair spacing, adjacent-node spacing
 
+**Decision**:
+What the rules choose for one text node or one boundary before pangu writes anything. A boundary spacing decision says where the space goes: nowhere, at the start of the next text node, at the end of the current one, or in a pangu element between them. A text node decision says what the node needs first: trim its leading space, prepend a space, or apply text spacing. A decision is computed from facts alone, with no DOM access, so it runs in vitest. The classifier never makes a decision; it answers with a label.
+_Avoid_: verdict
+
 **Settle**:
 A text node settles when nothing will rewrite it again in this batch. Text spacing runs first, then boundary spacing rewrites tails of nodes it already visited, so a node is spaced before it is settled. Pangu hands settled nodes to the host at the batch tail, never per node.
 _Avoid_: finished, done, final
