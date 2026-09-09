@@ -1,15 +1,24 @@
 {
   "name": "pangu",
-  "description": "Paranoid text spacing for good readability, to automatically insert whitespace between CJK (Chinese, Japanese, Korean) and half-width characters (alphabetical letters, numerical digits and symbols).",
+  "description": "Opinionated paranoid text spacing: automatically inserts whitespace between CJK (Chinese, Japanese, Korean) and ANS (alphabetical letters, numerical digits and symbols)",
   "keywords": [
+    "text-spacing",
+    "text-autospace",
+    "spacing",
+    "whitespace",
+    "cjk",
     "chinese",
     "japanese",
     "korean",
-    "cjk",
-    "text-spacing",
+    "punctuation",
+    "typesetting",
     "typography",
-    "formatting",
-    "readability"
+    "cli",
+    "中文",
+    "英文",
+    "數字",
+    "符號",
+    "空格"
   ],
   "version": "10.0.0",
   "author": {
