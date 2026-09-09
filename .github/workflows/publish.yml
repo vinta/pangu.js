@@ -55,6 +55,6 @@ jobs:
       - name: Publish to npm
         run: npm publish --provenance --access public
 
-  examples:
+  verify:
     needs: publish
-    uses: ./.github/workflows/examples.yml
+    uses: ./.github/workflows/verify.yml

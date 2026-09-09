@@ -1,4 +1,4 @@
-name: Examples
+name: Verify
 
 # Runs examples/ against the pangu version pinned in examples/package.json, which bump-version keeps equal to the release version.
 # Called from publish.yml after each release; dispatch by hand only makes sense once that pinned version is on npm
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  examples:
+  verify:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
@@ -46,5 +46,5 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run examples
+      - name: Run verify
         run: npm run verify
