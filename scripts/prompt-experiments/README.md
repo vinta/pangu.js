@@ -8,6 +8,8 @@ For title numbers and subtitle context, see [the v31 comparison](hyphen-sign/rep
 
 For clean clones versus shared history on one webpage, see [the session reuse experiment](session-reuse/README.md).
 
+For longer classifier inputs, see [the sentence length experiment](sentence-length/README.md).
+
 Run Gemini Nano experiments alongside the shipping code. The CLI sends evaluation code through Playwright to the installed pangu extension's service worker. No extra extension, eval page, or extension rebuild is needed to compare prompts.
 
 Requires Node 22.18+ and `playwright-cli` on PATH. The model must already be available in the configured Chrome profile. The runner does not download it.
