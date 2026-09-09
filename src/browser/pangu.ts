@@ -494,12 +494,6 @@ export class BrowserPangu extends Pangu {
   }
 
   private setupAutoSpacePageObserver(nodeDelayMs: number, nodeMaxWaitMs: number) {
-    // Disconnect any existing auto-spacing observer
-    if (this.autoSpacePageObserver) {
-      this.autoSpacePageObserver.disconnect();
-      this.autoSpacePageObserver = null;
-    }
-
     const queue: Node[] = [];
 
     // Debounce timers outlive disconnect(): both callbacks bail once stopAutoSpacePage() dropped this observer
