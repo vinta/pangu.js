@@ -95,7 +95,7 @@ const text = pangu.spaceText('與PM戰鬥的人，應當小心自己不要成為
 const content = await pangu.spaceFile('/path/to/text.txt');
 ```
 
-You **SHOULD NOT** use `pangu.js` to spacing Markdown documents, this library is specially designed for HTML webpages and plain texts without any markup language. See [issue #127](https://github.com/vinta/pangu.js/issues/127).
+You **SHOULD NOT** use `pangu.js` to space Markdown documents, this library is specially designed for HTML webpages and plain texts without any markup language. See [issue #127](https://github.com/vinta/pangu.js/issues/127).
 
 ### CLI
 
