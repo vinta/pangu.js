@@ -47,7 +47,7 @@ async function readStdin() {
   return chunks.join('').replace(/\n$/, '');
 }
 
-function printSpaceText(text: string | undefined) {
+function spaceTextPrinted(text: string | undefined) {
   if (typeof text === 'string') {
     console.log(pangu.spaceText(text));
   } else {
@@ -57,7 +57,7 @@ function printSpaceText(text: string | undefined) {
 }
 
 // An empty string is what -f "$EMPTY_VAR" expands to, so it counts as a missing path rather than a file to open
-function printSpaceFile(path: string | undefined) {
+function spaceFilePrinted(path: string | undefined) {
   if (path) {
     // File mode only does spacing: no newline appended, the file's own EOF newlines (or lack of one) pass through untouched
     process.stdout.write(pangu.spaceFileSync(path));
@@ -95,7 +95,7 @@ async function main() {
   }
 
   if (args.length === 0) {
-    printSpaceText(wantsStdin(undefined) ? await readStdin() : undefined);
+    spaceTextPrinted(wantsStdin(undefined) ? await readStdin() : undefined);
     return;
   }
 
@@ -110,16 +110,16 @@ async function main() {
       break;
     case '-t':
     case '--text':
-      printSpaceText(wantsStdin(args[1]) ? await readStdin() : args[1]);
+      spaceTextPrinted(wantsStdin(args[1]) ? await readStdin() : args[1]);
       break;
     case '-f':
     case '--file':
       // An explicit - is the conventional spelling for "the file is stdin" (cf. tar -f -). A missing path is a usage error instead of a stdin fallback, so that -f with an empty path variable
       // reports the missing path instead of silently spacing whatever happens to be piped in
       if (args[1] === '-') {
-        printSpaceText(await readStdin());
+        spaceTextPrinted(await readStdin());
       } else {
-        printSpaceFile(args[1]);
+        spaceFilePrinted(args[1]);
       }
       break;
     case '-c':
@@ -127,10 +127,10 @@ async function main() {
       checkSpacing(wantsStdin(args[1]) ? await readStdin() : args[1]);
       break;
     case '-':
-      printSpaceText(await readStdin());
+      spaceTextPrinted(await readStdin());
       break;
     default:
-      printSpaceText(args[0]);
+      spaceTextPrinted(args[0]);
   }
 }
 
