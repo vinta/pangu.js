@@ -27,7 +27,7 @@ Build, test, lint, and typecheck scripts are listed in `package.json`. The one w
 npm run bump-version 1.2.3      # Bumps package.json, extension manifest, src/shared/index.ts, examples/package.json, then builds and packs the extension zip. Does NOT commit or tag.
 ```
 
-**npm publishing** runs in GitHub Actions (`.github/workflows/publish.yml`) when a `v*` tag is pushed, using npm Trusted Publishing (OIDC), so no tokens are needed. Never run `npm publish` locally. ADR 0014 records why the workflow is a single job.
+**npm publishing** runs in GitHub Actions (`.github/workflows/publish.yml`) when a `v*` tag is pushed, using npm Trusted Publishing (OIDC), so no tokens are needed. Never run `npm publish` locally. ADR 0014 records why publishing is one job rather than a pack/publish split. After it, `verify.yml` installs the just-published version into `examples/` and runs `npm run verify` there.
 
 ## Gotcha
 
