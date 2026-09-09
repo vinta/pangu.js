@@ -1,8 +1,9 @@
 import { Pangu } from '../shared/index.js';
-import { decideBoundarySpacing, decideTextNodeSpacing, respaceCurrentTail } from './boundary-spacing.js';
+import { decideBoundarySpacing, decideTextNodeSpacing, respaceCurrentTail } from './dom/boundary-spacing.js';
 import { DomWalker } from './dom/dom-walker.js';
 import { VisibilityDetector } from './dom/visibility-detector.js';
 import { TaskScheduler } from './scheduling/task-scheduler.js';
+import { debounce, once, waitForVideosToLoad } from './scheduling/timing.js';
 
 export interface AutoSpacePageConfig {
   pageDelayMs?: number;
@@ -27,45 +28,6 @@ export interface LateFix {
 
 const TRAILING_WHITESPACE = /\s$/;
 const LEADING_WHITESPACE = /^\s/;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function once<T extends (...args: any[]) => unknown>(func: T) {
-  let executed = false;
-  return function (...args: Parameters<T>) {
-    if (executed) {
-      return undefined;
-    }
-    executed = true;
-    return func(...args);
-  };
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function debounce<T extends (...args: any[]) => void>(func: T, delay: number, mustRunDelay = Infinity) {
-  let timer: number | null = null;
-  let startTime: number | null = null;
-
-  return function (...args: Parameters<T>) {
-    const currentTime = Date.now();
-
-    if (timer) {
-      clearTimeout(timer);
-    }
-
-    if (!startTime) {
-      startTime = currentTime;
-    }
-
-    if (currentTime - startTime >= mustRunDelay) {
-      func(...args);
-      startTime = currentTime;
-    } else {
-      timer = window.setTimeout(() => {
-        func(...args);
-      }, delay);
-    }
-  };
-}
 
 export class BrowserPangu extends Pangu {
   // Pre-paint re-space stays bounded: subtrees with more text nodes than this fall back to the queue
@@ -102,7 +64,7 @@ export class BrowserPangu extends Pangu {
     const observer = this.setupAutoSpacePageObserver(nodeDelayMs, nodeMaxWaitMs);
 
     // Skipped once stopAutoSpacePage() dropped this observer before the delay elapsed
-    this.waitForVideosToLoad(
+    waitForVideosToLoad(
       pageDelayMs,
       once(() => {
         if (this.autoSpacePageObserver === observer) {
@@ -450,47 +412,6 @@ export class BrowserPangu extends Pangu {
     }
 
     this.taskScheduler.queue.add(task);
-  }
-
-  private waitForVideosToLoad(delayMs: number, onLoaded: () => void) {
-    // Wait for videos to load before spacing to avoid layout shifts
-    // See: https://github.com/vinta/pangu.js/issues/117
-    const videos = Array.from(document.getElementsByTagName('video'));
-
-    if (videos.length === 0) {
-      // No videos, proceed with normal delay
-      setTimeout(onLoaded, delayMs);
-    } else {
-      // Check if all videos are already loaded
-      const allVideosLoaded = videos.every((video) => video.readyState >= 3);
-
-      if (allVideosLoaded) {
-        // All videos loaded, proceed with normal delay
-        setTimeout(onLoaded, delayMs);
-      } else {
-        // Wait for all videos to load
-        let loadedCount = 0;
-        const videoCount = videos.length;
-
-        const checkAllLoaded = () => {
-          loadedCount++;
-          if (loadedCount >= videoCount) {
-            setTimeout(onLoaded, delayMs);
-          }
-        };
-
-        for (const video of videos) {
-          if (video.readyState >= 3) {
-            checkAllLoaded();
-          } else {
-            video.addEventListener('loadeddata', checkAllLoaded, { once: true });
-          }
-        }
-
-        // Fallback timeout in case videos never load
-        setTimeout(onLoaded, delayMs + 5000);
-      }
-    }
   }
 
   private setupAutoSpacePageObserver(nodeDelayMs: number, nodeMaxWaitMs: number) {

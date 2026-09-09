@@ -100,7 +100,11 @@ export function readSentence(node: Text, unspaced: string, at: number, unspacedB
     return lineTowards(node, own, backwards) ?? readSide(own, backwards);
   }
 
-  const before = readFrom(unspaced.slice(Math.max(0, at - MAX_SENTENCE_SIDE), at), true).replace(SEGMENT_BREAK, ' ').trimStart();
-  const after = readFrom(unspaced.slice(at + 1, at + 1 + MAX_SENTENCE_SIDE), false).replace(SEGMENT_BREAK, ' ').trimEnd();
+  const before = readFrom(unspaced.slice(Math.max(0, at - MAX_SENTENCE_SIDE), at), true)
+    .replace(SEGMENT_BREAK, ' ')
+    .trimStart();
+  const after = readFrom(unspaced.slice(at + 1, at + 1 + MAX_SENTENCE_SIDE), false)
+    .replace(SEGMENT_BREAK, ' ')
+    .trimEnd();
   return sliceSentence(before + unspaced[at] + after, before.length);
 }
