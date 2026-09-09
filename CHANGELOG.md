@@ -1,8 +1,8 @@
 # Changelog
 
-## v10.0.0 / 2026-xx-xx
+## v10.0.0 / 2026-09-10
 
-### pangu.js
+### [pangu.js](https://www.npmjs.com/package/pangu)
 
 - 各位觀眾！Paranoid Text Spacing 演算法 v10 強勢登場！
   - 英文單字後面緊接著 `+` 再接中文時，`+` 不再當成單字的後綴，而是當成分隔符號
@@ -13,7 +13,6 @@
     - 網頁裡的 `<sup>` 元素也一樣，跟前面的文字之間不加空格，空格只加在 `<sup>` 後面
   - `℃`、`℉`、`№` 這類 Letterlike Symbols 區段的字元碰到中文時會加空格；`™`、`℠`、`®` 跟上標字元一樣黏在前面的文字上
   - `©` 後面緊接著數字時會加空格：`版權所有©2026` 會變成 `版權所有 © 2026`
-- 修正動態填入內容的元素（例如原本是空的 `<span>` 後來才由 JavaScript 塞進數字）跟旁邊已經加過空格的文字之間會漏加空格的問題
 - 所有 `spacingXxx()` methods 改名為 `spaceXxx()`
   - `spacingText()` -> `spaceText()`
   - `spacingFile()` -> `spaceFile()`
@@ -23,13 +22,14 @@
   - `autoSpacingPage()` -> `autoSpacePage()`
   - `stopAutoSpacingPage()` -> `stopAutoSpacePage()`
 
-### 為什麼你們就是不能加個空格呢？
+### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 
 - 新功能：使用 Chrome 的 [Prompt API](https://developer.chrome.com/docs/ai/prompt-api) 來處理 pangu.js 的規則難以判斷的加空格情境
   - 中文後面緊接著 `-` 再接數字時，由模型判斷 `-` 是負號還是分隔符號：`氣溫是-5度` 會變成 `氣溫是 -5 度`
   - `Disney+`、`Apple TV+`、`公視+`、`AA+`、`AB+` 這類名字後面的 `+` 和 `-` 會黏回去
   - 所有的操作只在你的電腦上運行（完全離線，沒有任何資料會被上傳到雲端）
-  - 缺點是 Prompt API 只能用 on-device 模型：Gemini Nano，現階段的效果差強人意。不過總比沒有好，而且不用錢的東西就不要要求太多了
+  - 缺點是 Prompt API 只能用 on-device 模型：Gemini Nano，現階段的效果差強人意。不過總比沒有好，而且免錢的東西就不要要求太多了
+- 修正動態填入內容的元素（例如原本是空的 `<span>` 後來才由 JavaScript 塞進數字）跟旁邊已經加過空格的文字之間會漏加空格的問題
 - 修正在 GitHub 這類不重新載入頁面就換網址的網站上的黑名單和白名單不會跟著網址生效的問題
 - Chrome extension 支援的最低版本改成 Chrome 102
   - 為了用 `window.navigation` API
