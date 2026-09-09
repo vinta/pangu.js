@@ -4,7 +4,7 @@ import { Pangu } from '../../dist/shared/index.js';
 const pangu = new Pangu();
 
 describe('Symbol Superscripts', () => {
-  it('handle superscript', () => {
+  it('handle superscript as suffix', () => {
     expect(pangu.spacingText('前面E=mc²後面')).toBe('前面 E=mc² 後面');
 
     // prettier-ignore
@@ -28,3 +28,13 @@ describe('Symbol Superscripts', () => {
     expect(pangu.spacingText('服務商標℠後面')).toBe('服務商標℠ 後面');
   });
 });
+
+// \u00ae
+describe('Symbol ®', () => {
+  it('handle ® symbol', () => {
+    expect(pangu.spacingText('Registered Trademark®後面')).toBe('Registered Trademark® 後面');
+    expect(pangu.spacingText('註冊商標®公司')).toBe('註冊商標® 公司');
+    expect(pangu.spacingText('註冊商標®與Trademark™')).toBe('註冊商標® 與 Trademark™');
+  });
+});
+

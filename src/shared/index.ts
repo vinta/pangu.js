@@ -24,9 +24,9 @@ export const LETTERLIKE_SYMBOLS = '\u2100-\u214f';
 export const DINGBATS = '\u2700-\u27bf';
 
 // Superscript suffixes stay attached on the left. Exclude ⁽ so the following space never lands inside an opening parenthesis
-// \u2120 and \u2122 (SM, TM) belong here too: their NFKD decomposition is tagged <super>
-// Characters: ⁰ ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ ⁱ ⁿ ⁺ ⁻ ⁼ ⁾ ℠ ™
-export const SUPERSCRIPT_SUFFIXES = '\u00b2\u00b3\u00b9\u2070\u2071\u2074-\u207c\u207e\u207f\u2120\u2122';
+// \u2120 and \u2122 (SM, TM) belong here too: their NFKD decomposition is tagged <super>. \u00ae (R) has no decomposition but renders raised and attaches to the mark before it
+// Characters: ® ⁰ ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ ⁱ ⁿ ⁺ ⁻ ⁼ ⁾ ℠ ™
+export const SUPERSCRIPT_SUFFIXES = '\u00ae\u00b2\u00b3\u00b9\u2070\u2071\u2074-\u207c\u207e\u207f\u2120\u2122';
 
 export const CJK = `${CJK_RADICALS_SUPPLEMENT}${KANGXI_RADICALS}${HIRAGANA}${KATAKANA_NO_MIDDLE_DOT}${BOPOMOFO}${ENCLOSED_CJK_LETTERS_AND_MONTHS}${CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A}${CJK_UNIFIED_IDEOGRAPHS}${CJK_COMPATIBILITY_IDEOGRAPHS}`;
 
