@@ -238,7 +238,7 @@ test.describe('Visibility Detector', () => {
       pangu.taskScheduler.config.enabled = true;
       pangu.autoSpacePage({ pageDelayMs: 10, nodeDelayMs: 10, nodeMaxWaitMs: 50 });
 
-      // Wait for autoSpacing to initialize
+      // Wait for autoSpacePage() to initialize
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       // NOW add the content (simulating dynamic content loading)

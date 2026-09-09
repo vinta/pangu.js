@@ -44,7 +44,7 @@ function isUrlExcludedByFilter(settings: Settings, url: string) {
   return settings.filter_mode === 'whitelist';
 }
 
-export function shouldAutoSpacing(settings: Settings, url: string) {
+export function shouldAutoSpace(settings: Settings, url: string) {
   return settings.spacing_mode === 'spacing_when_load' && !isUrlExcludedByFilter(settings, url);
 }
 

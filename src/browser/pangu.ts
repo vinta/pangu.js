@@ -507,7 +507,7 @@ export class BrowserPangu extends Pangu {
     const queue: Node[] = [];
 
     // Debounce timers outlive disconnect(): both callbacks bail once stopAutoSpacePage() dropped this observer
-    const debouncedSpacingTitle = debounce(
+    const spaceTitleDebounced = debounce(
       () => {
         if (this.autoSpacePageObserver !== observer) {
           return;
@@ -521,7 +521,7 @@ export class BrowserPangu extends Pangu {
       nodeMaxWaitMs,
     );
 
-    const debouncedSpacingQueuedNodes = debounce(
+    const spaceQueuedNodesDebounced = debounce(
       () => {
         if (this.autoSpacePageObserver !== observer) {
           return;
@@ -586,7 +586,7 @@ export class BrowserPangu extends Pangu {
       // Element: https://developer.mozilla.org/en-US/docs/Web/API/Element
       // Text: https://developer.mozilla.org/en-US/docs/Web/API/Text
       for (const mutation of mutations) {
-        // Skip to avoid double processing - title handled separately by debouncedSpacingTitle()
+        // Skip to avoid double processing - title handled separately by spaceTitleDebounced()
         if (mutation.target.parentNode?.nodeName === 'TITLE' || mutation.target.nodeName === 'TITLE') {
           titleChanged = true;
           continue;
@@ -639,10 +639,10 @@ export class BrowserPangu extends Pangu {
       }
 
       if (titleChanged) {
-        debouncedSpacingTitle();
+        spaceTitleDebounced();
       }
 
-      debouncedSpacingQueuedNodes();
+      spaceQueuedNodesDebounced();
     });
     this.autoSpacePageObserver = observer;
 

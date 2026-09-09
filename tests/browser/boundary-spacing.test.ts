@@ -3,7 +3,7 @@ import type { BoundarySpacingContext, BoundarySpacingVerdict, TextNodeSpacingCon
 import { decideBoundarySpacing, decideTextNodeSpacing, respaceCurrentTail } from '../../src/browser/boundary-spacing';
 
 // A boundary that the spacing engine wants a space at, with every veto turned off
-const spacingBoundary: BoundarySpacingContext = {
+const boundarySpacingContext: BoundarySpacingContext = {
   currentTail: '中',
   nextFirst: 'a',
   currentEndsWithSpace: false,
@@ -56,7 +56,7 @@ interface TextNodeCase {
 }
 
 function boundaryContext(overrides: Partial<BoundarySpacingContext>) {
-  return { ...spacingBoundary, ...overrides };
+  return { ...boundarySpacingContext, ...overrides };
 }
 
 function textNodeContext(overrides: Partial<TextNodeSpacingContext>) {
