@@ -24,7 +24,7 @@ This skill briefly repoints that consumer at the **freshly packed tarball** inst
 
 Everything below runs as one command so the `trap` restores `examples/package.json` whether the checks pass, fail, or error midway. Never split it.
 
-The checks capture their exit code explicitly instead of leaning on `set -e` to abort. Some runners (Claude Code's Bash tool among them) invoke this in a shell where `set -e` does not stop the script, and a bare `echo "VERIFY OK"` after an unguarded `npm test` then prints a pass over a real failure. Report the `VERIFY OK` / `VERIFY FAILED` line, never the tool's own exit status.
+The checks capture their exit code explicitly instead of leaning on `set -e` to abort. Some runners (Claude Code's Bash tool among them) invoke this in a shell where `set -e` does not stop the script, and a bare `echo "VERIFY OK"` after an unguarded `npm run verify` then prints a pass over a real failure. Report the `VERIFY OK` / `VERIFY FAILED` line, never the tool's own exit status.
 
 ```bash
 set -eu
@@ -47,7 +47,7 @@ node -e "const fs=require('fs'),f='examples/package.json',p=JSON.parse(fs.readFi
 npm install --prefix examples --no-audit --no-fund
 
 rc=0
-npm test --prefix examples || rc=$?
+npm run verify --prefix examples || rc=$?
 if [ "$rc" -eq 0 ]; then echo "VERIFY OK"; else echo "VERIFY FAILED (exit $rc)"; fi
 exit "$rc"
 ```
@@ -72,4 +72,4 @@ To read the shipped artifact directly, unpack the tarball: `tar -xzf "$TGZ" -C "
 
 ## What the run exercises
 
-`npm test` in `examples/` chains the runtime entrypoints (`test:commonjs`, `test:esm`, `test:cli`), the browser page (`test:browser`, which serves `test-browser.html` and drives the UMD `<script>` tag and the ESM `import` in headless Chromium), and the type check (`typecheck`, whose `tsconfig.json` checks `test-types.ts` under the `require` condition and `test-types.mts` under the `import` condition, covering both branches of the dual-package `exports` map). Every one runs against the installed tarball, not the published pin.
+`npm run verify` in `examples/` chains the runtime entrypoints (`verify:commonjs`, `verify:esm`, `verify:cli`), the browser page (`verify:browser`, which serves `verify-browser.html` and drives the UMD `<script>` tag and the ESM `import` in headless Chromium), and the type check (`typecheck`, whose `tsconfig.json` checks `verify-types.ts` under the `require` condition and `verify-types.mts` under the `import` condition, covering both branches of the dual-package `exports` map). Every one runs against the installed tarball, not the published pin.

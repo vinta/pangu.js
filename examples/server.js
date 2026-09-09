@@ -7,7 +7,7 @@ const PORT = 8080;
 const server = http.createServer((req, res) => {
   let filePath = '.' + req.url;
   if (filePath === './') {
-    filePath = './test-browser.html';
+    filePath = './verify-browser.html';
   }
 
   const extname = path.extname(filePath);

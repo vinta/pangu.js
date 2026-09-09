@@ -4,12 +4,12 @@
   "description": "pangu.js Example app",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "npm run test:commonjs && npm run test:esm && npm run test:cli && npm run test:browser && npm run typecheck",
-    "test:commonjs": "node test-commonjs.js",
-    "test:esm": "node test-esm.mjs",
-    "test:cli": "node test-cli.js",
-    "server": "node server.js",
-    "test:browser": "node test-browser.js"
+    "verify": "npm run verify:commonjs && npm run verify:esm && npm run verify:cli && npm run verify:browser && npm run typecheck",
+    "verify:commonjs": "node verify-commonjs.js",
+    "verify:esm": "node verify-esm.mjs",
+    "verify:cli": "node verify-cli.js",
+    "verify:browser": "node verify-browser.js",
+    "server": "node server.js"
   },
   "dependencies": {
     "pangu": "10.0.0"

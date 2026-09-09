@@ -49,7 +49,7 @@ console.log('require("pangu/browser") fails with ERR_PACKAGE_PATH_NOT_EXPORTED a
 assert.equal(require('pangu/package.json').name, 'pangu');
 console.log('require("pangu/package.json") resolves');
 
-// Async file spacing trails every synchronous assertion because CommonJS has no top-level await, so source order here matches execution order rather than mirroring test-esm.mjs. A failed assertion inside
+// Async file spacing trails every synchronous assertion because CommonJS has no top-level await, so source order here matches execution order rather than mirroring verify-esm.mjs. A failed assertion inside
 // rejects, and Node exits non-zero on an unhandled rejection, so the IIFE still fails the suite
 const filePath = join(tmpdir(), 'pangu-example-commonjs.txt');
 (async () => {
