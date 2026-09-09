@@ -22,6 +22,8 @@ const { values, positionals } = parseArgs({
     'check': { type: 'boolean' },
     'require-perfect': { type: 'boolean' },
     'diagnostics': { type: 'string' },
+    'page-sessions': { type: 'string' },
+    'page-context': { type: 'boolean' },
   },
 });
 const repeats = Number(values.repeats);
@@ -53,6 +55,21 @@ assert(
   `invalid diagnosticQuestions in ${values.cases ?? values.experiment}; use a nonempty array of nonempty strings`,
 );
 const diagnosticIds = values.diagnostics?.split(',');
+const pageSessions = values['page-sessions'];
+assert(pageSessions === undefined || ['clone', 'reuse'].includes(pageSessions), '--page-sessions must be clone or reuse');
+assert(!values['page-context'] || pageSessions, '--page-context requires --page-sessions');
+assert(
+  !pageSessions || (values.cases && repeats === 1 && orderCount === 2 && !diagnosticIds),
+  '--page-sessions requires --cases, --repeats 1, --orders 2, and no diagnostics; repeat whole runs for independent trials',
+);
+if (pageSessions) {
+  const pages = new Map();
+  for (const kase of cases) {
+    assert(typeof kase.page === 'string' && kase.page && typeof kase.pageContext === 'string' && kase.pageContext.includes(kase.input), `invalid page context: ${kase.id}`);
+    assert(!pages.has(kase.page) || pages.get(kase.page) === kase.pageContext, `inconsistent page context: ${kase.page}`);
+    pages.set(kase.page, kase.pageContext);
+  }
+}
 assert(
   !diagnosticIds || (!values['require-perfect'] && repeats === 1 && orderCount === 1),
   '--diagnostics requires --repeats 1, --orders 1, and no --require-perfect; diagnostic history is not accuracy evidence',
@@ -131,7 +148,7 @@ mkdirSync(output, { recursive: false });
 writeFileSync(join(output, 'cases.json'), `${JSON.stringify({ ...corpus, cases }, null, 2)}\n`, { flag: 'wx' });
 
 const extensionURL = `chrome-extension://${values['extension-id']}`;
-async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics, diagnosticQuestions, rewrite }) {
+async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics, diagnosticQuestions, rewrite, pageSessions, pageContext }) {
   const context = page.context();
   const worker = context.serviceWorkers().find((candidate) => candidate.url() === `${extensionURL}/dist/service-worker.js`);
   if (!worker) {
@@ -154,7 +171,7 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
     await worker.evaluate((id) => chrome.tabs.remove(id), infoId);
   }
   const run = await worker.evaluate(
-    async ({ system, initialTurns, inputs, orders, repeats, diagnostics, diagnosticQuestions, rewrite, omitResponseConstraintInput }) => {
+    async ({ system, initialTurns, inputs, orders, repeats, diagnostics, diagnosticQuestions, rewrite, omitResponseConstraintInput, pageSessions, pageContext }) => {
       if (typeof LanguageModel === 'undefined' || typeof LanguageModel.params !== 'function') {
         throw new Error('extension Prompt API sampling controls unavailable; check Chrome and the extension context');
       }
@@ -163,55 +180,99 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
         throw new Error(`model availability is ${availability}; provision the model in the configured profile before running`);
       }
       let createMs = null;
+      const sessions = [];
       const answersById = new Map(inputs.map((input) => [input.id, []]));
       for (const order of orders) {
-        const started = performance.now();
-        const base = await LanguageModel.create({ initialPrompts: [{ role: 'system', content: system }, ...initialTurns], temperature: 0, topK: 1 });
-        createMs ??= Math.round(performance.now() - started);
-        try {
-          for (const index of order) {
-            const input = inputs[index];
-            if (input.question === null) {
-              continue;
-            }
-            const answers = answersById.get(input.id);
-            for (let repeat = 0; repeat < repeats; repeat++) {
-              const start = performance.now();
-              let raw = null;
-              let answer = null;
-              let error = null;
-              const followups = [];
-              let turn;
-              try {
-                turn = await base.clone();
-                raw = await turn.prompt(input.question, { responseConstraint: input.responseConstraint, omitResponseConstraintInput, signal: AbortSignal.timeout(30000) });
-                const parsed = JSON.parse(raw);
-                answer = rewrite ? (typeof parsed === 'string' ? parsed : null) : (input.tokens.find(([token]) => token === (input.answerKey ? parsed?.[input.answerKey] : parsed))?.[1] ?? null);
-                if (answer === null) {
-                  throw new Error(`response outside constraint: ${raw}`);
-                }
-                if (diagnostics) {
-                  const questions =
-                    diagnosticQuestions ??
-                    (rewrite
-                      ? ['請列出你剛才插入或刪除空格的位置，以及各自使用哪一條規則。', '原文中哪些空格是作者輸入的？你是否保留了它們？請引用原文說明。']
-                      : ['你剛才判斷的是原句中從左到右第幾個「-」？請把原句中所有「-」都計入，只回答位置。', '請逐字引用你剛才判斷的那個「-」前後的原文，讓我能辨認是哪一處。']);
-                  for (const question of questions) {
-                    const start = performance.now();
-                    const response = await turn.prompt(question, { signal: AbortSignal.timeout(30000) });
-                    followups.push({ question, raw: response, ms: Math.round(performance.now() - start) });
+        const groups = pageSessions ? [...new Set(order.map((index) => inputs[index].page))].map((page) => order.filter((index) => inputs[index].page === page)) : [order];
+        for (const group of groups) {
+          const started = performance.now();
+          const pageSystem = pageContext ? `${system}\n\n以下是網頁原文，僅供判讀句子時參考：\n${inputs[group[0]].pageContext}` : system;
+          const base = await LanguageModel.create({ initialPrompts: [{ role: 'system', content: pageSystem }, ...initialTurns], temperature: 0, topK: 1 });
+          createMs ??= Math.round(performance.now() - started);
+          if (pageSessions) {
+            sessions.push({
+              page: inputs[group[0]].page,
+              order: orders.indexOf(order),
+              createMs: Math.round(performance.now() - started),
+              system: pageSystem,
+              contextUsage: base.contextUsage,
+              contextWindow: base.contextWindow,
+            });
+          }
+          try {
+            for (const index of group) {
+              const input = inputs[index];
+              if (input.question === null) {
+                continue;
+              }
+              const answers = answersById.get(input.id);
+              for (let repeat = 0; repeat < repeats; repeat++) {
+                const start = performance.now();
+                let raw = null;
+                let answer = null;
+                let error = null;
+                const followups = [];
+                let turn;
+                let cloneMs = 0;
+                let promptMs = null;
+                let contextBefore = null;
+                let contextAfter = null;
+                let contextOverflows = 0;
+                const onOverflow = () => contextOverflows++;
+                try {
+                  turn = pageSessions === 'reuse' ? base : await base.clone();
+                  cloneMs = Math.round(performance.now() - start);
+                  if (pageSessions) {
+                    contextBefore = turn.contextUsage;
+                    turn.addEventListener('contextoverflow', onOverflow);
+                  }
+                  const promptStarted = performance.now();
+                  raw = await turn.prompt(input.question, { responseConstraint: input.responseConstraint, omitResponseConstraintInput, signal: AbortSignal.timeout(30000) });
+                  promptMs = Math.round(performance.now() - promptStarted);
+                  if (pageSessions) {
+                    contextAfter = turn.contextUsage;
+                  }
+                  const parsed = JSON.parse(raw);
+                  answer = rewrite ? (typeof parsed === 'string' ? parsed : null) : (input.tokens.find(([token]) => token === (input.answerKey ? parsed?.[input.answerKey] : parsed))?.[1] ?? null);
+                  if (answer === null) {
+                    throw new Error(`response outside constraint: ${raw}`);
+                  }
+                  if (diagnostics) {
+                    const questions =
+                      diagnosticQuestions ??
+                      (rewrite
+                        ? ['請列出你剛才插入或刪除空格的位置，以及各自使用哪一條規則。', '原文中哪些空格是作者輸入的？你是否保留了它們？請引用原文說明。']
+                        : ['你剛才判斷的是原句中從左到右第幾個「-」？請把原句中所有「-」都計入，只回答位置。', '請逐字引用你剛才判斷的那個「-」前後的原文，讓我能辨認是哪一處。']);
+                    for (const question of questions) {
+                      const start = performance.now();
+                      const response = await turn.prompt(question, { signal: AbortSignal.timeout(30000) });
+                      followups.push({ question, raw: response, ms: Math.round(performance.now() - start) });
+                    }
+                  }
+                } catch (caught) {
+                  error = String(caught);
+                } finally {
+                  if (pageSessions) {
+                    turn?.removeEventListener('contextoverflow', onOverflow);
+                  }
+                  if (turn !== base) {
+                    turn?.destroy();
                   }
                 }
-              } catch (caught) {
-                error = String(caught);
-              } finally {
-                turn?.destroy();
+                answers.push({
+                  answer,
+                  raw,
+                  error,
+                  ms: Math.round(performance.now() - start),
+                  order: orders.indexOf(order),
+                  ...(pageSessions ? { position: group.indexOf(index), cloneMs, promptMs, contextBefore, contextAfter, contextOverflows } : {}),
+                  ...(diagnostics ? { followups } : {}),
+                });
               }
-              answers.push({ answer, raw, error, ms: Math.round(performance.now() - start), order: orders.indexOf(order), ...(diagnostics ? { followups } : {}) });
             }
+          } finally {
+            base.destroy();
           }
-        } finally {
-          base.destroy();
         }
       }
       const normalized = (raw) => {
@@ -235,7 +296,7 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
           stable: answers.every((answer) => normalized(answer.raw) === normalized(answers[0].raw)),
         };
       });
-      return { availability, createMs, results };
+      return { availability, createMs, results, ...(pageSessions ? { sessions } : {}) };
     },
     {
       system: prompt.system,
@@ -247,6 +308,8 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
       diagnosticQuestions,
       rewrite,
       omitResponseConstraintInput: prompt.omitResponseConstraintInput ?? false,
+      pageSessions,
+      pageContext,
     },
   );
   return { ...run, browserVersion: context.browser().version(), profileVerified: true, extensionWorkerVerified: true };
@@ -254,7 +317,10 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
 
 for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
   const orders = caseOrders(orderCount, inputs.length);
-  const code = `async page => (${runInBrowser.toString()})(page, ${JSON.stringify({ profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics: Boolean(diagnosticIds), diagnosticQuestions: diagnosticIds ? corpus.diagnosticQuestions : undefined, rewrite: Boolean(rewrite) })})`;
+  if (pageSessions) {
+    orders[1] = [...orders[0]].reverse();
+  }
+  const code = `async page => (${runInBrowser.toString()})(page, ${JSON.stringify({ profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics: Boolean(diagnosticIds), diagnosticQuestions: diagnosticIds ? corpus.diagnosticQuestions : undefined, rewrite: Boolean(rewrite), pageSessions, pageContext: Boolean(values['page-context']) })})`;
   const run = JSON.parse(
     execFileSync('playwright-cli', ['-s=pangu-eval', '--raw', 'run-code', code], {
       encoding: 'utf8',
@@ -277,6 +343,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     shuffle: false,
     timestamp: new Date().toISOString(),
     purpose: diagnosticIds ? 'interpretation-diagnostics-not-accuracy' : 'accuracy',
+    ...(pageSessions ? { pageSessions, pageContext: Boolean(values['page-context']), orderStrategy: 'forward-and-reverse-per-page' } : {}),
     system: prompt.system,
     omitResponseConstraintInput: prompt.omitResponseConstraintInput ?? false,
     initialTurns: prompt.initialTurns ?? [],
