@@ -6,7 +6,7 @@ const baseSessions = new Map<string, Promise<LanguageModel>>();
 
 // Answers by question: a page re-render or a duplicated node asks the same question again, and sampling is pinned so the answer is the same
 // Unbounded on purpose, since the service worker is killed after idle and the map dies with it
-const answers = new Map<string, CandidateLabel>();
+const cachedAnswers = new Map<string, CandidateLabel>();
 
 // `unsupported` is ours, not an API value: the browser has no Prompt API at all
 export type AiModelAvailability = Availability | 'unsupported';
@@ -85,7 +85,7 @@ async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
 
 async function classifyOneCandidate(promptSpec: PromptSpec<CandidateLabel>, baseSession: LanguageModel, candidate: Candidate): Promise<CandidateLabel | null> {
   const question = promptSpec.buildQuestion(candidate.sentence, candidate.at);
-  const answer = answers.get(question);
+  const answer = cachedAnswers.get(question);
   if (answer) {
     return answer;
   }
@@ -107,7 +107,7 @@ async function classifyOneCandidate(promptSpec: PromptSpec<CandidateLabel>, base
       throw new TypeError(`response outside the constraint enum: ${raw}`);
     }
     console.debug(`Shape ${promptSpec.kind} raw answer: ${raw} -> ${candidateLabel}`);
-    answers.set(question, candidateLabel);
+    cachedAnswers.set(question, candidateLabel);
     return candidateLabel;
   } catch (error) {
     console.debug(`Shape ${promptSpec.kind} error: ${String(error)}`);
