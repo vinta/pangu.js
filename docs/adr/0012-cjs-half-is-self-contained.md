@@ -36,7 +36,7 @@ The require binding is aliased (`const { NodePangu: NodePanguClass } = ...`). Wi
 
 **Build order stopped mattering for the CJS pass.** It no longer reads another environment's output, so the only remaining ordering constraint in `builder.buildApp` is that `esm` runs first because it is the one that empties `dist/`.
 
-**Verified.** The `require()` surface is unchanged: `constructor.name` is still `NodePangu`, `spacingText()` works, `const { NodePangu } = require('pangu')` destructures, and `.default` and `.pangu` are present. `attw` is green on all four resolution modes, `publint` reports no problems, and `export = pangu` still appears in the emitted `.d.cts`.
+**Verified.** The `require()` surface is unchanged: `constructor.name` is still `NodePangu`, `spaceText()` works, `const { NodePangu } = require('pangu')` destructures, and `.default` and `.pangu` are present. `attw` is green on all four resolution modes, `publint` reports no problems, and `export = pangu` still appears in the emitted `.d.cts`.
 
 ## Notes
 
