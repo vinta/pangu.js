@@ -12,7 +12,7 @@ import browserPangu, { BrowserPangu, pangu as namedBrowserPangu } from 'pangu/br
 console.log('=== Testing ESM Imports ===\n');
 
 // Test default export
-assert.equal(typeof pangu.spacingText, 'function');
+assert.equal(typeof pangu.spaceText, 'function');
 console.log('Default import works');
 
 // In ESM, use the named import (NodePangu is not attached to the instance)
@@ -31,13 +31,13 @@ console.log('Namespace import exposes default, pangu, and NodePangu');
 
 // Test functionality
 const text = '測試ESM模組';
-const spaced = pangu.spacingText(text);
+const spaced = pangu.spaceText(text);
 assert.equal(spaced, '測試 ESM 模組');
 console.log(`\nTest spacing: "${text}" → "${spaced}"`);
 
 // Test instance creation
 const customPangu = new NodePangu();
-assert.equal(customPangu.spacingText('測試test'), '測試 test');
+assert.equal(customPangu.spaceText('測試test'), '測試 test');
 console.log('Custom instance works');
 
 // Test that pangu is the instance itself
@@ -46,10 +46,10 @@ console.log('\nVerifying pangu is an instance');
 
 // Test async file spacing
 const filePath = join(tmpdir(), 'pangu-example-esm.txt');
-await writeFile(filePath, '測試spacingFile方法');
+await writeFile(filePath, '測試spaceFile方法');
 try {
-  assert.equal(await pangu.spacingFile(filePath), '測試 spacingFile 方法');
-  console.log('spacingFile() works');
+  assert.equal(await pangu.spaceFile(filePath), '測試 spaceFile 方法');
+  console.log('spaceFile() works');
 } finally {
   await unlink(filePath);
 }
@@ -57,7 +57,7 @@ try {
 // The ./browser subpath has the same three-face surface, and its text engine works anywhere
 assert.equal(namedBrowserPangu, browserPangu);
 assert.ok(browserPangu instanceof BrowserPangu);
-assert.equal(browserPangu.spacingText('測試test'), '測試 test');
+assert.equal(browserPangu.spaceText('測試test'), '測試 test');
 console.log('\npangu/browser default, named pangu, and BrowserPangu work');
 
 console.log('\nESM imports working correctly!');

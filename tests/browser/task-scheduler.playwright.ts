@@ -41,7 +41,7 @@ test.describe('TaskScheduler Enabled', () => {
     const result = await page.evaluate(() => {
       pangu.taskScheduler.config.enabled = true;
 
-      pangu.spacingPage();
+      pangu.spacePage();
 
       // Since idle processing is async, we need to wait a bit
       return new Promise<{ finalText: string | null }>((resolve) => {
@@ -63,12 +63,12 @@ test.describe('TaskScheduler Enabled', () => {
   test('should process dynamic content asynchronously', async ({ page }) => {
     await page.evaluate(async () => {
       pangu.taskScheduler.config.enabled = true;
-      pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 50, nodeMaxWaitMs: 100 });
+      pangu.autoSpacePage({ pageDelayMs: 0, nodeDelayMs: 50, nodeMaxWaitMs: 100 });
     });
 
     await page.waitForTimeout(50);
 
-    // Dynamically add content after autoSpacingPage is active
+    // Dynamically add content after autoSpacePage is active
     await page.evaluate(() => {
       const div = document.createElement('div');
       div.textContent = '小明在開發軟體時總是嚴格地遵循各項協定與標準，直到他看了ISO 3166-1';
@@ -87,7 +87,7 @@ test.describe('TaskScheduler Enabled', () => {
 
     const result = await page.evaluate(async () => {
       pangu.taskScheduler.config.enabled = true;
-      pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 50, nodeMaxWaitMs: 100 });
+      pangu.autoSpacePage({ pageDelayMs: 0, nodeDelayMs: 50, nodeMaxWaitMs: 100 });
 
       const content = document.getElementById('content')!;
 
@@ -125,13 +125,13 @@ test.describe('TaskScheduler Enabled', () => {
 
       // Track how many times the observer processes mutations
       let processingCount = 0;
-      const originalSpacingNode = pangu.spacingNode.bind(pangu);
-      pangu.spacingNode = function (node: Node) {
+      const originalSpaceNode = pangu.spaceNode.bind(pangu);
+      pangu.spaceNode = function (node: Node) {
         processingCount++;
-        return originalSpacingNode(node);
+        return originalSpaceNode(node);
       };
 
-      pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 100, nodeMaxWaitMs: 200 });
+      pangu.autoSpacePage({ pageDelayMs: 0, nodeDelayMs: 100, nodeMaxWaitMs: 200 });
 
       const content = document.getElementById('content')!;
       const div = document.createElement('div');
@@ -165,7 +165,7 @@ test.describe('TaskScheduler Enabled', () => {
     const result = await page.evaluate(async () => {
       pangu.taskScheduler.config.enabled = true;
 
-      pangu.spacingNode(document.getElementById('content')!);
+      pangu.spaceNode(document.getElementById('content')!);
 
       // Wait for idle processing
       await new Promise((resolve) => setTimeout(resolve, 300));
@@ -183,7 +183,7 @@ test.describe('TaskScheduler Enabled', () => {
       pangu.taskScheduler.config.enabled = true;
 
       // Large pageDelayMs keeps the initial page sweep out of the assertion window
-      pangu.autoSpacingPage({ pageDelayMs: 60000, nodeDelayMs: 100, nodeMaxWaitMs: 200 });
+      pangu.autoSpacePage({ pageDelayMs: 60000, nodeDelayMs: 100, nodeMaxWaitMs: 200 });
 
       // The two queued spans sandwich an untouched sibling, so their text nodes are not adjacent
       const container = document.getElementById('container')!;
@@ -212,7 +212,7 @@ test.describe('TaskScheduler Enabled', () => {
       pangu.taskScheduler.config.enabled = true;
 
       // Large pageDelayMs keeps the initial page sweep out of the assertion window
-      pangu.autoSpacingPage({ pageDelayMs: 60000, nodeDelayMs: 100, nodeMaxWaitMs: 200 });
+      pangu.autoSpacePage({ pageDelayMs: 60000, nodeDelayMs: 100, nodeMaxWaitMs: 200 });
 
       // The two queued spans sandwich a wrapper whose whitespace already separates them
       const container = document.getElementById('container')!;
@@ -241,7 +241,7 @@ test.describe('TaskScheduler Enabled', () => {
 
       // Huge nodeDelayMs keeps the debounced queue path out of the assertion window:
       // only the pre-paint fast path can space anything below
-      pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 60000, nodeMaxWaitMs: 120000 });
+      pangu.autoSpacePage({ pageDelayMs: 0, nodeDelayMs: 60000, nodeMaxWaitMs: 120000 });
 
       // Wait for the initial sweep's idle processing
       await new Promise((resolve) => setTimeout(resolve, 300));
@@ -267,7 +267,7 @@ test.describe('TaskScheduler Enabled', () => {
       pangu.taskScheduler.config.enabled = true;
 
       // Huge nodeDelayMs keeps the debounced queue path out of the assertion window
-      pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 60000, nodeMaxWaitMs: 120000 });
+      pangu.autoSpacePage({ pageDelayMs: 0, nodeDelayMs: 60000, nodeMaxWaitMs: 120000 });
 
       // Wait for the initial sweep's idle processing
       await new Promise((resolve) => setTimeout(resolve, 300));
@@ -292,7 +292,7 @@ test.describe('TaskScheduler Enabled', () => {
       pangu.taskScheduler.config.enabled = true;
 
       // Huge nodeDelayMs keeps the debounced queue path out of the assertion window
-      pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 60000, nodeMaxWaitMs: 120000 });
+      pangu.autoSpacePage({ pageDelayMs: 0, nodeDelayMs: 60000, nodeMaxWaitMs: 120000 });
 
       // Wait for the initial sweep's idle processing
       await new Promise((resolve) => setTimeout(resolve, 300));
@@ -316,7 +316,7 @@ test.describe('TaskScheduler Enabled', () => {
     const result = await page.evaluate(async () => {
       pangu.taskScheduler.config.enabled = true;
 
-      pangu.autoSpacingPage({ pageDelayMs: 0, nodeDelayMs: 60000, nodeMaxWaitMs: 120000 });
+      pangu.autoSpacePage({ pageDelayMs: 0, nodeDelayMs: 60000, nodeMaxWaitMs: 120000 });
       await new Promise((resolve) => setTimeout(resolve, 300));
 
       const content = document.getElementById('content')!;
@@ -347,7 +347,7 @@ test.describe('TaskScheduler Enabled', () => {
       pangu.taskScheduler.queue.add(() => {
         throw new Error('boom');
       });
-      pangu.spacingNode(document.getElementById('content')!);
+      pangu.spaceNode(document.getElementById('content')!);
 
       // Wait for idle processing
       await new Promise((resolve) => setTimeout(resolve, 300));
@@ -373,7 +373,7 @@ test.describe('TaskScheduler Fallback', () => {
       Object.defineProperty(window, 'requestIdleCallback', { value: undefined, configurable: true });
       pangu.taskScheduler.config.enabled = true;
 
-      pangu.spacingNode(document.getElementById('content')!);
+      pangu.spaceNode(document.getElementById('content')!);
 
       // No waiting: spacing must have completed synchronously
       return document.getElementById('content')!.textContent;

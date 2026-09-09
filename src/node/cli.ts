@@ -47,9 +47,9 @@ async function readStdin() {
   return chunks.join('').replace(/\n$/, '');
 }
 
-function printSpacingText(text: string | undefined) {
+function printSpaceText(text: string | undefined) {
   if (typeof text === 'string') {
-    console.log(pangu.spacingText(text));
+    console.log(pangu.spaceText(text));
   } else {
     console.log(usage);
     process.exitCode = 1;
@@ -57,10 +57,10 @@ function printSpacingText(text: string | undefined) {
 }
 
 // An empty string is what -f "$EMPTY_VAR" expands to, so it counts as a missing path rather than a file to open
-function printSpacingFile(path: string | undefined) {
+function printSpaceFile(path: string | undefined) {
   if (path) {
     // File mode only does spacing: no newline appended, the file's own EOF newlines (or lack of one) pass through untouched
-    process.stdout.write(pangu.spacingFileSync(path));
+    process.stdout.write(pangu.spaceFileSync(path));
   } else {
     console.error('pangu: error: argument --file: expected a file path');
     console.log(usage);
@@ -73,7 +73,7 @@ function checkSpacing(text: string | undefined) {
     const hasProperSpacing = pangu.hasProperSpacing(text);
     if (!hasProperSpacing) {
       // Print the corrected version to stderr so a failing -c is debuggable. stdout stays empty, so -c composes in a pipeline
-      console.error(`Corrected: ${pangu.spacingText(text)}`);
+      console.error(`Corrected: ${pangu.spaceText(text)}`);
     }
     process.exitCode = hasProperSpacing ? 0 : 1;
   } else {
@@ -95,7 +95,7 @@ async function main() {
   }
 
   if (args.length === 0) {
-    printSpacingText(wantsStdin(undefined) ? await readStdin() : undefined);
+    printSpaceText(wantsStdin(undefined) ? await readStdin() : undefined);
     return;
   }
 
@@ -110,16 +110,16 @@ async function main() {
       break;
     case '-t':
     case '--text':
-      printSpacingText(wantsStdin(args[1]) ? await readStdin() : args[1]);
+      printSpaceText(wantsStdin(args[1]) ? await readStdin() : args[1]);
       break;
     case '-f':
     case '--file':
       // An explicit - is the conventional spelling for "the file is stdin" (cf. tar -f -). A missing path is a usage error instead of a stdin fallback, so that -f with an empty path variable
       // reports the missing path instead of silently spacing whatever happens to be piped in
       if (args[1] === '-') {
-        printSpacingText(await readStdin());
+        printSpaceText(await readStdin());
       } else {
-        printSpacingFile(args[1]);
+        printSpaceFile(args[1]);
       }
       break;
     case '-c':
@@ -127,10 +127,10 @@ async function main() {
       checkSpacing(wantsStdin(args[1]) ? await readStdin() : args[1]);
       break;
     case '-':
-      printSpacingText(await readStdin());
+      printSpaceText(await readStdin());
       break;
     default:
-      printSpacingText(args[0]);
+      printSpaceText(args[0]);
   }
 }
 

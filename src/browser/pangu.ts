@@ -4,7 +4,7 @@ import { DomWalker } from './dom/dom-walker.js';
 import { VisibilityDetector } from './dom/visibility-detector.js';
 import { TaskScheduler } from './scheduling/task-scheduler.js';
 
-export interface AutoSpacingPageConfig {
+export interface AutoSpacePageConfig {
   pageDelayMs?: number;
   nodeDelayMs?: number;
   nodeMaxWaitMs?: number;
@@ -71,8 +71,8 @@ export class BrowserPangu extends Pangu {
   // Pre-paint re-space stays bounded: subtrees with more text nodes than this fall back to the queue
   private static readonly maxSyncTextNodes = 256;
 
-  private isAutoSpacingPageExecuted = false;
-  private autoSpacingPageObserver: MutationObserver | null = null;
+  private isAutoSpacePageExecuted = false;
+  private autoSpacePageObserver: MutationObserver | null = null;
 
   // Last data we wrote per text node: distinguishes pangu's own mutation records
   // (data still equals the entry, drop them) from page re-renders of spaced content
@@ -85,59 +85,59 @@ export class BrowserPangu extends Pangu {
   public readonly taskScheduler = new TaskScheduler();
   public readonly visibilityDetector = new VisibilityDetector();
 
-  // A callback called after spacingTextNodes() settles a batch of text nodes, carrying each node's text before/after spacing
+  // A callback called after spaceTextNodes() settles a batch of text nodes, carrying each node's text before/after spacing
   // The Chrome extension's AI spacing uses it to apply late fixes from LLM
   public onTextNodesSettled: ((settledTextNodes: SettledTextNode[]) => void) | null = null;
 
   // PUBLIC
 
-  public autoSpacingPage({ pageDelayMs = 1000, nodeDelayMs = 500, nodeMaxWaitMs = 2000 }: AutoSpacingPageConfig = {}) {
+  public autoSpacePage({ pageDelayMs = 1000, nodeDelayMs = 500, nodeMaxWaitMs = 2000 }: AutoSpacePageConfig = {}) {
     if (!(document.body instanceof Node)) {
       return;
     }
 
-    if (this.isAutoSpacingPageExecuted) {
+    if (this.isAutoSpacePageExecuted) {
       return;
     }
 
-    this.isAutoSpacingPageExecuted = true;
-    const observer = this.setupAutoSpacingPageObserver(nodeDelayMs, nodeMaxWaitMs);
+    this.isAutoSpacePageExecuted = true;
+    const observer = this.setupAutoSpacePageObserver(nodeDelayMs, nodeMaxWaitMs);
 
-    // Skipped once stopAutoSpacingPage() dropped this observer before the delay elapsed
+    // Skipped once stopAutoSpacePage() dropped this observer before the delay elapsed
     this.waitForVideosToLoad(
       pageDelayMs,
       once(() => {
-        if (this.autoSpacingPageObserver === observer) {
-          this.spacingPage();
+        if (this.autoSpacePageObserver === observer) {
+          this.spacePage();
         }
       }),
     );
   }
 
-  public spacingPage() {
+  public spacePage() {
     // Page title
     const title = document.querySelector('head > title');
     if (title) {
-      this.spacingNode(title);
+      this.spaceNode(title);
     }
 
     // Page body
-    this.spacingNode(document.body);
+    this.spaceNode(document.body);
   }
 
-  public spacingNode(contextNode: Node) {
+  public spaceNode(contextNode: Node) {
     // Only process nodes with actual content (excluding text nodes that contain only whitespace)
     const textNodes = DomWalker.collectTextNodes(contextNode, true);
-    this.schedule(() => this.spacingTextNodes(textNodes));
+    this.schedule(() => this.spaceTextNodes(textNodes));
   }
 
-  public stopAutoSpacingPage() {
-    if (this.autoSpacingPageObserver) {
-      this.autoSpacingPageObserver.disconnect();
-      this.autoSpacingPageObserver = null;
+  public stopAutoSpacePage() {
+    if (this.autoSpacePageObserver) {
+      this.autoSpacePageObserver.disconnect();
+      this.autoSpacePageObserver = null;
     }
 
-    this.isAutoSpacingPageExecuted = false;
+    this.isAutoSpacePageExecuted = false;
   }
 
   public applyLateFixes(lateFixes: readonly LateFix[]) {
@@ -169,7 +169,7 @@ export class BrowserPangu extends Pangu {
     return display === 'grid' || display === 'inline-grid' || display === 'flex' || display === 'inline-flex';
   }
 
-  private spacingTextNodes(textNodes: Node[]) {
+  private spaceTextNodes(textNodes: Node[]) {
     // Visibility verdicts are memoized per batch; styles may change between batches
     this.visibilityDetector.clearCache();
 
@@ -307,7 +307,7 @@ export class BrowserPangu extends Pangu {
           if (this.onTextNodesSettled) {
             unsettledTextNodes.push({ node: textNode, unspaced: textNode.data });
           }
-          const newText = this.spacingText(textNode.data);
+          const newText = this.spaceText(textNode.data);
           if (textNode.data !== newText) {
             textNode.data = newText;
             this.lastWrittenData.set(textNode, textNode.data);
@@ -321,12 +321,12 @@ export class BrowserPangu extends Pangu {
   // Same processing as the queued paths, but synchronous, for pre-paint re-spacing
   // inside the MutationObserver callback. Returns false when the subtree exceeds
   // maxTextNodes, so the caller can fall back to the debounced queue
-  private spacingNodeSync(contextNode: Node, maxTextNodes: number) {
+  private spaceNodeSync(contextNode: Node, maxTextNodes: number) {
     const textNodes = DomWalker.collectTextNodes(contextNode);
     if (textNodes.length > maxTextNodes) {
       return false;
     }
-    this.spacingTextNodes(this.withNeighborTextNodes(textNodes).reverse());
+    this.spaceTextNodes(this.withNeighborTextNodes(textNodes).reverse());
     return true;
   }
 
@@ -497,24 +497,24 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  private setupAutoSpacingPageObserver(nodeDelayMs: number, nodeMaxWaitMs: number) {
+  private setupAutoSpacePageObserver(nodeDelayMs: number, nodeMaxWaitMs: number) {
     // Disconnect any existing auto-spacing observer
-    if (this.autoSpacingPageObserver) {
-      this.autoSpacingPageObserver.disconnect();
-      this.autoSpacingPageObserver = null;
+    if (this.autoSpacePageObserver) {
+      this.autoSpacePageObserver.disconnect();
+      this.autoSpacePageObserver = null;
     }
 
     const queue: Node[] = [];
 
-    // Debounce timers outlive disconnect(): both callbacks bail once stopAutoSpacingPage() dropped this observer
+    // Debounce timers outlive disconnect(): both callbacks bail once stopAutoSpacePage() dropped this observer
     const debouncedSpacingTitle = debounce(
       () => {
-        if (this.autoSpacingPageObserver !== observer) {
+        if (this.autoSpacePageObserver !== observer) {
           return;
         }
         const titleElement = document.querySelector('head > title');
         if (titleElement) {
-          this.spacingNode(titleElement);
+          this.spaceNode(titleElement);
         }
       },
       nodeDelayMs,
@@ -523,7 +523,7 @@ export class BrowserPangu extends Pangu {
 
     const debouncedSpacingQueuedNodes = debounce(
       () => {
-        if (this.autoSpacingPageObserver !== observer) {
+        if (this.autoSpacePageObserver !== observer) {
           return;
         }
         // NOTE: a single node could be very big which contains a lot of child nodes
@@ -558,7 +558,7 @@ export class BrowserPangu extends Pangu {
         }
         allTextNodes.reverse();
 
-        this.schedule(() => this.spacingTextNodes(allTextNodes));
+        this.schedule(() => this.spaceTextNodes(allTextNodes));
       },
       nodeDelayMs,
       nodeMaxWaitMs,
@@ -569,7 +569,7 @@ export class BrowserPangu extends Pangu {
       let titleChanged = false;
 
       // If this batch removed content we already spaced, there is usually a page re-render
-      // So the added nodes below are re-spaced with spacingNodeSync(), before the browser paints the re-rendered text
+      // So the added nodes below are re-spaced with spaceNodeSync(), before the browser paints the re-rendered text
       let removedSpacedContent = false;
       for (const mutation of mutations) {
         for (const node of mutation.removedNodes) {
@@ -606,7 +606,7 @@ export class BrowserPangu extends Pangu {
 
                 // The current text node's data doesn't match what we last wrote, which usually means there is a page re-render
                 // So re-space it before the next paint so the re-render never paints
-                if (this.spacingNodeSync(node.parentNode, BrowserPangu.maxSyncTextNodes)) {
+                if (this.spaceNodeSync(node.parentNode, BrowserPangu.maxSyncTextNodes)) {
                   break;
                 }
               }
@@ -620,12 +620,12 @@ export class BrowserPangu extends Pangu {
             // New nodes added to DOM (e.g., innerHTML change, appendChild)
             for (const node of mutation.addedNodes) {
               if (node.nodeType === Node.ELEMENT_NODE) {
-                if (removedSpacedContent && this.spacingNodeSync(node, BrowserPangu.maxSyncTextNodes)) {
+                if (removedSpacedContent && this.spaceNodeSync(node, BrowserPangu.maxSyncTextNodes)) {
                   continue;
                 }
                 queue.push(node); // Element added, process its text content
               } else if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
-                if (removedSpacedContent && this.spacingNodeSync(node.parentNode, BrowserPangu.maxSyncTextNodes)) {
+                if (removedSpacedContent && this.spaceNodeSync(node.parentNode, BrowserPangu.maxSyncTextNodes)) {
                   continue;
                 }
                 queue.push(node.parentNode); // Text node added, process its parent
@@ -644,7 +644,7 @@ export class BrowserPangu extends Pangu {
 
       debouncedSpacingQueuedNodes();
     });
-    this.autoSpacingPageObserver = observer;
+    this.autoSpacePageObserver = observer;
 
     // A single MutationObserver can observe multiple targets simultaneously
     observer.observe(document.head, {

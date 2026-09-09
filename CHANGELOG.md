@@ -13,6 +13,7 @@
     - 網頁裡的 `<sup>` 元素也一樣，跟前面的文字之間不加空格，空格只加在 `<sup>` 後面
   - `℃`、`℉`、`№` 這類 Letterlike Symbols 區段的字元碰到中文時會加空格；`™`、`℠`、`®` 跟上標字元一樣黏在前面的文字上
   - `©` 後面緊接著數字時會加空格：`版權所有©2026` 會變成 `版權所有 © 2026`
+- 所有 `spacingXxx()` 方法改名為 `spaceXxx()`：`spaceText()`、`spaceFile()`、`spaceFileSync()`、`spacePage()`、`spaceNode()`、`autoSpacePage()`、`stopAutoSpacePage()`，型別 `AutoSpacingPageConfig` 也改名為 `AutoSpacePageConfig`
 - 修正動態填入內容的元素（例如原本是空的 `<span>` 後來才由 JavaScript 塞進數字）跟旁邊已經加過空格的文字之間會漏加空格的問題
 
 ### 為什麼你們就是不能加個空格呢？

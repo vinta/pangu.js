@@ -7,20 +7,20 @@
 import panguNode, { NodePangu, pangu as namedPangu } from 'pangu';
 
 // Members inherited from the shared Pangu base class. These are the ones that disappear when dist/node/index.d.ts cannot resolve its '../shared/index.js' import, because NodePangu then extends an error type
-export const spaced: string = panguNode.spacingText('當你凝視著bug');
+export const spaced: string = panguNode.spaceText('當你凝視著bug');
 export const isProper: boolean = panguNode.hasProperSpacing('當你凝視著 bug');
 export const version: string = panguNode.version;
 
 // Members declared directly on NodePangu
-export const fileSpaced: Promise<string> = panguNode.spacingFile('example.txt');
-export const fileSpacedSync: string = panguNode.spacingFileSync('example.txt');
+export const fileSpaced: Promise<string> = panguNode.spaceFile('example.txt');
+export const fileSpacedSync: string = panguNode.spaceFileSync('example.txt');
 
 // The named exports must stay constructible and keep the inherited surface. The CJS entry is `export =` an instance, so NodePangu arrives as a value only and InstanceType is how a require() consumer names
 // the type; test-types.mts covers the class-as-type spelling that the ESM declarations support
 export const nodeInstance: InstanceType<typeof NodePangu> = new NodePangu();
-export const nodeInstanceSpaced: string = nodeInstance.spacingText('當你凝視著bug');
+export const nodeInstanceSpaced: string = nodeInstance.spaceText('當你凝視著bug');
 
 // The .d.cts declares the named `pangu` export and the interop `default` property, and both must surface the full instance type so destructuring require() consumers keep the same API as everyone else
 export const namedInstance: InstanceType<typeof NodePangu> = namedPangu;
-export const namedInstanceSpaced: string = namedPangu.spacingText('當你凝視著bug');
+export const namedInstanceSpaced: string = namedPangu.spaceText('當你凝視著bug');
 export const defaultProperty: InstanceType<typeof NodePangu> = panguNode.default;

@@ -10,7 +10,7 @@ const { NodePangu, pangu: namedPangu } = require('pangu');
 console.log('=== Testing CommonJS Imports ===\n');
 
 // Test default export
-assert.equal(typeof pangu.spacingText, 'function');
+assert.equal(typeof pangu.spaceText, 'function');
 console.log('Default require works');
 
 // NodePangu is attached to the instance for CommonJS ergonomics
@@ -28,13 +28,13 @@ console.log('Named pangu and interop default both point at the instance');
 
 // Test functionality
 const text = '測試CommonJS模組';
-const spaced = pangu.spacingText(text);
+const spaced = pangu.spaceText(text);
 assert.equal(spaced, '測試 CommonJS 模組');
 console.log(`\nTest spacing: "${text}" → "${spaced}"`);
 
 // Test instance creation
 const customPangu = new NodePangu();
-assert.equal(customPangu.spacingText('測試test'), '測試 test');
+assert.equal(customPangu.spaceText('測試test'), '測試 test');
 console.log('Custom instance works');
 
 // Test that pangu is the instance itself
@@ -53,10 +53,10 @@ console.log('require("pangu/package.json") resolves');
 // rejects, and Node exits non-zero on an unhandled rejection, so the IIFE still fails the suite
 const filePath = join(tmpdir(), 'pangu-example-commonjs.txt');
 (async () => {
-  await writeFile(filePath, '測試spacingFile方法');
+  await writeFile(filePath, '測試spaceFile方法');
   try {
-    assert.equal(await pangu.spacingFile(filePath), '測試 spacingFile 方法');
-    console.log('\nspacingFile() works');
+    assert.equal(await pangu.spaceFile(filePath), '測試 spaceFile 方法');
+    console.log('\nspaceFile() works');
   } finally {
     await unlink(filePath);
   }

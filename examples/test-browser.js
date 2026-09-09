@@ -37,21 +37,21 @@ function startServer() {
 
     await page.goto(PAGE_URL, { waitUntil: 'networkidle' });
 
-    // spacingNode() and autoSpacingPage() schedule their DOM writes, so wait for the text instead of reading it right after the click
+    // spaceNode() and autoSpacePage() schedule their DOM writes, so wait for the text instead of reading it right after the click
     const expectText = (selector, text) => page.waitForFunction(([s, t]) => document.querySelector(s).textContent === t, [selector, text], { timeout: 5000 });
     const runButton = (heading) => page.locator('.example', { hasText: heading }).getByRole('button');
 
     await runButton('UMD Version').click();
     await expectText('#demo1', '測試文字：當你凝視著 bug，bug 也凝視著你');
-    console.log('UMD <script> tag: spacingNode() works');
+    console.log('UMD <script> tag: spaceNode() works');
 
     await runButton('ESM Version').click();
     await expectText('#demo2', '另一個測試：使用 JavaScript 開發 Web 應用程式');
-    console.log('ESM module import: spacingText() works');
+    console.log('ESM module import: spaceText() works');
 
     await runButton('Auto-spacing Entire Page').click();
     await page.waitForFunction(() => document.body.innerText.includes('這段文字包含 English 和中文 mixed 在一起'), null, { timeout: 5000 });
-    console.log('autoSpacingPage() works');
+    console.log('autoSpacePage() works');
 
     assert.deepEqual(problems, []);
     console.log('No page errors, console errors, or failed requests');

@@ -5,7 +5,7 @@ pangu.js inserts whitespace between CJK and ANS characters automatically. It shi
 ## Language
 
 **Space**:
-The verb for inserting whitespace: pangu spaces CJK from ANS, and respaces a text node that a page re-render undid. Spaced and unspaced are the adjectives, and tight describes a shape that stays unspaced on purpose (`A/B`). Spacing is the noun and the modifier: spacing rules, boundary spacing. A space is also the character itself, and it counts: a pangu element holds one space. Public method names keep an older spacing prefix (`spacingText()`, `spacingPage()`), and those stay as they are.
+The verb for inserting whitespace: pangu spaces CJK from ANS, and respaces a text node that a page re-render undid. Spaced and unspaced are the adjectives, and tight describes a shape that stays unspaced on purpose (`A/B`). Spacing is the noun and the modifier: spacing rules, boundary spacing. A space is also the character itself, and it counts: a pangu element holds one space. Public method names take the verb (`spaceText()`, `spacePage()`); a predicate about the concept keeps the noun (`hasProperSpacing()`).
 _Avoid_: spacings (no plural), space out, spaced out, spacer, spacious
 
 **CJK**:

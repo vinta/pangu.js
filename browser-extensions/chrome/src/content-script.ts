@@ -8,7 +8,7 @@ function startAutoSpacing(settings: Settings) {
   if (settings.is_ai_spacing_enabled) {
     warmUpAiSpacing();
   }
-  pangu.autoSpacingPage();
+  pangu.autoSpacePage();
 }
 
 // Content script registration only applies at page load, so the navigation listener must check the URL policy when the URL changes as well
@@ -16,7 +16,7 @@ function applyAutoSpacingUrlPolicy(settings: Settings) {
   if (shouldAutoSpacing(settings, location.href)) {
     startAutoSpacing(settings);
   } else {
-    pangu.stopAutoSpacingPage();
+    pangu.stopAutoSpacePage();
   }
 }
 

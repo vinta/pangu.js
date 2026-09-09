@@ -133,7 +133,7 @@ function spaceJunction(currentTail: string, nextFirst: string) {
     return cached;
   }
 
-  const spacedJunction = pangu.spacingText(junction);
+  const spacedJunction = pangu.spaceText(junction);
 
   if (spacedJunctionCache.size >= SPACED_JUNCTION_CACHE_MAX) {
     spacedJunctionCache.clear();
@@ -143,7 +143,7 @@ function spaceJunction(currentTail: string, nextFirst: string) {
 }
 
 function needsBoundarySpace(currentTail: string, nextFirst: string) {
-  // Only a space right at the junction counts: a space that spacingText puts
+  // Only a space right at the junction counts: a space that spaceText puts
   // anywhere else belongs inside the tail, not at the boundary
   return spaceJunction(currentTail, nextFirst).endsWith(` ${nextFirst}`) && !isQuoteNextToCjk(currentTail.slice(-1), nextFirst);
 }

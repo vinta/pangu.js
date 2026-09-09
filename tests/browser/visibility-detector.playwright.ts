@@ -76,7 +76,7 @@ test.describe('Visibility Detector', () => {
       `;
 
       // Process with visibility-aware spacing (synchronous)
-      pangu.spacingPage();
+      pangu.spacePage();
 
       const hiddenSpan = content.querySelector('.sr-only')!;
       const visibleSpan = content.querySelector('span:not(.sr-only)')!;
@@ -119,7 +119,7 @@ test.describe('Visibility Detector', () => {
 
       // Process with both visibility checking and async task scheduling
       // Use minimal delays for testing
-      pangu.autoSpacingPage({ pageDelayMs: 10, nodeDelayMs: 10, nodeMaxWaitMs: 50 });
+      pangu.autoSpacePage({ pageDelayMs: 10, nodeDelayMs: 10, nodeMaxWaitMs: 50 });
     });
 
     // Spacing lands in an idle callback, which a loaded CI box can starve for
@@ -156,7 +156,7 @@ test.describe('Visibility Detector', () => {
       `;
 
       // Process with visibility checking enabled (synchronous)
-      pangu.spacingPage();
+      pangu.spacePage();
 
       const spans = content.querySelectorAll('span');
 
@@ -196,7 +196,7 @@ test.describe('Visibility Detector', () => {
       `;
 
       // Process with visibility checking (synchronous)
-      pangu.spacingPage();
+      pangu.spacePage();
 
       // Get the spans we actually want by text content to avoid selector issues
       const allDivs = content.querySelectorAll('div');
@@ -227,16 +227,16 @@ test.describe('Visibility Detector', () => {
     expect(result.nestedStartsWithSpace).toBe(false);
   });
 
-  test.skip('should reproduce Google Calendar with autoSpacingPage - with MutationObserver', async ({ page }) => {
-    // This test simulates what happens when content is dynamically added after autoSpacingPage is started
+  test.skip('should reproduce Google Calendar with autoSpacePage - with MutationObserver', async ({ page }) => {
+    // This test simulates what happens when content is dynamically added after autoSpacePage is started
     await page.setContent('<div id="content"></div>');
 
     const results = await page.evaluate(async () => {
       const content = document.getElementById('content')!;
 
-      // Start autoSpacingPage FIRST, then add content
+      // Start autoSpacePage FIRST, then add content
       pangu.taskScheduler.config.enabled = true;
-      pangu.autoSpacingPage({ pageDelayMs: 10, nodeDelayMs: 10, nodeMaxWaitMs: 50 });
+      pangu.autoSpacePage({ pageDelayMs: 10, nodeDelayMs: 10, nodeMaxWaitMs: 50 });
 
       // Wait for autoSpacing to initialize
       await new Promise((resolve) => setTimeout(resolve, 50));
@@ -280,13 +280,13 @@ test.describe('Visibility Detector', () => {
     expect(results.startsWithSpace).toBe(false);
   });
 
-  test('should reproduce Google Calendar with autoSpacingPage', async ({ page }) => {
+  test('should reproduce Google Calendar with autoSpacePage', async ({ page }) => {
     await page.setContent('<div id="content"></div>');
 
     const results = await page.evaluate(async () => {
       const content = document.getElementById('content')!;
 
-      // Test both cases with autoSpacingPage
+      // Test both cases with autoSpacePage
       pangu.taskScheduler.config.enabled = true;
 
       // Case 2: Complex content with links (testing this first)
@@ -313,9 +313,9 @@ test.describe('Visibility Detector', () => {
     發布新版本到測試環境</span></div>
       `;
 
-      // Use autoSpacingPage instead of spacingPage
-      pangu.autoSpacingPage({ pageDelayMs: 10, nodeDelayMs: 10, nodeMaxWaitMs: 50 });
-      await new Promise((resolve) => setTimeout(resolve, 200)); // Wait longer for autoSpacingPage
+      // Use autoSpacePage instead of spacePage
+      pangu.autoSpacePage({ pageDelayMs: 10, nodeDelayMs: 10, nodeMaxWaitMs: 50 });
+      await new Promise((resolve) => setTimeout(resolve, 200)); // Wait longer for autoSpacePage
 
       const result = content.querySelector('span:not(.XuJrye)')!.textContent;
 
@@ -356,7 +356,7 @@ test.describe('Visibility Detector', () => {
     記得更新測試案例的預期結果</span></div>
       `;
 
-      pangu.spacingPage();
+      pangu.spacePage();
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const case1Result = content.querySelector('span:not(.XuJrye)')!.textContent;
@@ -385,7 +385,7 @@ test.describe('Visibility Detector', () => {
     發布新版本到測試環境</span></div>
       `;
 
-      pangu.spacingPage();
+      pangu.spacePage();
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const case2Result = content.querySelector('span:not(.XuJrye)')!.textContent;
@@ -440,7 +440,7 @@ test.describe('Visibility Detector', () => {
       // Test 1: Synchronous mode (should work correctly)
       pangu.taskScheduler.config.enabled = false;
 
-      pangu.spacingPage();
+      pangu.spacePage();
 
       const syncResult = content.querySelector('span:not(.XuJrye)')!.textContent;
 
@@ -466,7 +466,7 @@ test.describe('Visibility Detector', () => {
       // Test 2: Async mode with taskScheduler
       pangu.taskScheduler.config.enabled = true;
 
-      pangu.spacingPage();
+      pangu.spacePage();
 
       // Wait for async processing
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -549,7 +549,7 @@ test.describe('Visibility Detector', () => {
       pangu.taskScheduler.config.enabled = true;
 
       // Process the page
-      pangu.spacingPage();
+      pangu.spacePage();
 
       // Wait for async processing
       await new Promise((resolve) => setTimeout(resolve, 200));

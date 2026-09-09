@@ -14,7 +14,7 @@ test.describe('applyLateFixes', () => {
     await page.setContent('<div id="target">氣溫是-5度左右</div>');
 
     const result = await page.evaluate(() => {
-      pangu.spacingNode(document.body);
+      pangu.spaceNode(document.body);
 
       const textNode = document.getElementById('target')!.firstChild as Text;
       pangu.applyLateFixes([{ node: textNode, settled: '氣溫是 - 5 度左右', data: '氣溫是 -5 度左右' }]);
@@ -28,7 +28,7 @@ test.describe('applyLateFixes', () => {
     await page.setContent('<div id="target">氣溫是-5度左右</div>');
 
     const result = await page.evaluate(() => {
-      pangu.spacingNode(document.body);
+      pangu.spaceNode(document.body);
 
       // Something else rewrote the node while the classifier was still thinking
       const textNode = document.getElementById('target')!.firstChild as Text;
@@ -44,7 +44,7 @@ test.describe('applyLateFixes', () => {
     await page.setContent('<div id="target">氣溫是-5度左右</div>');
 
     const result = await page.evaluate(() => {
-      pangu.spacingNode(document.body);
+      pangu.spaceNode(document.body);
 
       const target = document.getElementById('target')!;
       const textNode = target.firstChild as Text;
@@ -76,7 +76,7 @@ test.describe('applyLateFixes', () => {
         }
         pangu.applyLateFixes(lateFixes);
       };
-      pangu.autoSpacingPage({ pageDelayMs: 0 });
+      pangu.autoSpacePage({ pageDelayMs: 0 });
     });
 
     // Past the observer's own debounce, so a revert would have landed by now
