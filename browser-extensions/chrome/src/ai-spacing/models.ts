@@ -4,7 +4,6 @@ import type { PromptSpec } from './shapes/base';
 // One base session per ambiguous shape
 const baseSessions = new Map<string, Promise<LanguageModel>>();
 
-// Answers by question: a page re-render or a duplicated node asks the same question again, and sampling is pinned so the answer is the same
 // The promise, not the label, so batches in flight at the same time share one prompt. Unbounded on purpose, since the service worker is killed after idle and the map dies with it
 const cachedAnswers = new Map<string, Promise<CandidateLabel | null>>();
 
@@ -29,7 +28,6 @@ export async function isModelSupported() {
   return availability !== 'unsupported' && availability !== 'unavailable';
 }
 
-// Resolves when the model is ready
 export async function downloadModel() {
   // The download is browser-wide and outlives this page, so the session only exists to start it
   // TODO: 2026-09-08: after On-device AI is toggled off and on in chrome://settings/ai, availability stays 'downloading' and downloadprogress never moves past 0 until Chrome restarts; consider telling the user to restart Chrome when the download stays at 0
