@@ -639,6 +639,12 @@ export const PROMPTS = {
 
 PROMPTS['v26-zh-omit-constraint-input'] = { ...PROMPTS['v26-zh'], omitResponseConstraintInput: true };
 
+PROMPTS['v31-zh-title-number'] = {
+  ...PROMPTS['v26-zh'],
+  label: 'v31 v26 with title-number separator gloss',
+  build: (kase, labels) => PROMPTS['v26-zh'].build(kase, labels).replace('連接或分隔兩個項目，不屬於後面的數字', '分隔或連接文字與數字，例如標題與編號；後面的數字不是負數'),
+};
+
 export const SHOT_SENTENCES = Object.values(SHOTS)
   .flat()
   .map(([s]) => s);

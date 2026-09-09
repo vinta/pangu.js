@@ -12,6 +12,7 @@ const { values, positionals } = parseArgs({
   options: {
     'experiment': { type: 'string', default: 'hyphen-sign' },
     'split': { type: 'string' },
+    'cases': { type: 'string' },
     'out': { type: 'string' },
     'extension-id': { type: 'string' },
     'profile-path': { type: 'string' },
@@ -28,6 +29,7 @@ assert(Number.isSafeInteger(repeats) && repeats > 0, `invalid --repeats ${values
 const orderCount = Number(values.orders);
 assert(Number.isSafeInteger(orderCount) && orderCount > 0, `invalid --orders ${values.orders}; use a positive integer`);
 assert(['hyphen-sign', 'plus-sign', 'spacing-rewrite'].includes(values.experiment), `invalid --experiment ${values.experiment}; use hyphen-sign, plus-sign, or spacing-rewrite`);
+assert(values.cases === undefined || values.experiment === 'hyphen-sign', '--cases is only supported for --experiment hyphen-sign');
 const plus = values.experiment === 'plus-sign' ? await import('./plus-sign/experiment.mjs') : null;
 const rewrite = values.experiment === 'spacing-rewrite' ? await import('./spacing-rewrite/experiment.mjs') : null;
 assert(plus || !values.split, '--split is only supported for --experiment plus-sign');
@@ -42,9 +44,14 @@ const prompts =
         shipping: { system: hyphenPrompt.systemPrompt, build: (kase) => hyphenPrompt.buildQuestion(kase.input, kase.at) },
       };
 const root = new URL('./hyphen-sign/', import.meta.url);
-const corpus = rewrite ? rewrite.loadCorpus() : plus ? plus.loadCorpus(split) : JSON.parse(readFileSync(new URL('cases.json', root), 'utf8'));
-const fields = plus || rewrite ? [] : JSON.parse(readFileSync(new URL('field-cases.json', root), 'utf8')).cases;
+const corpus = rewrite ? rewrite.loadCorpus() : plus ? plus.loadCorpus(split) : JSON.parse(readFileSync(values.cases ?? new URL('cases.json', root), 'utf8'));
+const fields = plus || rewrite || values.cases !== undefined ? [] : JSON.parse(readFileSync(new URL('field-cases.json', root), 'utf8')).cases;
 const cases = [...corpus.cases, ...fields];
+assert(
+  corpus.diagnosticQuestions === undefined ||
+    (Array.isArray(corpus.diagnosticQuestions) && corpus.diagnosticQuestions.length > 0 && corpus.diagnosticQuestions.every((question) => typeof question === 'string' && question.trim())),
+  `invalid diagnosticQuestions in ${values.cases ?? values.experiment}; use a nonempty array of nonempty strings`,
+);
 const diagnosticIds = values.diagnostics?.split(',');
 assert(
   !diagnosticIds || (!values['require-perfect'] && repeats === 1 && orderCount === 1),
@@ -124,7 +131,7 @@ mkdirSync(output, { recursive: false });
 writeFileSync(join(output, 'cases.json'), `${JSON.stringify({ ...corpus, cases }, null, 2)}\n`, { flag: 'wx' });
 
 const extensionURL = `chrome-extension://${values['extension-id']}`;
-async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics, rewrite }) {
+async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics, diagnosticQuestions, rewrite }) {
   const context = page.context();
   const worker = context.serviceWorkers().find((candidate) => candidate.url() === `${extensionURL}/dist/service-worker.js`);
   if (!worker) {
@@ -147,7 +154,7 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
     await worker.evaluate((id) => chrome.tabs.remove(id), infoId);
   }
   const run = await worker.evaluate(
-    async ({ system, initialTurns, inputs, orders, repeats, diagnostics, rewrite, omitResponseConstraintInput }) => {
+    async ({ system, initialTurns, inputs, orders, repeats, diagnostics, diagnosticQuestions, rewrite, omitResponseConstraintInput }) => {
       if (typeof LanguageModel === 'undefined' || typeof LanguageModel.params !== 'function') {
         throw new Error('extension Prompt API sampling controls unavailable; check Chrome and the extension context');
       }
@@ -184,9 +191,11 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
                   throw new Error(`response outside constraint: ${raw}`);
                 }
                 if (diagnostics) {
-                  const questions = rewrite
-                    ? ['請列出你剛才插入或刪除空格的位置，以及各自使用哪一條規則。', '原文中哪些空格是作者輸入的？你是否保留了它們？請引用原文說明。']
-                    : ['你剛才判斷的是原句中從左到右第幾個「-」？請把原句中所有「-」都計入，只回答位置。', '請逐字引用你剛才判斷的那個「-」前後的原文，讓我能辨認是哪一處。'];
+                  const questions =
+                    diagnosticQuestions ??
+                    (rewrite
+                      ? ['請列出你剛才插入或刪除空格的位置，以及各自使用哪一條規則。', '原文中哪些空格是作者輸入的？你是否保留了它們？請引用原文說明。']
+                      : ['你剛才判斷的是原句中從左到右第幾個「-」？請把原句中所有「-」都計入，只回答位置。', '請逐字引用你剛才判斷的那個「-」前後的原文，讓我能辨認是哪一處。']);
                   for (const question of questions) {
                     const start = performance.now();
                     const response = await turn.prompt(question, { signal: AbortSignal.timeout(30000) });
@@ -228,14 +237,24 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
       });
       return { availability, createMs, results };
     },
-    { system: prompt.system, initialTurns: prompt.initialTurns ?? [], inputs, orders, repeats, diagnostics, rewrite, omitResponseConstraintInput: prompt.omitResponseConstraintInput ?? false },
+    {
+      system: prompt.system,
+      initialTurns: prompt.initialTurns ?? [],
+      inputs,
+      orders,
+      repeats,
+      diagnostics,
+      diagnosticQuestions,
+      rewrite,
+      omitResponseConstraintInput: prompt.omitResponseConstraintInput ?? false,
+    },
   );
   return { ...run, browserVersion: context.browser().version(), profileVerified: true, extensionWorkerVerified: true };
 }
 
 for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
   const orders = caseOrders(orderCount, inputs.length);
-  const code = `async page => (${runInBrowser.toString()})(page, ${JSON.stringify({ profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics: Boolean(diagnosticIds), rewrite: Boolean(rewrite) })})`;
+  const code = `async page => (${runInBrowser.toString()})(page, ${JSON.stringify({ profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics: Boolean(diagnosticIds), diagnosticQuestions: diagnosticIds ? corpus.diagnosticQuestions : undefined, rewrite: Boolean(rewrite) })})`;
   const run = JSON.parse(
     execFileSync('playwright-cli', ['-s=pangu-eval', '--raw', 'run-code', code], {
       encoding: 'utf8',
@@ -246,7 +265,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
   );
 
   const result = {
-    set: rewrite ? 'spacing-rewrite:development' : plus ? `plus-sign:${split}` : 'hyphen-sign+field',
+    set: corpus.set ?? (rewrite ? 'spacing-rewrite:development' : plus ? `plus-sign:${split}` : values.cases !== undefined ? 'hyphen-sign:custom' : 'hyphen-sign+field'),
     backend: 'prompt-api',
     model: 'gemini-nano',
     context: 'extension-sw',

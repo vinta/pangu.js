@@ -4,6 +4,8 @@ For direct text output from explicit spacing rules, see [the spacing rewrite exp
 
 For `omitResponseConstraintInput` on the hyphen classifier, see [the v26 comparison](hyphen-sign/reports/2026-09-07-omit-constraint-input.md).
 
+For title numbers and subtitle context, see [the v31 comparison](hyphen-sign/reports/2026-09-09-title-number.md).
+
 Run Gemini Nano experiments alongside the shipping code. The CLI sends evaluation code through Playwright to the installed pangu extension's service worker. No extra extension, eval page, or extension rebuild is needed to compare prompts.
 
 Requires Node 22.18+ and `playwright-cli` on PATH. The model must already be available in the configured Chrome profile. The runner does not download it.
@@ -49,6 +51,8 @@ playwright-cli -s=pangu-eval detach
 
 With no variant arguments, the runner uses `shipping`. This imports `hyphenPrompt` from `browser-extensions/chrome/src/ai-spacing/shapes/hyphen-prompt.ts` in the current checkout. It measures those source bytes even if the installed extension was built from an older checkout. The installed worker provides the execution context; its classifier and cached sessions are not used by the sweep.
 
+Use `--cases <JSON path>` for a separate hyphen corpus. It replaces both `cases.json` and `field-cases.json`; keep the same `{ "enums": ..., "cases": [...] }` structure. An optional `set` names the corpus in result exports. Without it, custom runs use `hyphen-sign:custom`.
+
 Add candidates to `hyphen-sign/prompts.js`. Keep measured variants unchanged and give revised prompts new IDs. Keep glosses generic; never describe control-specific cases or copy evaluation sentences into examples. To promote a winner, update the shipping prompt and compare `shipping` with the measured candidate.
 
 ## What the runner measures
@@ -64,7 +68,7 @@ The hyphen suite has 23 original cases, 5 field development cases, and 12 synthe
 
 A prompt builder can return `null` to abstain before inference. Exports retain the target with `skipped`, no answers, and `correct: false`. Every scored skip fails `--require-perfect`; a skipped sign is a missed correction. Skips are never counted as correct classifications.
 
-Use `--diagnostics <case-id,case-id>` with `--repeats 1` for separate interpretation sessions. After the constrained answer, the runner asks which occurrence the model understood and requests an exact surrounding quote. Diagnostic exports carry `purpose: interpretation-diagnostics-not-accuracy`; they are clues, not accuracy measurements. The flag cannot be combined with `--require-perfect`. Normal runs never include diagnostic history.
+Use `--diagnostics <case-id,case-id>` with `--repeats 1 --orders 1` for separate interpretation sessions. After the constrained answer, the runner asks which occurrence the model understood and requests an exact surrounding quote. A custom corpus can supply `diagnosticQuestions`, a nonempty array of nonempty strings, to replace these follow-ups. These questions run only with `--diagnostics`. Diagnostic exports carry `purpose: interpretation-diagnostics-not-accuracy`; they are clues, not accuracy measurements. The flag cannot be combined with `--require-perfect`. Normal runs never include diagnostic history.
 
 Run `node scripts/prompt-experiments/hyphen-sign/check-targets.mjs` to assert the baseline collision, target identities, unchanged sentences, and impossible quotes. Pass the intended shipping prompt's absolute path as the first argument to verify v26 parity too. The [target experiment report](hyphen-sign/reports/2026-09-06-target-identification.md) records the source commit used for this comparison.
 

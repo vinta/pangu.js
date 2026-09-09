@@ -4,6 +4,32 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { expect, onTestFinished, test } from 'vitest';
 
+test.skipIf(!process.features.typescript)('custom hyphen cases replace the default suite and retain diagnostic and target validation', () => {
+  const root = mkdtempSync(join(tmpdir(), 'pangu-cases-'));
+  onTestFinished(() => rmSync(root, { recursive: true, force: true }));
+  const file = join(root, 'cases.json');
+  const corpus = {
+    set: 'title-number',
+    enums: { hyphen: ['signed-number', 'range-or-separator', 'unsure'] },
+    diagnosticQuestions: ['這個數字在句子中表示什麼？'],
+    cases: [{ id: 'title-19', enum: 'hyphen', input: '標題-19', at: 2, symbol: '-', expected_label: 'range-or-separator', type: 'control' }],
+  };
+  const check = (...args: string[]) => spawnSync(process.execPath, ['scripts/prompt-experiments/sweep.mjs', '--check', '--cases', file, 'v26-zh', ...args], { encoding: 'utf8' });
+  writeFileSync(file, JSON.stringify(corpus));
+  const accuracy = check();
+  expect(accuracy.status, accuracy.stderr).toBe(0);
+  expect(accuracy.stdout).toContain('Checked 1 cases; rendered variants: v26-zh');
+  const diagnostics = check('--diagnostics', 'title-19', '--orders', '1');
+  expect(diagnostics.status, diagnostics.stderr).toBe(0);
+  expect(check('--diagnostics', 'title-19').stderr).toContain('--diagnostics requires --repeats 1, --orders 1');
+  expect(check('--experiment', 'plus-sign').stderr).toContain('--cases is only supported for --experiment hyphen-sign');
+
+  writeFileSync(file, JSON.stringify({ ...corpus, diagnosticQuestions: [' '] }));
+  expect(check().stderr).toContain('invalid diagnosticQuestions');
+  writeFileSync(file, JSON.stringify({ ...corpus, cases: [{ ...corpus.cases[0], at: 0 }] }));
+  expect(check().stderr).toContain('invalid symbol offset: title-19');
+});
+
 test.skipIf(!process.features.typescript)('requires an explicit matching Chrome profile before creating experiment output', () => {
   const root = mkdtempSync(join(tmpdir(), 'pangu-profile-'));
   onTestFinished(() => rmSync(root, { recursive: true, force: true }));
