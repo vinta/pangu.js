@@ -4,6 +4,14 @@ import type { PromptSpec } from './shapes/base';
 // One base session per ambiguous shape
 const baseSessions = new Map<string, Promise<LanguageModel>>();
 
+// Answers by shape and candidate: a page re-render or a duplicated node asks the same question again, and sampling is pinned so the answer is the same
+// Unbounded on purpose, since the service worker is killed after idle and the map dies with it
+const answers = new Map<string, CandidateLabel>();
+
+function answerKey(kind: string, candidate: Candidate) {
+  return `${kind}\0${candidate.at}\0${candidate.sentence}`;
+}
+
 // `unsupported` is ours, not an API value: the browser has no Prompt API at all
 export type AiModelAvailability = Availability | 'unsupported';
 
@@ -114,7 +122,16 @@ export async function classifyCandidates(promptSpec: PromptSpec<CandidateLabel>,
   // See https://source.chromium.org/chromium/chromium/src/+/main:services/on_device_model/on_device_model_mojom_impl.cc (RunTaskIfPossible)
   const candidateLabels: (CandidateLabel | null)[] = [];
   for (const candidate of candidates) {
-    candidateLabels.push(await classifyOneCandidate(promptSpec, baseSession, candidate));
+    const key = answerKey(promptSpec.kind, candidate);
+    let candidateLabel = answers.get(key) ?? null;
+    if (candidateLabel === null) {
+      candidateLabel = await classifyOneCandidate(promptSpec, baseSession, candidate);
+      // A null is a failure, not an answer, so the next batch asks again
+      if (candidateLabel !== null) {
+        answers.set(key, candidateLabel);
+      }
+    }
+    candidateLabels.push(candidateLabel);
   }
   return candidateLabels;
 }
