@@ -30,6 +30,8 @@ jobs:
         with:
           node-version: '24'
           cache: 'npm'
+          # npmjs.org is already the default registry, but this makes setup-node write its own .npmrc and point NPM_CONFIG_USERCONFIG at it, so publish ignores runner-level npm config
+          # No NODE_AUTH_TOKEN is set on purpose: npm then falls through to OIDC. This is the shape in npm's trusted publishing docs
           registry-url: 'https://registry.npmjs.org'
 
       - name: Check version
