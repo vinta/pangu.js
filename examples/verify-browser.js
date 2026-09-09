@@ -1,4 +1,4 @@
-// Test the browser builds the way test-browser.html loads them: the UMD file through a <script> tag and the ESM file through a module import, both served from node_modules over HTTP
+// Test the browser builds the way verify-browser.html loads them: the UMD file through a <script> tag and the ESM file through a module import, both served from node_modules over HTTP
 const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
 const { join } = require('node:path');
