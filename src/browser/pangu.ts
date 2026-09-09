@@ -71,7 +71,6 @@ export class BrowserPangu extends Pangu {
   // Pre-paint re-space stays bounded: subtrees with more text nodes than this fall back to the queue
   private static readonly maxSyncTextNodes = 256;
 
-  private isAutoSpacePageExecuted = false;
   private autoSpacePageObserver: MutationObserver | null = null;
 
   // Last data we wrote per text node: distinguishes pangu's own mutation records
@@ -96,11 +95,10 @@ export class BrowserPangu extends Pangu {
       return;
     }
 
-    if (this.isAutoSpacePageExecuted) {
+    if (this.autoSpacePageObserver) {
       return;
     }
 
-    this.isAutoSpacePageExecuted = true;
     const observer = this.setupAutoSpacePageObserver(nodeDelayMs, nodeMaxWaitMs);
 
     // Skipped once stopAutoSpacePage() dropped this observer before the delay elapsed
@@ -136,8 +134,6 @@ export class BrowserPangu extends Pangu {
       this.autoSpacePageObserver.disconnect();
       this.autoSpacePageObserver = null;
     }
-
-    this.isAutoSpacePageExecuted = false;
   }
 
   public applyLateFixes(lateFixes: readonly LateFix[]) {
