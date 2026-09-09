@@ -1,5 +1,5 @@
 import { Pangu } from '../shared/index.js';
-import { decideBoundarySpacing, decideTextNodeSpacing, respaceCurrentTail } from './boundary-spacing.js';
+import { decideBoundarySpacing, decideTextNodeSpacing, respaceCurrentTail } from './dom/boundary-spacing.js';
 import { DomWalker } from './dom/dom-walker.js';
 import { VisibilityDetector } from './dom/visibility-detector.js';
 import { TaskScheduler } from './scheduling/task-scheduler.js';
