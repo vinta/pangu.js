@@ -61,6 +61,7 @@ for (const [experiment, variant] of [
   ['hyphen-sign', 'v27-zh-unique-quote'],
   ['spacing-rewrite', 'v1-zh'],
   ['spacing-rewrite', 'v1-zh-omit-constraint-input'],
+  ['slash-unit', 'v1-zh'],
 ] as const) {
   test.skipIf(!process.features.typescript)(`${experiment}/${variant}: scored failures fail require-perfect and preserve raw answers`, () => {
     const root = mkdtempSync(join(tmpdir(), 'pangu-abstention-'));
@@ -85,6 +86,7 @@ const worker = {
         assert.equal(options.omitResponseConstraintInput, process.env.TEST_OMIT_CONSTRAINT_INPUT === 'true');
         calls++;
         const input = args.inputs.find(input => input.question === question);
+        if (input.enum === 'slash' && input === args.inputs[0]) return JSON.stringify('separator');
         if (args.rewrite && input === args.inputs[0]) return JSON.stringify(input.expected_label + '\\n');
         if (args.rewrite && input === args.inputs[1]) return 'invalid JSON';
         return JSON.stringify(input.expected_label);
@@ -124,13 +126,37 @@ new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context 
       },
     );
     expect(run.status, run.stderr).toBe(1);
-    const result = JSON.parse(readFileSync(join(output, `1-${variant}.json`), 'utf8'));
+    const result = JSON.parse(readFileSync(join(output, `1-${variant}.json`), 'utf8')) as {
+      omitResponseConstraintInput: boolean;
+      evaluation: { labels: unknown; misses: string[]; exact: unknown; nonSpaceChanges: number };
+      results: {
+        id: string;
+        input: string;
+        at: number;
+        unit: string;
+        expected_output: string;
+        responseConstraint: unknown;
+        skipped?: string;
+        correct: boolean;
+        answers: { order: number; answer: unknown }[];
+      }[];
+      testCalls: number;
+      orders: string[][];
+    };
     expect(result.omitResponseConstraintInput).toBe(variant === 'v1-zh-omit-constraint-input');
+    if (experiment === 'slash-unit') {
+      expect(result.evaluation.labels).toEqual({ passed: result.results.length - 1, total: result.results.length });
+      expect(result.evaluation.misses).toEqual([result.results[0].id]);
+      expect(result.results[0].answers[0]).toMatchObject({ raw: '"separator"', answer: 'separator', error: null });
+      expect(result.testCalls).toBe(result.results.length * 6);
+      expect(result.results.every((kase: { input: string; at: number; unit: string }) => kase.input.slice(kase.at).startsWith('/' + kase.unit))).toBe(true);
+      return;
+    }
     if (experiment === 'spacing-rewrite') {
       expect(result.evaluation.exact).toEqual({ passed: result.results.length - 2, total: result.results.length });
       expect(result.evaluation.nonSpaceChanges).toBe(6);
       expect(result.results[0].answers[0].answer).toBe(result.results[0].expected_output + '\n');
-      expect(result.results[1].answers[0]).toMatchObject({ raw: 'invalid JSON', answer: null, error: expect.any(String) });
+      expect(result.results[1].answers[0]).toMatchObject({ raw: 'invalid JSON', answer: null, error: expect.any(String) as unknown });
       expect(result.results.every((kase: { responseConstraint: unknown }) => JSON.stringify(kase.responseConstraint) === '{"type":"string"}')).toBe(true);
       expect(result.testCalls).toBe(result.results.length * 6);
       return;

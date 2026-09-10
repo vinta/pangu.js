@@ -30,24 +30,28 @@ const repeats = Number(values.repeats);
 assert(Number.isSafeInteger(repeats) && repeats > 0, `invalid --repeats ${values.repeats}; use a positive integer`);
 const orderCount = Number(values.orders);
 assert(Number.isSafeInteger(orderCount) && orderCount > 0, `invalid --orders ${values.orders}; use a positive integer`);
-assert(['hyphen-sign', 'plus-sign', 'spacing-rewrite'].includes(values.experiment), `invalid --experiment ${values.experiment}; use hyphen-sign, plus-sign, or spacing-rewrite`);
+assert(
+  ['hyphen-sign', 'plus-sign', 'spacing-rewrite', 'slash-unit'].includes(values.experiment),
+  `invalid --experiment ${values.experiment}; use hyphen-sign, plus-sign, spacing-rewrite, or slash-unit`,
+);
 assert(values.cases === undefined || values.experiment === 'hyphen-sign', '--cases is only supported for --experiment hyphen-sign');
 const plus = values.experiment === 'plus-sign' ? await import('./plus-sign/experiment.mjs') : null;
 const rewrite = values.experiment === 'spacing-rewrite' ? await import('./spacing-rewrite/experiment.mjs') : null;
+const slash = values.experiment === 'slash-unit' ? await import('./slash-unit/experiment.mjs') : null;
 assert(plus || !values.split, '--split is only supported for --experiment plus-sign');
-assert(!plus || !values.diagnostics, '--diagnostics is only supported for --experiment hyphen-sign or spacing-rewrite');
+assert(!plus || !values.diagnostics, '--diagnostics is only supported for --experiment hyphen-sign, spacing-rewrite, or slash-unit');
 const split = values.split ?? 'development';
-const variants = positionals.length ? positionals : rewrite ? ['v1-zh'] : plus ? ['v1-zh', 'v2-zh'] : ['shipping'];
+const variants = positionals.length ? positionals : slash ? ['v1-zh', 'v2-zh', 'v3-zh', 'v4-zh-local'] : rewrite ? ['v1-zh'] : plus ? ['v1-zh', 'v2-zh'] : ['shipping'];
 const prompts =
-  plus || rewrite
+  plus || rewrite || slash
     ? (await import(`./${values.experiment}/prompts.js`)).PROMPTS
     : {
         ...PROMPTS,
         shipping: { system: hyphenPrompt.systemPrompt, build: (kase) => hyphenPrompt.buildQuestion(kase.input, kase.at) },
       };
 const root = new URL('./hyphen-sign/', import.meta.url);
-const corpus = rewrite ? rewrite.loadCorpus() : plus ? plus.loadCorpus(split) : JSON.parse(readFileSync(values.cases ?? new URL('cases.json', root), 'utf8'));
-const fields = plus || rewrite || values.cases !== undefined ? [] : JSON.parse(readFileSync(new URL('field-cases.json', root), 'utf8')).cases;
+const corpus = slash ? slash.loadCorpus() : rewrite ? rewrite.loadCorpus() : plus ? plus.loadCorpus(split) : JSON.parse(readFileSync(values.cases ?? new URL('cases.json', root), 'utf8'));
+const fields = plus || rewrite || slash || values.cases !== undefined ? [] : JSON.parse(readFileSync(new URL('field-cases.json', root), 'utf8')).cases;
 const cases = [...corpus.cases, ...fields];
 assert(
   corpus.diagnosticQuestions === undefined ||
@@ -100,11 +104,11 @@ for (const kase of cases) {
   if (rewrite) {
     continue;
   }
-  assert.equal(kase.input[kase.at], plus ? '+' : '-', `invalid symbol offset: ${kase.id}`);
+  assert.equal(kase.input[kase.at], slash ? '/' : plus ? '+' : '-', `invalid symbol offset: ${kase.id}`);
   assert(corpus.enums[kase.enum].includes(kase.expected_label), `unknown expected label: ${kase.id}`);
   assert(!SHOT_SENTENCES.includes(kase.input), `few-shot leakage: ${kase.id}`);
 }
-if (!plus && !rewrite) {
+if (!plus && !rewrite && !slash) {
   assert.deepEqual(corpus.enums.hyphen, hyphenPrompt.candidateLabels, 'shipping labels differ from the corpus; update the cases before comparing prompts');
 }
 const runs = variants.map((variant) => {
@@ -132,7 +136,7 @@ const runs = variants.map((variant) => {
 if (values.check) {
   plus?.check(corpus);
   rewrite?.check();
-  console.log(`Checked ${cases.length} cases; rendered variants: ${variants.join(', ')}${plus || rewrite ? '' : `; shipping source version: ${hyphenPrompt.version}`}`);
+  console.log(`Checked ${cases.length} cases; rendered variants: ${variants.join(', ')}${plus || rewrite || slash ? '' : `; shipping source version: ${hyphenPrompt.version}`}`);
   process.exit(0);
 }
 assert(/^[a-p]{32}$/.test(values['extension-id'] ?? ''), `invalid --extension-id ${values['extension-id'] ?? '(missing)'}; copy the shipping extension ID from chrome://extensions/`);
@@ -350,6 +354,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     ...run,
     ...(plus ? { evaluation: plus.score(run, corpus, repeats * orders.length) } : {}),
     ...(rewrite ? { evaluation: rewrite.score(run) } : {}),
+    ...(slash ? { evaluation: slash.score(run) } : {}),
   };
   const file = join(output, `${runIndex + 1}-${variant}.json`);
   writeFileSync(file, `${JSON.stringify(result, null, 2)}\n`, { flag: 'wx' });
@@ -368,7 +373,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     }
     continue;
   }
-  if (rewrite) {
+  if (rewrite || slash) {
     console.log(`${variant}: ${JSON.stringify(result.evaluation)}; errors ${errors.length}; ${file}`);
     if (errors.length || (values['require-perfect'] && scored.some((kase) => !kase.correct))) {
       process.exitCode = 1;
