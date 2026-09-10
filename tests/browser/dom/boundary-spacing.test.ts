@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { BoundarySpacingContext, BoundarySpacingDecision, TextNodeSpacingContext, TextNodeSpacingDecision } from '../../src/browser/dom/boundary-spacing';
-import { decideBoundarySpacing, decideTextNodeSpacing, respaceCurrentTail } from '../../src/browser/dom/boundary-spacing';
+import type { BoundarySpacingContext, BoundarySpacingDecision, TextNodeSpacingContext, TextNodeSpacingDecision } from '../../../src/browser/dom/boundary-spacing';
+import { decideBoundarySpacing, decideTextNodeSpacing, respaceCurrentTail } from '../../../src/browser/dom/boundary-spacing';
 
 // A boundary that the spacing engine wants a space at, with every veto turned off
 const boundarySpacingContext: BoundarySpacingContext = {

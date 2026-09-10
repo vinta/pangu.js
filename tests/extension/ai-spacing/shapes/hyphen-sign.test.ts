@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { applyTextEdits, indexOfNthSymbol, sliceSentence, type TextEdit } from '../../browser-extensions/chrome/src/ai-spacing/shapes/base';
-import { hasInsertedGap, hyphenSign } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-shape';
+import { applyTextEdits, indexOfNthSymbol, sliceSentence, type TextEdit } from '../../../../browser-extensions/chrome/src/ai-spacing/shapes/base';
+import { hasInsertedGap, hyphenSign } from '../../../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-shape';
 
 describe('sliceSentence()', () => {
   it('keep a text with no terminator whole', () => {

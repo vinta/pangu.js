@@ -1,8 +1,8 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
-import type { CandidateLabel, ClassifyCandidatesMessage } from '../../browser-extensions/chrome/src/ai-spacing/messages';
-import type { Settings } from '../../browser-extensions/chrome/src/settings/storage';
+import type { CandidateLabel, ClassifyCandidatesMessage } from '../../../browser-extensions/chrome/src/ai-spacing/messages';
+import type { Settings } from '../../../browser-extensions/chrome/src/settings/storage';
 
 declare global {
   interface Window {

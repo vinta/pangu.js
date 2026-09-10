@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { hyphenPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-prompt';
+import { hyphenPrompt } from '../../../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-prompt';
 
 it('use the v26-zh system prompt with English output labels', () => {
   expect(hyphenPrompt.version).toBe('v26-zh');
