@@ -1,5 +1,7 @@
 # A plus after a word reads as a separator, and a name-suffix list restores listed names
 
+**Partially superseded by [ADR 0024](0024-name-suffixes-belong-to-core-spacing.md): core owns the accepted list and produces the suffix outputs in every consumer. The default separator policy stays.**
+
 ADR 0003 attached a plus to a preceding word as a suffix (`Disney+ 上架`), and ADR 0006 made a plus in CJK contact flip its line's undecided pluses into separators. The affix decides first, so in a telecom bundle plan the plus after a product code was never undecided: `HiNet光世代+MOD+影劇館+/全選` rendered as `HiNet 光世代 + MOD+ 影劇館 + /全選`, reading `MOD+` as a brand. ADR 0013 accepted that misread, and ADR 0018 closed the other bundle-plan FIXME with the extension's brand list while leaving this one open, since a list can remove a space but never turn a suffix into a separator.
 
 The shape `A+CJK` carries two readings that no rule can split: a name suffix (`Disney+`, `AA+`, `AB+`) and a separator (`Switch+健身環`, `AI+製造`, `MOD+影劇館`). Names are a closed set the extension can list. Separators are open. So the rules take the open reading, and the list restores the closed one.

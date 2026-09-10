@@ -55,6 +55,8 @@ describe('Symbol " "', () => {
 // \u201d
 describe('Symbol “ ”', () => {
   it('handle “ ” symbols as quotes', () => {
+    expect(pangu.spaceText('獲標準普爾長期信用評等“AA”全球電信業之首')).toBe('獲標準普爾長期信用評等 “AA” 全球電信業之首');
+
     // prettier-ignore
     expect(pangu.spaceText('阿里云开源“计算王牌”Blink，实时计算时代已来'))
                        .toBe('阿里云开源 “计算王牌” Blink，实时计算时代已来');

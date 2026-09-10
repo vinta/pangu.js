@@ -1,5 +1,7 @@
 # A plus after a closing bracket reads as a separator
 
+**The package/extension suffix difference below is superseded by [ADR 0024](0024-name-suffixes-belong-to-core-spacing.md). The closing-bracket separator policy stays.**
+
 Plus reading keeps a plus tight on the side that touches common Chinese full-width punctuation, even when another plus flips the line. The reason is a name: in `Disney+（迪士尼）` or `影劇館+」` the plus is a suffix that the extension's name-suffix list restores per ADR 0019, and a space before an opening full-width bracket or quote would split the name from its gloss.
 
 A real bundle plan broke the shape: `HiNet光世代+MOD+自選餐(全選)+「影劇館+」`. The third plus sits between `)` and `「`. A closing bracket carries no name, so nothing on its left can be a suffix, and yet the full-width rule kept the plus tight: `HiNet 光世代 + MOD + 自選餐 (全選)+「影劇館+」`.

@@ -1,4 +1,4 @@
-import { Pangu } from '../shared/index.js';
+import { NAME_SUFFIX_AT_END, Pangu } from '../shared/index.js';
 import { decideBoundarySpacing, decideTextNodeSpacing, respaceCurrentTail } from './dom/boundary-spacing.js';
 import { DomWalker } from './dom/dom-walker.js';
 import { VisibilityDetector } from './dom/visibility-detector.js';
@@ -170,7 +170,8 @@ export class BrowserPangu extends Pangu {
         const currentNode = currentTextNode;
         const nextNode = nextTextNode;
 
-        const currentTail = currentTextNode.data.slice(-3);
+        // Keep the whole ASCII word before a sign, so a truncated NotAB+ cannot look like the listed AB+
+        const currentTail = currentTextNode.data.match(/(?<![A-Za-z0-9])[A-Za-z0-9]{3,}[+-]$/)?.[0] ?? currentTextNode.data.slice(-3);
         const nextFirst = nextTextNode.data.slice(0, 1);
 
         const boundarySpacingDecision = decideBoundarySpacing({
@@ -195,7 +196,8 @@ export class BrowserPangu extends Pangu {
         });
 
         // A junction space can come with a second space that belongs inside the current text node's tail (CJK/ + CJK reads CJK / CJK): write the respaced tail back before placing the junction space
-        if (boundarySpacingDecision !== 'none' && !this.holdsLateFix(currentTextNode)) {
+        // Full-node spacing already preserved listed suffixes; a truncated tail can split them again
+        if (boundarySpacingDecision !== 'none' && !this.holdsLateFix(currentTextNode) && !NAME_SUFFIX_AT_END.test(currentTextNode.data)) {
           const respacedTail = respaceCurrentTail(currentTail, nextFirst);
           if (respacedTail !== null) {
             currentTextNode.data = currentTextNode.data.slice(0, currentTextNode.data.length - currentTail.length) + respacedTail;

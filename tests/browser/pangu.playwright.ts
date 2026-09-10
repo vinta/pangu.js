@@ -101,6 +101,34 @@ test.describe('BrowserPangu', () => {
       expect(result).toBe('甲 Xabc');
     });
 
+    test('wait for a visible video that has not loaded before the page pass', async ({ page }) => {
+      await page.setContent('<video></video><p id="container">中文abc</p>');
+
+      await page.evaluate(() => {
+        pangu.autoSpacePage({ pageDelayMs: 50 });
+      });
+
+      // Well inside the 5 s loadeddata fallback, so the page pass must not have run yet
+      await page.waitForTimeout(600);
+
+      const result = await page.evaluate(() => document.getElementById('container')!.textContent);
+      expect(result).toBe('中文abc');
+    });
+
+    test('skip a hidden video when waiting for videos to load', async ({ page }) => {
+      // A closed lightbox player: display: none ancestor, no src, never fires loadeddata
+      await page.setContent('<div style="display: none"><video></video></div><p id="container">中文abc</p>');
+
+      await page.evaluate(() => {
+        pangu.autoSpacePage({ pageDelayMs: 50 });
+      });
+
+      await page.waitForTimeout(600);
+
+      const result = await page.evaluate(() => document.getElementById('container')!.textContent);
+      expect(result).toBe('中文 abc');
+    });
+
     test('handle boundary against an unchanged sibling when a placeholder is filled after the page pass', async ({ page }) => {
       // An empty inline placeholder the page fills later, tight against text the page pass already settled
       await page.setContent('<p id="container">（<span id="count"></span>人的回答統計）</p>');
@@ -122,7 +150,7 @@ test.describe('BrowserPangu', () => {
     });
 
     test('keep a late fix on the unchanged sibling when a placeholder next to it is filled', async ({ page }) => {
-      await page.setContent('<p id="container">公視+的節目<span id="count"></span></p>');
+      await page.setContent('<p id="container">私視+的節目<span id="count"></span></p>');
 
       await page.evaluate(() => {
         pangu.autoSpacePage({ pageDelayMs: 50 });
@@ -130,10 +158,10 @@ test.describe('BrowserPangu', () => {
 
       await page.waitForTimeout(600);
 
-      // The host's late fix glues the CJK brand suffix back, as the extension does
+      // The host keeps an unlisted suffix tight
       await page.evaluate(() => {
         const textNode = document.getElementById('container')!.firstChild as Text;
-        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '公視+ 的節目' }]);
+        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '私視+ 的節目' }]);
       });
 
       await page.waitForTimeout(100);
@@ -145,7 +173,7 @@ test.describe('BrowserPangu', () => {
       await page.waitForTimeout(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.innerHTML);
-      expect(result).toBe('公視+ 的節目<span id="count"> 1</span>');
+      expect(result).toBe('私視+ 的節目<span id="count"> 1</span>');
     });
 
     test('space both text nodes when a re-render writes two adjacent ones in one task', async ({ page }) => {
@@ -171,7 +199,7 @@ test.describe('BrowserPangu', () => {
     });
 
     test('keep a late fix at the tail of the unchanged sibling when a placeholder after it is filled', async ({ page }) => {
-      await page.setContent('<p id="container">公視+<span id="count"></span></p>');
+      await page.setContent('<p id="container">私視+<span id="count"></span></p>');
 
       await page.evaluate(() => {
         pangu.autoSpacePage({ pageDelayMs: 50 });
@@ -182,7 +210,7 @@ test.describe('BrowserPangu', () => {
       // The late fix sits right at the tail, where the junction reading would put the space back
       await page.evaluate(() => {
         const textNode = document.getElementById('container')!.firstChild as Text;
-        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '公視+' }]);
+        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '私視+' }]);
       });
 
       await page.waitForTimeout(100);
@@ -194,11 +222,11 @@ test.describe('BrowserPangu', () => {
       await page.waitForTimeout(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.innerHTML);
-      expect(result).toBe('公視+<span id="count"> 上架</span>');
+      expect(result).toBe('私視+<span id="count"> 上架</span>');
     });
 
     test('keep a late fix on a text node re-collected with its parent when a sibling text node is appended', async ({ page }) => {
-      await page.setContent('<p id="container">公視+的節目</p>');
+      await page.setContent('<p id="container">私視+的節目</p>');
 
       await page.evaluate(() => {
         pangu.autoSpacePage({ pageDelayMs: 50 });
@@ -208,7 +236,7 @@ test.describe('BrowserPangu', () => {
 
       await page.evaluate(() => {
         const textNode = document.getElementById('container')!.firstChild as Text;
-        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '公視+ 的節目' }]);
+        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '私視+ 的節目' }]);
       });
 
       await page.waitForTimeout(100);
@@ -221,11 +249,11 @@ test.describe('BrowserPangu', () => {
       await page.waitForTimeout(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.textContent);
-      expect(result).toBe('公視+ 的節目 1');
+      expect(result).toBe('私視+ 的節目 1');
     });
 
     test('keep a late fix after a junction space was written into the fixed node', async ({ page }) => {
-      await page.setContent('<p id="container"><span id="count"></span>公視+的節目</p>');
+      await page.setContent('<p id="container"><span id="count"></span>私視+的節目</p>');
 
       await page.evaluate(() => {
         pangu.autoSpacePage({ pageDelayMs: 50 });
@@ -235,7 +263,7 @@ test.describe('BrowserPangu', () => {
 
       await page.evaluate(() => {
         const textNode = document.getElementById('container')!.lastChild as Text;
-        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '公視+ 的節目' }]);
+        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '私視+ 的節目' }]);
       });
 
       await page.waitForTimeout(100);
@@ -254,7 +282,7 @@ test.describe('BrowserPangu', () => {
       await page.waitForTimeout(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.innerHTML);
-      expect(result).toBe('<span id="count">2</span> 公視+ 的節目');
+      expect(result).toBe('<span id="count">2</span> 私視+ 的節目');
     });
 
     test('not pair body text with the title when a placeholder has no block ancestor', async ({ page }) => {
@@ -683,6 +711,24 @@ test.describe('BrowserPangu', () => {
         return element.textContent;
       });
       expect(result3).toBe('【UCG 中字】"數毛社" DF 的《戰神 4》全新演示解析');
+    });
+
+    test('handle credit ratings across styled spans', async ({ page }) => {
+      const htmlContent = loadFixture('cht-credit-ratings.html');
+      const expected = loadFixture('cht-credit-ratings.expected.html').trim();
+
+      await page.setContent(htmlContent);
+      const firstPass = await page.evaluate(() => {
+        pangu.spacePage();
+        return document.body.innerHTML.trim();
+      });
+      expect(firstPass).toBe(expected);
+
+      const secondPass = await page.evaluate(() => {
+        pangu.spacePage();
+        return document.body.innerHTML.trim();
+      });
+      expect(secondPass).toBe(expected);
     });
 
     test('handle text nodes with newlines and CSS {white-space: pre-wrap}', async ({ page }) => {
@@ -1143,6 +1189,31 @@ test.describe('BrowserPangu', () => {
       });
       const actual = await page.evaluate(() => document.body.innerHTML.trim());
       expect(actual).toBe(expected);
+    });
+
+    test('keep product name suffixes when spacing adjacent nodes', async ({ page }) => {
+      await page.setContent(
+        '<p><span>Disney+</span><span>上架</span></p>' +
+          '<p><span>影劇館+</span><span>上架</span></p>' +
+          '<p><span>Discovery+</span><span>上架</span></p>' +
+          '<p><span>Apple TV+</span><span>上架</span></p>',
+      );
+
+      const firstPass = await page.evaluate(() => {
+        pangu.spacePage();
+        return document.body.innerHTML;
+      });
+      expect(firstPass).toBe(
+        '<p><span>Disney+</span><span> 上架</span></p>' +
+          '<p><span>影劇館+</span><span> 上架</span></p>' +
+          '<p><span>Discovery+</span><span> 上架</span></p>' +
+          '<p><span>Apple TV+</span><span> 上架</span></p>',
+      );
+      const secondPass = await page.evaluate(() => {
+        pangu.spacePage();
+        return document.body.innerHTML;
+      });
+      expect(secondPass).toBe(firstPass);
     });
 
     test('should space both sides of a slash junction that a <wbr> splits across text nodes (real-world case)', async ({ page }) => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_SETTINGS, type Settings } from '../../browser-extensions/chrome/src/settings/storage';
-import { isValidMatchPattern, isValidUrl, shouldAutoSpace, shouldShowActiveStatus, shouldShowOffIcon } from '../../browser-extensions/chrome/src/settings/urls';
+import { DEFAULT_SETTINGS, type Settings } from '../../../browser-extensions/chrome/src/settings/storage';
+import { isValidMatchPattern, isValidUrl, shouldAutoSpace, shouldShowActiveStatus, shouldShowOffIcon } from '../../../browser-extensions/chrome/src/settings/urls';
 
 function makeSettings(overrides: Partial<Settings> = {}): Settings {
   return { ...DEFAULT_SETTINGS, ...overrides };

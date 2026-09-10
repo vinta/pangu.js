@@ -9,9 +9,7 @@ export type BoundarySpacingDecision = 'none' | 'prepend-next' | 'append-current'
 export type TextNodeSpacingDecision = 'trim-leading-space' | 'prepend-space' | 'apply-text-spacing';
 
 export interface BoundarySpacingContext {
-  // Up to three trailing characters of the current text node, not just the last
-  // one: rules like AN_COLON_CJK only fire with the characters before the
-  // junction in view
+  // The last three characters, or a whole ASCII word ending in + or -, so a sliced word cannot look like a listed suffix
   currentTail: string;
   nextFirst: string;
   currentEndsWithSpace: boolean;
@@ -160,7 +158,7 @@ export function respaceCurrentTail(currentTail: string, nextFirst: string) {
 }
 
 function isQuoteNextToCjk(currentLast: string, nextFirst: string) {
-  return (QUOTE.test(currentLast) && ANY_CJK.test(nextFirst)) || (ANY_CJK.test(currentLast) && QUOTE.test(nextFirst));
+  return (QUOTE.test(currentLast) && ANY_CJK.test(nextFirst)) || (ANY_CJK.test(currentLast) && /["\u201d]/.test(nextFirst));
 }
 
 function isStandaloneQuote(text: string) {
