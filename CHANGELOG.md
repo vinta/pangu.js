@@ -1,6 +1,6 @@
 # Changelog
 
-## v10.0.0 / 2026-09-10
+## v10.0.0 / 2026-09-11
 
 ### [pangu.js](https://www.npmjs.com/package/pangu)
 
