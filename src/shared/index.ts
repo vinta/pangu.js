@@ -125,11 +125,25 @@ export const HASH_CJK = new RegExp(`(([^ \\u00a0])#)([${CJK}])`, 'g');
 // In file path context (multiple slashes), only a final hashtag not preceded by a slash gets a space
 export const CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
 
+const PRODUCT_NAME = 'Apple TV|CATCHPLAY|[Dd]iscovery|Disney|ESPN|Fitness|iCloud|Paramount|PS';
+const CJK_PRODUCT_NAME = '公視|影劇館';
+const PRODUCT_TIER = 'Pro';
+const CREDIT_RATING = '(?:tw)?(?:AA|BBB|BB|CCC)|tw[AB]';
+const BLOOD_TYPE = 'AB|RhD|Rh';
+
+// Product names and tiers take + only; credit ratings and blood types take + or -
+const NAME_SUFFIX = `(?:(?<![A-Za-z0-9])(?:(?:${PRODUCT_NAME}|${PRODUCT_TIER})\\+|(?:${CREDIT_RATING}|${BLOOD_TYPE})[+-])|(?:${CJK_PRODUCT_NAME})\\+)`;
+export const NAME_SUFFIX_AT_END = new RegExp(`${NAME_SUFFIX}$`);
+
+// A closing mark follows the suffix tight; a word or an opening bracket keeps its boundary space
+const CLOSING_AFTER_SUFFIX = /[/)\]}\uff09\u3011\u3015\u3009\u300b\u300d\u300f\uff0c\u3002\u3001\uff1b\uff1a\uff01\uff1f]/;
+
 // The operator set is - * = & only (no + | / < >). Only direct CJK contact makes a symbol an operator: a symbol between two half-width characters binds them into a joiner token (A-B, a=1, S&P)
 // and never gets spaces, so there is deliberately no between-half-width rule here
 // On the left, a closing bracket also counts as the half-width side: ]-CJK reads as an operator whose operand is the bracketed run
+// Listed name suffixes keep their signs attached
 export const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS}])([${AN}])`, 'g');
-export const ANS_OPERATOR_CJK = new RegExp(`([${AN}${RIGHT_BRACKETS_BASIC}])([${OPERATORS}])([${CJK}])`, 'g');
+export const ANS_OPERATOR_CJK = new RegExp(`([${AN}${RIGHT_BRACKETS_BASIC}])([${OPERATORS}])(?<!${NAME_SUFFIX})([${CJK}])`, 'g');
 
 // Slash patterns for operator vs separator behavior
 export const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
@@ -161,21 +175,9 @@ export const SINGLE_LETTER_GRADE_CJK = new RegExp(`\\b([${A}])([${GRADE_OPERATOR
 export const CJK_SIGN_DIGIT = new RegExp(`([${CJK}])(\\+)([0-9])`, 'g');
 // Flag: - attaches to a following single lowercase letter (-m). [a-z] keeps a capitalized word on the operator reading, and the trailing \b keeps a longer lowercase word there too
 export const CJK_HYPHEN_FLAG = new RegExp(`([${CJK}])(\\-)([a-z])\\b`, 'g');
-// Suffix: + attaches to a preceding whole digit run (18+, 100+, 3.5+). The \b keeps a digit that ends a word (S24+, HDR10+) on the separator reading, see plus reading. A plus after a word
-// (Disney+, MOD+) is never a suffix here: plus reading spaces it as a separator, and the name-suffix list restores listed names. See ADR 0024
+// Suffix: + attaches to a preceding whole digit run (18+, 100+, 3.5+). The \b keeps a digit that ends a word (S24+, HDR10+) on the separator reading, see plus reading. Word suffixes are decided
+// by the name list during plus reading. See ADR 0024
 export const DIGIT_PLUS_CJK = new RegExp(`\\b([0-9]+)(\\+)([${CJK}])`, 'g');
-
-const PRODUCT_NAME = 'Apple TV|CATCHPLAY|[Dd]iscovery|Disney|ESPN|Fitness|iCloud|Paramount|PS';
-const CJK_PRODUCT_NAME = '公視|影劇館';
-const PRODUCT_TIER = 'Pro';
-const CREDIT_RATING = '(?:tw)?(?:AA|BBB|BB|CCC)|tw[AB]';
-const BLOOD_TYPE = 'AB|RhD|Rh';
-
-// Product names and tiers take + only; credit ratings and blood types take + or -
-const NAME_SUFFIX = new RegExp(`(?:(?<![A-Za-z0-9])(?:(?:${PRODUCT_NAME}|${PRODUCT_TIER})\\+|(?:${CREDIT_RATING}|${BLOOD_TYPE})[+-])|(?:${CJK_PRODUCT_NAME})\\+)`, 'g');
-
-// A closing mark follows the suffix tight; a word or an opening bracket keeps its boundary space
-const CLOSING_AFTER_SUFFIX = /[/)\]}\uff09\u3011\u3015\u3009\u300b\u300d\u300f\uff0c\u3002\u3001\uff1b\uff1a\uff01\uff1f]/;
 
 // < and > as comparison operators, not brackets
 export const CJK_LESS_THAN = new RegExp(`([${CJK}])(<)([${AN}])`, 'g');
@@ -212,7 +214,7 @@ export const CJK_WINDOWS_PATH = new RegExp(`([${CJK}])(${WINDOWS_FILE_PATH.sourc
 export const UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK = new RegExp(`(${UNIX_ABSOLUTE_FILE_PATH.source}/)([${CJK}])`, 'g');
 export const UNIX_RELATIVE_FILE_PATH_SLASH_CJK = new RegExp(`(${UNIX_RELATIVE_FILE_PATH.source}/)([${CJK}])`, 'g');
 
-export const CJK_ANS = new RegExp(`([${CJK}])(?![${SUPERSCRIPT_SUFFIXES}])([${ANS_CJK_AFTER}])`, 'g');
+export const CJK_ANS = new RegExp(`([${CJK}])(?![${SUPERSCRIPT_SUFFIXES}])([${ANS_CJK_AFTER}])(?<!${NAME_SUFFIX})`, 'g');
 export const ANS_CJK = new RegExp(`([${ANS_BEFORE_CJK}])([${CJK}])`, 'g');
 
 export const S_A = new RegExp(`(%)([${A}])`, 'g');
@@ -279,24 +281,6 @@ export class PlaceholderReplacer {
   }
 }
 
-// Both texts must keep the same + and - symbols in order. In spaceText(), compare before restoring protected content so it cannot become a correction target
-export function restoreNameSuffixes(unspaced: string, spaced: string) {
-  // ponytail: each listed suffix rescans the text; use one symbol pass if pages with many names make this slow
-  for (const nameMatch of unspaced.matchAll(NAME_SUFFIX)) {
-    const unspacedIndex = nameMatch.index + nameMatch[0].length - 1;
-    const symbol = nameMatch[0].slice(-1);
-    const ordinal = unspaced.slice(0, unspacedIndex).split(symbol).length;
-    const index = spaced.split(symbol, ordinal).join(symbol).length;
-    if (spaced[index - 1] !== ' ') {
-      continue;
-    }
-
-    const removeAfter = CLOSING_AFTER_SUFFIX.test(unspaced[unspacedIndex + 1] ?? '') && spaced[index + 1] === ' ';
-    spaced = spaced.slice(0, index - 1) + symbol + spaced.slice(index + (removeAfter ? 2 : 1));
-  }
-  return spaced;
-}
-
 export class Pangu {
   version: string;
 
@@ -354,9 +338,6 @@ export class Pangu {
         return htmlTagManager.store(processedTag);
       });
     }
-
-    // Keep the author's gaps while backticks and tags are hidden. Name suffixes use this snapshot after the rules finish
-    const unspaced = newText;
 
     // Dot runs go first, before the single-period rule
     newText = newText.replace(DOTS_CJK, '$1 $2');
@@ -432,10 +413,20 @@ export class Pangu {
     // Plus reading is per line: a plus in direct contact with CJK makes every undecided plus on the line a separator with spaces on both sides, as in telecom bundle plans that chain products with +
     // A decided plus keeps its reading: space-adjacent, affix-attached (100+, +886), or in a ++ run (C++). A line with no CJK contact keeps its joiner tokens tight (A+B, 5+5)
     // It runs right after the affixes and before the operator rules, so a CJK+A contact flips the line's joiners like a CJK+CJK contact does (CJK+A+A reads CJK + A + A)
+    // Name suffixes are recognized here so their CJK contact still decides the line's other pluses (Disney+CJK A+B)
     newText = newText
       .split('\n')
       .map((line) => {
-        const spaced = PLUS_CJK_CONTACT.test(line) ? line.replace(PLUS_SEPARATOR, ' + ') : line;
+        const spaced = PLUS_CJK_CONTACT.test(line)
+          ? line.replace(PLUS_SEPARATOR, (_match, offset: number) => {
+              // Read through compound placeholders to recognize names such as non-Disney+ and foo-Apple TV+
+              // ponytail: mixed compounds and pluses rescan prefixes; use a single name lookup pass if long lines make this slow
+              if (!NAME_SUFFIX_AT_END.test(compoundWordManager.restore(line.slice(0, offset + 1)))) {
+                return ' + ';
+              }
+              return CLOSING_AFTER_SUFFIX.test(line[offset + 1] ?? '') ? '+' : '+ ';
+            })
+          : line;
         if ((spaced.match(SOLITARY_PLUS) ?? []).length < 2) {
           return spaced;
         }
@@ -508,7 +499,6 @@ export class Pangu {
     newText = newText.replace(MIDDLE_DOT, '・');
 
     newText = this.fixBracketSpacing(newText);
-    newText = restoreNameSuffixes(unspaced, newText);
 
     if (hasHtmlTags) {
       newText = newText.replace(CJK_HTML_TAG_MENTION, '$1 ');

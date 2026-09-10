@@ -1151,6 +1151,10 @@ test.describe('BrowserPangu', () => {
           '<p><span>影劇館+</span><span>上架</span></p>' +
           '<p><span>Discovery+</span><span>上架</span></p>' +
           '<p><span>Apple TV+</span><span>上架</span></p>' +
+          '<p><span>A+B Apple TV+</span><span>上架</span></p>' +
+          '<p><span>foo(x) Apple TV+</span><span>上架</span></p>' +
+          '<p><span>影劇館+</span><span>/全選</span></p>' +
+          '<p><span>影劇館+</span><span>)</span></p>' +
           '<p><span>Disney +</span><span>上架</span></p>' +
           '<p><span>NotAB+</span><span>的人</span></p>' +
           '<p><span>NotRh-</span><span>的人</span></p>',
@@ -1165,6 +1169,10 @@ test.describe('BrowserPangu', () => {
           '<p><span>影劇館+</span><span> 上架</span></p>' +
           '<p><span>Discovery+</span><span> 上架</span></p>' +
           '<p><span>Apple TV+</span><span> 上架</span></p>' +
+          '<p><span>A+B Apple TV+</span><span> 上架</span></p>' +
+          '<p><span>foo(x) Apple TV+</span><span> 上架</span></p>' +
+          '<p><span>影劇館+</span><span> /全選</span></p>' +
+          '<p><span>影劇館+</span><span> )</span></p>' +
           '<p><span>Disney +</span><span> 上架</span></p>' +
           '<p><span>NotAB +</span><span> 的人</span></p>' +
           '<p><span>NotRh -</span><span> 的人</span></p>',

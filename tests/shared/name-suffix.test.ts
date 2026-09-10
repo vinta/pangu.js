@@ -4,7 +4,7 @@ import { Pangu } from '../../dist/shared/index.js';
 const pangu = new Pangu();
 
 describe('Name suffixes', () => {
-  it('restores name suffixes', () => {
+  it('preserves name suffixes', () => {
     expect(pangu.spaceText('Disney+上架了新片')).toBe('Disney+ 上架了新片');
     expect(pangu.spaceText('公視+上架了新片')).toBe('公視+ 上架了新片');
     expect(pangu.spaceText('如何使用PTS+（公視+）註冊與觀看？')).toBe('如何使用 PTS+（公視+）註冊與觀看？');
@@ -28,7 +28,7 @@ describe('Name suffixes', () => {
     expect(pangu.spaceText('氣溫是 - 5度')).toBe('氣溫是 - 5 度');
   });
 
-  it('restores product names, credit ratings, and blood types', () => {
+  it('preserves product names, credit ratings, and blood types', () => {
     expect(pangu.spaceText('Apple Fitness+推出新課程')).toBe('Apple Fitness+ 推出新課程');
     expect(pangu.spaceText('PS+會員')).toBe('PS+ 會員');
     expect(pangu.spaceText('Discovery+和discovery+都上架了')).toBe('Discovery+ 和 discovery+ 都上架了');
@@ -39,7 +39,7 @@ describe('Name suffixes', () => {
     expect(pangu.spaceText('血型是Rh-的人')).toBe('血型是 Rh- 的人');
   });
 
-  it('restores repeated names and mixed suffixes independently', () => {
+  it('preserves repeated names and mixed suffixes independently', () => {
     expect(pangu.spaceText('公視+上架新片，公視+也有紀錄片')).toBe('公視+ 上架新片，公視+ 也有紀錄片');
     expect(pangu.spaceText('公視+與Disney+都上架了新片')).toBe('公視+ 與 Disney+ 都上架了新片');
     expect(pangu.spaceText('公視+、Disney+、Apple TV+等平台')).toBe('公視+、Disney+、Apple TV+ 等平台');
@@ -72,6 +72,9 @@ describe('Name suffixes', () => {
   });
 
   it('preserves protected content and spaces attribute values independently', () => {
+    expect(pangu.spaceText('non-Disney+上架')).toBe('non-Disney+ 上架');
+    expect(pangu.spaceText('anti-RhD+的人')).toBe('anti-RhD+ 的人');
+    expect(pangu.spaceText('foo-Apple TV+上架')).toBe('foo-Apple TV+ 上架');
     expect(pangu.spaceText('保留`公視+與Disney +`，公視+上架了新片')).toBe('保留 `公視+與Disney +`，公視+ 上架了新片');
     expect(pangu.spaceText('<a data-name="Disney+" title="公視+上架了新片">公視+上架</a>')).toBe('<a data-name="Disney+" title="公視+ 上架了新片">公視+ 上架</a>');
     expect(pangu.spaceText('<a data-name="Disney +" title="公視 +上架">公視+上架</a>')).toBe('<a data-name="Disney +" title="公視 + 上架">公視+ 上架</a>');

@@ -32,6 +32,7 @@ describe('Symbol +', () => {
     expect(pangu.spaceText('MOD+影劇館+上架')).toBe('MOD + 影劇館+ 上架');
     expect(pangu.spaceText('Disney+上架了C++課程')).toBe('Disney+ 上架了 C++ 課程');
     expect(pangu.spaceText('Disney+上架了A+B')).toBe('Disney+ 上架了 A + B');
+    expect(pangu.spaceText('中+NotAB+|中文')).toBe('中 + NotAB + | 中文');
     expect(pangu.spaceText('Netflix、Disney+、Apple TV+等串流平台')).toBe('Netflix、Disney+、Apple TV+ 等串流平台');
 
     // prettier-ignore
