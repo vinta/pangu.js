@@ -1,11 +1,11 @@
 import type { Settings } from './storage';
 
 // Chrome match pattern grammar, in the subset ADR 0023 keeps: <scheme>://<host>[:<port>]<path>
-const MATCH_PATTERN = /^(\*|https?):\/\/(\*|(?:\*\.)?[^/*:?]+)(?::(\*|\d+))?(\/[^?]*)$/;
+const MATCH_PATTERN = /^(\*|https?):\/\/(\*|(?:\*\.)?[^/*:?]+)(?::(\*|\d+))?(\/[^?]*)(?:\?(.*))?$/;
 
 // A match pattern reads every character except `*` literally, so URLPattern's own syntax gets escaped
-function escapeUrlPatternSyntax(path: string) {
-  return path.replace(/[(){}:+\\]/g, '\\$&');
+function escapeUrlPatternSyntax(part: string) {
+  return part.replace(/[(){}:+?\\]/g, '\\$&');
 }
 
 // The string form of URLPattern reads `*.host` as subdomains only and pins a missing port to the scheme default, so the init form carries the match pattern's meaning instead
@@ -14,13 +14,15 @@ function matchPatternToUrlPattern(pattern: string): URLPattern | null {
   if (!match) {
     return null;
   }
-  const [, scheme = '', host = '', port, path = ''] = match;
+  const [, scheme = '', host = '', port, path = '', query] = match;
   try {
     return new URLPattern({
       protocol: scheme === '*' ? 'http{s}?' : scheme,
       hostname: host.startsWith('*.') ? `{*.}?${host.slice(2)}` : host,
       port: port ?? '*',
       pathname: escapeUrlPatternSyntax(path),
+      // Chrome matches the path against path plus query. URLPattern matches the query on its own, so `/search?*` also matches a bare `/search`
+      search: query === undefined ? '*' : escapeUrlPatternSyntax(query),
     });
   } catch {
     return null;

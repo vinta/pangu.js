@@ -11,6 +11,7 @@ describe('isValidMatchPattern', () => {
     expect(isValidMatchPattern('*://*.example.com/*')).toBe(true);
     expect(isValidMatchPattern('http://localhost:3000/*')).toBe(true);
     expect(isValidMatchPattern('https://github.com/*/*/blob/*')).toBe(true);
+    expect(isValidMatchPattern('https://www.google.com/search?*')).toBe(true);
   });
 
   it('rejects what Chrome rejects and what the content script never runs on', () => {
@@ -19,7 +20,6 @@ describe('isValidMatchPattern', () => {
     expect(isValidMatchPattern('https://*example.com/*')).toBe(false);
     expect(isValidMatchPattern('file:///Users/vinta/*')).toBe(false);
     expect(isValidMatchPattern('<all_urls>')).toBe(false);
-    expect(isValidMatchPattern('https://www.google.com/search?*')).toBe(false);
   });
 });
 
@@ -141,6 +141,13 @@ describe('shouldAutoSpace', () => {
     expect(shouldAutoSpace(current, 'http://localhost:3000/app')).toBe(false);
     expect(shouldAutoSpace(current, 'https://example.com:8443/')).toBe(false);
     expect(shouldAutoSpace(current, 'https://example.com/')).toBe(true);
+  });
+
+  it('matches the query part when the pattern has one, and a missing query too', () => {
+    const current = makeSettings({ blacklist: ['https://www.google.com/search?*'] });
+    expect(shouldAutoSpace(current, 'https://www.google.com/search?q=pangu')).toBe(false);
+    expect(shouldAutoSpace(current, 'https://www.google.com/search')).toBe(false);
+    expect(shouldAutoSpace(current, 'https://www.google.com/maps?q=pangu')).toBe(true);
   });
 
   it('reads every path character except `*` literally', () => {
