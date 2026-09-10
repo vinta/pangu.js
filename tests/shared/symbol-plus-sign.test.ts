@@ -37,14 +37,10 @@ describe('Symbol +', () => {
     expect(pangu.spaceText('【速在必行方案】HiNet光世代+Wi-Fi全屋通1台+MOD影劇館+(300M/300M)'))
                           .toBe('【速在必行方案】HiNet 光世代 + Wi-Fi 全屋通 1 台 + MOD 影劇館+ (300M/300M)');
 
-    // On a line with two or more pluses, a plus after a closing bracket is a separator even before an opening full-width quote, which takes no space on its side; one plus stays tight
     // prettier-ignore
     expect(pangu.spaceText('HiNet光世代+MOD+自選餐(全選)+「影劇館+」'))
                        .toBe('HiNet 光世代 + MOD + 自選餐 (全選) +「影劇館+」');
-  });
 
-  // FIXME
-  it.todo('handle + symbol as separator after a closing bracket on a single-plus line', () => {
     expect(pangu.spaceText('自選餐(全選)+「影劇館」')).toBe('自選餐 (全選) +「影劇館」');
   });
 

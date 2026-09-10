@@ -160,10 +160,8 @@ export const PLUS_CJK_CONTACT = new RegExp(`[${CJK}]\\+|\\+[${CJK}]`);
 // Characters: ，。；：！？、（）「」『』【】《》
 // prettier-ignore
 export const PLUS_SEPARATOR = /(?<=[^\s+\uff0c\u3002\uff1b\uff1a\uff01\uff1f\u3001\uff08\uff09\u300c\u300d\u300e\u300f\u3010\u3011\u300a\u300b])\+(?=[^\s+\uff0c\u3002\uff1b\uff1a\uff01\uff1f\u3001\uff08\uff09\u300c\u300d\u300e\u300f\u3010\u3011\u300a\u300b])/g;
-// A closing bracket carries no name, so on a line with two or more solitary pluses a plus after it is a separator even before an opening full-width bracket or quote; only the bracket side
-// gets the space ((CJK) +\u300cCJK+\u300d). A line with one plus keeps it tight, since one plus is no bundle plan
+// A closing bracket cannot carry a name suffix. Before a full-width opener, put the separator space on the closing-bracket side only
 // Characters: （「『【《
-export const SOLITARY_PLUS = /(?<!\+)\+(?!\+)/g;
 export const RIGHT_BRACKET_PLUS_FULL_WIDTH_LEFT_BRACKET = new RegExp(`(?<=[${RIGHT_BRACKETS_BASIC}])\\+(?=[\\uff08\\u300c\\u300e\\u3010\\u300a])`, 'g');
 
 // Single-letter grades (A+, B-, C*) before CJK get the space after the symbol, not before. The \b keeps the letter single, not the tail of a longer word
@@ -427,9 +425,6 @@ export class Pangu {
               return CLOSING_AFTER_SUFFIX.test(line[offset + 1] ?? '') ? '+' : '+ ';
             })
           : line;
-        if ((spaced.match(SOLITARY_PLUS) ?? []).length < 2) {
-          return spaced;
-        }
         return spaced.replace(RIGHT_BRACKET_PLUS_FULL_WIDTH_LEFT_BRACKET, ' +');
       })
       .join('\n');

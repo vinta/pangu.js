@@ -8,9 +8,9 @@ A real bundle plan broke the shape: `HiNet光世代+MOD+自選餐(全選)+「影
 
 The decision:
 
-1. **On a line with two or more solitary pluses, a plus after a closing bracket is a separator before an opening full-width bracket or quote.** `RIGHT_BRACKET_PLUS_FULL_WIDTH_LEFT_BRACKET` matches `)` `]` `}` on the left and `（` `「` `『` `【` `《` on the right, after plus reading has run.
+1. **A plus after a closing bracket is a separator before an opening full-width bracket or quote.** `RIGHT_BRACKET_PLUS_FULL_WIDTH_LEFT_BRACKET` matches `)` `]` `}` on the left and `（` `「` `『` `【` `《` on the right, after plus reading has run.
 2. **The space goes on the bracket side only.** The full-width opener still takes none: `自選餐 (全選) +「影劇館 +」`. The `影劇館+」` half stays the name-suffix list's job.
-3. **A line with one solitary plus keeps it tight.** One plus is no bundle plan, so `自選餐(全選)+「影劇館」` is unchanged. `SOLITARY_PLUS` counts the pluses that are not part of a `++` run.
+3. **The rule also applies to a single plus.** A closing bracket rules out a name suffix regardless of how many pluses appear on the line. The pattern already excludes `++`.
 
 Alternatives rejected:
 
@@ -20,6 +20,6 @@ Alternatives rejected:
 ## Consequences
 
 - `HiNet光世代+MOD+自選餐(全選)+「影劇館+」` renders as `HiNet 光世代 + MOD + 自選餐 (全選) +「影劇館 +」` in the package. The extension restores `影劇館+」`.
-- `自選餐(全選)+「影劇館」` stays tight and is left as a FIXME in the plus test file. Deciding it needs the sentence, not the line.
-- The glossary's plus reading entry records both halves: the full-width side stays tight, and the closing-bracket case on a bundle line.
+- `自選餐(全選)+「影劇館」` renders as `自選餐 (全選) +「影劇館」` and is covered by the single-plus regression test.
+- The glossary's plus reading entry records both halves: the full-width side stays tight, and the closing-bracket side gets a space.
 - pangu.py follows in its own repo.
