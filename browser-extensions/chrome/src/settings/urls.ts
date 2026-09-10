@@ -1,20 +1,34 @@
 import type { Settings } from './storage';
 
-export function isValidMatchPattern(pattern: string) {
-  // We only allow:
-  // https://
-  // http://
-  // *://
-  if (!pattern.match(/^(https?:\/\/|\*:\/\/)/)) {
-    return false;
-  }
+// Chrome match pattern grammar, in the subset ADR 0023 keeps: <scheme>://<host>[:<port>]<path>
+const MATCH_PATTERN = /^(\*|https?):\/\/(\*|(?:\*\.)?[^/*:?]+)(?::(\*|\d+))?(\/[^?]*)$/;
 
-  try {
-    new URLPattern(pattern);
-    return true;
-  } catch {
-    return false;
+// A match pattern reads every character except `*` literally, so URLPattern's own syntax gets escaped
+function escapeUrlPatternSyntax(path: string) {
+  return path.replace(/[(){}:+\\]/g, '\\$&');
+}
+
+// The string form of URLPattern reads `*.host` as subdomains only and pins a missing port to the scheme default, so the init form carries the match pattern's meaning instead
+function matchPatternToUrlPattern(pattern: string): URLPattern | null {
+  const match = MATCH_PATTERN.exec(pattern);
+  if (!match) {
+    return null;
   }
+  const [, scheme = '', host = '', port, path = ''] = match;
+  try {
+    return new URLPattern({
+      protocol: scheme === '*' ? 'http{s}?' : scheme,
+      hostname: host.startsWith('*.') ? `{*.}?${host.slice(2)}` : host,
+      port: port ?? '*',
+      pathname: escapeUrlPatternSyntax(path),
+    });
+  } catch {
+    return null;
+  }
+}
+
+export function isValidMatchPattern(pattern: string) {
+  return matchPatternToUrlPattern(pattern) !== null;
 }
 
 export function isValidUrl(url: string) {
@@ -24,17 +38,12 @@ export function isValidUrl(url: string) {
 }
 
 function isUrlExcludedByFilter(settings: Settings, url: string) {
-  const urlPatterns = settings[settings.filter_mode];
-  for (const pattern of urlPatterns) {
-    try {
-      const urlPattern = new URLPattern(pattern);
-      if (urlPattern.test(url)) {
-        // If URL matches blacklist, it is excluded
-        // If URL matches whitelist, it is not excluded
-        return settings.filter_mode === 'blacklist';
-      }
-    } catch {
-      // Invalid pattern, skip
+  for (const pattern of settings[settings.filter_mode]) {
+    // An invalid pattern is skipped
+    if (matchPatternToUrlPattern(pattern)?.test(url)) {
+      // If URL matches blacklist, it is excluded
+      // If URL matches whitelist, it is not excluded
+      return settings.filter_mode === 'blacklist';
     }
   }
 
