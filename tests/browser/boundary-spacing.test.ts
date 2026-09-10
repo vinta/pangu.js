@@ -96,6 +96,7 @@ describe('decideBoundarySpacing()', () => {
     { name: 'CJK then half-width', context: { currentTail: '中', nextFirst: 'a' }, decision: 'prepend-next' },
     { name: 'half-width then CJK', context: { currentTail: 'a', nextFirst: '中' }, decision: 'prepend-next' },
     { name: 'kana then half-width', context: { currentTail: 'の', nextFirst: 'a' }, decision: 'prepend-next' },
+    { name: 'CJK before an opening curly quote', context: { currentTail: '期評等', nextFirst: '“' }, decision: 'prepend-next' },
     { name: 'CJK then CJK', context: { currentTail: '中', nextFirst: '文' }, decision: 'none' },
     { name: 'half-width then half-width', context: { currentTail: 'a', nextFirst: 'b' }, decision: 'none' },
     // Hangul is outside the CJK class of shared, so the probe reports no spacing

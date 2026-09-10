@@ -158,7 +158,7 @@ export function respaceCurrentTail(currentTail: string, nextFirst: string) {
 }
 
 function isQuoteNextToCjk(currentLast: string, nextFirst: string) {
-  return (QUOTE.test(currentLast) && ANY_CJK.test(nextFirst)) || (ANY_CJK.test(currentLast) && QUOTE.test(nextFirst));
+  return (QUOTE.test(currentLast) && ANY_CJK.test(nextFirst)) || (ANY_CJK.test(currentLast) && /["\u201d]/.test(nextFirst));
 }
 
 function isStandaloneQuote(text: string) {

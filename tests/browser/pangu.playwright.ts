@@ -685,6 +685,24 @@ test.describe('BrowserPangu', () => {
       expect(result3).toBe('【UCG 中字】"數毛社" DF 的《戰神 4》全新演示解析');
     });
 
+    test('handle credit ratings across styled spans', async ({ page }) => {
+      const htmlContent = loadFixture('cht-credit-ratings.html');
+      const expected = loadFixture('cht-credit-ratings.expected.html').trim();
+
+      await page.setContent(htmlContent);
+      const firstPass = await page.evaluate(() => {
+        pangu.spacePage();
+        return document.body.innerHTML.trim();
+      });
+      expect(firstPass).toBe(expected);
+
+      const secondPass = await page.evaluate(() => {
+        pangu.spacePage();
+        return document.body.innerHTML.trim();
+      });
+      expect(secondPass).toBe(expected);
+    });
+
     test('handle text nodes with newlines and CSS {white-space: pre-wrap}', async ({ page }) => {
       const htmlContent = loadFixture('whitespace-pre-wrap.html');
       const expected = loadFixture('whitespace-pre-wrap.expected.html').trim();
