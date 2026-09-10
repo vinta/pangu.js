@@ -59,13 +59,10 @@ The algorithm behind text spacing. It has two stages. First, the rules decide ev
 ### Rule Spacing
 
 **Symbol handling**:
-A symbol between two ANS characters binds them into a joiner token, and the symbol never gets spaces. A symbol in direct contact with CJK reads as an operator and gets spaces, unless an affix reading attaches it to its ANS side. `/` also follows slash reading. `|` follows pipe reading. `+` follows plus reading. The separator `_` never gets spaces.
+A symbol between two ANS characters binds them into a joiner token, and the symbol never gets spaces. A symbol in direct contact with CJK reads as an operator and gets spaces, unless an affix reading attaches it to its ANS side. `|` follows pipe reading. `+` follows plus reading. The separators `_` and `/` never get spaces.
 
 **Joiner token**:
-ANS characters that any symbol joins tight (`A/B`, `26/30`, `vinta/hal-9000`, `S&P`, `Q&A`, `A+B`, `5+5`, `foo=bar&baz=1`, `A<B`, `HSIAO-MING`). A joiner token is never split. It is spaced from adjacent CJK as one unit. Slashes, pipes, and plus signs also follow slash reading, pipe reading, and plus reading.
-
-**Slash reading**:
-Decided per line, never across lines. A slash with ANS characters on both sides forms a joiner token. If a line has only one slash and that slash is in direct contact with CJK, the slash acts as an operator. If a line has repeated slashes, they read as a file path or a list and stay unspaced.
+ANS characters that any symbol joins tight (`A/B`, `26/30`, `vinta/hal-9000`, `S&P`, `Q&A`, `A+B`, `5+5`, `foo=bar&baz=1`, `A<B`, `HSIAO-MING`). A joiner token is never split. It is spaced from adjacent CJK as one unit. Pipes and plus signs also follow pipe reading and plus reading.
 
 **Pipe reading**:
 Decided per line, never across lines. If one pipe is in direct contact with CJK, every pipe on the line becomes a separator with spaces on both sides. This covers concatenated page titles (`CJK | A CJK | A`) and credit lines (`CJK | CJK`). If no pipe on the line is in direct contact with CJK, the pipes stay tight as joiner tokens (`CJK A|A CJK`, `ps aux|grep node`).

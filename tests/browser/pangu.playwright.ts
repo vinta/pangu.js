@@ -1216,9 +1216,8 @@ test.describe('BrowserPangu', () => {
       expect(secondPass).toBe(firstPass);
     });
 
-    test('should space both sides of a slash junction that a <wbr> splits across text nodes (real-world case)', async ({ page }) => {
-      // A <wbr> splits 蒸馏/训练 across text nodes, so each node alone shows the slash rule only one side: the junction reads 蒸馏 / 训, and the space before the slash belongs inside the current node,
-      // not at the boundary
+    test('should keep a slash tight when a <wbr> splits it across text nodes (real-world case)', async ({ page }) => {
+      // A <wbr> splits a CJK/CJK slash across text nodes. A slash never gets spaces, so neither node nor the junction between them gets one
       await page.setContent('<li>贼喊捉贼：Anthropic 自己的所有模型内容，<wbr>其实都是从全人类的知识以及相当多的版权内容上蒸馏/<wbr>训练出来的，现在他们却不允许其他人来蒸馏自己的模型。</li>');
 
       await page.evaluate(() => {
@@ -1226,7 +1225,19 @@ test.describe('BrowserPangu', () => {
       });
 
       const result = await page.evaluate(() => document.querySelector('li')!.textContent);
-      expect(result).toBe('贼喊捉贼：Anthropic 自己的所有模型内容，其实都是从全人类的知识以及相当多的版权内容上蒸馏 / 训练出来的，现在他们却不允许其他人来蒸馏自己的模型。');
+      expect(result).toBe('贼喊捉贼：Anthropic 自己的所有模型内容，其实都是从全人类的知识以及相当多的版权内容上蒸馏/训练出来的，现在他们却不允许其他人来蒸馏自己的模型。');
+    });
+
+    test('should leave a URL that ends with a slash in its own node untouched before CJK', async ({ page }) => {
+      // The junction window is the node's last three characters plus the next node's first, so the slash rule used to read the URL tail as CJK-contact and write a space into the URL
+      await page.setContent('<p><span>https://vinta.ws/code/</span>看看</p><p><a href="https://vinta.ws/code/">https://vinta.ws/code/</a>看看</p>');
+
+      await page.evaluate(() => {
+        pangu.spacePage();
+      });
+
+      const result = await page.evaluate(() => document.body.innerHTML);
+      expect(result).toBe('<p><span>https://vinta.ws/code/</span>看看</p><p><a href="https://vinta.ws/code/">https://vinta.ws/code/</a>看看</p>');
     });
 
     test('should not insert <pangu> in grid with CJK card content (real-world case)', async ({ page }) => {

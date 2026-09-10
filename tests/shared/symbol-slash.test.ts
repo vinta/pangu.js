@@ -4,11 +4,13 @@ import { Pangu } from '../../dist/shared/index.js';
 const pangu = new Pangu();
 
 describe('Symbol /', () => {
-  it('handle / symbol as operator', () => {
-    expect(pangu.spaceText('前面/後面')).toBe('前面 / 後面');
-    expect(pangu.spaceText('Mollie/陳上進')).toBe('Mollie / 陳上進');
-    expect(pangu.spaceText('陳上進/Mollie')).toBe('陳上進 / Mollie');
-    expect(pangu.spaceText('速度是60公里/小時')).toBe('速度是 60 公里 / 小時');
+  it('handle / symbol as separator', () => {
+    expect(pangu.spaceText('前面/後面')).toBe('前面/後面');
+    expect(pangu.spaceText('Mollie/陳上進')).toBe('Mollie/陳上進');
+    expect(pangu.spaceText('陳上進/Mollie')).toBe('陳上進/Mollie');
+    expect(pangu.spaceText('速度是60公里/小時')).toBe('速度是 60 公里/小時');
+    expect(pangu.spaceText('我/你\n他/她')).toBe('我/你\n他/她');
+    expect(pangu.spaceText('歡迎光臨/再見\n參考 https://example.com/docs')).toBe('歡迎光臨/再見\n參考 https://example.com/docs');
 
     // DO NOT change if already spacing
     expect(pangu.spaceText('前面 / 後面')).toBe('前面 / 後面');
@@ -30,11 +32,6 @@ describe('Symbol /', () => {
     expect(pangu.spaceText('選A/B其中一個')).toBe('選 A/B 其中一個');
     expect(pangu.spaceText('答案是6/2的商數')).toBe('答案是 6/2 的商數');
     expect(pangu.spaceText('安装指令：npx skills add vinta/hal-9000')).toBe('安装指令：npx skills add vinta/hal-9000');
-  });
-
-  it('handle / symbol per line', () => {
-    expect(pangu.spaceText('我/你\n他/她')).toBe('我 / 你\n他 / 她');
-    expect(pangu.spaceText('歡迎光臨/再見\n參考 https://example.com/docs')).toBe('歡迎光臨 / 再見\n參考 https://example.com/docs');
   });
 
   it('handle / symbol as list', () => {

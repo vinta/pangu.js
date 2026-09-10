@@ -145,11 +145,6 @@ const CLOSING_AFTER_SUFFIX = /[/)\]}\uff09\u3011\u3015\u3009\u300b\u300d\u300f\u
 export const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS}])([${AN}])`, 'g');
 export const ANS_OPERATOR_CJK = new RegExp(`([${AN}${RIGHT_BRACKETS_BASIC}])([${OPERATORS}])(?<!${NAME_SUFFIX})([${CJK}])`, 'g');
 
-// Slash patterns for operator vs separator behavior
-export const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
-export const CJK_SLASH_ANS = new RegExp(`([${CJK}])([/])([${AN}])`, 'g');
-export const ANS_SLASH_CJK = new RegExp(`([${AN}])([/])([${CJK}])`, 'g');
-
 // Pipe patterns for separator vs joiner-token behavior, decided per line
 export const PIPE_CJK_CONTACT = new RegExp(`[${CJK}]\\||\\|[${CJK}]`);
 export const PIPE_SEPARATOR = /([^\s|])[ ]*(\|+)[ ]*(?=[^\s|])/g;
@@ -374,7 +369,7 @@ export class Pangu {
     if (newText.length >= 5) {
       newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
     }
-    // Slash reading is per line, so each line's slash count decides its own hashtag behavior
+    // The hashtag block reads two or more slashes on a line as a path context, decided per line
     newText = newText
       .split('\n')
       .map((line) => {
@@ -443,21 +438,6 @@ export class Pangu {
 
     newText = newText.replace(UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK, '$1 $2');
     newText = newText.replace(UNIX_RELATIVE_FILE_PATH_SLASH_CJK, '$1 $2');
-
-    // Slash reading is per line: the line's only slash acts as an operator when CJK touches it. Repeated slashes read as a file path or a list and get no spaces
-    // A slash between half-width characters binds tight as a slash token, so no rule fires on it; file paths need no extra protection because the path rules already spaced their CJK edges
-    newText = newText
-      .split('\n')
-      .map((line) => {
-        if ((line.match(/\//g) || []).length !== 1) {
-          return line;
-        }
-        line = line.replace(CJK_SLASH_CJK, '$1 $2 $3');
-        line = line.replace(CJK_SLASH_ANS, '$1 $2 $3');
-        line = line.replace(ANS_SLASH_CJK, '$1 $2 $3');
-        return line;
-      })
-      .join('\n');
 
     // Pipe reading is per line: a pipe in direct CJK contact makes every pipe on the line a separator with spaces on both sides (CJK | CJK, as in concatenated page titles)
     // A line whose pipes touch no CJK keeps them tight as joiner tokens (x|y, ps aux|grep node)
