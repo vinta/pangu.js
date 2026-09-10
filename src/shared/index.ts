@@ -121,9 +121,8 @@ export const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}
 // Non-breaking space: [ ] (U+00A0)
 export const CJK_HASH = new RegExp(`([${CJK}])(#([^ \\u00a0]))`, 'g');
 // Non-breaking space: [ ] (U+00A0)
-export const HASH_CJK = new RegExp(`(([^ \\u00a0])#)([${CJK}])`, 'g');
-// In file path context (multiple slashes), only a final hashtag not preceded by a slash gets a space
-export const CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
+// A hashtag right after a slash in a list (/#tag) is a hashtag, not a C# shape
+export const HASH_CJK = new RegExp(`(([^ \\u00a0/])#)([${CJK}])`, 'g');
 
 const PRODUCT_NAME = 'Apple TV|CATCHPLAY|[Dd]iscovery|Disney|ESPN|Fitness|iCloud|Paramount|PS';
 const PRODUCT_NAME_IN_CJK = '公視|影劇館';
@@ -401,20 +400,8 @@ export class Pangu {
     if (newText.length >= 5) {
       newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
     }
-    // The hashtag block reads two or more slashes on a line as a path context, decided per line
-    newText = newText
-      .split('\n')
-      .map((line) => {
-        if ((line.match(/\//g) || []).length <= 1) {
-          line = line.replace(CJK_HASH, '$1 $2');
-          line = line.replace(HASH_CJK, '$1 $3');
-        } else {
-          // Multiple slashes read as a path: no hashtag spacing except a final hashtag not preceded by a slash
-          line = line.replace(CJK_FINAL_HASHTAG, '$1$2 $3');
-        }
-        return line;
-      })
-      .join('\n');
+    newText = newText.replace(CJK_HASH, '$1 $2');
+    newText = newText.replace(HASH_CJK, '$1 $3');
 
     // Protect compound words from operator spacing
     const compoundWordManager = new PlaceholderReplacer('COMPOUND_WORD_PLACEHOLDER_', '\uE008', '\uE009');

@@ -51,6 +51,10 @@ describe('HTTP URLs', () => {
                        .toBe('<a href="http://vinta.ws/中文網址with英文.html">oh 一個超連結 with 英文，網址包含中文</a>');
   });
 
+  it('space a hashtag on a line that also holds a URL', () => {
+    expect(pangu.spaceText('看完這篇#pangu 的介紹 https://vinta.ws/code/')).toBe('看完這篇 #pangu 的介紹 https://vinta.ws/code/');
+  });
+
   it('leave a URL with no CJK contact untouched', () => {
     expect(pangu.spaceText('see https://vinta.ws/code/ and 中文')).toBe('see https://vinta.ws/code/ and 中文');
   });
