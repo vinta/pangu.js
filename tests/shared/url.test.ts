@@ -23,7 +23,7 @@ describe('HTTP URLs', () => {
   });
 
   it('space a URL from CJK on its left only', () => {
-    // CJK letters continue the URL, so CJK prose glued right after a URL stays glued. See ADR 0026
+    // CJK characters continue the URL, so CJK prose written tight after a URL stays tight. See ADR 0026
     expect(pangu.spaceText('搜尋https://www.google.com/search?q=pangu.js&hl=zh-TW看看')).toBe('搜尋 https://www.google.com/search?q=pangu.js&hl=zh-TW看看');
     expect(pangu.spaceText('看https://github.com/vinta/pangu.js/issues/155這個issue')).toBe('看 https://github.com/vinta/pangu.js/issues/155這個issue');
     // prettier-ignore
@@ -40,7 +40,7 @@ describe('HTTP URLs', () => {
     expect(pangu.spaceText('「https://vinta.ws/code/」')).toBe('「https://vinta.ws/code/」');
   });
 
-  it('leave trailing ASCII punctuation outside the URL', () => {
+  it('leave trailing half-width punctuation outside the URL', () => {
     expect(pangu.spaceText('詳見https://vinta.ws/code/.')).toBe('詳見 https://vinta.ws/code/.');
   });
 

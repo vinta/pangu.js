@@ -2,9 +2,9 @@
 
 **Partially superseded by [ADR 0015](0015-hyphen-before-digit-reads-as-operator.md), which drops the hyphen half of rule 3's sign attachment. `+` before digits still attaches as a sign; `-` before digits now reads as an operator, so `氣溫是-5度` renders as `氣溫是 - 5 度` and the year range FIXME below is closed.**
 
-**Partially superseded by [ADR 0025](0025-slash-never-gets-spaces.md): the `/` half of rule 2 and the slash reading in rule 4 are dropped. A slash in direct CJK contact never gets spaces, so `公里/小時` stays tight. The file path rules in rule 4 stay.**
-
 **Partially superseded by [ADR 0019](0019-plus-after-a-word-reads-as-a-separator.md): the plus suffix after a word in rule 3 (`Disney+ 上架`) is dropped. A plus after a word in direct CJK contact reads as a separator, so the `Vinta+陳上進` consequence below is reversed (`Vinta + 陳上進`). The digit suffix stays. The extension's name-suffix list restores listed names, and restores the `-` after a listed credit rating or blood type too.**
+
+**Partially superseded by [ADR 0025](0025-slash-never-gets-spaces.md): the `/` half of rule 2 and the slash reading in rule 4 are dropped. A slash in direct CJK contact never gets spaces, so `公里/小時` stays tight. The file path rules in rule 4 stay.**
 
 ADR 0002 made `-` contact-gated while `=` `+` `*` `<` `>` stayed text-gated, meaning they got spaces between half-width characters whenever the text contained CJK anywhere. A usage inventory of real-world symbol readings showed that split was wrong twice over. First, the dominant readings between half-width characters are token-like across the board: query strings (`foo=bar&baz=1`), inline math typed tight (`5+5`, `A<B`), comparisons, and codes. Second, text-gated spacing never actually worked. Compound-word and joiner-token placeholders shield neighboring operators from the between-half-width rules, so mixed formulas came out as arbitrary mixes like `X * 5+Y/10 = 123` depending on which substring happened to be protected first.
 

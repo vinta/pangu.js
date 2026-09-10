@@ -1229,7 +1229,7 @@ test.describe('BrowserPangu', () => {
     });
 
     test('should leave a URL that ends with a slash in its own node untouched before CJK', async ({ page }) => {
-      // The junction window is the node's last three characters plus the next node's first, so the slash rule used to read the URL tail as CJK-contact and write a space into the URL
+      // A slash never gets spaces, so the URL tail stays untouched at the junction
       await page.setContent('<p><span>https://vinta.ws/code/</span>看看</p><p><a href="https://vinta.ws/code/">https://vinta.ws/code/</a>看看</p>');
 
       await page.evaluate(() => {

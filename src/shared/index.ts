@@ -120,8 +120,7 @@ export const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}
 // also excludes zero-width characters like U+FEFF, and treating those as a gap would drop the space entirely and leave the runs flush
 // Non-breaking space: [ ] (U+00A0)
 export const CJK_HASH = new RegExp(`([${CJK}])(#([^ \\u00a0]))`, 'g');
-// Non-breaking space: [ ] (U+00A0)
-// A hashtag right after a slash in a list (/#tag) is a hashtag, not a C# shape
+// Non-breaking space: [ ] (U+00A0). A hashtag right after a slash in a list (/#tag) is a hashtag, not a C# shape
 export const HASH_CJK = new RegExp(`(([^ \\u00a0/])#)([${CJK}])`, 'g');
 
 const PRODUCT_NAME = 'Apple TV|CATCHPLAY|[Dd]iscovery|Disney|ESPN|Fitness|iCloud|Paramount|PS';
@@ -226,11 +225,10 @@ export const CLOSING_HTML_TAG = /<\/([a-zA-Z][a-zA-Z0-9]*)/g;
 export const CJK_HTML_TAG_MENTION = new RegExp(`([${CJK}])(?=\uE004)`, 'g');
 export const HTML_TAG_MENTION_CJK = new RegExp(`(?<=\uE005)([${CJK}])`, 'g');
 
-// A URL reads as one unit: nothing inside it is modified, and it is spaced from CJK on its left. Scheme-anchored only; a letter or digit glued before the scheme is not a URL start
-// The body stops at whitespace, a straight quote, angle brackets, a backtick, CJK punctuation (\u3000-\u303f), full-width forms (\uff00-\uffef), curly quotes, an ellipsis, and the Private Use
-// Area (placeholder delimiters). CJK letters continue the URL (/wiki/\u4e2d\u6587), so CJK prose glued right after a URL stays glued. See ADR 0026
+// A URL reads as one unit: nothing inside it is modified, and it is spaced from CJK on its left. Scheme-anchored only, and CJK characters continue the URL (/wiki/\u4e2d\u6587), so CJK
+// prose written tight after a URL stays tight. The body ends at the Private Use Area too, so a URL never swallows a placeholder. See ADR 0026
 export const HTTP_URL = /(?<![A-Za-z0-9])https?:\/\/[^\s<>"`\u3000-\u303f\uff00-\uffef\u2018\u2019\u201c\u201d\u2026\ue000-\uf8ff]+/g;
-// Trailing ASCII punctuation and an unbalanced closing parenthesis belong to the prose, not the URL
+// Trailing half-width punctuation and an unbalanced closing parenthesis belong to the prose, not the URL
 const HTTP_URL_TRAILING_PUNCTUATION = /[.,;:!?'"]+$/;
 export const CJK_HTTP_URL = new RegExp(`([${CJK}])(?=\uE00A)`, 'g');
 
