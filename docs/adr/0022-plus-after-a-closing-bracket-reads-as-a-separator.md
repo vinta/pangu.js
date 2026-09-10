@@ -1,4 +1,4 @@
-# A plus after a closing bracket reads as a separator before a full-width opener
+# A plus after a closing bracket reads as a separator
 
 Plus reading keeps a plus tight on the side that touches common Chinese full-width punctuation, even when another plus flips the line. The reason is a name: in `Disney+（迪士尼）` or `影劇館+」` the plus is a suffix that the extension's name-suffix list restores per ADR 0019, and a space before an opening full-width bracket or quote would split the name from its gloss.
 
