@@ -57,7 +57,7 @@ test.describe('applyLateFixes', () => {
   });
 
   for (const ignoredMarkup of ['<div contenteditable="true"></div>', '<div g_editable="true"></div>', '<div class="no-pangu-spacing"></div>', '<pre></pre>', '<code></code>']) {
-    test(`drop a queued fix after the node moves under ${ignoredMarkup}`, async ({ page }) => {
+    test(`drop the late fix after the node moves under ${ignoredMarkup}`, async ({ page }) => {
       await page.setContent('<div id="target">氣溫是-5度左右</div>');
 
       const result = await page.evaluate((markup) => {
