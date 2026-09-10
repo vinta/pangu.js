@@ -31,15 +31,15 @@ describe('Symbol +', () => {
 
     // prettier-ignore
     expect(pangu.spaceText('HiNet光世代+MOD+影劇館+/全選/自選20/特選餐/豪華餐(5選1)+Wi-Fi全屋通(1台)'))
-                       .toBe('HiNet 光世代 + MOD + 影劇館+/全選/自選 20/特選餐/豪華餐 (5 選 1) + Wi-Fi 全屋通 (1 台)');
+                     .toBe('HiNet 光世代 + MOD + 影劇館+/全選/自選 20/特選餐/豪華餐 (5 選 1) + Wi-Fi 全屋通 (1 台)');
 
     // prettier-ignore
     expect(pangu.spaceText('【速在必行方案】HiNet光世代+Wi-Fi全屋通1台+MOD影劇館+(300M/300M)'))
-                          .toBe('【速在必行方案】HiNet 光世代 + Wi-Fi 全屋通 1 台 + MOD 影劇館+ (300M/300M)');
+                     .toBe('【速在必行方案】HiNet 光世代 + Wi-Fi 全屋通 1 台 + MOD 影劇館+ (300M/300M)');
 
     // prettier-ignore
     expect(pangu.spaceText('HiNet光世代+MOD+自選餐(全選)+「影劇館+」'))
-                       .toBe('HiNet 光世代 + MOD + 自選餐 (全選) +「影劇館+」');
+                     .toBe('HiNet 光世代 + MOD + 自選餐 (全選) +「影劇館+」');
 
     expect(pangu.spaceText('自選餐(全選)+「影劇館」')).toBe('自選餐 (全選) +「影劇館」');
   });

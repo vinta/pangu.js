@@ -13,7 +13,7 @@ describe('HTTP URLs', () => {
     expect(pangu.spaceText('第三條的內容為http://se.360.cn/')).toBe('第三條的內容為 http://se.360.cn/');
     // prettier-ignore
     expect(pangu.spaceText('打開此連結，https://www.google.com/search?q=%E5%9B%BD%E5%AF%86SM2%2F3%2F4%E7%AE%97%E6%B3%95+360'))
-                       .toBe('打開此連結，https://www.google.com/search?q=%E5%9B%BD%E5%AF%86SM2%2F3%2F4%E7%AE%97%E6%B3%95+360');
+                     .toBe('打開此連結，https://www.google.com/search?q=%E5%9B%BD%E5%AF%86SM2%2F3%2F4%E7%AE%97%E6%B3%95+360');
     expect(pangu.spaceText('https://www.google.com/search?q=中文&hl=zh-TW')).toBe('https://www.google.com/search?q=中文&hl=zh-TW');
     expect(pangu.spaceText('https://zh.wikipedia.org/w/index.php?title=中文&action=history')).toBe('https://zh.wikipedia.org/w/index.php?title=中文&action=history');
     expect(pangu.spaceText('網址是https://zh.wikipedia.org/wiki/%E4%B8%AD%E6%96%87')).toBe('網址是 https://zh.wikipedia.org/wiki/%E4%B8%AD%E6%96%87');
@@ -28,7 +28,7 @@ describe('HTTP URLs', () => {
     expect(pangu.spaceText('看https://github.com/vinta/pangu.js/issues/155這個issue')).toBe('看 https://github.com/vinta/pangu.js/issues/155這個issue');
     // prettier-ignore
     expect(pangu.spaceText('文件在https://developer.mozilla.org/zh-TW/docs/Web/API/URL/canParse_static這裡'))
-                       .toBe('文件在 https://developer.mozilla.org/zh-TW/docs/Web/API/URL/canParse_static這裡');
+                     .toBe('文件在 https://developer.mozilla.org/zh-TW/docs/Web/API/URL/canParse_static這裡');
     expect(pangu.spaceText('請看https://vinta.ws/code/的文章')).toBe('請看 https://vinta.ws/code/的文章');
   });
 
@@ -48,7 +48,7 @@ describe('HTTP URLs', () => {
     expect(pangu.spaceText('<a href="https://zh.wikipedia.org/wiki/中文#歷史">中文</a>')).toBe('<a href="https://zh.wikipedia.org/wiki/中文#歷史">中文</a>');
     // prettier-ignore
     expect(pangu.spaceText('<a href="http://vinta.ws/中文網址with英文.html">oh一個超連結with英文，網址包含中文</a>'))
-                       .toBe('<a href="http://vinta.ws/中文網址with英文.html">oh 一個超連結 with 英文，網址包含中文</a>');
+                     .toBe('<a href="http://vinta.ws/中文網址with英文.html">oh 一個超連結 with 英文，網址包含中文</a>');
   });
 
   it('space a hashtag on a line that also holds a URL', () => {

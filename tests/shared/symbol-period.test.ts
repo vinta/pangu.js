@@ -23,11 +23,11 @@ describe('Symbol .', () => {
 
     // prettier-ignore
     expect(pangu.spaceText("Mr.龍島主道：「Let's Party!各位高明博雅君子！"))
-                       .toBe("Mr. 龍島主道：「Let's Party! 各位高明博雅君子！");
+                     .toBe("Mr. 龍島主道：「Let's Party! 各位高明博雅君子！");
 
     // prettier-ignore
     expect(pangu.spaceText("Mr.龍島主道:「Let's Party!各位高明博雅君子!"))
-                       .toBe("Mr. 龍島主道:「Let's Party! 各位高明博雅君子!");
+                     .toBe("Mr. 龍島主道:「Let's Party! 各位高明博雅君子!");
 
     expect(pangu.spaceText('世.界.，草.班.与千.早.爱.音.')).toBe('世. 界.，草. 班. 与千. 早. 爱. 音.');
   });

@@ -8,11 +8,11 @@ describe('API', () => {
     it('space text', () => {
       // prettier-ignore
       expect(pangu.spaceText('聽說Hadoop工程師睡不著的時候都會MapReduce羊'))
-                         .toBe('聽說 Hadoop 工程師睡不著的時候都會 MapReduce 羊');
+                       .toBe('聽說 Hadoop 工程師睡不著的時候都會 MapReduce 羊');
 
       // prettier-ignore
       expect(pangu.spaceText('遇到了一個問題，決定用 thread 來解決，嗯，在現有我兩個問了題'))
-                         .toBe('遇到了一個問題，決定用 thread 來解決，嗯，在現有我兩個問了題');
+                       .toBe('遇到了一個問題，決定用 thread 來解決，嗯，在現有我兩個問了題');
     });
 
     it('space text is idempotent', () => {
