@@ -36,8 +36,8 @@ describe('Symbol -', () => {
 
     // Hyphenated English names
     // prettier-ignore
-    expect(pangu.spaceText('英文姓名須與護照上相同，包含標點符號；範例：王小明，英文名為WANG,HSIAO-MING，請於英文姓(Surname)欄位填入WANG,、英文名(Given Names)欄位填入HSIAO-MING。'))
-                     .toBe('英文姓名須與護照上相同，包含標點符號；範例：王小明，英文名為 WANG,HSIAO-MING，請於英文姓 (Surname) 欄位填入 WANG,、英文名 (Given Names) 欄位填入 HSIAO-MING。');
+    expect(pangu.spaceText('英文姓名須與護照上相同，包含標點符號；範例：王小明，英文名為WANG, HSIAO-MING，請於英文姓(Surname)欄位填入WANG,、英文名(Given Names)欄位填入HSIAO-MING。'))
+                     .toBe('英文姓名須與護照上相同，包含標點符號；範例：王小明，英文名為 WANG, HSIAO-MING，請於英文姓 (Surname) 欄位填入 WANG,、英文名 (Given Names) 欄位填入 HSIAO-MING。');
   });
 
   it('handle - symbol as preserved pattern', () => {

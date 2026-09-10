@@ -9,6 +9,7 @@ describe('Symbol /', () => {
     expect(pangu.spaceText('Mollie/陳上進')).toBe('Mollie/陳上進');
     expect(pangu.spaceText('陳上進/Mollie')).toBe('陳上進/Mollie');
     expect(pangu.spaceText('速度是60公里/小時')).toBe('速度是 60 公里/小時');
+    expect(pangu.spaceText('價格是$100/每小時')).toBe('價格是 $100/每小時');
     expect(pangu.spaceText('我/你\n他/她')).toBe('我/你\n他/她');
     expect(pangu.spaceText('歡迎光臨/再見\n參考 https://example.com/docs')).toBe('歡迎光臨/再見\n參考 https://example.com/docs');
 
