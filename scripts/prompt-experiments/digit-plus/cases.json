@@ -145,68 +145,60 @@
       "source": "synthetic"
     },
     {
-      "id": "mixed",
-      "input": "Switch 2+遊戲同捆組，另有100+的配件可選",
-      "expected_output": "Switch 2 + 遊戲同捆組，另有 100+ 的配件可選",
-      "targets": [
-        {
-          "ordinal": 1,
-          "expected_label": "conjunction"
-        },
-        {
-          "ordinal": 2,
-          "expected_label": "lower-bound"
-        }
-      ],
-      "group": "mixed",
-      "split": "development",
-      "source": "synthetic"
-    },
-    {
-      "id": "repeated",
-      "input": "支援Python 3+的版本，套組包含Python 3+教材兩項商品",
-      "expected_output": "支援 Python 3+ 的版本，套組包含 Python 3 + 教材兩項商品",
+      "id": "quantity-minimum",
+      "input": "商品數量2+",
+      "expected_output": "商品數量 2+",
       "targets": [
         {
           "ordinal": 1,
           "expected_label": "lower-bound"
-        },
-        {
-          "ordinal": 2,
-          "expected_label": "conjunction"
         }
       ],
-      "group": "mixed",
+      "group": "quantity",
       "split": "development",
       "source": "synthetic"
     },
     {
-      "id": "bare",
-      "input": "商品2+",
-      "expected_output": "商品 2+",
+      "id": "galaxy-s24",
+      "input": "我買了Galaxy S24+手機",
+      "expected_output": "我買了 Galaxy S24+ 手機",
       "targets": [
         {
           "ordinal": 1,
           "expected_label": "unsure"
         }
       ],
-      "group": "boundary",
+      "group": "product-name",
       "split": "development",
-      "source": "synthetic"
+      "source": "synthetic sentence; official product name: https://www.samsung.com/tw/smartphones/galaxy-s24/"
     },
     {
-      "id": "named",
-      "input": "這款產品正式命名為「X2+」",
-      "expected_output": "這款產品正式命名為「X2+」",
+      "id": "synology-ds224",
+      "input": "公司使用Synology DS224+儲存檔案",
+      "expected_output": "公司使用 Synology DS224+ 儲存檔案",
       "targets": [
         {
           "ordinal": 1,
           "expected_label": "unsure"
         }
       ],
-      "group": "boundary",
+      "group": "product-name",
       "split": "development",
-      "source": "synthetic"
+      "source": "synthetic sentence; official product name: https://www.synology.com/en-us/products/DS224%2B"
+    },
+    {
+      "id": "roborock-s7",
+      "input": "家裡用Roborock S7+掃地",
+      "expected_output": "家裡用 Roborock S7+ 掃地",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "unsure"
+        }
+      ],
+      "group": "product-name",
+      "split": "development",
+      "source": "synthetic sentence; official product name: https://us.roborock.com/pages/roborock-s7-plus"
     },
     {
       "id": "console",
@@ -319,6 +311,20 @@
       "group": "holdout",
       "split": "holdout",
       "source": "synthetic"
+    },
+    {
+      "id": "synology-ds923",
+      "input": "辦公室添購DS923+作為備份設備",
+      "expected_output": "辦公室添購 DS923+ 作為備份設備",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "unsure"
+        }
+      ],
+      "group": "product-name",
+      "split": "holdout",
+      "source": "synthetic sentence; official product name: https://global.download.synology.com/download/Document/Hardware/DataSheet/DiskStation/23-year/DS923%2B/enu/Synology_DS923%2B_Data_Sheet_enu.pdf"
     }
   ]
 }

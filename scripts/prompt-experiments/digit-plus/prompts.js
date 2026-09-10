@@ -8,6 +8,7 @@ function question(kase, instruction) {
 }
 
 export const PROMPTS = {
+  'v3-zh-single': { system, build: (kase) => `原句：${kase.input}\n\n判斷原句中的加號是什麼意思。\n${menu}\n\n用選項的名稱回答。` },
   'v1-zh': { system, build: (kase) => question(kase, '這個「+」在原句中是什麼意思？') },
   'v2-zh': {
     system,

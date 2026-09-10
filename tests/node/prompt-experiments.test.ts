@@ -147,11 +147,13 @@ new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context 
     };
     expect(result.omitResponseConstraintInput).toBe(variant === 'v1-zh-omit-constraint-input');
     if (experiment === 'digit-plus') {
-      expect(result.evaluation.labels).toEqual({ passed: 15, total: 16 });
+      expect(result.evaluation.labels).toEqual({ passed: 13, total: 14 });
       expect(result.evaluation.misses).toEqual(['switch-bundle-1']);
       expect(result.results[0].answers[0]).toMatchObject({ raw: '"lower-bound"', answer: 'lower-bound', error: null });
-      expect(result.results.every((kase) => kase.input[kase.at] === '+')).toBe(true);
-      expect(result.testCalls).toBe(16 * 6);
+      expect(result.results[0].responseConstraint).toEqual({ type: 'string', enum: ['conjunction', 'lower-bound', 'unsure'] });
+      expect(result.results.find((kase) => kase.id === 'galaxy-s24-1')).toMatchObject({ expected_label: 'unsure' });
+      expect(result.results.every((kase) => kase.input[kase.at] === '+' && kase.input.split('+').length === 2)).toBe(true);
+      expect(result.testCalls).toBe(14 * 6);
       return;
     }
     if (experiment === 'slash-unit') {

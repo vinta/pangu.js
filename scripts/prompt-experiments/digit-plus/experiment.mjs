@@ -8,7 +8,12 @@ export function loadCorpus(split = 'development') {
     .filter((sentence) => sentence.split === split)
     .flatMap((sentence) => {
       const offsets = [...sentence.input.matchAll(/\+/g)].map((match) => match.index);
-      assert.equal(new Set(sentence.targets.map((target) => target.ordinal)).size, sentence.targets.length, `duplicate target: ${sentence.id}`);
+      assert.equal(offsets.length, 1, `invalid digit-plus input: ${sentence.id}; provide a sentence with exactly one +`);
+      assert.deepEqual(
+        sentence.targets.map((target) => target.ordinal),
+        [1],
+        `invalid target: ${sentence.id}; annotate the only +`,
+      );
       assert.equal(sentence.input.replaceAll(' ', ''), sentence.expected_output.replaceAll(' ', ''), `non-space edit: ${sentence.id}`);
       return sentence.targets.map((target) => {
         const at = offsets[target.ordinal - 1];

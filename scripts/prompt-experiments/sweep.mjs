@@ -42,7 +42,7 @@ const digitPlus = values.experiment === 'digit-plus' ? await import('./digit-plu
 assert(plus || digitPlus || !values.split, '--split is only supported for --experiment plus-sign or digit-plus');
 assert(!plus || !values.diagnostics, '--diagnostics is only supported for --experiment hyphen-sign, digit-plus, spacing-rewrite, or slash-unit');
 const split = values.split ?? 'development';
-const variants = positionals.length ? positionals : slash ? ['v1-zh', 'v2-zh', 'v3-zh', 'v4-zh-local'] : rewrite ? ['v1-zh'] : plus || digitPlus ? ['v1-zh', 'v2-zh'] : ['shipping'];
+const variants = positionals.length ? positionals : slash ? ['v1-zh', 'v2-zh', 'v3-zh', 'v4-zh-local'] : rewrite || digitPlus ? ['v1-zh'] : plus ? ['v1-zh', 'v2-zh'] : ['shipping'];
 const prompts =
   plus || digitPlus || rewrite || slash
     ? (await import(`./${values.experiment}/prompts.js`)).PROMPTS
