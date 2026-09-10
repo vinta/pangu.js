@@ -10,7 +10,7 @@ The decisions:
    - port: optional. `:3000` for one port, `:*` or nothing for any port.
    - path: required, starts with `/`. `*` matches any characters, every other character is literal. A `?` starts the query part.
 
-   Everything else Chrome accepts is rejected: `<all_urls>`, `file://`, `ftp://`, `ws://`, `wss://`, `urn:`, `chrome-extension://`, bracketed IPv6 hosts, `*` inside a host except a leading `*.`, and an entry with no path. The content script never runs on those schemes, and Chrome rejects the rest too.
+   Everything else Chrome accepts is rejected: `<all_urls>`, `file://`, `ftp://`, `ws://`, `wss://`, `urn:`, `chrome-extension://`, bracketed IPv6 hosts, `*` inside a host except a leading `*.`, and an entry with no path. The content script never runs on those schemes. Chrome rejects a mid-host `*` and a missing path, and the old validator never accepted an IPv6 host, so no synced entry of those shapes exists.
 
 2. **One function translates an entry into a `URLPattern` init dict that carries Chrome's meaning.** The `*` scheme becomes `http{s}?`. `*.example.com` becomes `{*.}?example.com`, MDN's own example for a domain and its subdomains. A missing port becomes `*`. The path splits at the first `?` into `pathname` and `search`, with `URLPattern`'s own syntax characters escaped so `C++` and `(programming_language)` stay literal. Validation on the options page and matching in the content script, the popup, and the icon all go through this function.
 
