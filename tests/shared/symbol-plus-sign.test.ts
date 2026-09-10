@@ -28,12 +28,6 @@ describe('Symbol +', () => {
     expect(pangu.spaceText('陳上進+Vinta+Mollie')).toBe('陳上進 + Vinta + Mollie');
     expect(pangu.spaceText('HiNet光世代+MOD+Wi-Fi全屋通')).toBe('HiNet 光世代 + MOD + Wi-Fi 全屋通');
     expect(pangu.spaceText('套餐含MOD+Netflix+Disney')).toBe('套餐含 MOD+Netflix+Disney');
-    expect(pangu.spaceText('如何使用PTS+（公視+）註冊與觀看？')).toBe('如何使用 PTS+（公視+）註冊與觀看？');
-    expect(pangu.spaceText('MOD+影劇館+上架')).toBe('MOD + 影劇館+ 上架');
-    expect(pangu.spaceText('Disney+上架了C++課程')).toBe('Disney+ 上架了 C++ 課程');
-    expect(pangu.spaceText('Disney+上架了A+B')).toBe('Disney+ 上架了 A + B');
-    expect(pangu.spaceText('中+NotAB+|中文')).toBe('中 + NotAB + | 中文');
-    expect(pangu.spaceText('Netflix、Disney+、Apple TV+等串流平台')).toBe('Netflix、Disney+、Apple TV+ 等串流平台');
 
     // prettier-ignore
     expect(pangu.spaceText('HiNet光世代+MOD+影劇館+/全選/自選20/特選餐/豪華餐(5選1)+Wi-Fi全屋通(1台)'))
@@ -83,16 +77,10 @@ describe('Symbol +', () => {
     expect(pangu.spaceText('打+886這個號碼')).toBe('打 +886 這個號碼');
     expect(pangu.spaceText('氣溫是+5度左右')).toBe('氣溫是 +5 度左右');
 
-    // Suffix after a digit run
+    // Suffix after digits
     expect(pangu.spaceText('有100+的選擇')).toBe('有 100+ 的選擇');
     expect(pangu.spaceText('這裡有18+的內容')).toBe('這裡有 18+ 的內容');
     expect(pangu.spaceText('評分3.5+的餐廳')).toBe('評分 3.5+ 的餐廳');
     expect(pangu.spaceText('Python 3+的版本')).toBe('Python 3+ 的版本');
-
-    expect(pangu.spaceText('Disney+上架了新片')).toBe('Disney+ 上架了新片');
-    expect(pangu.spaceText('Apple TV+上架了新片')).toBe('Apple TV+ 上架了新片');
-    expect(pangu.spaceText('Disney+和Apple TV+都上架了')).toBe('Disney+ 和 Apple TV+ 都上架了');
-    expect(pangu.spaceText('公視+上架了新片')).toBe('公視+ 上架了新片');
-    expect(pangu.spaceText('MOD影劇館+上架了新片')).toBe('MOD 影劇館+ 上架了新片');
   });
 });

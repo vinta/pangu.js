@@ -122,7 +122,7 @@ test.describe('BrowserPangu', () => {
     });
 
     test('keep a late fix on the unchanged sibling when a placeholder next to it is filled', async ({ page }) => {
-      await page.setContent('<p id="container">星河+的節目<span id="count"></span></p>');
+      await page.setContent('<p id="container">私視+的節目<span id="count"></span></p>');
 
       await page.evaluate(() => {
         pangu.autoSpacePage({ pageDelayMs: 50 });
@@ -133,7 +133,7 @@ test.describe('BrowserPangu', () => {
       // The host keeps an unlisted suffix tight
       await page.evaluate(() => {
         const textNode = document.getElementById('container')!.firstChild as Text;
-        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '星河+ 的節目' }]);
+        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '私視+ 的節目' }]);
       });
 
       await page.waitForTimeout(100);
@@ -145,7 +145,7 @@ test.describe('BrowserPangu', () => {
       await page.waitForTimeout(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.innerHTML);
-      expect(result).toBe('星河+ 的節目<span id="count"> 1</span>');
+      expect(result).toBe('私視+ 的節目<span id="count"> 1</span>');
     });
 
     test('space both text nodes when a re-render writes two adjacent ones in one task', async ({ page }) => {
@@ -171,7 +171,7 @@ test.describe('BrowserPangu', () => {
     });
 
     test('keep a late fix at the tail of the unchanged sibling when a placeholder after it is filled', async ({ page }) => {
-      await page.setContent('<p id="container">星河+<span id="count"></span></p>');
+      await page.setContent('<p id="container">私視+<span id="count"></span></p>');
 
       await page.evaluate(() => {
         pangu.autoSpacePage({ pageDelayMs: 50 });
@@ -182,7 +182,7 @@ test.describe('BrowserPangu', () => {
       // The late fix sits right at the tail, where the junction reading would put the space back
       await page.evaluate(() => {
         const textNode = document.getElementById('container')!.firstChild as Text;
-        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '星河+' }]);
+        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '私視+' }]);
       });
 
       await page.waitForTimeout(100);
@@ -194,11 +194,11 @@ test.describe('BrowserPangu', () => {
       await page.waitForTimeout(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.innerHTML);
-      expect(result).toBe('星河+<span id="count"> 上架</span>');
+      expect(result).toBe('私視+<span id="count"> 上架</span>');
     });
 
     test('keep a late fix on a text node re-collected with its parent when a sibling text node is appended', async ({ page }) => {
-      await page.setContent('<p id="container">星河+的節目</p>');
+      await page.setContent('<p id="container">私視+的節目</p>');
 
       await page.evaluate(() => {
         pangu.autoSpacePage({ pageDelayMs: 50 });
@@ -208,7 +208,7 @@ test.describe('BrowserPangu', () => {
 
       await page.evaluate(() => {
         const textNode = document.getElementById('container')!.firstChild as Text;
-        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '星河+ 的節目' }]);
+        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '私視+ 的節目' }]);
       });
 
       await page.waitForTimeout(100);
@@ -221,11 +221,11 @@ test.describe('BrowserPangu', () => {
       await page.waitForTimeout(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.textContent);
-      expect(result).toBe('星河+ 的節目 1');
+      expect(result).toBe('私視+ 的節目 1');
     });
 
     test('keep a late fix after a junction space was written into the fixed node', async ({ page }) => {
-      await page.setContent('<p id="container"><span id="count"></span>星河+的節目</p>');
+      await page.setContent('<p id="container"><span id="count"></span>私視+的節目</p>');
 
       await page.evaluate(() => {
         pangu.autoSpacePage({ pageDelayMs: 50 });
@@ -235,7 +235,7 @@ test.describe('BrowserPangu', () => {
 
       await page.evaluate(() => {
         const textNode = document.getElementById('container')!.lastChild as Text;
-        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '星河+ 的節目' }]);
+        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '私視+ 的節目' }]);
       });
 
       await page.waitForTimeout(100);
@@ -254,7 +254,7 @@ test.describe('BrowserPangu', () => {
       await page.waitForTimeout(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.innerHTML);
-      expect(result).toBe('<span id="count">2</span> 星河+ 的節目');
+      expect(result).toBe('<span id="count">2</span> 私視+ 的節目');
     });
 
     test('not pair body text with the title when a placeholder has no block ancestor', async ({ page }) => {
