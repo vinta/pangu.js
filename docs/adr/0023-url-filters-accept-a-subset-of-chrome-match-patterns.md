@@ -18,7 +18,7 @@ Alternatives rejected:
 
 - `webext-patterns`, which converts match patterns to a RegExp: correct, but a dependency for one function.
 - A hand-rolled RegExp replacing `URLPattern`: more code to own for no gain.
-- `chrome.tabs.query({ url })`, which matches tabs with Chrome's own grammar and throws on an invalid pattern. Probed from the worker on 2026-09-10: it reads `*.host` and ports as Chrome does, and the tab URL is already updated when the content script reacts to `currententrychange`. Rejected because the content script cannot call it: the URL policy becomes a message hop and an async wait with a stale-response guard, `url: []` matches every tab, and one invalid entry throws the whole call. Same line count as the parser, spread over four files.
+- `chrome.tabs.query({ url })`, which matches tabs with Chrome's own grammar and throws on an invalid pattern. Probed from the worker on 2026-09-10: it reads a host wildcard (`*.example.com`) and ports as Chrome does, and the tab URL is already updated when the content script reacts to `currententrychange`. Rejected because the content script cannot call it: the URL policy becomes a message hop and an async wait with a stale-response guard, `url: []` matches every tab, and one invalid entry throws the whole call. Same line count as the parser, spread over four files.
 - Reverting ADR 0020: brings back the same-document navigation bug on GitHub for every default install, to protect a rare shape.
 
 ## Consequences

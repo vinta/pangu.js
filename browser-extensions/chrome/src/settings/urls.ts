@@ -8,7 +8,7 @@ function escapeUrlPatternSyntax(part: string) {
   return part.replace(/[(){}:+?\\]/g, '\\$&');
 }
 
-// The string form of URLPattern reads `*.host` as subdomains only and pins a missing port to the scheme default, so the init form carries the match pattern's meaning instead
+// The string form of URLPattern reads a host wildcard (`*.example.com`) as subdomains only and pins a missing port to the scheme default, so the init form carries the match pattern's meaning instead
 function matchPatternToUrlPattern(pattern: string): URLPattern | null {
   const match = MATCH_PATTERN.exec(pattern);
   if (!match) {

@@ -129,7 +129,7 @@ describe('shouldAutoSpace', () => {
     expect(shouldAutoSpace(current, 'https://other.com/')).toBe(false);
   });
 
-  it('reads `*.host` as the host and every subdomain, as Chrome does', () => {
+  it('reads a host wildcard as the host and every subdomain, as Chrome does', () => {
     const current = makeSettings({ blacklist: ['*://*.example.com/*'] });
     expect(shouldAutoSpace(current, 'https://example.com/')).toBe(false);
     expect(shouldAutoSpace(current, 'https://www.example.com/')).toBe(false);
