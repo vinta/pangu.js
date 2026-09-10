@@ -227,6 +227,31 @@ export const CLOSING_HTML_TAG = /<\/([a-zA-Z][a-zA-Z0-9]*)/g;
 export const CJK_HTML_TAG_MENTION = new RegExp(`([${CJK}])(?=\uE004)`, 'g');
 export const HTML_TAG_MENTION_CJK = new RegExp(`(?<=\uE005)([${CJK}])`, 'g');
 
+// A URL reads as one unit: nothing inside it is modified, and it is spaced from CJK on its left. Scheme-anchored only; a letter or digit glued before the scheme is not a URL start
+// The body stops at whitespace, a straight quote, angle brackets, a backtick, CJK punctuation (\u3000-\u303f), full-width forms (\uff00-\uffef), curly quotes, an ellipsis, and the Private Use
+// Area (placeholder delimiters). CJK letters continue the URL (/wiki/\u4e2d\u6587), so CJK prose glued right after a URL stays glued. See ADR 0026
+export const HTTP_URL = /(?<![A-Za-z0-9])https?:\/\/[^\s<>"`\u3000-\u303f\uff00-\uffef\u2018\u2019\u201c\u201d\u2026\ue000-\uf8ff]+/g;
+// Trailing ASCII punctuation and an unbalanced closing parenthesis belong to the prose, not the URL
+const HTTP_URL_TRAILING_PUNCTUATION = /[.,;:!?'"]+$/;
+export const CJK_HTTP_URL = new RegExp(`([${CJK}])(?=\uE00A)`, 'g');
+
+function trimHttpUrl(url: string) {
+  // Count once: a content script sees attacker text, and recounting per pass is quadratic on a long run of closing parentheses
+  let unbalancedClosingParentheses = (url.match(/\)/g) ?? []).length - (url.match(/\(/g) ?? []).length;
+  for (;;) {
+    const trimmed = url.replace(HTTP_URL_TRAILING_PUNCTUATION, '');
+    if (trimmed.endsWith(')') && unbalancedClosingParentheses > 0) {
+      unbalancedClosingParentheses--;
+      url = trimmed.slice(0, -1);
+      continue;
+    }
+    if (trimmed === url) {
+      return url;
+    }
+    url = trimmed;
+  }
+}
+
 // Used by fixBracketSpacing to strip the spaces just inside a bracket pair; everything else between the brackets stays unchanged
 export const BRACKET_PATTERNS = [
   { pattern: /<([^<>]*)>/g, open: '<', close: '>' },
@@ -297,6 +322,13 @@ export class Pangu {
     const backtickManager = new PlaceholderReplacer('BACKTICK_CONTENT_', '\uE000', '\uE001');
     newText = newText.replace(/`([^`]+)`/g, (_match, content: string) => {
       return `\`${backtickManager.store(content)}\``;
+    });
+
+    // Hide every URL from the rules. Attribute values reach spaceText() through the HTML step below, so a URL inside href="..." is hidden the same way
+    const urlManager = new PlaceholderReplacer('HTTP_URL_PLACEHOLDER_', '\uE00A', '\uE00B');
+    newText = newText.replace(HTTP_URL, (match) => {
+      const url = trimHttpUrl(match);
+      return urlManager.store(url) + match.slice(url.length);
     });
 
     const htmlTagManager = new PlaceholderReplacer('HTML_TAG_PLACEHOLDER_', '\uE002', '\uE003');
@@ -482,6 +514,8 @@ export class Pangu {
       newText = htmlTagManager.restore(newText);
     }
 
+    newText = newText.replace(CJK_HTTP_URL, '$1 ');
+    newText = urlManager.restore(newText);
     newText = backtickManager.restore(newText);
 
     return newText;

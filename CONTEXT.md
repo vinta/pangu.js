@@ -94,6 +94,9 @@ Tags are protected from spacing rules. Text inside attributes is processed. The 
 **Tag mention**:
 A bare tag with no attributes, a non-void name, and no closing counterpart anywhere in the text. It can be self-closing or not (`CJK <div> CJK`, `CJK List<String> CJK`, `CJK <Spinner /> CJK`). A tag mention reads as one unit that is mentioned in prose, not as markup: it is spaced where it is in direct contact with CJK, and tight against ANS characters. Paired tags, void elements (`<br>`, `<br />`), and tags with attributes stay protected markup.
 
+**HTTP URL**:
+An address that starts with `http://` or `https://`. It reads as one unit: nothing inside it is modified, and it is spaced from CJK on its left. It ends at whitespace or CJK punctuation; CJK letters belong to it, so CJK prose glued right after it stays glued. Trailing ASCII punctuation and an unbalanced closing parenthesis belong to the prose. A URL inside an attribute value is the same unit. See ADR 0026.
+
 ### AI Spacing
 
 **AI spacing**:
