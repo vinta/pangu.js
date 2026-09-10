@@ -40,7 +40,9 @@ export function debounce<T extends (...args: any[]) => void>(func: T, delay: num
 export function waitForVideosToLoad(delayMs: number, onLoaded: () => void) {
   // Wait for videos to load before spacing to avoid layout shifts
   // See: https://github.com/vinta/pangu.js/issues/117
-  const videos = Array.from(document.getElementsByTagName('video'));
+  // A hidden player (closed lightbox, no src) never fires loadeddata and cannot
+  // be disturbed by spacing, so only visible videos gate the page pass
+  const videos = Array.from(document.getElementsByTagName('video')).filter((video) => video.getClientRects().length > 0);
 
   if (videos.length === 0) {
     // No videos, proceed with normal delay

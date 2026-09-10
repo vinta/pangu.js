@@ -101,6 +101,34 @@ test.describe('BrowserPangu', () => {
       expect(result).toBe('甲 Xabc');
     });
 
+    test('wait for a visible video that has not loaded before the page pass', async ({ page }) => {
+      await page.setContent('<video></video><p id="container">中文abc</p>');
+
+      await page.evaluate(() => {
+        pangu.autoSpacePage({ pageDelayMs: 50 });
+      });
+
+      // Well inside the 5 s loadeddata fallback, so the page pass must not have run yet
+      await page.waitForTimeout(600);
+
+      const result = await page.evaluate(() => document.getElementById('container')!.textContent);
+      expect(result).toBe('中文abc');
+    });
+
+    test('skip a hidden video when waiting for videos to load', async ({ page }) => {
+      // A closed lightbox player: display: none ancestor, no src, never fires loadeddata
+      await page.setContent('<div style="display: none"><video></video></div><p id="container">中文abc</p>');
+
+      await page.evaluate(() => {
+        pangu.autoSpacePage({ pageDelayMs: 50 });
+      });
+
+      await page.waitForTimeout(600);
+
+      const result = await page.evaluate(() => document.getElementById('container')!.textContent);
+      expect(result).toBe('中文 abc');
+    });
+
     test('handle boundary against an unchanged sibling when a placeholder is filled after the page pass', async ({ page }) => {
       // An empty inline placeholder the page fills later, tight against text the page pass already settled
       await page.setContent('<p id="container">（<span id="count"></span>人的回答統計）</p>');
