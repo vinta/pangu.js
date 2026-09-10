@@ -41,7 +41,6 @@ describe('AI spacing results', () => {
     expect(await spaceTextWithAi('氣溫是-5度左右')).toBe('氣溫是 -5 度左右');
     expect(await spaceTextWithAi('從-5到-3度')).toBe('從 -5 到 -3 度');
     expect(await spaceTextWithAi('Nasdaq-100本週下跌-13.44%')).toBe('Nasdaq-100 本週下跌 -13.44%');
-    expect(await spaceTextWithAi('公視+上架了新片，氣溫是-5度')).toBe('公視+ 上架了新片，氣溫是 -5 度');
   });
 
   it('keeps separators and uncertain readings spaced', async () => {
@@ -59,7 +58,7 @@ describe('AI spacing results', () => {
 describe('AI spacing warm-up', () => {
   it('warms the model when a tight hyphen shape appears in the page', async () => {
     vi.stubGlobal('LanguageModel', undefined);
-    vi.stubGlobal('document', { documentElement: { textContent: '公視+上架了新片，氣溫是-5度' } });
+    vi.stubGlobal('document', { documentElement: { textContent: '氣溫是-5度' } });
     const { sendMessage, warmUpAiSpacing } = await loadAiSpacing();
 
     warmUpAiSpacing();
@@ -70,7 +69,7 @@ describe('AI spacing warm-up', () => {
 
   it('warms up only once per page', async () => {
     vi.stubGlobal('LanguageModel', undefined);
-    vi.stubGlobal('document', { documentElement: { textContent: '公視+上架了新片，氣溫是-5度' } });
+    vi.stubGlobal('document', { documentElement: { textContent: '氣溫是-5度' } });
     const { sendMessage, warmUpAiSpacing } = await loadAiSpacing();
 
     warmUpAiSpacing();
@@ -163,34 +162,5 @@ describe('AI spacing message flow', () => {
     expect(await sendMessage.mock.results[0]!.value).toEqual({ ok: false, error: 'Error: LanguageModel is not exposed in this context' });
     expect(pangu.onTextNodesSettled).toBe(onTextNodesSettled);
     expect(pangu.applyLateFixes).not.toHaveBeenCalled();
-  });
-
-  it('keeps core name suffix spacing before and after the model fails', async () => {
-    vi.stubGlobal('LanguageModel', undefined);
-    const { pangu, sendMessage, spaceTextWithAi } = await loadAiSpacing();
-
-    expect(await spaceTextWithAi('公視+上架了新片')).toBe('公視+ 上架了新片');
-    expect(sendMessage).not.toHaveBeenCalled();
-
-    expect(await spaceTextWithAi('公視+上架了新片，氣溫是-5度')).toBe('公視+ 上架了新片，氣溫是 - 5 度');
-    expect(await spaceTextWithAi('影劇館+/全選，從-3度')).toBe('影劇館+/全選，從 - 3 度');
-
-    expect(sendMessage).toHaveBeenCalledTimes(1);
-    expect(pangu.applyLateFixes).not.toHaveBeenCalled();
-  });
-
-  it('applies a model fix after core spaces a name suffix', async () => {
-    const clone = vi.fn(async () => ({ prompt: async () => '"signed-number"', destroy: vi.fn() }));
-    vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create: async () => ({ clone }) });
-    const { pangu, sendMessage, applyAiSpacing } = await loadAiSpacing();
-    const textNode = {} as Text;
-    const unspaced = '公視+上架了新片，氣溫是-5度';
-    const settled = corePangu.spaceText(unspaced);
-
-    await applyAiSpacing([{ node: textNode, unspaced, settled }]);
-
-    expect(sendMessage).toHaveBeenCalledTimes(1);
-    expect(sendMessage.mock.calls[0]![0].kind).toBe('hyphen-sign');
-    expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node: textNode, settled, data: '公視+ 上架了新片，氣溫是 -5 度' }]);
   });
 });

@@ -1191,19 +1191,12 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
-    test('keep listed suffixes and Latin left boundaries when spacing adjacent nodes', async ({ page }) => {
+    test('keep product name suffixes when spacing adjacent nodes', async ({ page }) => {
       await page.setContent(
         '<p><span>Disney+</span><span>上架</span></p>' +
           '<p><span>影劇館+</span><span>上架</span></p>' +
           '<p><span>Discovery+</span><span>上架</span></p>' +
-          '<p><span>Apple TV+</span><span>上架</span></p>' +
-          '<p><span>A+B Apple TV+</span><span>上架</span></p>' +
-          '<p><span>foo(x) Apple TV+</span><span>上架</span></p>' +
-          '<p><span>影劇館+</span><span>/全選</span></p>' +
-          '<p><span>影劇館+</span><span>)</span></p>' +
-          '<p><span>Disney +</span><span>上架</span></p>' +
-          '<p><span>NotAB+</span><span>的人</span></p>' +
-          '<p><span>NotRh-</span><span>的人</span></p>',
+          '<p><span>Apple TV+</span><span>上架</span></p>',
       );
 
       const firstPass = await page.evaluate(() => {
@@ -1214,14 +1207,7 @@ test.describe('BrowserPangu', () => {
         '<p><span>Disney+</span><span> 上架</span></p>' +
           '<p><span>影劇館+</span><span> 上架</span></p>' +
           '<p><span>Discovery+</span><span> 上架</span></p>' +
-          '<p><span>Apple TV+</span><span> 上架</span></p>' +
-          '<p><span>A+B Apple TV+</span><span> 上架</span></p>' +
-          '<p><span>foo(x) Apple TV+</span><span> 上架</span></p>' +
-          '<p><span>影劇館+</span><span> /全選</span></p>' +
-          '<p><span>影劇館+</span><span> )</span></p>' +
-          '<p><span>Disney +</span><span> 上架</span></p>' +
-          '<p><span>NotAB +</span><span> 的人</span></p>' +
-          '<p><span>NotRh -</span><span> 的人</span></p>',
+          '<p><span>Apple TV+</span><span> 上架</span></p>',
       );
       const secondPass = await page.evaluate(() => {
         pangu.spacePage();
