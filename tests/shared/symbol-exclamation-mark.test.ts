@@ -19,7 +19,7 @@ describe('Symbol !', () => {
 
     // prettier-ignore
     expect(pangu.spaceText('! git commit -a -m "蛤"'))
-                       .toBe('! git commit -a -m "蛤"');
+                     .toBe('! git commit -a -m "蛤"');
 
     // DO NOT change if already spacing
     expect(pangu.spaceText('前面 ! 後面')).toBe('前面 ! 後面');

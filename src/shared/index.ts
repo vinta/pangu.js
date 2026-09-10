@@ -120,10 +120,8 @@ export const HASH_ANS_CJK_HASH = new RegExp(`([${CJK}])(#)([${CJK}]+)(#)([${CJK}
 // also excludes zero-width characters like U+FEFF, and treating those as a gap would drop the space entirely and leave the runs flush
 // Non-breaking space: [ ] (U+00A0)
 export const CJK_HASH = new RegExp(`([${CJK}])(#([^ \\u00a0]))`, 'g');
-// Non-breaking space: [ ] (U+00A0)
-export const HASH_CJK = new RegExp(`(([^ \\u00a0])#)([${CJK}])`, 'g');
-// In file path context (multiple slashes), only a final hashtag not preceded by a slash gets a space
-export const CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
+// Non-breaking space: [ ] (U+00A0). A hashtag right after a slash in a list (/#tag) is a hashtag, not a C# shape
+export const HASH_CJK = new RegExp(`(([^ \\u00a0/])#)([${CJK}])`, 'g');
 
 const PRODUCT_NAME = 'Apple TV|CATCHPLAY|[Dd]iscovery|Disney|ESPN|Fitness|iCloud|Paramount|PS';
 const PRODUCT_NAME_IN_CJK = '公視|影劇館';
@@ -144,11 +142,6 @@ const CLOSING_AFTER_SUFFIX = /[/)\]}\uff09\u3011\u3015\u3009\u300b\u300d\u300f\u
 // Listed name suffixes keep their signs attached
 export const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS}])([${AN}])`, 'g');
 export const ANS_OPERATOR_CJK = new RegExp(`([${AN}${RIGHT_BRACKETS_BASIC}])([${OPERATORS}])(?<!${NAME_SUFFIX})([${CJK}])`, 'g');
-
-// Slash patterns for operator vs separator behavior
-export const CJK_SLASH_CJK = new RegExp(`([${CJK}])([/])([${CJK}])`, 'g');
-export const CJK_SLASH_ANS = new RegExp(`([${CJK}])([/])([${AN}])`, 'g');
-export const ANS_SLASH_CJK = new RegExp(`([${AN}])([/])([${CJK}])`, 'g');
 
 // Pipe patterns for separator vs joiner-token behavior, decided per line
 export const PIPE_CJK_CONTACT = new RegExp(`[${CJK}]\\||\\|[${CJK}]`);
@@ -232,6 +225,30 @@ export const CLOSING_HTML_TAG = /<\/([a-zA-Z][a-zA-Z0-9]*)/g;
 export const CJK_HTML_TAG_MENTION = new RegExp(`([${CJK}])(?=\uE004)`, 'g');
 export const HTML_TAG_MENTION_CJK = new RegExp(`(?<=\uE005)([${CJK}])`, 'g');
 
+// A URL reads as one unit: nothing inside it is modified, and it is spaced from CJK on its left. Scheme-anchored only, and CJK characters continue the URL (/wiki/\u4e2d\u6587), so CJK
+// prose written tight after a URL stays tight. The body ends at the Private Use Area too, so a URL never swallows a placeholder. See ADR 0026
+export const HTTP_URL = /(?<![A-Za-z0-9])https?:\/\/[^\s<>"`\u3000-\u303f\uff00-\uffef\u2018\u2019\u201c\u201d\u2026\ue000-\uf8ff]+/g;
+// Trailing half-width punctuation and an unbalanced closing parenthesis belong to the prose, not the URL
+const HTTP_URL_TRAILING_PUNCTUATION = /[.,;:!?'"]+$/;
+export const CJK_HTTP_URL = new RegExp(`([${CJK}])(?=\uE00A)`, 'g');
+
+function trimHttpUrl(url: string) {
+  // Count once: a content script sees attacker text, and recounting per pass is quadratic on a long run of closing parentheses
+  let unbalancedClosingParentheses = (url.match(/\)/g) ?? []).length - (url.match(/\(/g) ?? []).length;
+  for (;;) {
+    const trimmed = url.replace(HTTP_URL_TRAILING_PUNCTUATION, '');
+    if (trimmed.endsWith(')') && unbalancedClosingParentheses > 0) {
+      unbalancedClosingParentheses--;
+      url = trimmed.slice(0, -1);
+      continue;
+    }
+    if (trimmed === url) {
+      return url;
+    }
+    url = trimmed;
+  }
+}
+
 // Used by fixBracketSpacing to strip the spaces just inside a bracket pair; everything else between the brackets stays unchanged
 export const BRACKET_PATTERNS = [
   { pattern: /<([^<>]*)>/g, open: '<', close: '>' },
@@ -304,6 +321,13 @@ export class Pangu {
       return `\`${backtickManager.store(content)}\``;
     });
 
+    // Hide every URL from the rules. Attribute values reach spaceText() through the HTML step below, so a URL inside href="..." is hidden the same way
+    const urlManager = new PlaceholderReplacer('HTTP_URL_PLACEHOLDER_', '\uE00A', '\uE00B');
+    newText = newText.replace(HTTP_URL, (match) => {
+      const url = trimHttpUrl(match);
+      return urlManager.store(url) + match.slice(url.length);
+    });
+
     const htmlTagManager = new PlaceholderReplacer('HTML_TAG_PLACEHOLDER_', '\uE002', '\uE003');
     const mentionedTagManager = new PlaceholderReplacer('HTML_TAG_MENTION_', '\uE004', '\uE005');
     let hasHtmlTags = false;
@@ -374,20 +398,8 @@ export class Pangu {
     if (newText.length >= 5) {
       newText = newText.replace(HASH_ANS_CJK_HASH, '$1 $2$3$4 $5');
     }
-    // Slash reading is per line, so each line's slash count decides its own hashtag behavior
-    newText = newText
-      .split('\n')
-      .map((line) => {
-        if ((line.match(/\//g) || []).length <= 1) {
-          line = line.replace(CJK_HASH, '$1 $2');
-          line = line.replace(HASH_CJK, '$1 $3');
-        } else {
-          // Multiple slashes read as a path: no hashtag spacing except a final hashtag not preceded by a slash
-          line = line.replace(CJK_FINAL_HASHTAG, '$1$2 $3');
-        }
-        return line;
-      })
-      .join('\n');
+    newText = newText.replace(CJK_HASH, '$1 $2');
+    newText = newText.replace(HASH_CJK, '$1 $3');
 
     // Protect compound words from operator spacing
     const compoundWordManager = new PlaceholderReplacer('COMPOUND_WORD_PLACEHOLDER_', '\uE008', '\uE009');
@@ -444,21 +456,6 @@ export class Pangu {
     newText = newText.replace(UNIX_ABSOLUTE_FILE_PATH_SLASH_CJK, '$1 $2');
     newText = newText.replace(UNIX_RELATIVE_FILE_PATH_SLASH_CJK, '$1 $2');
 
-    // Slash reading is per line: the line's only slash acts as an operator when CJK touches it. Repeated slashes read as a file path or a list and get no spaces
-    // A slash between half-width characters binds tight as a slash token, so no rule fires on it; file paths need no extra protection because the path rules already spaced their CJK edges
-    newText = newText
-      .split('\n')
-      .map((line) => {
-        if ((line.match(/\//g) || []).length !== 1) {
-          return line;
-        }
-        line = line.replace(CJK_SLASH_CJK, '$1 $2 $3');
-        line = line.replace(CJK_SLASH_ANS, '$1 $2 $3');
-        line = line.replace(ANS_SLASH_CJK, '$1 $2 $3');
-        return line;
-      })
-      .join('\n');
-
     // Pipe reading is per line: a pipe in direct CJK contact makes every pipe on the line a separator with spaces on both sides (CJK | CJK, as in concatenated page titles)
     // A line whose pipes touch no CJK keeps them tight as joiner tokens (x|y, ps aux|grep node)
     newText = newText
@@ -502,6 +499,8 @@ export class Pangu {
       newText = htmlTagManager.restore(newText);
     }
 
+    newText = newText.replace(CJK_HTTP_URL, '$1 ');
+    newText = urlManager.restore(newText);
     newText = backtickManager.restore(newText);
 
     return newText;

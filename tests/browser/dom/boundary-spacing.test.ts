@@ -159,8 +159,8 @@ describe('decideBoundarySpacing()', () => {
 });
 
 describe('respaceCurrentTail()', () => {
-  it('writes the interior space of a split slash junction back into the tail', () => {
-    expect(respaceCurrentTail('蒸馏/', '训')).toBe('蒸馏 /');
+  it('writes the interior space of a split pipe junction back into the tail', () => {
+    expect(respaceCurrentTail('蒸馏|', '训')).toBe('蒸馏 |');
   });
 
   it('returns null when the junction space is the only space', () => {

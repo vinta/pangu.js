@@ -19,14 +19,14 @@ describe('Symbol -', () => {
 
     // DO NOT change if already spacing
     expect(pangu.spaceText('前面 - 後面')).toBe('前面 - 後面');
-    expect(pangu.spaceText('Vinta - Mollie')).toBe('Vinta - Mollie');
+    expect(pangu.spaceText('Vinta - Abc123')).toBe('Vinta - Abc123');
     expect(pangu.spaceText('Vinta - 陳上進')).toBe('Vinta - 陳上進');
     expect(pangu.spaceText('陳上進 - Vinta')).toBe('陳上進 - Vinta');
     expect(pangu.spaceText('得到一個 A - B 的結果')).toBe('得到一個 A - B 的結果');
   });
 
   it('handle - symbol as joiner token', () => {
-    expect(pangu.spaceText('Vinta-Mollie')).toBe('Vinta-Mollie'); // If no CJK, DO NOT change
+    expect(pangu.spaceText('Vinta-Abc123')).toBe('Vinta-Abc123'); // If no CJK, DO NOT change
     expect(pangu.spaceText('得到一個A-B的結果')).toBe('得到一個 A-B 的結果');
     expect(pangu.spaceText('去5-A教室上課')).toBe('去 5-A 教室上課');
     expect(pangu.spaceText('搭2-A的公車')).toBe('搭 2-A 的公車');
@@ -36,8 +36,8 @@ describe('Symbol -', () => {
 
     // Hyphenated English names
     // prettier-ignore
-    expect(pangu.spaceText('英文姓名須與護照上相同，包含標點符號；範例：王小明，英文名為WANG,HSIAO-MING，請於英文姓(Surname)欄位填入WANG,、英文名(Given Names)欄位填入HSIAO-MING。'))
-                       .toBe('英文姓名須與護照上相同，包含標點符號；範例：王小明，英文名為 WANG,HSIAO-MING，請於英文姓 (Surname) 欄位填入 WANG,、英文名 (Given Names) 欄位填入 HSIAO-MING。');
+    expect(pangu.spaceText('英文姓名須與護照上相同，包含標點符號；範例：王小明，英文名為WANG, HSIAO-MING，請於英文姓(Surname)欄位填入WANG,、英文名(Given Names)欄位填入HSIAO-MING。'))
+                     .toBe('英文姓名須與護照上相同，包含標點符號；範例：王小明，英文名為 WANG, HSIAO-MING，請於英文姓 (Surname) 欄位填入 WANG,、英文名 (Given Names) 欄位填入 HSIAO-MING。');
   });
 
   it('handle - symbol as preserved pattern', () => {
@@ -48,11 +48,11 @@ describe('Symbol -', () => {
 
     // prettier-ignore
     expect(pangu.spaceText('The company offered a state-of-the-art machine-learning-powered real-time fraud-detection system with end-to-end encryption and cutting-edge performance.'))
-                       .toBe('The company offered a state-of-the-art machine-learning-powered real-time fraud-detection system with end-to-end encryption and cutting-edge performance.');
+                     .toBe('The company offered a state-of-the-art machine-learning-powered real-time fraud-detection system with end-to-end encryption and cutting-edge performance.');
 
     // prettier-ignore
     expect(pangu.spaceText('這間公司提供了一套state-of-the-art、machine-learning-powered的real-time fraud-detection系統，具備end-to-end加密功能以及cutting-edge的效能。'))
-                       .toBe('這間公司提供了一套 state-of-the-art、machine-learning-powered 的 real-time fraud-detection 系統，具備 end-to-end 加密功能以及 cutting-edge 的效能。');
+                     .toBe('這間公司提供了一套 state-of-the-art、machine-learning-powered 的 real-time fraud-detection 系統，具備 end-to-end 加密功能以及 cutting-edge 的效能。');
 
     expect(pangu.spaceText('Anthropic的claude-4-opus模型')).toBe('Anthropic 的 claude-4-opus 模型');
     expect(pangu.spaceText('OpenAI的o3-pro模型')).toBe('OpenAI 的 o3-pro 模型');
@@ -65,7 +65,7 @@ describe('Symbol -', () => {
     // CLI flags
     // prettier-ignore
     expect(pangu.spaceText('你可以使用uname -m指令來檢查你的Linux作業系統是32位元或是[敏感词已被屏蔽]位元'))
-                       .toBe('你可以使用 uname -m 指令來檢查你的 Linux 作業系統是 32 位元或是 [敏感词已被屏蔽] 位元');
+                     .toBe('你可以使用 uname -m 指令來檢查你的 Linux 作業系統是 32 位元或是 [敏感词已被屏蔽] 位元');
     expect(pangu.spaceText('參數要加-m的旗標')).toBe('參數要加 -m 的旗標');
 
     // Grades

@@ -7,19 +7,19 @@ describe("Symbol ' '", () => {
   it("handle ' ' symbols as quotes", () => {
     // prettier-ignore
     expect(pangu.spaceText("Why are Python's 'private' methods not actually private?"))
-                       .toBe("Why are Python's 'private' methods not actually private?");
+                     .toBe("Why are Python's 'private' methods not actually private?");
 
     // prettier-ignore
     expect(pangu.spaceText("举个栗子，如果一道题只包含'A' ~ 'Z'意味着字符集大小是"))
-                       .toBe("举个栗子，如果一道题只包含 'A' ~ 'Z' 意味着字符集大小是");
+                     .toBe("举个栗子，如果一道题只包含 'A' ~ 'Z' 意味着字符集大小是");
 
     // prettier-ignore
     expect(pangu.spaceText("后续会直接用iframe window.addEventListener('message')"))
-                       .toBe("后续会直接用 iframe window.addEventListener('message')");
+                     .toBe("后续会直接用 iframe window.addEventListener('message')");
 
     // prettier-ignore
     expect(pangu.spaceText(`'! git commit -a -m "蛤"'`))
-                       .toBe(`'! git commit -a -m "蛤"'`);
+                     .toBe(`'! git commit -a -m "蛤"'`);
 
     // Single quotes around Chinese text should not have spaces added
     expect(pangu.spaceText("Remove '铁蕾' from 1 Folder?")).toBe("Remove '铁蕾' from 1 Folder?");

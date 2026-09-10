@@ -15,5 +15,10 @@ describe('Symbol #', () => {
   it('handle # symbol as preserved pattern', () => {
     expect(pangu.spaceText('前面C#後面')).toBe('前面 C# 後面');
     expect(pangu.spaceText('前面F#後面')).toBe('前面 F# 後面');
+    expect(pangu.spaceText('前端/後端/資料庫：C#和Python')).toBe('前端/後端/資料庫：C# 和 Python');
+  });
+
+  it('handle # symbol as hashtag in a slash list', () => {
+    expect(pangu.spaceText('dae-dae-o/#絕地家庭小會議/#今天大掃除了沒有/')).toBe('dae-dae-o/#絕地家庭小會議/#今天大掃除了沒有/');
   });
 });

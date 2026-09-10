@@ -28,7 +28,7 @@ describe('Symbol < >', () => {
     // Nested tags
     // prettier-ignore
     expect(pangu.spaceText('<div><p>嵌套<strong>測試</strong></p></div>'))
-                       .toBe('<div><p>嵌套<strong>測試</strong></p></div>');
+                     .toBe('<div><p>嵌套<strong>測試</strong></p></div>');
 
     // <br> or <hr> must stay untouched
     expect(pangu.spaceText('文字<br>換行')).toBe('文字<br>換行');
@@ -43,7 +43,7 @@ describe('Symbol < >', () => {
 
     // prettier-ignore
     expect(pangu.spaceText('<attackOnJava>那一天，人類終於回想起了，曾經一度被XML所支配的恐懼</attackOnJava> <!-- 進擊的Java -->'))
-                       .toBe('<attackOnJava>那一天，人類終於回想起了，曾經一度被 XML 所支配的恐懼</attackOnJava> <!-- 進擊的 Java -->');
+                     .toBe('<attackOnJava>那一天，人類終於回想起了，曾經一度被 XML 所支配的恐懼</attackOnJava> <!-- 進擊的 Java -->');
   });
 
   it('handle < > symbols as tag mention', () => {

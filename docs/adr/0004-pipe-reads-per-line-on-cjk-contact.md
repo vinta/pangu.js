@@ -4,13 +4,13 @@ Pipes never got spaces under the old separator model, regardless of context. Tha
 
 The decision extends ADR 0003's model to `|` with a per-line reading, following the slash precedent:
 
-1. A pipe in direct contact with CJK reads as a separator, and it flips every pipe on its line: a mixed list like `Mollie|Vinta|貓咪` spaces all its pipes (`Mollie | Vinta | 貓咪`), not just the one touching CJK.
+1. A pipe in direct contact with CJK reads as a separator, and it flips every pipe on its line: a mixed list like `Abc123|Vinta|貓咪` spaces all its pipes (`Abc123 | Vinta | 貓咪`), not just the one touching CJK.
 2. A line whose pipes touch no CJK keeps them tight as joiner tokens (`條件是 x|y 的情況`, `得到一個 A||B 的結果`), even when CJK appears elsewhere on the line.
 3. Decided per line, never across lines.
 
 Alternatives rejected:
 
-- Per-pipe contact instead of per-line: leaves mixed separator lists half-spaced (`Mollie|Vinta | 貓咪`), but the pipes on such a line are one list and should read uniformly.
+- Per-pipe contact instead of per-line: leaves mixed separator lists half-spaced (`Abc123|Vinta | 貓咪`), but the pipes on such a line are one list and should read uniformly.
 - Gating on whether the line already contains a space: fails the same mixed lists, which are typed without spaces, and reintroduces the action-at-a-distance gating that ADR 0003 removed.
 
 ## Consequences

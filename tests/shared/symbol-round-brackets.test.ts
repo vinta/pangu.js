@@ -17,15 +17,15 @@ describe('Symbol ( )', () => {
 
     // prettier-ignore
     expect(pangu.spaceText('預定於繳款截止日114/07/02(遇假日順延)之次一營業日進行扣款'))
-                       .toBe('預定於繳款截止日 114/07/02 (遇假日順延) 之次一營業日進行扣款');
+                     .toBe('預定於繳款截止日 114/07/02 (遇假日順延) 之次一營業日進行扣款');
 
     // prettier-ignore
     expect(pangu.spaceText("OperationalError: (2006, 'MySQL server has gone away')"))
-                       .toBe("OperationalError: (2006, 'MySQL server has gone away')");
+                     .toBe("OperationalError: (2006, 'MySQL server has gone away')");
 
     // prettier-ignore
     expect(pangu.spaceText('Chang Stream(变更记录流)是指collection(数据库集合)的变更事件流'))
-                       .toBe('Chang Stream (变更记录流) 是指 collection (数据库集合) 的变更事件流');
+                     .toBe('Chang Stream (变更记录流) 是指 collection (数据库集合) 的变更事件流');
   });
 
   it('handle multiline content in round brackets', () => {

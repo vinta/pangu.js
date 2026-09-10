@@ -29,11 +29,11 @@ describe('Symbol " "', () => {
 
     // prettier-ignore
     expect(pangu.spaceText('"! git commit -a -m \'蛤\'"'))
-                       .toBe('"! git commit -a -m \'蛤\'"');
+                     .toBe('"! git commit -a -m \'蛤\'"');
 
     // prettier-ignore
     expect(pangu.spaceText('Rev. (Reverend；牧師的尊稱)這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We invited the Rev. Alan Darling." 或\u00a0 "We\u00a0invited the Rev. Mr. Darling."，而非"We invited the Rev. Darling."我們也不可以說"We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 rev. 是 review 的縮寫，算是雙關語)'))
-                       .toBe('Rev. (Reverend；牧師的尊稱) 這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We invited the Rev. Alan Darling." 或\u00a0 "We\u00a0invited the Rev. Mr. Darling."，而非 "We invited the Rev. Darling." 我們也不可以說 "We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 rev. 是 review 的縮寫，算是雙關語)');
+                     .toBe('Rev. (Reverend；牧師的尊稱) 這個縮寫嚴格來說並不是一項頭銜，而是形容詞。所以，它應該這樣使用："We invited the Rev. Alan Darling." 或\u00a0 "We\u00a0invited the Rev. Mr. Darling."，而非 "We invited the Rev. Darling." 我們也不可以說 "We invited the reverend to dinner." -- Only a cad would invite the rev. (只有下流的人才會招致批評：句中的 rev. 是 review 的縮寫，算是雙關語)');
   });
 
   it('handle " " across the line breaks of a wrapped HTML source', () => {
@@ -59,15 +59,15 @@ describe('Symbol “ ”', () => {
 
     // prettier-ignore
     expect(pangu.spaceText('阿里云开源“计算王牌”Blink，实时计算时代已来'))
-                       .toBe('阿里云开源 “计算王牌” Blink，实时计算时代已来');
+                     .toBe('阿里云开源 “计算王牌” Blink，实时计算时代已来');
 
     // prettier-ignore
     expect(pangu.spaceText('苹果撤销Facebook“企业证书”后者股价一度短线走低'))
-                       .toBe('苹果撤销 Facebook “企业证书” 后者股价一度短线走低');
+                     .toBe('苹果撤销 Facebook “企业证书” 后者股价一度短线走低');
 
     // prettier-ignore
     expect(pangu.spaceText('【UCG中字】“數毛社”DF的《戰神4》全新演示解析'))
-                       .toBe('【UCG 中字】“數毛社” DF 的《戰神 4》全新演示解析');
+                     .toBe('【UCG 中字】“數毛社” DF 的《戰神 4》全新演示解析');
   });
 
   it('handle misused ” ” quote pairs', () => {
@@ -75,6 +75,6 @@ describe('Symbol “ ”', () => {
 
     // prettier-ignore
     expect(pangu.spaceText('《战斧骨》里还有个镜头挺有意思，就是男主”见路不走”，不从峡谷入口走，而选择了从侧面翻越，还顺便借着口哨吸引出来一个食人族给杀了。'))
-                       .toBe('《战斧骨》里还有个镜头挺有意思，就是男主 ”见路不走”，不从峡谷入口走，而选择了从侧面翻越，还顺便借着口哨吸引出来一个食人族给杀了。');
+                     .toBe('《战斧骨》里还有个镜头挺有意思，就是男主 ”见路不走”，不从峡谷入口走，而选择了从侧面翻越，还顺便借着口哨吸引出来一个食人族给杀了。');
   });
 });
