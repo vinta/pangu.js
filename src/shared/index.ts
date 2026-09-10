@@ -126,13 +126,13 @@ export const HASH_CJK = new RegExp(`(([^ \\u00a0])#)([${CJK}])`, 'g');
 export const CJK_FINAL_HASHTAG = new RegExp(`([^/])([${CJK}])(#[A-Za-z0-9]+)$`);
 
 const PRODUCT_NAME = 'Apple TV|CATCHPLAY|[Dd]iscovery|Disney|ESPN|Fitness|iCloud|Paramount|PS';
-const CJK_PRODUCT_NAME = '公視|影劇館';
+const PRODUCT_NAME_IN_CJK = '公視|影劇館';
 const PRODUCT_TIER = 'Pro';
 const CREDIT_RATING = '(?:tw)?(?:AA|BBB|BB|CCC)|tw[AB]';
-const BLOOD_TYPE = 'AB|RhD|Rh';
+const MULTI_LETTER_BLOOD_TYPE = 'AB|RhD|Rh';
 
 // Product names and tiers take + only; credit ratings and blood types take + or -
-const NAME_SUFFIX = `(?:(?<![A-Za-z0-9])(?:(?:${PRODUCT_NAME}|${PRODUCT_TIER})\\+|(?:${CREDIT_RATING}|${BLOOD_TYPE})[+-])|(?:${CJK_PRODUCT_NAME})\\+)`;
+const NAME_SUFFIX = `(?:(?<![A-Za-z0-9])(?:(?:${PRODUCT_NAME}|${PRODUCT_TIER})\\+|(?:${CREDIT_RATING}|${MULTI_LETTER_BLOOD_TYPE})[+-])|(?:${PRODUCT_NAME_IN_CJK})\\+)`;
 export const NAME_SUFFIX_AT_END = new RegExp(`${NAME_SUFFIX}$`);
 
 // A closing mark follows the suffix tight; a word or an opening bracket keeps its boundary space
