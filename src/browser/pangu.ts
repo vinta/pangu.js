@@ -1,5 +1,4 @@
-import { Pangu } from '../shared/index.js';
-import { restoreNameSuffixes } from '../shared/name-suffix.js';
+import { Pangu, restoreNameSuffixes } from '../shared/index.js';
 import { decideBoundarySpacing, decideTextNodeSpacing, respaceCurrentTail } from './dom/boundary-spacing.js';
 import { DomWalker } from './dom/dom-walker.js';
 import { VisibilityDetector } from './dom/visibility-detector.js';
