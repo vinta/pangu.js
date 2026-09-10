@@ -16,11 +16,11 @@ export interface TextEdit {
 }
 
 export interface AmbiguousShape {
-  readonly kind: string; // Model shapes join to their PromptSpec through this identifier
-  needsModel?(text: string): boolean; // Present for model shapes; the text scan decides whether to warm up. Absent when find() resolves the match without a model
-  // Model shapes use sentenceAt with the symbol's unspaced index when supplied; local shapes can keep their own context. Only matches with an inserted gap qualify
+  readonly kind: string; // Joins this shape to its PromptSpec
+  needsModel(text: string): boolean; // The text scan decides whether to warm up
+  // Use sentenceAt with the symbol's unspaced index when supplied. Only matches with an inserted gap qualify
   find(unspaced: string, settled: string, sentenceAt?: (at: number) => Candidate): CandidateMatch[];
-  edits(settledCandidate: SettledCandidate, candidateLabel: CandidateLabel | null): TextEdit[]; // model shapes must return [] for null or rejected labels. Shapes without needsModel can ignore the label
+  edits(settledCandidate: SettledCandidate, candidateLabel: CandidateLabel | null): TextEdit[]; // Return [] for null or rejected labels
 }
 
 // Where a sentence slice is cut: 。(U+3002), ！(U+FF01), ？(U+FF1F), and ；(U+FF1B). A newline is not one: on a page, readSentence() reads line breaks the way the browser renders them

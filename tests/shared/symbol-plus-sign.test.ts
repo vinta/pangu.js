@@ -28,41 +28,24 @@ describe('Symbol +', () => {
     expect(pangu.spaceText('陳上進+Vinta+Mollie')).toBe('陳上進 + Vinta + Mollie');
     expect(pangu.spaceText('HiNet光世代+MOD+Wi-Fi全屋通')).toBe('HiNet 光世代 + MOD + Wi-Fi 全屋通');
     expect(pangu.spaceText('套餐含MOD+Netflix+Disney')).toBe('套餐含 MOD+Netflix+Disney');
-    expect(pangu.spaceText('如何使用PTS+（公視+）註冊與觀看？')).toBe('如何使用 PTS+（公視 +）註冊與觀看？');
-
-    // NOTE: not expected, cannot fix with rules, but fixed by AI spacing
-    // see browser-extensions/chrome/src/ai-spacing/shapes/name-suffix-shape.ts
-
-    expect(pangu.spaceText('MOD+影劇館+上架')).toBe('MOD + 影劇館 + 上架');
-    // expect(pangu.spaceText('MOD+影劇館+上架')).toBe('MOD + 影劇館+ 上架');
-
-    expect(pangu.spaceText('Disney+上架了C++課程')).toBe('Disney + 上架了 C++ 課程');
-    // expect(pangu.spaceText('Disney+上架了C++課程')).toBe('Disney+ 上架了 C++ 課程');
-
-    expect(pangu.spaceText('Disney+上架了A+B')).toBe('Disney + 上架了 A + B');
-    // expect(pangu.spaceText('Disney+上架了A+B')).toBe('Disney+ 上架了 A + B');
-
-    expect(pangu.spaceText('Netflix、Disney+、Apple TV+等串流平台')).toBe('Netflix、Disney+、Apple TV + 等串流平台');
-    // expect(pangu.spaceText('Netflix、Disney+、Apple TV+等串流平台')).toBe('Netflix、Disney+、Apple TV+ 等串流平台');
+    expect(pangu.spaceText('如何使用PTS+（公視+）註冊與觀看？')).toBe('如何使用 PTS+（公視+）註冊與觀看？');
+    expect(pangu.spaceText('MOD+影劇館+上架')).toBe('MOD + 影劇館+ 上架');
+    expect(pangu.spaceText('Disney+上架了C++課程')).toBe('Disney+ 上架了 C++ 課程');
+    expect(pangu.spaceText('Disney+上架了A+B')).toBe('Disney+ 上架了 A + B');
+    expect(pangu.spaceText('Netflix、Disney+、Apple TV+等串流平台')).toBe('Netflix、Disney+、Apple TV+ 等串流平台');
 
     // prettier-ignore
     expect(pangu.spaceText('HiNet光世代+MOD+影劇館+/全選/自選20/特選餐/豪華餐(5選1)+Wi-Fi全屋通(1台)'))
-                       .toBe('HiNet 光世代 + MOD + 影劇館 + /全選/自選 20/特選餐/豪華餐 (5 選 1) + Wi-Fi 全屋通 (1 台)');
-    // expect(pangu.spaceText('HiNet光世代+MOD+影劇館+/全選/自選20/特選餐/豪華餐(5選1)+Wi-Fi全屋通(1台)'))
-    //                    .toBe('HiNet 光世代 + MOD + 影劇館+/全選/自選 20/特選餐/豪華餐 (5 選 1) + Wi-Fi 全屋通 (1 台)');
+                       .toBe('HiNet 光世代 + MOD + 影劇館+/全選/自選 20/特選餐/豪華餐 (5 選 1) + Wi-Fi 全屋通 (1 台)');
 
     // prettier-ignore
     expect(pangu.spaceText('【速在必行方案】HiNet光世代+Wi-Fi全屋通1台+MOD影劇館+(300M/300M)'))
-                          .toBe('【速在必行方案】HiNet 光世代 + Wi-Fi 全屋通 1 台 + MOD 影劇館 + (300M/300M)');
-    // expect(pangu.spaceText('【速在必行方案】HiNet光世代+Wi-Fi全屋通1台+MOD影劇館+(300M/300M)'))
-    //                    .toBe('【速在必行方案】HiNet 光世代 + Wi-Fi 全屋通 1 台 + MOD 影劇館+ (300M/300M)');
+                          .toBe('【速在必行方案】HiNet 光世代 + Wi-Fi 全屋通 1 台 + MOD 影劇館+ (300M/300M)');
 
     // On a line with two or more pluses, a plus after a closing bracket is a separator even before an opening full-width quote, which takes no space on its side; one plus stays tight
     // prettier-ignore
     expect(pangu.spaceText('HiNet光世代+MOD+自選餐(全選)+「影劇館+」'))
-                       .toBe('HiNet 光世代 + MOD + 自選餐 (全選) +「影劇館 +」');
-    // expect(pangu.spaceText('HiNet光世代+MOD+自選餐(全選)+「影劇館+」'))
-    //                    .toBe('HiNet 光世代 + MOD + 自選餐 (全選) +「影劇館+」');
+                       .toBe('HiNet 光世代 + MOD + 自選餐 (全選) +「影劇館+」');
   });
 
   // FIXME
@@ -105,22 +88,10 @@ describe('Symbol +', () => {
     expect(pangu.spaceText('評分3.5+的餐廳')).toBe('評分 3.5+ 的餐廳');
     expect(pangu.spaceText('Python 3+的版本')).toBe('Python 3+ 的版本');
 
-    // NOTE: not expected, cannot fix with rules, but fixed by AI spacing
-    // see browser-extensions/chrome/src/ai-spacing/shapes/name-suffix-shape.ts
-
-    expect(pangu.spaceText('Disney+上架了新片')).toBe('Disney + 上架了新片');
-    // expect(pangu.spaceText('Disney+上架了新片')).toBe('Disney+ 上架了新片');
-
-    expect(pangu.spaceText('Apple TV+上架了新片')).toBe('Apple TV + 上架了新片');
-    // expect(pangu.spaceText('Apple TV+上架了新片')).toBe('Apple TV+ 上架了新片');
-
-    expect(pangu.spaceText('Disney+和Apple TV+都上架了')).toBe('Disney + 和 Apple TV + 都上架了');
-    // expect(pangu.spaceText('Disney+和Apple TV+都上架了')).toBe('Disney+ 和 Apple TV+ 都上架了');
-
-    expect(pangu.spaceText('公視+上架了新片')).toBe('公視 + 上架了新片');
-    // expect(pangu.spaceText('公視+上架了新片')).toBe('公視+ 上架了新片');
-
-    expect(pangu.spaceText('MOD影劇館+上架了新片')).toBe('MOD 影劇館 + 上架了新片');
-    // expect(pangu.spaceText('MOD影劇館+上架了新片')).toBe('MOD 影劇館+ 上架了新片');
+    expect(pangu.spaceText('Disney+上架了新片')).toBe('Disney+ 上架了新片');
+    expect(pangu.spaceText('Apple TV+上架了新片')).toBe('Apple TV+ 上架了新片');
+    expect(pangu.spaceText('Disney+和Apple TV+都上架了')).toBe('Disney+ 和 Apple TV+ 都上架了');
+    expect(pangu.spaceText('公視+上架了新片')).toBe('公視+ 上架了新片');
+    expect(pangu.spaceText('MOD影劇館+上架了新片')).toBe('MOD 影劇館+ 上架了新片');
   });
 });

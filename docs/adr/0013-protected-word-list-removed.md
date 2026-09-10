@@ -1,5 +1,7 @@
 # The protected word list is removed, CJK brand suffixes read as operators
 
+**Partially superseded by [ADR 0024](0024-name-suffixes-belong-to-core-spacing.md): the accepted name-suffix list returns to core without the placeholder family and mask rules removed here.**
+
 ADR 0006 added a protected word list of exactly two entries, `公視+` and `影劇館+`, to pin the suffix reading (`公視+ 上架`) that no shape rule can distinguish from the operator reading (`前面+後面`). The machinery cost was out of proportion to those two words: a dedicated placeholder pass with its own private-use characters (U+E020/U+E021 atom edges, U+E022 masked plus), a special edge in `PLUS_CJK_CONTACT`, two mask-restoration rules ordered against the general spacing rules, and a documented list of shapes the masking cannot support.
 
 The decision deletes the list and its machinery entirely. A CJK brand suffix now reads as an operator like any other plus in CJK contact: `公視+上架` becomes `公視 + 上架`, `MOD影劇館+上架` becomes `MOD 影劇館 + 上架`. The affix shape rules are untouched, so `Disney+`, `Apple TV+`, `100+`, and `18+` keep the suffix reading, and `C++` stays pattern-preserved. Plus reading — the other half of ADR 0006 — survives unchanged, minus its protected-word contact edge.

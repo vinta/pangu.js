@@ -54,38 +54,6 @@ describe('AI spacing results', () => {
     expect(await spaceTextWithAi('未知-4')).toBe('未知 - 4');
     expect(prompt).toHaveBeenCalledTimes(2);
   });
-
-  it('restores name suffixes without a model', async () => {
-    vi.stubGlobal('LanguageModel', undefined);
-    const { spaceTextWithAi, sendMessage } = await loadAiSpacing();
-
-    expect(await spaceTextWithAi('Disney+上架了新片')).toBe('Disney+ 上架了新片');
-    expect(await spaceTextWithAi('公視+上架了新片')).toBe('公視+ 上架了新片');
-    expect(await spaceTextWithAi('如何使用PTS+（公視+）註冊與觀看？')).toBe('如何使用 PTS+（公視+）註冊與觀看？');
-    expect(await spaceTextWithAi('MOD+影劇館+上架')).toBe('MOD + 影劇館+ 上架');
-    expect(await spaceTextWithAi('Netflix、Disney+、Apple TV+等串流平台')).toBe('Netflix、Disney+、Apple TV+ 等串流平台');
-    expect(await spaceTextWithAi('影劇館+/全選')).toBe('影劇館+/全選');
-    expect(await spaceTextWithAi('公視+(免費平台)')).toBe('公視+ (免費平台)');
-    expect(await spaceTextWithAi('「公視+」')).toBe('「公視+」');
-    expect(await spaceTextWithAi('今天來看公視+')).toBe('今天來看公視+');
-    expect(await spaceTextWithAi('vivo X70 Pro+開賣')).toBe('vivo X70 Pro+ 開賣');
-    expect(await spaceTextWithAi('評等介於AA-和AA+之間')).toBe('評等介於 AA- 和 AA+ 之間');
-    expect(await spaceTextWithAi('血型是AB-的人')).toBe('血型是 AB- 的人');
-    expect(sendMessage).not.toHaveBeenCalled();
-  });
-
-  it('preserves core spacing and author-written gaps without a model', async () => {
-    vi.stubGlobal('LanguageModel', undefined);
-    const { spaceTextWithAi, sendMessage } = await loadAiSpacing();
-
-    expect(await spaceTextWithAi('打+886這個號碼')).toBe('打 +886 這個號碼');
-    expect(await spaceTextWithAi('Disney+上架了C++課程')).toBe('Disney+ 上架了 C++ 課程');
-    expect(await spaceTextWithAi('Disney+上架了A+B')).toBe('Disney+ 上架了 A + B');
-    expect(await spaceTextWithAi('Switch+健身環套組')).toBe('Switch + 健身環套組');
-    expect(await spaceTextWithAi('公視 +上架了新片')).toBe('公視 + 上架了新片');
-    expect(await spaceTextWithAi('氣溫是 - 5度')).toBe('氣溫是 - 5 度');
-    expect(sendMessage).not.toHaveBeenCalled();
-  });
 });
 
 describe('AI spacing warm-up', () => {
@@ -197,44 +165,29 @@ describe('AI spacing message flow', () => {
     expect(pangu.applyLateFixes).not.toHaveBeenCalled();
   });
 
-  it('applies a brand suffix fix without asking the worker', async () => {
+  it('keeps core name suffix spacing before and after the model fails', async () => {
     vi.stubGlobal('LanguageModel', undefined);
-    const { pangu, sendMessage, applyAiSpacing } = await loadAiSpacing();
-    const textNode = {} as Text;
-    const settled = '公視 + 上架了新片';
+    const { pangu, sendMessage, spaceTextWithAi } = await loadAiSpacing();
 
-    await applyAiSpacing([{ node: textNode, unspaced: '公視+上架了新片', settled }]);
-
+    expect(await spaceTextWithAi('公視+上架了新片')).toBe('公視+ 上架了新片');
     expect(sendMessage).not.toHaveBeenCalled();
-    expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node: textNode, settled, data: '公視+ 上架了新片' }]);
-  });
 
-  it('keeps applying brand suffix fixes after the model fails', async () => {
-    vi.stubGlobal('LanguageModel', undefined);
-    const { pangu, sendMessage, applyAiSpacing } = await loadAiSpacing();
-    const textNode = {} as Text;
-    const settled = '公視 + 上架了新片，氣溫是 - 5 度';
-
-    await applyAiSpacing([{ node: textNode, unspaced: '公視+上架了新片，氣溫是-5度', settled }]);
-
-    const nextTextNode = {} as Text;
-    const nextSettled = '影劇館 + /全選，從 - 3 度';
-    await applyAiSpacing([{ node: nextTextNode, unspaced: '影劇館+/全選，從-3度', settled: nextSettled }]);
+    expect(await spaceTextWithAi('公視+上架了新片，氣溫是-5度')).toBe('公視+ 上架了新片，氣溫是 - 5 度');
+    expect(await spaceTextWithAi('影劇館+/全選，從-3度')).toBe('影劇館+/全選，從 - 3 度');
 
     expect(sendMessage).toHaveBeenCalledTimes(1);
-    expect(pangu.applyLateFixes).toHaveBeenCalledTimes(2);
-    expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node: textNode, settled, data: '公視+ 上架了新片，氣溫是 - 5 度' }]);
-    expect(pangu.applyLateFixes).toHaveBeenNthCalledWith(2, [{ node: nextTextNode, settled: nextSettled, data: '影劇館+/全選，從 - 3 度' }]);
+    expect(pangu.applyLateFixes).not.toHaveBeenCalled();
   });
 
-  it('composes a brand suffix fix with a model fix on the same text node', async () => {
+  it('applies a model fix after core spaces a name suffix', async () => {
     const clone = vi.fn(async () => ({ prompt: async () => '"signed-number"', destroy: vi.fn() }));
     vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create: async () => ({ clone }) });
     const { pangu, sendMessage, applyAiSpacing } = await loadAiSpacing();
     const textNode = {} as Text;
-    const settled = '公視 + 上架了新片，氣溫是 - 5 度';
+    const unspaced = '公視+上架了新片，氣溫是-5度';
+    const settled = corePangu.spaceText(unspaced);
 
-    await applyAiSpacing([{ node: textNode, unspaced: '公視+上架了新片，氣溫是-5度', settled }]);
+    await applyAiSpacing([{ node: textNode, unspaced, settled }]);
 
     expect(sendMessage).toHaveBeenCalledTimes(1);
     expect(sendMessage.mock.calls[0]![0].kind).toBe('hyphen-sign');

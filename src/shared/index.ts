@@ -1,3 +1,5 @@
+import { restoreNameSuffixes } from './name-suffix.js';
+
 // CJK is short for Chinese, Japanese, and Korean
 //
 // ANS is short for Alphabets, Numbers, and Symbols:
@@ -162,7 +164,7 @@ export const CJK_SIGN_DIGIT = new RegExp(`([${CJK}])(\\+)([0-9])`, 'g');
 // Flag: - attaches to a following single lowercase letter (-m). [a-z] keeps a capitalized word on the operator reading, and the trailing \b keeps a longer lowercase word there too
 export const CJK_HYPHEN_FLAG = new RegExp(`([${CJK}])(\\-)([a-z])\\b`, 'g');
 // Suffix: + attaches to a preceding whole digit run (18+, 100+, 3.5+). The \b keeps a digit that ends a word (S24+, HDR10+) on the separator reading, see plus reading. A plus after a word
-// (Disney+, MOD+) is never a suffix here: plus reading spaces it as a separator, and the extension's name-suffix list restores listed names. See ADR 0019
+// (Disney+, MOD+) is never a suffix here: plus reading spaces it as a separator, and the name-suffix list restores listed names. See ADR 0024
 export const DIGIT_PLUS_CJK = new RegExp(`\\b([0-9]+)(\\+)([${CJK}])`, 'g');
 
 // < and > as comparison operators, not brackets
@@ -325,6 +327,9 @@ export class Pangu {
       });
     }
 
+    // Keep the author's gaps while backticks and tags are hidden. Name suffixes use this snapshot after the rules finish
+    const unspaced = newText;
+
     // Dot runs go first, before the single-period rule
     newText = newText.replace(DOTS_CJK, '$1 $2');
 
@@ -475,6 +480,7 @@ export class Pangu {
     newText = newText.replace(MIDDLE_DOT, '・');
 
     newText = this.fixBracketSpacing(newText);
+    newText = restoreNameSuffixes(unspaced, newText);
 
     if (hasHtmlTags) {
       newText = newText.replace(CJK_HTML_TAG_MENTION, '$1 ');

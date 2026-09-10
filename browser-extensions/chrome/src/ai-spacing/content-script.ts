@@ -4,9 +4,8 @@ import { readSentence } from './sentence-context';
 import type { AmbiguousShape, SettledCandidate, TextEdit } from './shapes/base';
 import { applyTextEdits } from './shapes/base';
 import { hyphenSign } from './shapes/hyphen-shape';
-import { nameSuffix } from './shapes/name-suffix-shape';
 
-const AMBIGUOUS_SHAPES: AmbiguousShape[] = [hyphenSign, nameSuffix];
+const AMBIGUOUS_SHAPES: AmbiguousShape[] = [hyphenSign];
 
 async function requestClassification(kind: string, candidates: ClassifyCandidatesMessage['candidates']): Promise<ClassifyCandidatesResponse> {
   const message: ClassifyCandidatesMessage = { type: 'CLASSIFY_CANDIDATES', kind, candidates };
@@ -40,7 +39,6 @@ function collectLateFixes(labeledShapeCandidates: readonly (ShapeCandidates & { 
   for (const { ambiguousShape, settledCandidates, candidateLabels } of labeledShapeCandidates) {
     for (const [index, settledCandidate] of settledCandidates.entries()) {
       const candidateLabel = candidateLabels[index] ?? null;
-      // Do not skip missing labels here: shapes without a model still need to produce their edits
       const textEdits = ambiguousShape.edits(settledCandidate, candidateLabel);
       console.debug(
         `[pangu] Shape ${ambiguousShape.kind}: "${settledCandidate.sentence}" (symbol at ${settledCandidate.at}, label: ${candidateLabel ?? 'none'})${textEdits.length > 0 ? ' -> applying its late fix' : ''}`,
@@ -72,22 +70,17 @@ export function warmUpAiSpacing() {
   const pageText = document.documentElement.textContent;
   // The loop is not redundant: we create base sessions per ambiguous shape
   for (const ambiguousShape of AMBIGUOUS_SHAPES) {
-    // A shape needs the model doesn't always mean we need to warm up the model on every webpage
-    // We only warm up when the webpage contains certain texts => needsModel() returns true
-    if (ambiguousShape.needsModel?.(pageText)) {
+    if (ambiguousShape.needsModel(pageText)) {
       console.debug(`[pangu] Shape ${ambiguousShape.kind} warms up its base session`);
       void requestClassification(ambiguousShape.kind, []);
     }
   }
 }
 
-// Once the worker fails to answer, this page's model shapes stay off; shapes resolved by rules keep running
+// Once the worker fails to answer, AI spacing stays off for this page
 let modelFailed = false;
 
 async function classifyShapeCandidates({ ambiguousShape, settledCandidates }: ShapeCandidates): Promise<readonly (CandidateLabel | null)[]> {
-  if (!ambiguousShape.needsModel) {
-    return [];
-  }
   const candidates = settledCandidates.map(({ sentence, at }) => ({ sentence, at }));
   const response = await requestClassification(ambiguousShape.kind, candidates);
   if (response.ok) {
@@ -99,10 +92,13 @@ async function classifyShapeCandidates({ ambiguousShape, settledCandidates }: Sh
 }
 
 export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[]) {
+  if (modelFailed) {
+    return;
+  }
   const unspacedByNode = new Map(settledTextNodes.map(({ node, unspaced }) => [node, unspaced]));
-  const shapeCandidates: ShapeCandidates[] = AMBIGUOUS_SHAPES.filter((ambiguousShape) => !modelFailed || !ambiguousShape.needsModel)
-    .map((ambiguousShape) => ({ ambiguousShape, settledCandidates: findCandidates(ambiguousShape, settledTextNodes, unspacedByNode) }))
-    .filter(({ settledCandidates }) => settledCandidates.length > 0);
+  const shapeCandidates: ShapeCandidates[] = AMBIGUOUS_SHAPES.map((ambiguousShape) => ({ ambiguousShape, settledCandidates: findCandidates(ambiguousShape, settledTextNodes, unspacedByNode) })).filter(
+    ({ settledCandidates }) => settledCandidates.length > 0,
+  );
   if (shapeCandidates.length === 0) {
     return;
   }

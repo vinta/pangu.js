@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyTextEdits, indexOfNthSymbol, sliceSentence, type AmbiguousShape, type SettledCandidate, type TextEdit } from '../../browser-extensions/chrome/src/ai-spacing/shapes/base';
+import { applyTextEdits, indexOfNthSymbol, sliceSentence, type TextEdit } from '../../browser-extensions/chrome/src/ai-spacing/shapes/base';
 import { hasInsertedGap, hyphenSign } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-shape';
 
 describe('sliceSentence()', () => {
@@ -116,19 +116,19 @@ describe('hasInsertedGap()', () => {
 
 describe('hyphenSign.needsModel()', () => {
   it('answer yes when the tight shape occurs anywhere in the text', () => {
-    expect(hyphenSign.needsModel!('前面一句。氣溫是-5度左右')).toBe(true);
+    expect(hyphenSign.needsModel('前面一句。氣溫是-5度左右')).toBe(true);
   });
 
   it('answer no when only looser shapes occur', () => {
-    expect(hyphenSign.needsModel!('abc-5')).toBe(false);
-    expect(hyphenSign.needsModel!('氣溫是 -5度')).toBe(false);
-    expect(hyphenSign.needsModel!('沒有連字號')).toBe(false);
+    expect(hyphenSign.needsModel('abc-5')).toBe(false);
+    expect(hyphenSign.needsModel('氣溫是 -5度')).toBe(false);
+    expect(hyphenSign.needsModel('沒有連字號')).toBe(false);
   });
 
   it('leave the shared scan regex where a repeat and find() expect it', () => {
     const text = '氣溫是-5度左右';
-    expect(hyphenSign.needsModel!(text)).toBe(true);
-    expect(hyphenSign.needsModel!(text)).toBe(true);
+    expect(hyphenSign.needsModel(text)).toBe(true);
+    expect(hyphenSign.needsModel(text)).toBe(true);
     expect(hyphenSign.find(text, '氣溫是 - 5 度左右')).toHaveLength(1);
   });
 });
@@ -161,19 +161,14 @@ describe('hyphenSign.edits()', () => {
 });
 
 describe('applyTextEdits()', () => {
-  // A stand-in second ambiguous shape that inserts a space rather than removing one, so one text node composes edits in both directions
-  const spaceInserter: AmbiguousShape = {
-    kind: 'space-inserter',
-    find: () => [],
-    edits: ({ index }) => [{ index, remove: 0, insert: ' ' }],
-  };
-
-  it('apply edits from two ambiguous shapes to one text node', () => {
+  it('apply removals and insertions to one text node', () => {
     const settled = '氣溫是 - 5 度 A+B';
-    const settledCandidate = (index: number): SettledCandidate => ({ sentence: '', at: 0, index, node: {} as Text, settled });
-    const textEdits: TextEdit[] = [...hyphenSign.edits(settledCandidate(4), 'signed-number'), ...spaceInserter.edits(settledCandidate(11), null)];
+    const textEdits: TextEdit[] = [
+      { index: 5, remove: 1, insert: '' },
+      { index: 11, remove: 0, insert: ' ' },
+    ];
 
-    // Descending index order keeps the insert from shifting the delete, whichever order the shapes were asked in
+    // Descending index order keeps the insert from shifting the delete, regardless of the input order
     expect(applyTextEdits(settled, textEdits)).toBe('氣溫是 -5 度 A +B');
     expect(applyTextEdits(settled, [...textEdits].reverse())).toBe('氣溫是 -5 度 A +B');
   });
