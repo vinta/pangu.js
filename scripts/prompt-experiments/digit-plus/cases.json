@@ -1,0 +1,324 @@
+{
+  "enums": {
+    "digit-plus": ["conjunction", "lower-bound", "unsure"]
+  },
+  "diagnosticQuestions": ["你剛才判斷的是原句中從左到右第幾個「+」？請引用它左右的原文。", "依照選項定義，這個「+」是連接兩個項目，還是修飾一個數值？請說明原句中的依據；若兩者都不是，請指出。"],
+  "cases": [
+    {
+      "id": "switch-bundle",
+      "input": "Switch 2+瑪利歐賽車世界同捆組",
+      "expected_output": "Switch 2 + 瑪利歐賽車世界同捆組",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "required",
+      "split": "development",
+      "source": "user acceptance case"
+    },
+    {
+      "id": "quantity",
+      "input": "有100+的選擇",
+      "expected_output": "有 100+ 的選擇",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "required",
+      "split": "development",
+      "source": "user acceptance case"
+    },
+    {
+      "id": "age",
+      "input": "這裡有18+的內容",
+      "expected_output": "這裡有 18+ 的內容",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "required",
+      "split": "development",
+      "source": "user acceptance case"
+    },
+    {
+      "id": "rating",
+      "input": "評分3.5+的餐廳",
+      "expected_output": "評分 3.5+ 的餐廳",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "required",
+      "split": "development",
+      "source": "user acceptance case"
+    },
+    {
+      "id": "version",
+      "input": "Python 3+的版本",
+      "expected_output": "Python 3+ 的版本",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "required",
+      "split": "development",
+      "source": "user acceptance case"
+    },
+    {
+      "id": "switch-version",
+      "input": "需要Switch 2+的版本",
+      "expected_output": "需要 Switch 2+ 的版本",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "contrast",
+      "split": "development",
+      "source": "synthetic"
+    },
+    {
+      "id": "python-bundle",
+      "input": "組合包含Python 3+入門教材兩項商品",
+      "expected_output": "組合包含 Python 3 + 入門教材兩項商品",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "contrast",
+      "split": "development",
+      "source": "synthetic"
+    },
+    {
+      "id": "camera-bundle",
+      "input": "相機X100+記憶卡同捆組",
+      "expected_output": "相機 X100 + 記憶卡同捆組",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "contrast",
+      "split": "development",
+      "source": "synthetic"
+    },
+    {
+      "id": "game-bundle",
+      "input": "套組包含NBA 2K18+原聲帶兩項商品",
+      "expected_output": "套組包含 NBA 2K18 + 原聲帶兩項商品",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "contrast",
+      "split": "development",
+      "source": "synthetic"
+    },
+    {
+      "id": "software-bundle",
+      "input": "套組包含繪圖軟體3.5+教學課程兩項商品",
+      "expected_output": "套組包含繪圖軟體 3.5 + 教學課程兩項商品",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "contrast",
+      "split": "development",
+      "source": "synthetic"
+    },
+    {
+      "id": "mixed",
+      "input": "Switch 2+遊戲同捆組，另有100+的配件可選",
+      "expected_output": "Switch 2 + 遊戲同捆組，另有 100+ 的配件可選",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        },
+        {
+          "ordinal": 2,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "mixed",
+      "split": "development",
+      "source": "synthetic"
+    },
+    {
+      "id": "repeated",
+      "input": "支援Python 3+的版本，套組包含Python 3+教材兩項商品",
+      "expected_output": "支援 Python 3+ 的版本，套組包含 Python 3 + 教材兩項商品",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        },
+        {
+          "ordinal": 2,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "mixed",
+      "split": "development",
+      "source": "synthetic"
+    },
+    {
+      "id": "bare",
+      "input": "商品2+",
+      "expected_output": "商品 2+",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "unsure"
+        }
+      ],
+      "group": "boundary",
+      "split": "development",
+      "source": "synthetic"
+    },
+    {
+      "id": "named",
+      "input": "這款產品正式命名為「X2+」",
+      "expected_output": "這款產品正式命名為「X2+」",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "unsure"
+        }
+      ],
+      "group": "boundary",
+      "split": "development",
+      "source": "synthetic"
+    },
+    {
+      "id": "console",
+      "input": "主機7+賽車遊戲雙入組",
+      "expected_output": "主機 7 + 賽車遊戲雙入組",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "holdout",
+      "split": "holdout",
+      "source": "synthetic"
+    },
+    {
+      "id": "editor",
+      "input": "編輯器4.2+外掛套裝",
+      "expected_output": "編輯器 4.2 + 外掛套裝",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "holdout",
+      "split": "holdout",
+      "source": "synthetic"
+    },
+    {
+      "id": "tablet",
+      "input": "平板M12+鍵盤組合",
+      "expected_output": "平板 M12 + 鍵盤組合",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "holdout",
+      "split": "holdout",
+      "source": "synthetic"
+    },
+    {
+      "id": "camera",
+      "input": "相機Z50+腳架優惠組",
+      "expected_output": "相機 Z50 + 腳架優惠組",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "holdout",
+      "split": "holdout",
+      "source": "synthetic"
+    },
+    {
+      "id": "choices",
+      "input": "提供250+種配色",
+      "expected_output": "提供 250+ 種配色",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "holdout",
+      "split": "holdout",
+      "source": "synthetic"
+    },
+    {
+      "id": "age",
+      "input": "活動限21+的成人參加",
+      "expected_output": "活動限 21+ 的成人參加",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "holdout",
+      "split": "holdout",
+      "source": "synthetic"
+    },
+    {
+      "id": "rating",
+      "input": "只列出評分4.2+的旅館",
+      "expected_output": "只列出評分 4.2+ 的旅館",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "holdout",
+      "split": "holdout",
+      "source": "synthetic"
+    },
+    {
+      "id": "version",
+      "input": "需要Node.js 22+的版本",
+      "expected_output": "需要 Node.js 22+ 的版本",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "holdout",
+      "split": "holdout",
+      "source": "synthetic"
+    }
+  ]
+}

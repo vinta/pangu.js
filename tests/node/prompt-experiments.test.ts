@@ -62,6 +62,7 @@ for (const [experiment, variant] of [
   ['spacing-rewrite', 'v1-zh'],
   ['spacing-rewrite', 'v1-zh-omit-constraint-input'],
   ['slash-unit', 'v1-zh'],
+  ['digit-plus', 'v1-zh'],
 ] as const) {
   test.skipIf(!process.features.typescript)(`${experiment}/${variant}: scored failures fail require-perfect and preserve raw answers`, () => {
     const root = mkdtempSync(join(tmpdir(), 'pangu-abstention-'));
@@ -87,6 +88,7 @@ const worker = {
         calls++;
         const input = args.inputs.find(input => input.question === question);
         if (input.enum === 'slash' && input === args.inputs[0]) return JSON.stringify('separator');
+        if (input.enum === 'digit-plus' && input === args.inputs[0]) return JSON.stringify('lower-bound');
         if (args.rewrite && input === args.inputs[0]) return JSON.stringify(input.expected_label + '\\n');
         if (args.rewrite && input === args.inputs[1]) return 'invalid JSON';
         return JSON.stringify(input.expected_label);
@@ -144,6 +146,14 @@ new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context 
       orders: string[][];
     };
     expect(result.omitResponseConstraintInput).toBe(variant === 'v1-zh-omit-constraint-input');
+    if (experiment === 'digit-plus') {
+      expect(result.evaluation.labels).toEqual({ passed: 15, total: 16 });
+      expect(result.evaluation.misses).toEqual(['switch-bundle-1']);
+      expect(result.results[0].answers[0]).toMatchObject({ raw: '"lower-bound"', answer: 'lower-bound', error: null });
+      expect(result.results.every((kase) => kase.input[kase.at] === '+')).toBe(true);
+      expect(result.testCalls).toBe(16 * 6);
+      return;
+    }
     if (experiment === 'slash-unit') {
       expect(result.evaluation.labels).toEqual({ passed: result.results.length - 1, total: result.results.length });
       expect(result.evaluation.misses).toEqual([result.results[0].id]);
