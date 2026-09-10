@@ -6,8 +6,8 @@ const pangu = new Pangu();
 describe('Symbol /', () => {
   it('handle / symbol as separator', () => {
     expect(pangu.spaceText('前面/後面')).toBe('前面/後面');
-    expect(pangu.spaceText('Mollie/陳上進')).toBe('Mollie/陳上進');
-    expect(pangu.spaceText('陳上進/Mollie')).toBe('陳上進/Mollie');
+    expect(pangu.spaceText('Vinta/貓咪')).toBe('Vinta/貓咪');
+    expect(pangu.spaceText('貓咪/Vinta')).toBe('貓咪/Vinta');
     expect(pangu.spaceText('速度是60公里/小時')).toBe('速度是 60 公里/小時');
     expect(pangu.spaceText('價格是$100/每小時')).toBe('價格是 $100/每小時');
     expect(pangu.spaceText('我/你\n他/她')).toBe('我/你\n他/她');
@@ -15,16 +15,16 @@ describe('Symbol /', () => {
 
     // DO NOT change if already spacing
     expect(pangu.spaceText('前面 / 後面')).toBe('前面 / 後面');
-    expect(pangu.spaceText('Vinta / Mollie')).toBe('Vinta / Mollie');
-    expect(pangu.spaceText('Mollie / 陳上進')).toBe('Mollie / 陳上進');
-    expect(pangu.spaceText('陳上進 / Mollie')).toBe('陳上進 / Mollie');
+    expect(pangu.spaceText('Vinta / Abc123')).toBe('Vinta / Abc123');
+    expect(pangu.spaceText('Abc123 / 陳上進')).toBe('Abc123 / 陳上進');
+    expect(pangu.spaceText('陳上進 / Abc123')).toBe('陳上進 / Abc123');
     expect(pangu.spaceText('得到一個 A / B 的結果')).toBe('得到一個 A / B 的結果');
     expect(pangu.spaceText('好人 / bad guy')).toBe('好人 / bad guy');
     expect(pangu.spaceText('吃apple / banana')).toBe('吃 apple / banana');
   });
 
   it('handle / symbol as joiner token', () => {
-    expect(pangu.spaceText('Vinta/Mollie')).toBe('Vinta/Mollie'); // If no CJK, DO NOT change
+    expect(pangu.spaceText('Vinta/Abc123')).toBe('Vinta/Abc123'); // If no CJK, DO NOT change
     expect(pangu.spaceText('得到一個A/B的結果')).toBe('得到一個 A/B 的結果');
     expect(pangu.spaceText('他要做A/B測試')).toBe('他要做 A/B 測試');
     expect(pangu.spaceText('打東東26/30')).toBe('打東東 26/30');
@@ -36,10 +36,10 @@ describe('Symbol /', () => {
   });
 
   it('handle / symbol as list', () => {
-    expect(pangu.spaceText('陳上進/貓咪/Mollie')).toBe('陳上進/貓咪/Mollie');
-    expect(pangu.spaceText('陳上進/Mollie/貓咪')).toBe('陳上進/Mollie/貓咪');
-    expect(pangu.spaceText('Mollie/Vinta/貓咪')).toBe('Mollie/Vinta/貓咪');
-    expect(pangu.spaceText('Mollie/陳上進/貓咪')).toBe('Mollie/陳上進/貓咪');
+    expect(pangu.spaceText('陳上進/貓咪/Abc123')).toBe('陳上進/貓咪/Abc123');
+    expect(pangu.spaceText('陳上進/Abc123/貓咪')).toBe('陳上進/Abc123/貓咪');
+    expect(pangu.spaceText('Abc123/Vinta/貓咪')).toBe('Abc123/Vinta/貓咪');
+    expect(pangu.spaceText('Abc123/陳上進/貓咪')).toBe('Abc123/陳上進/貓咪');
     expect(pangu.spaceText('日期是2024/01/22的早上')).toBe('日期是 2024/01/22 的早上');
 
     // prettier-ignore
@@ -55,10 +55,10 @@ describe('Symbol /', () => {
                      .toBe("after 80'/气象工作者/不苟同/关注 abc 天气变化/向往 123 自由/热爱科学、互联网、编程 Node.js Web C++ Julia Python");
 
     // DO NOT change if already spacing
-    expect(pangu.spaceText('陳上進 / 貓咪 / Mollie')).toBe('陳上進 / 貓咪 / Mollie');
-    expect(pangu.spaceText('陳上進 / Mollie / 貓咪')).toBe('陳上進 / Mollie / 貓咪');
-    expect(pangu.spaceText('Mollie / Vinta / 貓咪')).toBe('Mollie / Vinta / 貓咪');
-    expect(pangu.spaceText('Mollie / 陳上進 / 貓咪')).toBe('Mollie / 陳上進 / 貓咪');
+    expect(pangu.spaceText('陳上進 / 貓咪 / Abc123')).toBe('陳上進 / 貓咪 / Abc123');
+    expect(pangu.spaceText('陳上進 / Abc123 / 貓咪')).toBe('陳上進 / Abc123 / 貓咪');
+    expect(pangu.spaceText('Abc123 / Vinta / 貓咪')).toBe('Abc123 / Vinta / 貓咪');
+    expect(pangu.spaceText('Abc123 / 陳上進 / 貓咪')).toBe('Abc123 / 陳上進 / 貓咪');
 
     // prettier-ignore
     expect(pangu.spaceText('2016-12-26(奇幻电影节) / 2017-01-20(美国) / 詹姆斯麦卡沃伊'))

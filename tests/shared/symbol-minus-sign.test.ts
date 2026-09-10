@@ -19,14 +19,14 @@ describe('Symbol -', () => {
 
     // DO NOT change if already spacing
     expect(pangu.spaceText('前面 - 後面')).toBe('前面 - 後面');
-    expect(pangu.spaceText('Vinta - Mollie')).toBe('Vinta - Mollie');
+    expect(pangu.spaceText('Vinta - Abc123')).toBe('Vinta - Abc123');
     expect(pangu.spaceText('Vinta - 陳上進')).toBe('Vinta - 陳上進');
     expect(pangu.spaceText('陳上進 - Vinta')).toBe('陳上進 - Vinta');
     expect(pangu.spaceText('得到一個 A - B 的結果')).toBe('得到一個 A - B 的結果');
   });
 
   it('handle - symbol as joiner token', () => {
-    expect(pangu.spaceText('Vinta-Mollie')).toBe('Vinta-Mollie'); // If no CJK, DO NOT change
+    expect(pangu.spaceText('Vinta-Abc123')).toBe('Vinta-Abc123'); // If no CJK, DO NOT change
     expect(pangu.spaceText('得到一個A-B的結果')).toBe('得到一個 A-B 的結果');
     expect(pangu.spaceText('去5-A教室上課')).toBe('去 5-A 教室上課');
     expect(pangu.spaceText('搭2-A的公車')).toBe('搭 2-A 的公車');

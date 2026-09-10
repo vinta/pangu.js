@@ -6,14 +6,14 @@ const pangu = new Pangu();
 describe('Symbol _', () => {
   it('handle _ symbol as separator', () => {
     expect(pangu.spaceText('前面_後面')).toBe('前面_後面');
-    expect(pangu.spaceText('Vinta_Mollie')).toBe('Vinta_Mollie');
-    expect(pangu.spaceText('Vinta_Mollie_Kitten')).toBe('Vinta_Mollie_Kitten');
-    expect(pangu.spaceText('Mollie_陳上進')).toBe('Mollie_陳上進');
-    expect(pangu.spaceText('陳上進_Mollie')).toBe('陳上進_Mollie');
-    expect(pangu.spaceText('陳上進_貓咪_Mollie')).toBe('陳上進_貓咪_Mollie');
-    expect(pangu.spaceText('陳上進_Mollie_貓咪')).toBe('陳上進_Mollie_貓咪');
-    expect(pangu.spaceText('Mollie_Vinta_貓咪')).toBe('Mollie_Vinta_貓咪');
-    expect(pangu.spaceText('Mollie_陳上進_貓咪')).toBe('Mollie_陳上進_貓咪');
+    expect(pangu.spaceText('Vinta_Abc123')).toBe('Vinta_Abc123');
+    expect(pangu.spaceText('Vinta_Abc123_Kitten')).toBe('Vinta_Abc123_Kitten');
+    expect(pangu.spaceText('Vinta_貓咪')).toBe('Vinta_貓咪');
+    expect(pangu.spaceText('貓咪_Vinta')).toBe('貓咪_Vinta');
+    expect(pangu.spaceText('陳上進_貓咪_Abc123')).toBe('陳上進_貓咪_Abc123');
+    expect(pangu.spaceText('陳上進_Abc123_貓咪')).toBe('陳上進_Abc123_貓咪');
+    expect(pangu.spaceText('Abc123_Vinta_貓咪')).toBe('Abc123_Vinta_貓咪');
+    expect(pangu.spaceText('Abc123_陳上進_貓咪')).toBe('Abc123_陳上進_貓咪');
     expect(pangu.spaceText('得到一個A_B的結果')).toBe('得到一個 A_B 的結果');
 
     // prettier-ignore
@@ -22,11 +22,11 @@ describe('Symbol _', () => {
 
     // Rare cases, ignore
     // expect(pangu.spaceText('前面 _ 後面')).toBe('前面 _ 後面');
-    // expect(pangu.spaceText('Vinta _ Mollie')).toBe('Vinta _ Mollie');
-    // expect(pangu.spaceText('Vinta _ Mollie _ Kitten')).toBe('Vinta _ Mollie _ Kitten');
-    // expect(pangu.spaceText('陳上進 _ 貓咪 _ Mollie')).toBe('陳上進 _ 貓咪 _ Mollie');
-    // expect(pangu.spaceText('陳上進 _ Mollie _ 貓咪')).toBe('陳上進 _ Mollie _ 貓咪');
-    // expect(pangu.spaceText('Mollie _ Vinta _ 貓咪')).toBe('Mollie _ Vinta _ 貓咪');
-    // expect(pangu.spaceText('Mollie _ 陳上進 _ 貓咪')).toBe('Mollie _ 陳上進 _ 貓咪');
+    // expect(pangu.spaceText('Vinta _ Abc123')).toBe('Vinta _ Abc123');
+    // expect(pangu.spaceText('Vinta _ Abc123 _ Kitten')).toBe('Vinta _ Abc123 _ Kitten');
+    // expect(pangu.spaceText('陳上進 _ 貓咪 _ Abc123')).toBe('陳上進 _ 貓咪 _ Abc123');
+    // expect(pangu.spaceText('陳上進 _ Abc123 _ 貓咪')).toBe('陳上進 _ Abc123 _ 貓咪');
+    // expect(pangu.spaceText('Abc123 _ Vinta _ 貓咪')).toBe('Abc123 _ Vinta _ 貓咪');
+    // expect(pangu.spaceText('Abc123 _ 陳上進 _ 貓咪')).toBe('Abc123 _ 陳上進 _ 貓咪');
   });
 });
