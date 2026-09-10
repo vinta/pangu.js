@@ -80,19 +80,20 @@ export class DomWalker {
           return NodeFilter.FILTER_REJECT;
         }
 
-        // Skip nodes that should be ignored
-        // We need to check the node itself and its ancestors
-        let currentNode: Node | null = node;
-        while (currentNode) {
-          if (currentNode instanceof Element && this.isIgnoredElement(currentNode)) {
-            return NodeFilter.FILTER_REJECT;
-          }
-          currentNode = currentNode.parentNode;
-        }
-
-        return NodeFilter.FILTER_ACCEPT;
+        return this.isIgnoredNode(node) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
       },
     });
+  }
+
+  public static isIgnoredNode(node: Node) {
+    let currentNode: Node | null = node;
+    while (currentNode) {
+      if (currentNode instanceof Element && this.isIgnoredElement(currentNode)) {
+        return true;
+      }
+      currentNode = currentNode.parentNode;
+    }
+    return false;
   }
 
   public static isIgnoredElement(element: Element) {

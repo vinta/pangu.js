@@ -56,6 +56,32 @@ test.describe('applyLateFixes', () => {
     expect(result).toBe('氣溫是 - 5 度左右');
   });
 
+  for (const ignoredMarkup of ['<div contenteditable="true"></div>', '<div g_editable="true"></div>', '<div class="no-pangu-spacing"></div>', '<pre></pre>', '<code></code>']) {
+    test(`drop a queued fix after the node moves under ${ignoredMarkup}`, async ({ page }) => {
+      await page.setContent('<div id="target">氣溫是-5度左右</div>');
+
+      const result = await page.evaluate((markup) => {
+        pangu.spaceNode(document.body);
+        const target = document.getElementById('target')!;
+        const textNode = target.firstChild as Text;
+        let runIdle = () => {};
+        window.requestIdleCallback = (callback) => {
+          runIdle = () => callback({ didTimeout: false, timeRemaining: () => 50 });
+          return 1;
+        };
+        pangu.taskScheduler.config.enabled = true;
+        pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '氣溫是 -5 度左右' }]);
+
+        target.insertAdjacentHTML('beforebegin', markup);
+        target.previousElementSibling!.appendChild(target);
+        runIdle();
+        return textNode.data;
+      }, ignoredMarkup);
+
+      expect(result).toBe('氣溫是 - 5 度左右');
+    });
+  }
+
   test('not re-space a late fix back through the MutationObserver', async ({ page }) => {
     await page.setContent('<div id="target">氣溫是-5度左右</div>');
 

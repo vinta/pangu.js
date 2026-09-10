@@ -101,7 +101,7 @@ export class BrowserPangu extends Pangu {
   public applyLateFixes(lateFixes: readonly LateFix[]) {
     this.schedule(() => {
       for (const lateFix of lateFixes) {
-        if (!lateFix.node.isConnected || lateFix.node.data !== lateFix.settled) {
+        if (!lateFix.node.isConnected || lateFix.node.data !== lateFix.settled || DomWalker.isIgnoredNode(lateFix.node)) {
           continue;
         }
 
