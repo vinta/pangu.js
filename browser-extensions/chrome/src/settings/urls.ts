@@ -8,7 +8,6 @@ function escapeUrlPatternSyntax(part: string) {
   return part.replace(/[(){}:+?\\]/g, '\\$&');
 }
 
-// The string form of URLPattern reads a host wildcard (`*.example.com`) as subdomains only and pins a missing port to the scheme default, so the init form carries the match pattern's meaning instead
 function matchPatternToUrlPattern(pattern: string): URLPattern | null {
   const match = MATCH_PATTERN.exec(pattern);
   if (!match) {
@@ -18,7 +17,9 @@ function matchPatternToUrlPattern(pattern: string): URLPattern | null {
   try {
     return new URLPattern({
       protocol: scheme === '*' ? 'http{s}?' : scheme,
+      // Make the subdomain and its dot optional so `*.example.com` also matches `example.com`
       hostname: host.startsWith('*.') ? `{*.}?${host.slice(2)}` : host,
+      // Chrome match patterns allow any port when omitted, including non-default ports like 8443
       port: port ?? '*',
       pathname: escapeUrlPatternSyntax(path),
       // Chrome matches the path against path plus query. URLPattern matches the query on its own, so `/search?*` also matches a bare `/search`
@@ -41,7 +42,6 @@ export function isValidUrl(url: string) {
 
 function isUrlExcludedByFilter(settings: Settings, url: string) {
   for (const pattern of settings[settings.filter_mode]) {
-    // An invalid pattern is skipped
     if (matchPatternToUrlPattern(pattern)?.test(url)) {
       // If URL matches blacklist, it is excluded
       // If URL matches whitelist, it is not excluded
@@ -49,9 +49,9 @@ function isUrlExcludedByFilter(settings: Settings, url: string) {
     }
   }
 
-  // If no patterns matched:
-  // - For blacklist mode: not excluded (not blacklisted)
-  // - For whitelist mode: excluded (not whitelisted)
+  // If no valid pattern matched:
+  // - Blacklist mode: allowed
+  // - Whitelist mode: blocked
   return settings.filter_mode === 'whitelist';
 }
 
