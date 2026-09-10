@@ -114,21 +114,21 @@ describe('hasInsertedGap()', () => {
   });
 });
 
-describe('hyphenSign.needsModel()', () => {
+describe('hyphenSign.hasPotentialCandidates()', () => {
   it('answer yes when the tight shape occurs anywhere in the text', () => {
-    expect(hyphenSign.needsModel('前面一句。氣溫是-5度左右')).toBe(true);
+    expect(hyphenSign.hasPotentialCandidates('前面一句。氣溫是-5度左右')).toBe(true);
   });
 
   it('answer no when only looser shapes occur', () => {
-    expect(hyphenSign.needsModel('abc-5')).toBe(false);
-    expect(hyphenSign.needsModel('氣溫是 -5度')).toBe(false);
-    expect(hyphenSign.needsModel('沒有連字號')).toBe(false);
+    expect(hyphenSign.hasPotentialCandidates('abc-5')).toBe(false);
+    expect(hyphenSign.hasPotentialCandidates('氣溫是 -5度')).toBe(false);
+    expect(hyphenSign.hasPotentialCandidates('沒有連字號')).toBe(false);
   });
 
   it('leave the shared scan regex where a repeat and find() expect it', () => {
     const text = '氣溫是-5度左右';
-    expect(hyphenSign.needsModel(text)).toBe(true);
-    expect(hyphenSign.needsModel(text)).toBe(true);
+    expect(hyphenSign.hasPotentialCandidates(text)).toBe(true);
+    expect(hyphenSign.hasPotentialCandidates(text)).toBe(true);
     expect(hyphenSign.find(text, '氣溫是 - 5 度左右')).toHaveLength(1);
   });
 });

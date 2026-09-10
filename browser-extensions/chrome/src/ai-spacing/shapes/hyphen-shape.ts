@@ -18,7 +18,7 @@ export const hyphenSign: AmbiguousShape = {
   kind: 'hyphen-sign',
 
   // search() ignores lastIndex, so the g regex is safe to reuse here; test() would advance it
-  needsModel(text: string) {
+  hasPotentialCandidates(text: string) {
     return text.search(CJK_HYPHEN_DIGIT) !== -1;
   },
 

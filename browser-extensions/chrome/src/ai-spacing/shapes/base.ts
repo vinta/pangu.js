@@ -17,7 +17,7 @@ export interface TextEdit {
 
 export interface AmbiguousShape {
   readonly kind: string; // Joins this shape to its PromptSpec
-  needsModel(text: string): boolean; // The text scan decides whether to warm up
+  hasPotentialCandidates(text: string): boolean; // The text scan decides whether to warm up
   // Use sentenceAt with the symbol's unspaced index when supplied. Only matches with an inserted gap qualify
   find(unspaced: string, settled: string, sentenceAt?: (at: number) => Candidate): CandidateMatch[];
   edits(settledCandidate: SettledCandidate, candidateLabel: CandidateLabel | null): TextEdit[]; // Return [] for null or rejected labels
