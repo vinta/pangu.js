@@ -20,7 +20,7 @@ Alternatives rejected:
 ## Consequences
 
 - Issues 149 and 147 are fixed. CJK query strings, fragments, and percent-encoded paths stay intact, in text and inside `href`.
-- Three tight-prose rows lose a space: `zh-TW看看`, `155這個issue`, `canParse_static這裡`. `https://vinta.ws/code/的文章` was already tight.
+- Three tight-prose rows lose a space: `zh-TW看看`, `155這個issue`, `canParse_static這裡`. The reading stays open as a FIXME (`it.todo` in `url.test.ts`): the wanted output is `zh-TW 看看`, and no rule tells URL-internal CJK from prose written tight after the URL.
 - Half-width punctuation written tight between a URL and CJK stays inside the URL, because the CJK after it continues the body: `參考(https://vinta.ws/code/)的說明` reads `參考 (https://vinta.ws/code/)的說明`, and `https://vinta.ws/code/,謝謝` keeps its comma tight. On the previous engine both got the space. Full-width `（）` and `，` stop the body and are unaffected.
 - The per-line slash count in the hashtag block is no longer what protects CJK URL fragments, so ADR 0027 can delete it.
 - Glossary: new **HTTP URL** entry. The constant is `HTTP_URL` because `URL` would shadow the platform class inside the module.
