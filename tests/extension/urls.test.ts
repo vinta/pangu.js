@@ -1,10 +1,27 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SETTINGS, type Settings } from '../../browser-extensions/chrome/src/settings/storage';
-import { isValidUrl, shouldAutoSpace, shouldShowActiveStatus, shouldShowOffIcon } from '../../browser-extensions/chrome/src/settings/urls';
+import { isValidMatchPattern, isValidUrl, shouldAutoSpace, shouldShowActiveStatus, shouldShowOffIcon } from '../../browser-extensions/chrome/src/settings/urls';
 
 function makeSettings(overrides: Partial<Settings> = {}): Settings {
   return { ...DEFAULT_SETTINGS, ...overrides };
 }
+
+describe('isValidMatchPattern', () => {
+  it('accepts the subset of Chrome match patterns from ADR 0023', () => {
+    expect(isValidMatchPattern('*://*.example.com/*')).toBe(true);
+    expect(isValidMatchPattern('http://localhost:3000/*')).toBe(true);
+    expect(isValidMatchPattern('https://github.com/*/*/blob/*')).toBe(true);
+    expect(isValidMatchPattern('https://www.google.com/search?*')).toBe(true);
+  });
+
+  it('rejects what Chrome rejects and what the content script never runs on', () => {
+    expect(isValidMatchPattern('not-a-pattern')).toBe(false);
+    expect(isValidMatchPattern('https://example.com')).toBe(false);
+    expect(isValidMatchPattern('https://*example.com/*')).toBe(false);
+    expect(isValidMatchPattern('file:///Users/vinta/*')).toBe(false);
+    expect(isValidMatchPattern('<all_urls>')).toBe(false);
+  });
+});
 
 describe('isValidUrl', () => {
   it('accepts http and https urls', () => {
@@ -110,5 +127,33 @@ describe('shouldAutoSpace', () => {
     const current = makeSettings({ filter_mode: 'whitelist', whitelist: ['https://example.com/*'] });
     expect(shouldAutoSpace(current, 'https://example.com/foo')).toBe(true);
     expect(shouldAutoSpace(current, 'https://other.com/')).toBe(false);
+  });
+
+  it('reads a host wildcard as the host and every subdomain, as Chrome does', () => {
+    const current = makeSettings({ blacklist: ['*://*.example.com/*'] });
+    expect(shouldAutoSpace(current, 'https://example.com/')).toBe(false);
+    expect(shouldAutoSpace(current, 'https://www.example.com/')).toBe(false);
+    expect(shouldAutoSpace(current, 'https://example.com.evil.net/')).toBe(true);
+  });
+
+  it('matches any port unless the pattern names one, as Chrome does', () => {
+    const current = makeSettings({ blacklist: ['http://localhost/*', 'https://example.com:8443/*'] });
+    expect(shouldAutoSpace(current, 'http://localhost:3000/app')).toBe(false);
+    expect(shouldAutoSpace(current, 'https://example.com:8443/')).toBe(false);
+    expect(shouldAutoSpace(current, 'https://example.com/')).toBe(true);
+  });
+
+  it('matches the query part when the pattern has one, and a missing query too', () => {
+    const current = makeSettings({ blacklist: ['https://www.google.com/search?*'] });
+    expect(shouldAutoSpace(current, 'https://www.google.com/search?q=pangu')).toBe(false);
+    expect(shouldAutoSpace(current, 'https://www.google.com/search')).toBe(false);
+    expect(shouldAutoSpace(current, 'https://www.google.com/maps?q=pangu')).toBe(true);
+  });
+
+  it('reads every path character except `*` literally', () => {
+    const current = makeSettings({ blacklist: ['https://en.wikipedia.org/wiki/C++*', 'https://en.wikipedia.org/wiki/Python_(programming_language)'] });
+    expect(shouldAutoSpace(current, 'https://en.wikipedia.org/wiki/C++')).toBe(false);
+    expect(shouldAutoSpace(current, 'https://en.wikipedia.org/wiki/Python_(programming_language)')).toBe(false);
+    expect(shouldAutoSpace(current, 'https://en.wikipedia.org/wiki/Python')).toBe(true);
   });
 });
