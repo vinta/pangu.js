@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: '24'
 
-      # The registry can lag behind npm publish by a few seconds, so wait until the pinned version is visible before installing
+      # The registry can lag behind npm publish by a couple of minutes (v10.0.0 took ~90s), so wait until the pinned version is visible before installing
       - name: Wait for npm registry
         run: |
           VERSION=$(node -p "require('./package.json').dependencies.pangu")
@@ -35,8 +35,8 @@ jobs:
             if npm view "pangu@$VERSION" version; then
               exit 0
             fi
-            echo "pangu@$VERSION not on the registry yet, retrying in 15s ($i/10)"
-            sleep 15
+            echo "pangu@$VERSION not on the registry yet, retrying in 30s ($i/10)"
+            sleep 30
           done
           exit 1
 
