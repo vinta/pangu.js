@@ -4,7 +4,7 @@ import pangu from './index.js';
 const usage = `
 usage: pangu [-h] [-v] [-t | -f | -c] [text_or_path]
 
-pangu.js -- Paranoid text spacing for good readability, to automatically insert whitespace between CJK and half-width characters (alphabetical letters, numerical digits and symbols).
+pangu.js v${pangu.version} -- Paranoid text spacing for good readability, to automatically insert whitespace between CJK and half-width characters (alphabetical letters, numerical digits and symbols).
 
 positional arguments:
   text_or_path   the text or file path to apply spacing; omit it to read stdin when input is piped
