@@ -1,6 +1,6 @@
 # Prompt experiments
 
-Use [the real-text workflow](../../docs/research/2026-09-11-shape-prompt-improvement.md). For the next hyphen-digit round, follow [the experiment plan](../../docs/research/2026-09-11-hyphen-digit-real-text-experiment.md). Develop candidates from new baseline measurements and diagnostics; do not retrieve deleted experiments from Git history, temporary reports, previous sessions, or memories.
+Use [the real-text workflow](../../docs/research/2026-09-11-shape-prompt-improvement.md). For the hyphen-digit protocol and completed round report, see [the experiment plan](../../docs/research/2026-09-11-hyphen-digit-real-text-experiment.md). Develop candidates from new baseline measurements and diagnostics; do not retrieve deleted experiments from Git history, temporary reports, previous sessions, or memories.
 
 NEVER use fabricated text for experiments or prompt improvement. Every source passage in an input, example, or diagnostic must have verified provenance. Preserve authored text and production context. Keep disputed meanings unscored.
 
@@ -16,7 +16,7 @@ Set `PANGU_EXTENSION_ID`, `PANGU_CHROME_PROFILE_PATH`, and `PANGU_CHROME_PROFILE
 
 ## Run
 
-Run commands from the repository root. Hyphen-digit requires an explicit `--cases` file and has no legacy corpus fallback. Its source records live in `hyphen-digit/corpus/`; the corpus contains 19 development and 8 holdout targets. Recheck the sources and production inputs before the new experiment.
+Run commands from the repository root. Hyphen-digit requires an explicit `--cases` file and has no legacy corpus fallback. Its source records live in `hyphen-digit/corpus/`; the corpus contains 21 development and 8 holdout targets. The completed round evaluated all 8 holdouts; obtain fresh holdouts before another qualification round. Recheck sources and production inputs before new inference.
 
 ```bash
 # Validate the retained source records and render shipping without a browser.
@@ -31,7 +31,7 @@ node scripts/prompt-experiments/sweep.mjs --experiment hyphen-digit --cases scri
 
 `shipping` imports `hyphenDigitPrompt` from the current production source. The installed worker provides the execution context; the sweep uses its own model sessions. Freeze the shipping bytes before measurement and keep them fixed while comparing candidates.
 
-The hyphen candidate registry starts empty. Add a candidate only after the new baseline and real diagnostics justify its hypothesis. Give each measured version a distinct ID and preserve its rendered bytes. Any prompt examples must reference verified real records and their source pages must be excluded from scored cases.
+The hyphen registry retains the qualified `real-r1-semantic` candidate. Add another candidate only after the new baseline and real diagnostics justify its hypothesis. Give each measured version a distinct ID and preserve its rendered bytes. Any prompt examples must reference verified real records and their source pages must be excluded from scored cases.
 
 For the separate digit-plus experiment, use `--experiment digit-plus`; its interface is documented in [digit-plus/README.md](digit-plus/README.md). That experiment's historical results are outside the hyphen round and must not guide it.
 

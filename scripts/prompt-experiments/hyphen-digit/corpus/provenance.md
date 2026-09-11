@@ -1,8 +1,8 @@
 # Hyphen-digit source corpus
 
-Retrieved on 2026-09-11. Labels and roles were assigned before inference. The corpus has 19 development targets from 18 original excerpts and 8 holdout targets from 8 excerpts. Source pages are disjoint across roles.
+Retrieved on 2026-09-11. Labels and roles were assigned before inference. The corpus has 21 development targets from 18 original excerpts and 8 holdout targets from 8 excerpts. Source pages are disjoint across roles.
 
-`development.json` contains 19 targets, including 3 Blocktempo article numbers. The article heading and related-article headings were verified in source HTML. The 15 retained targets have prior model inference exposure.
+`development.json` contains 21 targets, including 3 Blocktempo article numbers. The article heading and related-article headings were verified in source HTML. The 15 retained targets have prior model inference exposure.
 
 `holdout.json` contains 8 targets. Do not use its answers to tune a candidate without moving the affected cases to development and collecting replacement holdouts.
 
@@ -49,3 +49,11 @@ The four additional records are in `development.json`. Both pages loaded in Chro
 Production `BrowserPangu.spaceNode()` emitted each target through `onTextNodesSettled`, including the real document title. `readSentence()` and `hyphenDigit.find()` produced the recorded inputs and offsets. Each excerpt has one eligible hyphen-digit target. The expected separator label preserves the rule output; `hyphenDigit.edits()` and `applyTextEdits()` matched the annotated target and full-excerpt spacing. Scheduling was disabled for deterministic execution, with no model calls. The replay checks retain these assertions.
 
 The initial source navigation occurred with Pangu enabled and may have triggered automatic classification. These records are development cases, never unseen holdouts. No new experiment inference or prompt examples were used. Keep all three Macromicro targets on the same source page and in the same role.
+
+## Executed round: 2026-09-11
+
+All 15 source pages were reverified in Chrome Beta with Pangu disabled before navigation. The [round report](../results/real-text-20260911-round1/REPORT.md) links the fresh HTML, DOM, style, routing, spacing, and model evidence. Two additional targets came from the unchanged course paragraph; every eligible target in each excerpt now has an annotation.
+
+The two new course-stage records conservatively inherit the paragraph's prior exposure flags. Those flags do not claim separate historical measurements of the newly added target IDs. No prior prompts, model answers, scores, or conclusions were retrieved.
+
+The frozen corpus files preserve exposure metadata as it stood before this round. All 21 development and 8 holdout targets were evaluated in this round. The holdouts are now exposed; they must not be described as never-inferred in future work. No source page became a prompt example.

@@ -8,7 +8,7 @@
       "unsure"
     ]
   },
-  "notes": "19 development targets: 15 retained source records and 4 additional records verified in Chrome Beta. Source HTML, production inputs and offsets are recorded. The four additions also have expected target and full-excerpt spacing checked through production edits. Freeze the corpus before the new experiment.",
+  "notes": "21 development targets reverified in Chrome Beta with Pangu disabled. Individual and combined spacing checked through production edits before this round. Prior exposure remains recorded.",
   "cases": [
     {
       "id": "real-development-01",
@@ -46,11 +46,21 @@
       ],
       "settled": "第三次交易的報酬率為 - 2%",
       "settled_index": 11,
+      "expected_target_spacing": "第三次交易的報酬率為 -2%",
+      "expected_spacing": "第三次交易的報酬率為 -2%",
       "prior_exposure": {
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false
+      },
+      "canonical_source": "https://www.xq.com.tw/lesson/sensor/%E7%AD%96%E7%95%A5%E9%9B%B7%E9%81%94%E5%9B%9E%E6%B8%AC%E5%8A%9F%E8%83%BD%EF%BC%9A%E3%80%8C%E5%9B%9E%E6%B8%AC%E5%A0%B1%E5%91%8A%E3%80%8D%E8%AA%AA%E6%98%8E/",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:20.681Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/01.json",
+        "evidence_record": "real-development-01",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -89,11 +99,21 @@
       ],
       "settled": "第二次交易的報酬率為 - 5%",
       "settled_index": 11,
+      "expected_target_spacing": "第二次交易的報酬率為 -5%",
+      "expected_spacing": "第二次交易的報酬率為 -5%",
       "prior_exposure": {
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false
+      },
+      "canonical_source": "https://www.xq.com.tw/lesson/sensor/%E7%AD%96%E7%95%A5%E9%9B%B7%E9%81%94%E5%9B%9E%E6%B8%AC%E5%8A%9F%E8%83%BD%EF%BC%9A%E3%80%8C%E5%9B%9E%E6%B8%AC%E5%A0%B1%E5%91%8A%E3%80%8D%E8%AA%AA%E6%98%8E/",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:20.681Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/01.json",
+        "evidence_record": "real-development-02",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -132,11 +152,21 @@
       ],
       "settled": "第三次交易的報酬率為 - 8%",
       "settled_index": 11,
+      "expected_target_spacing": "第三次交易的報酬率為 -8%",
+      "expected_spacing": "第三次交易的報酬率為 -8%",
       "prior_exposure": {
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false
+      },
+      "canonical_source": "https://www.xq.com.tw/lesson/sensor/%E7%AD%96%E7%95%A5%E9%9B%B7%E9%81%94%E5%9B%9E%E6%B8%AC%E5%8A%9F%E8%83%BD%EF%BC%9A%E3%80%8C%E5%9B%9E%E6%B8%AC%E5%A0%B1%E5%91%8A%E3%80%8D%E8%AA%AA%E6%98%8E/",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:20.681Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/01.json",
+        "evidence_record": "real-development-03",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -175,11 +205,21 @@
       ],
       "settled": "1/2 日的投資組合中有二檔商品，日報酬率各為 - 3% 及 - 5%，則 1/2 日的投資組合報酬率為 ((-3%)+(-5%))/2=-4%，總報酬率為 (1+5%)*(1-4%)-1=0.8%",
       "settled_index": 24,
+      "expected_target_spacing": "1/2 日的投資組合中有二檔商品，日報酬率各為 -3% 及 - 5%，則 1/2 日的投資組合報酬率為 ((-3%)+(-5%))/2=-4%，總報酬率為 (1+5%)*(1-4%)-1=0.8%",
+      "expected_spacing": "1/2 日的投資組合中有二檔商品，日報酬率各為 -3% 及 -5%，則 1/2 日的投資組合報酬率為 ((-3%)+(-5%))/2=-4%，總報酬率為 (1+5%)*(1-4%)-1=0.8%",
       "prior_exposure": {
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false
+      },
+      "canonical_source": "https://www.xq.com.tw/lesson/sensor/%E7%AD%96%E7%95%A5%E9%9B%B7%E9%81%94%E5%9B%9E%E6%B8%AC%E5%8A%9F%E8%83%BD%EF%BC%9A%E3%80%8C%E5%9B%9E%E6%B8%AC%E5%A0%B1%E5%91%8A%E3%80%8D%E8%AA%AA%E6%98%8E/",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:20.681Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/01.json",
+        "evidence_record": "real-development-04",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -218,11 +258,21 @@
       ],
       "settled": "1/2 日的投資組合中有二檔商品，日報酬率各為 - 3% 及 - 5%，則 1/2 日的投資組合報酬率為 ((-3%)+(-5%))/2=-4%，總報酬率為 (1+5%)*(1-4%)-1=0.8%",
       "settled_index": 31,
+      "expected_target_spacing": "1/2 日的投資組合中有二檔商品，日報酬率各為 - 3% 及 -5%，則 1/2 日的投資組合報酬率為 ((-3%)+(-5%))/2=-4%，總報酬率為 (1+5%)*(1-4%)-1=0.8%",
+      "expected_spacing": "1/2 日的投資組合中有二檔商品，日報酬率各為 -3% 及 -5%，則 1/2 日的投資組合報酬率為 ((-3%)+(-5%))/2=-4%，總報酬率為 (1+5%)*(1-4%)-1=0.8%",
       "prior_exposure": {
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false
+      },
+      "canonical_source": "https://www.xq.com.tw/lesson/sensor/%E7%AD%96%E7%95%A5%E9%9B%B7%E9%81%94%E5%9B%9E%E6%B8%AC%E5%8A%9F%E8%83%BD%EF%BC%9A%E3%80%8C%E5%9B%9E%E6%B8%AC%E5%A0%B1%E5%91%8A%E3%80%8D%E8%AA%AA%E6%98%8E/",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:20.681Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/01.json",
+        "evidence_record": "real-development-05",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -264,11 +314,21 @@
       ],
       "settled": "\n外幣科目在期末要做外幣的評價.\n\n依您的狀況, 當月底外幣數為 0, 假設月底美金匯率 30\n\n\n台幣數應等於 0*30=0  而你帳上台幣數為 - 200\n\n因此該調整 借: 銀行存款 200  貸: 兌換收入 200\n\n帳上台幣數就會歸 0.\n\n\n\n\n\n\n",
       "settled_index": 74,
+      "expected_target_spacing": "\n外幣科目在期末要做外幣的評價.\n\n依您的狀況, 當月底外幣數為 0, 假設月底美金匯率 30\n\n\n台幣數應等於 0*30=0  而你帳上台幣數為 -200\n\n因此該調整 借: 銀行存款 200  貸: 兌換收入 200\n\n帳上台幣數就會歸 0.\n\n\n\n\n\n\n",
+      "expected_spacing": "\n外幣科目在期末要做外幣的評價.\n\n依您的狀況, 當月底外幣數為 0, 假設月底美金匯率 30\n\n\n台幣數應等於 0*30=0  而你帳上台幣數為 -200\n\n因此該調整 借: 銀行存款 200  貸: 兌換收入 200\n\n帳上台幣數就會歸 0.\n\n\n\n\n\n\n",
       "prior_exposure": {
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false
+      },
+      "canonical_source": "https://www.ptt.cc/bbs/Accounting/M.1399559559.A.BFF.html",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:20.962Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/02.json",
+        "evidence_record": "real-development-06",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -310,11 +370,21 @@
       ],
       "settled": ": 變成 - 200 了。這個問題該怎麼解決?\n",
       "settled_index": 5,
+      "expected_target_spacing": ": 變成 -200 了。這個問題該怎麼解決?\n",
+      "expected_spacing": ": 變成 -200 了。這個問題該怎麼解決?\n",
       "prior_exposure": {
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false
+      },
+      "canonical_source": "https://www.ptt.cc/bbs/Accounting/M.1399559559.A.BFF.html",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:20.962Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/02.json",
+        "evidence_record": "real-development-07",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -353,11 +423,21 @@
       ],
       "settled": "理想的 冰箱冷凍溫度 應為攝氏 -18 度以下。這個溫度能讓食物保持冷凍並預防細菌和其他微生物孳生而造成食物腐壞。一定要注意冰庫溫度設定在 - 18°C 或以下的同時，要維持固定溫度讓食物保持冷凍方可安心食用。建議定期以溫度計測量冷凍溫度，並視需要調整溫度設定以維持適當溫度。",
       "settled_index": 70,
+      "expected_target_spacing": "理想的 冰箱冷凍溫度 應為攝氏 -18 度以下。這個溫度能讓食物保持冷凍並預防細菌和其他微生物孳生而造成食物腐壞。一定要注意冰庫溫度設定在 -18°C 或以下的同時，要維持固定溫度讓食物保持冷凍方可安心食用。建議定期以溫度計測量冷凍溫度，並視需要調整溫度設定以維持適當溫度。",
+      "expected_spacing": "理想的 冰箱冷凍溫度 應為攝氏 -18 度以下。這個溫度能讓食物保持冷凍並預防細菌和其他微生物孳生而造成食物腐壞。一定要注意冰庫溫度設定在 -18°C 或以下的同時，要維持固定溫度讓食物保持冷凍方可安心食用。建議定期以溫度計測量冷凍溫度，並視需要調整溫度設定以維持適當溫度。",
       "prior_exposure": {
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": true
+      },
+      "canonical_source": "https://www.electrolux.com.tw/blog/refrigerator-temperature-setting/",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:22.911Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/03.json",
+        "evidence_record": "real-development-08",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -396,11 +476,21 @@
       ],
       "settled": "【115-1 微學分課程】計算機概論與程式設計 - 1 Introduction to Computers and Programming-1",
       "settled_index": 24,
+      "expected_target_spacing": "【115-1 微學分課程】計算機概論與程式設計 - 1 Introduction to Computers and Programming-1",
+      "expected_spacing": "【115-1 微學分課程】計算機概論與程式設計 - 1 Introduction to Computers and Programming-1",
       "prior_exposure": {
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": true
+      },
+      "canonical_source": "https://ict.nycu.edu.tw/course/%E3%80%90115-1%E5%BE%AE%E5%AD%B8%E5%88%86%E8%AA%B2%E7%A8%8B%E3%80%91%E8%A8%88%E7%AE%97%E6%A9%9F%E6%A6%82%E8%AB%96%E8%88%87%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88-1-introduction-to-computers-and-programmi/",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:23.133Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/04.json",
+        "evidence_record": "real-development-09",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -439,11 +529,127 @@
       ],
       "settled": "補充說明：學期課是學校課務系統上選的 3 學分課程，微學分則是在 ICT 系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成 - 1,-2,-3 或 A,B,C 三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修 - 1 或 A 者，不得選修 - 2,-3 或 B,C 課程。",
       "settled_index": 69,
+      "expected_target_spacing": "補充說明：學期課是學校課務系統上選的 3 學分課程，微學分則是在 ICT 系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成 - 1,-2,-3 或 A,B,C 三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修 - 1 或 A 者，不得選修 - 2,-3 或 B,C 課程。",
+      "expected_spacing": "補充說明：學期課是學校課務系統上選的 3 學分課程，微學分則是在 ICT 系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成 - 1,-2,-3 或 A,B,C 三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修 - 1 或 A 者，不得選修 - 2,-3 或 B,C 課程。",
       "prior_exposure": {
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": true
+      },
+      "canonical_source": "https://ict.nycu.edu.tw/course/%E3%80%90115-1%E5%BE%AE%E5%AD%B8%E5%88%86%E8%AA%B2%E7%A8%8B%E3%80%91%E8%A8%88%E7%AE%97%E6%A9%9F%E6%A6%82%E8%AB%96%E8%88%87%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88-1-introduction-to-computers-and-programmi/",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:23.133Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/04.json",
+        "evidence_record": "real-development-10",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
+      }
+    },
+    {
+      "id": "real-development-10-stage-1",
+      "enum": "hyphen",
+      "input": "若是課程內容設計具連貫性，則未修-1或A者，不得選修-2,-3或B,C課程",
+      "at": 16,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "control",
+      "review": false,
+      "meaning": "course-number",
+      "source": "https://ict.nycu.edu.tw/course/%E3%80%90115-1%E5%BE%AE%E5%AD%B8%E5%88%86%E8%AA%B2%E7%A8%8B%E3%80%91%E8%A8%88%E7%AE%97%E6%A9%9F%E6%A6%82%E8%AB%96%E8%88%87%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88-1-introduction-to-computers-and-programmi/",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "補充說明：學期課是學校課務系統上選的3學分課程，微學分則是在ICT系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成-1,-2,-3或A,B,C三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修-1或A者，不得選修-2,-3或B,C課程。",
+      "original_at": 119,
+      "target": "修-1",
+      "annotation_rationale": "The same paragraph defines numbered course stages and their prerequisites; this target marks a course stage, not a negative value.",
+      "source_html": "<p>補充說明：學期課是學校課務系統上選的3學分課程，微學分則是在ICT系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成-1,-2,-3或A,B,C三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修-1或A者，不得選修-2,-3或B,C課程。</p>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "P",
+          "display": "block",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "補充說明：學期課是學校課務系統上選的 3 學分課程，微學分則是在 ICT 系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成 - 1,-2,-3 或 A,B,C 三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修 - 1 或 A 者，不得選修 - 2,-3 或 B,C 課程。",
+      "settled_index": 129,
+      "expected_target_spacing": "補充說明：學期課是學校課務系統上選的 3 學分課程，微學分則是在 ICT 系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成 - 1,-2,-3 或 A,B,C 三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修 - 1 或 A 者，不得選修 - 2,-3 或 B,C 課程。",
+      "expected_spacing": "補充說明：學期課是學校課務系統上選的 3 學分課程，微學分則是在 ICT 系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成 - 1,-2,-3 或 A,B,C 三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修 - 1 或 A 者，不得選修 - 2,-3 或 B,C 課程。",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": true
+      },
+      "canonical_source": "https://ict.nycu.edu.tw/course/%E3%80%90115-1%E5%BE%AE%E5%AD%B8%E5%88%86%E8%AA%B2%E7%A8%8B%E3%80%91%E8%A8%88%E7%AE%97%E6%A9%9F%E6%A6%82%E8%AB%96%E8%88%87%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88-1-introduction-to-computers-and-programmi/",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:23.133Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/04.json",
+        "evidence_record": "real-development-10",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
+      }
+    },
+    {
+      "id": "real-development-10-stage-2",
+      "enum": "hyphen",
+      "input": "若是課程內容設計具連貫性，則未修-1或A者，不得選修-2,-3或B,C課程",
+      "at": 26,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "control",
+      "review": false,
+      "meaning": "course-number",
+      "source": "https://ict.nycu.edu.tw/course/%E3%80%90115-1%E5%BE%AE%E5%AD%B8%E5%88%86%E8%AA%B2%E7%A8%8B%E3%80%91%E8%A8%88%E7%AE%97%E6%A9%9F%E6%A6%82%E8%AB%96%E8%88%87%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88-1-introduction-to-computers-and-programmi/",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "補充說明：學期課是學校課務系統上選的3學分課程，微學分則是在ICT系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成-1,-2,-3或A,B,C三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修-1或A者，不得選修-2,-3或B,C課程。",
+      "original_at": 129,
+      "target": "修-2",
+      "annotation_rationale": "The same paragraph defines numbered course stages and their prerequisites; this target marks a course stage, not a negative value.",
+      "source_html": "<p>補充說明：學期課是學校課務系統上選的3學分課程，微學分則是在ICT系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成-1,-2,-3或A,B,C三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修-1或A者，不得選修-2,-3或B,C課程。</p>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "P",
+          "display": "block",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "補充說明：學期課是學校課務系統上選的 3 學分課程，微學分則是在 ICT 系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成 - 1,-2,-3 或 A,B,C 三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修 - 1 或 A 者，不得選修 - 2,-3 或 B,C 課程。",
+      "settled_index": 144,
+      "expected_target_spacing": "補充說明：學期課是學校課務系統上選的 3 學分課程，微學分則是在 ICT 系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成 - 1,-2,-3 或 A,B,C 三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修 - 1 或 A 者，不得選修 - 2,-3 或 B,C 課程。",
+      "expected_spacing": "補充說明：學期課是學校課務系統上選的 3 學分課程，微學分則是在 ICT 系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成 - 1,-2,-3 或 A,B,C 三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修 - 1 或 A 者，不得選修 - 2,-3 或 B,C 課程。",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": true
+      },
+      "canonical_source": "https://ict.nycu.edu.tw/course/%E3%80%90115-1%E5%BE%AE%E5%AD%B8%E5%88%86%E8%AA%B2%E7%A8%8B%E3%80%91%E8%A8%88%E7%AE%97%E6%A9%9F%E6%A6%82%E8%AB%96%E8%88%87%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88-1-introduction-to-computers-and-programmi/",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:23.133Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/04.json",
+        "evidence_record": "real-development-10",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -482,11 +688,21 @@
       ],
       "settled": "水轉印系列 - 1",
       "settled_index": 6,
+      "expected_target_spacing": "水轉印系列 - 1",
+      "expected_spacing": "水轉印系列 - 1",
       "prior_exposure": {
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false
+      },
+      "canonical_source": "https://chien-ching.com.tw/cht/water-transfer-printing/water-transfer-printing-series1.html",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:54.083Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/05.json",
+        "evidence_record": "real-development-11",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -528,11 +744,21 @@
       ],
       "settled": "\n\n目前加值過三次  (都沒有自動 需要靠卡 QQ)\n\n大概介紹一下 \"悠遊付\" 也可以算是一個 NFC 悠遊卡\n在開啟 APP\"嗶乘車\" 才會讀取  (越來越方便了\n\n第一次捷運靠卡加值時 悠游付為 0 加值完後\n\n銀行 - 600 元  悠游付 +100 元  NFC-SIM +500 元\n\n加值原理是 銀行→悠游付→悠遊卡 最低單位可以自己設定\n\n",
       "settled_index": 112,
+      "expected_target_spacing": "\n\n目前加值過三次  (都沒有自動 需要靠卡 QQ)\n\n大概介紹一下 \"悠遊付\" 也可以算是一個 NFC 悠遊卡\n在開啟 APP\"嗶乘車\" 才會讀取  (越來越方便了\n\n第一次捷運靠卡加值時 悠游付為 0 加值完後\n\n銀行 -600 元  悠游付 +100 元  NFC-SIM +500 元\n\n加值原理是 銀行→悠游付→悠遊卡 最低單位可以自己設定\n\n",
+      "expected_spacing": "\n\n目前加值過三次  (都沒有自動 需要靠卡 QQ)\n\n大概介紹一下 \"悠遊付\" 也可以算是一個 NFC 悠遊卡\n在開啟 APP\"嗶乘車\" 才會讀取  (越來越方便了\n\n第一次捷運靠卡加值時 悠游付為 0 加值完後\n\n銀行 -600 元  悠游付 +100 元  NFC-SIM +500 元\n\n加值原理是 銀行→悠游付→悠遊卡 最低單位可以自己設定\n\n",
       "prior_exposure": {
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": true
+      },
+      "canonical_source": "https://www.ptt.cc/bbs/MobilePay/M.1617104205.A.8DF.html",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:54.223Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/06.json",
+        "evidence_record": "real-development-12",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -572,11 +798,21 @@
       ],
       "settled": "《温宏駿穩定幣新金融 - 19》美英聯合聲明！歐洲美元 2.0 的數位復辟",
       "settled_index": 11,
+      "expected_target_spacing": "《温宏駿穩定幣新金融 - 19》美英聯合聲明！歐洲美元 2.0 的數位復辟",
+      "expected_spacing": "《温宏駿穩定幣新金融 - 19》美英聯合聲明！歐洲美元 2.0 的數位復辟",
       "prior_exposure": {
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false
+      },
+      "canonical_source": "https://www.blocktempo.com/the-digital-restoration-of-eurodollar-version-2/",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:55.084Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/07.json",
+        "evidence_record": "real-development-blocktempo-19",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -616,11 +852,21 @@
       ],
       "settled": "《温宏駿穩定幣新金融 - 18》OUSD 自由競爭 vs 銀行存款代幣堅守本位，新舊勢力全面開戰",
       "settled_index": 11,
+      "expected_target_spacing": "《温宏駿穩定幣新金融 - 18》OUSD 自由競爭 vs 銀行存款代幣堅守本位，新舊勢力全面開戰",
+      "expected_spacing": "《温宏駿穩定幣新金融 - 18》OUSD 自由競爭 vs 銀行存款代幣堅守本位，新舊勢力全面開戰",
       "prior_exposure": {
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false
+      },
+      "canonical_source": "https://www.blocktempo.com/the-digital-restoration-of-eurodollar-version-2/",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:55.084Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/07.json",
+        "evidence_record": "real-development-blocktempo-18",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -660,11 +906,21 @@
       ],
       "settled": "《温宏駿穩定幣新金融 - 17》市佔大戰來襲？新舊勢力的終極結算主權對決",
       "settled_index": 11,
+      "expected_target_spacing": "《温宏駿穩定幣新金融 - 17》市佔大戰來襲？新舊勢力的終極結算主權對決",
+      "expected_spacing": "《温宏駿穩定幣新金融 - 17》市佔大戰來襲？新舊勢力的終極結算主權對決",
       "prior_exposure": {
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false
+      },
+      "canonical_source": "https://www.blocktempo.com/the-digital-restoration-of-eurodollar-version-2/",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:55.084Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/07.json",
+        "evidence_record": "real-development-blocktempo-17",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -713,7 +969,15 @@
       "review": false,
       "meaning": "retailer-title",
       "source_css": "",
-      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed."
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "canonical_source": "https://www.books.com.tw/products/E050341578",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:50:57.086Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/08.json",
+        "evidence_record": "books-4-percent-ebook",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
+      }
     },
     {
       "id": "macromicro-labor-15-64",
@@ -759,6 +1023,14 @@
         "prompt_example": false,
         "model_inference": null,
         "inference_note": "No experiment calls were made. Initial source navigation had Pangu enabled and may have triggered automatic classification; source checks were repeated after disabling it."
+      },
+      "canonical_source": "https://www.macromicro.me/cross-country-database",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:51:29.415Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/09.json",
+        "evidence_record": "macromicro-labor-15-64",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -805,6 +1077,14 @@
         "prompt_example": false,
         "model_inference": null,
         "inference_note": "No experiment calls were made. Initial source navigation had Pangu enabled and may have triggered automatic classification; source checks were repeated after disabling it."
+      },
+      "canonical_source": "https://www.macromicro.me/cross-country-database",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:51:29.415Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/09.json",
+        "evidence_record": "macromicro-global-labor-25-54",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     },
     {
@@ -851,6 +1131,14 @@
         "prompt_example": false,
         "model_inference": null,
         "inference_note": "No experiment calls were made. Initial source navigation had Pangu enabled and may have triggered automatic classification; source checks were repeated after disabling it."
+      },
+      "canonical_source": "https://www.macromicro.me/cross-country-database",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:51:29.415Z",
+        "evidence": "results/real-text-20260911-round1/source-browser/09.json",
+        "evidence_record": "macromicro-us-cds-5y",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true
       }
     }
   ],
