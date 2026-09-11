@@ -1,6 +1,6 @@
 # Full-width glyphs for ANS characters in CJK fonts
 
-Date: 2026-09-11. Status: research only, no rule change.
+Date: 2026-09-10. Status: research only, no rule change.
 
 ## Question
 
