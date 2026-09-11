@@ -8,6 +8,8 @@ Use this workflow when adding a model-assisted shape, investigating a classifica
 
 ### 1. Establish the real input contract
 
+NEVER use fabricated text for experiments or prompt improvement. This applies to prompt examples, diagnostic probes, development cases, confirmation runs, and holdouts. Do not invent sentences, substitute names or numbers in real excerpts, or append artificial context. If a real case is missing, record the coverage gap and find a verified source.
+
 Collect exact sentences from Taiwanese websites, news, and public posts. Record the source URL, retrieval date, original excerpt, expected meaning, and annotation rationale. Preserve the author's whitespace and punctuation. Verify the text on the source page or in its HTML; search snippets alone are insufficient.
 
 Pass each excerpt through the production detector and context extractor. Save the model input separately from the original excerpt. Context boundaries, neighboring inline text, and author-written spaces can determine whether a candidate reaches the model. Keep excluded inputs as routing checks, separate from classifier accuracy. Keep disputed meanings in an unscored review set until their labels are resolved.
@@ -18,7 +20,7 @@ Pass each excerpt through the production detector and context extractor. Save th
 
 Use three roles: prompt examples teach the task, development cases guide changes, and holdouts evaluate a frozen candidate. Keep source pages disjoint across roles and record shared entities or closely related publishers. Repeated mentions of one brand test that brand, not arbitrary name recognition.
 
-When a development sentence becomes a prompt example, move it out of accuracy scoring before the next run. When a holdout failure guides a change, move that case into development and obtain a fresh holdout. Keep synthetic fixtures for deterministic implementation tests separate from this real-world prompt evaluation.
+When a development sentence becomes a prompt example, move it out of accuracy scoring before the next run. When a holdout failure guides a change, move that case into development and obtain a fresh holdout. Synthetic fixtures are limited to deterministic implementation tests; never use them as model inputs or evidence for prompt selection or no-regression gates.
 
 **Done when:** role assignments are recorded before inference, prompt examples are excluded from accuracy, and source overlap has been checked. This follows [Chrome's guidance on evaluation contamination](https://developer.chrome.com/docs/ai/evals/run).
 
