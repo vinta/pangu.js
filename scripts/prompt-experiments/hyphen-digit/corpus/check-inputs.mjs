@@ -37,11 +37,12 @@ async function replay(page, bundle, cases) {
     await tab.evaluate(bundle);
     const results = [];
     for (const kase of cases) {
-      await tab.setContent(`<style>${kase.source_css}</style>${kase.source_html}`);
+      const title = kase.source_surface === 'document-title';
+      await tab.setContent(`<html><head><style>${kase.source_css}</style>${title ? kase.source_html : ''}</head><body>${title ? '' : kase.source_html}</body></html>`);
       results.push(
         await tab.evaluate((kase) => {
-          const { Pangu, hyphenDigit, readSentence } = globalThis.hyphenEval;
-          const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+          const { BrowserPangu, Pangu, applyTextEdits, hyphenDigit, readSentence } = globalThis.hyphenEval;
+          const walker = document.createTreeWalker(document, NodeFilter.SHOW_TEXT);
           let node;
           while (walker.nextNode()) {
             if (walker.currentNode.data === kase.original_excerpt) {
@@ -61,6 +62,34 @@ async function replay(page, bundle, cases) {
             throw new Error(`${kase.id}: production detector excluded the target; check source spacing and CSS`);
           }
           const result = { id: kase.id, input: context.sentence, at: context.at, settled, index: match.index };
+          if (kase.expected_target_spacing !== undefined || kase.expected_spacing !== undefined) {
+            const matches = hyphenDigit.find(node.data, settled, sentenceAt);
+            if (matches.length !== 1) {
+              throw new Error(`${kase.id}: spacing gold requires exactly one eligible target in this excerpt`);
+            }
+            const expected = applyTextEdits(settled, hyphenDigit.edits({ ...match, node, settled }, kase.expected_label));
+            if (expected !== kase.expected_target_spacing || expected !== kase.expected_spacing) {
+              throw new Error(`${kase.id}: production target edits differ from recorded spacing gold`);
+            }
+            const browserPangu = new BrowserPangu();
+            browserPangu.taskScheduler.config.enabled = false;
+            let routed;
+            browserPangu.onTextNodesSettled = (entries) => {
+              const entry = entries.find((entry) => entry.node === node);
+              if (entry) {
+                const unspacedByNode = new Map(entries.map((entry) => [entry.node, entry.unspaced]));
+                routed = hyphenDigit.find(entry.unspaced, entry.settled, (at) => readSentence(node, entry.unspaced, at, unspacedByNode));
+              }
+            };
+            browserPangu.spaceNode(kase.source_surface === 'document-title' ? document.querySelector('head > title') : document.body);
+            if (node.data !== settled || routed?.length !== 1 || routed[0].sentence !== context.sentence || routed[0].at !== context.at || routed[0].index !== match.index) {
+              throw new Error(`${kase.id}: BrowserPangu did not emit the recorded production target`);
+            }
+            browserPangu.applyLateFixes([{ node, settled, data: expected }]);
+            if (node.data !== kase.expected_spacing) {
+              throw new Error(`${kase.id}: production late fix differs from recorded full-excerpt spacing`);
+            }
+          }
           if (kase.source.includes('electrolux.com.tw')) {
             const authored = node.data.split('。', 1)[0];
             if (!authored.includes('攝氏 -18 度以下')) {
@@ -86,6 +115,8 @@ try {
     entry,
     [
       `export { Pangu } from ${JSON.stringify(join(root, 'src/shared/index.ts'))};`,
+      `export { BrowserPangu } from ${JSON.stringify(join(root, 'src/browser/pangu.ts'))};`,
+      `export { applyTextEdits } from ${JSON.stringify(join(root, 'browser-extensions/chrome/src/ai-spacing/shapes/base.ts'))};`,
       `export { hyphenDigit } from ${JSON.stringify(join(root, 'browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit.ts'))};`,
       `export { readSentence } from ${JSON.stringify(join(root, 'browser-extensions/chrome/src/ai-spacing/sentence-context.ts'))};`,
     ].join('\n'),

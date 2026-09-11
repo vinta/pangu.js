@@ -16,7 +16,7 @@ Set `PANGU_EXTENSION_ID`, `PANGU_CHROME_PROFILE_PATH`, and `PANGU_CHROME_PROFILE
 
 ## Run
 
-Run commands from the repository root. Hyphen-digit requires an explicit `--cases` file and has no legacy corpus fallback. Its source records live in `hyphen-digit/corpus/`; pending user submissions are not scored. Recheck the sources and production inputs before the new experiment.
+Run commands from the repository root. Hyphen-digit requires an explicit `--cases` file and has no legacy corpus fallback. Its source records live in `hyphen-digit/corpus/`; the corpus contains 19 development and 8 holdout targets. Recheck the sources and production inputs before the new experiment.
 
 ```bash
 # Validate the retained source records and render shipping without a browser.

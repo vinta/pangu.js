@@ -1,6 +1,5 @@
 {
   "set": "hyphen-digit:2026-09-11-real-development",
-  "frozen_at": "2026-09-11T08:10:38.075618+00:00",
   "role": "development",
   "enums": {
     "hyphen": [
@@ -9,7 +8,7 @@
       "unsure"
     ]
   },
-  "notes": "Source HTML and relevant live display and whitespace were verified on 2026-09-11. Production Pangu.spaceText, hyphenDigit.find and readSentence replay produced the recorded inputs and offsets. Reverify sources and routing before a new experiment.",
+  "notes": "19 development targets: 15 retained source records and 4 additional records verified in Chrome Beta. Source HTML, production inputs and offsets are recorded. The four additions also have expected target and full-excerpt spacing checked through production edits. Freeze the corpus before the new experiment.",
   "cases": [
     {
       "id": "real-development-01",
@@ -667,11 +666,198 @@
         "model_inference": true,
         "prompt_example": false
       }
+    },
+    {
+      "id": "books-4-percent-ebook",
+      "source": "https://www.books.com.tw/products/E050341578",
+      "supplied_at": "2026-09-11",
+      "expected_label": "range-or-separator",
+      "role": "development",
+      "verification_status": "verified",
+      "annotation_rationale": "The hyphen separates the retailer name from the book title; 4% is not negative.",
+      "prior_exposure": {
+        "topic_discussed": true,
+        "note": "The same book was discussed in earlier experiments. Source title verified during preparation; no new experimental inference was performed.",
+        "source_inspected": true,
+        "label_reviewed": true,
+        "prompt_example": false,
+        "model_inference": null,
+        "inference_note": "No experiment calls were made. Initial source navigation had Pangu enabled and may have triggered automatic classification; source checks were repeated after disabling it."
+      },
+      "supplied_excerpt": "博客來-4%法則：讓錢活得比你久的提領金律(電子書)",
+      "original_excerpt": "博客來-4%法則：讓錢活得比你久的提領金律 (電子書)",
+      "original_at": 3,
+      "retrieved_at": "2026-09-11",
+      "routing_status": "Verified on the live source in Chrome Beta with production BrowserPangu.spaceNode, onTextNodesSettled, readSentence, hyphenDigit.find, hyphenDigit.edits and applyTextEdits. Scheduling disabled for deterministic replay; no model inference.",
+      "source_verification": "Checked the original HTTP 200 page response and the live DOM after disabling Pangu and reloading in Chrome Beta.",
+      "source_html": "<title>博客來-4%法則：讓錢活得比你久的提領金律 (電子書)</title>",
+      "source_surface": "document-title",
+      "source_note": "The verified document title includes an authored space before (電子書), absent from the supplied passage. Production emits this title to AI spacing; retain its actual title surface.",
+      "input": "博客來-4%法則：讓錢活得比你久的提領金律 (電子書)",
+      "at": 3,
+      "settled": "博客來 - 4% 法則：讓錢活得比你久的提領金律 (電子書)",
+      "settled_index": 4,
+      "expected_target_spacing": "博客來 - 4% 法則：讓錢活得比你久的提領金律 (電子書)",
+      "expected_spacing": "博客來 - 4% 法則：讓錢活得比你久的提領金律 (電子書)",
+      "source_style_check": [
+        {
+          "tag": "TITLE",
+          "display": "none",
+          "whiteSpace": "normal"
+        }
+      ],
+      "eligible_targets": 1,
+      "enum": "hyphen",
+      "symbol": "-",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "retailer-title",
+      "source_css": "",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed."
+    },
+    {
+      "id": "macromicro-labor-15-64",
+      "source": "https://www.macromicro.me/cross-country-database",
+      "supplied_at": "2026-09-11",
+      "expected_label": "range-or-separator",
+      "role": "development",
+      "verification_status": "verified",
+      "annotation_rationale": "The hyphen introduces the age group from 15 to 64.",
+      "supplied_excerpt": "勞動參與率-15歲至64歲",
+      "original_excerpt": "勞動參與率-15歲至64歲",
+      "original_at": 5,
+      "retrieved_at": "2026-09-11",
+      "routing_status": "Verified on the live source in Chrome Beta with production BrowserPangu.spaceNode, onTextNodesSettled, readSentence, hyphenDigit.find, hyphenDigit.edits and applyTextEdits. Scheduling disabled for deterministic replay; no model inference.",
+      "source_verification": "Checked the original HTTP 200 page response and the live DOM after disabling Pangu and reloading in Chrome Beta.",
+      "source_surface": "visible-body-text",
+      "source_html": "<a class=\"btn--more\">勞動參與率-15歲至64歲</a>",
+      "source_css": "a.btn--more { display: block; white-space: nowrap; }",
+      "source_note": "Exact supplied text matches the visible element. source_css records its computed display and whitespace.",
+      "input": "勞動參與率-15歲至64歲",
+      "at": 5,
+      "settled": "勞動參與率 - 15 歲至 64 歲",
+      "settled_index": 6,
+      "expected_target_spacing": "勞動參與率 - 15 歲至 64 歲",
+      "expected_spacing": "勞動參與率 - 15 歲至 64 歲",
+      "source_style_check": [
+        {
+          "tag": "A",
+          "display": "block",
+          "whiteSpace": "nowrap"
+        }
+      ],
+      "eligible_targets": 1,
+      "enum": "hyphen",
+      "symbol": "-",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "age-group",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "prompt_example": false,
+        "model_inference": null,
+        "inference_note": "No experiment calls were made. Initial source navigation had Pangu enabled and may have triggered automatic classification; source checks were repeated after disabling it."
+      }
+    },
+    {
+      "id": "macromicro-global-labor-25-54",
+      "source": "https://www.macromicro.me/cross-country-database",
+      "supplied_at": "2026-09-11",
+      "expected_label": "range-or-separator",
+      "role": "development",
+      "verification_status": "verified",
+      "annotation_rationale": "The target hyphen introduces the age group from 25 to 54.",
+      "supplied_excerpt": "全球-勞動參與率-25歲至54歲(ILO預估)",
+      "original_excerpt": "全球-勞動參與率-25歲至54歲(ILO預估)",
+      "original_at": 8,
+      "retrieved_at": "2026-09-11",
+      "routing_status": "Verified on the live source in Chrome Beta with production BrowserPangu.spaceNode, onTextNodesSettled, readSentence, hyphenDigit.find, hyphenDigit.edits and applyTextEdits. Scheduling disabled for deterministic replay; no model inference.",
+      "source_verification": "Checked the original HTTP 200 page response and the live DOM after disabling Pangu and reloading in Chrome Beta.",
+      "source_surface": "visible-body-text",
+      "source_html": "<h6 class=\"stat-name\">全球-勞動參與率-25歲至54歲(ILO預估)</h6>",
+      "source_css": "h6.stat-name { display: block; white-space: nowrap; }",
+      "source_note": "Exact supplied text matches the visible element. source_css records its computed display and whitespace.",
+      "input": "全球-勞動參與率-25歲至54歲(ILO預估)",
+      "at": 8,
+      "settled": "全球 - 勞動參與率 - 25 歲至 54 歲 (ILO 預估)",
+      "settled_index": 11,
+      "expected_target_spacing": "全球 - 勞動參與率 - 25 歲至 54 歲 (ILO 預估)",
+      "expected_spacing": "全球 - 勞動參與率 - 25 歲至 54 歲 (ILO 預估)",
+      "source_style_check": [
+        {
+          "tag": "H6",
+          "display": "block",
+          "whiteSpace": "nowrap"
+        }
+      ],
+      "eligible_targets": 1,
+      "enum": "hyphen",
+      "symbol": "-",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "age-group",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "prompt_example": false,
+        "model_inference": null,
+        "inference_note": "No experiment calls were made. Initial source navigation had Pangu enabled and may have triggered automatic classification; source checks were repeated after disabling it."
+      }
+    },
+    {
+      "id": "macromicro-us-cds-5y",
+      "source": "https://www.macromicro.me/cross-country-database",
+      "supplied_at": "2026-09-11",
+      "expected_label": "range-or-separator",
+      "role": "development",
+      "verification_status": "verified",
+      "annotation_rationale": "The hyphen introduces the five-year credit default swap tenor.",
+      "supplied_excerpt": "美國-5年信用違約交換",
+      "original_excerpt": "美國-5年信用違約交換",
+      "original_at": 2,
+      "retrieved_at": "2026-09-11",
+      "routing_status": "Verified on the live source in Chrome Beta with production BrowserPangu.spaceNode, onTextNodesSettled, readSentence, hyphenDigit.find, hyphenDigit.edits and applyTextEdits. Scheduling disabled for deterministic replay; no model inference.",
+      "source_verification": "Checked the original HTTP 200 page response and the live DOM after disabling Pangu and reloading in Chrome Beta.",
+      "source_surface": "visible-body-text",
+      "source_html": "<h6 class=\"stat-name\">美國-5年信用違約交換</h6>",
+      "source_css": "h6.stat-name { display: block; white-space: nowrap; }",
+      "source_note": "Exact supplied text matches the visible element. source_css records its computed display and whitespace.",
+      "input": "美國-5年信用違約交換",
+      "at": 2,
+      "settled": "美國 - 5 年信用違約交換",
+      "settled_index": 3,
+      "expected_target_spacing": "美國 - 5 年信用違約交換",
+      "expected_spacing": "美國 - 5 年信用違約交換",
+      "source_style_check": [
+        {
+          "tag": "H6",
+          "display": "block",
+          "whiteSpace": "nowrap"
+        }
+      ],
+      "eligible_targets": 1,
+      "enum": "hyphen",
+      "symbol": "-",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "tenor",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "prompt_example": false,
+        "model_inference": null,
+        "inference_note": "No experiment calls were made. Initial source navigation had Pangu enabled and may have triggered automatic classification; source checks were repeated after disabling it."
+      }
     }
   ],
   "diagnosticQuestions": [
     "Translate the original sentence into English, preserving the meaning of each number.",
     "Which occurrence of the hyphen did the question identify? Quote the exact surrounding original text.",
     "Explain whether that number is negative, or a positive number connected to a preceding item. Which label fits?"
-  ]
+  ],
+  "prepared_at": "2026-09-11"
 }
