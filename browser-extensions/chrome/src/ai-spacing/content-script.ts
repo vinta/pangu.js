@@ -4,9 +4,9 @@ import { readSentence } from './sentence-context';
 import type { AmbiguousShape, SettledCandidate, TextEdit } from './shapes/base';
 import { applyTextEdits } from './shapes/base';
 import { digitPlus } from './shapes/digit-plus-shape';
-import { hyphenSign } from './shapes/hyphen-shape';
+import { hyphenDigit } from './shapes/hyphen-digit-shape';
 
-const AMBIGUOUS_SHAPES: AmbiguousShape[] = [hyphenSign, digitPlus];
+const AMBIGUOUS_SHAPES: AmbiguousShape[] = [hyphenDigit, digitPlus];
 
 async function requestClassification(kind: string, candidates: ClassifyCandidatesMessage['candidates']): Promise<ClassifyCandidatesResponse> {
   const message: ClassifyCandidatesMessage = { type: 'CLASSIFY_CANDIDATES', kind, candidates };

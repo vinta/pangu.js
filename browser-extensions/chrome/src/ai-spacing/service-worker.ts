@@ -2,10 +2,10 @@ import type { Candidate, CandidateLabel, ClassifyCandidatesResponse } from './me
 import { classifyCandidates } from './models';
 import type { PromptSpec } from './shapes/base';
 import { digitPlusPrompt } from './shapes/digit-plus-prompt';
-import { hyphenPrompt } from './shapes/hyphen-prompt';
+import { hyphenDigitPrompt } from './shapes/hyphen-digit-prompt';
 
 const PROMPT_SPECS = new Map<string, PromptSpec<CandidateLabel>>([
-  [hyphenPrompt.kind, hyphenPrompt],
+  [hyphenDigitPrompt.kind, hyphenDigitPrompt],
   [digitPlusPrompt.kind, digitPlusPrompt],
 ]);
 

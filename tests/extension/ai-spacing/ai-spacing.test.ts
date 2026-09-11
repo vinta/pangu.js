@@ -130,7 +130,7 @@ describe('AI spacing warm-up', () => {
     expect(sendMessage).toHaveBeenCalledWith({ type: 'CLASSIFY_CANDIDATES', kind: 'digit-plus', candidates: [] });
   });
 
-  it('warms the model when a tight hyphen shape appears in the page', async () => {
+  it('warms the model when a tight hyphen-digit shape appears in the page', async () => {
     vi.stubGlobal('LanguageModel', undefined);
     vi.stubGlobal('document', { documentElement: { textContent: '氣溫是-5度' } });
     const { sendMessage, warmUpAiSpacing } = await loadAiSpacing();
@@ -138,7 +138,7 @@ describe('AI spacing warm-up', () => {
     warmUpAiSpacing();
 
     expect(sendMessage).toHaveBeenCalledTimes(1);
-    expect(sendMessage).toHaveBeenCalledWith({ type: 'CLASSIFY_CANDIDATES', kind: 'hyphen-sign', candidates: [] });
+    expect(sendMessage).toHaveBeenCalledWith({ type: 'CLASSIFY_CANDIDATES', kind: 'hyphen-digit', candidates: [] });
   });
 
   it('warms up only once per page', async () => {
@@ -175,12 +175,12 @@ describe('AI spacing model sessions', () => {
     vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create });
     const { handleClassification } = await loadAiSpacing();
 
-    const warmup = handleClassification('hyphen-sign', []);
+    const warmup = handleClassification('hyphen-digit', []);
     await Promise.resolve();
     expect(create).toHaveBeenCalledTimes(1);
     expect(clone).not.toHaveBeenCalled();
 
-    const batch = handleClassification('hyphen-sign', [{ sentence: '氣溫是-5度', at: 3 }]);
+    const batch = handleClassification('hyphen-digit', [{ sentence: '氣溫是-5度', at: 3 }]);
     finishCreation();
 
     expect(await warmup).toEqual({ ok: true, candidateLabels: [] });
@@ -194,8 +194,8 @@ describe('AI spacing model sessions', () => {
     vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create });
     const { handleClassification } = await loadAiSpacing();
 
-    expect(await handleClassification('hyphen-sign', [])).toEqual({ ok: false, error: 'Error: creation failed' });
-    expect(await handleClassification('hyphen-sign', [])).toEqual({ ok: true, candidateLabels: [] });
+    expect(await handleClassification('hyphen-digit', [])).toEqual({ ok: false, error: 'Error: creation failed' });
+    expect(await handleClassification('hyphen-digit', [])).toEqual({ ok: true, candidateLabels: [] });
     expect(create).toHaveBeenCalledTimes(2);
   });
 });
@@ -220,7 +220,7 @@ describe('AI spacing message flow', () => {
     await applyAiSpacing([{ node, unspaced, settled }]);
 
     expect(node.data).toBe('氣溫是 -5 度，Switch 2 + 瑪利歐賽車世界同捆組');
-    expect(sendMessage.mock.calls.map(([message]) => message.kind)).toEqual(['hyphen-sign', 'digit-plus']);
+    expect(sendMessage.mock.calls.map(([message]) => message.kind)).toEqual(['hyphen-digit', 'digit-plus']);
     expect(create).toHaveBeenCalledTimes(2);
     expect(pangu.applyLateFixes).toHaveBeenCalledTimes(1);
     expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node, settled, data: '氣溫是 -5 度，Switch 2 + 瑪利歐賽車世界同捆組' }]);
