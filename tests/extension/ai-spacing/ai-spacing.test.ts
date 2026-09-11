@@ -44,7 +44,7 @@ function stubDigitPlusModel(answer: (question: string) => string | Promise<strin
 
 describe('AI spacing results', () => {
   it('routes the five digit-plus originals through core spacing, the worker, and late edits', async () => {
-    const prompt = stubDigitPlusModel((question) => (question.startsWith('原句：Switch 2+') ? '"conjunction"' : '"lower-bound"'));
+    const prompt = stubDigitPlusModel((question) => (question.startsWith('Sentence: Switch 2+') ? '"conjunction"' : '"lower-bound"'));
     const { spaceTextWithAi, sendMessage } = await loadAiSpacing();
 
     expect(await spaceTextWithAi('Switch 2+瑪利歐賽車世界同捆組')).toBe('Switch 2 + 瑪利歐賽車世界同捆組');
