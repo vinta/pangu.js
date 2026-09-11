@@ -10,11 +10,13 @@ Use this workflow when adding a model-assisted shape, investigating a classifica
 
 NEVER use fabricated text for experiments or prompt improvement. This applies to prompt examples, diagnostic probes, development cases, confirmation runs, and holdouts. Do not invent sentences, substitute names or numbers in real excerpts, or append artificial context. If a real case is missing, record the coverage gap and find a verified source.
 
-Collect exact sentences from Taiwanese websites, news, and public posts. Record the source URL, retrieval date, original excerpt, expected meaning, and annotation rationale. Preserve the author's whitespace and punctuation. Verify the text on the source page or in its HTML; search snippets alone are insufficient. Keep source HTML, relevant styles, original and extracted target offsets in JavaScript UTF-16 units, and expected production spacing.
+Reuse verified source snapshots by default. Check recorded hashes for unchanged text, HTML, styles, and provenance, then replay production inputs and spacing locally. A new prompt experiment does not require downloading every source again.
 
-If a fetch fails or is blocked, inspect the rendered page and source HTML in the configured Chrome Beta profile. Before loading sources, disable Pangu and verify its switch is off. Reload pages opened with Pangu enabled before capture. Keep it disabled until collection ends. Exclude changed or unverifiable records until resolved; preserve their wording.
+Fetch sources only for new or changed records, missing or disputed evidence, or experiments that require current live-page behavior. For new records, collect exact sentences from Taiwanese websites, news, and public posts. Record the source URL, retrieval date, original excerpt, expected meaning, and annotation rationale. Preserve the author's whitespace and punctuation. Verify the text on the source page or in its HTML; search snippets alone are insufficient. Keep source HTML, relevant styles, original and extracted target offsets in JavaScript UTF-16 units, and expected production spacing.
 
-Pass each excerpt through the production detector and context extractor. Save the model input separately from the original excerpt. Context boundaries, neighboring inline text, and author-written spaces can determine whether a candidate reaches the model. Keep excluded inputs as routing checks, separate from classifier accuracy. Keep disputed meanings in an unscored review set until their labels are resolved. Gold `unsure` requires a defensible explanation that the exact production context is insufficient. Model explanations and translations remain diagnostic outputs; never turn them into corpus examples.
+If a fetch fails or is blocked, inspect the rendered page and source HTML in the configured Chrome Beta profile. Before loading sources, disable Pangu and verify its switch is off. Reload pages opened with Pangu enabled before capture. Keep it disabled until collection ends. Keep new or changed records out of scoring until verified. A later website change does not invalidate an intact historical snapshot; retain its capture date and state which version is being evaluated.
+
+Replay each snapshot through the production detector and context extractor before inference. If those components change, regenerate production inputs and spacing expectations from the saved source context; revisit the live page only where that context is insufficient. Save the model input separately from the original excerpt. Context boundaries, neighboring inline text, and author-written spaces can determine whether a candidate reaches the model. Keep excluded inputs as routing checks, separate from classifier accuracy. Keep disputed meanings in an unscored review set until their labels are resolved. Gold `unsure` requires a defensible explanation that the exact production context is insufficient. Model explanations and translations remain diagnostic outputs; never turn them into corpus examples.
 
 Annotate every eligible target in multi-target excerpts before inference. Verify both each target's edit on frozen rule output and the combined edits through production text application. Bind `settled` text and `settled_index` to that path. Keep authored-space exclusions as routing checks.
 
@@ -32,7 +34,7 @@ When a development case becomes a prompt example, exclude its entire source page
 
 For an existing shape, keep the shipping prompt as the control. For a new shape, start with a concise instruction and explicit label definitions. Freeze the baseline bytes, question builder, labels/order, schema, detector, context extraction, and sampling before inference. Record the commit and file hashes; recheck them before each phase. Keep these controls fixed during comparisons. A detector or extraction change requires a new baseline.
 
-Measure shipping with corpus order and a recorded seeded shuffle, using 1 attempt per target per order. If no development failures remain, collect more verified coverage or finish without a prompt change.
+Measure a fresh shipping baseline in each new round, even when source snapshots are reused. Use corpus order and a recorded seeded shuffle, using 1 attempt per target per order. If no development failures remain, collect more verified coverage or finish without a prompt change.
 
 Record raw answers, errors, misses by meaning, and unstable cases. For representative failures, run separate diagnostic conversations: ask the model to interpret or translate the original sentence, identify the target symbol, and explain which label fits. Use these answers to generate falsifiable hypotheses. Explanations after a wrong answer may be rationalizations.
 
@@ -78,19 +80,19 @@ An infrastructure failure leaves the comparison incomplete. Fix it, repeat the e
 
 ## Automated execution
 
-The agent verifies sources, annotates cases, and chooses hypotheses. The runner handles serial model calls and immutable result export. Before inference, finish source verification, production input/spacing replay, and runner checks. Test paired gates with retained real inputs and mocked answers: regression, stable improvement, baseline instability, missing attempts, and errors.
+The agent verifies sources, annotates cases, and chooses hypotheses. The runner handles serial model calls and immutable result export. Before inference, finish snapshot integrity checks, any source verification required by step 1, local production input/spacing replay, and runner checks. Test paired gates with retained real inputs and mocked answers: regression, stable improvement, baseline instability, missing attempts, and errors.
 
 Verify the configured Chrome Beta profile, intended extension worker, model availability, and current production options. Record actual browser/Node/model details. Read local connection settings from ignored configuration and keep machine-local identifiers out of tracked reports.
 
 Use fresh base sessions per prompt/order and fresh clones per target/attempt. Match production sampling, language declarations, and schema handling. Keep diagnostics isolated. Save raw answers, errors, timings, and execution order in a new directory per invocation.
 
-Keep one frozen protocol, verified source records, candidate definitions, raw outputs, per-case gates, and a report for each round. Close temporary inspection pages and disconnect when done.
+Keep one frozen protocol, verified source records, candidate definitions, raw outputs, per-case gates, and a report for each round. Redact session-cookie values from retained HTTP headers; they are not source-text evidence. Close temporary inspection pages and disconnect when done.
 
 ## Starting an independent round
 
-Preserve verified source records and their exposure history. Remove previous candidate prompts, diagnostic answers, scores, and conclusions from the new round's working context. Do not retrieve them from Git history, temporary reports, old agent sessions, or memories to select candidates. Use current production code as the baseline and new real-text measurements as evidence.
+Start with this workflow, current production code, and verified source snapshots with their exposure history. Verify source hashes without reading prior reports, diagnostics, or model outputs. Remove previous candidate prompts, diagnostic answers, scores, and conclusions from the new round's working context. Do not retrieve them from Git history, temporary reports, old agent sessions, or memories to select candidates. Use current production code as the baseline and new real-text measurements as evidence.
 
-Reusing a development case does not make it unseen. An exposed holdout must be reassigned before it can guide tuning. Record related source pages and shared entities, and retain coverage gaps when verified real examples are unavailable.
+Reusing a development case does not make it unseen. Obtain fresh holdouts for a new qualification round when the previous holdouts have been evaluated. An exposed holdout must be reassigned before it can guide tuning. Record related source pages and shared entities, and retain coverage gaps when verified real examples are unavailable.
 
 ## References
 
