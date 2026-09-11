@@ -1,5 +1,5 @@
 {
-  "set": "hyphen-sign:2026-09-11-real-holdout",
+  "set": "hyphen-digit:2026-09-11-real-holdout",
   "frozen_at": "2026-09-11T08:00:34.185481+00:00",
   "role": "holdout",
   "enums": {

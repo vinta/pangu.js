@@ -1,5 +1,5 @@
 {
-  "set": "hyphen-sign:2026-09-11-real-development",
+  "set": "hyphen-digit:2026-09-11-real-development",
   "frozen_at": "2026-09-11T08:10:38.075618+00:00",
   "role": "development",
   "enums": {

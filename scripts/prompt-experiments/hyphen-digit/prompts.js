@@ -1,4 +1,4 @@
-// Frozen prompt variants for the hyphen-sign probe. Add a new version when changing measured prompt bytes.
+// Frozen prompt variants for the hyphen-digit probe. Add a new version when changing measured prompt bytes.
 // Keep few-shot examples OUT of cases.json (plan rule: never few-shot from the eval corpus).
 //
 // To iterate: add a variant to PROMPTS (or edit a gloss), then rerun each backend with

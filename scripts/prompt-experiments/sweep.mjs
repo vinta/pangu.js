@@ -5,12 +5,12 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { hyphenDigitPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-prompt.ts';
-import { PROMPTS, SHOT_SENTENCES } from './hyphen-sign/prompts.js';
+import { PROMPTS, SHOT_SENTENCES } from './hyphen-digit/prompts.js';
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
   options: {
-    'experiment': { type: 'string', default: 'hyphen-sign' },
+    'experiment': { type: 'string', default: 'hyphen-digit' },
     'split': { type: 'string' },
     'cases': { type: 'string' },
     'out': { type: 'string' },
@@ -28,8 +28,8 @@ const repeats = Number(values.repeats);
 assert(Number.isSafeInteger(repeats) && repeats > 0, `invalid --repeats ${values.repeats}; use a positive integer`);
 const orderCount = Number(values.orders);
 assert(Number.isSafeInteger(orderCount) && orderCount > 0, `invalid --orders ${values.orders}; use a positive integer`);
-assert(['hyphen-sign', 'digit-plus'].includes(values.experiment), `invalid --experiment ${values.experiment}; use hyphen-sign or digit-plus`);
-assert(values.cases === undefined || values.experiment === 'hyphen-sign', '--cases is only supported for --experiment hyphen-sign');
+assert(['hyphen-digit', 'digit-plus'].includes(values.experiment), `invalid --experiment ${values.experiment}; use hyphen-digit or digit-plus`);
+assert(values.cases === undefined || values.experiment === 'hyphen-digit', '--cases is only supported for --experiment hyphen-digit');
 const digitPlus = values.experiment === 'digit-plus' ? await import('./digit-plus/experiment.mjs') : null;
 assert(digitPlus || !values.split, '--split is only supported for --experiment digit-plus');
 const split = values.split ?? 'development';
@@ -40,7 +40,7 @@ const prompts = digitPlus
       ...PROMPTS,
       shipping: { system: hyphenDigitPrompt.systemPrompt, build: (kase) => hyphenDigitPrompt.buildQuestion(kase.input, kase.at) },
     };
-const root = new URL('./hyphen-sign/', import.meta.url);
+const root = new URL('./hyphen-digit/', import.meta.url);
 const corpus = digitPlus ? digitPlus.loadCorpus(split) : JSON.parse(readFileSync(values.cases ?? new URL('cases.json', root), 'utf8'));
 const fields = digitPlus || values.cases !== undefined ? [] : JSON.parse(readFileSync(new URL('field-cases.json', root), 'utf8')).cases;
 const cases = [...corpus.cases, ...fields];
@@ -258,7 +258,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
   );
 
   const result = {
-    set: corpus.set ?? (values.cases !== undefined ? 'hyphen-sign:custom' : 'hyphen-sign+field'),
+    set: corpus.set ?? (values.cases !== undefined ? 'hyphen-digit:custom' : 'hyphen-digit+field'),
     backend: 'prompt-api',
     model: 'gemini-nano',
     context: 'extension-sw',

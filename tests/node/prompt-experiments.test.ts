@@ -22,7 +22,7 @@ test.skipIf(!process.features.typescript)('custom hyphen cases replace the defau
   const diagnostics = check('--diagnostics', 'title-19', '--orders', '1');
   expect(diagnostics.status, diagnostics.stderr).toBe(0);
   expect(check('--diagnostics', 'title-19').stderr).toContain('--diagnostics requires --repeats 1, --orders 1');
-  expect(check('--experiment', 'digit-plus').stderr).toContain('--cases is only supported for --experiment hyphen-sign');
+  expect(check('--experiment', 'digit-plus').stderr).toContain('--cases is only supported for --experiment hyphen-digit');
 
   writeFileSync(file, JSON.stringify({ ...corpus, diagnosticQuestions: [' '] }));
   expect(check().stderr).toContain('invalid diagnosticQuestions');
@@ -58,7 +58,7 @@ test.skipIf(!process.features.typescript)('requires an explicit matching Chrome 
 });
 
 for (const [experiment, variant] of [
-  ['hyphen-sign', 'v27-zh-unique-quote'],
+  ['hyphen-digit', 'v27-zh-unique-quote'],
   ['digit-plus', 'v1-zh'],
 ] as const) {
   test.skipIf(!process.features.typescript)(`${experiment}/${variant}: scored failures fail require-perfect and preserve raw answers`, () => {

@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { rolldown } from 'rolldown';
 
 const usage =
-  'Usage: node scripts/prompt-experiments/hyphen-sign/2026-09-11/check-inputs.mjs\nReplays frozen development/holdout HTML in the attached pangu-eval session. Run outside the browser sandbox. No model inference.';
+  'Usage: node scripts/prompt-experiments/hyphen-digit/2026-09-11/check-inputs.mjs\nReplays frozen development/holdout HTML in the attached pangu-eval session. Run outside the browser sandbox. No model inference.';
 if (process.argv.includes('--help')) {
   console.log(usage);
   process.exit(0);
