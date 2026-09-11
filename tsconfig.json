@@ -16,7 +16,7 @@
     "moduleResolution": "bundler",
 
     // TypeScript 6 stopped auto-enumerating `node_modules/@types`, so every ambient type package this config needs has to be listed. This one spans the extension sources (`chrome` for the extension
-    // APIs, `dom-chromium-ai` for the built-in Prompt API the hyphen-sign classifier calls) plus the Node sources and the Vite and Playwright configs (`node`). The narrower `src/node/tsconfig.json`
+    // APIs, `dom-chromium-ai` for the built-in Prompt API the hyphen-digit classifier calls) plus the Node sources and the Vite and Playwright configs (`node`). The narrower `src/node/tsconfig.json`
     // overrides it back down to just `node`.
     "types": ["node", "chrome", "dom-chromium-ai"],
 

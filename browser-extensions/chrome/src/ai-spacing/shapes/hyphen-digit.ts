@@ -1,9 +1,9 @@
 import { CJK } from '../../../../../src/shared/index';
 import type { AmbiguousShape, CandidateMatch, SettledCandidate } from './base';
 import { indexOfNthSymbol, sliceSentence } from './base';
-import { HYPHEN_LABELS } from './hyphen-prompt';
+import { HYPHEN_DIGIT_LABELS } from './hyphen-digit-prompt';
 
-// The hyphen-sign ambiguous shape: a hyphen-minus tight between a CJK character and a digit. Flagged on the unspaced text, because after spacing a rules-written `CJK - digit` is byte-identical
+// The hyphen-digit ambiguous shape: a hyphen-minus tight between a CJK character and a digit. Flagged on the unspaced text, because after spacing a rules-written `CJK - digit` is byte-identical
 // to an author-typed one
 const CJK_HYPHEN_DIGIT = new RegExp(`[${CJK}]-[0-9]`, 'g');
 
@@ -14,8 +14,8 @@ export function hasInsertedGap(text: string, hyphenIndex: number) {
   return text[hyphenIndex] === '-' && text[hyphenIndex + 1] === ' ' && DIGIT.test(text[hyphenIndex + 2] ?? '');
 }
 
-export const hyphenSign: AmbiguousShape = {
-  kind: 'hyphen-sign',
+export const hyphenDigit: AmbiguousShape = {
+  kind: 'hyphen-digit',
 
   // search() ignores lastIndex, so the g regex is safe to reuse here; test() would advance it
   hasPotentialCandidates(text: string) {
@@ -38,6 +38,6 @@ export const hyphenSign: AmbiguousShape = {
 
   // Only the space after the hyphen goes. The space before it is a boundary the rules got right
   edits({ index }: SettledCandidate, candidateLabel) {
-    return candidateLabel === HYPHEN_LABELS.signedNumber ? [{ index: index + 1, remove: 1, insert: '' }] : [];
+    return candidateLabel === HYPHEN_DIGIT_LABELS.signedNumber ? [{ index: index + 1, remove: 1, insert: '' }] : [];
   },
 };

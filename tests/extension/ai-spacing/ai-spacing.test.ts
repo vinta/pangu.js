@@ -32,7 +32,69 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+function stubDigitPlusModel(answer: (question: string) => string | Promise<string>) {
+  const prompt = vi.fn((question: string, { responseConstraint }: { responseConstraint: { enum: string[] } }) => {
+    expect(responseConstraint.enum).toEqual(['conjunction', 'lower-bound', 'unsure']);
+    return answer(question);
+  });
+  const clone = async () => ({ prompt, destroy: vi.fn() });
+  vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create: async () => ({ clone }) });
+  return prompt;
+}
+
 describe('AI spacing results', () => {
+  it('routes the five digit-plus originals through core spacing, the worker, and late edits', async () => {
+    const prompt = stubDigitPlusModel((question) => (question.startsWith('Sentence: Switch 2+') ? '"conjunction"' : '"lower-bound"'));
+    const { spaceTextWithAi, sendMessage } = await loadAiSpacing();
+
+    expect(await spaceTextWithAi('Switch 2+瑪利歐賽車世界同捆組')).toBe('Switch 2 + 瑪利歐賽車世界同捆組');
+    expect(await spaceTextWithAi('有100+的選擇')).toBe('有 100+ 的選擇');
+    expect(await spaceTextWithAi('這裡有18+的內容')).toBe('這裡有 18+ 的內容');
+    expect(await spaceTextWithAi('評分3.5+的餐廳')).toBe('評分 3.5+ 的餐廳');
+    expect(await spaceTextWithAi('Python 3+的版本')).toBe('Python 3+ 的版本');
+    expect(prompt).toHaveBeenCalledTimes(5);
+    expect(sendMessage.mock.calls.map(([message]) => message.kind)).toEqual(['digit-plus', 'digit-plus', 'digit-plus', 'digit-plus', 'digit-plus']);
+  });
+
+  it.each(['"unsure"', '"signed-number"', 'null', 'conjunction'])('retains core digit-plus spacing for answer %s', async (answer) => {
+    const prompt = stubDigitPlusModel(() => answer);
+    const { spaceTextWithAi, pangu } = await loadAiSpacing();
+
+    expect(await spaceTextWithAi('Switch 2+瑪利歐賽車世界同捆組')).toBe('Switch 2+ 瑪利歐賽車世界同捆組');
+    expect(prompt).toHaveBeenCalledTimes(1);
+    expect(pangu.applyLateFixes).not.toHaveBeenCalled();
+  });
+
+  it('retains core digit-plus spacing when a candidate prompt fails', async () => {
+    stubDigitPlusModel(() => Promise.reject(new Error('candidate failed')));
+    const { spaceTextWithAi, pangu } = await loadAiSpacing();
+
+    expect(await spaceTextWithAi('Switch 2+瑪利歐賽車世界同捆組')).toBe('Switch 2+ 瑪利歐賽車世界同捆組');
+    expect(pangu.applyLateFixes).not.toHaveBeenCalled();
+  });
+
+  it('retains core digit-plus spacing when the model is unavailable', async () => {
+    const create = vi.fn();
+    vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'unavailable', create });
+    const { spaceTextWithAi, pangu, sendMessage } = await loadAiSpacing();
+
+    expect(await spaceTextWithAi('Switch 2+瑪利歐賽車世界同捆組')).toBe('Switch 2+ 瑪利歐賽車世界同捆組');
+    expect(await spaceTextWithAi('有100+的選擇')).toBe('有 100+ 的選擇');
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(create).not.toHaveBeenCalled();
+    expect(pangu.applyLateFixes).not.toHaveBeenCalled();
+  });
+
+  it('leaves product names and a trailing quantity plus to core without classification', async () => {
+    const { spaceTextWithAi, sendMessage } = await loadAiSpacing();
+
+    expect(await spaceTextWithAi('Galaxy S24+手機')).toBe('Galaxy S24 + 手機');
+    expect(await spaceTextWithAi('Synology DS224+儲存檔案')).toBe('Synology DS224 + 儲存檔案');
+    expect(await spaceTextWithAi('Roborock S7+掃地')).toBe('Roborock S7 + 掃地');
+    expect(await spaceTextWithAi('商品數量2+')).toBe('商品數量 2+');
+    expect(sendMessage).not.toHaveBeenCalled();
+  });
+
   it('joins negative signs when the model answers signed-number', async () => {
     const clone = async () => ({ prompt: async () => '"signed-number"', destroy: vi.fn() });
     vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create: async () => ({ clone }) });
@@ -56,7 +118,19 @@ describe('AI spacing results', () => {
 });
 
 describe('AI spacing warm-up', () => {
-  it('warms the model when a tight hyphen shape appears in the page', async () => {
+  it('warms the digit-plus model once even when the page contains multiple pluses', async () => {
+    vi.stubGlobal('LanguageModel', undefined);
+    vi.stubGlobal('document', { documentElement: { textContent: 'Switch 2+瑪利歐。有100+的選擇' } });
+    const { sendMessage, warmUpAiSpacing } = await loadAiSpacing();
+
+    warmUpAiSpacing();
+    warmUpAiSpacing();
+
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(sendMessage).toHaveBeenCalledWith({ type: 'CLASSIFY_CANDIDATES', kind: 'digit-plus', candidates: [] });
+  });
+
+  it('warms the model when a tight hyphen-digit shape appears in the page', async () => {
     vi.stubGlobal('LanguageModel', undefined);
     vi.stubGlobal('document', { documentElement: { textContent: '氣溫是-5度' } });
     const { sendMessage, warmUpAiSpacing } = await loadAiSpacing();
@@ -64,7 +138,7 @@ describe('AI spacing warm-up', () => {
     warmUpAiSpacing();
 
     expect(sendMessage).toHaveBeenCalledTimes(1);
-    expect(sendMessage).toHaveBeenCalledWith({ type: 'CLASSIFY_CANDIDATES', kind: 'hyphen-sign', candidates: [] });
+    expect(sendMessage).toHaveBeenCalledWith({ type: 'CLASSIFY_CANDIDATES', kind: 'hyphen-digit', candidates: [] });
   });
 
   it('warms up only once per page', async () => {
@@ -101,12 +175,12 @@ describe('AI spacing model sessions', () => {
     vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create });
     const { handleClassification } = await loadAiSpacing();
 
-    const warmup = handleClassification('hyphen-sign', []);
+    const warmup = handleClassification('hyphen-digit', []);
     await Promise.resolve();
     expect(create).toHaveBeenCalledTimes(1);
     expect(clone).not.toHaveBeenCalled();
 
-    const batch = handleClassification('hyphen-sign', [{ sentence: '氣溫是-5度', at: 3 }]);
+    const batch = handleClassification('hyphen-digit', [{ sentence: '氣溫是-5度', at: 3 }]);
     finishCreation();
 
     expect(await warmup).toEqual({ ok: true, candidateLabels: [] });
@@ -120,13 +194,38 @@ describe('AI spacing model sessions', () => {
     vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create });
     const { handleClassification } = await loadAiSpacing();
 
-    expect(await handleClassification('hyphen-sign', [])).toEqual({ ok: false, error: 'Error: creation failed' });
-    expect(await handleClassification('hyphen-sign', [])).toEqual({ ok: true, candidateLabels: [] });
+    expect(await handleClassification('hyphen-digit', [])).toEqual({ ok: false, error: 'Error: creation failed' });
+    expect(await handleClassification('hyphen-digit', [])).toEqual({ ok: true, candidateLabels: [] });
     expect(create).toHaveBeenCalledTimes(2);
   });
 });
 
 describe('AI spacing message flow', () => {
+  it('combines hyphen deletion and digit-plus insertion in one late fix for the same node', async () => {
+    const prompt = vi.fn(async (_question: string, { responseConstraint }: { responseConstraint: { enum: string[] } }) => {
+      if (responseConstraint.enum.includes('conjunction')) {
+        expect(responseConstraint.enum).toEqual(['conjunction', 'lower-bound', 'unsure']);
+        return '"conjunction"';
+      }
+      expect(responseConstraint.enum).toEqual(['signed-number', 'range-or-separator', 'unsure']);
+      return '"signed-number"';
+    });
+    const create = vi.fn(async () => ({ clone: async () => ({ prompt, destroy: vi.fn() }) }));
+    vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create });
+    const { pangu, sendMessage, applyAiSpacing } = await loadAiSpacing();
+    const unspaced = '氣溫是-5度，Switch 2+瑪利歐賽車世界同捆組';
+    const settled = corePangu.spaceText(unspaced);
+    const node = { data: settled } as Text;
+
+    await applyAiSpacing([{ node, unspaced, settled }]);
+
+    expect(node.data).toBe('氣溫是 -5 度，Switch 2 + 瑪利歐賽車世界同捆組');
+    expect(sendMessage.mock.calls.map(([message]) => message.kind)).toEqual(['hyphen-digit', 'digit-plus']);
+    expect(create).toHaveBeenCalledTimes(2);
+    expect(pangu.applyLateFixes).toHaveBeenCalledTimes(1);
+    expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node, settled, data: '氣溫是 -5 度，Switch 2 + 瑪利歐賽車世界同捆組' }]);
+  });
+
   it.each(['"負"', 'null', 'signed-number'])('keeps invalid answer %s in place and composes successful fixes into one write', async (invalidAnswer) => {
     const answers = ['"signed-number"', invalidAnswer, '"signed-number"', '"range-or-separator"', '"unsure"'];
     const destroy = vi.fn();

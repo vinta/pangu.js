@@ -4,10 +4,12 @@ import { expect, test } from '@playwright/test';
 import type { CandidateLabel, ClassifyCandidatesMessage } from '../../../browser-extensions/chrome/src/ai-spacing/messages';
 import type { Settings } from '../../../browser-extensions/chrome/src/settings/storage';
 
+type StubLabels = CandidateLabel[] | Record<string, CandidateLabel>;
+
 declare global {
   interface Window {
     __aiClassifications: ClassifyCandidatesMessage[];
-    __aiLabels: CandidateLabel[];
+    __aiLabels: StubLabels;
   }
 }
 
@@ -18,32 +20,45 @@ async function sentCandidates(page: Page) {
 }
 
 // A fresh document per case, then the built content script injected the way Chrome does on spacing_when_load, with the worker stubbed to answer the given labels
-async function loadContentScript(page: Page, html: string, candidateLabels: CandidateLabel[]) {
+async function loadContentScript(page: Page, html: string, candidateLabels: StubLabels, aiEnabled = true) {
   await page.goto(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
-  await page.evaluate((candidateLabels) => {
-    window.__aiClassifications = [];
-    window.__aiLabels = candidateLabels;
-    Object.defineProperty(window, 'chrome', {
-      value: {
-        storage: { sync: { get: async (defaults: Settings) => ({ ...defaults, spacing_mode: 'spacing_when_load', is_ai_spacing_enabled: true }) } },
-        runtime: {
-          onMessage: { addListener: () => {} },
-          sendMessage: async (message: ClassifyCandidatesMessage) => {
-            window.__aiClassifications.push(message);
-            return { ok: true, candidateLabels: message.candidates.map((_, index) => window.__aiLabels[index] ?? 'range-or-separator') };
+  await page.evaluate(
+    ({ candidateLabels, aiEnabled }) => {
+      window.__aiClassifications = [];
+      window.__aiLabels = candidateLabels;
+      Object.defineProperty(window, 'chrome', {
+        value: {
+          storage: { sync: { get: async (defaults: Settings) => ({ ...defaults, spacing_mode: 'spacing_when_load', is_ai_spacing_enabled: aiEnabled }) } },
+          runtime: {
+            onMessage: { addListener: () => {} },
+            sendMessage: async (message: ClassifyCandidatesMessage) => {
+              window.__aiClassifications.push(message);
+              const labels = message.kind === 'digit-plus' ? ['conjunction', 'lower-bound', 'unsure'] : ['signed-number', 'range-or-separator', 'unsure'];
+              return {
+                ok: true,
+                candidateLabels: message.candidates.map((candidate, index) => {
+                  const label = (Array.isArray(window.__aiLabels) ? window.__aiLabels[index] : window.__aiLabels[candidate.sentence]) ?? 'unsure';
+                  if (!labels.includes(label)) {
+                    throw new Error(`Invalid stub label ${label} for ${message.kind}`);
+                  }
+                  return label;
+                }),
+              };
+            },
           },
         },
-      },
-    });
-    if (!('navigation' in window)) {
-      Object.defineProperty(window, 'navigation', { value: { addEventListener: () => {} } });
-    }
-  }, candidateLabels);
+      });
+      if (!('navigation' in window)) {
+        Object.defineProperty(window, 'navigation', { value: { addEventListener: () => {} } });
+      }
+    },
+    { candidateLabels, aiEnabled },
+  );
   await page.addScriptTag({ path: 'browser-extensions/chrome/dist/content-script.js' });
 }
 
 // What the page pass classifies
-async function classify(page: Page, html: string, candidateLabels: CandidateLabel[] = []) {
+async function classify(page: Page, html: string, candidateLabels: StubLabels = []) {
   await loadContentScript(page, html, candidateLabels);
   return sentCandidates(page);
 }
@@ -59,6 +74,41 @@ async function classifyCandidate(page: Page, html: string) {
 }
 
 test.describe('AI spacing DOM context', () => {
+  test('inserts the digit-plus separator using original neighboring inline context', async ({ page }) => {
+    expect(await classify(page, '<p><span>Switch </span><a>2+瑪利歐賽車世界同捆組</a><b>現貨</b></p>', ['conjunction'])).toEqual([{ sentence: 'Switch 2+瑪利歐賽車世界同捆組現貨', at: 8 }]);
+    await expect(page.locator('p')).toHaveText('Switch 2 + 瑪利歐賽車世界同捆組現貨');
+    expect(await page.evaluate(() => window.__aiClassifications.filter(({ candidates }) => candidates.length > 0).map(({ kind }) => kind))).toEqual(['digit-plus']);
+  });
+
+  test('does not classify a digit-plus when an inline sibling adds a second plus', async ({ page }) => {
+    await loadContentScript(page, '<p><a>Switch 2+瑪利歐賽車世界同捆組</a><span>，另送A+B</span></p>', ['conjunction']);
+
+    await expect(page.locator('p')).toHaveText('Switch 2+ 瑪利歐賽車世界同捆組，另送 A+B');
+    expect(await page.evaluate(() => window.__aiClassifications.flatMap(({ candidates }) => candidates))).toEqual([]);
+  });
+
+  test('classifies pluses in separate sentences independently across inline siblings', async ({ page }) => {
+    const candidates = await classify(page, '<p><a>Switch 2+瑪利歐賽車世界同捆組</a><span>。有100+的選擇</span></p>', {
+      'Switch 2+瑪利歐賽車世界同捆組': 'conjunction',
+      '有100+的選擇': 'lower-bound',
+    });
+    expect(candidates).toHaveLength(2);
+    expect(candidates).toEqual(
+      expect.arrayContaining([
+        { sentence: 'Switch 2+瑪利歐賽車世界同捆組', at: 8 },
+        { sentence: '有100+的選擇', at: 4 },
+      ]),
+    );
+    await expect(page.locator('p')).toHaveText('Switch 2 + 瑪利歐賽車世界同捆組。有 100+ 的選擇');
+  });
+
+  test('retains core digit-plus spacing without classification when AI spacing is disabled', async ({ page }) => {
+    await loadContentScript(page, '<p>Switch 2+瑪利歐賽車世界同捆組</p>', ['conjunction'], false);
+
+    await expect(page.locator('p')).toHaveText('Switch 2+ 瑪利歐賽車世界同捆組');
+    expect(await page.evaluate(() => window.__aiClassifications)).toEqual([]);
+  });
+
   test('plain text and nested inline elements provide the same sentence and symbol position', async ({ page }) => {
     const expected = [{ sentence: '目前已經發展成為一個擁有運-12輕型多用途飛機', at: 13 }];
     expect(await classify(page, '<p>目前已經發展成為一個擁有運-12輕型多用途飛機</p>')).toEqual(expected);

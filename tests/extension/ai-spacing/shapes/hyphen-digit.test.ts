@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { applyTextEdits, indexOfNthSymbol, sliceSentence, type TextEdit } from '../../../../browser-extensions/chrome/src/ai-spacing/shapes/base';
-import { hasInsertedGap, hyphenSign } from '../../../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-shape';
+import { hasInsertedGap, hyphenDigit } from '../../../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit';
 
 describe('sliceSentence()', () => {
   it('keep a text with no terminator whole', () => {
@@ -45,44 +45,44 @@ describe('sliceSentence()', () => {
   });
 });
 
-describe('hyphenSign.find()', () => {
+describe('hyphenDigit.find()', () => {
   it('flag a tight CJK-digit hyphen', () => {
-    expect(hyphenSign.find('氣溫是-5度左右', '氣溫是 - 5 度左右')).toEqual([{ sentence: '氣溫是-5度左右', at: 3, index: 4 }]);
+    expect(hyphenDigit.find('氣溫是-5度左右', '氣溫是 - 5 度左右')).toEqual([{ sentence: '氣溫是-5度左右', at: 3, index: 4 }]);
   });
 
   it('follow the hyphen past a junction space', () => {
-    expect(hyphenSign.find('氣溫是-5度', ' 氣溫是 - 5 度')).toEqual([{ sentence: '氣溫是-5度', at: 3, index: 5 }]);
+    expect(hyphenDigit.find('氣溫是-5度', ' 氣溫是 - 5 度')).toEqual([{ sentence: '氣溫是-5度', at: 3, index: 5 }]);
   });
 
   it('count earlier hyphens that were never flagged into the ordinal', () => {
     // The Nasdaq-100 hyphen is ordinal 0 and reads A-digit, so only the second hyphen is flagged
-    expect(hyphenSign.find('Nasdaq-100本週下跌-13.44%', 'Nasdaq-100 本週下跌 - 13.44%')).toEqual([{ sentence: 'Nasdaq-100本週下跌-13.44%', at: 14, index: 16 }]);
+    expect(hyphenDigit.find('Nasdaq-100本週下跌-13.44%', 'Nasdaq-100 本週下跌 - 13.44%')).toEqual([{ sentence: 'Nasdaq-100本週下跌-13.44%', at: 14, index: 16 }]);
   });
 
   it('flag every hyphen in one text node', () => {
-    expect(hyphenSign.find('從-5到-3度', '從 - 5 到 - 3 度')).toEqual([
+    expect(hyphenDigit.find('從-5到-3度', '從 - 5 到 - 3 度')).toEqual([
       { sentence: '從-5到-3度', at: 1, index: 2 },
       { sentence: '從-5到-3度', at: 4, index: 8 },
     ]);
   });
 
   it('slice each hyphen into its own sentence', () => {
-    expect(hyphenSign.find('溫度是-5度。濕度是-3度', '溫度是 - 5 度。濕度是 - 3 度')).toEqual([
+    expect(hyphenDigit.find('溫度是-5度。濕度是-3度', '溫度是 - 5 度。濕度是 - 3 度')).toEqual([
       { sentence: '溫度是-5度', at: 3, index: 4 },
       { sentence: '濕度是-3度', at: 3, index: 14 },
     ]);
   });
 
   it('ignore shapes outside the tight CJK-digit form', () => {
-    expect(hyphenSign.find('abc-5', 'abc-5')).toEqual([]);
-    expect(hyphenSign.find('中文-abc', '中文 - abc')).toEqual([]);
-    expect(hyphenSign.find('氣溫是 -5度', '氣溫是 - 5 度')).toEqual([]);
-    expect(hyphenSign.find('氣溫是- 5度', '氣溫是 - 5 度')).toEqual([]);
+    expect(hyphenDigit.find('abc-5', 'abc-5')).toEqual([]);
+    expect(hyphenDigit.find('中文-abc', '中文 - abc')).toEqual([]);
+    expect(hyphenDigit.find('氣溫是 -5度', '氣溫是 - 5 度')).toEqual([]);
+    expect(hyphenDigit.find('氣溫是- 5度', '氣溫是 - 5 度')).toEqual([]);
   });
 
   it('drop a tight match when its settled hyphen or inserted gap is absent', () => {
-    expect(hyphenSign.find('氣溫是-5度', '氣溫是 -5 度')).toEqual([]);
-    expect(hyphenSign.find('氣溫是-5度', '氣溫是 5 度')).toEqual([]);
+    expect(hyphenDigit.find('氣溫是-5度', '氣溫是 -5 度')).toEqual([]);
+    expect(hyphenDigit.find('氣溫是-5度', '氣溫是 5 度')).toEqual([]);
   });
 });
 
@@ -114,36 +114,36 @@ describe('hasInsertedGap()', () => {
   });
 });
 
-describe('hyphenSign.hasPotentialCandidates()', () => {
+describe('hyphenDigit.hasPotentialCandidates()', () => {
   it('answer yes when the tight shape occurs anywhere in the text', () => {
-    expect(hyphenSign.hasPotentialCandidates('前面一句。氣溫是-5度左右')).toBe(true);
+    expect(hyphenDigit.hasPotentialCandidates('前面一句。氣溫是-5度左右')).toBe(true);
   });
 
   it('answer no when only looser shapes occur', () => {
-    expect(hyphenSign.hasPotentialCandidates('abc-5')).toBe(false);
-    expect(hyphenSign.hasPotentialCandidates('氣溫是 -5度')).toBe(false);
-    expect(hyphenSign.hasPotentialCandidates('沒有連字號')).toBe(false);
+    expect(hyphenDigit.hasPotentialCandidates('abc-5')).toBe(false);
+    expect(hyphenDigit.hasPotentialCandidates('氣溫是 -5度')).toBe(false);
+    expect(hyphenDigit.hasPotentialCandidates('沒有連字號')).toBe(false);
   });
 
   it('leave the shared scan regex where a repeat and find() expect it', () => {
     const text = '氣溫是-5度左右';
-    expect(hyphenSign.hasPotentialCandidates(text)).toBe(true);
-    expect(hyphenSign.hasPotentialCandidates(text)).toBe(true);
-    expect(hyphenSign.find(text, '氣溫是 - 5 度左右')).toHaveLength(1);
+    expect(hyphenDigit.hasPotentialCandidates(text)).toBe(true);
+    expect(hyphenDigit.hasPotentialCandidates(text)).toBe(true);
+    expect(hyphenDigit.find(text, '氣溫是 - 5 度左右')).toHaveLength(1);
   });
 });
 
-describe('hyphenSign.edits()', () => {
+describe('hyphenDigit.edits()', () => {
   function fixAll(unspaced: string, settled: string) {
-    const textEdits = hyphenSign.find(unspaced, settled).flatMap((candidateMatch) => hyphenSign.edits({ ...candidateMatch, node: {} as Text, settled }, 'signed-number'));
+    const textEdits = hyphenDigit.find(unspaced, settled).flatMap((candidateMatch) => hyphenDigit.edits({ ...candidateMatch, node: {} as Text, settled }, 'signed-number'));
     return applyTextEdits(settled, textEdits);
   }
 
   it('leave other labels and missing answers unchanged', () => {
     const settled = '氣溫是 - 5 度左右';
-    const candidate = { ...hyphenSign.find('氣溫是-5度左右', settled)[0]!, node: {} as Text, settled };
+    const candidate = { ...hyphenDigit.find('氣溫是-5度左右', settled)[0]!, node: {} as Text, settled };
     for (const candidateLabel of ['range-or-separator', 'unsure', null] as const) {
-      expect(hyphenSign.edits(candidate, candidateLabel)).toEqual([]);
+      expect(hyphenDigit.edits(candidate, candidateLabel)).toEqual([]);
     }
   });
 
