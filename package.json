@@ -76,7 +76,7 @@
     "build:lib": "vite build && npm run build:types",
     "build:types": "tsc -p src/browser/tsconfig.json --emitDeclarationOnly --declarationDir dist && tsc -p src/node/tsconfig.json --emitDeclarationOnly --declarationDir dist",
     "build:extension": "vite build --config browser-extensions/vite.config.extension.ts && cp -f browser-extensions/chrome/src/content-script.css browser-extensions/chrome/dist/",
-    "test": "npm run build && vitest run && playwright test --reporter=list",
+    "test": "npm run build && vitest run tests/ && playwright test --reporter=list",
     "test:shared": "npm run build && vitest run tests/shared/",
     "test:node": "npm run build && vitest run tests/node/",
     "test:browser": "npm run build && playwright test --reporter=list",

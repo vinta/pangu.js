@@ -55,6 +55,10 @@ Use `--cases <JSON path>` for a separate hyphen corpus. It replaces both `cases.
 
 Add candidates to `hyphen-digit/prompts.js`. Keep measured variants unchanged and give revised prompts new IDs. Keep glosses generic; never describe control-specific cases or copy evaluation sentences into examples. To promote a winner, update the shipping prompt and compare `shipping` with the measured candidate.
 
+## Runner tests
+
+Run `npx vitest run scripts/prompt-experiments/sweep.test.ts` from the repository root. These tests mock the model and require no browser. Run them separately; `npm test` only selects tests under `tests/`.
+
 ## What the runner measures
 
 - Original sign accuracy, control flips, and field accuracy, reported separately. Any wrong repeat makes that case fail.
