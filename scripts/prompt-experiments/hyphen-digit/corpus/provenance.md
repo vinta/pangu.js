@@ -40,7 +40,7 @@ Before cleanup on 2026-09-11, all 163 files under the repository's prompt-experi
 
 All 15 retained development IDs had saved model inference records. Four development records were also used as prompt examples: `real-development-08`, `real-development-09`, `real-development-10`, and `real-development-12`. Each record preserves these facts in `prior_exposure`. Keep them in development; any future example page must be excluded from scored development.
 
-The audit covers repository artifacts and the prior report, not unrecorded external activity. Reverify source pages and production routing before inference. If exposure is later found to be uncertain, move the whole page to development and replace its holdout cases.
+The audit covers repository artifacts and the prior report, not unrecorded external activity. Before another round, validate saved source hashes and replay production routing locally. Follow the [workflow](../../../../docs/research/2026-09-11-shape-prompt-improvement.md#1-establish-the-real-input-contract) to decide when a source needs fetching again. If exposure is later found to be uncertain, move the whole page to development and replace its holdout cases.
 
 ## Additional development sources
 

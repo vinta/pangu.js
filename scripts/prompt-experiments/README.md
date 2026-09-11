@@ -1,6 +1,6 @@
 # Prompt experiments
 
-Use [the real-text workflow](../../docs/research/2026-09-11-shape-prompt-improvement.md). See the completed [hyphen-digit report](hyphen-digit/results/real-text-20260911-round1/REPORT.md) and [frozen protocol](hyphen-digit/results/real-text-20260911-round1/protocol.json). Develop candidates from new baseline measurements and diagnostics; do not retrieve deleted experiments from Git history, temporary reports, previous sessions, or memories.
+For a new experiment, start with [the real-text workflow](../../docs/research/2026-09-11-shape-prompt-improvement.md), current production code, and verified corpus snapshots. Develop candidates from fresh baseline measurements and diagnostics. Keep prior reports, candidate explanations, and model outputs outside the new round, including copies in Git history, temporary reports, previous sessions, or memories.
 
 NEVER use fabricated text for experiments or prompt improvement. Every source passage in an input, example, or diagnostic must have verified provenance. Preserve authored text and production context. Keep disputed meanings unscored.
 
@@ -16,7 +16,7 @@ Set `PANGU_EXTENSION_ID`, `PANGU_CHROME_PROFILE_PATH`, and `PANGU_CHROME_PROFILE
 
 ## Run
 
-Run commands from the repository root. Hyphen-digit requires an explicit `--cases` file and has no legacy corpus fallback. Its source records live in `hyphen-digit/corpus/`; the corpus contains 21 development and 8 holdout targets. The completed round evaluated all 8 holdouts; obtain fresh holdouts before another qualification round. Recheck sources and production inputs before new inference.
+Run commands from the repository root. Hyphen-digit requires an explicit `--cases` file and has no legacy corpus fallback. Its source records live in `hyphen-digit/corpus/`; the corpus contains 21 development and 8 holdout targets. The completed round evaluated all 8 holdouts; obtain fresh holdouts before another qualification round. Validate saved source hashes and replay production inputs locally. Fetch sources again only under the workflow’s [source-verification rules](../../docs/research/2026-09-11-shape-prompt-improvement.md#1-establish-the-real-input-contract).
 
 ```bash
 # Validate the retained source records and render shipping without a browser.
@@ -41,7 +41,7 @@ The runner records labels, raw answers, errors, timings, and actual case orders.
 
 A case passes only when every expected answer is correct and has no error. Missing answers, skips, and incomplete runs fail. Diagnostic output is separate from accuracy: use `--diagnostics <case IDs>` with `--orders 1 --repeats 1` on development cases only. Never run diagnostics on holdout.
 
-`--require-perfect` fails if any scored case fails. The new experiment's paired no-regression gate is different: compare baseline and candidate per case under the declared protocol. Label outputs alone do not establish final spacing or shipping integration. Complete the spacing annotations and production checks required by the plan before accepting a candidate.
+`--require-perfect` fails if any scored case fails. The new experiment's paired no-regression gate is different: compare baseline and candidate per case under the declared protocol. Label outputs alone do not establish final spacing or shipping integration. Complete the spacing annotations and production checks in the workflow’s [acceptance gates](../../docs/research/2026-09-11-shape-prompt-improvement.md#acceptance-gates) before accepting a candidate.
 
 When finished, disconnect with `playwright-cli -s=pangu-eval detach`.
 
@@ -52,3 +52,7 @@ npx vitest run scripts/prompt-experiments/sweep.test.ts
 ```
 
 These tests use mocked model responses and require no browser. They run separately from `npm test` and are outside the typed ESLint scope.
+
+## Historical review only
+
+The completed [hyphen-digit report](hyphen-digit/results/real-text-20260911-round1/REPORT.md) and [frozen protocol](hyphen-digit/results/real-text-20260911-round1/protocol.json) document the finished round. Open them when reviewing that round; do not use them to select candidates for an independent experiment.
