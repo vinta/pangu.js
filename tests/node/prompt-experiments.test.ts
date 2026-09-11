@@ -22,7 +22,7 @@ test.skipIf(!process.features.typescript)('custom hyphen cases replace the defau
   const diagnostics = check('--diagnostics', 'title-19', '--orders', '1');
   expect(diagnostics.status, diagnostics.stderr).toBe(0);
   expect(check('--diagnostics', 'title-19').stderr).toContain('--diagnostics requires --repeats 1, --orders 1');
-  expect(check('--experiment', 'plus-sign').stderr).toContain('--cases is only supported for --experiment hyphen-sign');
+  expect(check('--experiment', 'digit-plus').stderr).toContain('--cases is only supported for --experiment hyphen-sign');
 
   writeFileSync(file, JSON.stringify({ ...corpus, diagnosticQuestions: [' '] }));
   expect(check().stderr).toContain('invalid diagnosticQuestions');
@@ -59,9 +59,6 @@ test.skipIf(!process.features.typescript)('requires an explicit matching Chrome 
 
 for (const [experiment, variant] of [
   ['hyphen-sign', 'v27-zh-unique-quote'],
-  ['spacing-rewrite', 'v1-zh'],
-  ['spacing-rewrite', 'v1-zh-omit-constraint-input'],
-  ['slash-unit', 'v1-zh'],
   ['digit-plus', 'v1-zh'],
 ] as const) {
   test.skipIf(!process.features.typescript)(`${experiment}/${variant}: scored failures fail require-perfect and preserve raw answers`, () => {
@@ -84,13 +81,10 @@ const worker = {
       params: () => ({}), availability: async () => 'available',
       create: async () => ({ destroy() {}, clone: async () => ({ destroy() {}, prompt: async (question, options) => {
         assert.equal(typeof question, 'string');
-        assert.equal(options.omitResponseConstraintInput, process.env.TEST_OMIT_CONSTRAINT_INPUT === 'true');
+        assert.equal(options.omitResponseConstraintInput, false);
         calls++;
         const input = args.inputs.find(input => input.question === question);
-        if (input.enum === 'slash' && input === args.inputs[0]) return JSON.stringify('separator');
         if (input.enum === 'digit-plus' && input === args.inputs[0]) return JSON.stringify('lower-bound');
-        if (args.rewrite && input === args.inputs[0]) return JSON.stringify(input.expected_label + '\\n');
-        if (args.rewrite && input === args.inputs[1]) return 'invalid JSON';
         return JSON.stringify(input.expected_label);
       } }) })
     };
@@ -124,19 +118,17 @@ new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context 
       ],
       {
         encoding: 'utf8',
-        env: { ...process.env, PATH: `${root}:${process.env.PATH}`, TEST_PROFILE: profile, TEST_OMIT_CONSTRAINT_INPUT: String(variant === 'v1-zh-omit-constraint-input') },
+        env: { ...process.env, PATH: `${root}:${process.env.PATH}`, TEST_PROFILE: profile },
       },
     );
     expect(run.status, run.stderr).toBe(1);
     const result = JSON.parse(readFileSync(join(output, `1-${variant}.json`), 'utf8')) as {
       omitResponseConstraintInput: boolean;
-      evaluation: { labels: unknown; misses: string[]; exact: unknown; nonSpaceChanges: number };
+      evaluation: { labels: unknown; misses: string[] };
       results: {
         id: string;
         input: string;
         at: number;
-        unit: string;
-        expected_output: string;
         responseConstraint: unknown;
         skipped?: string;
         correct: boolean;
@@ -145,32 +137,14 @@ new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context 
       testCalls: number;
       orders: string[][];
     };
-    expect(result.omitResponseConstraintInput).toBe(variant === 'v1-zh-omit-constraint-input');
+    expect(result.omitResponseConstraintInput).toBe(false);
     if (experiment === 'digit-plus') {
-      expect(result.evaluation.labels).toEqual({ passed: 13, total: 14 });
-      expect(result.evaluation.misses).toEqual(['switch-bundle-1']);
+      expect(result.evaluation.labels).toEqual({ passed: 6, total: 7 });
+      expect(result.evaluation.misses).toEqual(['tw-conj-diablo-1']);
       expect(result.results[0].answers[0]).toMatchObject({ raw: '"lower-bound"', answer: 'lower-bound', error: null });
       expect(result.results[0].responseConstraint).toEqual({ type: 'string', enum: ['conjunction', 'lower-bound', 'unsure'] });
-      expect(result.results.find((kase) => kase.id === 'galaxy-s24-1')).toMatchObject({ expected_label: 'unsure' });
       expect(result.results.every((kase) => kase.input[kase.at] === '+' && kase.input.split('+').length === 2)).toBe(true);
-      expect(result.testCalls).toBe(14 * 6);
-      return;
-    }
-    if (experiment === 'slash-unit') {
-      expect(result.evaluation.labels).toEqual({ passed: result.results.length - 1, total: result.results.length });
-      expect(result.evaluation.misses).toEqual([result.results[0].id]);
-      expect(result.results[0].answers[0]).toMatchObject({ raw: '"separator"', answer: 'separator', error: null });
-      expect(result.testCalls).toBe(result.results.length * 6);
-      expect(result.results.every((kase: { input: string; at: number; unit: string }) => kase.input.slice(kase.at).startsWith('/' + kase.unit))).toBe(true);
-      return;
-    }
-    if (experiment === 'spacing-rewrite') {
-      expect(result.evaluation.exact).toEqual({ passed: result.results.length - 2, total: result.results.length });
-      expect(result.evaluation.nonSpaceChanges).toBe(6);
-      expect(result.results[0].answers[0].answer).toBe(result.results[0].expected_output + '\n');
-      expect(result.results[1].answers[0]).toMatchObject({ raw: 'invalid JSON', answer: null, error: expect.any(String) as unknown });
-      expect(result.results.every((kase: { responseConstraint: unknown }) => JSON.stringify(kase.responseConstraint) === '{"type":"string"}')).toBe(true);
-      expect(result.testCalls).toBe(result.results.length * 6);
+      expect(result.testCalls).toBe(7 * 6);
       return;
     }
     const skipped = result.results.filter((kase: { skipped?: string }) => kase.skipped);

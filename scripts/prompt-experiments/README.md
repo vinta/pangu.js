@@ -1,16 +1,8 @@
 # Prompt experiments
 
-For direct text output from explicit spacing rules, see [the spacing rewrite experiment](spacing-rewrite/README.md).
-
 For `omitResponseConstraintInput` on the hyphen classifier, see [the v26 comparison](hyphen-sign/reports/2026-09-07-omit-constraint-input.md).
 
 For title numbers and subtitle context, see [the v31 comparison](hyphen-sign/reports/2026-09-09-title-number.md).
-
-For clean clones versus shared history on one webpage, see [the session reuse experiment](session-reuse/README.md).
-
-For longer classifier inputs, see [the sentence length experiment](sentence-length/README.md).
-
-For `CJK/單位` and “per” classification, see [the slash-unit experiment](slash-unit/README.md).
 
 For `Switch 2+遊戲` versus `Python 3+的版本`, see [the digit-plus experiment](digit-plus/README.md).
 
@@ -39,7 +31,7 @@ If the worker is missing, click its **service worker** inspection link in `chrom
 
 ## Run
 
-The default experiment is `hyphen-sign`. For suffix/separator classification, use `--experiment plus-sign`; see [the plus experiment](plus-sign/README.md).
+The default experiment is `hyphen-sign`. For classification after a digit, use `--experiment digit-plus`; see [the digit-plus experiment](digit-plus/README.md).
 
 Run from the repository root. Every output directory must be new; existing results are never overwritten.
 
@@ -69,8 +61,6 @@ Add candidates to `hyphen-sign/prompts.js`. Keep measured variants unchanged and
 - Exact system/user prompts, response schemas, token-to-label mappings, every raw response, errors, timings, browser user agent and prompt version in each new export.
 - Fixed `temperature: 0`, `topK: 1`, canonical menu order, and no language declaration. Each case/repeat gets a fresh clone.
 - `--orders N` (default 2) runs the cases in N orders per variant: corpus order, then seeded shuffles. Each order gets its own base session. A label near a tie depends on which questions earlier clones of the same base answered, so agreement within one order is not stability; the export lists the orders and tags every answer with its order index, and any disagreement marks the case unstable and wrong. Use `--orders 1` only for diagnostics.
-
-The session reuse experiment overrides these defaults with `--page-sessions clone|reuse`. It requires a custom corpus with `page` and `pageContext` on every case, one repeat, and two orders. It resets sessions for each page and order, testing forward and reverse order. Add `--page-context` to include the page excerpt in each base session. Repeat whole runs for independent trials. Exports include exact page system prompts, session creation times, per-call timings, context usage, and overflow counts.
 
 The runner verifies the configured profile before each variant. Inference errors make the command fail; `--require-perfect` also fails if any scored case is wrong. A normal comparison can finish successfully while reporting accuracy failures.
 
