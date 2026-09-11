@@ -52,6 +52,45 @@ Check that the built extension uses the measured system prompt, rendered questio
 
 **Done when:** the built runtime returns the intended labels and final spacing for the evaluation cases, and relevant deterministic checks pass. Report label accuracy and spacing accuracy separately: different labels can produce the same edit.
 
+## Automated execution
+
+The automation had two parts: an AI agent made the research and prompt-design decisions, while scripts handled repeatable model calls and scoring. Once browser setup and the required permissions were complete, the agent could run the improvement loop without a person entering prompts, copying answers, or starting each comparison.
+
+### Connect the agent to the model
+
+A Node.js script used Playwright through the Chrome DevTools Protocol to reach the installed extension's service worker. Code evaluated in that worker called Chrome's Prompt API, which ran Gemini Nano locally. The script received structured results back through the browser connection.
+
+```text
+Agent → Node.js script → Playwright → extension worker → Chrome Prompt API
+  ↑                          results and scores                        ↓
+  └────────────────────────────────────────────────────────────────────┘
+```
+
+Computer automation handled the browser-facing setup: selecting the intended Chrome profile, opening the extension's worker inspector when needed, and later reloading the built extension. Before inference, the script verified the target profile and extension worker and checked that the model was available in that context. Model provisioning and browser debugging permissions remained prerequisites for unattended runs.
+
+### Automate a comparison
+
+The agent supplied a versioned candidate prompt and annotated cases. For each comparison, the script:
+
+1. Rendered the exact system prompt, case questions, and allowed response labels, then saved the inputs used by the run.
+2. Created a fresh base model session for each candidate and execution order, with the candidate's system prompt and the chosen sampling settings.
+3. Cloned that base for each case and repeat, submitted the question with a constrained response format, and collected the raw answer or error. Each clone started from the same base context, keeping earlier case answers out of later conversations.
+4. Parsed answers and compared them with the expected labels. It reported failures by case and meaning, flagged inconsistent repeats, and saved raw responses, errors, timings, and execution order. Confirmation failed if any required answer was wrong.
+
+Candidate prompts were passed directly to these experiment sessions. This let the agent compare wording, examples, and output options without rebuilding the extension for every variant. The installed worker provided the model execution context; the sweep used its own sessions rather than the shipping classifier's cached answers.
+
+### Let results drive the next experiment
+
+The agent read the result files and selected representative failures for a separate diagnostic run. The script asked follow-up questions about the sentence's meaning and recorded the replies. The agent used those replies to propose a hypothesis, wrote a new candidate, and launched another development comparison.
+
+Source selection, label judgments, and the decision to change a prompt remained agent tasks. The script made those decisions measurable by executing the same checks consistently. Diagnostic conversations and prompt examples stayed outside independent accuracy scoring; a passing development run triggered confirmation and then the frozen holdout evaluation.
+
+### Verify the installed implementation
+
+After selection, automation rebuilt and reloaded the extension. A temporary extension page sent classification requests through the extension's actual message entry point, exercising the registered prompt and model-handling code. Returned labels were applied through production spacing and edits, and the final strings were compared with the expected output.
+
+This last check covered the gap between a successful experimental prompt and a correctly integrated feature. Automation then closed temporary inspection pages and disconnected from the browser.
+
 ## What the digit-plus experiments established
 
 | Experiment                                                                                    | Observation                                                                         | Interpretation                                                                                              |
@@ -74,6 +113,6 @@ Valid enum responses were often consistently wrong. [Structured output](https://
 
 ## Evidence and reuse
 
-The [digit-plus prompt](../../browser-extensions/chrome/src/ai-spacing/shapes/digit-plus-prompt.ts) contains the selected instructions and examples. Its [frozen prompt tests](../../tests/extension/ai-spacing/shapes/digit-plus-prompt.test.ts) check exact bytes, not model accuracy. The experiment corpus and runner live under `scripts/prompt-experiments/` on `feature/prompt-experiments`; inspect that checkout's instructions and commands before reuse.
+The [digit-plus prompt](../../browser-extensions/chrome/src/ai-spacing/shapes/digit-plus-prompt.ts) contains the selected instructions and examples. Its [frozen prompt tests](../../tests/extension/ai-spacing/shapes/digit-plus-prompt.test.ts) check exact bytes, not model accuracy.
 
-The [local experiment report](../../tmp/digit-plus-real-tw/RESULTS.md) links raw answers, diagnostics, corpus splits, and shipping verification. Those exports are ignored local artifacts and may be absent from a fresh checkout; the measured summary above is self-contained. [Chrome's evaluation guidance](https://developer.chrome.com/docs/ai/evals/run) supports separate evaluation layers and fresh release cases. Check the current [Prompt API documentation](https://developer.chrome.com/docs/ai/prompt-api) before changing session or schema options.
+[Chrome's evaluation guidance](https://developer.chrome.com/docs/ai/evals/run) supports separate evaluation layers and fresh release cases. Check the current [Prompt API documentation](https://developer.chrome.com/docs/ai/prompt-api) before changing session or schema options.
