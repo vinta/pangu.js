@@ -9,7 +9,7 @@
       "unsure"
     ]
   },
-  "notes": "Exact source HTML replayed through production Pangu.spaceText, hyphenDigit.find and readSentence in Chrome Beta. Relevant live source display and whitespace verified. No model inference before routing freeze.",
+  "notes": "Source HTML and relevant live display and whitespace were verified on 2026-09-11. Production Pangu.spaceText, hyphenDigit.find and readSentence replay produced the recorded inputs and offsets. Reverify sources and routing before a new experiment.",
   "cases": [
     {
       "id": "real-holdout-01",
@@ -46,7 +46,13 @@
         }
       ],
       "settled": "3. 冷凍及冷藏食品之品溫應分別維持於攝氏 - 18℃ 以下及 7℃ 以下凍結點以上，且不得有劇烈的溫度變動。 冷凍、冷藏設備應定期除霜，並保持清潔。",
-      "settled_index": 22
+      "settled_index": 22,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": false,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-holdout-02",
@@ -83,7 +89,13 @@
         }
       ],
       "settled": "冷凍食品之品溫應維持於攝氏 - 18℃ 以下，並定期除霜",
-      "settled_index": 14
+      "settled_index": 14,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": false,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-holdout-03",
@@ -120,7 +132,13 @@
         }
       ],
       "settled": "附件 1 補償金申請書 - 1120731.pdf",
-      "settled_index": 12
+      "settled_index": 12,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": false,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-holdout-04",
@@ -157,7 +175,13 @@
         }
       ],
       "settled": "附件 4 申請犯罪被害補償金事件委任書 - 1120731.pdf",
-      "settled_index": 20
+      "settled_index": 20,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": false,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-holdout-05",
@@ -194,7 +218,13 @@
         }
       ],
       "settled": "8 個月 - 1 歲 3 個月 ",
-      "settled_index": 5
+      "settled_index": 5,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": false,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-holdout-06",
@@ -231,7 +261,13 @@
         }
       ],
       "settled": "磷產品系列 - 1",
-      "settled_index": 6
+      "settled_index": 6,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": false,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-holdout-07",
@@ -271,7 +307,13 @@
         }
       ],
       "settled": "最多應該就 - 100 吧 剛好押金",
-      "settled_index": 6
+      "settled_index": 6,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": false,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-holdout-08",
@@ -308,7 +350,13 @@
         }
       ],
       "settled": "2022 年成立滿一年的台股 ETF 共 29 檔全數負報酬，平均報酬率為 - 20.1%，僅 11 檔 ETF 報酬率優於大盤，其中「高股息、低波動」相關 ETF 成為相對抗跌的標的而名列前茅，全年度績效榜首為 00731 復華富時高股息低波動 ETF，跌幅僅 5.9% 優於大盤 18.7%。",
-      "settled_index": 38
+      "settled_index": 38,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": false,
+        "prompt_example": false
+      }
     }
   ],
   "diagnosticQuestions": [

@@ -5,7 +5,6 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { hyphenDigitPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-prompt.ts';
-import { PROMPTS, SHOT_SENTENCES } from './hyphen-digit/prompts.js';
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
@@ -32,18 +31,22 @@ assert(['hyphen-digit', 'digit-plus'].includes(values.experiment), `invalid --ex
 assert(values.cases === undefined || values.experiment === 'hyphen-digit', '--cases is only supported for --experiment hyphen-digit');
 const digitPlus = values.experiment === 'digit-plus' ? await import('./digit-plus/experiment.mjs') : null;
 assert(digitPlus || !values.split, '--split is only supported for --experiment digit-plus');
+assert(digitPlus || values.cases, 'provide --cases <verified-corpus.json> for --experiment hyphen-digit');
 const split = values.split ?? 'development';
 const variants = positionals.length ? positionals : digitPlus ? ['v18-en-real-examples'] : ['shipping'];
 const prompts = digitPlus
   ? (await import(`./${values.experiment}/prompts.js`)).PROMPTS
   : {
-      ...PROMPTS,
+      ...(await import('./hyphen-digit/prompts.js')).PROMPTS,
       shipping: { system: hyphenDigitPrompt.systemPrompt, build: (kase) => hyphenDigitPrompt.buildQuestion(kase.input, kase.at) },
     };
-const root = new URL('./hyphen-digit/', import.meta.url);
-const corpus = digitPlus ? digitPlus.loadCorpus(split) : JSON.parse(readFileSync(values.cases ?? new URL('cases.json', root), 'utf8'));
-const fields = digitPlus || values.cases !== undefined ? [] : JSON.parse(readFileSync(new URL('field-cases.json', root), 'utf8')).cases;
-const cases = [...corpus.cases, ...fields];
+const corpus = digitPlus ? digitPlus.loadCorpus(split) : JSON.parse(readFileSync(values.cases, 'utf8'));
+const cases = corpus.cases;
+assert(Array.isArray(cases) && cases.length > 0, 'empty corpus; provide at least one scored case');
+if (!digitPlus) {
+  assert(['development', 'holdout'].includes(corpus.role), 'invalid corpus role; use development or holdout');
+  assert(!values.diagnostics || corpus.role === 'development', 'holdout diagnostics are forbidden; use development cases');
+}
 assert(
   corpus.diagnosticQuestions === undefined ||
     (Array.isArray(corpus.diagnosticQuestions) && corpus.diagnosticQuestions.length > 0 && corpus.diagnosticQuestions.every((question) => typeof question === 'string' && question.trim())),
@@ -76,9 +79,18 @@ for (const id of diagnosticIds ?? []) {
 }
 assert.equal(new Set(cases.map((kase) => kase.id)).size, cases.length, 'duplicate case IDs');
 for (const kase of cases) {
+  assert(typeof kase.input === 'string' && Number.isSafeInteger(kase.at) && kase.at >= 0, `invalid input or target offset: ${kase.id}`);
   assert.equal(kase.input[kase.at], digitPlus ? '+' : '-', `invalid symbol offset: ${kase.id}`);
-  assert(corpus.enums[kase.enum].includes(kase.expected_label), `unknown expected label: ${kase.id}`);
-  assert(!SHOT_SENTENCES.includes(kase.input), `few-shot leakage: ${kase.id}`);
+  assert(corpus.enums?.[kase.enum]?.includes(kase.expected_label), `unknown expected label: ${kase.id}`);
+  if (!digitPlus) {
+    assert(!kase.review, `unresolved review case: ${kase.id}; exclude it from scored corpora`);
+    for (const field of ['source', 'retrieved_at', 'original_excerpt', 'source_html', 'annotation_rationale', 'source_verification', 'routing_status', 'settled']) {
+      assert(typeof kase[field] === 'string' && kase[field].trim(), `missing ${field}: ${kase.id}; record verified source and production input evidence`);
+    }
+    assert(/^https?:\/\/[^/\s]+(?:\/[^\s]*)?$/.test(kase.source), `invalid source URL: ${kase.id}`);
+    assert(Number.isSafeInteger(kase.original_at) && kase.original_at >= 0 && kase.original_excerpt[kase.original_at] === '-', `invalid original target offset: ${kase.id}`);
+    assert(Number.isSafeInteger(kase.settled_index) && kase.settled_index >= 0 && kase.settled[kase.settled_index] === '-', `invalid settled target offset: ${kase.id}`);
+  }
 }
 if (!digitPlus) {
   assert.deepEqual(corpus.enums.hyphen, hyphenDigitPrompt.candidateLabels, 'shipping labels differ from the corpus; update the cases before comparing prompts');
@@ -90,20 +102,14 @@ const runs = variants.map((variant) => {
     .filter((kase) => !diagnosticIds || diagnosticIds.includes(kase.id))
     .map((kase) => {
       const labels = corpus.enums[kase.enum];
-      // A variant may reorder the menu/enum (labelOrder), name tokens per case (displayLabels as a function), or wrap the answer in an object schema (constraint + answerKey)
-      const ordered = prompt.labelOrder ?? labels;
-      const displayLabels = typeof prompt.displayLabels === 'function' ? prompt.displayLabels(kase) : prompt.displayLabels;
-      const tokens = ordered.flatMap((label) => [displayLabels?.[label] ?? label].flat().map((token) => [token, label]));
       const question = prompt.build(kase, labels);
       assert(question === null || typeof question === 'string', `invalid prompt for ${variant}/${kase.id}; return a string or null for abstention`);
-      const enumTokens = tokens.map(([token]) => token);
-      assert.equal(new Set(enumTokens).size, enumTokens.length, `duplicate response tokens: ${variant}/${kase.id}`);
-      return { ...kase, question, tokens, answerKey: prompt.answerKey ?? null, responseConstraint: prompt.constraint ? prompt.constraint(enumTokens) : { type: 'string', enum: enumTokens } };
+      return { ...kase, question, responseConstraint: { type: 'string', enum: labels } };
     });
   return { variant, prompt, inputs };
 });
 if (values.check) {
-  console.log(`Checked ${cases.length} cases; rendered variants: ${variants.join(', ')}${digitPlus ? '' : `; shipping source version: ${hyphenDigitPrompt.version}`}`);
+  console.log(`Checked ${cases.length} cases (offline structure only); rendered variants: ${variants.join(', ')}${digitPlus ? '' : `; shipping source version: ${hyphenDigitPrompt.version}`}`);
   process.exit(0);
 }
 assert(/^[a-p]{32}$/.test(values['extension-id'] ?? ''), `invalid --extension-id ${values['extension-id'] ?? '(missing)'}; copy the shipping extension ID from chrome://extensions/`);
@@ -115,6 +121,7 @@ const statePath = join(dirname(profilePath), 'Local State');
 const state = JSON.parse(readFileSync(statePath, 'utf8'));
 assert.equal(state.profile?.info_cache?.[basename(profilePath)]?.name, values['profile-name'], `Chrome profile name mismatch for ${profilePath}; verify --profile-name against ${statePath}`);
 const output = resolve(values.out);
+mkdirSync(dirname(output), { recursive: true });
 mkdirSync(output, { recursive: false });
 writeFileSync(join(output, 'cases.json'), `${JSON.stringify({ ...corpus, cases }, null, 2)}\n`, { flag: 'wx' });
 
@@ -142,7 +149,7 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
     await worker.evaluate((id) => chrome.tabs.remove(id), infoId);
   }
   const run = await worker.evaluate(
-    async ({ system, initialTurns, inputs, orders, repeats, diagnostics, diagnosticQuestions, omitResponseConstraintInput }) => {
+    async ({ system, inputs, orders, repeats, diagnostics, diagnosticQuestions, omitResponseConstraintInput }) => {
       if (typeof LanguageModel === 'undefined' || typeof LanguageModel.params !== 'function') {
         throw new Error('extension Prompt API sampling controls unavailable; check Chrome and the extension context');
       }
@@ -154,7 +161,7 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
       const answersById = new Map(inputs.map((input) => [input.id, []]));
       for (const order of orders) {
         const started = performance.now();
-        const base = await LanguageModel.create({ initialPrompts: [{ role: 'system', content: system }, ...initialTurns], temperature: 0, topK: 1 });
+        const base = await LanguageModel.create({ initialPrompts: [{ role: 'system', content: system }], temperature: 0, topK: 1 });
         createMs ??= Math.round(performance.now() - started);
         try {
           for (const index of order) {
@@ -174,7 +181,7 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
                 turn = await base.clone();
                 raw = await turn.prompt(input.question, { responseConstraint: input.responseConstraint, omitResponseConstraintInput, signal: AbortSignal.timeout(30000) });
                 const parsed = JSON.parse(raw);
-                answer = input.tokens.find(([token]) => token === (input.answerKey ? parsed?.[input.answerKey] : parsed))?.[1] ?? null;
+                answer = input.responseConstraint.enum.includes(parsed) ? parsed : null;
                 if (answer === null) {
                   throw new Error(`response outside constraint: ${raw}`);
                 }
@@ -185,8 +192,13 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
                   ];
                   for (const question of questions) {
                     const start = performance.now();
-                    const response = await turn.prompt(question, { signal: AbortSignal.timeout(30000) });
-                    followups.push({ question, raw: response, ms: Math.round(performance.now() - start) });
+                    try {
+                      const response = await turn.prompt(question, { signal: AbortSignal.timeout(30000) });
+                      followups.push({ question, raw: response, ms: Math.round(performance.now() - start) });
+                    } catch (error) {
+                      followups.push({ question, raw: null, error: String(error), ms: Math.round(performance.now() - start) });
+                      throw error;
+                    }
                   }
                 }
               } catch (caught) {
@@ -208,32 +220,15 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
           base.destroy();
         }
       }
-      const normalized = (raw) => {
-        try {
-          return raw === null ? null : JSON.stringify(JSON.parse(raw));
-        } catch {
-          return raw;
-        }
-      };
-      const results = inputs.map((input) => {
-        if (input.question === null) {
-          return { ...input, skipped: 'no-unique-target-reference', answers: [], answer: null, correct: false, stable: null };
-        }
-        const answers = answersById.get(input.id);
-        return {
-          ...input,
-          answers,
-          answer: answers[0].answer,
-          correct: answers.every((answer) => answer.answer === input.expected_label),
-          // Compare parsed values: an object-schema answer can differ only in JSON whitespace between calls
-          stable: answers.every((answer) => normalized(answer.raw) === normalized(answers[0].raw)),
-        };
-      });
+      const results = inputs.map((input) => ({
+        ...input,
+        ...(input.question === null ? { skipped: 'prompt-abstention' } : {}),
+        answers: answersById.get(input.id),
+      }));
       return { availability, createMs, results };
     },
     {
       system: prompt.system,
-      initialTurns: prompt.initialTurns ?? [],
       inputs,
       orders,
       repeats,
@@ -248,17 +243,8 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
 for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
   const orders = caseOrders(orderCount, inputs.length);
   const code = `async page => (${runInBrowser.toString()})(page, ${JSON.stringify({ profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics: Boolean(diagnosticIds), diagnosticQuestions: diagnosticIds ? corpus.diagnosticQuestions : undefined })})`;
-  const run = JSON.parse(
-    execFileSync('playwright-cli', ['-s=pangu-eval', '--raw', 'run-code', code], {
-      encoding: 'utf8',
-      maxBuffer: 10 * 1024 * 1024,
-      timeout: 120000,
-      stdio: ['ignore', 'pipe', 'inherit'],
-    }),
-  );
-
   const result = {
-    set: corpus.set ?? (values.cases !== undefined ? 'hyphen-digit:custom' : 'hyphen-digit+field'),
+    set: corpus.set ?? `${values.experiment}:${corpus.role ?? split}`,
     backend: 'prompt-api',
     model: 'gemini-nano',
     context: 'extension-sw',
@@ -272,36 +258,84 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     purpose: diagnosticIds ? 'interpretation-diagnostics-not-accuracy' : 'accuracy',
     system: prompt.system,
     omitResponseConstraintInput: prompt.omitResponseConstraintInput ?? false,
-    initialTurns: prompt.initialTurns ?? [],
-    ...run,
-    ...(digitPlus ? { evaluation: digitPlus.score(run) } : {}),
+    expectedAttemptsPerCase: orderCount * repeats,
   };
   const file = join(output, `${runIndex + 1}-${variant}.json`);
+  let stdout;
+  try {
+    stdout = execFileSync('playwright-cli', ['-s=pangu-eval', '--raw', 'run-code', code], {
+      encoding: 'utf8',
+      maxBuffer: 10 * 1024 * 1024,
+      timeout: 120000,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    const run = JSON.parse(stdout);
+    assert(Array.isArray(run.results), 'browser result missing results array');
+    assert.equal(new Set(run.results.map((kase) => kase.id)).size, run.results.length, 'duplicate browser result IDs');
+    assert(
+      run.results.every((kase) => inputs.some((input) => input.id === kase.id)),
+      'unexpected browser result ID',
+    );
+    run.results = inputs.map((input) => {
+      const returned = run.results.find((kase) => kase.id === input.id);
+      const answers = returned?.answers ?? [];
+      const complete = answers.length === orderCount * repeats && orders.every((_, order) => answers.filter((answer) => answer.order === order).length === repeats);
+      const valid = complete && !returned?.skipped && answers.every((answer) => !answer.error && typeof answer.raw === 'string' && input.responseConstraint.enum.includes(answer.answer));
+      return {
+        ...input,
+        ...returned,
+        ...(!returned ? { unavailable: 'browser returned no result for this case' } : {}),
+        answers,
+        answer: answers[0]?.answer ?? null,
+        complete,
+        correct: Boolean(valid && answers.every((answer) => answer.answer === input.expected_label)),
+        stable: Boolean(valid && answers.every((answer) => answer.answer === answers[0].answer)),
+      };
+    });
+    Object.assign(result, run, {
+      status: run.results.every((kase) => kase.complete) ? 'complete' : 'incomplete',
+      ...(digitPlus ? { evaluation: digitPlus.score(run) } : {}),
+    });
+  } catch (error) {
+    Object.assign(result, {
+      status: 'incomplete',
+      error: String(error),
+      inputs,
+      stdout: error.stdout?.toString() ?? stdout ?? null,
+      stderr: error.stderr?.toString() ?? null,
+    });
+    writeFileSync(file, `${JSON.stringify(result, null, 2)}\n`, { flag: 'wx' });
+    console.error(`${variant}: incomplete run; ${result.error}; ${file}`);
+    process.exitCode = 1;
+    break;
+  }
   writeFileSync(file, `${JSON.stringify(result, null, 2)}\n`, { flag: 'wx' });
-  const scored = run.results.filter((kase) => !kase.review);
-  const original = scored.filter((kase) => !kase.id.startsWith('field-'));
-  const ambiguous = original.filter((kase) => kase.type === 'ambiguous');
-  const controls = original.filter((kase) => kase.type === 'control');
-  const field = scored.filter((kase) => kase.id.startsWith('field-') && !kase.id.startsWith('field-collision-'));
-  const synthetic = scored.filter((kase) => kase.id.startsWith('field-collision-'));
+  const scored = result.results.filter((kase) => !kase.review);
   const skipped = scored.filter((kase) => kase.skipped);
-  const errors = run.results.flatMap((kase) => kase.answers).filter((answer) => answer.error);
+  const errors = result.results.flatMap((kase) => kase.answers).filter((answer) => answer.error);
+  const incomplete = scored.filter((kase) => !kase.complete);
   if (diagnosticIds) {
-    console.log(`${variant}: diagnostics for ${run.results.length} cases; errors ${errors.length}; ${file}`);
-    if (errors.length) {
+    console.log(`${variant}: diagnostics for ${result.results.length} cases; errors ${errors.length}; ${file}`);
+    if (errors.length || incomplete.length || skipped.length) {
       process.exitCode = 1;
     }
     continue;
   }
   if (digitPlus) {
     console.log(`${variant}: ${JSON.stringify(result.evaluation)}; errors ${errors.length}; ${file}`);
-    if (errors.length || (values['require-perfect'] && scored.some((kase) => !kase.correct))) {
+    if (errors.length || incomplete.length || skipped.length || (values['require-perfect'] && scored.some((kase) => !kase.correct))) {
       process.exitCode = 1;
     }
     continue;
   }
+  const classes = Object.fromEntries(
+    corpus.enums.hyphen.map((label) => {
+      const matching = scored.filter((kase) => kase.expected_label === label);
+      return [label, { passed: matching.filter((kase) => kase.correct).length, total: matching.length }];
+    }),
+  );
   console.log(
-    `${variant}: original ${ambiguous.filter((kase) => kase.correct).length}/${ambiguous.length}; control flips ${controls.filter((kase) => !kase.correct).length}/${controls.length}; field ${field.filter((kase) => kase.correct).length}/${field.length}; synthetic ${synthetic.filter((kase) => kase.correct).length}/${synthetic.length}; skipped ${skipped.length} (${skipped.filter((kase) => kase.expected_label === 'signed-number').length} missed corrections); errors ${errors.length}; ${file}`,
+    `${variant}: labels ${scored.filter((kase) => kase.correct).length}/${scored.length}; classes ${JSON.stringify(classes)}; skipped ${skipped.length}; incomplete ${incomplete.length}; errors ${errors.length}; ${file}`,
   );
   console.log(
     'Misses:',
@@ -317,7 +351,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
       .map((kase) => kase.id)
       .join(', ') || 'none',
   );
-  if (errors.length || (values['require-perfect'] && scored.some((kase) => !kase.correct))) {
+  if (errors.length || incomplete.length || skipped.length || (values['require-perfect'] && scored.some((kase) => !kase.correct))) {
     process.exitCode = 1;
   }
 }

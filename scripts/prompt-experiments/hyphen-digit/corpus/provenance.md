@@ -2,7 +2,7 @@
 
 Retrieved on 2026-09-11. Labels and roles were assigned before inference. The corpus has 15 development targets from 14 original excerpts and 8 holdout targets from 8 excerpts. Source pages are disjoint across roles.
 
-`development.json` contains 15 targets, including 3 Blocktempo article numbers from the known failing series. The main article heading and related-article headings were verified in source HTML. These remain development cases because earlier experiments already used the series.
+`development.json` contains 15 targets, including 3 Blocktempo article numbers. The article heading and related-article headings were verified in source HTML. All 15 targets have prior model inference exposure.
 
 `holdout.json` contains 8 targets. Do not use its answers to tune a candidate without moving the affected cases to development and collecting replacement holdouts.
 
@@ -30,6 +30,16 @@ PTT's [source stylesheet](https://images.ptt.cc/bbs/v2.27/bbs-base.css) sets `#m
 
 The source set is small and clustered. XQ supplies several return examples; Blocktempo supplies all article-number cases; the 2 Taoyuan instructions share one page. PTT occurs in both roles on different boards and pages. Both roles contain numbered product series from different suppliers. These checks test transfer across the selected pages, not arbitrary publishers or domains.
 
-No defensible real `unsure` case was found. Real negative temperature, money, percentages, course/article/product numbers, filename dates, and age ranges are covered. Historical and synthetic cases remain separate development/regression controls. No model inference was performed during collection.
+No defensible real `unsure` case was found. Real negative temperature, money, percentages, course/article/product numbers, filename dates, and age ranges are covered. No model inference was performed during collection. Use only verified real text in future examples, diagnostics, and evaluations.
 
-During tuning, v35 used the Electrolux and PTT payment cases as examples and excluded them from its 13-case score. v36 also used both NYCU cases and excluded that page, leaving 11 scored cases. Both candidates were rejected for regressions. The zero-shot v37 comparison uses all 15 development cases; none appears in its prompt. Historical exports preserve each role assignment.
+## Exposure audit
+
+Before cleanup on 2026-09-11, all 163 files under the repository's prompt-experiment result paths were searched for the 8 holdout IDs, exact production inputs, and original excerpts. None matched. The prior report explicitly recorded that these holdout cases were never sent to the model. Their source text and labels were inspected, so they are not blind or newly collected cases. No prior inference outcomes are retained.
+
+All 15 development IDs had saved model inference records. Four development records were also used as prompt examples: `real-development-08`, `real-development-09`, `real-development-10`, and `real-development-12`. Each record preserves these facts in `prior_exposure`. Keep them in development; any future example page must be excluded from scored development.
+
+The audit covers repository artifacts and the prior report, not unrecorded external activity. Reverify source pages and production routing before inference. If exposure is later found to be uncertain, move the whole page to development and replace its holdout cases.
+
+## Pending sources
+
+`pending.json` contains 4 exact user-supplied passages and URLs. Independent web and HTTP fetches returned 403 during planning. Their HTML, production context, and spacing remain unverified. They are proposed development cases and must not be loaded for evaluation or used as prompt examples until source and routing verification succeeds.

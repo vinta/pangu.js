@@ -9,7 +9,7 @@
       "unsure"
     ]
   },
-  "notes": "Exact source HTML replayed through production Pangu.spaceText, hyphenDigit.find and readSentence in Chrome Beta. Relevant live source display and whitespace verified. No model inference before routing freeze. Final zero-shot comparison uses all 15 development cases. The 4 examples used only by rejected v35/v36 remain development data for zero-shot variants; those candidates were scored separately without their examples.",
+  "notes": "Source HTML and relevant live display and whitespace were verified on 2026-09-11. Production Pangu.spaceText, hyphenDigit.find and readSentence replay produced the recorded inputs and offsets. Reverify sources and routing before a new experiment.",
   "cases": [
     {
       "id": "real-development-01",
@@ -46,7 +46,13 @@
         }
       ],
       "settled": "第三次交易的報酬率為 - 2%",
-      "settled_index": 11
+      "settled_index": 11,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-development-02",
@@ -83,7 +89,13 @@
         }
       ],
       "settled": "第二次交易的報酬率為 - 5%",
-      "settled_index": 11
+      "settled_index": 11,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-development-03",
@@ -120,7 +132,13 @@
         }
       ],
       "settled": "第三次交易的報酬率為 - 8%",
-      "settled_index": 11
+      "settled_index": 11,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-development-04",
@@ -157,7 +175,13 @@
         }
       ],
       "settled": "1/2 日的投資組合中有二檔商品，日報酬率各為 - 3% 及 - 5%，則 1/2 日的投資組合報酬率為 ((-3%)+(-5%))/2=-4%，總報酬率為 (1+5%)*(1-4%)-1=0.8%",
-      "settled_index": 24
+      "settled_index": 24,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-development-05",
@@ -194,7 +218,13 @@
         }
       ],
       "settled": "1/2 日的投資組合中有二檔商品，日報酬率各為 - 3% 及 - 5%，則 1/2 日的投資組合報酬率為 ((-3%)+(-5%))/2=-4%，總報酬率為 (1+5%)*(1-4%)-1=0.8%",
-      "settled_index": 31
+      "settled_index": 31,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-development-06",
@@ -234,7 +264,13 @@
         }
       ],
       "settled": "\n外幣科目在期末要做外幣的評價.\n\n依您的狀況, 當月底外幣數為 0, 假設月底美金匯率 30\n\n\n台幣數應等於 0*30=0  而你帳上台幣數為 - 200\n\n因此該調整 借: 銀行存款 200  貸: 兌換收入 200\n\n帳上台幣數就會歸 0.\n\n\n\n\n\n\n",
-      "settled_index": 74
+      "settled_index": 74,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-development-07",
@@ -274,7 +310,13 @@
         }
       ],
       "settled": ": 變成 - 200 了。這個問題該怎麼解決?\n",
-      "settled_index": 5
+      "settled_index": 5,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-development-08",
@@ -311,7 +353,13 @@
         }
       ],
       "settled": "理想的 冰箱冷凍溫度 應為攝氏 -18 度以下。這個溫度能讓食物保持冷凍並預防細菌和其他微生物孳生而造成食物腐壞。一定要注意冰庫溫度設定在 - 18°C 或以下的同時，要維持固定溫度讓食物保持冷凍方可安心食用。建議定期以溫度計測量冷凍溫度，並視需要調整溫度設定以維持適當溫度。",
-      "settled_index": 70
+      "settled_index": 70,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": true
+      }
     },
     {
       "id": "real-development-09",
@@ -348,7 +396,13 @@
         }
       ],
       "settled": "【115-1 微學分課程】計算機概論與程式設計 - 1 Introduction to Computers and Programming-1",
-      "settled_index": 24
+      "settled_index": 24,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": true
+      }
     },
     {
       "id": "real-development-10",
@@ -385,7 +439,13 @@
         }
       ],
       "settled": "補充說明：學期課是學校課務系統上選的 3 學分課程，微學分則是在 ICT 系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成 - 1,-2,-3 或 A,B,C 三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修 - 1 或 A 者，不得選修 - 2,-3 或 B,C 課程。",
-      "settled_index": 69
+      "settled_index": 69,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": true
+      }
     },
     {
       "id": "real-development-11",
@@ -422,7 +482,13 @@
         }
       ],
       "settled": "水轉印系列 - 1",
-      "settled_index": 6
+      "settled_index": 6,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-development-12",
@@ -462,7 +528,13 @@
         }
       ],
       "settled": "\n\n目前加值過三次  (都沒有自動 需要靠卡 QQ)\n\n大概介紹一下 \"悠遊付\" 也可以算是一個 NFC 悠遊卡\n在開啟 APP\"嗶乘車\" 才會讀取  (越來越方便了\n\n第一次捷運靠卡加值時 悠游付為 0 加值完後\n\n銀行 - 600 元  悠游付 +100 元  NFC-SIM +500 元\n\n加值原理是 銀行→悠游付→悠遊卡 最低單位可以自己設定\n\n",
-      "settled_index": 112
+      "settled_index": 112,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": true
+      }
     },
     {
       "id": "real-development-blocktempo-19",
@@ -500,7 +572,13 @@
         }
       ],
       "settled": "《温宏駿穩定幣新金融 - 19》美英聯合聲明！歐洲美元 2.0 的數位復辟",
-      "settled_index": 11
+      "settled_index": 11,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-development-blocktempo-18",
@@ -538,7 +616,13 @@
         }
       ],
       "settled": "《温宏駿穩定幣新金融 - 18》OUSD 自由競爭 vs 銀行存款代幣堅守本位，新舊勢力全面開戰",
-      "settled_index": 11
+      "settled_index": 11,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false
+      }
     },
     {
       "id": "real-development-blocktempo-17",
@@ -576,7 +660,13 @@
         }
       ],
       "settled": "《温宏駿穩定幣新金融 - 17》市佔大戰來襲？新舊勢力的終極結算主權對決",
-      "settled_index": 11
+      "settled_index": 11,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false
+      }
     }
   ],
   "diagnosticQuestions": [

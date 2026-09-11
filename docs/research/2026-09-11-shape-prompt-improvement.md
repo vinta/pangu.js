@@ -1,8 +1,8 @@
 # Improving prompts for ambiguous spacing shapes
 
-Date: 2026-09-11. Evidence: digit-plus experiments with Gemini Nano in Chrome Beta 154.0.8037.17. Treat the measured results as a runtime snapshot.
+Date: 2026-09-11. Evaluation workflow for experiments using verified real source text.
 
-Use this workflow when adding a model-assisted shape, investigating a classification failure, or comparing a replacement prompt for an existing shape. The transferable result is the evaluation method; English instructions and few-shot examples remain hypotheses to test for each shape.
+Use this workflow when adding a model-assisted shape, investigating a classification failure, or comparing a replacement prompt for an existing shape. Choose candidate changes from the current baseline and diagnostics.
 
 ## Workflow
 
@@ -26,7 +26,7 @@ When a development sentence becomes a prompt example, move it out of accuracy sc
 
 ### 3. Measure a baseline and diagnose failures
 
-For an existing shape, keep the shipping prompt as the control. For a new shape, start with a concise instruction and explicit label definitions. Test English instructions while preserving the original Chinese input as an early comparison; instruction language and response-label language are separate variables.
+For an existing shape, keep the shipping prompt as the control. For a new shape, start with a concise instruction and explicit label definitions. Measure the baseline before choosing a change.
 
 Record raw answers, errors, misses by meaning, and unstable cases. For representative failures, run separate diagnostic conversations: ask the model to interpret or translate the original sentence, identify the target symbol, and explain which label fits. Use these answers to generate falsifiable hypotheses. Explanations after a wrong answer may be rationalizations.
 
@@ -44,7 +44,7 @@ If two or three similar wording changes leave the same failures, investigate a d
 
 Freeze the candidate prompt, response schema, and corpus before confirmation. Match production session behavior and sampling options. Use fresh base sessions per run/order and fresh clones per candidate; keep diagnostic history out of accuracy runs. Record browser/model availability and runtime details needed to reproduce the result, with machine-local identifiers kept out of publishable reports.
 
-The digit-plus confirmation protocol used two fresh runs, each with two case orders and three attempts per case. A case passed only if every attempt returned the correct label. Report distinct case counts separately from repeated attempts. Then evaluate the frozen candidate and baseline on the same untouched holdouts, including meanings missing from development coverage. Record both before using either result to guide further tuning.
+Declare the confirmation runs, case orders, and attempts per case before inference. A case passes only if every required attempt returns the correct label without an error. Report distinct case counts separately from repeated attempts. Then evaluate the frozen candidate and baseline on the same untouched holdouts, including meanings missing from development coverage. Record both before using either result to guide further tuning.
 
 **Done when:** the declared confirmation and holdout gates pass, every error counts as a failure, and remaining coverage limits are stated. Repetition establishes stability on those inputs; broader sources establish coverage.
 
@@ -56,65 +56,24 @@ Check that the built extension uses the measured system prompt, rendered questio
 
 ## Automated execution
 
-The automation had two parts: an AI agent made the research and prompt-design decisions, while scripts handled repeatable model calls and scoring. Once browser setup and the required permissions were complete, the agent could run the improvement loop without a person entering prompts, copying answers, or starting each comparison.
+The agent verifies sources, annotates cases, and chooses hypotheses. The runner handles repeatable model calls and raw result export. Keep those responsibilities separate so source judgments and model outcomes can be reviewed independently.
 
-### Connect the agent to the model
+Connect to the intended extension worker through the configured browser session. Verify the profile, worker, model availability, and current API options before inference. Read machine-specific connection settings from ignored local configuration; keep them out of tracked reports.
 
-A Node.js script used Playwright through the Chrome DevTools Protocol to reach the installed extension's service worker. Code evaluated in that worker called Chrome's Prompt API, which ran Gemini Nano locally. The script received structured results back through the browser connection.
+For each run, save the exact source cases, rendered instructions, questions, labels/schema, runtime details, and execution order. Create fresh base sessions for the declared runs/orders and fresh clones per case. Keep diagnostic history out of accuracy sessions. Record raw answers, errors, missing attempts, and timings. An incomplete run cannot pass a gate.
 
-```text
-Agent → Node.js script → Playwright → extension worker → Chrome Prompt API
-  ↑                          results and scores                        ↓
-  └────────────────────────────────────────────────────────────────────┘
-```
+Compare baseline and candidate on the same cases and report per-case changes. Protect baseline-correct cases; aggregate improvements cannot offset a new failure. Follow the experiment's declared gate for unstable cases, confirmation, holdout, and final spacing. A successful command exit is not itself evidence of a successful experiment.
 
-Computer automation handled the browser-facing setup: selecting the intended Chrome profile, opening the extension's worker inspector when needed, and later reloading the built extension. Before inference, the script verified the target profile and extension worker and checked that the model was available in that context. Model provisioning and browser debugging permissions remained prerequisites for unattended runs.
+When a candidate qualifies, rebuild and load the intended extension checkout. Verify the actual message entry point and production edits on sourced text. Distinguish fresh inference from cached answers. Close temporary inspection pages and disconnect when the work is complete.
 
-### Automate a comparison
+## Starting an independent round
 
-The agent supplied a versioned candidate prompt and annotated cases. For each comparison, the script:
+Preserve verified source records and their exposure history. Remove previous candidate prompts, diagnostic answers, scores, and conclusions from the new round's working context. Do not retrieve them from Git history, temporary reports, old agent sessions, or memories to select candidates. Use current production code as the baseline and new real-text measurements as evidence.
 
-1. Rendered the exact system prompt, case questions, and allowed response labels, then saved the inputs used by the run.
-2. Created a fresh base model session for each candidate and execution order, with the candidate's system prompt and the chosen sampling settings.
-3. Cloned that base for each case and repeat, submitted the question with a constrained response format, and collected the raw answer or error. Each clone started from the same base context, keeping earlier case answers out of later conversations.
-4. Parsed answers and compared them with the expected labels. It reported failures by case and meaning, flagged inconsistent repeats, and saved raw responses, errors, timings, and execution order. Confirmation failed if any required answer was wrong.
+Reusing a development case does not make it unseen. An exposed holdout must be reassigned before it can guide tuning. Record related source pages and shared entities, and retain coverage gaps when verified real examples are unavailable.
 
-Candidate prompts were passed directly to these experiment sessions. This let the agent compare wording, examples, and output options without rebuilding the extension for every variant. The installed worker provided the model execution context; the sweep used its own sessions rather than the shipping classifier's cached answers.
+## References
 
-### Let results drive the next experiment
+[Chrome's evaluation guidance](https://developer.chrome.com/docs/ai/evals/run) describes evaluation layers, contamination from prompt examples, and final evaluation on unseen cases. Its suggestions to generate synthetic data do not apply to this workflow.
 
-The agent read the result files and selected representative failures for a separate diagnostic run. The script asked follow-up questions about the sentence's meaning and recorded the replies. The agent used those replies to propose a hypothesis, wrote a new candidate, and launched another development comparison.
-
-Source selection, label judgments, and the decision to change a prompt remained agent tasks. The script made those decisions measurable by executing the same checks consistently. Diagnostic conversations and prompt examples stayed outside independent accuracy scoring; a passing development run triggered confirmation and then the frozen holdout evaluation.
-
-### Verify the installed implementation
-
-After selection, automation rebuilt and reloaded the extension. A temporary extension page sent classification requests through the extension's actual message entry point, exercising the registered prompt and model-handling code. Returned labels were applied through production spacing and edits, and the final strings were compared with the expected output.
-
-This last check covered the gap between a successful experimental prompt and a correctly integrated feature. Automation then closed temporary inspection pages and disconnected from the browser.
-
-## What the digit-plus experiments established
-
-| Experiment                                                                                    | Observation                                                                         | Interpretation                                                                                              |
-| --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Original Chinese prompt                                                                       | Passed the five synthetic acceptance cases, but only 3/10 real development cases    | Synthetic acceptance success did not predict real usage                                                     |
-| English instructions, unchanged Chinese inputs                                                | 7/10 on the same real cases                                                         | Instruction language mattered on this runtime                                                               |
-| Clearer English semantic definitions                                                          | 8/10 on the same cases                                                              | Definitions helped, then wording changes plateaued                                                          |
-| Remove left/right fragments or reorder the Chinese text menu                                  | Remained 3/10                                                                       | The model's explanation implicating fragments was not confirmed                                             |
-| English glossary, renamed labels, extra name-scope guidance, or omitted automatic schema text | Remained 8/10 against the English definition baseline                               | These changes added no measured benefit                                                                     |
-| Three sourced prompt examples                                                                 | 7 other development cases passed 84/84 confirmation attempts; 6 holdouts passed 6/6 | Example fit and holdout checks passed; unseen-case improvement over the zero-shot baseline was not measured |
-| Rebuilt extension                                                                             | 13/13 evaluation cases had correct labels and final spacing                         | The selected prompt worked through the shipping path                                                        |
-
-Diagnostics described a game expansion as “data chips” and treated a media brand as an age threshold. The selected examples covered a game plus expansion from [PTT](https://www.ptt.cc/bbs/NSwitch/M.1610033538.A.1C4.html), an age threshold from [TVBS](https://health.tvbs.com.tw/nutrition/340731), and a brand name from [50+](https://event.fiftyplus.com.tw/funyouth2023/market.html). Example fit passed separately at 3/3.
-
-The two remaining zero-shot failures became prompt examples. The seven remaining development cases already passed the English definition baseline, so their later success does not establish a few-shot gain. The zero-shot baseline was not evaluated on the holdouts.
-
-The final development set had seven cases because three of the original ten became prompt examples. A direct 3/10-to-7/7 accuracy comparison would mix datasets. The 84 successful confirmation attempts represent seven distinct inputs. Both fresh brand holdouts concern the same `50+` brand; one publisher is independent and one shares its corporate group. Real rating/version cases were absent. These results establish neither universal brand recognition nor general Chinese-language reliability.
-
-Valid enum responses were often consistently wrong. [Structured output](https://developer.chrome.com/docs/ai/structured-output-for-prompt-api) constrains the response format; semantic correctness needs separate evaluation. Text-menu ordering, schema ordering, and case execution ordering are distinct experiments. This round did not establish a benefit from schema reordering or explanation-before-label output.
-
-## Evidence and reuse
-
-The [digit-plus prompt](../../browser-extensions/chrome/src/ai-spacing/shapes/digit-plus-prompt.ts) contains the selected instructions and examples. Its [frozen prompt tests](../../tests/extension/ai-spacing/shapes/digit-plus-prompt.test.ts) check exact bytes, not model accuracy.
-
-[Chrome's evaluation guidance](https://developer.chrome.com/docs/ai/evals/run) supports separate evaluation layers and fresh release cases. Check the current [Prompt API documentation](https://developer.chrome.com/docs/ai/prompt-api) before changing session or schema options.
+Check the current [Prompt API documentation](https://developer.chrome.com/docs/ai/prompt-api) before changing session or schema options. [Structured output](https://developer.chrome.com/docs/ai/structured-output-for-prompt-api) constrains format; semantic correctness requires separate evaluation.
