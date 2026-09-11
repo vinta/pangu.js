@@ -86,7 +86,7 @@ Verify the configured Chrome Beta profile, intended extension worker, model avai
 
 Use fresh base sessions per prompt/order and fresh clones per target/attempt. Match production sampling, language declarations, and schema handling. Keep diagnostics isolated. Save raw answers, errors, timings, and execution order in a new directory per invocation.
 
-Keep one frozen protocol, verified source records, candidate definitions, raw outputs, per-case gates, and a report for each round. Redact session-cookie values from retained HTTP headers; they are not source-text evidence. Close temporary inspection pages and disconnect when done.
+Keep one frozen protocol, verified source records, candidate definitions, raw outputs, per-case gates, and a report for each round. Close temporary inspection pages and disconnect when done.
 
 ## Starting an independent round
 
