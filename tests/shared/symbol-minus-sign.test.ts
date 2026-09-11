@@ -72,7 +72,7 @@ describe('Symbol -', () => {
     expect(pangu.spaceText('得到一個D-的結果')).toBe('得到一個 D- 的結果');
     expect(pangu.spaceText('得到一個D--的結果')).toBe('得到一個 D-- 的結果');
 
-    // NOTE: fixed by AI spacing, see browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-shape.ts
+    // NOTE: fixed by AI spacing, see browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit.ts
     // The hyphen sign reading was dropped, CJK-N reads as an operator, see ADR 0015
     // expect(pangu.spaceText('氣溫是-5度左右')).toBe('氣溫是 -5 度左右');
     // expect(pangu.spaceText('Nasdaq-100本週下跌-13.44%')).toBe('Nasdaq-100 本週下跌 -13.44%');

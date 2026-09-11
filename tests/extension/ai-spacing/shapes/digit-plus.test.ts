@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { applyTextEdits } from '../../../../browser-extensions/chrome/src/ai-spacing/shapes/base';
-import { digitPlus } from '../../../../browser-extensions/chrome/src/ai-spacing/shapes/digit-plus-shape';
+import { digitPlus } from '../../../../browser-extensions/chrome/src/ai-spacing/shapes/digit-plus';
 
 describe('digitPlus.find()', () => {
   it('find a whole numeric token before CJK', () => {
