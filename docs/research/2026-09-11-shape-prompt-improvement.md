@@ -10,23 +10,29 @@ Use this workflow when adding a model-assisted shape, investigating a classifica
 
 NEVER use fabricated text for experiments or prompt improvement. This applies to prompt examples, diagnostic probes, development cases, confirmation runs, and holdouts. Do not invent sentences, substitute names or numbers in real excerpts, or append artificial context. If a real case is missing, record the coverage gap and find a verified source.
 
-Collect exact sentences from Taiwanese websites, news, and public posts. Record the source URL, retrieval date, original excerpt, expected meaning, and annotation rationale. Preserve the author's whitespace and punctuation. Verify the text on the source page or in its HTML; search snippets alone are insufficient.
+Collect exact sentences from Taiwanese websites, news, and public posts. Record the source URL, retrieval date, original excerpt, expected meaning, and annotation rationale. Preserve the author's whitespace and punctuation. Verify the text on the source page or in its HTML; search snippets alone are insufficient. Keep source HTML, relevant styles, original and extracted target offsets in JavaScript UTF-16 units, and expected production spacing.
 
-Pass each excerpt through the production detector and context extractor. Save the model input separately from the original excerpt. Context boundaries, neighboring inline text, and author-written spaces can determine whether a candidate reaches the model. Keep excluded inputs as routing checks, separate from classifier accuracy. Keep disputed meanings in an unscored review set until their labels are resolved.
+If a fetch fails or is blocked, inspect the rendered page and source HTML in the configured Chrome Beta profile. Before loading sources, disable Pangu and verify its switch is off. Reload pages opened with Pangu enabled before capture. Keep it disabled until collection ends. Exclude changed or unverifiable records until resolved; preserve their wording.
+
+Pass each excerpt through the production detector and context extractor. Save the model input separately from the original excerpt. Context boundaries, neighboring inline text, and author-written spaces can determine whether a candidate reaches the model. Keep excluded inputs as routing checks, separate from classifier accuracy. Keep disputed meanings in an unscored review set until their labels are resolved. Gold `unsure` requires a defensible explanation that the exact production context is insufficient. Model explanations and translations remain diagnostic outputs; never turn them into corpus examples.
+
+Annotate every eligible target in multi-target excerpts before inference. Verify both each target's edit on frozen rule output and the combined edits through production text application. Bind `settled` text and `settled_index` to that path. Keep authored-space exclusions as routing checks.
 
 **Done when:** every scored case has verified provenance, a defensible label, and the exact input the production model would receive. Each supported meaning and preserve-output behavior has coverage, or an explicit coverage gap.
 
 ### 2. Separate examples, development, and holdout
 
-Use three roles: prompt examples teach the task, development cases guide changes, and holdouts evaluate a frozen candidate. Keep source pages disjoint across roles and record shared entities or closely related publishers. Repeated mentions of one brand test that brand, not arbitrary name recognition.
+Use three roles: prompt examples teach the task, development cases guide changes, and holdouts evaluate a frozen candidate. Split by canonical source page, recording redirects, duplicate passages, syndication, and related publishers. Keep pages disjoint across roles. Repeated mentions of one brand test that brand, not arbitrary name recognition.
 
-When a development sentence becomes a prompt example, move it out of accuracy scoring before the next run. When a holdout failure guides a change, move that case into development and obtain a fresh holdout. Synthetic fixtures are limited to deterministic implementation tests; never use them as model inputs or evidence for prompt selection or no-regression gates.
+When a development case becomes a prompt example, exclude its entire source page from scoring and rerun the baseline on the reduced set. If holdout text, labels, or answers guide tuning, end the round, move the affected pages to development, and obtain fresh holdouts. Record prior inference and example exposure; uncertain exposure belongs in development. Synthetic fixtures are limited to deterministic implementation tests; never use them as model inputs or evidence for prompt selection or no-regression gates.
 
 **Done when:** role assignments are recorded before inference, prompt examples are excluded from accuracy, and source overlap has been checked. This follows [Chrome's guidance on evaluation contamination](https://developer.chrome.com/docs/ai/evals/run).
 
 ### 3. Measure a baseline and diagnose failures
 
-For an existing shape, keep the shipping prompt as the control. For a new shape, start with a concise instruction and explicit label definitions. Measure the baseline before choosing a change.
+For an existing shape, keep the shipping prompt as the control. For a new shape, start with a concise instruction and explicit label definitions. Freeze the baseline bytes, question builder, labels/order, schema, detector, context extraction, and sampling before inference. Record the commit and file hashes; recheck them before each phase. Keep these controls fixed during comparisons. A detector or extraction change requires a new baseline.
+
+Measure shipping with corpus order and a recorded seeded shuffle, using 1 attempt per target per order. If no development failures remain, collect more verified coverage or finish without a prompt change.
 
 Record raw answers, errors, misses by meaning, and unstable cases. For representative failures, run separate diagnostic conversations: ask the model to interpret or translate the original sentence, identify the target symbol, and explain which label fits. Use these answers to generate falsifiable hypotheses. Explanations after a wrong answer may be rationalizations.
 
@@ -34,7 +40,7 @@ Record raw answers, errors, misses by meaning, and unstable cases. For represent
 
 ### 4. Test one hypothesis at a time
 
-Change one dimension per comparison: instruction language, semantic definitions, context presentation, examples, text-menu order, schema order, or output options. Preserve immutable variant IDs and rendered prompts. Distinguish improvements from regressions in other meanings and preserve-output controls.
+Write the hypothesis, predicted effect, parent variant, and isolated change before inference. Change one prompt dimension per comparison: instruction language, semantic definitions, target identification using unchanged source text, or sourced examples. Freeze variant IDs and rendered bytes. Run matched shipping and candidate comparisons on the same scored records, orders, and attempt counts. Prefer the smaller prompt when qualifying candidates behave equally.
 
 If two or three similar wording changes leave the same failures, investigate a different cause. Vocabulary or domain misunderstandings may benefit from a few sourced examples. Routing errors belong in the detector or extractor. Ambiguous annotations require revisiting the expected meaning. Add examples only after identifying what they need to teach.
 
@@ -42,29 +48,43 @@ If two or three similar wording changes leave the same failures, investigate a d
 
 ### 5. Freeze and confirm
 
-Freeze the candidate prompt, response schema, and corpus before confirmation. Match production session behavior and sampling options. Use fresh base sessions per run/order and fresh clones per candidate; keep diagnostic history out of accuracy runs. Record browser/model availability and runtime details needed to reproduce the result, with machine-local identifiers kept out of publishable reports.
+Freeze one candidate, examples, source roles, questions, schema, sampling, and spacing expectations. Run 2 fresh confirmation comparisons, each with 2 case orders and 3 attempts per target per order. Run both prompts and reverse their execution order in the second comparison. This gives 12 answers per target per prompt.
 
-Declare the confirmation runs, case orders, and attempts per case before inference. A case passes only if every required attempt returns the correct label without an error. Report distinct case counts separately from repeated attempts. Then evaluate the frozen candidate and baseline on the same untouched holdouts, including meanings missing from development coverage. Record both before using either result to guide further tuning.
+Only after confirmation passes, evaluate that candidate and shipping on holdout with the same 2-run protocol. Save both sides of both runs before inspecting answers. Holdout answers must not enter diagnostics or tuning in this round.
 
 **Done when:** the declared confirmation and holdout gates pass, every error counts as a failure, and remaining coverage limits are stated. Repetition establishes stability on those inputs; broader sources establish coverage.
 
 ### 6. Verify the shipping path
 
-Check that the built extension uses the measured system prompt, rendered questions, enum, and API options. Reload the extension and send classification requests through its actual message entry point. Apply the returned labels through production spacing and edits, then compare final text. Count cached responses separately from fresh inference.
+Build and load the intended checkout; verify the installed extension points to it. Check that the built extension uses the measured system prompt, rendered questions, enum, and API options. Reload the extension and send classification requests through its actual message entry point. Apply the returned labels through production spacing and edits, then compare final text. Reset sessions/caches between baseline and candidate checks. Count cache hits separately; they cannot satisfy fresh attempts. Keep real question collisions visible without changing inputs or dropping targets. Run the extension build, relevant shape tests, and typecheck; update frozen prompt tests only to the qualified bytes.
 
 **Done when:** the built runtime returns the intended labels and final spacing for the evaluation cases, and relevant deterministic checks pass. Report label accuracy and spacing accuracy separately: different labels can produce the same edit.
 
+## Acceptance gates
+
+A correct attempt has no error, returns the expected label, and produces expected individual-target and combined-excerpt spacing through production edits. Missing attempts and skips fail. A case passes only when every scheduled attempt passes. Report label and spacing correctness separately.
+
+| Phase | Required result |
+| --- | --- |
+| Preflight | Every model input/example has verified real provenance and production context; role separation passes; no unresolved labels in scored sets |
+| Screening | Candidate preserves every baseline-passing case and fixes at least one baseline-failing case outside its example source pages; no candidate inference errors |
+| Confirmation | The same rule holds independently in both fresh runs, and at least one same scored case is a stable improvement in both; no candidate inference errors |
+| Holdout | Candidate preserves every baseline-passing case and has at least as many passing cases as baseline; no candidate inference errors; a new improvement is not required |
+| Shipping integration | Built prompt/options match the frozen candidate; fresh real requests preserve the confirmed improvements and baseline-passing cases in labels and final spacing; routing exclusions and authored whitespace remain correct |
+
+For baseline-unstable cases, require candidate correct-attempt counts to be no lower in each matched run. Aggregate gains cannot offset a new case failure. List remaining failures and coverage gaps. Report target, sentence, page, and publisher counts separately; repeated answers are not independent source cases.
+
+An infrastructure failure leaves the comparison incomplete. Fix it, repeat the entire affected comparison under the frozen protocol, and retain the failed artifact. Never retry a semantic failure until it passes. A successful command exit or `--require-perfect` does not establish these paired gates. If any phase fails, retain or restore shipping.
+
 ## Automated execution
 
-The agent verifies sources, annotates cases, and chooses hypotheses. The runner handles repeatable model calls and raw result export. Keep those responsibilities separate so source judgments and model outcomes can be reviewed independently.
+The agent verifies sources, annotates cases, and chooses hypotheses. The runner handles serial model calls and immutable result export. Before inference, finish source verification, production input/spacing replay, and runner checks. Test paired gates with retained real inputs and mocked answers: regression, stable improvement, baseline instability, missing attempts, and errors.
 
-Connect to the intended extension worker through the configured browser session. Verify the profile, worker, model availability, and current API options before inference. Read machine-specific connection settings from ignored local configuration; keep them out of tracked reports.
+Verify the configured Chrome Beta profile, intended extension worker, model availability, and current production options. Record actual browser/Node/model details. Read local connection settings from ignored configuration and keep machine-local identifiers out of tracked reports.
 
-For each run, save the exact source cases, rendered instructions, questions, labels/schema, runtime details, and execution order. Create fresh base sessions for the declared runs/orders and fresh clones per case. Keep diagnostic history out of accuracy sessions. Record raw answers, errors, missing attempts, and timings. An incomplete run cannot pass a gate.
+Use fresh base sessions per prompt/order and fresh clones per target/attempt. Match production sampling, language declarations, and schema handling. Keep diagnostics isolated. Save raw answers, errors, timings, and execution order in a new directory per invocation.
 
-Compare baseline and candidate on the same cases and report per-case changes. Protect baseline-correct cases; aggregate improvements cannot offset a new failure. Follow the experiment's declared gate for unstable cases, confirmation, holdout, and final spacing. A successful command exit is not itself evidence of a successful experiment.
-
-When a candidate qualifies, rebuild and load the intended extension checkout. Verify the actual message entry point and production edits on sourced text. Distinguish fresh inference from cached answers. Close temporary inspection pages and disconnect when the work is complete.
+Keep one frozen protocol, verified source records, candidate definitions, raw outputs, per-case gates, and a report for each round. Close temporary inspection pages and disconnect when done.
 
 ## Starting an independent round
 

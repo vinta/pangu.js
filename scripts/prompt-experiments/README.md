@@ -1,6 +1,6 @@
 # Prompt experiments
 
-Use [the real-text workflow](../../docs/research/2026-09-11-shape-prompt-improvement.md). For the hyphen-digit protocol and completed round report, see [the experiment plan](../../docs/research/2026-09-11-hyphen-digit-real-text-experiment.md). Develop candidates from new baseline measurements and diagnostics; do not retrieve deleted experiments from Git history, temporary reports, previous sessions, or memories.
+Use [the real-text workflow](../../docs/research/2026-09-11-shape-prompt-improvement.md). See the completed [hyphen-digit report](hyphen-digit/results/real-text-20260911-round1/REPORT.md) and [frozen protocol](hyphen-digit/results/real-text-20260911-round1/protocol.json). Develop candidates from new baseline measurements and diagnostics; do not retrieve deleted experiments from Git history, temporary reports, previous sessions, or memories.
 
 NEVER use fabricated text for experiments or prompt improvement. Every source passage in an input, example, or diagnostic must have verified provenance. Preserve authored text and production context. Keep disputed meanings unscored.
 
