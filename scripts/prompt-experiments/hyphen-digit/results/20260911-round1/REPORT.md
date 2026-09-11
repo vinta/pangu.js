@@ -121,6 +121,6 @@ The installed current-checkout extension now uses `v27-zh`. The original extensi
 
 The extension build, 44 focused runner/gate/shape tests, typecheck, and whitespace checks passed. Final verification corrected the mock example-page test to use its canonical source URL after fresh metadata added that mapping; the production gate and measured scores were unchanged.
 
-Run `node scripts/prompt-experiments/hyphen-digit/results/real-text-20260911-round1/verify-lock.mjs --integrated` to verify the baseline archive, unchanged runtime files, frozen corpus/evidence, and exact qualified shipping prompt. [Artifact hashes](artifacts-sha256.json) retain the final evidence inventory.
+Run `node scripts/prompt-experiments/hyphen-digit/results/20260911-round1/verify-lock.mjs --integrated` to verify the baseline archive, unchanged runtime files, frozen corpus/evidence, and exact qualified shipping prompt. [Artifact hashes](artifacts-sha256.json) retain the final evidence inventory.
 
 Current API checks used the official [Chrome extension Prompt API documentation](https://developer.chrome.com/docs/extensions/ai/prompt-api) and [Playwright CDP documentation](https://playwright.dev/docs/api/class-browsertype#browser-type-connect-over-cdp). Local production code determined the actual sampling, language, schema, and cache behavior.

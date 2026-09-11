@@ -52,7 +52,7 @@ The initial source navigation occurred with Pangu enabled and may have triggered
 
 ## Executed round: 2026-09-11
 
-All 15 source pages were reverified in Chrome Beta with Pangu disabled before navigation. The [round report](../results/real-text-20260911-round1/REPORT.md) links the fresh HTML, DOM, style, routing, spacing, and model evidence. Two additional targets came from the unchanged course paragraph; every eligible target in each excerpt now has an annotation.
+All 15 source pages were reverified in Chrome Beta with Pangu disabled before navigation. The [round report](../results/20260911-round1/REPORT.md) links the fresh HTML, DOM, style, routing, spacing, and model evidence. Two additional targets came from the unchanged course paragraph; every eligible target in each excerpt now has an annotation.
 
 The two new course-stage records conservatively inherit the paragraph's prior exposure flags. Those flags do not claim separate historical measurements of the newly added target IDs. No prior prompts, model answers, scores, or conclusions were retrieved.
 

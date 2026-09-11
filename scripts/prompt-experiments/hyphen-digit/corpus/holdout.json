@@ -58,7 +58,7 @@
       "canonical_source": "https://food-safety.tycg.gov.tw/News_Content.aspx?n=1228&s=5714",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:52:00.800Z",
-        "evidence": "results/real-text-20260911-round1/source-browser/10.json",
+        "evidence": "results/20260911-round1/source-browser/10.json",
         "evidence_record": "real-holdout-01",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
         "pangu_disabled": true
@@ -111,7 +111,7 @@
       "canonical_source": "https://food-safety.tycg.gov.tw/News_Content.aspx?n=1228&s=5714",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:52:00.800Z",
-        "evidence": "results/real-text-20260911-round1/source-browser/10.json",
+        "evidence": "results/20260911-round1/source-browser/10.json",
         "evidence_record": "real-holdout-02",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
         "pangu_disabled": true
@@ -164,7 +164,7 @@
       "canonical_source": "https://www.moj.gov.tw/2204/2205/2323/2354/2371/2381/2382/177680/post",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:52:31.027Z",
-        "evidence": "results/real-text-20260911-round1/source-browser/11.json",
+        "evidence": "results/20260911-round1/source-browser/11.json",
         "evidence_record": "real-holdout-03",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
         "pangu_disabled": true
@@ -217,7 +217,7 @@
       "canonical_source": "https://www.moj.gov.tw/2204/2205/2323/2354/2371/2381/2382/177680/post",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:52:31.027Z",
-        "evidence": "results/real-text-20260911-round1/source-browser/11.json",
+        "evidence": "results/20260911-round1/source-browser/11.json",
         "evidence_record": "real-holdout-04",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
         "pangu_disabled": true
@@ -270,7 +270,7 @@
       "canonical_source": "https://class.children.org.tw/search",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:53:01.979Z",
-        "evidence": "results/real-text-20260911-round1/source-browser/12.json",
+        "evidence": "results/20260911-round1/source-browser/12.json",
         "evidence_record": "real-holdout-05",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
         "pangu_disabled": true
@@ -323,7 +323,7 @@
       "canonical_source": "https://www.web66.com.tw/CW895/-N895610.html",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:53:05.888Z",
-        "evidence": "results/real-text-20260911-round1/source-browser/13.json",
+        "evidence": "results/20260911-round1/source-browser/13.json",
         "evidence_record": "real-holdout-06",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
         "pangu_disabled": true
@@ -379,7 +379,7 @@
       "canonical_source": "https://www.ptt.cc/bbs/CVS/M.1372351544.A.405.html",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:53:06.097Z",
-        "evidence": "results/real-text-20260911-round1/source-browser/14.json",
+        "evidence": "results/20260911-round1/source-browser/14.json",
         "evidence_record": "real-holdout-07",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
         "pangu_disabled": true
@@ -432,7 +432,7 @@
       "canonical_source": "https://www.navigate.com.tw/trends/ETFFund_tw/917b260e-f4c9-43e6-a3c0-74864f844faa",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:53:36.358Z",
-        "evidence": "results/real-text-20260911-round1/source-browser/15.json",
+        "evidence": "results/20260911-round1/source-browser/15.json",
         "evidence_record": "real-holdout-08",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
         "pangu_disabled": true

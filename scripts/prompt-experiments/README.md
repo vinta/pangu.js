@@ -55,4 +55,4 @@ These tests use mocked model responses and require no browser. They run separate
 
 ## Historical review only
 
-The completed [hyphen-digit report](hyphen-digit/results/real-text-20260911-round1/REPORT.md) and [frozen protocol](hyphen-digit/results/real-text-20260911-round1/protocol.json) document the finished round. Open them when reviewing that round; do not use them to select candidates for an independent experiment.
+The completed [hyphen-digit report](hyphen-digit/results/20260911-round1/REPORT.md) and [frozen protocol](hyphen-digit/results/20260911-round1/protocol.json) document the finished round. Open them when reviewing that round; do not use them to select candidates for an independent experiment.
