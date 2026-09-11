@@ -1,0 +1,587 @@
+{
+  "set": "hyphen-sign:2026-09-11-real-development",
+  "frozen_at": "2026-09-11T08:10:38.075618+00:00",
+  "role": "development",
+  "enums": {
+    "hyphen": [
+      "signed-number",
+      "range-or-separator",
+      "unsure"
+    ]
+  },
+  "notes": "Exact source HTML replayed through production Pangu.spaceText, hyphenDigit.find and readSentence in Chrome Beta. Relevant live source display and whitespace verified. No model inference before routing freeze. Final zero-shot comparison uses all 15 development cases. The 4 examples used only by rejected v35/v36 remain development data for zero-shot variants; those candidates were scored separately without their examples.",
+  "cases": [
+    {
+      "id": "real-development-01",
+      "enum": "hyphen",
+      "input": "第三次交易的報酬率為-2%",
+      "at": 10,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "return",
+      "source": "https://www.xq.com.tw/learn/sensor/backtestreport/",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "第三次交易的報酬率為-2%",
+      "original_at": 10,
+      "target": "為-2",
+      "annotation_rationale": "The documented trade return is below zero.",
+      "source_html": "<li>第三次交易的報酬率為-2%</li>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "LI",
+          "display": "list-item",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "UL",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "第三次交易的報酬率為 - 2%",
+      "settled_index": 11
+    },
+    {
+      "id": "real-development-02",
+      "enum": "hyphen",
+      "input": "第二次交易的報酬率為-5%",
+      "at": 10,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "return",
+      "source": "https://www.xq.com.tw/learn/sensor/backtestreport/",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "第二次交易的報酬率為-5%",
+      "original_at": 10,
+      "target": "為-5",
+      "annotation_rationale": "The documented losing trade has a negative percentage return.",
+      "source_html": "<li>第二次交易的報酬率為-5%</li>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "LI",
+          "display": "list-item",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "UL",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "第二次交易的報酬率為 - 5%",
+      "settled_index": 11
+    },
+    {
+      "id": "real-development-03",
+      "enum": "hyphen",
+      "input": "第三次交易的報酬率為-8%",
+      "at": 10,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "return",
+      "source": "https://www.xq.com.tw/learn/sensor/backtestreport/",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "第三次交易的報酬率為-8%",
+      "original_at": 10,
+      "target": "為-8",
+      "annotation_rationale": "The loss-rate example explicitly describes a negative trade return.",
+      "source_html": "<li>第三次交易的報酬率為-8%</li>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "LI",
+          "display": "list-item",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "UL",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "第三次交易的報酬率為 - 8%",
+      "settled_index": 11
+    },
+    {
+      "id": "real-development-04",
+      "enum": "hyphen",
+      "input": "1/2日的投資組合中有二檔商品，日報酬率各為-3%及-5%，則1/2日的投資組合報酬率為((-3%)+(-5%))/2=-4%，總報酬率為(1+5%)*(1-4%)-1=0.8%",
+      "at": 22,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "return",
+      "source": "https://www.xq.com.tw/learn/sensor/backtestreport/",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "1/2日的投資組合中有二檔商品，日報酬率各為-3%及-5%，則1/2日的投資組合報酬率為((-3%)+(-5%))/2=-4%，總報酬率為(1+5%)*(1-4%)-1=0.8%",
+      "original_at": 22,
+      "target": "為-3",
+      "annotation_rationale": "Both daily returns are negative terms in the displayed average.",
+      "source_html": "<li>1/2日的投資組合中有二檔商品，日報酬率各為-3%及-5%，則1/2日的投資組合報酬率為((-3%)+(-5%))/2=-4%，總報酬率為(1+5%)*(1-4%)-1=0.8%</li>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "LI",
+          "display": "list-item",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "UL",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "1/2 日的投資組合中有二檔商品，日報酬率各為 - 3% 及 - 5%，則 1/2 日的投資組合報酬率為 ((-3%)+(-5%))/2=-4%，總報酬率為 (1+5%)*(1-4%)-1=0.8%",
+      "settled_index": 24
+    },
+    {
+      "id": "real-development-05",
+      "enum": "hyphen",
+      "input": "1/2日的投資組合中有二檔商品，日報酬率各為-3%及-5%，則1/2日的投資組合報酬率為((-3%)+(-5%))/2=-4%，總報酬率為(1+5%)*(1-4%)-1=0.8%",
+      "at": 26,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "return",
+      "source": "https://www.xq.com.tw/learn/sensor/backtestreport/",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "1/2日的投資組合中有二檔商品，日報酬率各為-3%及-5%，則1/2日的投資組合報酬率為((-3%)+(-5%))/2=-4%，總報酬率為(1+5%)*(1-4%)-1=0.8%",
+      "original_at": 26,
+      "target": "及-5",
+      "annotation_rationale": "The second negative return is joined by the Chinese conjunction.",
+      "source_html": "<li>1/2日的投資組合中有二檔商品，日報酬率各為-3%及-5%，則1/2日的投資組合報酬率為((-3%)+(-5%))/2=-4%，總報酬率為(1+5%)*(1-4%)-1=0.8%</li>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "LI",
+          "display": "list-item",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "UL",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "1/2 日的投資組合中有二檔商品，日報酬率各為 - 3% 及 - 5%，則 1/2 日的投資組合報酬率為 ((-3%)+(-5%))/2=-4%，總報酬率為 (1+5%)*(1-4%)-1=0.8%",
+      "settled_index": 31
+    },
+    {
+      "id": "real-development-06",
+      "enum": "hyphen",
+      "input": "台幣數應等於0*30=0  而你帳上台幣數為-200",
+      "at": 22,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "money",
+      "source": "https://www.ptt.cc/bbs/Accounting/M.1399559559.A.BFF.html",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "\n外幣科目在期末要做外幣的評價.\n\n依您的狀況,當月底外幣數為0,假設月底美金匯率30\n\n\n台幣數應等於0*30=0  而你帳上台幣數為-200\n\n因此該調整 借:銀行存款 200  貸:兌換收入 200\n\n帳上台幣數就會歸0.\n\n\n\n\n\n\n",
+      "original_at": 68,
+      "target": "為-200",
+      "annotation_rationale": "The accounting explanation explicitly identifies a negative TWD balance.",
+      "source_html": "<div id=\"main-content\">\n外幣科目在期末要做外幣的評價.\n\n依您的狀況,當月底外幣數為0,假設月底美金匯率30\n\n\n台幣數應等於0*30=0  而你帳上台幣數為-200\n\n因此該調整 借:銀行存款 200  貸:兌換收入 200\n\n帳上台幣數就會歸0.\n\n\n\n\n\n\n</div>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "#main-content { position: relative; white-space: pre-wrap; }",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_css_sources": [
+        "https://images.ptt.cc/bbs/v2.27/bbs-base.css"
+      ],
+      "source_style_check": [
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "pre-wrap"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "\n外幣科目在期末要做外幣的評價.\n\n依您的狀況, 當月底外幣數為 0, 假設月底美金匯率 30\n\n\n台幣數應等於 0*30=0  而你帳上台幣數為 - 200\n\n因此該調整 借: 銀行存款 200  貸: 兌換收入 200\n\n帳上台幣數就會歸 0.\n\n\n\n\n\n\n",
+      "settled_index": 74
+    },
+    {
+      "id": "real-development-07",
+      "enum": "hyphen",
+      "input": ": 變成-200了",
+      "at": 4,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "money",
+      "source": "https://www.ptt.cc/bbs/Accounting/M.1399559559.A.BFF.html",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": ": 變成-200了。這個問題該怎麼解決?\n",
+      "original_at": 4,
+      "target": "成-200",
+      "annotation_rationale": "The quoted question describes paying out more TWD than the recorded balance.",
+      "source_html": "<div id=\"main-content\"><span>: 變成-200了。這個問題該怎麼解決?\n</span></div>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "#main-content { position: relative; white-space: pre-wrap; }",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_css_sources": [
+        "https://images.ptt.cc/bbs/v2.27/bbs-base.css"
+      ],
+      "source_style_check": [
+        {
+          "tag": "SPAN",
+          "display": "inline",
+          "whiteSpace": "pre-wrap"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "pre-wrap"
+        }
+      ],
+      "settled": ": 變成 - 200 了。這個問題該怎麼解決?\n",
+      "settled_index": 5
+    },
+    {
+      "id": "real-development-08",
+      "enum": "hyphen",
+      "input": "一定要注意冰庫溫度設定在-18°C或以下的同時，要維持固定溫度讓食物保持冷凍方可安心食用",
+      "at": 12,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "temperature",
+      "source": "https://www.electrolux.com.tw/blog/refrigerator-temperature-setting/",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "理想的 冰箱冷凍溫度 應為攝氏 -18 度以下。這個溫度能讓食物保持冷凍並預防細菌和其他微生物孳生而造成食物腐壞。一定要注意冰庫溫度設定在-18°C或以下的同時，要維持固定溫度讓食物保持冷凍方可安心食用。建議定期以溫度計測量冷凍溫度，並視需要調整溫度設定以維持適當溫度。",
+      "original_at": 69,
+      "target": "在-18",
+      "annotation_rationale": "The freezer setting is negative eighteen degrees Celsius.",
+      "source_html": "<p>理想的 冰箱冷凍溫度 應為攝氏 -18 度以下。這個溫度能讓食物保持冷凍並預防細菌和其他微生物孳生而造成食物腐壞。一定要注意冰庫溫度設定在-18&deg;C或以下的同時，要維持固定溫度讓食物保持冷凍方可安心食用。建議定期以溫度計測量冷凍溫度，並視需要調整溫度設定以維持適當溫度。</p>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "P",
+          "display": "block",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "理想的 冰箱冷凍溫度 應為攝氏 -18 度以下。這個溫度能讓食物保持冷凍並預防細菌和其他微生物孳生而造成食物腐壞。一定要注意冰庫溫度設定在 - 18°C 或以下的同時，要維持固定溫度讓食物保持冷凍方可安心食用。建議定期以溫度計測量冷凍溫度，並視需要調整溫度設定以維持適當溫度。",
+      "settled_index": 70
+    },
+    {
+      "id": "real-development-09",
+      "enum": "hyphen",
+      "input": "首頁 > 課程 > 機器人微學程 > 【115-1微學分課程】計算機概論與程式設計-1 Introduction to Computers and Programming-1",
+      "at": 41,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "control",
+      "review": false,
+      "meaning": "course-number",
+      "source": "https://ict.nycu.edu.tw/course/%E3%80%90115-1%E5%BE%AE%E5%AD%B8%E5%88%86%E8%AA%B2%E7%A8%8B%E3%80%91%E8%A8%88%E7%AE%97%E6%A9%9F%E6%A6%82%E8%AB%96%E8%88%87%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88-1-introduction-to-computers-and-programmi/",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "【115-1微學分課程】計算機概論與程式設計-1 Introduction to Computers and Programming-1",
+      "original_at": 22,
+      "target": "計-1",
+      "annotation_rationale": "The course title identifies the first stage, confirmed by the page explaining stages 1, 2, and 3.",
+      "source_html": "<div>\n\t\t\t\t\t<nav><a>首頁</a><span> &gt; </span><a>課程</a><span> &gt; </span><a>機器人微學程</a><span> &gt; </span><span>【115-1微學分課程】計算機概論與程式設計-1 Introduction to Computers and Programming-1</span></nav>\t\t\t\t</div>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "SPAN",
+          "display": "inline",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "NAV",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "【115-1 微學分課程】計算機概論與程式設計 - 1 Introduction to Computers and Programming-1",
+      "settled_index": 24
+    },
+    {
+      "id": "real-development-10",
+      "enum": "hyphen",
+      "input": "有的學期課微學分將會分成-1,-2,-3或A,B,C三階段來進行，每完成一階段，需再報名下一階段選課",
+      "at": 12,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "control",
+      "review": false,
+      "meaning": "course-number",
+      "source": "https://ict.nycu.edu.tw/course/%E3%80%90115-1%E5%BE%AE%E5%AD%B8%E5%88%86%E8%AA%B2%E7%A8%8B%E3%80%91%E8%A8%88%E7%AE%97%E6%A9%9F%E6%A6%82%E8%AB%96%E8%88%87%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88-1-introduction-to-computers-and-programmi/",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "補充說明：學期課是學校課務系統上選的3學分課程，微學分則是在ICT系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成-1,-2,-3或A,B,C三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修-1或A者，不得選修-2,-3或B,C課程。",
+      "original_at": 64,
+      "target": "成-1",
+      "annotation_rationale": "The paragraph explains course stages -1, -2, -3 and A, B, C.",
+      "source_html": "<p>補充說明：學期課是學校課務系統上選的3學分課程，微學分則是在ICT系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成-1,-2,-3或A,B,C三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修-1或A者，不得選修-2,-3或B,C課程。</p>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "P",
+          "display": "block",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "補充說明：學期課是學校課務系統上選的 3 學分課程，微學分則是在 ICT 系統上報名的課程，兩者的永久課號不同。有的學期課微學分將會分成 - 1,-2,-3 或 A,B,C 三階段來進行，每完成一階段，需再報名下一階段選課。若是課程內容設計具連貫性，則未修 - 1 或 A 者，不得選修 - 2,-3 或 B,C 課程。",
+      "settled_index": 69
+    },
+    {
+      "id": "real-development-11",
+      "enum": "hyphen",
+      "input": "水轉印系列-1",
+      "at": 5,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "control",
+      "review": false,
+      "meaning": "product-number",
+      "source": "https://chien-ching.com.tw/cht/water-transfer-printing/water-transfer-printing-series1.html",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "水轉印系列-1",
+      "original_at": 5,
+      "target": "列-1",
+      "annotation_rationale": "The manufacturer names numbered product series and links series 2, 3, and 4.",
+      "source_html": "<h1><i></i>水轉印系列-1</h1>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "H1",
+          "display": "block",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "水轉印系列 - 1",
+      "settled_index": 6
+    },
+    {
+      "id": "real-development-12",
+      "enum": "hyphen",
+      "input": "銀行-600元  悠游付 +100元  NFC-SIM +500元",
+      "at": 2,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "money",
+      "source": "https://www.ptt.cc/bbs/MobilePay/M.1617104205.A.8DF.html",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "\n\n目前加值過三次  (都沒有自動 需要靠卡QQ)\n\n大概介紹一下\"悠遊付\" 也可以算是一個NFC悠遊卡\n在開啟APP\"嗶乘車\"才會讀取  (越來越方便了\n\n第一次捷運靠卡加值時 悠游付為0 加值完後\n\n銀行-600元  悠游付 +100元  NFC-SIM +500元\n\n加值原理是 銀行→悠游付→悠遊卡 最低單位可以自己設定\n\n",
+      "original_at": 104,
+      "target": "行-600",
+      "annotation_rationale": "The author describes 600 debited from the bank and matching positive credits to two payment balances.",
+      "source_html": "<div id=\"main-content\">\n\n目前加值過三次  (都沒有自動 需要靠卡QQ)\n\n大概介紹一下\"悠遊付\" 也可以算是一個NFC悠遊卡\n在開啟APP\"嗶乘車\"才會讀取  (越來越方便了\n\n第一次捷運靠卡加值時 悠游付為0 加值完後\n\n銀行-600元  悠游付 +100元  NFC-SIM +500元\n\n加值原理是 銀行→悠游付→悠遊卡 最低單位可以自己設定\n\n</div>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "#main-content { position: relative; white-space: pre-wrap; }",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_css_sources": [
+        "https://images.ptt.cc/bbs/v2.27/bbs-base.css"
+      ],
+      "source_style_check": [
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "pre-wrap"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "\n\n目前加值過三次  (都沒有自動 需要靠卡 QQ)\n\n大概介紹一下 \"悠遊付\" 也可以算是一個 NFC 悠遊卡\n在開啟 APP\"嗶乘車\" 才會讀取  (越來越方便了\n\n第一次捷運靠卡加值時 悠游付為 0 加值完後\n\n銀行 - 600 元  悠游付 +100 元  NFC-SIM +500 元\n\n加值原理是 銀行→悠游付→悠遊卡 最低單位可以自己設定\n\n",
+      "settled_index": 112
+    },
+    {
+      "id": "real-development-blocktempo-19",
+      "enum": "hyphen",
+      "input": "《温宏駿穩定幣新金融-19》美英聯合聲明",
+      "at": 10,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "control",
+      "review": false,
+      "meaning": "article-number",
+      "source": "https://www.blocktempo.com/the-digital-restoration-of-eurodollar-version-2/",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "《温宏駿穩定幣新金融-19》美英聯合聲明！歐洲美元2.0的數位復辟",
+      "original_at": 10,
+      "target": "融-19",
+      "annotation_rationale": "The publisher numbers articles in the same named series. Article 19 and links to articles 18 and 17 occur on this page.",
+      "source_html": "<h1>《温宏駿穩定幣新金融-19》美英聯合聲明！歐洲美元2.0的數位復辟</h1>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "role_note": "This series was already used in historical development and is not a fresh holdout.",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "H1",
+          "display": "block",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "《温宏駿穩定幣新金融 - 19》美英聯合聲明！歐洲美元 2.0 的數位復辟",
+      "settled_index": 11
+    },
+    {
+      "id": "real-development-blocktempo-18",
+      "enum": "hyphen",
+      "input": "（前情提要：《温宏駿穩定幣新金融-18》OUSD 自由競爭 vs 銀行存款代幣堅守本位，新舊勢力全面開戰 ）",
+      "at": 16,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "control",
+      "review": false,
+      "meaning": "article-number",
+      "source": "https://www.blocktempo.com/the-digital-restoration-of-eurodollar-version-2/",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "《温宏駿穩定幣新金融-18》OUSD 自由競爭 vs 銀行存款代幣堅守本位，新舊勢力全面開戰",
+      "original_at": 10,
+      "target": "融-18",
+      "annotation_rationale": "The publisher numbers articles in the same named series. Article 19 and links to articles 18 and 17 occur on this page.",
+      "source_html": "<p>美國和英國聯合聲明的「境外美元」其實藏著金融大殺器！穩定幣將成為歐洲美元最強的載體，內行人看背景和細節，金融派大星教你該讀懂哪些重點。<br></br>\n（前情提要：<span><a>《温宏駿穩定幣新金融-18》OUSD 自由競爭 vs 銀行存款代幣堅守本位，新舊勢力全面開戰</a></span> ）<br></br>\n（背景補充：<span><a>《温宏駿穩定幣新金融-17》市佔大戰來襲？新舊勢力的終極結算主權對決</a> </span>）</p>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "role_note": "This series was already used in historical development and is not a fresh holdout.",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "A",
+          "display": "inline",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "SPAN",
+          "display": "inline",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "《温宏駿穩定幣新金融 - 18》OUSD 自由競爭 vs 銀行存款代幣堅守本位，新舊勢力全面開戰",
+      "settled_index": 11
+    },
+    {
+      "id": "real-development-blocktempo-17",
+      "enum": "hyphen",
+      "input": "（背景補充：《温宏駿穩定幣新金融-17》市佔大戰來襲",
+      "at": 16,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "control",
+      "review": false,
+      "meaning": "article-number",
+      "source": "https://www.blocktempo.com/the-digital-restoration-of-eurodollar-version-2/",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "《温宏駿穩定幣新金融-17》市佔大戰來襲？新舊勢力的終極結算主權對決",
+      "original_at": 10,
+      "target": "融-17",
+      "annotation_rationale": "The publisher numbers articles in the same named series. Article 19 and links to articles 18 and 17 occur on this page.",
+      "source_html": "<p>美國和英國聯合聲明的「境外美元」其實藏著金融大殺器！穩定幣將成為歐洲美元最強的載體，內行人看背景和細節，金融派大星教你該讀懂哪些重點。<br></br>\n（前情提要：<span><a>《温宏駿穩定幣新金融-18》OUSD 自由競爭 vs 銀行存款代幣堅守本位，新舊勢力全面開戰</a></span> ）<br></br>\n（背景補充：<span><a>《温宏駿穩定幣新金融-17》市佔大戰來襲？新舊勢力的終極結算主權對決</a> </span>）</p>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "role_note": "This series was already used in historical development and is not a fresh holdout.",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "A",
+          "display": "inline",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "SPAN",
+          "display": "inline",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "《温宏駿穩定幣新金融 - 17》市佔大戰來襲？新舊勢力的終極結算主權對決",
+      "settled_index": 11
+    }
+  ],
+  "diagnosticQuestions": [
+    "Translate the original sentence into English, preserving the meaning of each number.",
+    "Which occurrence of the hyphen did the question identify? Quote the exact surrounding original text.",
+    "Explain whether that number is negative, or a positive number connected to a preceding item. Which label fits?"
+  ]
+}

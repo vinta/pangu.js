@@ -1,0 +1,319 @@
+{
+  "set": "hyphen-sign:2026-09-11-real-holdout",
+  "frozen_at": "2026-09-11T08:00:34.185481+00:00",
+  "role": "holdout",
+  "enums": {
+    "hyphen": [
+      "signed-number",
+      "range-or-separator",
+      "unsure"
+    ]
+  },
+  "notes": "Exact source HTML replayed through production Pangu.spaceText, hyphenDigit.find and readSentence in Chrome Beta. Relevant live source display and whitespace verified. No model inference before routing freeze.",
+  "cases": [
+    {
+      "id": "real-holdout-01",
+      "enum": "hyphen",
+      "input": "3.冷凍及冷藏食品之品溫應分別維持於攝氏-18℃以下及7℃以下凍結點以上，且不得有劇烈的溫度變動",
+      "at": 20,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "temperature",
+      "source": "https://food-safety.tycg.gov.tw/News_Content.aspx?n=1228&s=5714",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "3.冷凍及冷藏食品之品溫應分別維持於攝氏-18℃以下及7℃以下凍結點以上，且不得有劇烈的溫度變動。 冷凍、冷藏設備應定期除霜，並保持清潔。",
+      "original_at": 20,
+      "target": "氏-18",
+      "annotation_rationale": "The food-storage requirement specifies a subzero freezer temperature.",
+      "source_html": "<p><span>3.冷凍及冷藏食品之品溫應分別維持於攝氏-18℃以下及7℃以下凍結點以上，且不得有劇烈的溫度變動。 冷凍、冷藏設備應定期除霜，並保持清潔。</span></p>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "SPAN",
+          "display": "inline",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "P",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "3. 冷凍及冷藏食品之品溫應分別維持於攝氏 - 18℃ 以下及 7℃ 以下凍結點以上，且不得有劇烈的溫度變動。 冷凍、冷藏設備應定期除霜，並保持清潔。",
+      "settled_index": 22
+    },
+    {
+      "id": "real-holdout-02",
+      "enum": "hyphen",
+      "input": "冷凍食品之品溫應維持於攝氏-18℃以下，並定期除霜",
+      "at": 13,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "temperature",
+      "source": "https://food-safety.tycg.gov.tw/News_Content.aspx?n=1228&s=5714",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "冷凍食品之品溫應維持於攝氏-18℃以下，並定期除霜",
+      "original_at": 13,
+      "target": "氏-18",
+      "annotation_rationale": "The freezer storage instruction specifies negative eighteen Celsius.",
+      "source_html": "<div><span style=\"white-space: normal; display: inline !important\"><strong>冷凍食品之品溫應維持於攝氏-18℃以下，並定期除霜</strong></span></div>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "STRONG",
+          "display": "inline",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "SPAN",
+          "display": "inline",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "冷凍食品之品溫應維持於攝氏 - 18℃ 以下，並定期除霜",
+      "settled_index": 14
+    },
+    {
+      "id": "real-holdout-03",
+      "enum": "hyphen",
+      "input": "附件1補償金申請書-1120731.pdf 附件1補償金申請書-1120731.pdf (下載次數：2151次)",
+      "at": 9,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "control",
+      "review": false,
+      "meaning": "filename-date",
+      "source": "https://www.moj.gov.tw/2204/2205/2323/2354/2371/2381/2382/177680/post",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "附件1補償金申請書-1120731.pdf",
+      "original_at": 9,
+      "target": "書-112",
+      "annotation_rationale": "The digits identify the dated document filename, not a negative amount.",
+      "source_html": "<li>\n                                <span>附件1補償金申請書-1120731.pdf</span>\n                                <a>附件1補償金申請書-1120731.pdf</a>\n                                <span>(下載次數：2151次)</span>\n                            </li>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "SPAN",
+          "display": "inline",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "LI",
+          "display": "list-item",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "附件 1 補償金申請書 - 1120731.pdf",
+      "settled_index": 12
+    },
+    {
+      "id": "real-holdout-04",
+      "enum": "hyphen",
+      "input": "附件4申請犯罪被害補償金事件委任書-1120731.pdf 附件4申請犯罪被害補償金事件委任書-1120731.pdf (下載次數：621次)",
+      "at": 17,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "control",
+      "review": false,
+      "meaning": "filename-date",
+      "source": "https://www.moj.gov.tw/2204/2205/2323/2354/2371/2381/2382/177680/post",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "附件4申請犯罪被害補償金事件委任書-1120731.pdf",
+      "original_at": 17,
+      "target": "書-112",
+      "annotation_rationale": "The filename joins the document name to its date stamp.",
+      "source_html": "<li>\n                                <span>附件4申請犯罪被害補償金事件委任書-1120731.pdf</span>\n                                <a>附件4申請犯罪被害補償金事件委任書-1120731.pdf</a>\n                                <span>(下載次數：621次)</span>\n                            </li>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "SPAN",
+          "display": "inline",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "LI",
+          "display": "list-item",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "附件 4 申請犯罪被害補償金事件委任書 - 1120731.pdf",
+      "settled_index": 20
+    },
+    {
+      "id": "real-holdout-05",
+      "enum": "hyphen",
+      "input": "8個月-1歲3個月",
+      "at": 3,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "control",
+      "review": false,
+      "meaning": "age-range",
+      "source": "https://class.children.org.tw/search",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "8個月-1歲3個月 ",
+      "original_at": 3,
+      "target": "月-1",
+      "annotation_rationale": "The class age band runs from eight months to one year three months.",
+      "source_html": "<div>8個月-1歲3個月&nbsp;</div>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "8 個月 - 1 歲 3 個月 ",
+      "settled_index": 5
+    },
+    {
+      "id": "real-holdout-06",
+      "enum": "hyphen",
+      "input": "磷產品系列-1",
+      "at": 5,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "control",
+      "review": false,
+      "meaning": "product-number",
+      "source": "https://www.web66.com.tw/CW895/-N895610.html",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "磷產品系列-1",
+      "original_at": 5,
+      "target": "列-1",
+      "annotation_rationale": "The supplier identifies the first phosphate product series.",
+      "source_html": "<div class=\"topmap\">\n<a>首頁</a>/<a>正煌</a>/<span>磷產品系列-1</span>\n</div>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": ".topmap { display: flex; } .topmap > span { display: block; }",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "SPAN",
+          "display": "block",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "DIV",
+          "display": "flex",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "磷產品系列 - 1",
+      "settled_index": 6
+    },
+    {
+      "id": "real-holdout-07",
+      "enum": "hyphen",
+      "input": "最多應該就-100吧 剛好押金",
+      "at": 5,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "money",
+      "source": "https://www.ptt.cc/bbs/CVS/M.1372351544.A.405.html",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "最多應該就-100吧 剛好押金",
+      "original_at": 5,
+      "target": "就-100",
+      "annotation_rationale": "The post asks about the lowest EasyCard balance; this line identifies a negative balance limited by the deposit.",
+      "source_html": "<div id=\"main-content\">最多應該就-100吧 剛好押金</div>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "#main-content { position: relative; white-space: pre-wrap; }",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_css_sources": [
+        "https://images.ptt.cc/bbs/v2.27/bbs-base.css"
+      ],
+      "source_style_check": [
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "pre-wrap"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "最多應該就 - 100 吧 剛好押金",
+      "settled_index": 6
+    },
+    {
+      "id": "real-holdout-08",
+      "enum": "hyphen",
+      "input": "2022年成立滿一年的台股ETF共29檔全數負報酬，平均報酬率為-20.1%，僅11檔ETF報酬率優於大盤，其中「高股息、低波動」相關ETF成為相對抗跌的標的而名列前茅，全年度績效榜首為00731復華富時高股息低波動ETF，跌幅僅5.9%優於大盤18.7%",
+      "at": 32,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "return",
+      "source": "https://www.navigate.com.tw/trends/ETFFund_tw/917b260e-f4c9-43e6-a3c0-74864f844faa",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "2022年成立滿一年的台股ETF共29檔全數負報酬，平均報酬率為-20.1%，僅11檔ETF報酬率優於大盤，其中「高股息、低波動」相關ETF成為相對抗跌的標的而名列前茅，全年度績效榜首為00731復華富時高股息低波動ETF，跌幅僅5.9%優於大盤18.7%。",
+      "original_at": 32,
+      "target": "為-20.1",
+      "annotation_rationale": "The paragraph explicitly reports all funds having negative returns.",
+      "source_html": "<li>2022年成立滿一年的台股ETF共29檔全數負報酬，平均報酬率為-20.1%，僅11檔ETF報酬率優於大盤，其中「高股息、低波動」相關ETF成為相對抗跌的標的而名列前茅，全年度績效榜首為00731復華富時高股息低波動ETF，跌幅僅5.9%優於大盤18.7%。</li>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched; fund additionally matched web open text",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "LI",
+          "display": "list-item",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "UL",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "2022 年成立滿一年的台股 ETF 共 29 檔全數負報酬，平均報酬率為 - 20.1%，僅 11 檔 ETF 報酬率優於大盤，其中「高股息、低波動」相關 ETF 成為相對抗跌的標的而名列前茅，全年度績效榜首為 00731 復華富時高股息低波動 ETF，跌幅僅 5.9% 優於大盤 18.7%。",
+      "settled_index": 38
+    }
+  ],
+  "diagnosticQuestions": [
+    "Translate the original sentence into English, preserving the meaning of each number.",
+    "Which occurrence of the hyphen did the question identify? Quote the exact surrounding original text.",
+    "Explain whether that number is negative, or a positive number connected to a preceding item. Which label fits?"
+  ]
+}

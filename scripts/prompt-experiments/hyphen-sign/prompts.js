@@ -648,3 +648,73 @@ PROMPTS['v31-zh-title-number'] = {
 export const SHOT_SENTENCES = Object.values(SHOTS)
   .flat()
   .map(([s]) => s);
+
+PROMPTS['v32-en'] = {
+  label: 'v32 English translation of v26 instructions, unchanged target and labels',
+  system:
+    'You interpret numbers in Chinese text. Decide whether the specified "-" is a minus sign or a separator. Classify only the specified symbol. Do not rewrite the sentence or explain. Answer with one option name.',
+  build: (kase, labels) => {
+    const number = kase.input.slice(kase.at + 1).match(/^\d+(?:\.\d+)?/)?.[0] ?? '';
+    const glosses = {
+      'signed-number': 'a minus sign belonging to the following number, indicating a value below zero',
+      'range-or-separator': 'connects or separates two items and does not belong to the following number',
+      'unsure': 'the sentence does not provide enough information to decide',
+    };
+    const menu = labels.map((label) => `- ${label}: ${glosses[label]}`).join('\n');
+    return `Sentence: ${kase.input}\n\nWhat kind of symbol is the "-" in "${kase.input[kase.at - 1]}-${number}"?\n${menu}\n\nAnswer with the option name.`;
+  },
+};
+
+PROMPTS['v33-en-context'] = {
+  ...PROMPTS['v32-en'],
+  label: 'v33 English v32 with exact text before and after the target',
+  build: (kase, labels) => {
+    const question = PROMPTS['v32-en'].build(kase, labels);
+    return `Sentence: ${kase.input}\n\nText before the target "-": ${JSON.stringify(kase.input.slice(0, kase.at))}\nText after the target "-": ${JSON.stringify(kase.input.slice(kase.at + 1))}\nWhat kind of symbol is this "-"?${question.slice(question.indexOf('\n- signed-number:'))}`;
+  },
+};
+
+PROMPTS['v34-en-quantity'] = {
+  ...PROMPTS['v32-en'],
+  label: 'v34 English v32 with quantity/change versus identifier definitions',
+  build: (kase, labels) =>
+    PROMPTS['v32-en']
+      .build(kase, labels)
+      .replace('a minus sign belonging to the following number, indicating a value below zero', 'a minus sign on a numeric quantity or change: a negative value, balance, debit, decrease or loss')
+      .replace(
+        'connects or separates two items and does not belong to the following number',
+        'connects items or introduces a number used as a label, title, stage, identifier, count or range endpoint; it does not make the quantity negative',
+      ),
+};
+
+PROMPTS['v35-en-examples'] = {
+  ...PROMPTS['v34-en-quantity'],
+  label: 'v35 v34 with sourced subzero-bound and bank-debit examples, excluded from scoring',
+  system: `${PROMPTS['v34-en-quantity'].system}\n\nExamples:\nSentence: 一定要注意冰庫溫度設定在-18°C或以下的同時，要維持固定溫度讓食物保持冷凍方可安心食用\nThe "-" in "在-18" marks a negative temperature, even though it is a limit.\nAnswer: signed-number\n\nSentence: 銀行-600元  悠游付 +100元  NFC-SIM +500元\nThe "-" in "行-600" marks a debit of 600 from the bank, balanced by positive credits.\nAnswer: signed-number`,
+};
+
+PROMPTS['v36-en-balanced'] = {
+  ...PROMPTS['v35-en-examples'],
+  label: 'v36 v35 plus two sourced course-number examples, page excluded from scoring',
+  system:
+    PROMPTS['v35-en-examples'].system +
+    '\n\nSentence: 首頁 > 課程 > 機器人微學程 > 【115-1微學分課程】計算機概論與程式設計-1 Introduction to Computers and Programming-1\nThe "-" in "計-1" is a course identifier, not a negative quantity.\nAnswer: range-or-separator\n\nSentence: 有的學期課微學分將會分成-1,-2,-3或A,B,C三階段來進行，每完成一階段，需再報名下一階段選課\nThe "-" in "成-1" introduces stage 1, listed alongside stages 2 and 3 and letters A, B, C; it is not a negative quantity.\nAnswer: range-or-separator',
+};
+
+PROMPTS['v37-en-system'] = {
+  ...PROMPTS['v26-zh'],
+  label: 'v37 English system instruction only; shipping Chinese question and definitions',
+  system: PROMPTS['v32-en'].system,
+};
+
+PROMPTS['v38-en-system-identifiers'] = {
+  ...PROMPTS['v37-en-system'],
+  label: 'v38 v37 with identifier-versus-quantity distinction in the system instruction',
+  system: `${PROMPTS['v37-en-system'].system} A number identifying an item, title, or stage is not a negative quantity just because a hyphen precedes it.`,
+};
+
+PROMPTS['v39-en-system-ordinal'] = {
+  ...PROMPTS['v28-zh-ordinal'],
+  label: 'v39 existing ordinal target format with v37 English system instruction',
+  system: PROMPTS['v37-en-system'].system,
+};

@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { hyphenPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-prompt.ts';
+import { hyphenDigitPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-prompt.ts';
 import { PROMPTS, SHOT_SENTENCES } from './hyphen-sign/prompts.js';
 
 const { values, positionals } = parseArgs({
@@ -58,7 +58,7 @@ const prompts =
     ? (await import(`./${values.experiment}/prompts.js`)).PROMPTS
     : {
         ...PROMPTS,
-        shipping: { system: hyphenPrompt.systemPrompt, build: (kase) => hyphenPrompt.buildQuestion(kase.input, kase.at) },
+        shipping: { system: hyphenDigitPrompt.systemPrompt, build: (kase) => hyphenDigitPrompt.buildQuestion(kase.input, kase.at) },
       };
 const root = new URL('./hyphen-sign/', import.meta.url);
 const corpus = digitPlus
@@ -128,7 +128,7 @@ for (const kase of cases) {
   assert(!SHOT_SENTENCES.includes(kase.input), `few-shot leakage: ${kase.id}`);
 }
 if (!plus && !digitPlus && !rewrite && !slash) {
-  assert.deepEqual(corpus.enums.hyphen, hyphenPrompt.candidateLabels, 'shipping labels differ from the corpus; update the cases before comparing prompts');
+  assert.deepEqual(corpus.enums.hyphen, hyphenDigitPrompt.candidateLabels, 'shipping labels differ from the corpus; update the cases before comparing prompts');
 }
 const runs = variants.map((variant) => {
   assert(Object.hasOwn(prompts, variant), `unknown variant ${variant}; add it to scripts/prompt-experiments/${values.experiment}/prompts.js`);
@@ -155,7 +155,7 @@ const runs = variants.map((variant) => {
 if (values.check) {
   plus?.check(corpus);
   rewrite?.check();
-  console.log(`Checked ${cases.length} cases; rendered variants: ${variants.join(', ')}${plus || digitPlus || rewrite || slash ? '' : `; shipping source version: ${hyphenPrompt.version}`}`);
+  console.log(`Checked ${cases.length} cases; rendered variants: ${variants.join(', ')}${plus || digitPlus || rewrite || slash ? '' : `; shipping source version: ${hyphenDigitPrompt.version}`}`);
   process.exit(0);
 }
 assert(/^[a-p]{32}$/.test(values['extension-id'] ?? ''), `invalid --extension-id ${values['extension-id'] ?? '(missing)'}; copy the shipping extension ID from chrome://extensions/`);
@@ -359,7 +359,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     model: 'gemini-nano',
     context: 'extension-sw',
     variant,
-    promptVersion: variant === 'shipping' ? hyphenPrompt.version : variant,
+    promptVersion: variant === 'shipping' ? hyphenDigitPrompt.version : variant,
     repeats,
     orders: orders.map((order) => order.map((index) => inputs[index].id)),
     sampling: 'temperature 0, topK 1',

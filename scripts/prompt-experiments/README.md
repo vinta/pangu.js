@@ -57,7 +57,7 @@ node scripts/prompt-experiments/sweep.mjs --extension-id "$PANGU_EXTENSION_ID" -
 playwright-cli -s=pangu-eval detach
 ```
 
-With no variant arguments, the runner uses `shipping`. This imports `hyphenPrompt` from `browser-extensions/chrome/src/ai-spacing/shapes/hyphen-prompt.ts` in the current checkout. It measures those source bytes even if the installed extension was built from an older checkout. The installed worker provides the execution context; its classifier and cached sessions are not used by the sweep.
+With no variant arguments, the runner uses `shipping`. This imports `hyphenDigitPrompt` from `browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-prompt.ts` in the current checkout. It measures those source bytes even if the installed extension was built from an older checkout. The installed worker provides the execution context; its classifier and cached sessions are not used by the sweep.
 
 Use `--cases <JSON path>` for a separate hyphen corpus. It replaces both `cases.json` and `field-cases.json`; keep the same `{ "enums": ..., "cases": [...] }` structure. An optional `set` names the corpus in result exports. Without it, custom runs use `hyphen-sign:custom`.
 
