@@ -269,7 +269,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     stdout = execFileSync('playwright-cli', ['-s=pangu-eval', '--raw', 'run-code', code], {
       encoding: 'utf8',
       maxBuffer: 10 * 1024 * 1024,
-      timeout: 120000,
+      timeout: 120000 + inputs.length * orderCount * repeats * 30000 * (diagnosticIds ? 1 + (corpus.diagnosticQuestions?.length ?? 2) : 1),
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     let run;

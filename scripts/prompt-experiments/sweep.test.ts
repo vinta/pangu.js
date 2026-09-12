@@ -132,6 +132,21 @@ for (const [experiment, variant] of [
     onTestFinished(() => rmSync(root, { recursive: true, force: true }));
     const profile = join(root, 'Test Profile');
     const output = join(root, 'results');
+    const timeoutProbe = join(root, 'timeout-probe.mjs');
+    writeFileSync(
+      timeoutProbe,
+      `
+import childProcess from 'node:child_process';
+import { writeFileSync } from 'node:fs';
+import { syncBuiltinESMExports } from 'node:module';
+const original = childProcess.execFileSync;
+childProcess.execFileSync = (file, args, options) => {
+  if (file === 'playwright-cli') writeFileSync(${JSON.stringify(join(root, 'timeout.json'))}, JSON.stringify(options.timeout));
+  return original(file, args, options);
+};
+syncBuiltinESMExports();
+`,
+    );
     writeFileSync(
       join(root, 'playwright-cli'),
       `#!/usr/bin/env node
@@ -166,6 +181,8 @@ new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context 
     const run = spawnSync(
       process.execPath,
       [
+        '--import',
+        timeoutProbe,
         'scripts/prompt-experiments/sweep.mjs',
         '--experiment',
         experiment,
@@ -187,6 +204,7 @@ new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context 
       },
     );
     expect(run.status, run.stderr).toBe(1);
+    expect(JSON.parse(readFileSync(join(root, 'timeout.json'), 'utf8'))).toBe(120000 + (experiment === 'hyphen-digit' ? sourceCorpus.cases.length : 7) * 6 * 30000);
     const result = JSON.parse(readFileSync(join(output, `1-${variant}.json`), 'utf8')) as {
       omitResponseConstraintInput: boolean;
       evaluation: { labels: unknown; misses: string[] };
