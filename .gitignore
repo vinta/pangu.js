@@ -8,6 +8,7 @@ node_modules/
 browser-extensions/chrome/dist/
 
 # Test results
+.playwright-cli/
 test-results/
 playwright-report/
 
@@ -17,6 +18,10 @@ playwright-report/
 # Environment files
 .env
 .env.*
+!/scripts/prompt-experiments/.env.example
+
+# Local experiment setup and raw captures
+/tmp/
 
 # Examples
 examples/package-lock.json

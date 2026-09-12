@@ -44,6 +44,8 @@
 
 ## Workflow
 
+- For model-assisted prompt experiments, use [prompt-experiments](.agents/skills/prompt-experiments/SKILL.md). Ordinary deterministic spacing fixes use the checks below.
+
 - For multi-step tasks, first inspect the relevant files, current branch and worktree state, generated-versus-tracked ownership, command availability, and package scripts.
 - Before editing, state a short 3-5 item plan that covers approach, files touched, verification, and any open questions that materially affect correctness.
 - Give Codex enough task context: goal, relevant files or errors, constraints, and what counts as done.
@@ -51,6 +53,7 @@
 - Search usages with `rg` before removing or renaming public APIs, imports, functions, commands, config keys, dependencies, docs references, or files.
 - Keep behavior changes, refactors, generated-output updates, and documentation cleanups separate unless the request explicitly combines them.
 - When coding against dependencies, tools, browser APIs, extension APIs, or release machinery, check current docs or local source before relying on memory.
+- When improving a prompt, ask the model follow-up questions to understand how it interprets the instructions, then use its answers to guide experiments.
 
 ## Coding Conventions
 

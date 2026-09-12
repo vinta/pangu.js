@@ -1,0 +1,388 @@
+{
+  "enums": {
+    "digit-plus": ["conjunction", "lower-bound", "unsure", "product-name"]
+  },
+  "diagnosticQuestions": ["你剛才判斷的是原句中從左到右第幾個「+」？請引用它左右的原文。", "依照選項定義，這個「+」是連接兩個項目，還是修飾一個數值？請說明原句中的依據；若兩者都不是，請指出。"],
+  "set": "digit-plus:historical",
+  "role": "development",
+  "historical": true,
+  "notes": "Synthetic historical cases retained only for reproducing old experiments. Not eligible for new verified real-source experiments.",
+  "cases": [
+    {
+      "id": "switch-bundle-1",
+      "input": "Switch 2+瑪利歐賽車世界同捆組",
+      "expected_output": "Switch 2 + 瑪利歐賽車世界同捆組",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "required",
+      "split": "development",
+      "source": "user acceptance case",
+      "ordinal": 1,
+      "expected_label": "conjunction",
+      "at": 8,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "quantity-1",
+      "input": "有100+的選擇",
+      "expected_output": "有 100+ 的選擇",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "required",
+      "split": "development",
+      "source": "user acceptance case",
+      "ordinal": 1,
+      "expected_label": "lower-bound",
+      "at": 4,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "age-1",
+      "input": "這裡有18+的內容",
+      "expected_output": "這裡有 18+ 的內容",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "required",
+      "split": "development",
+      "source": "user acceptance case",
+      "ordinal": 1,
+      "expected_label": "lower-bound",
+      "at": 5,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "rating-1",
+      "input": "評分3.5+的餐廳",
+      "expected_output": "評分 3.5+ 的餐廳",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "required",
+      "split": "development",
+      "source": "user acceptance case",
+      "ordinal": 1,
+      "expected_label": "lower-bound",
+      "at": 5,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "version-1",
+      "input": "Python 3+的版本",
+      "expected_output": "Python 3+ 的版本",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "required",
+      "split": "development",
+      "source": "user acceptance case",
+      "ordinal": 1,
+      "expected_label": "lower-bound",
+      "at": 8,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "switch-version-1",
+      "input": "需要Switch 2+的版本",
+      "expected_output": "需要 Switch 2+ 的版本",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "contrast",
+      "split": "development",
+      "source": "synthetic",
+      "ordinal": 1,
+      "expected_label": "lower-bound",
+      "at": 10,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "python-bundle-1",
+      "input": "組合包含Python 3+入門教材兩項商品",
+      "expected_output": "組合包含 Python 3 + 入門教材兩項商品",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "contrast",
+      "split": "development",
+      "source": "synthetic",
+      "ordinal": 1,
+      "expected_label": "conjunction",
+      "at": 12,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "camera-bundle-1",
+      "input": "相機X100+記憶卡同捆組",
+      "expected_output": "相機 X100 + 記憶卡同捆組",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "contrast",
+      "split": "development",
+      "source": "synthetic",
+      "ordinal": 1,
+      "expected_label": "conjunction",
+      "at": 6,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "game-bundle-1",
+      "input": "套組包含NBA 2K18+原聲帶兩項商品",
+      "expected_output": "套組包含 NBA 2K18 + 原聲帶兩項商品",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "contrast",
+      "split": "development",
+      "source": "synthetic",
+      "ordinal": 1,
+      "expected_label": "conjunction",
+      "at": 12,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "software-bundle-1",
+      "input": "套組包含繪圖軟體3.5+教學課程兩項商品",
+      "expected_output": "套組包含繪圖軟體 3.5 + 教學課程兩項商品",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "contrast",
+      "split": "development",
+      "source": "synthetic",
+      "ordinal": 1,
+      "expected_label": "conjunction",
+      "at": 11,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "mixed-1",
+      "input": "Switch 2+遊戲同捆組，另有100+的配件可選",
+      "expected_output": "Switch 2 + 遊戲同捆組，另有 100+ 的配件可選",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        },
+        {
+          "ordinal": 2,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "mixed",
+      "split": "development",
+      "source": "synthetic",
+      "ordinal": 1,
+      "expected_label": "conjunction",
+      "at": 8,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "mixed-2",
+      "input": "Switch 2+遊戲同捆組，另有100+的配件可選",
+      "expected_output": "Switch 2 + 遊戲同捆組，另有 100+ 的配件可選",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        },
+        {
+          "ordinal": 2,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "mixed",
+      "split": "development",
+      "source": "synthetic",
+      "ordinal": 2,
+      "expected_label": "lower-bound",
+      "at": 20,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "repeated-1",
+      "input": "支援Python 3+的版本，套組包含Python 3+教材兩項商品",
+      "expected_output": "支援 Python 3+ 的版本，套組包含 Python 3 + 教材兩項商品",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        },
+        {
+          "ordinal": 2,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "mixed",
+      "split": "development",
+      "source": "synthetic",
+      "ordinal": 1,
+      "expected_label": "lower-bound",
+      "at": 10,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "repeated-2",
+      "input": "支援Python 3+的版本，套組包含Python 3+教材兩項商品",
+      "expected_output": "支援 Python 3+ 的版本，套組包含 Python 3 + 教材兩項商品",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        },
+        {
+          "ordinal": 2,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "mixed",
+      "split": "development",
+      "source": "synthetic",
+      "ordinal": 2,
+      "expected_label": "conjunction",
+      "at": 27,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "bare-1",
+      "input": "商品2+",
+      "expected_output": "商品 2+",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "unsure"
+        }
+      ],
+      "group": "boundary",
+      "split": "development",
+      "source": "synthetic",
+      "ordinal": 1,
+      "expected_label": "unsure",
+      "at": 3,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "named-1",
+      "input": "這款產品正式命名為「X2+」",
+      "expected_output": "這款產品正式命名為「X2+」",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "unsure"
+        }
+      ],
+      "group": "boundary",
+      "split": "development",
+      "source": "synthetic",
+      "ordinal": 1,
+      "expected_label": "unsure",
+      "at": 12,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "quantity-minimum-1",
+      "input": "商品數量2+",
+      "expected_output": "商品數量 2+",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "quantity",
+      "split": "development",
+      "source": "synthetic",
+      "ordinal": 1,
+      "expected_label": "lower-bound",
+      "at": 5,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "galaxy-s24-1",
+      "input": "我買了Galaxy S24+手機",
+      "expected_output": "我買了 Galaxy S24+ 手機",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "product-name"
+        }
+      ],
+      "group": "product-name",
+      "split": "development",
+      "source": "synthetic sentence; official product name: https://www.samsung.com/tw/smartphones/galaxy-s24/",
+      "ordinal": 1,
+      "expected_label": "product-name",
+      "at": 13,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "synology-ds224-1",
+      "input": "公司使用Synology DS224+儲存檔案",
+      "expected_output": "公司使用 Synology DS224+ 儲存檔案",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "product-name"
+        }
+      ],
+      "group": "product-name",
+      "split": "development",
+      "source": "synthetic sentence; official product name: https://www.synology.com/en-us/products/DS224%2B",
+      "ordinal": 1,
+      "expected_label": "product-name",
+      "at": 18,
+      "enum": "digit-plus"
+    },
+    {
+      "id": "roborock-s7-1",
+      "input": "家裡用Roborock S7+掃地",
+      "expected_output": "家裡用 Roborock S7+ 掃地",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "product-name"
+        }
+      ],
+      "group": "product-name",
+      "split": "development",
+      "source": "synthetic sentence; official product name: https://us.roborock.com/pages/roborock-s7-plus",
+      "ordinal": 1,
+      "expected_label": "product-name",
+      "at": 14,
+      "enum": "digit-plus"
+    }
+  ]
+}
