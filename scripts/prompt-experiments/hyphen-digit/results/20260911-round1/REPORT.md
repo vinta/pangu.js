@@ -80,11 +80,11 @@ Canonical pages are disjoint across roles. XQ declares a canonical URL different
 
 No candidate used prompt examples. Prior exposure was preserved. The two new course-stage records conservatively inherit their paragraph's exposure flags, rather than claiming separate historical measurements. All eight holdouts were evaluated in this round and are no longer never-inferred inputs for future work.
 
-See [HTTP provenance](source-http/manifest.json), [reviewed browser evidence](source-browser/), [production replay](production-replay.txt), and the [frozen protocol](protocol.json). Full response bodies and unrelated captured content were removed. Public fixtures have separate hashes; historical hashes still identify the original bytes.
+See [HTTP provenance](source-http/manifest.json), [reviewed browser evidence](source-browser/), [production replay](production-replay.txt), and the [frozen protocol](protocol.json). Full response bodies and unrelated captured content were removed. Git records changes to the retained public evidence.
 
 ## Baseline, diagnostics, and candidate
 
-The control was frozen at commit `9e552c29e8593cd4c70ec40a1c7a16f506dd2bcb`, with prompt version `v26-zh`. [Baseline hashes and bytes](baseline-lock.json) cover the prompt, detector, context extractor, model options, messages, edits, and relevant core code. No prior experiment prompts, answers, scores, or conclusions were retrieved from history, temporary reports, sessions, or memories.
+The control was frozen at commit `9e552c29e8593cd4c70ec40a1c7a16f506dd2bcb`, with prompt version `v26-zh`. [Baseline prompt and settings](baseline-lock.json) preserve the system prompt, question builder, labels, and sampling options. No prior experiment prompts, answers, scores, or conclusions were retrieved from history, temporary reports, sessions, or memories.
 
 The new baseline's six label failures were course stages, an article identifier, an age-group label, and a five-year tenor. [Isolated diagnostics](diagnostics/1-shipping.json) asked the model to interpret the unchanged text, locate the target, and explain its label. It often understood the positive age, tenor, or identifier but still treated an adjacent hyphen-digit pattern as a negative number. Those explanations are diagnostic clues, not independent gold labels.
 
@@ -121,6 +121,6 @@ The installed current-checkout extension now uses `v27-zh`. The original extensi
 
 The extension build, 44 focused runner/gate/shape tests, typecheck, and whitespace checks passed. Final verification corrected the mock example-page test to use its canonical source URL after fresh metadata added that mapping; the production gate and measured scores were unchanged.
 
-Run `node scripts/prompt-experiments/hyphen-digit/results/20260911-round1/verify-lock.mjs --integrated` to verify the baseline archive, unchanged runtime files, current public evidence, and exact qualified shipping prompt.
+Run `node scripts/prompt-experiments/hyphen-digit/results/20260911-round1/verify-lock.mjs --integrated` to check the shipping prompt, labels, and questions against the qualified candidate and its recorded integration gate.
 
 Current API checks used the official [Chrome extension Prompt API documentation](https://developer.chrome.com/docs/extensions/ai/prompt-api) and [Playwright CDP documentation](https://playwright.dev/docs/api/class-browsertype#browser-type-connect-over-cdp). Local production code determined the actual sampling, language, schema, and cache behavior.

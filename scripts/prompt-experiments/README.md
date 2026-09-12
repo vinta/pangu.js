@@ -10,7 +10,7 @@ Connection settings are optional and local. Copy [`.env.example`](.env.example) 
 
 ## Run
 
-Run commands from the repository root. Hyphen-digit requires an explicit `--cases` file and has no legacy corpus fallback. Its source records live in `hyphen-digit/corpus/`; the corpus contains 21 development and 8 holdout targets. The completed round evaluated all 8 holdouts; obtain fresh holdouts before another qualification round. Validate saved source hashes and replay production inputs locally. Fetch sources again only under the workflow’s [source-verification rules](../../.agents/skills/prompt-experiments/references/sources.md).
+Run commands from the repository root. Hyphen-digit requires an explicit `--cases` file and has no legacy corpus fallback. Its source records live in `hyphen-digit/corpus/`; the corpus contains 21 development and 8 holdout targets. The completed round evaluated all 8 holdouts; obtain fresh holdouts before another qualification round. Reuse saved source snapshots and replay production inputs locally. Fetch sources again only under the workflow’s [source-verification rules](../../.agents/skills/prompt-experiments/references/sources.md).
 
 ```bash
 # Validate the retained source records and render shipping without a browser.
@@ -53,6 +53,8 @@ For the separate digit-plus experiment, use `--experiment digit-plus`; its inter
 
 The runner records labels, raw answers, errors, timings, and actual case orders. It creates a fresh base session per order and a fresh clone per target/attempt, with the sampling settings used by production. `--orders` defaults to two; `--repeats` defaults to one. Recorded seeded shuffles make orders reproducible.
 
+Record the run's Git revision in the experiment notes. Save any relevant uncommitted or external code and inputs alongside the results before changing them again.
+
 A case passes only when every expected answer is correct and has no error. Missing answers, skips, and incomplete runs fail. Diagnostic output is separate from accuracy: use `--diagnostics <case IDs>` with `--orders 1 --repeats 1` on development cases only. Never run diagnostics on holdout.
 
 `--require-perfect` fails if any scored case fails. The new experiment's paired no-regression gate is different: compare baseline and candidate per case under the declared protocol. Label outputs alone do not establish final spacing or shipping integration. Complete the spacing annotations and production checks in the workflow’s [acceptance gates](../../.agents/skills/prompt-experiments/SKILL.md#acceptance-gates) before accepting a candidate.
@@ -85,15 +87,17 @@ These paths describe files you create for the new round. Collection verifies sou
 
 For a new round, write its own protocol with the fields in [artifact rules](../../.agents/skills/prompt-experiments/references/artifacts.md#round-record). Reuse `hyphen-digit/paired-gates.mjs`'s `evaluatePaired({ phase, cases, comparisons, exampleSources, editsForLabel, applyTextEdits })`. Each comparison is `{ baseline, candidate }` from the two result JSON files. Supply current production `hyphenDigit.edits({ index: kase.settled_index }, label)` and `applyTextEdits`; bundle their TypeScript imports with the installed `rolldown` as the existing replay helper does.
 
-If adapting a recorded-round gate/integration helper, replace its round/corpus paths, baseline and candidate locks, variant IDs, count assumptions, and prompt-question lookup with the new round's frozen values. Validate hashes, options, labels and questions before scoring. Keep production spacing functions and `evaluatePaired` unchanged. For integration, use the current extension message entry point in `browser-extensions/chrome/src/ai-spacing/messages.ts` and `service-worker.ts`, reset its sessions/caches between matched runs, and record fresh replies plus individual/combined production edits. Do not run a historical helper against new-round output without those adaptations.
+If adapting a recorded-round gate/integration helper, replace its round/corpus paths, baseline and candidate locks, variant IDs, count assumptions, and prompt-question lookup with the new round's frozen values. Check the recorded revision and saved changes, then validate options, labels and questions before scoring. Keep production spacing functions and `evaluatePaired` unchanged. For integration, use the current extension message entry point in `browser-extensions/chrome/src/ai-spacing/messages.ts` and `service-worker.ts`, reset its sessions/caches between matched runs, and record fresh replies plus individual/combined production edits. Do not run a historical helper against new-round output without those adaptations.
 
 ## Historical review only
 
 The completed [hyphen-digit report](hyphen-digit/results/20260911-round1/REPORT.md) and [frozen protocol](hyphen-digit/results/20260911-round1/protocol.json) document the finished round. Open them when reviewing that round; do not use them to select candidates for an independent experiment.
 
+Older results may lack an execution revision. Use their saved inputs and prompts; the commit that added a result does not establish which revision ran.
+
 The completed round's `freeze.mjs`, `gate.mjs`, `verify-lock.mjs`, and `integration.mjs` keep its fixed paths, candidate IDs, protocol, and coverage assumptions. They are recorded-round tools. Inspect those assumptions before reuse. The collection helper accepts explicit corpus/output paths; the production replay helper accepts `--cases`.
 
 ```bash
-# Verify the completed round against retained public evidence.
+# Check the archived candidate against the shipping prompt, labels, questions, and integration gate.
 node scripts/prompt-experiments/hyphen-digit/results/20260911-round1/verify-lock.mjs --integrated
 ```

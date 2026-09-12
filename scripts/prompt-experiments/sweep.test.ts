@@ -298,6 +298,6 @@ test('public artifact fields preserve evidence and omit unknown metadata', () =>
     prior_exposure: { model_inference: true },
   });
   expect(JSON.stringify(kase)).not.toMatch(/private-session|private-id|private-class|private-token/);
-  expect(publicFixture(kase)).toMatchObject({ html: source.source_html, css: source.source_css, sha256: expect.stringMatching(/^[a-f0-9]{64}$/) });
+  expect(publicFixture(kase)).toEqual({ html: source.source_html, css: source.source_css });
   expect(publicError(new Error('wrong profile: /Users/example/Profile\nstack with token'), ['/Users/example/Profile'])).toBe('wrong profile: [local]');
 });

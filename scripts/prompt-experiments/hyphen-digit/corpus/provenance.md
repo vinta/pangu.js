@@ -40,11 +40,9 @@ Before cleanup on 2026-09-11, all 163 files under the repository's prompt-experi
 
 All 15 retained development IDs had saved model inference records. Four development records were also used as prompt examples: `real-development-08`, `real-development-09`, `real-development-10`, and `real-development-12`. Each record preserves these facts in `prior_exposure`. Keep them in development; any future example page must be excluded from scored development.
 
-The audit covers repository artifacts and the prior report, not unrecorded external activity. Before another round, validate saved source hashes and replay production routing locally. Follow the [workflow](../../../../.agents/skills/prompt-experiments/references/sources.md) to decide when a source needs fetching again. If exposure is later found to be uncertain, move the whole page to development and replace its holdout cases.
+The audit covers repository artifacts and the prior report, not unrecorded external activity. Before another round, reuse saved source snapshots and replay production routing locally. Follow the [workflow](../../../../.agents/skills/prompt-experiments/references/sources.md) to decide when a source needs fetching again. If exposure is later found to be uncertain, move the whole page to development and replace its holdout cases.
 
 ## Additional development sources
-
-The four additional records are in `development.json`. Both pages loaded in Chrome Beta on 2026-09-11. Pangu was disabled and the pages reloaded before checking the live DOM. The three Macromicro strings match exactly; the Books.com.tw title includes an authored space before `(電子書)`, preserved separately from the supplied text.
 
 Production `BrowserPangu.spaceNode()` emitted each target through `onTextNodesSettled`, including the real document title. `readSentence()` and `hyphenDigit.find()` produced the recorded inputs and offsets. Each excerpt has one eligible hyphen-digit target. The expected separator label preserves the rule output; `hyphenDigit.edits()` and `applyTextEdits()` matched the annotated target and full-excerpt spacing. Scheduling was disabled for deterministic execution, with no model calls. The replay checks retain these assertions.
 

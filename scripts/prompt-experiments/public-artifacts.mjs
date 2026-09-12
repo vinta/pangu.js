@@ -1,5 +1,4 @@
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdirSync, mkdtempSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
@@ -42,7 +41,6 @@ export function publicCase(kase) {
     'source_surface',
     'source_note',
     'eligible_targets',
-    'fixture_sha256',
     'expected_output',
     'group',
     'split',
@@ -75,8 +73,7 @@ export function publicCase(kase) {
 }
 
 export function publicFixture(kase) {
-  const fixture = { html: kase.source_html, css: kase.source_css };
-  return { ...fixture, sha256: createHash('sha256').update(JSON.stringify(fixture)).digest('hex') };
+  return { html: kase.source_html, css: kase.source_css };
 }
 
 export function publicError(error, privateValues = []) {
