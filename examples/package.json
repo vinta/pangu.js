@@ -12,7 +12,7 @@
     "server": "node server.js"
   },
   "dependencies": {
-    "pangu": "10.0.0"
+    "pangu": "10.1.0"
   },
   "devDependencies": {
     "typescript": "6.0.3",

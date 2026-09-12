@@ -1,5 +1,17 @@
 # Changelog
 
+## v10.1.0 / 2026-09-13
+
+### [pangu.js](https://www.npmjs.com/package/pangu)
+
+- CLI 的 `-h` 會在說明的開頭顯示版本號
+
+### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+
+- 數字後面緊接著 `+` 再接中文時，由模型判斷 `+` 是連接兩個東西還是「以上」的意思
+  - 同一句只有一個 `+` 時才會交給模型判斷
+- 改進 `-` 是負號還是分隔符號的判斷，編號、年齡、年期前面的 `-` 比較不會被誤判成負號
+
 ## v10.0.0 / 2026-09-11
 
 ### [pangu.js](https://www.npmjs.com/package/pangu)

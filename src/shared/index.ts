@@ -300,7 +300,7 @@ export class Pangu {
   version: string;
 
   constructor() {
-    this.version = '10.0.0';
+    this.version = '10.1.0';
   }
 
   public spaceText(text: string) {
