@@ -6,16 +6,16 @@ Adopt `real-r1-semantic` as `v27-zh`. Screening, both confirmation runs, holdout
 
 A passing target requires every scheduled attempt to have the right label, individual-target spacing, and combined excerpt spacing. Correct labels alone do not qualify a target.
 
-| Phase | Attempts per target per prompt | Shipping labels | Candidate labels | Shipping full gate | Candidate full gate | Decision |
-| --- | ---: | ---: | ---: | ---: | ---: | --- |
-| New baseline | 2 | 15/21 | — | 15/21 | — | Six stable label failures |
-| Matched screening | 2 | 15/21 | 19/21 | 15/21 | 17/21 | Pass |
-| Confirmation run 1 | 6 | 15/21 | 19/21 | 15/21 | 17/21 | Pass |
-| Confirmation run 2 | 6 | 15/21 | 19/21 | 15/21 | 17/21 | Pass |
-| Holdout run 1 | 6 | 8/8 | 8/8 | 8/8 | 8/8 | Pass |
-| Holdout run 2 | 6 | 8/8 | 8/8 | 8/8 | 8/8 | Pass |
-| Final integration, development | 1 fresh | 15/21 | 19/21 | 15/21 | 17/21 | Pass |
-| Final integration, holdout | 1 fresh | 8/8 | 8/8 | 8/8 | 8/8 | Pass |
+| Phase                          | Attempts per target per prompt | Shipping labels | Candidate labels | Shipping full gate | Candidate full gate | Decision                  |
+| ------------------------------ | -----------------------------: | --------------: | ---------------: | -----------------: | ------------------: | ------------------------- |
+| New baseline                   |                              2 |           15/21 |                — |              15/21 |                   — | Six stable label failures |
+| Matched screening              |                              2 |           15/21 |            19/21 |              15/21 |               17/21 | Pass                      |
+| Confirmation run 1             |                              6 |           15/21 |            19/21 |              15/21 |               17/21 | Pass                      |
+| Confirmation run 2             |                              6 |           15/21 |            19/21 |              15/21 |               17/21 | Pass                      |
+| Holdout run 1                  |                              6 |             8/8 |              8/8 |                8/8 |                 8/8 | Pass                      |
+| Holdout run 2                  |                              6 |             8/8 |              8/8 |                8/8 |                 8/8 | Pass                      |
+| Final integration, development |                        1 fresh |           15/21 |            19/21 |              15/21 |               17/21 | Pass                      |
+| Final integration, holdout     |                        1 fresh |             8/8 |              8/8 |                8/8 |                 8/8 | Pass                      |
 
 The same two targets improved in both confirmation runs: `real-development-blocktempo-19` and `macromicro-labor-15-64`. Each passed all 12 candidate attempts and failed all 12 shipping attempts. No baseline-passing target regressed. No scored answer was unstable, missing, skipped, or errored.
 
@@ -27,50 +27,50 @@ Counts below combine both fresh runs: 12 scheduled attempts per target per promp
 
 ### Development
 
-| Target ID | Shipping labels | Candidate labels | Shipping target | Candidate target | Shipping full | Candidate full | Full case pass: shipping → candidate |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| `real-development-01` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-development-02` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-development-03` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-development-04` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-development-05` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-development-06` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-development-07` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-development-08` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-development-09` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-development-10` | 0/12 | 0/12 | 0/12 | 0/12 | 0/12 | 0/12 | fail → fail |
-| `real-development-10-stage-1` | 0/12 | 12/12 | 0/12 | 12/12 | 0/12 | 0/12 | fail → fail |
-| `real-development-10-stage-2` | 0/12 | 12/12 | 0/12 | 12/12 | 0/12 | 0/12 | fail → fail |
-| `real-development-11` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-development-12` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-development-blocktempo-19` | 0/12 | 12/12 | 0/12 | 12/12 | 0/12 | 12/12 | fail → pass |
-| `real-development-blocktempo-18` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-development-blocktempo-17` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `books-4-percent-ebook` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `macromicro-labor-15-64` | 0/12 | 12/12 | 0/12 | 12/12 | 0/12 | 12/12 | fail → pass |
-| `macromicro-global-labor-25-54` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `macromicro-us-cds-5y` | 0/12 | 0/12 | 0/12 | 0/12 | 0/12 | 0/12 | fail → fail |
+| Target ID                        | Shipping labels | Candidate labels | Shipping target | Candidate target | Shipping full | Candidate full | Full case pass: shipping → candidate |
+| -------------------------------- | --------------: | ---------------: | --------------: | ---------------: | ------------: | -------------: | ------------------------------------ |
+| `real-development-01`            |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-development-02`            |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-development-03`            |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-development-04`            |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-development-05`            |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-development-06`            |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-development-07`            |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-development-08`            |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-development-09`            |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-development-10`            |            0/12 |             0/12 |            0/12 |             0/12 |          0/12 |           0/12 | fail → fail                          |
+| `real-development-10-stage-1`    |            0/12 |            12/12 |            0/12 |            12/12 |          0/12 |           0/12 | fail → fail                          |
+| `real-development-10-stage-2`    |            0/12 |            12/12 |            0/12 |            12/12 |          0/12 |           0/12 | fail → fail                          |
+| `real-development-11`            |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-development-12`            |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-development-blocktempo-19` |            0/12 |            12/12 |            0/12 |            12/12 |          0/12 |          12/12 | fail → pass                          |
+| `real-development-blocktempo-18` |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-development-blocktempo-17` |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `books-4-percent-ebook`          |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `macromicro-labor-15-64`         |            0/12 |            12/12 |            0/12 |            12/12 |          0/12 |          12/12 | fail → pass                          |
+| `macromicro-global-labor-25-54`  |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `macromicro-us-cds-5y`           |            0/12 |             0/12 |            0/12 |             0/12 |          0/12 |           0/12 | fail → fail                          |
 
 ### Holdout
 
-| Target ID | Shipping labels | Candidate labels | Shipping target | Candidate target | Shipping full | Candidate full | Full case pass: shipping → candidate |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| `real-holdout-01` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-holdout-02` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-holdout-03` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-holdout-04` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-holdout-05` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-holdout-06` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-holdout-07` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
-| `real-holdout-08` | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | 12/12 | pass → pass |
+| Target ID         | Shipping labels | Candidate labels | Shipping target | Candidate target | Shipping full | Candidate full | Full case pass: shipping → candidate |
+| ----------------- | --------------: | ---------------: | --------------: | ---------------: | ------------: | -------------: | ------------------------------------ |
+| `real-holdout-01` |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-holdout-02` |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-holdout-03` |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-holdout-04` |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-holdout-05` |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-holdout-06` |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-holdout-07` |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
+| `real-holdout-08` |           12/12 |            12/12 |           12/12 |            12/12 |         12/12 |          12/12 | pass → pass                          |
 
 ## Source verification and separation
 
-| Role | Targets | Distinct sentence contexts | Original excerpts | Canonical pages | Publishers |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Development | 21 | 19 | 18 | 9 | 8 |
-| Holdout | 8 | 8 | 8 | 6 | 6 |
-| Combined | 29 | 27 | 26 | 15 | 13 |
+| Role        | Targets | Distinct sentence contexts | Original excerpts | Canonical pages | Publishers |
+| ----------- | ------: | -------------------------: | ----------------: | --------------: | ---------: |
+| Development |      21 |                         19 |                18 |               9 |          8 |
+| Holdout     |       8 |                          8 |                 8 |               6 |          6 |
+| Combined    |      29 |                         27 |                26 |              15 |         13 |
 
 Every source page was opened in the configured Chrome Beta profile with Pangu confirmed off before navigation. Fresh HTTP responses verified 22 of the original 27 targets. Books.com.tw and MacroMicro returned 403 responses; Navigate failed certificate verification. All three passed the required Chrome Beta fallback, including DOM text, source HTML, computed styles, and production input checks. Certificate verification was not bypassed.
 
@@ -80,11 +80,11 @@ Canonical pages are disjoint across roles. XQ declares a canonical URL different
 
 No candidate used prompt examples. Prior exposure was preserved. The two new course-stage records conservatively inherit their paragraph's exposure flags, rather than claiming separate historical measurements. All eight holdouts were evaluated in this round and are no longer never-inferred inputs for future work.
 
-See [HTTP provenance](source-http/manifest.json), [reviewed browser evidence](source-browser/), [production replay](production-replay.txt), and the [frozen protocol](protocol.json). Full response bodies and unrelated captured content were removed. Git records changes to the retained public evidence.
+See [reviewed browser evidence](source/) and the [frozen protocol](protocol.json). Full response bodies and unrelated captured content were removed. Git records changes to the retained public evidence.
 
 ## Baseline, diagnostics, and candidate
 
-The control was frozen at commit `9e552c29e8593cd4c70ec40a1c7a16f506dd2bcb`, with prompt version `v26-zh`. [Baseline prompt and settings](baseline-lock.json) preserve the system prompt, question builder, labels, and sampling options. No prior experiment prompts, answers, scores, or conclusions were retrieved from history, temporary reports, sessions, or memories.
+The control was frozen with prompt version `v26-zh`. The [frozen protocol](protocol.json)'s `baseline` preserves the system prompt, question builder, labels, and sampling options. No prior experiment prompts, answers, scores, or conclusions were retrieved from history, temporary reports, sessions, or memories.
 
 The new baseline's six label failures were course stages, an article identifier, an age-group label, and a five-year tenor. [Isolated diagnostics](diagnostics/1-shipping.json) asked the model to interpret the unchanged text, locate the target, and explain its label. It often understood the positive age, tenor, or identifier but still treated an adjacent hyphen-digit pattern as a negative number. Those explanations are diagnostic clues, not independent gold labels.
 
@@ -119,7 +119,18 @@ The installed current-checkout extension now uses `v27-zh`. The original extensi
 
 ## Verification and retained artifacts
 
-The extension build, 44 focused runner/gate/shape tests, typecheck, and whitespace checks passed. Final verification corrected the mock example-page test to use its canonical source URL after fresh metadata added that mapping; the production gate and measured scores were unchanged.
+Validation at `2026-09-11T10:26:28.065Z` passed the extension build, all three tsconfigs, ESLint for the changed production prompt and prompt test, whitespace checks, and an independent artifact audit. All 44 tests passed, with zero failures, across:
+
+- `scripts/prompt-experiments/sweep.test.ts`
+- `scripts/prompt-experiments/hyphen-digit/paired-gates.test.ts`
+- `tests/extension/ai-spacing/shapes/hyphen-digit.test.ts`
+- `tests/extension/ai-spacing/shapes/hyphen-digit-prompt.test.ts`
+
+Final verification corrected the mock example-page test to pass `canonical_source` after fresh metadata added that mapping. The production gate code and scored artifacts were unchanged. `verify-lock.mjs --integrated` passed for the frozen evidence and qualified prompt.
+
+Local paths were removed from summary console exports; model response JSON was unchanged. Tracked report artifacts contained no profile names or extension IDs.
+
+Source, fixture, sender, and temporary worker-inspection pages were closed. The current extension was enabled, the original extension was disabled, and automation was detached.
 
 Run `node scripts/prompt-experiments/hyphen-digit/results/20260911-round1/verify-lock.mjs --integrated` to check the shipping prompt, labels, and questions against the qualified candidate and its recorded integration gate.
 

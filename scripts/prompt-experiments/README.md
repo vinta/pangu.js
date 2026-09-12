@@ -95,7 +95,7 @@ The completed [hyphen-digit report](hyphen-digit/results/20260911-round1/REPORT.
 
 Older results may lack an execution revision. Use their saved inputs and prompts; the commit that added a result does not establish which revision ran.
 
-The completed round's `freeze.mjs`, `gate.mjs`, `verify-lock.mjs`, and `integration.mjs` keep its fixed paths, candidate IDs, protocol, and coverage assumptions. They are recorded-round tools. Inspect those assumptions before reuse. The collection helper accepts explicit corpus/output paths; the production replay helper accepts `--cases`.
+The completed round's `gate.mjs`, `verify-lock.mjs`, and `integration.mjs` keep its fixed paths, candidate IDs, protocol, and coverage assumptions. They are recorded-round tools. Inspect those assumptions before reuse. The frozen protocol retains baseline settings and runtime details. The collection helper accepts explicit corpus/output paths; the production replay helper accepts `--cases`.
 
 ```bash
 # Check the archived candidate against the shipping prompt, labels, questions, and integration gate.
