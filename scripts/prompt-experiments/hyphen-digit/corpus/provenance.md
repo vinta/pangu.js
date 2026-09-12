@@ -1,6 +1,6 @@
 # Hyphen-digit source corpus
 
-The shared development corpus contains 30 reusable targets: 22 used in `20260912-tenors` and 8 evaluated as holdouts in `20260911-round1`. Capture dates, source context, and exposure are recorded per case. Each experiment report pins its corpus version and case selection.
+The shared development corpus contains 30 reusable targets: 22 used in `20260912-tenors` and 8 evaluated as holdouts in `20260911-semantic-rule` (originally `20260911-round1`). Capture dates, source context, and exposure are recorded per case. Each experiment report pins its corpus version and case selection.
 
 `development.json` includes all verified cases below. The 2026-09-12 merge adds the 10-year Treasury title and preserves existing IDs, target text, annotations, and prior example exposure.
 
@@ -50,7 +50,7 @@ The initial source navigation occurred with Pangu enabled and may have triggered
 
 ## Executed round: 2026-09-11
 
-All 15 source pages were reverified in Chrome Beta with Pangu disabled before navigation. The [round report](../results/20260911-round1/REPORT.md) links the fresh HTML, DOM, style, routing, spacing, and model evidence. Two additional targets came from the unchanged course paragraph; every eligible target in each excerpt now has an annotation.
+All 15 source pages were reverified in Chrome Beta with Pangu disabled before navigation. The [round report](../results/20260911-semantic-rule/REPORT.md) summarizes the source, spacing, and model checks. The shared corpus retains replay fixtures and inline verification summaries; raw captures stay in ignored temporary storage. Two additional targets came from the unchanged course paragraph; every eligible target in each excerpt now has an annotation.
 
 The two new course-stage records conservatively inherit the paragraph's prior exposure flags. Those flags do not claim separate historical measurements of the newly added target IDs. No prior prompts, model answers, scores, or conclusions were retrieved.
 
