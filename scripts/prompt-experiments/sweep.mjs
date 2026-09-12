@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { basename, dirname, isAbsolute, join, resolve } from 'node:path';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { hyphenDigitPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-prompt.ts';
@@ -18,7 +18,6 @@ const { values, positionals } = parseArgs({
     'out': { type: 'string' },
     'extension-id': { type: 'string', default: process.env.PANGU_EXTENSION_ID },
     'profile-path': { type: 'string', default: process.env.PANGU_CHROME_PROFILE_PATH },
-    'profile-name': { type: 'string', default: process.env.PANGU_CHROME_PROFILE_NAME },
     'repeats': { type: 'string', default: '1' },
     'orders': { type: 'string', default: '2' },
     'check': { type: 'boolean' },
@@ -118,10 +117,6 @@ assert(/^[a-p]{32}$/.test(values['extension-id'] ?? ''), `invalid --extension-id
 assert(values.out, 'provide --out <new-directory> to preserve previous results');
 const profilePath = values['profile-path'];
 assert(profilePath && isAbsolute(profilePath), `invalid --profile-path ${profilePath ?? '(missing)'}; copy the absolute Profile Path from chrome://version`);
-assert(values['profile-name'], 'provide --profile-name <display-name> for the intended Chrome profile');
-const statePath = join(dirname(profilePath), 'Local State');
-const state = JSON.parse(readFileSync(statePath, 'utf8'));
-assert.equal(state.profile?.info_cache?.[basename(profilePath)]?.name, values['profile-name'], `Chrome profile name mismatch for ${profilePath}; verify --profile-name against ${statePath}`);
 const output = resolve(values.out);
 mkdirSync(dirname(output), { recursive: true });
 mkdirSync(output, { recursive: false });

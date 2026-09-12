@@ -6,7 +6,7 @@ Invoke `$prompt-experiments` in Codex, or follow the [prompt experiment skill](.
 
 Follow [machine setup](../../.agents/skills/prompt-experiments/references/setup.md) to install dependencies, load the extension, provision the model, and attach `pangu-eval`. Use Node 22.18+ and `playwright-cli` on `PATH`.
 
-Connection settings are optional and local. Copy [`.env.example`](.env.example) to `.env.local` after checking it is ignored and untracked. Supply settings through Node's `--env-file` support, exported environment variables, or the sweep's explicit profile/extension flags. `AGENTS.local.md` is optional personal guidance.
+Connection settings are optional and local. Copy [`.env.example`](.env.example) to `.env.local` after checking it is ignored and untracked. Supply settings through Node's `--env-file` support, exported environment variables, or the sweep's explicit profile/extension flags.
 
 ## Run
 

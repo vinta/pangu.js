@@ -21,7 +21,6 @@ playwright-report/
 !/scripts/prompt-experiments/.env.example
 
 # Local experiment setup and raw captures
-/AGENTS.local.md
 /tmp/
 
 # Examples

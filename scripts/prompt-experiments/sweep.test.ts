@@ -53,19 +53,16 @@ test.skipIf(!supportsTypeScript)('hyphen corpora require provenance and retain d
   expect(check().stderr).toContain(`invalid symbol offset: ${sourceCase.id}`);
 });
 
-test.skipIf(!supportsTypeScript)('requires an explicit matching Chrome profile before creating experiment output', () => {
+test.skipIf(!supportsTypeScript)('requires an absolute Chrome profile path without local profile metadata', () => {
   const root = mkdtempSync(join(tmpdir(), 'pangu-profile-'));
   onTestFinished(() => rmSync(root, { recursive: true, force: true }));
   const profile = join(root, 'Test Profile');
   const output = join(root, 'results');
-  writeFileSync(join(root, 'Local State'), JSON.stringify({ profile: { info_cache: { 'Test Profile': { name: 'Experiment' } } } }));
   const args = ['scripts/prompt-experiments/sweep.mjs', '--cases', hyphenCases, '--extension-id', 'a'.repeat(32), '--out', output];
 
   for (const [options, message] of [
     [[], 'invalid --profile-path (missing)'],
     [['--profile-path', 'relative'], 'invalid --profile-path relative'],
-    [['--profile-path', profile], 'provide --profile-name'],
-    [['--profile-path', profile, '--profile-name', 'Wrong'], 'Chrome profile name mismatch'],
   ] as const) {
     const run = spawnSync(process.execPath, [...args, ...options], { encoding: 'utf8' });
     expect(run.status).toBe(1);
@@ -75,11 +72,11 @@ test.skipIf(!supportsTypeScript)('requires an explicit matching Chrome profile b
 
   // A valid profile reaches output creation; an existing directory stops the run before Chrome is contacted.
   mkdirSync(output);
-  const run = spawnSync(process.execPath, [...args, '--profile-path', profile, '--profile-name', 'Experiment'], { encoding: 'utf8' });
+  const run = spawnSync(process.execPath, [...args, '--profile-path', profile], { encoding: 'utf8' });
   expect(run.status).toBe(1);
   expect(run.stderr).toContain('EEXIST');
   const envFile = join(root, 'settings.env');
-  writeFileSync(envFile, `PANGU_EXTENSION_ID=${'a'.repeat(32)}\nPANGU_CHROME_PROFILE_PATH=${profile}\nPANGU_CHROME_PROFILE_NAME=Experiment\n`);
+  writeFileSync(envFile, `PANGU_EXTENSION_ID=${'a'.repeat(32)}\nPANGU_CHROME_PROFILE_PATH=${profile}\n`);
   const configured = spawnSync(process.execPath, [`--env-file=${envFile}`, 'scripts/prompt-experiments/sweep.mjs', '--cases', hyphenCases, '--out', output], { encoding: 'utf8' });
   expect(configured.status).toBe(1);
   expect(configured.stderr).toContain('EEXIST');
@@ -94,7 +91,6 @@ for (const [experiment, variant] of [
     onTestFinished(() => rmSync(root, { recursive: true, force: true }));
     const profile = join(root, 'Test Profile');
     const output = join(root, 'results');
-    writeFileSync(join(root, 'Local State'), JSON.stringify({ profile: { info_cache: { 'Test Profile': { name: 'Experiment' } } } }));
     writeFileSync(
       join(root, 'playwright-cli'),
       `#!/usr/bin/env node
@@ -137,8 +133,6 @@ new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context 
         'a'.repeat(32),
         '--profile-path',
         profile,
-        '--profile-name',
-        'Experiment',
         '--out',
         output,
         '--repeats',
@@ -197,18 +191,17 @@ new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context 
   });
 }
 
-test.skipIf(!supportsTypeScript)('browser command failure leaves an incomplete artifact without invented answers', () => {
+test.skipIf(!supportsTypeScript)('browser and profile failures leave incomplete artifacts without invented answers', () => {
   const root = mkdtempSync(join(tmpdir(), 'pangu-incomplete-'));
   onTestFinished(() => rmSync(root, { recursive: true, force: true }));
   const profile = join(root, 'Test Profile');
   const output = join(root, 'results', 'new-run');
-  writeFileSync(join(root, 'Local State'), JSON.stringify({ profile: { info_cache: { 'Test Profile': { name: 'Experiment' } } } }));
   writeFileSync(join(root, 'playwright-cli'), '#!/usr/bin/env node\nprocess.stderr.write("worker unavailable; token=private-token; profile=/Users/example/Profile"); process.exit(9);\n', {
     mode: 0o755,
   });
   const run = spawnSync(
     process.execPath,
-    ['scripts/prompt-experiments/sweep.mjs', '--cases', hyphenCases, '--extension-id', 'a'.repeat(32), '--profile-path', profile, '--profile-name', 'Experiment', '--out', output],
+    ['scripts/prompt-experiments/sweep.mjs', '--cases', hyphenCases, '--extension-id', 'a'.repeat(32), '--profile-path', profile, '--out', output],
     { encoding: 'utf8', env: { ...process.env, PATH: `${root}:${process.env.PATH}` } },
   );
   expect(run.status).toBe(1);
@@ -234,7 +227,7 @@ const worker = {
     catch (error) { error.message += ' (' + profile + ')\\nprivate-token'; throw error; }
   }
 };
-const info = { waitForURL: async () => {}, locator: () => ({ innerText: async () => profile }) };
+const info = { waitForURL: async () => {}, locator: () => ({ innerText: async () => process.env.TEST_PROFILE ?? profile }) };
 const context = { serviceWorkers: () => [worker], waitForEvent: async () => info };
 new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context }).then(run => console.log(JSON.stringify({ ...run, sessionId: 'private-session' })));
 `,
@@ -243,7 +236,7 @@ new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context 
   const unavailableOutput = join(root, 'results', 'api-unavailable');
   const unavailable = spawnSync(
     process.execPath,
-    ['scripts/prompt-experiments/sweep.mjs', '--cases', hyphenCases, '--extension-id', 'a'.repeat(32), '--profile-path', profile, '--profile-name', 'Experiment', '--out', unavailableOutput],
+    ['scripts/prompt-experiments/sweep.mjs', '--cases', hyphenCases, '--extension-id', 'a'.repeat(32), '--profile-path', profile, '--out', unavailableOutput],
     { encoding: 'utf8', env: { ...process.env, PATH: `${root}:${process.env.PATH}` } },
   );
   expect(unavailable.status).toBe(1);
@@ -255,6 +248,18 @@ new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context 
   expect(JSON.stringify(unavailableArtifact)).not.toMatch(/private-token|private-session|sessionId|stdout|stderr/);
   expect(unavailableArtifact.inputs).toHaveLength(sourceCorpus.cases.length);
   expect(unavailableArtifact.results).toBeUndefined();
+
+  const wrongProfileOutput = join(root, 'results', 'wrong-profile');
+  const wrongProfile = spawnSync(
+    process.execPath,
+    ['scripts/prompt-experiments/sweep.mjs', '--cases', hyphenCases, '--extension-id', 'a'.repeat(32), '--profile-path', profile, '--out', wrongProfileOutput],
+    { encoding: 'utf8', env: { ...process.env, PATH: `${root}:${process.env.PATH}`, TEST_PROFILE: join(root, 'Other Profile') } },
+  );
+  expect(wrongProfile.status).toBe(1);
+  const wrongProfileArtifact = JSON.parse(readFileSync(join(wrongProfileOutput, '1-shipping.json'), 'utf8')) as { status: string; error: string; results?: unknown[] };
+  expect(wrongProfileArtifact.status).toBe('incomplete');
+  expect(wrongProfileArtifact.error).toContain('wrong Chrome profile');
+  expect(wrongProfileArtifact.results).toBeUndefined();
 });
 
 test('public artifact fields preserve evidence and omit unknown metadata', () => {
