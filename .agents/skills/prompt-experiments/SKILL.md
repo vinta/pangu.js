@@ -7,7 +7,7 @@ description: Use when running or verifying pangu.js prompt experiments, diagnosi
 
 Run experiments, verify their evidence, and report results using the existing helpers in the [command reference](../../../scripts/prompt-experiments/README.md). Keep reusable helpers and durable round records under `scripts/prompt-experiments/`, with runtime output under `tmp/prompt-experiments/`; leave production source and production prompt tests unchanged. The user decides what to do with the results in a separate task.
 
-Before collecting or writing experiment evidence, read [artifact rules](references/artifacts.md) for what to save and keep private.
+Before collecting or writing evidence, or auditing a completed round, read [artifact rules](references/artifacts.md) for retention and verification limits.
 
 ## Starting context
 
@@ -15,7 +15,7 @@ Start from current production code and verified corpus records with their exposu
 
 ## 1. Establish the real input contract
 
-Use only verified real text for prompt examples, diagnostics, development, confirmation, and holdout. Preserve authored text and context; never invent passages, substitute names or numbers, or use model explanations/translations as corpus examples. Synthetic fixtures are limited to deterministic implementation tests. Record missing meaning or preserve-output coverage and find verified sources.
+For new experiments, use only verified real text for prompt examples, diagnostics, development, confirmation, and holdout. Preserve authored text and context; never invent passages, substitute names or numbers, or use model explanations/translations as corpus examples. New synthetic fixtures are limited to deterministic implementation tests. Record missing meaning or preserve-output coverage and find verified sources.
 
 Read [source collection](references/sources.md) when adding or changing records, evidence is missing or disputed, or live-page behavior matters. Reuse verified source snapshots by default and replay production inputs and spacing locally. A new prompt experiment does not require downloading every source again.
 
@@ -61,7 +61,7 @@ Only after confirmation passes, evaluate that candidate and shipping on holdout 
 
 ## 6. Verify and report results
 
-Recompute the paired gates from saved answers and verify individual-target and combined-excerpt spacing through the existing production edit functions. The paired gate helper covers hyphen-digit only; for digit-plus, compute the same gates from the saved result JSON. Check that recorded prompts, rendered questions, labels, API options, orders, and attempt counts match the frozen protocol. Save the verification outputs alongside the raw results.
+Before finalizing a new round, recompute the paired gates from saved answers and verify individual-target and combined-excerpt spacing through the existing production edit functions. Use a compatible shared gate helper from the command reference, or compute the same gates from saved answers and production edits. Check that recorded prompts, rendered questions, labels, API options, orders, and attempt counts match the frozen protocol. Save the verification outputs alongside the raw results.
 
 Report the hypothesis, baseline/candidate comparison, each phase's pass, fail, incomplete, or not-run status, remaining failures, and coverage limits. Complete the round record in [artifact rules](references/artifacts.md), including the exact candidates and execution settings. Report label accuracy and spacing accuracy separately: different labels can produce the same edit. State that applying the candidate and verifying its integration into the extension remain outside this experiment.
 
