@@ -9,9 +9,9 @@ Use the existing helpers in the [command reference](../../../scripts/prompt-expe
 
 ## Resume or start
 
-A round contains many candidate iterations. To resume, read its current-state entry in `REPORT.md` and the relevant frozen prompt; continue the screening loop. Reuse recorded checks and diagnostics while their inputs remain unchanged. Read older reports, corpus text, raw answers, and reference sections only to resolve the next question.
+A round contains many candidate iterations. Start with its current-state entry in `REPORT.md` and the relevant frozen prompt. Search older reports for the current failure or hypothesis, then read only the matching findings. Load corpus text, failed answer rows, or reference sections when the next decision needs them. Reuse recorded checks and diagnostics while their inputs remain unchanged.
 
-For a new round, read the [destinations](references/artifacts.md#destinations) and [round record](references/artifacts.md#round-record) sections once, inspect current production code and relevant previous findings, and select verified corpus records with their exposure history. Record the goal, selection, controls, and reused findings. Declare holdout coverage and separation rules now; collect holdouts only after confirmation passes. Existing unseen reservations may remain private.
+For a new round, read the [destinations](references/artifacts.md#destinations) and [round record](references/artifacts.md#round-record) sections once, inspect the production prompt and question builder, and select verified corpus records with their exposure history. Record the goal, selection, controls, and reused findings. Declare holdout coverage and separation rules now; collect holdouts only after confirmation passes. Existing unseen reservations may remain private.
 
 For an existing shape, measure fresh shipping as the control; for a new shape, start with a concise instruction and explicit labels. Screening uses corpus order and a recorded seeded shuffle, with 1 attempt per target per order. If no development failures remain, collect more verified coverage or finish without a prompt change.
 
@@ -80,4 +80,4 @@ An infrastructure failure leaves the comparison incomplete; retain its artifact 
 
 [Chrome's evaluation guidance](https://developer.chrome.com/docs/ai/evals/run) describes evaluation layers, contamination from prompt examples, and final evaluation on unseen cases. Its suggestions to generate synthetic data do not apply to this workflow.
 
-Check the current [Prompt API documentation](https://developer.chrome.com/docs/ai/prompt-api) before changing session or schema options. [Structured output](https://developer.chrome.com/docs/ai/structured-output-for-prompt-api) constrains format; semantic correctness requires separate evaluation.
+For prompt-only changes, use the checked-in runner and its recorded API options. Read current API documentation when changing API-dependent code/options or diagnosing an unresolved API failure: [Prompt API](https://developer.chrome.com/docs/ai/prompt-api) for model sessions and [structured output](https://developer.chrome.com/docs/ai/structured-output-for-prompt-api) for schema handling. Research prompting ideas when a stalled hypothesis needs new evidence.

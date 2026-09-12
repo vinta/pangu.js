@@ -20,7 +20,7 @@ The helpers invoke `playwright-cli` directly, so it must be on `PATH`. The insta
 
 Use a browser separate from the user's daily browsing for safety and privacy: experiments require full browser control. This setup assumes Chrome Beta is that browser.
 
-Run experiments in a visible window of the user-installed Chrome Beta. Headless Chrome is not supported for this workflow. If Chrome Beta is not installed, suggest downloading and installing it from the [official Chrome Beta page](https://www.google.com/chrome/beta/) before continuing. The Prompt API must be available in the intended extension service worker. Check the current [Prompt API requirements](https://developer.chrome.com/docs/ai/prompt-api), including supported hardware, OS, storage, languages, and model download requirements. Browser installation alone does not provision the model. Record actual capabilities; a requested language may be unsupported even when the API exists.
+Run experiments in a visible window of the user-installed Chrome Beta. Headless Chrome is not supported for this workflow. If Chrome Beta is missing, use the [official download page](https://www.google.com/chrome/beta/). For initial model provisioning or a capability failure, check the current [Prompt API requirements](https://developer.chrome.com/docs/ai/prompt-api) for the affected hardware, OS, storage, language, or download requirement. The API must be available in the intended extension service worker; browser installation alone does not provision the model.
 
 Use Chrome Beta's `Default` profile and start it normally. Its macOS Profile Path is `~/Library/Application Support/Google/Chrome Beta/Default`.
 
