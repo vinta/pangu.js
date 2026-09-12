@@ -5,67 +5,53 @@ description: Use when running or verifying pangu.js prompt experiments, diagnosi
 
 # Prompt experiments
 
-Run experiments, verify their evidence, and report results using the existing helpers in the [command reference](../../../scripts/prompt-experiments/README.md). Keep reusable helpers and durable round records under `scripts/prompt-experiments/`, with runtime output under `tmp/prompt-experiments/`; leave production source and production prompt tests unchanged. The user decides what to do with the results in a separate task.
+Use the existing helpers in the [command reference](../../../scripts/prompt-experiments/README.md). Keep helpers and durable round records under `scripts/prompt-experiments/`, and raw output under `tmp/prompt-experiments/`. Applying results to production is a separate task; leave production source and prompt tests unchanged.
 
-Before collecting or writing evidence, or auditing a completed round, read [artifact rules](references/artifacts.md) for retention and verification limits.
+## Resume or start
 
-## Starting context
+A round contains many candidate iterations. To resume, read its current-state entry in `REPORT.md` and the relevant frozen prompt; continue the screening loop. Reuse recorded checks and diagnostics while their inputs remain unchanged. Read older reports, corpus text, raw answers, and reference sections only to resolve the next question.
 
-Start from current production code and verified corpus records with their exposure history. Reuse cases from the shared corpus and read relevant previous reports and prompts to avoid repeating rejected ideas. Record what you reuse and the exact case selection and corpus version. Measure a fresh shipping baseline on the selected regression corpus before choosing changes; historical scores do not replace current measurements. Keep active holdouts unseen.
+For a new round, read the [destinations](references/artifacts.md#destinations) and [round record](references/artifacts.md#round-record) sections once, inspect current production code and relevant previous findings, and select verified corpus records with their exposure history. Record the goal, selection, controls, and reused findings. Declare holdout coverage and separation rules now; collect holdouts only after confirmation passes. Existing unseen reservations may remain private.
 
-## 1. Establish the real input contract
+For an existing shape, measure fresh shipping as the control; for a new shape, start with a concise instruction and explicit labels. Screening uses corpus order and a recorded seeded shuffle, with 1 attempt per target per order. If no development failures remain, collect more verified coverage or finish without a prompt change.
 
-For new experiments, use only verified real text for prompt examples, diagnostics, development, confirmation, and holdout. Preserve authored text and context; never invent passages, substitute names or numbers, or use model explanations/translations as corpus examples. New synthetic fixtures are limited to deterministic implementation tests. Record missing meaning or preserve-output coverage and find verified sources.
+For an audit of a completed round, read [verification and retention](references/artifacts.md#verification-and-retention) and inspect its saved evidence; a new inference run is new evidence.
 
-Read [source collection](references/sources.md) when adding or changing records, evidence is missing or disputed, or live-page behavior matters. Reuse verified source snapshots by default and replay production inputs and spacing locally. A new prompt experiment does not require downloading every source again.
+## Checks to reuse
 
-If the detector or context extractor changes, regenerate production inputs and spacing expectations from saved context; revisit the live page only where that context is insufficient. Before inference, annotate every eligible target and verify individual and combined edits on frozen rule output. Keep routing and authored-space exclusions separate from classifier accuracy, and disputed meanings unscored. Gold `unsure` requires a defensible explanation that the exact production context is insufficient.
+| Work | Run when |
+| --- | --- |
+| [Runner tests](../../../scripts/prompt-experiments/README.md#runner-tests) | No matching passing check is recorded, or runner, gate, or relevant dependencies change; add coverage for helper changes |
+| Production fixture replay | No matching pass is recorded, or fixtures, annotations, relevant spacing/detector/extractor code, replay tooling, or browser version/configuration change |
+| [Setup and connection discovery](references/setup.md) | Initial connection, reconnect, or repair; verify the intended profile before browser replay and record model component version or its unavailability |
+| Fresh screening baseline | New round; changed scored records, example-page exclusions, gold, production inputs/edits, baseline prompt/options, tooling, or schedule; browser/model restart, update, reconnect, or uncertain runtime continuity |
 
-## 2. Separate examples, development, and holdout
+Use `sweep.mjs` for inference. Each invocation validates cases and rendered prompts, verifies the extension profile and model readiness, isolates sessions, and records immutable results. Separate `--check` is optional for offline validation or diagnosis. Helper-managed output already enforces ignored, untracked destinations; apply [destination checks](references/artifacts.md#destinations) to private writes that bypass it.
 
-Assign roles before inference: prompt examples teach the task, development cases guide prompt changes, and holdout cases are reserved for checking the frozen prompt. Collect reserved holdouts in a separate context under `tmp/prompt-experiments/<round>/`; the context that edits the prompt must not read their text or expected labels before evaluation. Keep canonical source pages disjoint across roles; record redirects, duplicate passages, syndication, related publishers, and shared entities. Repeated mentions of one brand test that brand, not arbitrary name recognition.
+Reuse a complete baseline's saved answers only within the same round and continuous browser connection with unchanged model/runtime and controls above. The runner still creates fresh inference sessions. Record which baseline each screening comparison uses. Gates check orders and sampling, not browser/model identity; if continuity cannot be established, run shipping with the candidate. Match production sampling, language declarations, and schema handling.
 
-Record prior inference and example exposure; uncertain exposure belongs in development. After holdout evaluation, merge those cases into the shared development corpus and mark them as evaluated. Reserve new cases for future holdout checks. When a development case becomes a prompt example, exclude its entire source page from scoring and rerun the baseline. If holdout text, labels, or answers guide tuning, end the round, move affected pages to development, and obtain fresh holdouts.
+## Corpus and roles
 
-## Automated execution
+Use verified real text for examples, diagnostics, development, confirmation, and holdout. Preserve authored text and context; synthetic fixtures are only for deterministic implementation tests. Read [source collection](references/sources.md) for new/changed records, evidence gaps or disputes, and live-page behavior. Reuse verified snapshots; regenerate affected production inputs and spacing from saved context when the contract changes.
 
-Use `sweep.mjs` for inference; it owns session isolation, runtime checks, and immutable result recording. Run the existing [runner tests](../../../scripts/prompt-experiments/README.md#runner-tests) before inference; add coverage when changing helpers. Match production sampling, language declarations, and schema handling.
+Before scoring, every eligible target needs a verified label and individual/combined spacing. Keep routing and authored-space exclusions separate from classifier accuracy. Disputed meanings stay unscored; gold `unsure` needs an explanation of why the exact production context is insufficient.
 
-For initial setup or connection repair, read [setup](references/setup.md). Verify the intended profile and extension before browser replay; sweep verifies them again before inference. Record the actual model component version or its unavailability in the [round record](references/artifacts.md#round-record), alongside the runner's runtime metadata. Close temporary inspection pages and disconnect when done.
+Keep canonical pages disjoint across examples, development, and holdout. Record exposure; uncertain exposure belongs in development. Promoting a development case to an example excludes its whole page from scoring and requires a fresh baseline. Keep holdout text and labels outside the prompt-editing context until frozen evaluation. If holdout evidence guides tuning, end the round, move affected pages to development, and reserve fresh holdouts.
 
-## 3. Measure a baseline and diagnose failures
+## Screening loop
 
-For an existing shape, keep shipping as the control; for a new shape, start with a concise instruction and explicit label definitions. Freeze the [round record](references/artifacts.md#round-record) before inference and keep its controls fixed during comparisons. A detector or extraction change requires a new baseline.
+1. Record the hypothesis, predicted effect, parent variant, and one changed prompt dimension. Freeze the variant ID, prompt bytes, and question builder in `prompts.mjs` before inference.
+2. Run the candidate on the same scored records, orders, and attempts as its baseline. Use saved baseline answers when eligible; otherwise run both prompts. Compute the paired gates and individual/combined spacing from saved answers using a compatible shared helper and production edits. A command exit or `--require-perfect` is not a paired-gate result.
+3. Read CLI scores, miss IDs, unstable cases, and gate summaries first; inspect only relevant failed rows. For a new unexplained development failure, use `--diagnostics` with 1 order and 1 attempt: follow classification with translation, target identification, and label-meaning questions. Reuse earlier diagnostic findings for the same failure. Explanations may be rationalizations and never count as accuracy evidence.
+4. Append the result and decision to `REPORT.md`; update its current-state entry with the next hypothesis and any invalidated checks. Prefer the smaller prompt when qualifying candidates behave equally.
 
-Measure a fresh shipping baseline in each new round, even when source snapshots are reused. Use corpus order and a recorded seeded shuffle, using 1 attempt per target per order. If no development failures remain, collect more verified coverage or finish without a prompt change.
+After two or three similar wording changes leave the same failures, investigate another cause. Use sourced examples for an identified vocabulary/domain gap, revisit disputed annotations, or report routing/extraction limits. Finish the iteration with a recorded gate outcome and next decision; retain raw artifacts without loading the full runs into context.
 
-Inspect recorded errors, misses by meaning, and unstable cases. For representative development failures, run the sweep's diagnostics mode (`--diagnostics`, 1 order, 1 attempt, development corpus only): after the classification answer, the same turn asks the corpus's diagnostic questions, which have the model translate the original sentence, identify the target symbol, and explain which label fits. Diagnostic output is not accuracy evidence. Use these answers to generate falsifiable hypotheses. Explanations after a wrong answer may be rationalizations.
+## Confirm and finish
 
-**Done when:** a saved baseline records whether the failure reproduces, and each proposed change has a prediction that an isolated experiment can confirm or reject.
+Once one candidate meets screening and the task's requirements, read [confirmation and holdout](references/artifacts.md#confirmation-and-holdout). These phases always require fresh paired comparisons. Prepare new holdouts in a separate context only after confirmation passes, keeping the declared coverage and page separation fixed.
 
-## 4. Test one hypothesis at a time
-
-Write the hypothesis, predicted effect, parent variant, and isolated change before inference. Change one prompt dimension per comparison: instruction language, semantic definitions, target identification using unchanged source text, or sourced examples. Freeze variant IDs and rendered bytes. Run matched shipping and candidate comparisons on the same scored records, orders, and attempt counts. Prefer the smaller prompt when qualifying candidates behave equally.
-
-If two or three similar wording changes leave the same failures, investigate a different cause. Vocabulary or domain misunderstandings may benefit from a few sourced examples. Routing errors belong in the detector or extractor. Ambiguous annotations require revisiting the expected meaning. Add examples only after identifying what they need to teach.
-
-**Done when:** the comparison records whether the candidate improves the declared development checks without a control regression. If no candidate passes screening, report that outcome.
-
-## 5. Freeze and confirm
-
-Freeze one candidate, examples, source roles, questions, schema, sampling, and spacing expectations. Run 2 fresh confirmation comparisons, each with 2 case orders and 3 attempts per target per order. Run both prompts and reverse their execution order in the second comparison. This gives 12 answers per target per prompt.
-
-Only after confirmation passes, evaluate that candidate and shipping on holdout with the same 2-run protocol. Save both sides of both runs before inspecting answers. Holdout answers must not enter diagnostics or tuning in this round.
-
-**Done when:** confirmation and any eligible holdout evaluation have recorded outcomes, every error counts as a failure, and remaining coverage limits are stated. Repetition establishes stability on those inputs; broader sources establish coverage.
-
-## 6. Verify and report results
-
-Before finalizing a new round, recompute the paired gates from saved answers and verify individual-target and combined-excerpt spacing through the existing production edit functions. Use a compatible shared gate helper from the command reference, or compute the same gates from saved answers and production edits. Check that recorded prompts, rendered questions, labels, API options, orders, and attempt counts match the frozen protocol. Save the verification outputs alongside the raw results.
-
-Report the hypothesis, baseline/candidate comparison, each phase's pass, fail, incomplete, or not-run status, remaining failures, and coverage limits. Complete the round record in [artifact rules](references/artifacts.md), including the exact candidates and execution settings. Report label accuracy and spacing accuracy separately: different labels can produce the same edit. State that applying the candidate and verifying its integration into the extension remain outside this experiment.
-
-**Done when:** the saved evidence supports the reported outcomes and the user has the findings needed to decide the next step. A failed or inconclusive experiment is a valid result.
+When ending the round, read [verification and retention](references/artifacts.md#verification-and-retention), complete the report, close temporary inspection pages, and disconnect. Failed or inconclusive experiments are valid outcomes; later dependent phases remain unrun.
 
 ## Acceptance gates
 
@@ -80,7 +66,7 @@ A correct attempt has no error, returns the expected label, and produces expecte
 
 For baseline-unstable cases, require candidate correct-attempt counts to be no lower in each matched run. Aggregate gains cannot offset a new case failure. List remaining failures and coverage gaps. Report target, sentence, page, and publisher counts separately; repeated answers are not independent source cases.
 
-An infrastructure failure leaves the comparison incomplete; retain the failed artifact locally through verification and record it in the report. If the issue can be resolved, fix it and repeat the entire affected comparison under the frozen protocol. Otherwise report the incomplete result. Never retry a semantic failure until it passes. A successful command exit or `--require-perfect` does not establish these paired gates. Report failed or incomplete phases and leave later dependent phases unrun.
+An infrastructure failure leaves the comparison incomplete; retain its artifact and record it. After repair, repeat the entire affected comparison under the frozen protocol, refreshing the baseline if required above. Otherwise report it incomplete. Never retry a semantic failure until it passes.
 
 ## References
 
