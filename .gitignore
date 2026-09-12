@@ -8,6 +8,7 @@ node_modules/
 browser-extensions/chrome/dist/
 
 # Test results
+.playwright-cli/
 test-results/
 playwright-report/
 
