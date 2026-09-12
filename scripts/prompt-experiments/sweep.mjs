@@ -46,8 +46,8 @@ const cases = corpus.cases?.map(publicCase);
 assert(Array.isArray(cases) && cases.length > 0, 'empty corpus; provide at least one scored case');
 if (!digitPlus) {
   assert(['development', 'holdout'].includes(corpus.role), 'invalid corpus role; use development or holdout');
-  assert(!values.diagnostics || corpus.role === 'development', 'holdout diagnostics are forbidden; use development cases');
 }
+assert(!values.diagnostics || (digitPlus ? split : corpus.role) === 'development', 'holdout diagnostics are forbidden; use development cases');
 assert(
   corpus.diagnosticQuestions === undefined ||
     (Array.isArray(corpus.diagnosticQuestions) && corpus.diagnosticQuestions.length > 0 && corpus.diagnosticQuestions.every((question) => typeof question === 'string' && question.trim())),
@@ -271,7 +271,12 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
       timeout: 120000,
       stdio: ['ignore', 'pipe', 'pipe'],
     });
-    const run = JSON.parse(stdout);
+    let run;
+    try {
+      run = JSON.parse(stdout);
+    } catch {
+      throw new Error('Browser command returned invalid JSON; verify the browser attachment');
+    }
     if (run.runnerError !== undefined) {
       assert(typeof run.runnerError === 'string' && run.runnerError.trim(), 'Invalid browser runner error; expected a nonempty message');
       throw new Error(run.runnerError);

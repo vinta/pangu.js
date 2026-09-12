@@ -82,6 +82,15 @@ test.skipIf(!supportsTypeScript)('requires an absolute Chrome profile path witho
   expect(configured.stderr).toContain('EEXIST');
 });
 
+test.skipIf(!supportsTypeScript)('digit-plus permits development diagnostics and forbids holdout diagnostics', () => {
+  const args = ['scripts/prompt-experiments/sweep.mjs', '--experiment', 'digit-plus', '--orders', '1', '--check'];
+  const development = spawnSync(process.execPath, [...args, '--split', 'development', '--diagnostics', 'tw-lb-07-1'], { encoding: 'utf8' });
+  expect(development.status, development.stderr).toBe(0);
+  const holdout = spawnSync(process.execPath, [...args, '--split', 'holdout', '--diagnostics', 'tw-conj-empire-earth-1'], { encoding: 'utf8' });
+  expect(holdout.status).toBe(1);
+  expect(holdout.stderr).toContain('holdout diagnostics are forbidden; use development cases');
+});
+
 for (const [experiment, variant] of [
   ['hyphen-digit', 'shipping'],
   ['digit-plus', 'v1-zh'],
@@ -199,11 +208,10 @@ test.skipIf(!supportsTypeScript)('browser and profile failures leave incomplete 
   writeFileSync(join(root, 'playwright-cli'), '#!/usr/bin/env node\nprocess.stderr.write("worker unavailable; token=private-token; profile=/Users/example/Profile"); process.exit(9);\n', {
     mode: 0o755,
   });
-  const run = spawnSync(
-    process.execPath,
-    ['scripts/prompt-experiments/sweep.mjs', '--cases', hyphenCases, '--extension-id', 'a'.repeat(32), '--profile-path', profile, '--out', output],
-    { encoding: 'utf8', env: { ...process.env, PATH: `${root}:${process.env.PATH}` } },
-  );
+  const run = spawnSync(process.execPath, ['scripts/prompt-experiments/sweep.mjs', '--cases', hyphenCases, '--extension-id', 'a'.repeat(32), '--profile-path', profile, '--out', output], {
+    encoding: 'utf8',
+    env: { ...process.env, PATH: `${root}:${process.env.PATH}` },
+  });
   expect(run.status).toBe(1);
   const artifact = JSON.parse(readFileSync(join(output, '1-shipping.json'), 'utf8')) as { status: string; error: string; stderr: string; inputs: unknown[]; results?: unknown[] };
   expect(artifact.status).toBe('incomplete');
@@ -212,6 +220,17 @@ test.skipIf(!supportsTypeScript)('browser and profile failures leave incomplete 
   expect(JSON.stringify(artifact)).not.toMatch(/private-token|\/Users\/example|stdout|stderr/);
   expect(artifact.inputs).toHaveLength(sourceCorpus.cases.length);
   expect(artifact.results).toBeUndefined();
+
+  writeFileSync(join(root, 'playwright-cli'), '#!/usr/bin/env node\nconsole.log("PRIVATE");\n', { mode: 0o755 });
+  const invalidOutput = join(root, 'results', 'invalid-json');
+  const invalid = spawnSync(process.execPath, ['scripts/prompt-experiments/sweep.mjs', '--cases', hyphenCases, '--extension-id', 'a'.repeat(32), '--profile-path', profile, '--out', invalidOutput], {
+    encoding: 'utf8',
+    env: { ...process.env, PATH: `${root}:${process.env.PATH}` },
+  });
+  expect(invalid.status).toBe(1);
+  const invalidArtifact = readFileSync(join(invalidOutput, '1-shipping.json'), 'utf8');
+  expect(invalidArtifact + invalid.stderr).not.toContain('PRIVATE');
+  expect(JSON.parse(invalidArtifact)).toMatchObject({ status: 'incomplete', error: 'Browser command returned invalid JSON; verify the browser attachment' });
 
   writeFileSync(
     join(root, 'playwright-cli'),
