@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { randomUUID } from 'node:crypto';
+import { lstatSync, mkdirSync } from 'node:fs';
+import { dirname, join, relative, resolve, sep } from 'node:path';
 
 export const pick = (value, fields) => Object.fromEntries(fields.filter((field) => value?.[field] !== undefined).map((field) => [field, value[field]]));
 
@@ -61,7 +62,7 @@ export function publicCase(kase) {
     result.prior_exposure = pick(kase.prior_exposure, ['source_inspected', 'label_reviewed', 'model_inference', 'prompt_example', 'topic_discussed', 'note', 'inference_note']);
   }
   if (kase.fresh_verification) {
-    result.fresh_verification = pick(kase.fresh_verification, ['timestamp', 'evidence', 'evidence_record', 'method', 'pangu_disabled']);
+    result.fresh_verification = pick(kase.fresh_verification, ['timestamp', 'evidence', 'evidence_record', 'method', 'pangu_disabled', 'verified', 'final_url', 'http_status', 'evidence_kind']);
   }
   if (kase.source_style_check) {
     result.source_style_check = kase.source_style_check.map((style) => pick(style, ['tag', 'display', 'whiteSpace', 'visibility']));
@@ -87,12 +88,32 @@ export function publicError(error, privateValues = []) {
   return message.replace(/chrome-extension:\/\/[^/\s]+/g, 'chrome-extension://[local]').replace(/(?:[A-Za-z]:\\|\/Users\/|\/home\/)[^\s"']+/g, '[local-path]');
 }
 
-export function scratchDirectory(root, prefix) {
-  const directory = join(root, 'tmp', prefix);
-  execFileSync('git', ['-C', root, 'check-ignore', '--quiet', '--no-index', directory]);
-  if (execFileSync('git', ['-C', root, 'ls-files', '--', relative(root, directory)], { encoding: 'utf8' }).trim()) {
-    throw new Error('Scratch path is tracked; use an ignored, untracked tmp directory');
+export function outputDirectory(root, path) {
+  const directory = resolve(path);
+  const base = resolve(root, 'tmp', 'prompt-experiments');
+  if (!directory.startsWith(`${base}${sep}`)) {
+    throw new Error(`Invalid experiment output: ${path}; use a new directory under tmp/prompt-experiments/`);
   }
-  mkdirSync(join(root, 'tmp'), { recursive: true });
-  return mkdtempSync(directory);
+  let parent = resolve(root);
+  for (const part of relative(root, directory).split(sep)) {
+    parent = join(parent, part);
+    if (lstatSync(parent, { throwIfNoEntry: false })?.isSymbolicLink()) {
+      throw new Error(`Experiment output contains a symlink: ${parent}; use a directory inside the repository`);
+    }
+  }
+  try {
+    execFileSync('git', ['-C', root, 'check-ignore', '--quiet', '--no-index', directory]);
+  } catch {
+    throw new Error(`Experiment output is not ignored: ${path}; add /tmp/ to the repository .gitignore`);
+  }
+  if (execFileSync('git', ['-C', root, 'ls-files', '--', relative(root, directory)], { encoding: 'utf8' }).trim()) {
+    throw new Error(`Experiment output is tracked: ${path}; use an ignored, untracked directory`);
+  }
+  mkdirSync(dirname(directory), { recursive: true });
+  mkdirSync(directory, { recursive: false });
+  return directory;
+}
+
+export function scratchDirectory(root, prefix) {
+  return outputDirectory(root, join(root, 'tmp', 'prompt-experiments', `${prefix}${randomUUID()}`));
 }

@@ -5,13 +5,13 @@ description: Use when running or verifying pangu.js prompt experiments, diagnosi
 
 # Prompt experiments
 
-Run experiments, verify their evidence, and report results using the existing helpers in the [command reference](../../../scripts/prompt-experiments/README.md). Keep candidate prompts and experiment changes under `scripts/prompt-experiments/`; leave production source and production prompt tests unchanged. The user decides what to do with the results in a separate task.
+Run experiments, verify their evidence, and report results using the existing helpers in the [command reference](../../../scripts/prompt-experiments/README.md). Keep reusable helpers and durable round records under `scripts/prompt-experiments/`, with runtime output under `tmp/prompt-experiments/`; leave production source and production prompt tests unchanged. The user decides what to do with the results in a separate task.
 
 Before collecting or writing experiment evidence, read [artifact rules](references/artifacts.md) for what to save and keep private.
 
 ## Starting context
 
-Start from current production code and verified source snapshots with their exposure history. Select candidates from fresh baseline measurements and diagnostics. Keep previous candidate prompts, answers, scores, and conclusions outside the new round's context, including copies in Git history, temporary reports, old agent sessions, and memories.
+Start from current production code and verified corpus records with their exposure history. Reuse cases from the shared corpus and read relevant previous reports and prompts to avoid repeating rejected ideas. Record what you reuse and the exact case selection and corpus version. Measure a fresh shipping baseline on the selected regression corpus before choosing changes; historical scores do not replace current measurements. Keep active holdouts unseen.
 
 ## 1. Establish the real input contract
 
@@ -23,9 +23,9 @@ If the detector or context extractor changes, regenerate production inputs and s
 
 ## 2. Separate examples, development, and holdout
 
-Assign roles before inference: prompt examples teach the task, development cases guide changes, and holdouts evaluate a frozen candidate. Keep canonical source pages disjoint across roles; record redirects, duplicate passages, syndication, related publishers, and shared entities. Repeated mentions of one brand test that brand, not arbitrary name recognition.
+Assign roles before inference: prompt examples teach the task, development cases guide prompt changes, and holdout cases are reserved for checking the frozen prompt. Collect reserved holdouts in a separate context under `tmp/prompt-experiments/<round>/`; the context that edits the prompt must not read their text or expected labels before evaluation. Keep canonical source pages disjoint across roles; record redirects, duplicate passages, syndication, related publishers, and shared entities. Repeated mentions of one brand test that brand, not arbitrary name recognition.
 
-Record prior inference and example exposure; uncertain exposure belongs in development. Obtain fresh holdouts when previous ones have been evaluated. When a development case becomes a prompt example, exclude its entire source page from scoring and rerun the baseline. If holdout text, labels, or answers guide tuning, end the round, move affected pages to development, and obtain fresh holdouts.
+Record prior inference and example exposure; uncertain exposure belongs in development. After holdout evaluation, merge those cases into the shared development corpus and mark them as evaluated. Reserve new cases for future holdout checks. When a development case becomes a prompt example, exclude its entire source page from scoring and rerun the baseline. If holdout text, labels, or answers guide tuning, end the round, move affected pages to development, and obtain fresh holdouts.
 
 ## Automated execution
 
@@ -63,7 +63,7 @@ Only after confirmation passes, evaluate that candidate and shipping on holdout 
 
 Recompute the paired gates from saved answers and verify individual-target and combined-excerpt spacing through the existing production edit functions. The paired gate helper covers hyphen-digit only; for digit-plus, compute the same gates from the saved result JSON. Check that recorded prompts, rendered questions, labels, API options, orders, and attempt counts match the frozen protocol. Save the verification outputs alongside the raw results.
 
-Report the hypothesis, baseline/candidate comparison, each phase's pass, fail, incomplete, or not-run status, remaining failures, and coverage limits. Link the exact candidate, protocol, and result artifacts. Report label accuracy and spacing accuracy separately: different labels can produce the same edit. State that applying the candidate and verifying its integration into the extension remain outside this experiment.
+Report the hypothesis, baseline/candidate comparison, each phase's pass, fail, incomplete, or not-run status, remaining failures, and coverage limits. Complete the round record in [artifact rules](references/artifacts.md), including the exact candidates and execution settings. Report label accuracy and spacing accuracy separately: different labels can produce the same edit. State that applying the candidate and verifying its integration into the extension remain outside this experiment.
 
 **Done when:** the saved evidence supports the reported outcomes and the user has the findings needed to decide the next step. A failed or inconclusive experiment is a valid result.
 
@@ -80,7 +80,7 @@ A correct attempt has no error, returns the expected label, and produces expecte
 
 For baseline-unstable cases, require candidate correct-attempt counts to be no lower in each matched run. Aggregate gains cannot offset a new case failure. List remaining failures and coverage gaps. Report target, sentence, page, and publisher counts separately; repeated answers are not independent source cases.
 
-An infrastructure failure leaves the comparison incomplete; retain the failed artifact. If the issue can be resolved, fix it and repeat the entire affected comparison under the frozen protocol. Otherwise report the incomplete result. Never retry a semantic failure until it passes. A successful command exit or `--require-perfect` does not establish these paired gates. Report failed or incomplete phases and leave later dependent phases unrun.
+An infrastructure failure leaves the comparison incomplete; retain the failed artifact locally through verification and record it in the report. If the issue can be resolved, fix it and repeat the entire affected comparison under the frozen protocol. Otherwise report the incomplete result. Never retry a semantic failure until it passes. A successful command exit or `--require-perfect` does not establish these paired gates. Report failed or incomplete phases and leave later dependent phases unrun.
 
 ## References
 

@@ -1,9 +1,8 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, onTestFinished, test } from 'vitest';
-import { publicCase, publicError, publicFixture } from './public-artifacts.mjs';
+import { outputDirectory, publicCase, publicError, publicFixture, scratchDirectory } from './public-artifacts.mjs';
 
 const supportsTypeScript = 'typescript' in process.features && process.features.typescript;
 const hyphenCases = 'scripts/prompt-experiments/hyphen-digit/corpus/development.json';
@@ -13,7 +12,7 @@ const sourceCorpus = JSON.parse(readFileSync(hyphenCases, 'utf8')) as {
 };
 
 test.skipIf(!supportsTypeScript)('hyphen corpora require provenance and retain diagnostic and target validation', () => {
-  const root = mkdtempSync(join(tmpdir(), 'pangu-cases-'));
+  const root = scratchDirectory(process.cwd(), 'pangu-cases-');
   onTestFinished(() => rmSync(root, { recursive: true, force: true }));
   const file = join(root, 'cases.json');
   const sourceCase = sourceCorpus.cases[0]!;
@@ -54,7 +53,7 @@ test.skipIf(!supportsTypeScript)('hyphen corpora require provenance and retain d
 });
 
 test.skipIf(!supportsTypeScript)('requires an absolute Chrome profile path without local profile metadata', () => {
-  const root = mkdtempSync(join(tmpdir(), 'pangu-profile-'));
+  const root = scratchDirectory(process.cwd(), 'pangu-profile-');
   onTestFinished(() => rmSync(root, { recursive: true, force: true }));
   const profile = join(root, 'Test Profile');
   const output = join(root, 'results');
@@ -69,6 +68,10 @@ test.skipIf(!supportsTypeScript)('requires an absolute Chrome profile path witho
     expect(run.stderr).toContain(message);
     expect(existsSync(output)).toBe(false);
   }
+
+  const outside = spawnSync(process.execPath, [...args, '--profile-path', profile, '--out', 'scripts/prompt-experiments/results'], { encoding: 'utf8' });
+  expect(outside.status).toBe(1);
+  expect(outside.stderr).toContain('use a new directory under tmp/prompt-experiments/');
 
   // A valid profile reaches output creation; an existing directory stops the run before Chrome is contacted.
   mkdirSync(output);
@@ -96,14 +99,14 @@ for (const [experiment, variant] of [
   ['digit-plus', 'v1-zh'],
 ] as const) {
   test.skipIf(!supportsTypeScript)(`${experiment}/${variant}: scored failures fail require-perfect and preserve raw answers`, () => {
-    const root = mkdtempSync(join(tmpdir(), 'pangu-abstention-'));
+    const root = scratchDirectory(process.cwd(), 'pangu-abstention-');
     onTestFinished(() => rmSync(root, { recursive: true, force: true }));
     const profile = join(root, 'Test Profile');
     const output = join(root, 'results');
     writeFileSync(
       join(root, 'playwright-cli'),
       `#!/usr/bin/env node
-const assert = require('node:assert/strict');
+import assert from 'node:assert/strict';
 let calls = 0;
 const worker = {
   url: () => 'chrome-extension://' + 'a'.repeat(32) + '/dist/service-worker.js',
@@ -201,7 +204,7 @@ new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context 
 }
 
 test.skipIf(!supportsTypeScript)('browser and profile failures leave incomplete artifacts without invented answers', () => {
-  const root = mkdtempSync(join(tmpdir(), 'pangu-incomplete-'));
+  const root = scratchDirectory(process.cwd(), 'pangu-incomplete-');
   onTestFinished(() => rmSync(root, { recursive: true, force: true }));
   const profile = join(root, 'Test Profile');
   const output = join(root, 'results', 'new-run');
@@ -288,6 +291,7 @@ test('public artifact fields preserve evidence and omit unknown metadata', () =>
     sessionId: 'private-session',
     source_style_check: [{ tag: 'P', display: 'block', whiteSpace: 'normal', id: 'private-id', className: 'private-class' }],
     prior_exposure: { model_inference: true, requestToken: 'private-token' },
+    fresh_verification: { verified: true, final_url: source.source, http_status: 200, evidence_kind: 'live DOM', sessionId: 'private-session' },
   });
   expect(kase).toMatchObject({
     id: source.id,
@@ -296,8 +300,22 @@ test('public artifact fields preserve evidence and omit unknown metadata', () =>
     expected_label: source.expected_label,
     source_style_check: [{ tag: 'P', display: 'block', whiteSpace: 'normal' }],
     prior_exposure: { model_inference: true },
+    fresh_verification: { verified: true, final_url: source.source, http_status: 200, evidence_kind: 'live DOM' },
   });
   expect(JSON.stringify(kase)).not.toMatch(/private-session|private-id|private-class|private-token/);
   expect(publicFixture(kase)).toEqual({ html: source.source_html, css: source.source_css });
   expect(publicError(new Error('wrong profile: /Users/example/Profile\nstack with token'), ['/Users/example/Profile'])).toBe('wrong profile: [local]');
+});
+
+test('temporary output directories reject traversal and preserve existing runs', () => {
+  const root = scratchDirectory(process.cwd(), 'pangu-output-');
+  onTestFinished(() => rmSync(root, { recursive: true, force: true }));
+  expect(() => outputDirectory(process.cwd(), join(root, '..', '..', '..', 'results'))).toThrow('use a new directory under tmp/prompt-experiments/');
+  symlinkSync(process.cwd(), join(root, 'linked'));
+  expect(() => outputDirectory(process.cwd(), join(root, 'linked', 'run'))).toThrow('contains a symlink');
+  const output = outputDirectory(process.cwd(), join(root, 'run'));
+  const file = join(output, 'answer.json');
+  writeFileSync(file, 'original answer');
+  expect(() => outputDirectory(process.cwd(), output)).toThrow('EEXIST');
+  expect(readFileSync(file, 'utf8')).toBe('original answer');
 });

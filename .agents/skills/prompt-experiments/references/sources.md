@@ -10,7 +10,7 @@ Use the collection and replay commands in the [command reference](../../../../sc
 
 ## New corpus record
 
-Use a JSON object with `role` (`development` or `holdout`), `enums`, and `cases`. Copy label definitions from current production: Set `enums.hyphen` to the exact ordered `hyphenDigitPrompt.candidateLabels` and each case's `enum` to `hyphen`. Choose a unique `id` for each target. The existing [development records](../../../../scripts/prompt-experiments/hyphen-digit/corpus/development.json) show the shape without loading model answers; read them only when a concrete example is needed.
+Use a JSON object with `role` (`development` or `holdout`), `enums`, and `cases`. Copy label definitions from current production: Set `enums.hyphen` to the exact ordered `hyphenDigitPrompt.candidateLabels` and each case's `enum` to `hyphen`. Merge new verified development records into the shape’s shared corpus (`hyphen-digit/corpus/development.json` for hyphen-digit). Reuse the existing `id` for the same source target; assign a new ID to a new target and check annotation conflicts. Keep reserved holdout records in ignored temporary storage until evaluation, then merge them into shared development with their exposure recorded. The existing [development records](../../../../scripts/prompt-experiments/hyphen-digit/corpus/development.json) show the shape without loading model answers; read them only when a concrete example is needed.
 
 | Fields | Required content |
 | --- | --- |
@@ -23,6 +23,6 @@ Use a JSON object with `role` (`development` or `holdout`), `enums`, and `cases`
 | `expected_target_spacing`, `expected_spacing` | Production edits for this target alone and every eligible target combined |
 | `prior_exposure`, `role_note` | Source/label/inference/example exposure and role rationale |
 | `source_verification`, `routing_status` | Nonempty verification evidence and production routing descriptions |
-| `fresh_verification` | Public source-record reference/date/method |
+| `fresh_verification` | Capture date, method, and inline verification summary; optional durable public reference |
 
-Generate UTF-16 offsets with JavaScript string indexing, not code-point counting. Done when the collector/replay checks pass, all eligible targets are annotated, and public evidence references resolve; offline runner validation checks structure only.
+Generate UTF-16 offsets with JavaScript string indexing, not code-point counting. Done when the collector/replay checks pass, all eligible targets are annotated, necessary provenance is retained in the corpus, and any public references resolve; offline runner validation checks structure only.

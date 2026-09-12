@@ -1,12 +1,12 @@
 // Run with Node 22.18+ for the shipping TypeScript prompt import. Reuses the approved pangu-eval Playwright CLI session; verifies the configured profile before each run.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, isAbsolute, join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { isAbsolute, join, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { hyphenDigitPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-prompt.ts';
-import { pick, publicCase, publicError } from './public-artifacts.mjs';
+import { outputDirectory, pick, publicCase, publicError } from './public-artifacts.mjs';
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
@@ -114,12 +114,10 @@ if (values.check) {
   process.exit(0);
 }
 assert(/^[a-p]{32}$/.test(values['extension-id'] ?? ''), `invalid --extension-id ${values['extension-id'] ?? '(missing)'}; copy the shipping extension ID from chrome://extensions/`);
-assert(values.out, 'provide --out <new-directory> to preserve previous results');
+assert(values.out, 'provide --out tmp/prompt-experiments/<round>/<run>; use a new directory for each invocation');
 const profilePath = values['profile-path'];
 assert(profilePath && isAbsolute(profilePath), `invalid --profile-path ${profilePath ?? '(missing)'}; copy the absolute Profile Path from chrome://version`);
-const output = resolve(values.out);
-mkdirSync(dirname(output), { recursive: true });
-mkdirSync(output, { recursive: false });
+const output = outputDirectory(fileURLToPath(new URL('../../', import.meta.url)), values.out);
 writeFileSync(join(output, 'cases.json'), `${JSON.stringify({ ...pick(corpus, ['set', 'role', 'enums', 'notes', 'diagnosticQuestions', 'prepared_at', 'frozen_at']), cases }, null, 2)}\n`, {
   flag: 'wx',
 });

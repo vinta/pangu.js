@@ -1,14 +1,10 @@
 {
-  "set": "hyphen-digit:2026-09-11-real-development",
+  "set": "hyphen-digit:shared-development",
   "role": "development",
   "enums": {
-    "hyphen": [
-      "signed-number",
-      "range-or-separator",
-      "unsure"
-    ]
+    "hyphen": ["signed-number", "range-or-separator", "unsure"]
   },
-  "notes": "21 development targets reverified in Chrome Beta with Pangu disabled. Individual and combined spacing checked through production edits before this round. Prior exposure remains recorded.",
+  "notes": "Shared regression corpus with prior inference and example exposure recorded per case. Select case IDs for each round and exclude prompt-example source pages from scoring.",
   "cases": [
     {
       "id": "real-development-01",
@@ -52,16 +48,23 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": false
+        "prompt_example": false,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://www.xq.com.tw/lesson/sensor/%E7%AD%96%E7%95%A5%E9%9B%B7%E9%81%94%E5%9B%9E%E6%B8%AC%E5%8A%9F%E8%83%BD%EF%BC%9A%E3%80%8C%E5%9B%9E%E6%B8%AC%E5%A0%B1%E5%91%8A%E3%80%8D%E8%AA%AA%E6%98%8E/",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:20.681Z",
-        "evidence": "results/20260911-round1/source/01.json",
-        "evidence_record": "real-development-01",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.xq.com.tw/lesson/sensor/%E7%AD%96%E7%95%A5%E9%9B%B7%E9%81%94%E5%9B%9E%E6%B8%AC%E5%8A%9F%E8%83%BD%EF%BC%9A%E3%80%8C%E5%9B%9E%E6%B8%AC%E5%A0%B1%E5%91%8A%E3%80%8D%E8%AA%AA%E6%98%8E/",
+        "http_status": 200,
+        "evidence_record": "real-development-01",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
+      "role": "development"
     },
     {
       "id": "real-development-02",
@@ -105,16 +108,23 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": false
+        "prompt_example": false,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://www.xq.com.tw/lesson/sensor/%E7%AD%96%E7%95%A5%E9%9B%B7%E9%81%94%E5%9B%9E%E6%B8%AC%E5%8A%9F%E8%83%BD%EF%BC%9A%E3%80%8C%E5%9B%9E%E6%B8%AC%E5%A0%B1%E5%91%8A%E3%80%8D%E8%AA%AA%E6%98%8E/",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:20.681Z",
-        "evidence": "results/20260911-round1/source/01.json",
-        "evidence_record": "real-development-02",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.xq.com.tw/lesson/sensor/%E7%AD%96%E7%95%A5%E9%9B%B7%E9%81%94%E5%9B%9E%E6%B8%AC%E5%8A%9F%E8%83%BD%EF%BC%9A%E3%80%8C%E5%9B%9E%E6%B8%AC%E5%A0%B1%E5%91%8A%E3%80%8D%E8%AA%AA%E6%98%8E/",
+        "http_status": 200,
+        "evidence_record": "real-development-02",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
+      "role": "development"
     },
     {
       "id": "real-development-03",
@@ -158,16 +168,23 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": false
+        "prompt_example": false,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://www.xq.com.tw/lesson/sensor/%E7%AD%96%E7%95%A5%E9%9B%B7%E9%81%94%E5%9B%9E%E6%B8%AC%E5%8A%9F%E8%83%BD%EF%BC%9A%E3%80%8C%E5%9B%9E%E6%B8%AC%E5%A0%B1%E5%91%8A%E3%80%8D%E8%AA%AA%E6%98%8E/",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:20.681Z",
-        "evidence": "results/20260911-round1/source/01.json",
-        "evidence_record": "real-development-03",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.xq.com.tw/lesson/sensor/%E7%AD%96%E7%95%A5%E9%9B%B7%E9%81%94%E5%9B%9E%E6%B8%AC%E5%8A%9F%E8%83%BD%EF%BC%9A%E3%80%8C%E5%9B%9E%E6%B8%AC%E5%A0%B1%E5%91%8A%E3%80%8D%E8%AA%AA%E6%98%8E/",
+        "http_status": 200,
+        "evidence_record": "real-development-03",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
+      "role": "development"
     },
     {
       "id": "real-development-04",
@@ -211,16 +228,23 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": false
+        "prompt_example": false,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://www.xq.com.tw/lesson/sensor/%E7%AD%96%E7%95%A5%E9%9B%B7%E9%81%94%E5%9B%9E%E6%B8%AC%E5%8A%9F%E8%83%BD%EF%BC%9A%E3%80%8C%E5%9B%9E%E6%B8%AC%E5%A0%B1%E5%91%8A%E3%80%8D%E8%AA%AA%E6%98%8E/",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:20.681Z",
-        "evidence": "results/20260911-round1/source/01.json",
-        "evidence_record": "real-development-04",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.xq.com.tw/lesson/sensor/%E7%AD%96%E7%95%A5%E9%9B%B7%E9%81%94%E5%9B%9E%E6%B8%AC%E5%8A%9F%E8%83%BD%EF%BC%9A%E3%80%8C%E5%9B%9E%E6%B8%AC%E5%A0%B1%E5%91%8A%E3%80%8D%E8%AA%AA%E6%98%8E/",
+        "http_status": 200,
+        "evidence_record": "real-development-04",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
+      "role": "development"
     },
     {
       "id": "real-development-05",
@@ -264,16 +288,23 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": false
+        "prompt_example": false,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://www.xq.com.tw/lesson/sensor/%E7%AD%96%E7%95%A5%E9%9B%B7%E9%81%94%E5%9B%9E%E6%B8%AC%E5%8A%9F%E8%83%BD%EF%BC%9A%E3%80%8C%E5%9B%9E%E6%B8%AC%E5%A0%B1%E5%91%8A%E3%80%8D%E8%AA%AA%E6%98%8E/",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:20.681Z",
-        "evidence": "results/20260911-round1/source/01.json",
-        "evidence_record": "real-development-05",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.xq.com.tw/lesson/sensor/%E7%AD%96%E7%95%A5%E9%9B%B7%E9%81%94%E5%9B%9E%E6%B8%AC%E5%8A%9F%E8%83%BD%EF%BC%9A%E3%80%8C%E5%9B%9E%E6%B8%AC%E5%A0%B1%E5%91%8A%E3%80%8D%E8%AA%AA%E6%98%8E/",
+        "http_status": 200,
+        "evidence_record": "real-development-05",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
+      "role": "development"
     },
     {
       "id": "real-development-06",
@@ -297,9 +328,7 @@
       "source_verification": "source HTML fetched",
       "source_css": "#main-content { position: relative; white-space: pre-wrap; }",
       "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
-      "source_css_sources": [
-        "https://images.ptt.cc/bbs/v2.27/bbs-base.css"
-      ],
+      "source_css_sources": ["https://images.ptt.cc/bbs/v2.27/bbs-base.css"],
       "source_style_check": [
         {
           "tag": "DIV",
@@ -320,16 +349,23 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": false
+        "prompt_example": false,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://www.ptt.cc/bbs/Accounting/M.1399559559.A.BFF.html",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:20.962Z",
-        "evidence": "results/20260911-round1/source/02.json",
-        "evidence_record": "real-development-06",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.ptt.cc/bbs/Accounting/M.1399559559.A.BFF.html",
+        "http_status": 200,
+        "evidence_record": "real-development-06",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
+      "role": "development"
     },
     {
       "id": "real-development-07",
@@ -353,9 +389,7 @@
       "source_verification": "source HTML fetched",
       "source_css": "#main-content { position: relative; white-space: pre-wrap; }",
       "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
-      "source_css_sources": [
-        "https://images.ptt.cc/bbs/v2.27/bbs-base.css"
-      ],
+      "source_css_sources": ["https://images.ptt.cc/bbs/v2.27/bbs-base.css"],
       "source_style_check": [
         {
           "tag": "SPAN",
@@ -376,16 +410,23 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": false
+        "prompt_example": false,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://www.ptt.cc/bbs/Accounting/M.1399559559.A.BFF.html",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:20.962Z",
-        "evidence": "results/20260911-round1/source/02.json",
-        "evidence_record": "real-development-07",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.ptt.cc/bbs/Accounting/M.1399559559.A.BFF.html",
+        "http_status": 200,
+        "evidence_record": "real-development-07",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
+      "role": "development"
     },
     {
       "id": "real-development-08",
@@ -429,16 +470,23 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": true
+        "prompt_example": true,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": true
       },
       "canonical_source": "https://www.electrolux.com.tw/blog/refrigerator-temperature-setting/",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:22.911Z",
-        "evidence": "results/20260911-round1/source/03.json",
-        "evidence_record": "real-development-08",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.electrolux.com.tw/blog/refrigerator-temperature-setting/#/",
+        "http_status": 200,
+        "evidence_record": "real-development-08",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
+      "role": "development"
     },
     {
       "id": "real-development-09",
@@ -482,16 +530,23 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": true
+        "prompt_example": true,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://ict.nycu.edu.tw/course/%E3%80%90115-1%E5%BE%AE%E5%AD%B8%E5%88%86%E8%AA%B2%E7%A8%8B%E3%80%91%E8%A8%88%E7%AE%97%E6%A9%9F%E6%A6%82%E8%AB%96%E8%88%87%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88-1-introduction-to-computers-and-programmi/",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:23.133Z",
-        "evidence": "results/20260911-round1/source/04.json",
-        "evidence_record": "real-development-09",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://ict.nycu.edu.tw/course/%E3%80%90115-1%E5%BE%AE%E5%AD%B8%E5%88%86%E8%AA%B2%E7%A8%8B%E3%80%91%E8%A8%88%E7%AE%97%E6%A9%9F%E6%A6%82%E8%AB%96%E8%88%87%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88-1-introduction-to-computers-and-programmi/",
+        "http_status": 200,
+        "evidence_record": "real-development-09",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
+      "role": "development"
     },
     {
       "id": "real-development-10",
@@ -535,16 +590,23 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": true
+        "prompt_example": true,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://ict.nycu.edu.tw/course/%E3%80%90115-1%E5%BE%AE%E5%AD%B8%E5%88%86%E8%AA%B2%E7%A8%8B%E3%80%91%E8%A8%88%E7%AE%97%E6%A9%9F%E6%A6%82%E8%AB%96%E8%88%87%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88-1-introduction-to-computers-and-programmi/",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:23.133Z",
-        "evidence": "results/20260911-round1/source/04.json",
-        "evidence_record": "real-development-10",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://ict.nycu.edu.tw/course/%E3%80%90115-1%E5%BE%AE%E5%AD%B8%E5%88%86%E8%AA%B2%E7%A8%8B%E3%80%91%E8%A8%88%E7%AE%97%E6%A9%9F%E6%A6%82%E8%AB%96%E8%88%87%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88-1-introduction-to-computers-and-programmi/",
+        "http_status": 200,
+        "evidence_record": "real-development-10",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
+      "role": "development"
     },
     {
       "id": "real-development-10-stage-1",
@@ -588,16 +650,23 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": true
+        "prompt_example": true,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://ict.nycu.edu.tw/course/%E3%80%90115-1%E5%BE%AE%E5%AD%B8%E5%88%86%E8%AA%B2%E7%A8%8B%E3%80%91%E8%A8%88%E7%AE%97%E6%A9%9F%E6%A6%82%E8%AB%96%E8%88%87%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88-1-introduction-to-computers-and-programmi/",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:23.133Z",
-        "evidence": "results/20260911-round1/source/04.json",
-        "evidence_record": "real-development-10",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://ict.nycu.edu.tw/course/%E3%80%90115-1%E5%BE%AE%E5%AD%B8%E5%88%86%E8%AA%B2%E7%A8%8B%E3%80%91%E8%A8%88%E7%AE%97%E6%A9%9F%E6%A6%82%E8%AB%96%E8%88%87%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88-1-introduction-to-computers-and-programmi/",
+        "http_status": 200,
+        "evidence_record": "real-development-10",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
+      "role": "development"
     },
     {
       "id": "real-development-10-stage-2",
@@ -641,16 +710,23 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": true
+        "prompt_example": true,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://ict.nycu.edu.tw/course/%E3%80%90115-1%E5%BE%AE%E5%AD%B8%E5%88%86%E8%AA%B2%E7%A8%8B%E3%80%91%E8%A8%88%E7%AE%97%E6%A9%9F%E6%A6%82%E8%AB%96%E8%88%87%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88-1-introduction-to-computers-and-programmi/",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:23.133Z",
-        "evidence": "results/20260911-round1/source/04.json",
-        "evidence_record": "real-development-10",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://ict.nycu.edu.tw/course/%E3%80%90115-1%E5%BE%AE%E5%AD%B8%E5%88%86%E8%AA%B2%E7%A8%8B%E3%80%91%E8%A8%88%E7%AE%97%E6%A9%9F%E6%A6%82%E8%AB%96%E8%88%87%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88-1-introduction-to-computers-and-programmi/",
+        "http_status": 200,
+        "evidence_record": "real-development-10",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
+      "role": "development"
     },
     {
       "id": "real-development-11",
@@ -694,16 +770,23 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": false
+        "prompt_example": true,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": true
       },
       "canonical_source": "https://chien-ching.com.tw/cht/water-transfer-printing/water-transfer-printing-series1.html",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:54.083Z",
-        "evidence": "results/20260911-round1/source/05.json",
-        "evidence_record": "real-development-11",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://chien-ching.com.tw/cht/water-transfer-printing/water-transfer-printing-series1.html",
+        "http_status": 200,
+        "evidence_record": "real-development-11",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
+      "role": "development"
     },
     {
       "id": "real-development-12",
@@ -727,9 +810,7 @@
       "source_verification": "source HTML fetched",
       "source_css": "#main-content { position: relative; white-space: pre-wrap; }",
       "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
-      "source_css_sources": [
-        "https://images.ptt.cc/bbs/v2.27/bbs-base.css"
-      ],
+      "source_css_sources": ["https://images.ptt.cc/bbs/v2.27/bbs-base.css"],
       "source_style_check": [
         {
           "tag": "DIV",
@@ -750,16 +831,23 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": true
+        "prompt_example": true,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://www.ptt.cc/bbs/MobilePay/M.1617104205.A.8DF.html",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:54.223Z",
-        "evidence": "results/20260911-round1/source/06.json",
-        "evidence_record": "real-development-12",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.ptt.cc/bbs/MobilePay/M.1617104205.A.8DF.html",
+        "http_status": 200,
+        "evidence_record": "real-development-12",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
+      "role": "development"
     },
     {
       "id": "real-development-blocktempo-19",
@@ -781,7 +869,7 @@
       "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
       "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
       "source_verification": "source HTML fetched",
-      "role_note": "This series was already used in historical development and is not a fresh holdout.",
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
       "source_css": "",
       "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
       "source_style_check": [
@@ -804,16 +892,22 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": false
+        "prompt_example": false,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://www.blocktempo.com/the-digital-restoration-of-eurodollar-version-2/",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:55.084Z",
-        "evidence": "results/20260911-round1/source/07.json",
-        "evidence_record": "real-development-blocktempo-19",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.blocktempo.com/the-digital-restoration-of-eurodollar-version-2/",
+        "http_status": 200,
+        "evidence_record": "real-development-blocktempo-19",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role": "development"
     },
     {
       "id": "real-development-blocktempo-18",
@@ -835,7 +929,7 @@
       "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
       "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
       "source_verification": "source HTML fetched",
-      "role_note": "This series was already used in historical development and is not a fresh holdout.",
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
       "source_css": "",
       "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
       "source_style_check": [
@@ -858,16 +952,22 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": false
+        "prompt_example": false,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://www.blocktempo.com/the-digital-restoration-of-eurodollar-version-2/",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:55.084Z",
-        "evidence": "results/20260911-round1/source/07.json",
-        "evidence_record": "real-development-blocktempo-18",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.blocktempo.com/the-digital-restoration-of-eurodollar-version-2/",
+        "http_status": 200,
+        "evidence_record": "real-development-blocktempo-18",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role": "development"
     },
     {
       "id": "real-development-blocktempo-17",
@@ -889,7 +989,7 @@
       "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
       "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
       "source_verification": "source HTML fetched",
-      "role_note": "This series was already used in historical development and is not a fresh holdout.",
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout.",
       "source_css": "",
       "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
       "source_style_check": [
@@ -912,16 +1012,22 @@
         "source_inspected": true,
         "label_reviewed": true,
         "model_inference": true,
-        "prompt_example": false
+        "prompt_example": false,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://www.blocktempo.com/the-digital-restoration-of-eurodollar-version-2/",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:55.084Z",
-        "evidence": "results/20260911-round1/source/07.json",
-        "evidence_record": "real-development-blocktempo-17",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.blocktempo.com/the-digital-restoration-of-eurodollar-version-2/",
+        "http_status": 200,
+        "evidence_record": "real-development-blocktempo-17",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role": "development"
     },
     {
       "id": "books-4-percent-ebook",
@@ -933,12 +1039,13 @@
       "annotation_rationale": "The hyphen separates the retailer name from the book title; 4% is not negative.",
       "prior_exposure": {
         "topic_discussed": true,
-        "note": "The same book was discussed in earlier experiments. Source title verified during preparation; no new experimental inference was performed.",
+        "note": "Earlier preparation: the same book was discussed in previous experiments, and the source title was verified before inference. Subsequent evaluation is recorded in inference_note.",
         "source_inspected": true,
         "label_reviewed": true,
         "prompt_example": false,
-        "model_inference": null,
-        "inference_note": "No experiment calls were made. Initial source navigation had Pangu enabled and may have triggered automatic classification; source checks were repeated after disabling it."
+        "model_inference": true,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "supplied_excerpt": "博客來-4%法則：讓錢活得比你久的提領金律(電子書)",
       "original_excerpt": "博客來-4%法則：讓錢活得比你久的提領金律 (電子書)",
@@ -973,11 +1080,15 @@
       "canonical_source": "https://www.books.com.tw/products/E050341578",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:50:57.086Z",
-        "evidence": "results/20260911-round1/source/08.json",
-        "evidence_record": "books-4-percent-ebook",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.books.com.tw/products/E050341578",
+        "http_status": 200,
+        "evidence_record": "books-4-percent-ebook",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout."
     },
     {
       "id": "macromicro-labor-15-64",
@@ -1021,17 +1132,22 @@
         "source_inspected": true,
         "label_reviewed": true,
         "prompt_example": false,
-        "model_inference": null,
-        "inference_note": "No experiment calls were made. Initial source navigation had Pangu enabled and may have triggered automatic classification; source checks were repeated after disabling it."
+        "model_inference": true,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://www.macromicro.me/cross-country-database",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:51:29.415Z",
-        "evidence": "results/20260911-round1/source/09.json",
-        "evidence_record": "macromicro-labor-15-64",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.macromicro.me/cross-country-database",
+        "http_status": 200,
+        "evidence_record": "macromicro-labor-15-64",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout."
     },
     {
       "id": "macromicro-global-labor-25-54",
@@ -1075,17 +1191,22 @@
         "source_inspected": true,
         "label_reviewed": true,
         "prompt_example": false,
-        "model_inference": null,
-        "inference_note": "No experiment calls were made. Initial source navigation had Pangu enabled and may have triggered automatic classification; source checks were repeated after disabling it."
+        "model_inference": true,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://www.macromicro.me/cross-country-database",
       "fresh_verification": {
         "timestamp": "2026-09-11T09:51:29.415Z",
-        "evidence": "results/20260911-round1/source/09.json",
-        "evidence_record": "macromicro-global-labor-25-54",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.macromicro.me/cross-country-database",
+        "http_status": 200,
+        "evidence_record": "macromicro-global-labor-25-54",
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout."
     },
     {
       "id": "macromicro-us-cds-5y",
@@ -1129,17 +1250,567 @@
         "source_inspected": true,
         "label_reviewed": true,
         "prompt_example": false,
-        "model_inference": null,
-        "inference_note": "No experiment calls were made. Initial source navigation had Pangu enabled and may have triggered automatic classification; source checks were repeated after disabling it."
+        "model_inference": true,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
       },
       "canonical_source": "https://www.macromicro.me/cross-country-database",
       "fresh_verification": {
-        "timestamp": "2026-09-11T09:51:29.415Z",
-        "evidence": "results/20260911-round1/source/09.json",
-        "evidence_record": "macromicro-us-cds-5y",
+        "timestamp": "2026-09-12T10:49:20.512Z",
+        "method": "Chrome Beta HTTP 200, DOM, computed styles, production detector and readSentence; extension disabled",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.macromicro.me/cross-country-database",
+        "http_status": 200,
+        "evidence_record": "macromicro-us-cds-5y"
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout."
+    },
+    {
+      "id": "macromicro-us-treasury-10y",
+      "source": "https://www.macromicro.me/cross-country-database",
+      "supplied_at": "2026-09-12",
+      "expected_label": "range-or-separator",
+      "role": "development",
+      "verification_status": "verified",
+      "annotation_rationale": "The hyphen separates the country from a government-bond metric. Ten years is the positive maturity, not a negative yield.",
+      "supplied_excerpt": "美國-10年期公債殖利率",
+      "original_excerpt": "美國-10年期公債殖利率",
+      "original_at": 2,
+      "retrieved_at": "2026-09-12",
+      "routing_status": "Verified on the live source in Chrome Beta with production BrowserPangu.spaceNode, onTextNodesSettled, readSentence, hyphenDigit.find, hyphenDigit.edits and applyTextEdits. Scheduling disabled for deterministic replay; no model inference.",
+      "source_verification": "Checked the original HTTP 200 page response and the live DOM after disabling Pangu and reloading in Chrome Beta.",
+      "source_surface": "visible-body-text",
+      "source_html": "<h6 class=\"stat-name\">美國-10年期公債殖利率</h6>",
+      "source_css": "h6.stat-name { display: block; white-space: nowrap; }",
+      "source_note": "Exact supplied text matches the visible element. source_css records its computed display and whitespace.",
+      "input": "美國-10年期公債殖利率",
+      "at": 2,
+      "settled": "美國 - 10 年期公債殖利率",
+      "settled_index": 3,
+      "expected_target_spacing": "美國 - 10 年期公債殖利率",
+      "expected_spacing": "美國 - 10 年期公債殖利率",
+      "source_style_check": [
+        {
+          "tag": "H6",
+          "display": "block",
+          "whiteSpace": "nowrap"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "DIV",
+          "display": "flex",
+          "whiteSpace": "normal"
+        }
+      ],
+      "eligible_targets": 1,
+      "enum": "hyphen",
+      "symbol": "-",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "tenor",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "inference_note": "Evaluated during 20260912-tenors baseline and screening; prior exposure flags are retained here.",
+        "prompt_example_in_20260912_tenors": false
+      },
+      "canonical_source": "https://www.macromicro.me/cross-country-database",
+      "fresh_verification": {
+        "timestamp": "2026-09-12T10:49:20.512Z",
+        "method": "Chrome Beta HTTP 200, DOM, computed styles, production detector and readSentence; extension disabled",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.macromicro.me/cross-country-database",
+        "http_status": 200,
+        "evidence_record": "macromicro-us-treasury-10y"
+      },
+      "role_note": "Historical regression case; evaluated during 20260912-tenors. Not an unseen holdout."
+    },
+    {
+      "id": "real-holdout-01",
+      "enum": "hyphen",
+      "input": "3.冷凍及冷藏食品之品溫應分別維持於攝氏-18℃以下及7℃以下凍結點以上，且不得有劇烈的溫度變動",
+      "at": 20,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "temperature",
+      "source": "https://food-safety.tycg.gov.tw/News_Content.aspx?n=1228&s=5714",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "3.冷凍及冷藏食品之品溫應分別維持於攝氏-18℃以下及7℃以下凍結點以上，且不得有劇烈的溫度變動。 冷凍、冷藏設備應定期除霜，並保持清潔。",
+      "original_at": 20,
+      "target": "氏-18",
+      "annotation_rationale": "The food-storage requirement specifies a subzero freezer temperature.",
+      "source_html": "<p><span>3.冷凍及冷藏食品之品溫應分別維持於攝氏-18℃以下及7℃以下凍結點以上，且不得有劇烈的溫度變動。 冷凍、冷藏設備應定期除霜，並保持清潔。</span></p>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "SPAN",
+          "display": "inline",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "P",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "3. 冷凍及冷藏食品之品溫應分別維持於攝氏 - 18℃ 以下及 7℃ 以下凍結點以上，且不得有劇烈的溫度變動。 冷凍、冷藏設備應定期除霜，並保持清潔。",
+      "settled_index": 22,
+      "expected_target_spacing": "3. 冷凍及冷藏食品之品溫應分別維持於攝氏 -18℃ 以下及 7℃ 以下凍結點以上，且不得有劇烈的溫度變動。 冷凍、冷藏設備應定期除霜，並保持清潔。",
+      "expected_spacing": "3. 冷凍及冷藏食品之品溫應分別維持於攝氏 -18℃ 以下及 7℃ 以下凍結點以上，且不得有劇烈的溫度變動。 冷凍、冷藏設備應定期除霜，並保持清潔。",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "inference_note": "Evaluated in 20260911-round1; see the shared corpus provenance record."
+      },
+      "canonical_source": "https://food-safety.tycg.gov.tw/News_Content.aspx?n=1228&s=5714",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:52:00.800Z",
+        "evidence_record": "real-holdout-01",
         "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
-        "pangu_disabled": true
-      }
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://food-safety.tycg.gov.tw/News_Content.aspx?n=1228&s=5714",
+        "http_status": 200,
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role": "development",
+      "role_note": "Evaluated as holdout in 20260911-round1; reusable regression case, not an unseen holdout."
+    },
+    {
+      "id": "real-holdout-02",
+      "enum": "hyphen",
+      "input": "冷凍食品之品溫應維持於攝氏-18℃以下，並定期除霜",
+      "at": 13,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "temperature",
+      "source": "https://food-safety.tycg.gov.tw/News_Content.aspx?n=1228&s=5714",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "冷凍食品之品溫應維持於攝氏-18℃以下，並定期除霜",
+      "original_at": 13,
+      "target": "氏-18",
+      "annotation_rationale": "The freezer storage instruction specifies negative eighteen Celsius.",
+      "source_html": "<div><span style=\"white-space: normal; display: inline !important\"><strong>冷凍食品之品溫應維持於攝氏-18℃以下，並定期除霜</strong></span></div>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "STRONG",
+          "display": "inline",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "SPAN",
+          "display": "inline",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "冷凍食品之品溫應維持於攝氏 - 18℃ 以下，並定期除霜",
+      "settled_index": 14,
+      "expected_target_spacing": "冷凍食品之品溫應維持於攝氏 -18℃ 以下，並定期除霜",
+      "expected_spacing": "冷凍食品之品溫應維持於攝氏 -18℃ 以下，並定期除霜",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "inference_note": "Evaluated in 20260911-round1; see the shared corpus provenance record."
+      },
+      "canonical_source": "https://food-safety.tycg.gov.tw/News_Content.aspx?n=1228&s=5714",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:52:00.800Z",
+        "evidence_record": "real-holdout-02",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://food-safety.tycg.gov.tw/News_Content.aspx?n=1228&s=5714",
+        "http_status": 200,
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role": "development",
+      "role_note": "Evaluated as holdout in 20260911-round1; reusable regression case, not an unseen holdout."
+    },
+    {
+      "id": "real-holdout-03",
+      "enum": "hyphen",
+      "input": "附件1補償金申請書-1120731.pdf 附件1補償金申請書-1120731.pdf (下載次數：2151次)",
+      "at": 9,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "control",
+      "review": false,
+      "meaning": "filename-date",
+      "source": "https://www.moj.gov.tw/2204/2205/2323/2354/2371/2381/2382/177680/post",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "附件1補償金申請書-1120731.pdf",
+      "original_at": 9,
+      "target": "書-112",
+      "annotation_rationale": "The digits identify the dated document filename, not a negative amount.",
+      "source_html": "<li>\n                                <span>附件1補償金申請書-1120731.pdf</span>\n                                <a>附件1補償金申請書-1120731.pdf</a>\n                                <span>(下載次數：2151次)</span>\n                            </li>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "SPAN",
+          "display": "inline",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "LI",
+          "display": "list-item",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "附件 1 補償金申請書 - 1120731.pdf",
+      "settled_index": 12,
+      "expected_target_spacing": "附件 1 補償金申請書 - 1120731.pdf",
+      "expected_spacing": "附件 1 補償金申請書 - 1120731.pdf",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "inference_note": "Evaluated in 20260911-round1; see the shared corpus provenance record."
+      },
+      "canonical_source": "https://www.moj.gov.tw/2204/2205/2323/2354/2371/2381/2382/177680/post",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:52:31.027Z",
+        "evidence_record": "real-holdout-03",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.moj.gov.tw/2204/2205/2323/2354/2371/2381/2382/177680/post",
+        "http_status": 200,
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role": "development",
+      "role_note": "Evaluated as holdout in 20260911-round1; reusable regression case, not an unseen holdout."
+    },
+    {
+      "id": "real-holdout-04",
+      "enum": "hyphen",
+      "input": "附件4申請犯罪被害補償金事件委任書-1120731.pdf 附件4申請犯罪被害補償金事件委任書-1120731.pdf (下載次數：621次)",
+      "at": 17,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "control",
+      "review": false,
+      "meaning": "filename-date",
+      "source": "https://www.moj.gov.tw/2204/2205/2323/2354/2371/2381/2382/177680/post",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "附件4申請犯罪被害補償金事件委任書-1120731.pdf",
+      "original_at": 17,
+      "target": "書-112",
+      "annotation_rationale": "The filename joins the document name to its date stamp.",
+      "source_html": "<li>\n                                <span>附件4申請犯罪被害補償金事件委任書-1120731.pdf</span>\n                                <a>附件4申請犯罪被害補償金事件委任書-1120731.pdf</a>\n                                <span>(下載次數：621次)</span>\n                            </li>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "SPAN",
+          "display": "inline",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "LI",
+          "display": "list-item",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "附件 4 申請犯罪被害補償金事件委任書 - 1120731.pdf",
+      "settled_index": 20,
+      "expected_target_spacing": "附件 4 申請犯罪被害補償金事件委任書 - 1120731.pdf",
+      "expected_spacing": "附件 4 申請犯罪被害補償金事件委任書 - 1120731.pdf",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "inference_note": "Evaluated in 20260911-round1; see the shared corpus provenance record."
+      },
+      "canonical_source": "https://www.moj.gov.tw/2204/2205/2323/2354/2371/2381/2382/177680/post",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:52:31.027Z",
+        "evidence_record": "real-holdout-04",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.moj.gov.tw/2204/2205/2323/2354/2371/2381/2382/177680/post",
+        "http_status": 200,
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role": "development",
+      "role_note": "Evaluated as holdout in 20260911-round1; reusable regression case, not an unseen holdout."
+    },
+    {
+      "id": "real-holdout-05",
+      "enum": "hyphen",
+      "input": "8個月-1歲3個月",
+      "at": 3,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "control",
+      "review": false,
+      "meaning": "age-range",
+      "source": "https://class.children.org.tw/search",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "8個月-1歲3個月 ",
+      "original_at": 3,
+      "target": "月-1",
+      "annotation_rationale": "The class age band runs from eight months to one year three months.",
+      "source_html": "<div>8個月-1歲3個月&nbsp;</div>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "8 個月 - 1 歲 3 個月 ",
+      "settled_index": 5,
+      "expected_target_spacing": "8 個月 - 1 歲 3 個月 ",
+      "expected_spacing": "8 個月 - 1 歲 3 個月 ",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "inference_note": "Evaluated in 20260911-round1; see the shared corpus provenance record."
+      },
+      "canonical_source": "https://class.children.org.tw/search",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:53:01.979Z",
+        "evidence_record": "real-holdout-05",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://class.children.org.tw/search",
+        "http_status": 200,
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role": "development",
+      "role_note": "Evaluated as holdout in 20260911-round1; reusable regression case, not an unseen holdout."
+    },
+    {
+      "id": "real-holdout-06",
+      "enum": "hyphen",
+      "input": "磷產品系列-1",
+      "at": 5,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "control",
+      "review": false,
+      "meaning": "product-number",
+      "source": "https://www.web66.com.tw/CW895/-N895610.html",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "磷產品系列-1",
+      "original_at": 5,
+      "target": "列-1",
+      "annotation_rationale": "The supplier identifies the first phosphate product series.",
+      "source_html": "<div class=\"topmap\">\n<a>首頁</a>/<a>正煌</a>/<span>磷產品系列-1</span>\n</div>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": ".topmap { display: flex; } .topmap > span { display: block; }",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "SPAN",
+          "display": "block",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "DIV",
+          "display": "flex",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "磷產品系列 - 1",
+      "settled_index": 6,
+      "expected_target_spacing": "磷產品系列 - 1",
+      "expected_spacing": "磷產品系列 - 1",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "inference_note": "Evaluated in 20260911-round1; see the shared corpus provenance record."
+      },
+      "canonical_source": "https://www.web66.com.tw/CW895/-N895610.html",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:53:05.888Z",
+        "evidence_record": "real-holdout-06",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.web66.com.tw/CW895/-N895610.html",
+        "http_status": 200,
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role": "development",
+      "role_note": "Evaluated as holdout in 20260911-round1; reusable regression case, not an unseen holdout."
+    },
+    {
+      "id": "real-holdout-07",
+      "enum": "hyphen",
+      "input": "最多應該就-100吧 剛好押金",
+      "at": 5,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "money",
+      "source": "https://www.ptt.cc/bbs/CVS/M.1372351544.A.405.html",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "最多應該就-100吧 剛好押金",
+      "original_at": 5,
+      "target": "就-100",
+      "annotation_rationale": "The post asks about the lowest EasyCard balance; this line identifies a negative balance limited by the deposit.",
+      "source_html": "<div id=\"main-content\">最多應該就-100吧 剛好押金</div>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched",
+      "source_css": "#main-content { position: relative; white-space: pre-wrap; }",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_css_sources": ["https://images.ptt.cc/bbs/v2.27/bbs-base.css"],
+      "source_style_check": [
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "pre-wrap"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "最多應該就 - 100 吧 剛好押金",
+      "settled_index": 6,
+      "expected_target_spacing": "最多應該就 -100 吧 剛好押金",
+      "expected_spacing": "最多應該就 -100 吧 剛好押金",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "inference_note": "Evaluated in 20260911-round1; see the shared corpus provenance record."
+      },
+      "canonical_source": "https://www.ptt.cc/bbs/CVS/M.1372351544.A.405.html",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:53:06.097Z",
+        "evidence_record": "real-holdout-07",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.ptt.cc/bbs/CVS/M.1372351544.A.405.html",
+        "http_status": 200,
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role": "development",
+      "role_note": "Evaluated as holdout in 20260911-round1; reusable regression case, not an unseen holdout."
+    },
+    {
+      "id": "real-holdout-08",
+      "enum": "hyphen",
+      "input": "2022年成立滿一年的台股ETF共29檔全數負報酬，平均報酬率為-20.1%，僅11檔ETF報酬率優於大盤，其中「高股息、低波動」相關ETF成為相對抗跌的標的而名列前茅，全年度績效榜首為00731復華富時高股息低波動ETF，跌幅僅5.9%優於大盤18.7%",
+      "at": 32,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "return",
+      "source": "https://www.navigate.com.tw/trends/ETFFund_tw/917b260e-f4c9-43e6-a3c0-74864f844faa",
+      "retrieved_at": "2026-09-11",
+      "original_excerpt": "2022年成立滿一年的台股ETF共29檔全數負報酬，平均報酬率為-20.1%，僅11檔ETF報酬率優於大盤，其中「高股息、低波動」相關ETF成為相對抗跌的標的而名列前茅，全年度績效榜首為00731復華富時高股息低波動ETF，跌幅僅5.9%優於大盤18.7%。",
+      "original_at": 32,
+      "target": "為-20.1",
+      "annotation_rationale": "The paragraph explicitly reports all funds having negative returns.",
+      "source_html": "<li>2022年成立滿一年的台股ETF共29檔全數負報酬，平均報酬率為-20.1%，僅11檔ETF報酬率優於大盤，其中「高股息、低波動」相關ETF成為相對抗跌的標的而名列前茅，全年度績效榜首為00731復華富時高股息低波動ETF，跌幅僅5.9%優於大盤18.7%。</li>",
+      "html_capture": "Sanitized replay fixture: original text nodes and relevant DOM/CSS retained; unrelated attributes removed.",
+      "routing_status": "verified with production detector and readSentence under live-verified display and whitespace",
+      "source_verification": "source HTML fetched; fund additionally matched web open text",
+      "source_css": "",
+      "source_css_status": "Relevant ancestor display and white-space verified on the live source page before production HTML replay; see source_style_check.",
+      "source_style_check": [
+        {
+          "tag": "LI",
+          "display": "list-item",
+          "whiteSpace": "normal"
+        },
+        {
+          "tag": "UL",
+          "display": "block",
+          "whiteSpace": "normal"
+        }
+      ],
+      "settled": "2022 年成立滿一年的台股 ETF 共 29 檔全數負報酬，平均報酬率為 - 20.1%，僅 11 檔 ETF 報酬率優於大盤，其中「高股息、低波動」相關 ETF 成為相對抗跌的標的而名列前茅，全年度績效榜首為 00731 復華富時高股息低波動 ETF，跌幅僅 5.9% 優於大盤 18.7%。",
+      "settled_index": 38,
+      "expected_target_spacing": "2022 年成立滿一年的台股 ETF 共 29 檔全數負報酬，平均報酬率為 -20.1%，僅 11 檔 ETF 報酬率優於大盤，其中「高股息、低波動」相關 ETF 成為相對抗跌的標的而名列前茅，全年度績效榜首為 00731 復華富時高股息低波動 ETF，跌幅僅 5.9% 優於大盤 18.7%。",
+      "expected_spacing": "2022 年成立滿一年的台股 ETF 共 29 檔全數負報酬，平均報酬率為 -20.1%，僅 11 檔 ETF 報酬率優於大盤，其中「高股息、低波動」相關 ETF 成為相對抗跌的標的而名列前茅，全年度績效榜首為 00731 復華富時高股息低波動 ETF，跌幅僅 5.9% 優於大盤 18.7%。",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "inference_note": "Evaluated in 20260911-round1; see the shared corpus provenance record."
+      },
+      "canonical_source": "https://www.navigate.com.tw/trends/ETFFund_tw/917b260e-f4c9-43e6-a3c0-74864f844faa",
+      "fresh_verification": {
+        "timestamp": "2026-09-11T09:53:36.358Z",
+        "evidence_record": "real-holdout-08",
+        "method": "Chrome Beta DOM, source HTML, computed styles, production detector and readSentence; extension disabled before navigation",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.navigate.com.tw/trends/ETFFund_tw/917b260e-f4c9-43e6-a3c0-74864f844faa",
+        "http_status": 200,
+        "evidence_kind": "Reviewed public source record; fixture bytes were sanitized after measurement."
+      },
+      "role": "development",
+      "role_note": "Evaluated as holdout in 20260911-round1; reusable regression case, not an unseen holdout."
     }
   ],
   "diagnosticQuestions": [
@@ -1147,5 +1818,5 @@
     "Which occurrence of the hyphen did the question identify? Quote the exact surrounding original text.",
     "Explain whether that number is negative, or a positive number connected to a preceding item. Which label fits?"
   ],
-  "prepared_at": "2026-09-11"
+  "prepared_at": "2026-09-12"
 }

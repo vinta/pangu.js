@@ -8,13 +8,13 @@ import { rolldown } from 'rolldown';
 import { scratchDirectory } from '../../public-artifacts.mjs';
 
 const usage =
-  'Usage: node scripts/prompt-experiments/hyphen-digit/corpus/check-inputs.mjs [--cases <corpus.json> ...]\nReplays supplied corpora, or the recorded development/holdout corpora, in the attached pangu-eval session. Run outside the browser sandbox. No model inference.';
+  'Usage: node scripts/prompt-experiments/hyphen-digit/corpus/check-inputs.mjs [--cases <corpus.json> ...]\nReplays supplied corpora, or the shared development corpus, in the attached pangu-eval session. Run outside the browser sandbox. No model inference.';
 const { values } = parseArgs({ options: { cases: { type: 'string', multiple: true }, help: { type: 'boolean' } } });
 if (values.help) {
   console.log(usage);
   process.exit(0);
 }
-const paths = values.cases ?? ['development.json', 'holdout.json'].map((name) => new URL(name, import.meta.url));
+const paths = values.cases ?? [new URL('./development.json', import.meta.url)];
 const corpora = paths.map((path) => JSON.parse(readFileSync(path, 'utf8')));
 for (const corpus of corpora) {
   assert(['development', 'holdout'].includes(corpus.role), 'Corpus role must be development or holdout');
