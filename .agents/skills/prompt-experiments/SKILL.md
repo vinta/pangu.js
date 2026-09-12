@@ -19,7 +19,7 @@ For an audit of a completed round, read [verification and retention](references/
 
 For inference on a configured machine:
 
-1. Use `scripts/prompt-experiments/.env.local`. Reuse the live `pangu-eval` connection, or attach it to the configured `PANGU_CDP_URL` with `playwright-cli -s=pangu-eval attach --cdp="$PANGU_CDP_URL"` after loading the settings into the environment.
+1. Use `scripts/prompt-experiments/.env.local`. Reuse the live `pangu-eval` connection, or attach it to the configured `PANGU_CDP_URL` with `playwright-cli -s=pangu-eval attach --cdp="$PANGU_CDP_URL"` after loading the settings into the environment. Try the saved connection before inspecting Chrome settings or rediscovering local values; a successful attachment completes connection setup.
 2. Apply the [reuse conditions](#checks-to-reuse) to the recorded checks. Run the missing or invalidated checks and record any missing runtime metadata.
 3. Once those checks pass, run shipping and the first frozen candidate with `sweep.mjs`; resume an existing round from its recorded next comparison.
 

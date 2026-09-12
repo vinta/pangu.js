@@ -26,6 +26,8 @@ Use Chrome Beta's `Default` profile and start it normally. Its macOS Profile Pat
 
 In Chrome Beta 144+, enable remote debugging at `chrome://inspect/#remote-debugging`. When a client attaches, have the user approve Chrome's connection dialog. This [connection flow](https://developer.chrome.com/blog/chrome-devtools-mcp-debug-your-browser-session) uses the existing browser session.
 
+Keep the connection flow above for the existing Chrome Beta profile. The launch flag `--remote-debugging-port=9222` fixes the port, but [Chrome 136+ requires a non-default `--user-data-dir`](https://developer.chrome.com/blog/remote-debugging-port) with it; it does not configure the standard user-data directory used here.
+
 Run browser launches outside the execution sandbox through normal escalation, including indirect launches from package scripts. Before a full browser suite, confirm each requested browser launches and closes in that same context. On a startup permission or application-registration failure, stop the run and diagnose one launch. Put raw launch logs only in a destination verified ignored and untracked under [artifact rules](artifacts.md).
 
 At `chrome://extensions`, enable Developer mode and [load unpacked](https://developer.chrome.com/docs/extensions/get-started/tutorial/hello-world#load-unpacked) from this checkout's `browser-extensions/chrome/`. Reload after setup builds.
@@ -52,7 +54,9 @@ Copy the [template](../../../../scripts/prompt-experiments/.env.example) to `scr
 | `PANGU_CHROME_PROFILE_PATH` | Exact Profile Path at `chrome://version` in the intended extension profile                                                                                                                                                                                      | Sweep and source profile checks     |
 | `PANGU_EXTENSION_ID`        | Loaded extension's ID at `chrome://extensions`                                                                                                                                                                                                                  | Sweep and source worker selection   |
 
-This connection flow disables HTTP `/json/version` discovery and accepts `/devtools/browser` without a session UUID; see [Chromium's handler](https://github.com/chromium/chromium/blob/main/content/browser/devtools/devtools_http_handler.cc). Recheck the port after restarting Chrome.
+This connection flow disables HTTP `/json/version` discovery and accepts `/devtools/browser` without a session UUID; see [Chromium's handler](https://github.com/chromium/chromium/blob/main/content/browser/devtools/devtools_http_handler.cc). Save this URL without a UUID in `.env.local` so a changed browser UUID does not require an update.
+
+Chrome [reuses the port recorded in `DevToolsActivePort`, falling back to a free port if occupied](https://github.com/chromium/chromium/blob/main/chrome/browser/devtools/remote_debugging_server.cc). Try the saved URL even after a restart; reread `DevToolsActivePort` only to repair a failed attachment. A 403 does not prove the URL is stale: check Chrome's connection approval and any message about a rejected origin first. A successful attachment verifies the saved settings are usable.
 
 Inspect `playwright-cli list` locally before attaching. Detach a stale `pangu-eval` attachment and attach to the verified endpoint. Keep unfiltered CLI output local. After work, close only temporary inspection pages and run `playwright-cli -s=pangu-eval detach` to leave the browser running.
 
