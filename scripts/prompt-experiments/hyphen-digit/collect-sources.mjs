@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { chromium } from 'playwright';
 import { rolldown } from 'rolldown';
-import { outputDirectory, pick, publicError, publicFixture, scratchDirectory } from '../public-artifacts.mjs';
+import { outputDirectory, pick, publicError, publicFixture, scratchDirectory } from '../artifacts.mjs';
 
 const { values } = parseArgs({ options: { cases: { type: 'string', multiple: true }, out: { type: 'string' }, help: { type: 'boolean' } } });
 const usage = 'Usage: node collect-sources.mjs --cases <reviewed-corpus.json> [--cases <other-corpus.json>] --out tmp/prompt-experiments/<round>/<run>';

@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, onTestFinished, test } from 'vitest';
-import { outputDirectory, publicCase, publicError, publicFixture, scratchDirectory } from './public-artifacts.mjs';
+import { outputDirectory, publicCase, publicError, publicFixture, scratchDirectory } from './artifacts.mjs';
 
 const supportsTypeScript = 'typescript' in process.features && process.features.typescript;
 const hyphenCases = 'scripts/prompt-experiments/hyphen-digit/corpus/development.json';

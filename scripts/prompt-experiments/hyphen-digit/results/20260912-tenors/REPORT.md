@@ -98,7 +98,7 @@ node --input-type=module <<'JS'
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { outputDirectory } from './scripts/prompt-experiments/public-artifacts.mjs';
+import { outputDirectory } from './scripts/prompt-experiments/artifacts.mjs';
 const report = readFileSync('scripts/prompt-experiments/hyphen-digit/results/20260912-tenors/REPORT.md', 'utf8');
 const selection = JSON.parse(report.match(/```json\n([\s\S]*?)\n```/)[1]);
 const currentBlob = execFileSync('git', ['hash-object', selection.corpusPath], { encoding: 'utf8' }).trim();

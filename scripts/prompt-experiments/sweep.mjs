@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { digitPlusPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/digit-plus-prompt.ts';
 import { hyphenDigitPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-prompt.ts';
-import { outputDirectory, pick, publicCase, publicError } from './public-artifacts.mjs';
+import { outputDirectory, pick, publicCase, publicError } from './artifacts.mjs';
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,

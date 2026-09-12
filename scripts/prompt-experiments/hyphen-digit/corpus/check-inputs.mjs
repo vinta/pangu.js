@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { rolldown } from 'rolldown';
-import { scratchDirectory } from '../../public-artifacts.mjs';
+import { scratchDirectory } from '../../artifacts.mjs';
 
 const usage =
   'Usage: node scripts/prompt-experiments/hyphen-digit/corpus/check-inputs.mjs [--cases <corpus.json> ...]\nReplays supplied corpora, or the shared development corpus, in the attached pangu-eval session. Run outside the browser sandbox. No model inference.';

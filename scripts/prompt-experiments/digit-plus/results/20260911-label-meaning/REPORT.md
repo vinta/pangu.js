@@ -210,7 +210,7 @@ node --input-type=module <<'JS'
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { outputDirectory } from './scripts/prompt-experiments/public-artifacts.mjs';
+import { outputDirectory } from './scripts/prompt-experiments/artifacts.mjs';
 import { DIAGNOSTIC_QUESTIONS } from './scripts/prompt-experiments/digit-plus/results/20260911-label-meaning/prompts.mjs';
 const report = readFileSync('scripts/prompt-experiments/digit-plus/results/20260911-label-meaning/REPORT.md', 'utf8');
 const record = JSON.parse(report.match(/```json\n([\s\S]*?)\n```/)[1]);
