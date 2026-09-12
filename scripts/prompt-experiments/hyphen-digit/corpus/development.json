@@ -5,6 +5,11 @@
     "hyphen": ["signed-number", "range-or-separator", "unsure"]
   },
   "notes": "Shared regression corpus with prior inference and example exposure recorded per case. Select case IDs for each round and exclude prompt-example source pages from scoring.",
+  "provenance": {
+    "fixtures": "Source fixtures preserve authored whitespace and decode HTML entities in original_excerpt. Large PTT containers keep the original parent opening tag and target text node, omitting unrelated siblings beyond preserved line breaks; the quoted accounting line keeps its f6 span. PTT #main-content uses white-space: pre-wrap from https://images.ptt.cc/bbs/v2.27/bbs-base.css, retained in source_css. The supplier breadcrumb fixture retains the flex layout that makes its target span a block. These fragments preserve relevant display and whitespace, not unrelated page behavior.",
+    "exposure_audit": "Before cleanup on 2026-09-11, all 163 files under repository prompt-experiment result paths were searched for the 8 former holdout IDs, exact production inputs, and original excerpts; none matched. The prior report recorded no model inference for those holdouts, but their text and labels had been inspected, so they were not blind or newly collected. All 15 development IDs retained at that time had saved inference records; real-development-08, real-development-09, real-development-10, and real-development-12 had also been prompt examples. This audit covered repository artifacts and the prior report, not unrecorded external activity. The later 20260911-semantic-rule round evaluated all 21 development and 8 holdout targets; current per-case exposure reflects subsequent rounds too.",
+    "additional_sources": "Initial navigation for books-4-percent-ebook, macromicro-labor-15-64, macromicro-global-labor-25-54, and macromicro-us-cds-5y occurred with Pangu enabled and may have triggered automatic classification. These were development cases, never unseen holdouts. Their separate production replay disabled scheduling and made no model calls: BrowserPangu.spaceNode/onTextNodesSettled, readSentence, and hyphenDigit.find emitted the recorded target, including the document title; hyphenDigit.edits and applyTextEdits matched individual and combined expected spacing. Later source verification with Pangu disabled does not erase earlier exposure."
+  },
   "cases": [
     {
       "id": "real-development-01",
@@ -1382,7 +1387,7 @@
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false,
-        "inference_note": "Evaluated in 20260911-round1; see the shared corpus provenance record."
+        "inference_note": "Evaluated as holdout in 20260911-semantic-rule; now exposed development material."
       },
       "canonical_source": "https://food-safety.tycg.gov.tw/News_Content.aspx?n=1228&s=5714",
       "fresh_verification": {
@@ -1441,7 +1446,7 @@
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false,
-        "inference_note": "Evaluated in 20260911-round1; see the shared corpus provenance record."
+        "inference_note": "Evaluated as holdout in 20260911-semantic-rule; now exposed development material."
       },
       "canonical_source": "https://food-safety.tycg.gov.tw/News_Content.aspx?n=1228&s=5714",
       "fresh_verification": {
@@ -1500,7 +1505,7 @@
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false,
-        "inference_note": "Evaluated in 20260911-round1; see the shared corpus provenance record."
+        "inference_note": "Evaluated as holdout in 20260911-semantic-rule; now exposed development material."
       },
       "canonical_source": "https://www.moj.gov.tw/2204/2205/2323/2354/2371/2381/2382/177680/post",
       "fresh_verification": {
@@ -1559,7 +1564,7 @@
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false,
-        "inference_note": "Evaluated in 20260911-round1; see the shared corpus provenance record."
+        "inference_note": "Evaluated as holdout in 20260911-semantic-rule; now exposed development material."
       },
       "canonical_source": "https://www.moj.gov.tw/2204/2205/2323/2354/2371/2381/2382/177680/post",
       "fresh_verification": {
@@ -1618,7 +1623,7 @@
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false,
-        "inference_note": "Evaluated in 20260911-round1; see the shared corpus provenance record."
+        "inference_note": "Evaluated as holdout in 20260911-semantic-rule; now exposed development material."
       },
       "canonical_source": "https://class.children.org.tw/search",
       "fresh_verification": {
@@ -1677,7 +1682,7 @@
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false,
-        "inference_note": "Evaluated in 20260911-round1; see the shared corpus provenance record."
+        "inference_note": "Evaluated as holdout in 20260911-semantic-rule; now exposed development material."
       },
       "canonical_source": "https://www.web66.com.tw/CW895/-N895610.html",
       "fresh_verification": {
@@ -1737,7 +1742,7 @@
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false,
-        "inference_note": "Evaluated in 20260911-round1; see the shared corpus provenance record."
+        "inference_note": "Evaluated as holdout in 20260911-semantic-rule; now exposed development material."
       },
       "canonical_source": "https://www.ptt.cc/bbs/CVS/M.1372351544.A.405.html",
       "fresh_verification": {
@@ -1796,7 +1801,7 @@
         "label_reviewed": true,
         "model_inference": true,
         "prompt_example": false,
-        "inference_note": "Evaluated in 20260911-round1; see the shared corpus provenance record."
+        "inference_note": "Evaluated as holdout in 20260911-semantic-rule; now exposed development material."
       },
       "canonical_source": "https://www.navigate.com.tw/trends/ETFFund_tw/917b260e-f4c9-43e6-a3c0-74864f844faa",
       "fresh_verification": {
