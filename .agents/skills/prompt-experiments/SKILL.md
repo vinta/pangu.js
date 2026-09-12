@@ -5,53 +5,41 @@ description: Use when running pangu.js prompt experiments, adding a model-assist
 
 # Prompt experiments
 
-Start from current production code and verified source records. Choose candidate changes from a fresh baseline and diagnostics. Use the [command reference](../../../scripts/prompt-experiments/README.md) for existing helpers; keep executable code there.
+Use the existing helpers in the [command reference](../../../scripts/prompt-experiments/README.md). This skill guides source selection, prompt decisions, and acceptance.
 
 Before collecting or writing any experiment artifact, read [artifact rules](references/artifacts.md). Every output must be suitable for the public repo unless its destination is verified ignored and untracked before writing.
 
 ## Starting context
 
-Start with this workflow, current production code, and verified source snapshots with their exposure history. Verify source hashes without reading prior reports, diagnostics, or model outputs. Remove previous candidate prompts, diagnostic answers, scores, and conclusions from the new round's working context. Do not retrieve them from Git history, temporary reports, old agent sessions, or memories to select candidates. Use current production code as the baseline and new real-text measurements as evidence.
-
-Reusing a development case does not make it unseen. Obtain fresh holdouts for a new qualification round when the previous holdouts have been evaluated. An exposed holdout must be reassigned before it can guide tuning. Record related source pages and shared entities, and retain coverage gaps when verified real examples are unavailable.
+Start from current production code and verified source snapshots with their exposure history. Select candidates from fresh baseline measurements and diagnostics. Keep previous candidate prompts, answers, scores, and conclusions outside the new round's context, including copies in Git history, temporary reports, old agent sessions, and memories.
 
 ## 1. Establish the real input contract
 
-Use only verified real text; do not use fabricated text for experiments or prompt improvement. This applies to prompt examples, diagnostic probes, development cases, confirmation runs, and holdouts. Do not invent sentences, substitute names or numbers in real excerpts, or append artificial context. If a real case is missing, record the coverage gap and find a verified source.
+Use only verified real text for prompt examples, diagnostics, development, confirmation, and holdout. Preserve authored text and context; never invent passages, substitute names or numbers, or use model explanations/translations as corpus examples. Synthetic fixtures are limited to deterministic implementation tests. Record missing meaning or preserve-output coverage and find verified sources.
 
 Read [source collection](references/sources.md) when adding or changing records, evidence is missing or disputed, or live-page behavior matters. Reuse verified source snapshots by default. Check recorded hashes for unchanged text, HTML, styles, and provenance, then replay production inputs and spacing locally. A new prompt experiment does not require downloading every source again.
 
-Replay each snapshot through the production detector and context extractor before inference. If those components change, regenerate production inputs and spacing expectations from the saved source context; revisit the live page only where that context is insufficient. Save the model input separately from the original excerpt. Context boundaries, neighboring inline text, and author-written spaces can determine whether a candidate reaches the model. Keep excluded inputs as routing checks, separate from classifier accuracy. Keep disputed meanings in an unscored review set until their labels are resolved. Gold `unsure` requires a defensible explanation that the exact production context is insufficient. Model explanations and translations remain diagnostic outputs; never turn them into corpus examples.
-
-Annotate every eligible target in multi-target excerpts before inference. Verify both each target's edit on frozen rule output and the combined edits through production text application. Bind `settled` text and `settled_index` to that path. Keep authored-space exclusions as routing checks.
-
-**Done when:** every scored case has verified provenance, a defensible label, and the exact input the production model would receive. Each supported meaning and preserve-output behavior has coverage, or an explicit coverage gap.
+If the detector or context extractor changes, regenerate production inputs and spacing expectations from saved context; revisit the live page only where that context is insufficient. Before inference, annotate every eligible target and verify individual and combined edits on frozen rule output. Keep routing and authored-space exclusions separate from classifier accuracy, and disputed meanings unscored. Gold `unsure` requires a defensible explanation that the exact production context is insufficient.
 
 ## 2. Separate examples, development, and holdout
 
-Use three roles: prompt examples teach the task, development cases guide changes, and holdouts evaluate a frozen candidate. Split by canonical source page, recording redirects, duplicate passages, syndication, and related publishers. Keep pages disjoint across roles. Repeated mentions of one brand test that brand, not arbitrary name recognition.
+Assign roles before inference: prompt examples teach the task, development cases guide changes, and holdouts evaluate a frozen candidate. Keep canonical source pages disjoint across roles; record redirects, duplicate passages, syndication, related publishers, and shared entities. Repeated mentions of one brand test that brand, not arbitrary name recognition.
 
-When a development case becomes a prompt example, exclude its entire source page from scoring and rerun the baseline on the reduced set. If holdout text, labels, or answers guide tuning, end the round, move the affected pages to development, and obtain fresh holdouts. Record prior inference and example exposure; uncertain exposure belongs in development. Synthetic fixtures are limited to deterministic implementation tests; never use them as model inputs or evidence for prompt selection or no-regression gates.
-
-**Done when:** role assignments are recorded before inference, prompt examples are excluded from accuracy, and source overlap has been checked. This follows [Chrome's guidance on evaluation contamination](https://developer.chrome.com/docs/ai/evals/run).
+Record prior inference and example exposure; uncertain exposure belongs in development. Obtain fresh holdouts when previous ones have been evaluated. When a development case becomes a prompt example, exclude its entire source page from scoring and rerun the baseline. If holdout text, labels, or answers guide tuning, end the round, move affected pages to development, and obtain fresh holdouts.
 
 ## Automated execution
 
-You verify sources, annotate cases, and choose hypotheses. The runner handles serial model calls and immutable result export. Before inference, finish snapshot integrity checks, any source verification required by step 1, local production input/spacing replay, and runner checks. Test paired gates with retained real inputs and mocked answers: regression, stable improvement, baseline instability, missing attempts, and errors.
+Use `sweep.mjs` for inference; it owns session isolation, runtime checks, and immutable result recording. Run the existing [runner tests](../../../scripts/prompt-experiments/README.md#runner-tests) before inference; add coverage when changing helpers. Match production sampling, language declarations, and schema handling.
 
-Before browser replay or inference, verify the configured Chrome profile, intended extension worker, model availability, and current production options. Record actual browser/Node/model versions and sampling. For a new machine or connection repair, read [setup](references/setup.md). Private configuration is optional; verify any supplied settings at runtime.
-
-Use fresh base sessions per prompt/order and fresh clones per target/attempt. Match production sampling, language declarations, and schema handling. Keep diagnostics isolated. Save raw answers, errors, timings, and execution order in a new directory per invocation.
-
-Keep one frozen protocol, verified source records, candidate definitions, raw outputs, per-case gates, and a report for each round. Close temporary inspection pages and disconnect when done.
+For initial setup or connection repair, read [setup](references/setup.md). Verify the intended profile and extension before browser replay; sweep verifies them again before inference. Record the actual model component version or its unavailability in the [round record](references/artifacts.md#round-record), alongside the runner's runtime metadata. Close temporary inspection pages and disconnect when done.
 
 ## 3. Measure a baseline and diagnose failures
 
-For an existing shape, keep the shipping prompt as the control. For a new shape, start with a concise instruction and explicit label definitions. Freeze the baseline bytes, question builder, labels/order, schema, detector, context extraction, and sampling before inference. Record the commit and file hashes; recheck them before each phase. Keep these controls fixed during comparisons. A detector or extraction change requires a new baseline.
+For an existing shape, keep shipping as the control; for a new shape, start with a concise instruction and explicit label definitions. Freeze the [round record](references/artifacts.md#round-record) before inference and keep its controls fixed during comparisons. A detector or extraction change requires a new baseline.
 
 Measure a fresh shipping baseline in each new round, even when source snapshots are reused. Use corpus order and a recorded seeded shuffle, using 1 attempt per target per order. If no development failures remain, collect more verified coverage or finish without a prompt change.
 
-Record raw answers, errors, misses by meaning, and unstable cases. For representative failures, run separate diagnostic conversations: ask the model to interpret or translate the original sentence, identify the target symbol, and explain which label fits. Use these answers to generate falsifiable hypotheses. Explanations after a wrong answer may be rationalizations.
+Inspect recorded errors, misses by meaning, and unstable cases. For representative development failures, run separate diagnostic conversations: ask the model to interpret or translate the original sentence, identify the target symbol, and explain which label fits. Use these answers to generate falsifiable hypotheses. Explanations after a wrong answer may be rationalizations.
 
 **Done when:** a saved baseline reproduces the failure and each proposed change has a prediction that an isolated experiment can confirm or reject.
 

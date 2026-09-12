@@ -4,7 +4,7 @@ Read before collecting or writing experiment data, including settings, debugging
 
 ## Destinations
 
-Keep helpers and public evidence under `scripts/prompt-experiments/`. Use a new directory for each invocation. Keep personal connection settings in `scripts/prompt-experiments/.env.local`; [setup](setup.md) explains discovery and explicit loading.
+Keep helpers and public evidence under `scripts/prompt-experiments/`. Use a new directory for each invocation. Keep personal connection settings in `scripts/prompt-experiments/.env.local`; [setup](setup.md) explains discovery and use.
 
 Before a private write, run `git check-ignore -- <destination>` and `git ls-files -- <destination>` from the repository root. Proceed only when the first confirms an ignore rule and the second returns no tracked path. Check existing files inside directories too. Add a repository ignore rule for a chosen raw-output directory before using it; global ignores are not portable. Never overwrite existing run output.
 
@@ -23,7 +23,7 @@ Preserve exact authored source text and model inputs. A fixture must reproduce p
 
 Validate public paths and hashes against public files alone. Preserve original measurement hashes as provenance when bytes change; never claim cleaned bytes were measured historically. Review embedded HTML, corpus copies, per-run case copies, result metadata, and operational records. A secret scan does not establish privacy.
 
-Publish completed holdouts only as historical evidence. Keep active holdouts outside tuning context; an ignore rule alone does not prevent exposure. For an independent round, read source records and exposure without opening old answers, candidate explanations, or reports.
+Publish completed holdouts only as historical evidence. Keep active holdouts outside tuning context; an ignore rule alone does not prevent exposure.
 
 Done when every output has an appropriate destination, every public field is needed for inspection or replay, public references/hashes resolve, and exact scored inputs/outputs remain intact.
 
@@ -31,6 +31,6 @@ Done when every output has an appropriate destination, every public field is nee
 
 Before inference, create a new round's `protocol.json` with baseline prompt bytes, question builder, label order/schema, sampling/languages/API options, detector/context/edit revisions and SHA-256 hashes, corpus/fixture hashes, source roles/exposure, case orders/shuffle seed, scheduled phases, and the skill's acceptance-gates path. Recheck those frozen values before each phase. Save rendered questions as well as code hashes.
 
-Keep `runtime.json` for observed versions/capabilities, a hypothesis record for the parent variant/prediction/isolated change, and a new directory for every invocation. Store baseline/candidate results together with per-case paired gates and the decision. Repetition counts and phase criteria are defined only in the skill. New helpers must select the same public fields as the existing writers.
+Keep `runtime.json` for observed versions/capabilities, the hypothesis record, baseline/candidate results, per-case gates, and a report with the decision. Reuse the runner's recorded metadata. New helpers must select the same public fields as the existing writers.
 
 Before adopting a recorded-round script, inspect its fixed paths, IDs, counts, locks, and prompt lookups without loading its old answers. Adapt only what the new round needs; current production code and newly frozen records supply the replacements. The [command reference](../../../../scripts/prompt-experiments/README.md) identifies reusable gate functions and required integration adaptations.

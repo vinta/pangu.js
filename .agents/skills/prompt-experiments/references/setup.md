@@ -18,6 +18,8 @@ The helpers invoke `playwright-cli` directly, so it must be on `PATH`. The insta
 
 ## Chrome and the model
 
+Use a browser separate from the user's daily browsing for safety and privacy: experiments require full browser control. This setup assumes Chrome Beta is that browser.
+
 Run experiments in a visible window of the user-installed Chrome Beta. Headless Chrome is not supported for this workflow. If Chrome Beta is not installed, suggest downloading and installing it from the [official Chrome Beta page](https://www.google.com/chrome/beta/) before continuing. The Prompt API must be available in the intended extension service worker. Check the current [Prompt API requirements](https://developer.chrome.com/docs/ai/prompt-api), including supported hardware, OS, storage, languages, and model download requirements. Browser installation alone does not provision the model. Record actual capabilities; a requested language may be unsupported even when the API exists.
 
 Use Chrome Beta's default user-data directory and its `Default` profile. On macOS, these are `~/Library/Application Support/Google/Chrome Beta/` and `~/Library/Application Support/Google/Chrome Beta/Default`. Start Chrome Beta normally, without `--user-data-dir` or `--remote-debugging-port`. Verify the Profile Path at `chrome://version` matches the configured profile before inference.
@@ -42,20 +44,7 @@ Copy the [template](../../../../scripts/prompt-experiments/.env.example) to `scr
 
 This connection flow disables HTTP `/json/version` discovery and accepts `/devtools/browser` without a session UUID; see [Chromium's handler](https://github.com/chromium/chromium/blob/main/content/browser/devtools/devtools_http_handler.cc). Recheck the port after restarting Chrome. `chrome://version` must belong to the extension's profile; a generic new CDP tab can use another profile. The sweep checks the actual path through a tab created by the intended extension.
 
-[Node's native env-file support](https://nodejs.org/api/cli.html#--env-filefile) loads values into the Node process. Use `--env-file=scripts/prompt-experiments/.env.local` explicitly. Use `--env-file-if-exists` when the file is optional; externally supplied environment values take precedence. You can also supply the sweep's `--extension-id` and `--profile-path` flags directly without any local file.
-
-Shell variables expand before Node loads an env file. Attach with a Node process that reads the values, rather than expanding unloaded shell variables:
-
-```bash
-node --env-file-if-exists=scripts/prompt-experiments/.env.local --input-type=module - <<'JS'
-import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
-assert(process.env.PANGU_CDP_URL, 'Set PANGU_CDP_URL to the verified loopback debugging endpoint');
-const result = spawnSync('playwright-cli', ['-s=pangu-eval', 'attach', `--cdp=${process.env.PANGU_CDP_URL}`], { stdio: 'inherit' });
-if (result.error) throw result.error;
-process.exit(result.status ?? 1);
-JS
-```
+Read connection settings from `scripts/prompt-experiments/.env.local`. Use `PANGU_CDP_URL` to attach the `pangu-eval` session, and pass the extension ID and profile path to the experiment commands. Verify the settings against the running browser before use.
 
 Inspect `playwright-cli list` locally before attaching. Detach a stale `pangu-eval` attachment and attach to the verified endpoint. Keep unfiltered CLI output local. After work, close only temporary inspection pages and run `playwright-cli -s=pangu-eval detach` to leave the browser running.
 
@@ -64,7 +53,5 @@ Inspect `playwright-cli list` locally before attaching. Detach a stale `pangu-ev
 Follow the [command reference](../../../../scripts/prompt-experiments/README.md) in order: offline corpus/runner checks, browser production replay, then model inference. Finish source, fixture, role, and runner checks before sending model requests.
 
 The installed worker supplies the sweep's execution context; the sweep imports prompts from this checkout. Shipping integration additionally requires the loaded extension to point to the built checkout and match the frozen prompt/options.
-
-For a clean-machine portability check, use a clean checkout without copied local config and connect to Chrome Beta's default profile. Discover settings, validate the retained corpus, replay production inputs, run a matched baseline/candidate comparison in a new directory, and collect/validate a new real case. Treat historical candidates as replay examples. Check generated public fields before claiming success. An unavailable browser/model makes that part incomplete; a read-only simulation does not substitute for execution.
 
 Done when offline checks pass, the intended browser/profile/extension and model readiness are verified for the requested layer, and the round has public runtime metadata or an explicit capability limitation.
