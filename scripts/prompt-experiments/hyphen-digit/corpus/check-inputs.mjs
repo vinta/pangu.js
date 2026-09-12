@@ -172,7 +172,9 @@ try {
     );
   }
   assert(!cases.some((kase) => kase.id === 'real-development-08') || results.some((result) => result.authoredSpaceExcluded === true), 'Author-written Electrolux spaces must remain excluded');
-  console.log(`Verified ${cases.length} inputs, complete target annotations, individual and combined production spacing, disjoint source pages, and authored-space exclusion.`);
+  console.log(
+    `Verified ${cases.length} inputs, complete target annotations, individual and combined production spacing, disjoint source pages${results.some((result) => result.authoredSpaceExcluded === true) ? ', and authored-space exclusion' : ''}.`,
+  );
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }
