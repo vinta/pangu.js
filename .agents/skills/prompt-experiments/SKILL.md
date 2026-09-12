@@ -17,14 +17,22 @@ For an existing shape, measure fresh shipping as the control; for a new shape, s
 
 For an audit of a completed round, read [verification and retention](references/artifacts.md#verification-and-retention) and inspect its saved evidence; a new inference run is new evidence.
 
+For inference on a configured machine:
+
+1. Use `scripts/prompt-experiments/.env.local`. Reuse the live `pangu-eval` connection, or attach it to the configured `PANGU_CDP_URL` with `playwright-cli -s=pangu-eval attach --cdp="$PANGU_CDP_URL"` after loading the settings into the environment.
+2. Apply the [reuse conditions](#checks-to-reuse) to the recorded checks. Run the missing or invalidated checks and record any missing runtime metadata.
+3. Once those checks pass, run shipping and the first frozen candidate with `sweep.mjs`; resume an existing round from its recorded next comparison.
+
+Read [setup and repair](references/setup.md) for a missing prerequisite or failed connection/runtime check. Follow the relevant section, then resume the interrupted step.
+
 ## Checks to reuse
 
-| Work | Run when |
-| --- | --- |
-| [Runner tests](../../../scripts/prompt-experiments/README.md#runner-tests) | No matching passing check is recorded, or runner, gate, or relevant dependencies change; add coverage for helper changes |
-| Production fixture replay | No matching pass is recorded, or fixtures, annotations, relevant spacing/detector/extractor code, replay tooling, or browser version/configuration change |
-| [Setup and connection discovery](references/setup.md) | Initial connection, reconnect, or repair; verify the intended profile before browser replay and record model component version or its unavailability |
-| Fresh screening baseline | New round; changed scored records, example-page exclusions, gold, production inputs/edits, baseline prompt/options, tooling, or schedule; browser/model restart, update, reconnect, or uncertain runtime continuity |
+| Work                                                                       | Run when                                                                                                                                                                                                            |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Runner tests](../../../scripts/prompt-experiments/README.md#runner-tests) | No matching passing check is recorded, or runner, gate, or relevant dependencies change; add coverage for helper changes                                                                                            |
+| Production fixture replay                                                  | No matching pass is recorded, or fixtures, annotations, relevant spacing/detector/extractor code, replay tooling, or browser version/configuration change                                                           |
+| Runtime verification                                                       | Initial connection or changed browser/profile/model; verify the intended profile before browser replay and record model component version or its unavailability                                                     |
+| Fresh screening baseline                                                   | New round; changed scored records, example-page exclusions, gold, production inputs/edits, baseline prompt/options, tooling, or schedule; browser/model restart, update, reconnect, or uncertain runtime continuity |
 
 Use `sweep.mjs` for inference. Each invocation validates cases and rendered prompts, verifies the extension profile and model readiness, isolates sessions, and records immutable results. Separate `--check` is optional for offline validation or diagnosis. Helper-managed output already enforces ignored, untracked destinations; apply [destination checks](references/artifacts.md#destinations) to private writes that bypass it.
 
@@ -57,12 +65,12 @@ When ending the round, read [verification and retention](references/artifacts.md
 
 A correct attempt has no error, returns the expected label, and produces expected individual-target and combined-excerpt spacing through production edits. Missing attempts and skips fail. A case passes only when every scheduled attempt passes. Report label and spacing correctness separately.
 
-| Phase | Required result |
-| --- | --- |
-| Preflight | Every model input/example has verified real provenance and production context; role separation passes; no unresolved labels in scored sets |
-| Screening | Candidate preserves every baseline-passing case and fixes at least one baseline-failing case outside its example source pages; no inference errors in either run |
-| Confirmation | The same rule holds independently in both fresh runs, and at least one same scored case is a stable improvement in both; no inference errors in either run |
-| Holdout | Candidate preserves every baseline-passing case and has at least as many passing cases as baseline; no inference errors in either run; a new improvement is not required |
+| Phase        | Required result                                                                                                                                                          |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Preflight    | Every model input/example has verified real provenance and production context; role separation passes; no unresolved labels in scored sets                               |
+| Screening    | Candidate preserves every baseline-passing case and fixes at least one baseline-failing case outside its example source pages; no inference errors in either run         |
+| Confirmation | The same rule holds independently in both fresh runs, and at least one same scored case is a stable improvement in both; no inference errors in either run               |
+| Holdout      | Candidate preserves every baseline-passing case and has at least as many passing cases as baseline; no inference errors in either run; a new improvement is not required |
 
 For baseline-unstable cases, require candidate correct-attempt counts to be no lower in each matched run. Aggregate gains cannot offset a new case failure. List remaining failures and coverage gaps. Report target, sentence, page, and publisher counts separately; repeated answers are not independent source cases.
 

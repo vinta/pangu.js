@@ -1,6 +1,6 @@
 # Machine setup and connection repair
 
-Use these steps on a new machine, after browser or environment changes, or when the connection fails. Reuse a working connection during candidate iterations. Run commands from the repository root.
+Use the relevant section for a missing prerequisite or failed connection/runtime check. On a configured machine, start with the skill's [inference steps](../SKILL.md#resume-or-start). Run commands from the repository root.
 
 ## Dependencies
 
@@ -36,11 +36,11 @@ Open the extension options in that visible Chrome Beta profile and use `下載�
 
 Copy the [template](../../../../scripts/prompt-experiments/.env.example) to `scripts/prompt-experiments/.env.local` only after verifying the destination is ignored and untracked. Fill these values from the current browser:
 
-| Setting | Discovery | Consumer |
-| --- | --- | --- |
-| `PANGU_CDP_URL` | Loopback WebSocket URL `ws://127.0.0.1:<port>/devtools/browser`; after enabling remote debugging, read the port from the first line of `DevToolsActivePort` in Chrome Beta's user-data directory (`~/Library/Application Support/Google/Chrome Beta/` on macOS) | Attachment below; collection helper |
-| `PANGU_CHROME_PROFILE_PATH` | Exact Profile Path at `chrome://version` in the intended extension profile | Sweep and source profile checks |
-| `PANGU_EXTENSION_ID` | Loaded extension's ID at `chrome://extensions` | Sweep and source worker selection |
+| Setting                     | Discovery                                                                                                                                                                                                                                                       | Consumer                            |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `PANGU_CDP_URL`             | Loopback WebSocket URL `ws://127.0.0.1:<port>/devtools/browser`; after enabling remote debugging, read the port from the first line of `DevToolsActivePort` in Chrome Beta's user-data directory (`~/Library/Application Support/Google/Chrome Beta/` on macOS) | Attachment below; collection helper |
+| `PANGU_CHROME_PROFILE_PATH` | Exact Profile Path at `chrome://version` in the intended extension profile                                                                                                                                                                                      | Sweep and source profile checks     |
+| `PANGU_EXTENSION_ID`        | Loaded extension's ID at `chrome://extensions`                                                                                                                                                                                                                  | Sweep and source worker selection   |
 
 This connection flow disables HTTP `/json/version` discovery and accepts `/devtools/browser` without a session UUID; see [Chromium's handler](https://github.com/chromium/chromium/blob/main/content/browser/devtools/devtools_http_handler.cc). Recheck the port after restarting Chrome. `chrome://version` must belong to the extension's profile; a generic new CDP tab can use another profile. The sweep checks the actual path through a tab created by the intended extension.
 
