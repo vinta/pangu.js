@@ -1,11 +1,11 @@
 ---
 name: prompt-experiments
-description: Use when running pangu.js prompt experiments, adding a model-assisted spacing shape, diagnosing model classification failures, or comparing replacement prompts. Excludes ordinary deterministic spacing fixes.
+description: Use when running or verifying pangu.js prompt experiments, diagnosing model classification failures, or comparing candidate prompts. Excludes applying results to production and ordinary deterministic spacing fixes.
 ---
 
 # Prompt experiments
 
-Use the existing helpers in the [command reference](../../../scripts/prompt-experiments/README.md). This skill guides source selection, prompt decisions, and acceptance.
+Run experiments, verify their evidence, and report results using the existing helpers in the [command reference](../../../scripts/prompt-experiments/README.md). Keep candidate prompts and experiment changes under `scripts/prompt-experiments/`; leave production source and production prompt tests unchanged. The user decides what to do with the results in a separate task.
 
 Before collecting or writing experiment evidence, read [artifact rules](references/artifacts.md) for what to save and keep private.
 
@@ -41,7 +41,7 @@ Measure a fresh shipping baseline in each new round, even when source snapshots 
 
 Inspect recorded errors, misses by meaning, and unstable cases. For representative development failures, run separate diagnostic conversations: ask the model to interpret or translate the original sentence, identify the target symbol, and explain which label fits. Use these answers to generate falsifiable hypotheses. Explanations after a wrong answer may be rationalizations.
 
-**Done when:** a saved baseline reproduces the failure and each proposed change has a prediction that an isolated experiment can confirm or reject.
+**Done when:** a saved baseline records whether the failure reproduces, and each proposed change has a prediction that an isolated experiment can confirm or reject.
 
 ## 4. Test one hypothesis at a time
 
@@ -49,7 +49,7 @@ Write the hypothesis, predicted effect, parent variant, and isolated change befo
 
 If two or three similar wording changes leave the same failures, investigate a different cause. Vocabulary or domain misunderstandings may benefit from a few sourced examples. Routing errors belong in the detector or extractor. Ambiguous annotations require revisiting the expected meaning. Add examples only after identifying what they need to teach.
 
-**Done when:** the selected change improves the declared development checks without a control regression. Retain the baseline when the experiment shows no benefit.
+**Done when:** the comparison records whether the candidate improves the declared development checks without a control regression. If no candidate passes screening, report that outcome.
 
 ## 5. Freeze and confirm
 
@@ -57,13 +57,15 @@ Freeze one candidate, examples, source roles, questions, schema, sampling, and s
 
 Only after confirmation passes, evaluate that candidate and shipping on holdout with the same 2-run protocol. Save both sides of both runs before inspecting answers. Holdout answers must not enter diagnostics or tuning in this round.
 
-**Done when:** the declared confirmation and holdout gates pass, every error counts as a failure, and remaining coverage limits are stated. Repetition establishes stability on those inputs; broader sources establish coverage.
+**Done when:** confirmation and any eligible holdout evaluation have recorded outcomes, every error counts as a failure, and remaining coverage limits are stated. Repetition establishes stability on those inputs; broader sources establish coverage.
 
-## 6. Verify the shipping path
+## 6. Verify and report results
 
-Build and load the intended checkout; verify the installed extension points to it. Check that the built extension uses the measured system prompt, rendered questions, enum, and API options. Reload the extension and send classification requests through its actual message entry point. Apply the returned labels through production spacing and edits, then compare final text. Reset sessions/caches between baseline and candidate checks. Count cache hits separately; they cannot satisfy fresh attempts. Keep real question collisions visible without changing inputs or dropping targets. Run the extension build, relevant shape tests, and typecheck; update frozen prompt tests only to the qualified bytes.
+Recompute the paired gates from saved answers and verify individual-target and combined-excerpt spacing through the existing production edit functions. Check that recorded prompts, rendered questions, labels, API options, orders, and attempt counts match the frozen protocol. Save the verification outputs alongside the raw results.
 
-**Done when:** the built runtime returns the intended labels and final spacing for the evaluation cases, and relevant deterministic checks pass. Report label accuracy and spacing accuracy separately: different labels can produce the same edit.
+Report the hypothesis, baseline/candidate comparison, each phase's pass, fail, incomplete, or not-run status, remaining failures, and coverage limits. Link the exact candidate, protocol, and result artifacts. Report label accuracy and spacing accuracy separately: different labels can produce the same edit. State that applying the candidate and verifying its integration into the extension remain outside this experiment.
+
+**Done when:** the saved evidence supports the reported outcomes and the user has the findings needed to decide the next step. A failed or inconclusive experiment is a valid result.
 
 ## Acceptance gates
 
@@ -75,11 +77,10 @@ A correct attempt has no error, returns the expected label, and produces expecte
 | Screening | Candidate preserves every baseline-passing case and fixes at least one baseline-failing case outside its example source pages; no candidate inference errors |
 | Confirmation | The same rule holds independently in both fresh runs, and at least one same scored case is a stable improvement in both; no candidate inference errors |
 | Holdout | Candidate preserves every baseline-passing case and has at least as many passing cases as baseline; no candidate inference errors; a new improvement is not required |
-| Shipping integration | Built prompt/options match the frozen candidate; fresh real requests preserve the confirmed improvements and baseline-passing cases in labels and final spacing; routing exclusions and authored whitespace remain correct |
 
 For baseline-unstable cases, require candidate correct-attempt counts to be no lower in each matched run. Aggregate gains cannot offset a new case failure. List remaining failures and coverage gaps. Report target, sentence, page, and publisher counts separately; repeated answers are not independent source cases.
 
-An infrastructure failure leaves the comparison incomplete. Fix it, repeat the entire affected comparison under the frozen protocol, and retain the failed artifact. Never retry a semantic failure until it passes. A successful command exit or `--require-perfect` does not establish these paired gates. If any phase fails, retain or restore shipping.
+An infrastructure failure leaves the comparison incomplete; retain the failed artifact. If the issue can be resolved, fix it and repeat the entire affected comparison under the frozen protocol. Otherwise report the incomplete result. Never retry a semantic failure until it passes. A successful command exit or `--require-perfect` does not establish these paired gates. Report failed or incomplete phases and leave later dependent phases unrun.
 
 ## References
 

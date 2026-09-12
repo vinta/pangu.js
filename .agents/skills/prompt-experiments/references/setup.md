@@ -28,7 +28,7 @@ In Chrome Beta 144+, enable remote debugging at `chrome://inspect/#remote-debugg
 
 Run browser launches outside the execution sandbox through normal escalation, including indirect launches from package scripts. Before a full browser suite, confirm each requested browser launches and closes in that same context. On a startup permission or application-registration failure, stop the run and diagnose one launch. Put raw launch logs only in a destination verified ignored and untracked under [artifact rules](artifacts.md).
 
-At `chrome://extensions`, enable Developer mode and [load unpacked](https://developer.chrome.com/docs/extensions/get-started/tutorial/hello-world#load-unpacked) from this checkout's `browser-extensions/chrome/`. Verify the loaded path; derive it from the repository root. Reload after builds when checking shipping integration.
+At `chrome://extensions`, enable Developer mode and [load unpacked](https://developer.chrome.com/docs/extensions/get-started/tutorial/hello-world#load-unpacked) from this checkout's `browser-extensions/chrome/`. Verify the loaded path; derive it from the repository root. Reload after setup builds.
 
 Open the extension options in that visible Chrome Beta profile and use `下載模型` if required. Complete any required user interaction there; Chrome requires [user activation](https://developer.chrome.com/docs/ai/get-started#user_activation) to create a session when the model is still downloadable or downloading. In the extension service-worker DevTools console, check `await LanguageModel.availability()` and `await LanguageModel.params()`. Inference requires availability `available` and the production sampling/schema capabilities. The runner does not download a model. Record the browser and Node versions, model/component version from `chrome://on-device-internals` or `chrome://components` where exposed, and actual sampling in the round runtime record. Retain only the relevant model version, never the full component dump. If a version or capability is unavailable, record that limitation explicitly.
 
@@ -38,9 +38,9 @@ Copy the [template](../../../../scripts/prompt-experiments/.env.example) to `scr
 
 | Setting | Discovery | Consumer |
 | --- | --- | --- |
-| `PANGU_CDP_URL` | Loopback WebSocket URL `ws://127.0.0.1:<port>/devtools/browser`; read the port from the first line of `DevToolsActivePort` in the user-data directory after enabling remote debugging | Attachment below; collection and integration helpers |
-| `PANGU_CHROME_PROFILE_PATH` | Exact Profile Path at `chrome://version` in the intended extension profile | Sweep and source/integration profile checks |
-| `PANGU_EXTENSION_ID` | Loaded extension's ID at `chrome://extensions` | Sweep and integration/source worker selection |
+| `PANGU_CDP_URL` | Loopback WebSocket URL `ws://127.0.0.1:<port>/devtools/browser`; read the port from the first line of `DevToolsActivePort` in the user-data directory after enabling remote debugging | Attachment below; collection helper |
+| `PANGU_CHROME_PROFILE_PATH` | Exact Profile Path at `chrome://version` in the intended extension profile | Sweep and source profile checks |
+| `PANGU_EXTENSION_ID` | Loaded extension's ID at `chrome://extensions` | Sweep and source worker selection |
 
 This connection flow disables HTTP `/json/version` discovery and accepts `/devtools/browser` without a session UUID; see [Chromium's handler](https://github.com/chromium/chromium/blob/main/content/browser/devtools/devtools_http_handler.cc). Recheck the port after restarting Chrome. `chrome://version` must belong to the extension's profile; a generic new CDP tab can use another profile. The sweep checks the actual path through a tab created by the intended extension.
 
@@ -52,6 +52,6 @@ Inspect `playwright-cli list` locally before attaching. Detach a stale `pangu-ev
 
 Follow the [command reference](../../../../scripts/prompt-experiments/README.md) in order: offline corpus/runner checks, browser production replay, then model inference. Finish source, fixture, role, and runner checks before sending model requests.
 
-The installed worker supplies the sweep's execution context; the sweep imports prompts from this checkout. Shipping integration additionally requires the loaded extension to point to the built checkout and match the frozen prompt/options.
+The installed worker supplies the sweep's execution context; the sweep imports the production baseline and separate experiment prompt modules from this checkout. Candidates run in the sweep's own model sessions.
 
 Done when offline checks pass, the intended browser/profile/extension and model readiness are verified for the requested layer, and the round has public runtime metadata or an explicit capability limitation.

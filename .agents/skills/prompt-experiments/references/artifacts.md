@@ -18,7 +18,7 @@ Keep the following evidence for each round, reusing the existing helpers' format
 - **Exact prompts for each iteration:** system prompts, rendered model inputs, and the code that constructed them, including label definitions and response schema.
 - **Results:** raw answers, errors, scores, relevant diagnostic exchanges, and individual-target and combined final-spacing outputs. Retain failed runs as well as successful ones.
 - **Iteration history:** the previous version and what changed from it.
-- **Reasoning and decisions:** the hypothesis, what the results showed, and why the change was accepted or rejected.
+- **Reasoning and conclusions:** the hypothesis, what the results showed, and whether the candidate met the experiment gates, including failed or inconclusive outcomes.
 - **Essential execution settings:** model/browser versions when known, sampling and other model API options, repetition counts, and execution order, including any shuffle seed.
 - **Reusable scripts and tests:** the code version and commands needed to run the experiment and check its results again.
 
@@ -32,4 +32,4 @@ Preserve exact scored text and model inputs; exclude sensitive cases or collect 
 
 Publish completed holdouts only as historical evidence. Keep active holdouts outside tuning context; an ignore rule alone does not prevent exposure.
 
-Done when the saved evidence identifies what was tested, supports the decision, and is sufficient to rerun the experiment and recompute its scores and spacing checks.
+Done when the saved evidence identifies what was tested, supports the reported conclusions, and is sufficient to rerun the experiment and recompute its scores and spacing checks.

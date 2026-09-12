@@ -1,6 +1,6 @@
 # Prompt experiments
 
-Invoke `$prompt-experiments` in Codex, or follow the [prompt experiment skill](../../.agents/skills/prompt-experiments/SKILL.md). It owns the real-source workflow, independent-round rules, and acceptance gates. This README covers commands.
+Invoke the `prompt-experiments`. It runs experiments, verifies results, and reports findings for the user to decide what comes next. This README covers commands.
 
 ## Setup
 
@@ -57,7 +57,7 @@ Record the run's Git revision in the experiment notes. Save any relevant uncommi
 
 A case passes only when every expected answer is correct and has no error. Missing answers, skips, and incomplete runs fail. Diagnostic output is separate from accuracy: use `--diagnostics <case IDs>` with `--orders 1 --repeats 1` on development cases only. Never run diagnostics on holdout.
 
-`--require-perfect` fails if any scored case fails. The new experiment's paired no-regression gate is different: compare baseline and candidate per case under the declared protocol. Label outputs alone do not establish final spacing or shipping integration. Complete the spacing annotations and production checks in the workflow’s [acceptance gates](../../.agents/skills/prompt-experiments/SKILL.md#acceptance-gates) before accepting a candidate.
+`--require-perfect` fails if any scored case fails. The new experiment's paired no-regression gate is different: compare baseline and candidate per case under the declared protocol. Label outputs alone do not establish final spacing. Complete the spacing annotations and replay checks in the workflow’s [acceptance gates](../../.agents/skills/prompt-experiments/SKILL.md#acceptance-gates), then report the outcomes.
 
 When finished, disconnect with `playwright-cli -s=pangu-eval detach`.
 
@@ -87,17 +87,4 @@ These paths describe files you create for the new round. Collection verifies sou
 
 For a new round, write its own protocol with the fields in [artifact rules](../../.agents/skills/prompt-experiments/references/artifacts.md#round-record). Reuse `hyphen-digit/paired-gates.mjs`'s `evaluatePaired({ phase, cases, comparisons, exampleSources, editsForLabel, applyTextEdits })`. Each comparison is `{ baseline, candidate }` from the two result JSON files. Supply current production `hyphenDigit.edits({ index: kase.settled_index }, label)` and `applyTextEdits`; bundle their TypeScript imports with the installed `rolldown` as the existing replay helper does.
 
-If adapting a recorded-round gate/integration helper, replace its round/corpus paths, baseline and candidate locks, variant IDs, count assumptions, and prompt-question lookup with the new round's frozen values. Check the recorded revision and saved changes, then validate options, labels and questions before scoring. Keep production spacing functions and `evaluatePaired` unchanged. For integration, use the current extension message entry point in `browser-extensions/chrome/src/ai-spacing/messages.ts` and `service-worker.ts`, reset its sessions/caches between matched runs, and record fresh replies plus individual/combined production edits. Do not run a historical helper against new-round output without those adaptations.
-
-## Historical review only
-
-The completed [hyphen-digit report](hyphen-digit/results/20260911-round1/REPORT.md) and [frozen protocol](hyphen-digit/results/20260911-round1/protocol.json) document the finished round. Open them when reviewing that round; do not use them to select candidates for an independent experiment.
-
-Older results may lack an execution revision. Use their saved inputs and prompts; the commit that added a result does not establish which revision ran.
-
-The completed round's `gate.mjs`, `verify-lock.mjs`, and `integration.mjs` keep its fixed paths, candidate IDs, protocol, and coverage assumptions. They are recorded-round tools. Inspect those assumptions before reuse. The frozen protocol retains baseline settings and runtime details. The collection helper accepts explicit corpus/output paths; the production replay helper accepts `--cases`.
-
-```bash
-# Check the archived candidate against the shipping prompt, labels, questions, and integration gate.
-node scripts/prompt-experiments/hyphen-digit/results/20260911-round1/verify-lock.mjs --integrated
-```
+If adapting a recorded-round gate helper, replace its round/corpus paths, baseline and candidate locks, variant IDs, count assumptions, and prompt-question lookup with the new round's frozen values. Check the recorded revision and saved changes, then validate options, labels and questions before scoring. Keep production spacing functions and `evaluatePaired` unchanged. Do not run a historical helper against new-round output without those adaptations.
