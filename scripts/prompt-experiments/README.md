@@ -49,7 +49,7 @@ export const PROMPTS = {
 node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases scripts/prompt-experiments/hyphen-digit/corpus/development.json --prompts scripts/prompt-experiments/hyphen-digit/results/new-round/prompts.mjs --out tmp/prompt-experiments/new-round/comparison shipping control-copy
 ```
 
-For candidate screening, pass your frozen variant ID. Omit `shipping` when baseline reuse applies, and give the saved baseline and candidate results to the paired gate helper.
+For candidate screening, pass your frozen variant ID. Omit `shipping` when baseline reuse applies, then run the [paired gate command](#paired-gate-helper) on the saved baseline and candidate results.
 
 ### digit-plus
 
@@ -85,7 +85,7 @@ Use `--diagnostics <id1,id2>` with a development corpus, `--orders 1 --repeats 1
 Run when no matching pass is recorded, or after runner, gate, or relevant dependency changes. Prompt wording changes alone do not require another run.
 
 ```bash
-npx vitest run --exclude '**/tmp/**' scripts/prompt-experiments/sweep.test.ts scripts/prompt-experiments/hyphen-digit/paired-gates.test.ts
+npx vitest run --exclude '**/tmp/**' scripts/prompt-experiments/sweep.test.ts scripts/prompt-experiments/hyphen-digit/paired-gates.test.ts scripts/prompt-experiments/hyphen-digit/check-paired.test.ts
 ```
 
 These tests require no browser and run separately from `npm test`.
@@ -106,4 +106,21 @@ Prepare new source records in an ignored, untracked input directory first. After
 
 ## Paired gate helper
 
-Import `evaluatePaired({ phase, cases, comparisons, exampleSources, editsForLabel, applyTextEdits })` from `hyphen-digit/paired-gates.mjs`. Each comparison is `{ baseline, candidate }` from the two result JSON files. Supply current production `hyphenDigit.edits({ index: kase.settled_index }, label)` and `applyTextEdits`; bundle their TypeScript imports with the installed `rolldown` as the existing replay helper does.
+Run `check-paired.mjs` on saved hyphen-digit artifacts. It calls the shared evaluator with production edits and checks the frozen prompts, inputs, schema, sampling, and runtime verification flags. It runs offline.
+
+```bash
+node scripts/prompt-experiments/hyphen-digit/check-paired.mjs \
+  --phase screening \
+  --cases scripts/prompt-experiments/hyphen-digit/corpus/development.json \
+  --prompts scripts/prompt-experiments/hyphen-digit/results/new-round/prompts.mjs \
+  --baseline v27-zh \
+  --out tmp/prompt-experiments/new-round/gate \
+  tmp/prompt-experiments/new-round/baseline/1-shipping.json \
+  tmp/prompt-experiments/new-round/candidate/1-candidate.json
+```
+
+Use the exact scored corpus selection; restore its recorded version if the shared corpus changed. `--baseline` names the frozen prompt entry for the saved shipping artifact. Candidate entries come from their saved variant IDs. Replace the example paths and prompt keys with the round's records.
+
+For `--phase confirmation` or `--phase holdout`, supply both fresh comparisons: `baseline-1.json candidate-1.json baseline-2.json candidate-2.json`. Keep this argument order even when candidate inference ran first. Holdout requires a corpus with `role: "holdout"`; other phases require `role: "development"`. Repeat `--example-source <canonical-url>` for excluded example pages; those pages must be absent from the scored selection.
+
+The command prints scores and failure summaries and writes the full result to a new ignored `gate.json`. Failed gates exit 1 and retain their result; invalid inputs exit 1 with an error. Browser/model continuity and source verification remain the skill's responsibility.

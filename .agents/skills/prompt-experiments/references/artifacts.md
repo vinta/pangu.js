@@ -37,7 +37,7 @@ Done when confirmation and any eligible holdout evaluation have recorded gate ou
 
 ## Verification and retention
 
-Finalize from saved evidence: recompute any unverified paired gates and individual/combined spacing with compatible shared helpers and production edits. Reuse recorded verification when its answers, controls, and verifier are unchanged. Check that prompts, rendered questions, labels, API options, orders, and attempts match the frozen protocol; save verification outputs with raw results.
+Finalize from saved evidence: use the [hyphen-digit paired gate command](../../../../scripts/prompt-experiments/README.md#paired-gate-helper), or a compatible shared evaluator for another shape, to recompute unverified gates and individual/combined spacing. Reuse recorded verification when its answers, controls, and verifier are unchanged. Check that prompts, rendered questions, labels, API options, orders, and attempts match the frozen protocol; save verification outputs with raw results.
 
 Complete `REPORT.md` with the hypothesis, comparisons, each phase's pass/fail/incomplete/not-run status, remaining failures, and coverage limits. Report label and spacing accuracy separately, since different labels can produce the same edit. State that applying the candidate and verifying its extension integration remain separate work.
 

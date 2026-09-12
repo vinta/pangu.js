@@ -49,7 +49,7 @@ Keep canonical pages disjoint across examples, development, and holdout. Record 
 ## Screening loop
 
 1. Record the hypothesis, predicted effect, parent variant, and one changed prompt dimension. Freeze the variant ID, prompt bytes, and question builder in `prompts.mjs` before inference.
-2. Run the candidate on the same scored records, orders, and attempts as its baseline. Use saved baseline answers when eligible; otherwise run both prompts. Compute the paired gates and individual/combined spacing from saved answers using a compatible shared helper and production edits. A command exit or `--require-perfect` is not a paired-gate result.
+2. Run the candidate on the same scored records, orders, and attempts as its baseline. Use saved baseline answers when eligible; otherwise run both prompts. For hyphen-digit, run the [paired gate command](../../../scripts/prompt-experiments/README.md#paired-gate-helper) on saved answers to check labels, individual/combined spacing, and the frozen protocol. Other shapes require a compatible shared evaluator with production edits. A sweep exit or `--require-perfect` is not a paired-gate result.
 3. Read CLI scores, miss IDs, unstable cases, and gate summaries first; inspect only relevant failed rows. For a new unexplained development failure, use `--diagnostics` with 1 order and 1 attempt: follow classification with translation, target identification, and label-meaning questions. Reuse earlier diagnostic findings for the same failure. Explanations may be rationalizations and never count as accuracy evidence.
 4. Append the result and decision to `REPORT.md`; update its current-state entry with the next hypothesis and any invalidated checks. Prefer the smaller prompt when qualifying candidates behave equally.
 
