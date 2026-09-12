@@ -1816,6 +1816,261 @@
       },
       "role": "development",
       "role_note": "Evaluated as holdout in 20260911-round1; reusable regression case, not an unseen holdout."
+    },
+    {
+      "id": "jinbao-frozen-egg-white-minus-18",
+      "enum": "hyphen",
+      "input": "保存冷凍於-18°C以下",
+      "at": 5,
+      "symbol": "-",
+      "expected_label": "signed-number",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "negative storage temperature",
+      "source": "https://www.jinbaoegg.com.tw/product.html",
+      "canonical_source": "https://www.jinbaoegg.com.tw/product.html",
+      "retrieved_at": "2026-09-12",
+      "original_excerpt": "冷凍於-18°C以下",
+      "original_at": 3,
+      "target": "於-18°",
+      "annotation_rationale": "The storage instruction gives a freezer temperature below zero degrees Celsius.",
+      "source_html": "<p>\n                <span>保存</span><span>冷凍於-18°C以下</span>\n              </p>",
+      "source_css": "p span { display: inline-block; }",
+      "source_css_status": "Relevant display and whitespace verified in Chrome Beta before replay.",
+      "source_style_check": [
+        {
+          "tag": "SPAN",
+          "display": "inline-block",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        },
+        {
+          "tag": "P",
+          "display": "block",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        },
+        {
+          "tag": "LI",
+          "display": "flex",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        },
+        {
+          "tag": "UL",
+          "display": "flex",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        }
+      ],
+      "source_verification": "Exact authored text, DOM ancestry, computed styles, hyphenDigit.find, and readSentence verified on the public page in Chrome Beta with Pangu disabled.",
+      "routing_status": "Verified with live production detector/readSentence and Chrome Beta 154.0.8037.17 BrowserPangu fixture replay, including all target annotations, individual edits, combined spacing, and late fixes.",
+      "source_surface": "rendered-text",
+      "html_capture": "Minimal public fixture preserves target text, relevant adjacent text, display and whitespace; unrelated attributes and material outside production context are omitted.",
+      "settled": "冷凍於 - 18°C 以下",
+      "settled_index": 4,
+      "expected_target_spacing": "冷凍於 -18°C 以下",
+      "expected_spacing": "冷凍於 -18°C 以下",
+      "role": "development",
+      "role_note": "Collected and evaluated as an unseen, separate-context holdout for frozen question-first-cashflow in 20260912-all-development; retained as exposed development regression coverage after evaluation.",
+      "publisher": "金寶蛋品",
+      "sourceTitle": "產品 - 金寶蛋品",
+      "source_note": "The first frozen egg-white storage field is selected; repeated product fields on this same page are not additional cases.",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": false,
+        "note": "Source text and labels stayed outside the prompt-editing context until all four paired raw artifacts were saved. No holdout diagnostics or prompt tuning.",
+        "inference_note": "Evaluated during 20260912-all-development holdout with shipping and question-first-cashflow: two fresh paired comparisons, each with two case orders and three attempts per target per order. Both prompts passed all twelve attempts per target, including labels and production individual/combined spacing."
+      },
+      "fresh_verification": {
+        "timestamp": "2026-09-12T15:19:35.260Z",
+        "method": "Chrome Beta public DOM and computed styles; production detector/context; Pangu off before source navigation.",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.jinbaoegg.com.tw/product.html",
+        "http_status": 200,
+        "evidence_record": "jinbao-frozen-egg-white-minus-18",
+        "evidence_kind": "Reviewed public source record with a minimal faithful replay fixture."
+      }
+    },
+    {
+      "id": "ncku-advanced-course-file-1",
+      "enum": "hyphen",
+      "input": "智慧晶片-終端裝置聯盟-AI加速器設計概論與實務-進階課程-1.pdf(4.53 MB)",
+      "at": 29,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "numbered course document",
+      "source": "https://atp.ee.ncku.edu.tw/classview_76.html",
+      "canonical_source": "https://atp.ee.ncku.edu.tw/classview_76.html",
+      "retrieved_at": "2026-09-12",
+      "original_excerpt": "智慧晶片-終端裝置聯盟-AI加速器設計概論與實務-進階課程-1.pdf",
+      "original_at": 29,
+      "target": "程-1.p",
+      "annotation_rationale": "The suffix identifies the first advanced-course attachment in a consecutively numbered file list; it is not a negative number.",
+      "source_html": "<ul><li><a>智慧晶片-終端裝置聯盟-AI加速器設計概論與實務-進階課程-1.pdf</a><span>(4.53 MB)</span></li></ul>",
+      "source_css": "",
+      "source_css_status": "Relevant display and whitespace verified in Chrome Beta before replay.",
+      "source_style_check": [
+        {
+          "tag": "A",
+          "display": "inline",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        },
+        {
+          "tag": "LI",
+          "display": "list-item",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        },
+        {
+          "tag": "UL",
+          "display": "block",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        }
+      ],
+      "source_verification": "Exact authored text, DOM ancestry, computed styles, hyphenDigit.find, and readSentence verified on the public page in Chrome Beta with Pangu disabled.",
+      "routing_status": "Verified with live production detector/readSentence and Chrome Beta 154.0.8037.17 BrowserPangu fixture replay, including all target annotations, individual edits, combined spacing, and late fixes.",
+      "source_surface": "rendered-text",
+      "html_capture": "Minimal public fixture preserves target text, relevant adjacent text, display and whitespace; unrelated attributes and material outside production context are omitted.",
+      "settled": "智慧晶片 - 終端裝置聯盟 - AI 加速器設計概論與實務 - 進階課程 - 1.pdf",
+      "settled_index": 37,
+      "expected_target_spacing": "智慧晶片 - 終端裝置聯盟 - AI 加速器設計概論與實務 - 進階課程 - 1.pdf",
+      "expected_spacing": "智慧晶片 - 終端裝置聯盟 - AI 加速器設計概論與實務 - 進階課程 - 1.pdf",
+      "role": "development",
+      "role_note": "Collected and evaluated as an unseen, separate-context holdout for frozen question-first-cashflow in 20260912-all-development; retained as exposed development regression coverage after evaluation.",
+      "publisher": "國立成功大學",
+      "sourceTitle": "AI加速器設計概論與實務-ATP課程資料庫系統 | 教育部跨域智慧晶片設計人才培育計畫",
+      "source_note": "Captured after opening 課程附件 and expanding 進階課程, with the file label visible. The public attachment listing was inspected; no protected file was opened. The visible adjacent file size belongs to the exact production input.",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": false,
+        "note": "Source text and labels stayed outside the prompt-editing context until all four paired raw artifacts were saved. No holdout diagnostics or prompt tuning.",
+        "inference_note": "Evaluated during 20260912-all-development holdout with shipping and question-first-cashflow: two fresh paired comparisons, each with two case orders and three attempts per target per order. Both prompts passed all twelve attempts per target, including labels and production individual/combined spacing."
+      },
+      "fresh_verification": {
+        "timestamp": "2026-09-12T15:22:38.178Z",
+        "method": "Chrome Beta public DOM and computed styles; production detector/context; Pangu off before source navigation.",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://atp.ee.ncku.edu.tw/classview_76.html",
+        "http_status": 200,
+        "evidence_record": "ncku-advanced-course-file-1",
+        "evidence_kind": "Reviewed public source record with a minimal faithful replay fixture."
+      }
+    },
+    {
+      "id": "ptt-delivery-duration-3-to-5-days",
+      "enum": "hyphen",
+      "input": "→ joy55: ，到貨天數會變成3天-5天",
+      "at": 19,
+      "symbol": "-",
+      "expected_label": "range-or-separator",
+      "type": "ambiguous",
+      "review": false,
+      "meaning": "delivery duration range",
+      "source": "https://www.ptt.cc/bbs/e-shopping/M.1624553591.A.2F0.html",
+      "canonical_source": "https://www.ptt.cc/bbs/e-shopping/M.1624553591.A.2F0.html",
+      "retrieved_at": "2026-09-12",
+      "original_excerpt": ": ，到貨天數會變成3天-5天",
+      "original_at": 12,
+      "target": "天-5天",
+      "annotation_rationale": "The comment describes delivery taking three to five days; five is the positive upper endpoint of the duration.",
+      "source_html": "<div class=\"push\"><span>→ </span><span>joy55</span><span class=\"push-content\">: ，到貨天數會變成3天-5天</span></div>",
+      "source_css": ".push-content { white-space: pre-wrap; }",
+      "source_css_status": "Relevant display and whitespace verified in Chrome Beta before replay.",
+      "source_style_check": [
+        {
+          "tag": "SPAN",
+          "display": "inline",
+          "whiteSpace": "pre-wrap",
+          "visibility": "visible"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "pre-wrap",
+          "visibility": "visible"
+        },
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        },
+        {
+          "tag": "BODY",
+          "display": "block",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        }
+      ],
+      "source_verification": "Exact authored text, DOM ancestry, computed styles, hyphenDigit.find, and readSentence verified on the public page in Chrome Beta with Pangu disabled.",
+      "routing_status": "Verified with live production detector/readSentence and Chrome Beta 154.0.8037.17 BrowserPangu fixture replay, including all target annotations, individual edits, combined spacing, and late fixes.",
+      "source_surface": "rendered-text",
+      "html_capture": "Minimal public fixture preserves target text, relevant adjacent text, display and whitespace; unrelated attributes and material outside production context are omitted.",
+      "settled": ": ，到貨天數會變成 3 天 - 5 天",
+      "settled_index": 15,
+      "expected_target_spacing": ": ，到貨天數會變成 3 天 - 5 天",
+      "expected_spacing": ": ，到貨天數會變成 3 天 - 5 天",
+      "role": "development",
+      "role_note": "Collected and evaluated as an unseen, separate-context holdout for frozen question-first-cashflow in 20260912-all-development; retained as exposed development regression coverage after evaluation.",
+      "publisher": "批踢踢實業坊",
+      "sourceTitle": "[問題] 有人最近訂Lativ 全家取貨的嗎？ - 看板 e-shopping - 批踢踢實業坊",
+      "source_note": "The exact production input includes the adjacent public forum attribution. The right-aligned IP/timestamp is outside the sentence context and is omitted from the fixture; no IP address or timestamp is retained in the case.",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": false,
+        "note": "Source text and labels stayed outside the prompt-editing context until all four paired raw artifacts were saved. No holdout diagnostics or prompt tuning.",
+        "inference_note": "Evaluated during 20260912-all-development holdout with shipping and question-first-cashflow: two fresh paired comparisons, each with two case orders and three attempts per target per order. Both prompts passed all twelve attempts per target, including labels and production individual/combined spacing."
+      },
+      "fresh_verification": {
+        "timestamp": "2026-09-12T15:19:36.991Z",
+        "method": "Chrome Beta public DOM and computed styles; production detector/context; Pangu off before source navigation.",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.ptt.cc/bbs/e-shopping/M.1624553591.A.2F0.html",
+        "http_status": 200,
+        "evidence_record": "ptt-delivery-duration-3-to-5-days",
+        "evidence_kind": "Reviewed public source record with a minimal faithful replay fixture."
+      }
     }
   ],
   "diagnosticQuestions": [
