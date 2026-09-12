@@ -2,7 +2,7 @@
 
 For new records, collect exact sentences from Taiwanese websites, news, and public posts. Verify the text on the source page or in its HTML; search snippets alone are insufficient. Populate the fields below from verified text and production replay.
 
-If a fetch fails or is blocked, inspect the rendered page and source HTML in the configured Chrome Beta profile. Before loading sources, disable Pangu and verify its switch is off. Reload pages opened with Pangu enabled before capture. Keep it disabled until collection ends. Keep new or changed records out of scoring until verified. A later website change does not invalidate an intact historical snapshot; retain its capture date and state which version is being evaluated.
+Use the connected Chrome Beta session to collect new sources and inspect their rendered pages and source HTML. Before loading sources, disable Pangu and verify its switch is off. Reload pages opened with Pangu enabled before capture. After collection, re-enable Pangu and verify its service worker before inference. Keep new or changed records out of scoring until verified. A later website change does not invalidate an intact historical snapshot; retain its capture date and state which version is being evaluated.
 
 Before capture, apply [artifact rules](artifacts.md) for public fixtures and private raw captures.
 
