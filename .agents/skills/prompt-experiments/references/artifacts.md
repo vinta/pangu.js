@@ -1,6 +1,6 @@
 # Artifact rules
 
-Read before collecting or writing experiment data, including settings, debugging output, and failed runs. Choose fields before writing. Normal public output must need no later sanitization step.
+Save only relevant experiment evidence; keep credentials and private operational data out of public artifacts.
 
 ## Destinations
 
@@ -8,29 +8,28 @@ Keep helpers and public evidence under `scripts/prompt-experiments/`. Use a new 
 
 Before a private write, run `git check-ignore -- <destination>` and `git ls-files -- <destination>` from the repository root. Proceed only when the first confirms an ignore rule and the second returns no tracked path. Check existing files inside directories too. Add a repository ignore rule for a chosen raw-output directory before using it; global ignores are not portable. Never overwrite existing run output.
 
-| Public | Local only |
-| --- | --- |
-| Helpers, prompts, diagnostics, gates, tests, and usage instructions | Connection values, browser profiles, credentials |
-| Verified excerpts, minimal HTML/CSS fixtures, labels, rationale, source URLs, capture dates, exposure | Full pages, headers, unrelated page content, authenticated material |
-| Every scored outcome, relevant diagnostic exchange, error, decision, remaining failure | Unfiltered terminal output, traces, screenshots, agent conversations |
-| Browser/Node/model versions, sampling, code revisions, fixture hashes | Full environment inventories, session/request identifiers, machine paths |
-
-## Evidence integrity
-
-Explicitly select permitted public fields in collection and result writers, including nested objects. Preserve raw model answers and relevant errors while excluding operational identifiers and unrelated content. Keep failed comparisons that support a decision. Selecting fields must never select favorable outcomes.
-
-Preserve exact authored source text and model inputs. A fixture must reproduce production inputs, UTF-16 target offsets, routing, individual edits, combined spacing, and authored-space exclusions. Retain only required HTML structure and computed styles; give sanitized bytes their own hash. Exclude sensitive cases or collect another verified source; do not alter scored text for privacy.
-
-Validate public paths and hashes against public files alone. Preserve original measurement hashes as provenance when bytes change; never claim cleaned bytes were measured historically. Review embedded HTML, corpus copies, per-run case copies, result metadata, and operational records. A secret scan does not establish privacy.
-
-Publish completed holdouts only as historical evidence. Keep active holdouts outside tuning context; an ignore rule alone does not prevent exposure.
-
-Done when every output has an appropriate destination, every public field is needed for inspection or replay, public references/hashes resolve, and exact scored inputs/outputs remain intact.
+Select public fields before writing, including nested objects. Keep credentials, connection/profile values, machine paths, session identifiers, authenticated content, and unfiltered logs/captures local. Review embedded fixtures and result metadata for these fields; a secret scan alone does not establish privacy.
 
 ## Round record
 
-Before inference, create a new round's `protocol.json` with baseline prompt bytes, question builder, label order/schema, sampling/languages/API options, detector/context/edit revisions and SHA-256 hashes, corpus/fixture hashes, source roles/exposure, case orders/shuffle seed, scheduled phases, and the skill's acceptance-gates path. Recheck those frozen values before each phase. Save rendered questions as well as code hashes.
+Keep the following evidence for each round, reusing the existing helpers' formats and metadata:
 
-Keep `runtime.json` for observed versions/capabilities, the hypothesis record, baseline/candidate results, per-case gates, and a report with the decision. Reuse the runner's recorded metadata. New helpers must select the same public fields as the existing writers.
+- **Corpus:** exact source text, source URLs, expected answers, and example/development/holdout roles. Include the context and target annotations needed to reconstruct production inputs and check final spacing.
+- **Exact prompts for each iteration:** system prompts, rendered model inputs, and the code that constructed them, including label definitions and response schema.
+- **Results:** raw answers, errors, scores, relevant diagnostic exchanges, and individual-target and combined final-spacing outputs. Retain failed runs as well as successful ones.
+- **Iteration history:** the previous version and what changed from it.
+- **Reasoning and decisions:** the hypothesis, what the results showed, and why the change was accepted or rejected.
+- **Essential execution settings:** model/browser versions when known, sampling and other model API options, repetition counts, and execution order, including any shuffle seed.
+- **Reusable scripts and tests:** the code version and commands needed to run the experiment and check its results again.
 
-Before adopting a recorded-round script, inspect its fixed paths, IDs, counts, locks, and prompt lookups without loading its old answers. Adapt only what the new round needs; current production code and newly frozen records supply the replacements. The [command reference](../../../../scripts/prompt-experiments/README.md) identifies reusable gate functions and required integration adaptations.
+Before inference, freeze the corpus, prompts, input construction, code version, and execution settings. Recheck those controls before each phase.
+
+Keep public experiment inputs, scripts, and results in Git. Record the Git revision used for each run and save any uncommitted code or input changes that affected it alongside the results.
+
+## Evidence integrity
+
+Preserve exact scored text and model inputs; exclude sensitive cases or collect another verified source instead of altering them for privacy. Fixtures must reproduce production inputs, UTF-16 target offsets, routing, individual edits, combined spacing, and authored-space exclusions. Validate references to public evidence.
+
+Publish completed holdouts only as historical evidence. Keep active holdouts outside tuning context; an ignore rule alone does not prevent exposure.
+
+Done when the saved evidence identifies what was tested, supports the decision, and is sufficient to rerun the experiment and recompute its scores and spacing checks.

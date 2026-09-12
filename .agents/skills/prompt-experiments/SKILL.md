@@ -7,7 +7,7 @@ description: Use when running pangu.js prompt experiments, adding a model-assist
 
 Use the existing helpers in the [command reference](../../../scripts/prompt-experiments/README.md). This skill guides source selection, prompt decisions, and acceptance.
 
-Before collecting or writing any experiment artifact, read [artifact rules](references/artifacts.md). Every output must be suitable for the public repo unless its destination is verified ignored and untracked before writing.
+Before collecting or writing experiment evidence, read [artifact rules](references/artifacts.md) for what to save and keep private.
 
 ## Starting context
 
@@ -17,7 +17,7 @@ Start from current production code and verified source snapshots with their expo
 
 Use only verified real text for prompt examples, diagnostics, development, confirmation, and holdout. Preserve authored text and context; never invent passages, substitute names or numbers, or use model explanations/translations as corpus examples. Synthetic fixtures are limited to deterministic implementation tests. Record missing meaning or preserve-output coverage and find verified sources.
 
-Read [source collection](references/sources.md) when adding or changing records, evidence is missing or disputed, or live-page behavior matters. Reuse verified source snapshots by default. Check recorded hashes for unchanged text, HTML, styles, and provenance, then replay production inputs and spacing locally. A new prompt experiment does not require downloading every source again.
+Read [source collection](references/sources.md) when adding or changing records, evidence is missing or disputed, or live-page behavior matters. Reuse verified source snapshots by default and replay production inputs and spacing locally. A new prompt experiment does not require downloading every source again.
 
 If the detector or context extractor changes, regenerate production inputs and spacing expectations from saved context; revisit the live page only where that context is insufficient. Before inference, annotate every eligible target and verify individual and combined edits on frozen rule output. Keep routing and authored-space exclusions separate from classifier accuracy, and disputed meanings unscored. Gold `unsure` requires a defensible explanation that the exact production context is insufficient.
 

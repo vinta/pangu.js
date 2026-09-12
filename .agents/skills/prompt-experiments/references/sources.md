@@ -23,6 +23,6 @@ Use a JSON object with `role` (`development` or `holdout`), `enums`, and `cases`
 | `expected_target_spacing`, `expected_spacing` | Production edits for this target alone and every eligible target combined |
 | `prior_exposure`, `role_note` | Source/label/inference/example exposure and role rationale |
 | `source_verification`, `routing_status` | Nonempty verification evidence and production routing descriptions |
-| `fresh_verification`, `fixture_sha256` | Public source-record reference/date/method and hash of the reviewed fixture |
+| `fresh_verification` | Public source-record reference/date/method |
 
-Generate UTF-16 offsets with JavaScript string indexing, not code-point counting. Done when the collector/replay checks pass, all eligible targets are annotated, and public evidence references and hashes resolve; offline runner validation checks structure only.
+Generate UTF-16 offsets with JavaScript string indexing, not code-point counting. Done when the collector/replay checks pass, all eligible targets are annotated, and public evidence references resolve; offline runner validation checks structure only.
