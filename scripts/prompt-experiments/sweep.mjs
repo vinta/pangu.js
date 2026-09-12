@@ -5,6 +5,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
+import { digitPlusPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/digit-plus-prompt.ts';
 import { hyphenDigitPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-prompt.ts';
 import { outputDirectory, pick, publicCase, publicError } from './public-artifacts.mjs';
 
@@ -12,7 +13,6 @@ const { values, positionals } = parseArgs({
   allowPositionals: true,
   options: {
     'experiment': { type: 'string', default: 'hyphen-digit' },
-    'split': { type: 'string' },
     'cases': { type: 'string' },
     'prompts': { type: 'string' },
     'out': { type: 'string' },
@@ -30,24 +30,20 @@ assert(Number.isSafeInteger(repeats) && repeats > 0, `invalid --repeats ${values
 const orderCount = Number(values.orders);
 assert(Number.isSafeInteger(orderCount) && orderCount > 0, `invalid --orders ${values.orders}; use a positive integer`);
 assert(['hyphen-digit', 'digit-plus'].includes(values.experiment), `invalid --experiment ${values.experiment}; use hyphen-digit or digit-plus`);
-assert(values.cases === undefined || values.experiment === 'hyphen-digit', '--cases is only supported for --experiment hyphen-digit');
 const digitPlus = values.experiment === 'digit-plus' ? await import('./digit-plus/experiment.mjs') : null;
-assert(digitPlus || !values.split, '--split is only supported for --experiment digit-plus');
 assert(digitPlus || values.cases, 'provide --cases <verified-corpus.json> for --experiment hyphen-digit');
-const split = values.split ?? 'development';
 const variants = positionals.length ? positionals : digitPlus ? ['v18-en-real-examples'] : ['shipping'];
-assert(!digitPlus || !values.prompts, '--prompts is only supported for --experiment hyphen-digit');
-const registry = digitPlus ? (await import('./digit-plus/prompts.js')).PROMPTS : (await import(values.prompts ? pathToFileURL(resolve(values.prompts)).href : './hyphen-digit/prompts.js')).PROMPTS;
+const promptPath = values.prompts ? pathToFileURL(resolve(values.prompts)).href : digitPlus ? './digit-plus/results/20260911-label-meaning/prompts.mjs' : './hyphen-digit/prompts.js';
+const registry = (await import(promptPath)).PROMPTS;
 assert(registry && typeof registry === 'object' && !Array.isArray(registry), 'Prompt module must export a PROMPTS object');
-assert(digitPlus || !Object.hasOwn(registry, 'shipping'), 'Prompt module cannot override shipping; shipping always imports the production prompt');
-const prompts = digitPlus ? registry : { ...registry, shipping: { system: hyphenDigitPrompt.systemPrompt, build: (kase) => hyphenDigitPrompt.buildQuestion(kase.input, kase.at) } };
-const corpus = digitPlus ? digitPlus.loadCorpus(split) : JSON.parse(readFileSync(values.cases, 'utf8'));
+assert(!Object.hasOwn(registry, 'shipping'), 'Prompt module cannot override shipping; shipping always imports the production prompt');
+const shipping = digitPlus ? digitPlusPrompt : hyphenDigitPrompt;
+const prompts = { ...registry, shipping: { system: shipping.systemPrompt, labels: shipping.candidateLabels, build: (kase) => shipping.buildQuestion(kase.input, kase.at) } };
+const corpus = digitPlus ? digitPlus.loadCorpus(values.cases) : JSON.parse(readFileSync(values.cases, 'utf8'));
 const cases = corpus.cases?.map(publicCase);
 assert(Array.isArray(cases) && cases.length > 0, 'empty corpus; provide at least one scored case');
-if (!digitPlus) {
-  assert(['development', 'holdout'].includes(corpus.role), 'invalid corpus role; use development or holdout');
-}
-assert(!values.diagnostics || (digitPlus ? split : corpus.role) === 'development', 'holdout diagnostics are forbidden; use development cases');
+assert(['development', 'holdout'].includes(corpus.role), 'invalid corpus role; use development or holdout');
+assert(!values.diagnostics || corpus.role === 'development', 'holdout diagnostics are forbidden; use development cases');
 assert(
   corpus.diagnosticQuestions === undefined ||
     (Array.isArray(corpus.diagnosticQuestions) && corpus.diagnosticQuestions.length > 0 && corpus.diagnosticQuestions.every((question) => typeof question === 'string' && question.trim())),
@@ -97,20 +93,23 @@ if (!digitPlus) {
   assert.deepEqual(corpus.enums.hyphen, hyphenDigitPrompt.candidateLabels, 'shipping labels differ from the corpus; update the cases before comparing prompts');
 }
 const runs = variants.map((variant) => {
-  assert(Object.hasOwn(prompts, variant), `unknown variant ${variant}; add it to ${values.prompts ?? `scripts/prompt-experiments/${values.experiment}/prompts.js`}`);
+  assert(Object.hasOwn(prompts, variant), `unknown variant ${variant}; add it to ${promptPath}`);
   const prompt = prompts[variant];
   const inputs = cases
     .filter((kase) => !diagnosticIds || diagnosticIds.includes(kase.id))
     .map((kase) => {
-      const labels = corpus.enums[kase.enum];
+      const labels = digitPlus ? (prompt.labels ?? corpus.enums[kase.enum]) : corpus.enums[kase.enum];
+      const expectedLabel = digitPlus && prompt.expectedLabel ? prompt.expectedLabel(kase) : kase.expected_label;
+      assert(Array.isArray(labels) && labels.length > 0 && labels.every((label) => typeof label === 'string') && new Set(labels).size === labels.length, `invalid labels: ${variant}`);
+      assert(labels.includes(expectedLabel), `unknown expected label for ${variant}/${kase.id}: ${expectedLabel}`);
       const question = prompt.build(kase, labels);
       assert(question === null || typeof question === 'string', `invalid prompt for ${variant}/${kase.id}; return a string or null for abstention`);
-      return { ...kase, question, responseConstraint: { type: 'string', enum: labels } };
+      return { ...kase, expected_label: expectedLabel, question, responseConstraint: { type: 'string', enum: labels } };
     });
   return { variant, prompt, inputs };
 });
 if (values.check) {
-  console.log(`Checked ${cases.length} cases (offline structure only); rendered variants: ${variants.join(', ')}${digitPlus ? '' : `; shipping source version: ${hyphenDigitPrompt.version}`}`);
+  console.log(`Checked ${cases.length} cases (offline structure only); rendered variants: ${variants.join(', ')}; shipping source version: ${shipping.version}`);
   process.exit(0);
 }
 assert(/^[a-p]{32}$/.test(values['extension-id'] ?? ''), `invalid --extension-id ${values['extension-id'] ?? '(missing)'}; copy the shipping extension ID from chrome://extensions/`);
@@ -118,9 +117,13 @@ assert(values.out, 'provide --out tmp/prompt-experiments/<round>/<run>; use a ne
 const profilePath = values['profile-path'];
 assert(profilePath && isAbsolute(profilePath), `invalid --profile-path ${profilePath ?? '(missing)'}; copy the absolute Profile Path from chrome://version`);
 const output = outputDirectory(fileURLToPath(new URL('../../', import.meta.url)), values.out);
-writeFileSync(join(output, 'cases.json'), `${JSON.stringify({ ...pick(corpus, ['set', 'role', 'enums', 'notes', 'diagnosticQuestions', 'prepared_at', 'frozen_at']), cases }, null, 2)}\n`, {
-  flag: 'wx',
-});
+writeFileSync(
+  join(output, 'cases.json'),
+  `${JSON.stringify({ ...pick(corpus, ['set', 'role', 'historical', 'enums', 'notes', 'diagnosticQuestions', 'prepared_at', 'frozen_at']), cases }, null, 2)}\n`,
+  {
+    flag: 'wx',
+  },
+);
 
 const extensionURL = `chrome-extension://${values['extension-id']}`;
 async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics, diagnosticQuestions }) {
@@ -241,14 +244,14 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
   const orders = caseOrders(orderCount, inputs.length);
   const code = `async page => { try { return await (${runInBrowser.toString()})(page, ${JSON.stringify({ profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics: Boolean(diagnosticIds), diagnosticQuestions: diagnosticIds ? corpus.diagnosticQuestions : undefined })}); } catch (error) { return { runnerError: String(error.message ?? error) }; } }`;
   const result = {
-    set: corpus.set ?? `${values.experiment}:${corpus.role ?? split}`,
+    set: corpus.set ?? `${values.experiment}:${corpus.role}`,
     backend: 'prompt-api',
     model: 'gemini-nano',
     modelVersion: null,
     modelVersionStatus: 'Prompt API does not expose the model version; record the observed component version in the round runtime record',
     context: 'extension-sw',
     variant,
-    promptVersion: variant === 'shipping' ? hyphenDigitPrompt.version : variant,
+    promptVersion: variant === 'shipping' ? shipping.version : variant,
     repeats,
     orders: orders.map((order) => order.map((index) => inputs[index].id)),
     sampling: 'temperature 0, topK 1',

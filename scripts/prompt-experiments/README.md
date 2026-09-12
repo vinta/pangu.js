@@ -49,19 +49,24 @@ node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-e
 
 ### digit-plus
 
-Use `--experiment digit-plus`. The default prompt is `v18-en-real-examples`; pass prompt IDs as positional arguments to select others. Cases come from [digit-plus/cases.json](digit-plus/cases.json). `--split` accepts `development` (default) or `holdout`.
+Use `--experiment digit-plus`. Cases default to [corpus/development.json](digit-plus/corpus/development.json); select another corpus with `--cases`. The default prompt remains `v18-en-real-examples`. Use `--prompts` and positional prompt IDs to select frozen prompts from a round.
+
+The [historical report](digit-plus/results/20260911-label-meaning/REPORT.md) retains the synthetic experiments and their exact prompt changes. [corpus/historical.json](digit-plus/corpus/historical.json) keeps those cases for historical reruns only. The real development corpus retains source notes, 3 training examples, and 4 unresolved review records. Training and review records are excluded from scoring. Its older evidence still needs the current production-input and spacing checks before a new experiment.
+
+Previously reserved holdouts now stay under ignored `tmp/prompt-experiments/`; they have no retained evaluation results and must not be treated as evaluated regression cases. Their earlier tracked text also means they cannot be assumed unseen. Pass a separate corpus with `role: "holdout"` for an eligible frozen-prompt evaluation; `--split` has been removed.
 
 ```bash
-# Validate both splits without Chrome.
+# Validate the shared development corpus without Chrome.
 node scripts/prompt-experiments/sweep.mjs --experiment digit-plus --check
-node scripts/prompt-experiments/sweep.mjs --experiment digit-plus --split holdout --check
 
-# Run the selected prompt.
-node scripts/prompt-experiments/sweep.mjs --experiment digit-plus --extension-id "$PANGU_EXTENSION_ID" --profile-path "$PANGU_CHROME_PROFILE_PATH" --out tmp/prompt-experiments/digit-plus-next/screen
+# Run the selected prompt in the verified Chrome Beta session after source and spacing checks.
+node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --experiment digit-plus --out tmp/prompt-experiments/digit-plus-next/screen shipping
 
-# Run diagnostics for a case.
-node scripts/prompt-experiments/sweep.mjs --experiment digit-plus --extension-id "$PANGU_EXTENSION_ID" --profile-path "$PANGU_CHROME_PROFILE_PATH" --orders 1 --diagnostics tw-lb-07-1 --out tmp/prompt-experiments/digit-plus-next/diagnostics
+# Run diagnostics for a development case.
+node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --experiment digit-plus --orders 1 --diagnostics tw-lb-07-1 --out tmp/prompt-experiments/digit-plus-next/diagnostics
 ```
+
+Digit-plus prompt modules can provide `labels` and `expectedLabel(kase)` when comparing label sets. These preserve the historical merged/separate product-name comparisons. Current development inputs require exactly one plus; only a corpus marked `historical: true` permits the old multiple-plus cases. `shipping` loads the current production digit-plus prompt; use it as the control for new experiments. The versioned entries remain frozen historical prompts.
 
 ## Runner options
 

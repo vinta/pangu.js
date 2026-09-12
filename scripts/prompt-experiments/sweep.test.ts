@@ -32,7 +32,6 @@ test.skipIf(!supportsTypeScript)('hyphen corpora require provenance and retain d
   const diagnostics = check('--diagnostics', sourceCase.id, '--orders', '1');
   expect(diagnostics.status, diagnostics.stderr).toBe(0);
   expect(check('--diagnostics', sourceCase.id).stderr).toContain('--diagnostics requires --repeats 1, --orders 1');
-  expect(check('--experiment', 'digit-plus').stderr).toContain('--cases is only supported for --experiment hyphen-digit');
   const missingCorpus = spawnSync(process.execPath, ['scripts/prompt-experiments/sweep.mjs', '--check'], { encoding: 'utf8' });
   expect(missingCorpus.status).toBe(1);
   expect(missingCorpus.stderr).toContain('provide --cases');
@@ -85,13 +84,43 @@ test.skipIf(!supportsTypeScript)('requires an absolute Chrome profile path witho
   expect(configured.stderr).toContain('EEXIST');
 });
 
-test.skipIf(!supportsTypeScript)('digit-plus permits development diagnostics and forbids holdout diagnostics', () => {
-  const args = ['scripts/prompt-experiments/sweep.mjs', '--experiment', 'digit-plus', '--orders', '1', '--check'];
-  const development = spawnSync(process.execPath, [...args, '--split', 'development', '--diagnostics', 'tw-lb-07-1'], { encoding: 'utf8' });
+test.skipIf(!supportsTypeScript)('digit-plus loads explicit corpora and prompt labels while enforcing target and holdout constraints', () => {
+  const root = scratchDirectory(process.cwd(), 'pangu-digit-cases-');
+  onTestFinished(() => rmSync(root, { recursive: true, force: true }));
+  const file = join(root, 'cases.json');
+  const corpus = JSON.parse(readFileSync('scripts/prompt-experiments/digit-plus/corpus/development.json', 'utf8'));
+  const original = corpus.cases[0];
+  const selected = { ...corpus, cases: [original] };
+  writeFileSync(file, JSON.stringify(selected));
+  const args = ['scripts/prompt-experiments/sweep.mjs', '--experiment', 'digit-plus', '--cases', file, '--orders', '1', '--check'];
+  const check = (...extra: string[]) => spawnSync(process.execPath, [...args, ...extra], { encoding: 'utf8' });
+  const live = check('shipping');
+  expect(live.status, live.stderr).toBe(0);
+  expect(live.stdout).toContain('shipping source version: v18-en-real-examples');
+  const development = check('--diagnostics', original.id);
   expect(development.status, development.stderr).toBe(0);
-  const holdout = spawnSync(process.execPath, [...args, '--split', 'holdout', '--diagnostics', 'tw-conj-empire-earth-1'], { encoding: 'utf8' });
-  expect(holdout.status).toBe(1);
-  expect(holdout.stderr).toContain('holdout diagnostics are forbidden; use development cases');
+  writeFileSync(file, JSON.stringify({ ...selected, role: 'holdout' }));
+  expect(check('--diagnostics', original.id).stderr).toContain('holdout diagnostics are forbidden');
+
+  writeFileSync(file, JSON.stringify(selected));
+  const prompt = join(root, 'prompts.mjs');
+  writeFileSync(prompt, "export const PROMPTS = { merged: { system: 'Test', labels: ['attached'], expectedLabel: () => 'attached', build: kase => kase.input } };");
+  const mapped = check('--prompts', prompt, 'merged');
+  expect(mapped.status, mapped.stderr).toBe(0);
+  expect(mapped.stdout).toContain('rendered variants: merged');
+  writeFileSync(prompt, 'export const PROMPTS = { shipping: {} };');
+  expect(check('--prompts', prompt, 'shipping').stderr).toContain('cannot override shipping');
+  writeFileSync(prompt, "export const PROMPTS = { merged: { system: 'Test', labels: ['attached'], expectedLabel: () => 'invalid', build: kase => kase.input } };");
+  expect(check('--prompts', prompt, 'merged').stderr).toContain('unknown expected label for merged/');
+
+  writeFileSync(file, JSON.stringify({ ...selected, cases: [{ ...original, at: 0 }] }));
+  expect(check().stderr).toContain('invalid digit-plus target');
+  const historical = JSON.parse(readFileSync('scripts/prompt-experiments/digit-plus/corpus/historical.json', 'utf8'));
+  const multiple = historical.cases.find((kase: { input: string }) => kase.input.split('+').length > 2);
+  writeFileSync(file, JSON.stringify({ ...historical, historical: false, cases: [multiple] }));
+  expect(check('v1-zh').stderr).toContain('provide a sentence with exactly one +');
+  writeFileSync(file, JSON.stringify({ ...historical, cases: [multiple] }));
+  expect(check('v1-zh').status).toBe(0);
 });
 
 for (const [experiment, variant] of [

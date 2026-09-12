@@ -1,0 +1,328 @@
+{
+  "enums": {
+    "digit-plus": ["conjunction", "lower-bound", "unsure"]
+  },
+  "diagnosticQuestions": ["你剛才判斷的是原句中從左到右第幾個「+」？請引用它左右的原文。", "依照選項定義，這個「+」是連接兩個項目，還是修飾一個數值？請說明原句中的依據；若兩者都不是，請指出。"],
+  "set": "digit-plus:development",
+  "role": "development",
+  "notes": "Retained real-source records, not freshly reverified during migration. Inline evidence predates the current fixture-replay requirements; review missing production evidence before new inference. No retained run measures v18 on these cases.",
+  "cases": [
+    {
+      "id": "tw-conj-diablo-1",
+      "input": "請問沒在玩的D2盒裝*2+資料片*1有賣價還是直接送",
+      "expected_output": "請問沒在玩的 D2 盒裝 * 2 + 資料片 * 1 有賣價還是直接送",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "real-world",
+      "split": "development",
+      "source": "https://www.ptt.cc/bbs/DIABLO/M.1541827292.A.D7B.html",
+      "sourceTitle": "[閒聊] D2置底閒聊區",
+      "publisher": "PTT DIABLO",
+      "publishedDate": null,
+      "retrievedDate": "2026-09-11",
+      "sourceExcerpt": "請問沒在玩的D2盒裝*2+資料片*1有賣價還是直接送？",
+      "category": "game-and-expansion",
+      "rationale": "The author offers two game boxes together with one expansion; the plus joins merchandise, not a minimum quantity.",
+      "evidence": "opened-page-and-live-html-substring",
+      "ordinal": 1,
+      "expected_label": "conjunction",
+      "at": 12,
+      "enum": "digit-plus",
+      "prior_exposure": {
+        "note": "Previously tracked development case. No matching run in retained artifacts; model inference exposure is not established."
+      }
+    },
+    {
+      "id": "tw-lb-02-1",
+      "input": "30+輕熟女上班族的生活保養哲學，這5招讓你年輕好幾歲",
+      "expected_output": "30+ 輕熟女上班族的生活保養哲學，這 5 招讓你年輕好幾歲",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "real-world",
+      "split": "development",
+      "source": "https://www.518.com.tw/article/1253",
+      "sourceTitle": "30+輕熟女上班族的生活保養哲學，這5招讓你年輕好幾歲！",
+      "publisher": "518職場熊報",
+      "publishedDate": "2021-06-24",
+      "retrievedDate": "2026-09-11",
+      "sourceExcerpt": "30+輕熟女上班族的生活保養哲學，這5招讓你年輕好幾歲！",
+      "category": "age",
+      "rationale": "正文定義輕熟女為30歲以上；完整標題。",
+      "evidence": "Opened page heading and date (web lines89-97).",
+      "ordinal": 1,
+      "expected_label": "lower-bound",
+      "at": 2,
+      "enum": "digit-plus",
+      "prior_exposure": {
+        "note": "Previously tracked development case. No matching run in retained artifacts; model inference exposure is not established."
+      }
+    },
+    {
+      "id": "tw-lb-04-1",
+      "input": "穿搭顯老不是錯覺～40+女性「穿搭思路」上身年輕5歲，日造型師推薦必收3單品",
+      "expected_output": "穿搭顯老不是錯覺～40+ 女性「穿搭思路」上身年輕 5 歲，日造型師推薦必收 3 單品",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "real-world",
+      "split": "development",
+      "source": "https://woman.tvbs.com.tw/fashion/62713",
+      "sourceTitle": "穿搭顯老不是錯覺～40+女性「穿搭思路」上身年輕5歲，日造型師推薦必收3單品",
+      "publisher": "TVBS女人我最大",
+      "publishedDate": "2026-02-04",
+      "retrievedDate": "2026-09-11",
+      "sourceExcerpt": "穿搭顯老不是錯覺～40+女性「穿搭思路」上身年輕5歲，日造型師推薦必收3單品",
+      "category": "age",
+      "rationale": "完整標題；正文將目標族群稱為40+歲女性。",
+      "evidence": "Opened page and directly fetched HTML heading; date2026/02/04 13:27; updated2026/02/09.",
+      "ordinal": 1,
+      "expected_label": "lower-bound",
+      "at": 11,
+      "enum": "digit-plus",
+      "prior_exposure": {
+        "note": "Previously tracked development case. No matching run in retained artifacts; model inference exposure is not established."
+      }
+    },
+    {
+      "id": "tw-lb-06-1",
+      "input": "40+女性，請允許自己先是被照顧的人!",
+      "expected_output": "40+ 女性，請允許自己先是被照顧的人!",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "real-world",
+      "split": "development",
+      "source": "https://www.smarter.com.tw/article/3cc15600a58641318751e3271dc8aa6c",
+      "sourceTitle": "40+女性，請允許自己先是被照顧的人!",
+      "publisher": "詩嫚特SPA",
+      "publishedDate": "2026-02-04",
+      "retrievedDate": "2026-09-11",
+      "sourceExcerpt": "40+女性，請允許自己先是被照顧的人!",
+      "category": "age",
+      "rationale": "完整標題；保留ASCII驚嘆號；正文以40多歲女性說明其年齡族群。",
+      "evidence": "Opened page lines28-41 and direct HTML heading; original knowledge URL redirects to article URL.",
+      "ordinal": 1,
+      "expected_label": "lower-bound",
+      "at": 2,
+      "enum": "digit-plus",
+      "prior_exposure": {
+        "note": "Previously tracked development case. No matching run in retained artifacts; model inference exposure is not established."
+      }
+    },
+    {
+      "id": "tw-lb-07-1",
+      "input": "一衣多穿搭出24+種造型，5分鐘就能輕鬆出門",
+      "expected_output": "一衣多穿搭出 24+ 種造型，5 分鐘就能輕鬆出門",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "real-world",
+      "split": "development",
+      "source": "https://woman.tvbs.com.tw/fashion/60839",
+      "sourceTitle": "時尚網紅列「衣櫃必有10單品」！一衣多穿搭出24+種造型，5分鐘就能輕鬆出門",
+      "publisher": "TVBS女人我最大",
+      "publishedDate": "2025-11-03",
+      "retrievedDate": "2026-09-11",
+      "sourceExcerpt": "時尚網紅列「衣櫃必有10單品」！一衣多穿搭出24+種造型，5分鐘就能輕鬆出門",
+      "category": "quantity",
+      "rationale": "完整標題；正文明確說超過24種以上穿搭，24+是數量下限。",
+      "evidence": "Opened page heading line45, date line52, count explanation line71.",
+      "ordinal": 1,
+      "expected_label": "lower-bound",
+      "at": 8,
+      "enum": "digit-plus",
+      "prior_exposure": {
+        "note": "Previously tracked development case. No matching run in retained artifacts; model inference exposure is not established."
+      }
+    },
+    {
+      "id": "tw-lb-08-1",
+      "input": "10 件單品=24+種穿搭",
+      "expected_output": "10 件單品 = 24+ 種穿搭",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "real-world",
+      "split": "development",
+      "source": "https://woman.tvbs.com.tw/fashion/60839",
+      "sourceTitle": "時尚網紅列「衣櫃必有10單品」！一衣多穿搭出24+種造型，5分鐘就能輕鬆出門",
+      "publisher": "TVBS女人我最大",
+      "publishedDate": "2025-11-03",
+      "retrievedDate": "2026-09-11",
+      "sourceExcerpt": "10 件單品=24+種穿搭",
+      "category": "quantity",
+      "rationale": "完整小標；保留10後作者空格與ASCII等號。同來源為tw-lb-07，不可拆到不同資料分割。",
+      "evidence": "Opened page subheading line65 and explanatory text line71.",
+      "ordinal": 1,
+      "expected_label": "lower-bound",
+      "at": 9,
+      "enum": "digit-plus",
+      "prior_exposure": {
+        "note": "Previously tracked development case. No matching run in retained artifacts; model inference exposure is not established."
+      }
+    },
+    {
+      "id": "tw-lb-10-1",
+      "input": "「台灣觀光100亮點」搭配在地主題活動，串聯Taiwan PASS、台灣好行與台灣觀巴等各項旅運服務，交織成100+豐富的旅遊選項，邀請你一起出發探索亮點，發現臺灣這片土地的價值與感動",
+      "expected_output": "「台灣觀光 100 亮點」搭配在地主題活動，串聯 Taiwan PASS、台灣好行與台灣觀巴等各項旅運服務，交織成 100+ 豐富的旅遊選項，邀請你一起出發探索亮點，發現臺灣這片土地的價值與感動",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "real-world",
+      "split": "development",
+      "source": "https://100spotlights.taiwan.net.tw/",
+      "sourceTitle": "台灣觀光100亮點",
+      "publisher": "交通部觀光署",
+      "publishedDate": null,
+      "retrievedDate": "2026-09-11",
+      "sourceExcerpt": "「台灣觀光100亮點」搭配在地主題活動，串聯Taiwan PASS、台灣好行與台灣觀巴等各項旅運服務，交織成100+豐富的旅遊選項，邀請你一起出發探索亮點，發現臺灣這片土地的價值與感動。",
+      "category": "quantity",
+      "rationale": "完整原句。觀光景點與交通活動帶來100個以上旅遊選項；+後是形容詞豐富而非量詞，因此與常見N+種形式不同。",
+      "evidence": "Public HTTPS HTML fetched successfully with curl; exact sentence in introductory <p> after second <br> block. Search snippet independently corroborates; web text extractor omitted it.",
+      "ordinal": 1,
+      "expected_label": "lower-bound",
+      "at": 57,
+      "enum": "digit-plus",
+      "prior_exposure": {
+        "note": "Previously tracked development case. No matching run in retained artifacts; model inference exposure is not established."
+      }
+    }
+  ],
+  "trainingCases": [
+    {
+      "id": "tw-conj-overcooked",
+      "input": "煮過頭2+資料片超棒",
+      "expected_output": "煮過頭 2 + 資料片超棒",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "group": "real-world",
+      "split": "training",
+      "source": "https://www.ptt.cc/bbs/NSwitch/M.1610033538.A.1C4.html",
+      "sourceTitle": "[問題] 讓喜歡魔獸世界也會喜歡的遊戲推薦",
+      "publisher": "PTT NSwitch",
+      "publishedDate": "2021-01-07",
+      "retrievedDate": "2026-09-11",
+      "sourceExcerpt": "煮過頭2+資料片超棒",
+      "category": "game-and-expansion",
+      "rationale": "A game and its expansion are two items being recommended together.",
+      "evidence": "opened-page-and-live-html-substring"
+    },
+    {
+      "id": "tw-lb-05",
+      "input": "40+女性 熟齡期提前準備，養成「鈣」完美熟女",
+      "expected_output": "40+ 女性 熟齡期提前準備，養成「鈣」完美熟女",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "lower-bound"
+        }
+      ],
+      "group": "real-world",
+      "split": "training",
+      "source": "https://health.tvbs.com.tw/nutrition/340731",
+      "sourceTitle": "40+女性 熟齡期提前準備，養成「鈣」完美熟女！",
+      "publisher": "TVBS健康2.0",
+      "publishedDate": "2023-07-18",
+      "retrievedDate": "2026-09-11",
+      "sourceExcerpt": "40+女性 熟齡期提前準備，養成「鈣」完美熟女！",
+      "category": "age",
+      "rationale": "完整標題；女性後有一個原作者空格；40+修飾年齡族群。只用作文本語義資料，未評估其醫療主張。",
+      "evidence": "Opened page heading web line13; publication2023-07-18 and update2024-02-01 line17; direct HTML corroborates."
+    },
+    {
+      "id": "tw-brand-fiftyplus",
+      "input": "50+的品牌精神，即強有力的兩個字：「顛覆」",
+      "expected_output": "50+ 的品牌精神，即強有力的兩個字：「顛覆」",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "unsure"
+        }
+      ],
+      "group": "real-world",
+      "split": "training",
+      "source": "https://event.fiftyplus.com.tw/funyouth2023/market.html",
+      "sourceTitle": "50+好好同學會-美食與市集",
+      "publisher": "50+ Fifty Plus",
+      "publishedDate": null,
+      "retrievedDate": "2026-09-11",
+      "sourceExcerpt": "50+的品牌精神，即強有力的兩個字：「顛覆」。",
+      "category": "brand",
+      "rationale": "前一句為「50+（Fifty Plus）就此成立！」；這一句的50+是媒體品牌名稱。",
+      "evidence": "Direct public HTML text node; sentence boundaries are the original ！ and 。."
+    }
+  ],
+  "reviewCases": [
+    {
+      "id": "tw-conj-filter-shipping",
+      "input": "但因為216主打CP值 這咖濾網150+運費100 個人覺得CP值略低",
+      "source": "https://www.ptt.cc/bbs/PC_Shopping/M.1678386582.A.2B4.html",
+      "sourceTitle": "Re: [情報] 藝人店聯力216少量進貨",
+      "publisher": "PTT PC_Shopping",
+      "publishedDate": "2023-03-10",
+      "retrievedDate": "2026-09-11",
+      "expected_label": null,
+      "reason": "The filter price is combined with shipping; review whether the prompt taxonomy treats cost addition as conjunction or unsure."
+    },
+    {
+      "id": "tw-conj-repair-shipping",
+      "input": "謝謝大大提醒，一支50+運費45=95",
+      "source": "https://www.ptt.cc/bbs/FixMyHouse/M.1703922288.A.630.html",
+      "sourceTitle": "[電氣] 大同電鍋燈不亮",
+      "publisher": "PTT FixMyHouse",
+      "publishedDate": "2023-12-30",
+      "retrievedDate": "2026-09-11",
+      "expected_label": null,
+      "reason": "A tool price plus shipping is summed explicitly; this may belong to arithmetic/unsure rather than conjunction."
+    },
+    {
+      "id": "tw-conj-shopping-shipping",
+      "input": "399-回饋金50+運費50=399",
+      "source": "https://www.ptt.cc/bbs/e-shopping/M.1493738778.A.90C.html",
+      "sourceTitle": "Re: [問題] OB嚴選全退 卻扣運費",
+      "publisher": "PTT e-shopping",
+      "publishedDate": "2017-05-02",
+      "retrievedDate": "2026-09-11",
+      "expected_label": null,
+      "reason": "An explicit discounted-price plus shipping equation; review arithmetic/unsure label before using as gold."
+    },
+    {
+      "id": "tw-conj-coupon-shipping",
+      "input": "1張券150+運費25=175 也有人替賣家說話 差點忘了版上",
+      "source": "https://www.ptt.cc/bbs/Lifeismoney/M.1440518746.A.9EA.html",
+      "sourceTitle": "[情報] 蝦皮拍賣滿150折100代碼整理",
+      "publisher": "PTT Lifeismoney",
+      "publishedDate": "2015-08-30",
+      "retrievedDate": "2026-09-11",
+      "expected_label": null,
+      "reason": "A voucher price plus shipping equation in a single original reply; review arithmetic/unsure label before using as gold."
+    }
+  ]
+}
