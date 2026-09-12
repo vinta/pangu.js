@@ -44,6 +44,8 @@
 
 ## Workflow
 
+- For model-assisted prompt experiments, use [prompt-experiments](.agents/skills/prompt-experiments/SKILL.md). Ordinary deterministic spacing fixes use the checks below.
+
 - For multi-step tasks, first inspect the relevant files, current branch and worktree state, generated-versus-tracked ownership, command availability, and package scripts.
 - Before editing, state a short 3-5 item plan that covers approach, files touched, verification, and any open questions that materially affect correctness.
 - Give Codex enough task context: goal, relevant files or errors, constraints, and what counts as done.

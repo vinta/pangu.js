@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { hyphenDigitPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-prompt.ts';
+import { pick, publicCase, publicError } from './public-artifacts.mjs';
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
@@ -12,10 +14,11 @@ const { values, positionals } = parseArgs({
     'experiment': { type: 'string', default: 'hyphen-digit' },
     'split': { type: 'string' },
     'cases': { type: 'string' },
+    'prompts': { type: 'string' },
     'out': { type: 'string' },
-    'extension-id': { type: 'string' },
-    'profile-path': { type: 'string' },
-    'profile-name': { type: 'string' },
+    'extension-id': { type: 'string', default: process.env.PANGU_EXTENSION_ID },
+    'profile-path': { type: 'string', default: process.env.PANGU_CHROME_PROFILE_PATH },
+    'profile-name': { type: 'string', default: process.env.PANGU_CHROME_PROFILE_NAME },
     'repeats': { type: 'string', default: '1' },
     'orders': { type: 'string', default: '2' },
     'check': { type: 'boolean' },
@@ -34,14 +37,13 @@ assert(digitPlus || !values.split, '--split is only supported for --experiment d
 assert(digitPlus || values.cases, 'provide --cases <verified-corpus.json> for --experiment hyphen-digit');
 const split = values.split ?? 'development';
 const variants = positionals.length ? positionals : digitPlus ? ['v18-en-real-examples'] : ['shipping'];
-const prompts = digitPlus
-  ? (await import(`./${values.experiment}/prompts.js`)).PROMPTS
-  : {
-      ...(await import('./hyphen-digit/prompts.js')).PROMPTS,
-      shipping: { system: hyphenDigitPrompt.systemPrompt, build: (kase) => hyphenDigitPrompt.buildQuestion(kase.input, kase.at) },
-    };
+assert(!digitPlus || !values.prompts, '--prompts is only supported for --experiment hyphen-digit');
+const registry = digitPlus ? (await import('./digit-plus/prompts.js')).PROMPTS : (await import(values.prompts ? pathToFileURL(resolve(values.prompts)).href : './hyphen-digit/prompts.js')).PROMPTS;
+assert(registry && typeof registry === 'object' && !Array.isArray(registry), 'Prompt module must export a PROMPTS object');
+assert(digitPlus || !Object.hasOwn(registry, 'shipping'), 'Prompt module cannot override shipping; shipping always imports the production prompt');
+const prompts = digitPlus ? registry : { ...registry, shipping: { system: hyphenDigitPrompt.systemPrompt, build: (kase) => hyphenDigitPrompt.buildQuestion(kase.input, kase.at) } };
 const corpus = digitPlus ? digitPlus.loadCorpus(split) : JSON.parse(readFileSync(values.cases, 'utf8'));
-const cases = corpus.cases;
+const cases = corpus.cases?.map(publicCase);
 assert(Array.isArray(cases) && cases.length > 0, 'empty corpus; provide at least one scored case');
 if (!digitPlus) {
   assert(['development', 'holdout'].includes(corpus.role), 'invalid corpus role; use development or holdout');
@@ -96,7 +98,7 @@ if (!digitPlus) {
   assert.deepEqual(corpus.enums.hyphen, hyphenDigitPrompt.candidateLabels, 'shipping labels differ from the corpus; update the cases before comparing prompts');
 }
 const runs = variants.map((variant) => {
-  assert(Object.hasOwn(prompts, variant), `unknown variant ${variant}; add it to scripts/prompt-experiments/${values.experiment}/prompts.js`);
+  assert(Object.hasOwn(prompts, variant), `unknown variant ${variant}; add it to ${values.prompts ?? `scripts/prompt-experiments/${values.experiment}/prompts.js`}`);
   const prompt = prompts[variant];
   const inputs = cases
     .filter((kase) => !diagnosticIds || diagnosticIds.includes(kase.id))
@@ -123,7 +125,9 @@ assert.equal(state.profile?.info_cache?.[basename(profilePath)]?.name, values['p
 const output = resolve(values.out);
 mkdirSync(dirname(output), { recursive: true });
 mkdirSync(output, { recursive: false });
-writeFileSync(join(output, 'cases.json'), `${JSON.stringify({ ...corpus, cases }, null, 2)}\n`, { flag: 'wx' });
+writeFileSync(join(output, 'cases.json'), `${JSON.stringify({ ...pick(corpus, ['set', 'role', 'enums', 'notes', 'diagnosticQuestions', 'prepared_at', 'frozen_at']), cases }, null, 2)}\n`, {
+  flag: 'wx',
+});
 
 const extensionURL = `chrome-extension://${values['extension-id']}`;
 async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics, diagnosticQuestions }) {
@@ -242,11 +246,13 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
 
 for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
   const orders = caseOrders(orderCount, inputs.length);
-  const code = `async page => (${runInBrowser.toString()})(page, ${JSON.stringify({ profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics: Boolean(diagnosticIds), diagnosticQuestions: diagnosticIds ? corpus.diagnosticQuestions : undefined })})`;
+  const code = `async page => { try { return await (${runInBrowser.toString()})(page, ${JSON.stringify({ profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics: Boolean(diagnosticIds), diagnosticQuestions: diagnosticIds ? corpus.diagnosticQuestions : undefined })}); } catch (error) { return { runnerError: String(error.message ?? error) }; } }`;
   const result = {
     set: corpus.set ?? `${values.experiment}:${corpus.role ?? split}`,
     backend: 'prompt-api',
     model: 'gemini-nano',
+    modelVersion: null,
+    modelVersionStatus: 'Prompt API does not expose the model version; record the observed component version in the round runtime record',
     context: 'extension-sw',
     variant,
     promptVersion: variant === 'shipping' ? hyphenDigitPrompt.version : variant,
@@ -259,6 +265,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     system: prompt.system,
     omitResponseConstraintInput: prompt.omitResponseConstraintInput ?? false,
     expectedAttemptsPerCase: orderCount * repeats,
+    nodeVersion: process.version,
   };
   const file = join(output, `${runIndex + 1}-${variant}.json`);
   let stdout;
@@ -270,6 +277,10 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     const run = JSON.parse(stdout);
+    if (run.runnerError !== undefined) {
+      assert(typeof run.runnerError === 'string' && run.runnerError.trim(), 'Invalid browser runner error; expected a nonempty message');
+      throw new Error(run.runnerError);
+    }
     assert(Array.isArray(run.results), 'browser result missing results array');
     assert.equal(new Set(run.results.map((kase) => kase.id)).size, run.results.length, 'duplicate browser result IDs');
     assert(
@@ -278,12 +289,23 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     );
     run.results = inputs.map((input) => {
       const returned = run.results.find((kase) => kase.id === input.id);
-      const answers = returned?.answers ?? [];
+      const answers = (returned?.answers ?? []).map((answer) => ({
+        ...pick(answer, ['answer', 'raw', 'ms', 'order']),
+        error: answer.error ? publicError(answer.error, [profilePath, extensionURL, process.env.HOME]) : null,
+        ...(answer.followups
+          ? {
+              followups: answer.followups.map((followup) => ({
+                ...pick(followup, ['question', 'raw', 'ms']),
+                ...(followup.error ? { error: publicError(followup.error, [profilePath, extensionURL, process.env.HOME]) } : {}),
+              })),
+            }
+          : {}),
+      }));
       const complete = answers.length === orderCount * repeats && orders.every((_, order) => answers.filter((answer) => answer.order === order).length === repeats);
       const valid = complete && !returned?.skipped && answers.every((answer) => !answer.error && typeof answer.raw === 'string' && input.responseConstraint.enum.includes(answer.answer));
       return {
         ...input,
-        ...returned,
+        ...pick(returned, ['skipped']),
         ...(!returned ? { unavailable: 'browser returned no result for this case' } : {}),
         answers,
         answer: answers[0]?.answer ?? null,
@@ -292,17 +314,15 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
         stable: Boolean(valid && answers.every((answer) => answer.answer === answers[0].answer)),
       };
     });
-    Object.assign(result, run, {
+    Object.assign(result, pick(run, ['availability', 'createMs', 'browserVersion', 'profileVerified', 'extensionWorkerVerified', 'results']), {
       status: run.results.every((kase) => kase.complete) ? 'complete' : 'incomplete',
       ...(digitPlus ? { evaluation: digitPlus.score(run) } : {}),
     });
   } catch (error) {
     Object.assign(result, {
       status: 'incomplete',
-      error: String(error),
+      error: publicError(error, [profilePath, extensionURL, process.env.HOME]),
       inputs,
-      stdout: error.stdout?.toString() ?? stdout ?? null,
-      stderr: error.stderr?.toString() ?? null,
     });
     writeFileSync(file, `${JSON.stringify(result, null, 2)}\n`, { flag: 'wx' });
     console.error(`${variant}: incomplete run; ${result.error}; ${file}`);

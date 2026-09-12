@@ -1,29 +1,30 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
 import { rolldown } from 'rolldown';
+import { scratchDirectory } from '../../public-artifacts.mjs';
 
 const usage =
-  'Usage: node scripts/prompt-experiments/hyphen-digit/corpus/check-inputs.mjs\nReplays frozen development/holdout HTML in the attached pangu-eval session. Run outside the browser sandbox. No model inference.';
-if (process.argv.includes('--help')) {
+  'Usage: node scripts/prompt-experiments/hyphen-digit/corpus/check-inputs.mjs [--cases <corpus.json> ...]\nReplays supplied corpora, or the recorded development/holdout corpora, in the attached pangu-eval session. Run outside the browser sandbox. No model inference.';
+const { values } = parseArgs({ options: { cases: { type: 'string', multiple: true }, help: { type: 'boolean' } } });
+if (values.help) {
   console.log(usage);
   process.exit(0);
 }
-assert.equal(process.argv.length, 2, usage);
-
-const read = (name) => JSON.parse(readFileSync(new URL(name, import.meta.url), 'utf8'));
-const development = read('development.json');
-const holdout = read('holdout.json');
-assert.equal(development.role, 'development');
-assert.equal(holdout.role, 'holdout');
-const developmentSources = new Set(development.cases.map((kase) => kase.source));
-for (const kase of holdout.cases) {
-  assert(!developmentSources.has(kase.source), `Source appears in both roles: ${kase.source}`);
+const paths = values.cases ?? ['development.json', 'holdout.json'].map((name) => new URL(name, import.meta.url));
+const corpora = paths.map((path) => JSON.parse(readFileSync(path, 'utf8')));
+for (const corpus of corpora) {
+  assert(['development', 'holdout'].includes(corpus.role), 'Corpus role must be development or holdout');
 }
-const cases = [...development.cases, ...holdout.cases];
+const developmentSources = new Set(corpora.filter((corpus) => corpus.role === 'development').flatMap((corpus) => corpus.cases.map((kase) => kase.canonical_source ?? kase.source)));
+for (const kase of corpora.filter((corpus) => corpus.role === 'holdout').flatMap((corpus) => corpus.cases)) {
+  assert(!developmentSources.has(kase.canonical_source ?? kase.source), `Source appears in both roles: ${kase.source}`);
+}
+const cases = corpora.flatMap((corpus) => corpus.cases);
+assert(cases.length, 'Empty corpus; provide at least one verified case');
 assert.equal(new Set(cases.map((kase) => kase.id)).size, cases.length, 'Case IDs must be unique');
 for (const kase of cases) {
   assert.equal(kase.original_excerpt[kase.original_at], '-', `${kase.id}: original target moved`);
@@ -103,7 +104,7 @@ async function replay(page, bundle, cases) {
             if (node.data !== kase.expected_spacing) {
               throw new Error(`${kase.id}: production late fix differs from recorded full-excerpt spacing`);
             }
-            if (kase.source.includes('electrolux.com.tw')) {
+            if (kase.id === 'real-development-08') {
               const authored = kase.original_excerpt.split('。', 1)[0];
               if (!authored.includes('攝氏 -18 度以下')) {
                 throw new Error(`${kase.id}: authored-space source excerpt changed`);
@@ -123,9 +124,9 @@ async function replay(page, bundle, cases) {
   }
 }
 
-const temporary = mkdtempSync(join(tmpdir(), 'pangu-hyphen-inputs-'));
+const root = fileURLToPath(new URL('../../../../', import.meta.url));
+const temporary = scratchDirectory(root, 'pangu-hyphen-inputs-');
 try {
-  const root = fileURLToPath(new URL('../../../../', import.meta.url));
   const entry = join(temporary, 'entry.ts');
   writeFileSync(
     entry,
@@ -170,13 +171,8 @@ try {
       `${kase.id}: production routing differs from the frozen input`,
     );
   }
-  assert(
-    results.some((result) => result.authoredSpaceExcluded === true),
-    'Author-written Electrolux spaces must remain excluded',
-  );
-  console.log(
-    `Verified ${development.cases.length} development and ${holdout.cases.length} holdout inputs, complete target annotations, individual and combined production spacing, disjoint source pages, and authored-space exclusion.`,
-  );
+  assert(!cases.some((kase) => kase.id === 'real-development-08') || results.some((result) => result.authoredSpaceExcluded === true), 'Author-written Electrolux spaces must remain excluded');
+  console.log(`Verified ${cases.length} inputs, complete target annotations, individual and combined production spacing, disjoint source pages, and authored-space exclusion.`);
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }

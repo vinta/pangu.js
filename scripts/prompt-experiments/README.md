@@ -1,22 +1,16 @@
 # Prompt experiments
 
-For a new experiment, start with [the real-text workflow](../../docs/research/2026-09-11-shape-prompt-improvement.md), current production code, and verified corpus snapshots. Develop candidates from fresh baseline measurements and diagnostics. Keep prior reports, candidate explanations, and model outputs outside the new round, including copies in Git history, temporary reports, previous sessions, or memories.
+Invoke `$prompt-experiments` in Codex, or follow the [prompt experiment skill](../../.agents/skills/prompt-experiments/SKILL.md). It owns the real-source workflow, independent-round rules, and acceptance gates. This README covers commands.
 
-NEVER use fabricated text for experiments or prompt improvement. Every source passage in an input, example, or diagnostic must have verified provenance. Preserve authored text and production context. Keep disputed meanings unscored.
+## Setup
 
-The runner uses the installed extension worker to call Gemini Nano. It requires Node 22.18+ and `playwright-cli` on PATH. The model must already be available; the runner does not download it.
+Follow [machine setup](../../.agents/skills/prompt-experiments/references/setup.md) to install dependencies, load the extension, provision the model, and attach `pangu-eval`. Use Node 22.18+ and `playwright-cli` on `PATH`.
 
-## Browser connection
-
-Read ignored `AGENTS.local.md` for the intended Chrome Beta profile, debugging endpoint, extension ID, and local paths. Verify current state before reusing those settings. Keep personal identifiers out of tracked files.
-
-Use `playwright-cli list` to check the existing `pangu-eval` session. Attach to the configured debugging endpoint only if needed. The runner checks the Chrome profile name and verifies its actual path through a tab created by the extension. Browser launches and replay checks on macOS run outside the execution sandbox.
-
-Set `PANGU_EXTENSION_ID`, `PANGU_CHROME_PROFILE_PATH`, and `PANGU_CHROME_PROFILE_NAME` from the verified local settings. Verify the unpacked extension's source checkout before any shipping integration check.
+Connection settings are optional and local. Copy [`.env.example`](.env.example) to `.env.local` after checking it is ignored and untracked. Supply settings through Node's `--env-file` support, exported environment variables, or the sweep's explicit profile/extension flags. `AGENTS.local.md` is optional personal guidance.
 
 ## Run
 
-Run commands from the repository root. Hyphen-digit requires an explicit `--cases` file and has no legacy corpus fallback. Its source records live in `hyphen-digit/corpus/`; the corpus contains 21 development and 8 holdout targets. The completed round evaluated all 8 holdouts; obtain fresh holdouts before another qualification round. Validate saved source hashes and replay production inputs locally. Fetch sources again only under the workflow’s [source-verification rules](../../docs/research/2026-09-11-shape-prompt-improvement.md#1-establish-the-real-input-contract).
+Run commands from the repository root. Hyphen-digit requires an explicit `--cases` file and has no legacy corpus fallback. Its source records live in `hyphen-digit/corpus/`; the corpus contains 21 development and 8 holdout targets. The completed round evaluated all 8 holdouts; obtain fresh holdouts before another qualification round. Validate saved source hashes and replay production inputs locally. Fetch sources again only under the workflow’s [source-verification rules](../../.agents/skills/prompt-experiments/references/sources.md).
 
 ```bash
 # Validate the retained source records and render shipping without a browser.
@@ -26,12 +20,32 @@ node scripts/prompt-experiments/sweep.mjs --experiment hyphen-digit --cases scri
 node scripts/prompt-experiments/hyphen-digit/corpus/check-inputs.mjs
 
 # Measure shipping in the new execution session; every output directory must be new.
-node scripts/prompt-experiments/sweep.mjs --experiment hyphen-digit --cases scripts/prompt-experiments/hyphen-digit/corpus/development.json --extension-id "$PANGU_EXTENSION_ID" --profile-path "$PANGU_CHROME_PROFILE_PATH" --profile-name "$PANGU_CHROME_PROFILE_NAME" --out scripts/prompt-experiments/hyphen-digit/results/new-baseline shipping
+node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --experiment hyphen-digit --cases scripts/prompt-experiments/hyphen-digit/corpus/development.json --out scripts/prompt-experiments/hyphen-digit/results/new-baseline shipping
 ```
 
 `shipping` imports `hyphenDigitPrompt` from the current production source. The installed worker provides the execution context; the sweep uses its own model sessions. Freeze the shipping bytes before measurement and keep them fixed while comparing candidates.
 
-The hyphen registry retains the qualified `real-r1-semantic` candidate. Add another candidate only after the new baseline and real diagnostics justify its hypothesis. Give each measured version a distinct ID and preserve its rendered bytes. Any prompt examples must reference verified real records and their source pages must be excluded from scored cases.
+For an independent round, use `--prompts <module>` with a new module exporting `PROMPTS`. This avoids loading historical candidates. `shipping` always comes from current production and cannot be overridden.
+
+After fresh diagnostics justify a candidate, create `scripts/prompt-experiments/hyphen-digit/new-round-prompts.mjs`. Each entry has `system`, `build(kase)`, and optional `omitResponseConstraintInput`. For an initial wiring check, a copy of the baseline can use this interface:
+
+```javascript
+import { hyphenDigitPrompt } from '../../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-prompt.ts';
+
+export const PROMPTS = {
+  'control-copy': {
+    system: hyphenDigitPrompt.systemPrompt,
+    build: (kase) => hyphenDigitPrompt.buildQuestion(kase.input, kase.at),
+  },
+};
+```
+
+A copied control tests the execution path; it is not an improvement candidate. Freeze a distinct variant ID and the measured prompt bytes after making the justified change.
+
+```bash
+# Matched invocation using only the new round's definitions and current shipping.
+node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases scripts/prompt-experiments/hyphen-digit/corpus/development.json --prompts scripts/prompt-experiments/hyphen-digit/new-round-prompts.mjs --out scripts/prompt-experiments/hyphen-digit/results/new-comparison shipping control-copy
+```
 
 For the separate digit-plus experiment, use `--experiment digit-plus`; its interface is documented in [digit-plus/README.md](digit-plus/README.md). That experiment's historical results are outside the hyphen round and must not guide it.
 
@@ -41,18 +55,45 @@ The runner records labels, raw answers, errors, timings, and actual case orders.
 
 A case passes only when every expected answer is correct and has no error. Missing answers, skips, and incomplete runs fail. Diagnostic output is separate from accuracy: use `--diagnostics <case IDs>` with `--orders 1 --repeats 1` on development cases only. Never run diagnostics on holdout.
 
-`--require-perfect` fails if any scored case fails. The new experiment's paired no-regression gate is different: compare baseline and candidate per case under the declared protocol. Label outputs alone do not establish final spacing or shipping integration. Complete the spacing annotations and production checks in the workflow’s [acceptance gates](../../docs/research/2026-09-11-shape-prompt-improvement.md#acceptance-gates) before accepting a candidate.
+`--require-perfect` fails if any scored case fails. The new experiment's paired no-regression gate is different: compare baseline and candidate per case under the declared protocol. Label outputs alone do not establish final spacing or shipping integration. Complete the spacing annotations and production checks in the workflow’s [acceptance gates](../../.agents/skills/prompt-experiments/SKILL.md#acceptance-gates) before accepting a candidate.
 
 When finished, disconnect with `playwright-cli -s=pangu-eval detach`.
 
 ## Runner tests
 
 ```bash
-npx vitest run scripts/prompt-experiments/sweep.test.ts
+npx vitest run --exclude '**/tmp/**' scripts/prompt-experiments/sweep.test.ts scripts/prompt-experiments/hyphen-digit/paired-gates.test.ts
 ```
 
 These tests use mocked model responses and require no browser. They run separately from `npm test` and are outside the typed ESLint scope.
 
+## Collect and replay a new source
+
+Read the skill's [source collection rules](../../.agents/skills/prompt-experiments/references/sources.md) and [artifact rules](../../.agents/skills/prompt-experiments/references/artifacts.md) before capture. Select a public passage, annotate all eligible targets, and prepare a reviewed corpus with exact source context. Disable Pangu and verify its switch before loading source pages.
+
+```bash
+# Verify a reviewed new corpus against the live source; output must be a new directory.
+node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/hyphen-digit/results/20260911-round1/collect-sources.mjs --cases scripts/prompt-experiments/hyphen-digit/corpus/new-development.json --out scripts/prompt-experiments/hyphen-digit/results/new-sources
+
+# Replay its production inputs, target edits, and combined spacing without inference.
+node scripts/prompt-experiments/hyphen-digit/corpus/check-inputs.mjs --cases scripts/prompt-experiments/hyphen-digit/corpus/new-development.json
+```
+
+These paths describe files you create for the new round. Collection verifies source text; annotation, exposure, role assignment, and choosing the smallest faithful fixture still require judgment.
+
+## New round helpers
+
+For a new round, write its own protocol with the fields in [artifact rules](../../.agents/skills/prompt-experiments/references/artifacts.md#round-record). Reuse `hyphen-digit/paired-gates.mjs`'s `evaluatePaired({ phase, cases, comparisons, exampleSources, editsForLabel, applyTextEdits })`. Each comparison is `{ baseline, candidate }` from the two result JSON files. Supply current production `hyphenDigit.edits({ index: kase.settled_index }, label)` and `applyTextEdits`; bundle their TypeScript imports with the installed `rolldown` as the existing replay helper does.
+
+If adapting a recorded-round gate/integration helper, replace its round/corpus paths, baseline and candidate locks, variant IDs, count assumptions, and prompt-question lookup with the new round's frozen values. Validate hashes, options, labels and questions before scoring. Keep production spacing functions and `evaluatePaired` unchanged. For integration, use the current extension message entry point in `browser-extensions/chrome/src/ai-spacing/messages.ts` and `service-worker.ts`, reset its sessions/caches between matched runs, and record fresh replies plus individual/combined production edits. Do not run a historical helper against new-round output without those adaptations.
+
 ## Historical review only
 
 The completed [hyphen-digit report](hyphen-digit/results/20260911-round1/REPORT.md) and [frozen protocol](hyphen-digit/results/20260911-round1/protocol.json) document the finished round. Open them when reviewing that round; do not use them to select candidates for an independent experiment.
+
+The completed round's `freeze.mjs`, `gate.mjs`, `verify-lock.mjs`, and `integration.mjs` keep its fixed paths, candidate IDs, protocol, and coverage assumptions. They are recorded-round tools. Inspect those assumptions before reuse. The collection helper accepts explicit corpus/output paths; the production replay helper accepts `--cases`.
+
+```bash
+# Verify the completed round against retained public evidence.
+node scripts/prompt-experiments/hyphen-digit/results/20260911-round1/verify-lock.mjs --integrated
+```

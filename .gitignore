@@ -18,6 +18,11 @@ playwright-report/
 # Environment files
 .env
 .env.*
+!/scripts/prompt-experiments/.env.example
+
+# Local experiment setup and raw captures
+/AGENTS.local.md
+/tmp/
 
 # Examples
 examples/package-lock.json
