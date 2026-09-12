@@ -89,7 +89,7 @@ Run from the repository root with the dependency and Chrome Beta setup in the [c
 }
 ```
 
-The blob ID identifies the merged shared corpus, independently of the original code revision above. The merge is currently uncommitted. Until committed, use the current corpus only when its hash matches; after committing, Git can restore that exact blob even if the corpus changes.
+The blob ID identifies the merged shared corpus, independently of the original code revision above. The rerun command uses the current corpus when its hash matches; otherwise, Git restores the recorded version.
 
 Prepare both selections below. The command reads only the recorded corpus version, preserves case order, and excludes whole example pages. It writes disposable inputs to a fresh ignored directory.
 
