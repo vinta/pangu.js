@@ -39,7 +39,7 @@ For an existing shape, keep shipping as the control; for a new shape, start with
 
 Measure a fresh shipping baseline in each new round, even when source snapshots are reused. Use corpus order and a recorded seeded shuffle, using 1 attempt per target per order. If no development failures remain, collect more verified coverage or finish without a prompt change.
 
-Inspect recorded errors, misses by meaning, and unstable cases. For representative development failures, run separate diagnostic conversations: ask the model to interpret or translate the original sentence, identify the target symbol, and explain which label fits. Use these answers to generate falsifiable hypotheses. Explanations after a wrong answer may be rationalizations.
+Inspect recorded errors, misses by meaning, and unstable cases. For representative development failures, run the sweep's diagnostics mode (`--diagnostics`, 1 order, 1 attempt, development corpus only): after the classification answer, the same turn asks the corpus's diagnostic questions, which have the model translate the original sentence, identify the target symbol, and explain which label fits. Diagnostic output is not accuracy evidence. Use these answers to generate falsifiable hypotheses. Explanations after a wrong answer may be rationalizations.
 
 **Done when:** a saved baseline records whether the failure reproduces, and each proposed change has a prediction that an isolated experiment can confirm or reject.
 
@@ -61,7 +61,7 @@ Only after confirmation passes, evaluate that candidate and shipping on holdout 
 
 ## 6. Verify and report results
 
-Recompute the paired gates from saved answers and verify individual-target and combined-excerpt spacing through the existing production edit functions. Check that recorded prompts, rendered questions, labels, API options, orders, and attempt counts match the frozen protocol. Save the verification outputs alongside the raw results.
+Recompute the paired gates from saved answers and verify individual-target and combined-excerpt spacing through the existing production edit functions. The paired gate helper covers hyphen-digit only; for digit-plus, compute the same gates from the saved result JSON. Check that recorded prompts, rendered questions, labels, API options, orders, and attempt counts match the frozen protocol. Save the verification outputs alongside the raw results.
 
 Report the hypothesis, baseline/candidate comparison, each phase's pass, fail, incomplete, or not-run status, remaining failures, and coverage limits. Link the exact candidate, protocol, and result artifacts. Report label accuracy and spacing accuracy separately: different labels can produce the same edit. State that applying the candidate and verifying its integration into the extension remain outside this experiment.
 
@@ -74,9 +74,9 @@ A correct attempt has no error, returns the expected label, and produces expecte
 | Phase | Required result |
 | --- | --- |
 | Preflight | Every model input/example has verified real provenance and production context; role separation passes; no unresolved labels in scored sets |
-| Screening | Candidate preserves every baseline-passing case and fixes at least one baseline-failing case outside its example source pages; no candidate inference errors |
-| Confirmation | The same rule holds independently in both fresh runs, and at least one same scored case is a stable improvement in both; no candidate inference errors |
-| Holdout | Candidate preserves every baseline-passing case and has at least as many passing cases as baseline; no candidate inference errors; a new improvement is not required |
+| Screening | Candidate preserves every baseline-passing case and fixes at least one baseline-failing case outside its example source pages; no inference errors in either run |
+| Confirmation | The same rule holds independently in both fresh runs, and at least one same scored case is a stable improvement in both; no inference errors in either run |
+| Holdout | Candidate preserves every baseline-passing case and has at least as many passing cases as baseline; no inference errors in either run; a new improvement is not required |
 
 For baseline-unstable cases, require candidate correct-attempt counts to be no lower in each matched run. Aggregate gains cannot offset a new case failure. List remaining failures and coverage gaps. Report target, sentence, page, and publisher counts separately; repeated answers are not independent source cases.
 
