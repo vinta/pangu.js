@@ -281,7 +281,7 @@ class PopupController {
       // The button only shows in blacklist mode, and the pattern is built from an already-validated tab URL, so no match-pattern validation here
       const settings = await getSettings();
       if (settings.blacklist.includes(domainPattern)) {
-        this.showMessage(chrome.i18n.getMessage('already_in_blacklist'), 'info', 1000 * 3);
+        this.showMessage(chrome.i18n.getMessage('already_in_list'), 'info', 1000 * 3);
         return;
       }
       await updateSettings({ blacklist: [...settings.blacklist, domainPattern] });

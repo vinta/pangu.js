@@ -338,7 +338,7 @@ class OptionsController {
 
     if (outcome === 'duplicate') {
       this.isAddingUrl = true;
-      alert(chrome.i18n.getMessage('already_in_blacklist'));
+      alert(chrome.i18n.getMessage('already_in_list'));
     }
   }
 
@@ -388,7 +388,7 @@ class OptionsController {
 
     if (outcome === 'duplicate') {
       this.editingUrls.set(index, newUrl);
-      alert(chrome.i18n.getMessage('already_in_blacklist'));
+      alert(chrome.i18n.getMessage('already_in_list'));
       return;
     }
 
