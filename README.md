@@ -58,7 +58,9 @@ The same symbol can mean totally different things in different contexts:
   - `女朋友今天的氣溫是-273.15度` is a negative number => `女朋友今天的氣溫是 -273.15 度`
   - `博客來-4% 法則：讓錢活得比你久的提領金律` is a separator => `博客來 - 4% 法則：讓錢活得比你久的提領金律`
 
-Regex rules can't distinguish symbols like these, so the extension asks an LLM. It uses Chrome's built-in [Prompt API](https://developer.chrome.com/docs/ai/prompt-api), which runs Gemini Nano on your device. Fully offline, nothing leaves your machine. Needs Chrome 138+ and a one-time model download, started from the options page. It's free, btw.
+Regex rules can't distinguish symbols like these, so the extension asks an LLM. It uses Chrome's built-in [Prompt API](https://developer.chrome.com/docs/ai/prompt-api), which runs Gemini Nano on your device. Fully offline, nothing leaves your machine. Needs a one-time model download from the options page. It's free, btw.
+
+GPT-6 Astra writes the prompts. It runs the [prompt-experiments](.agents/skills/prompt-experiments/SKILL.md) skill: propose a change, then test it against the real Gemini Nano in Chrome. When a case fails, it interviews Gemini Nano for clues. When progress stalls, it searches online for new approaches to test. Prompts for a model, tuned by a bigger model, judged on real data.
 
 ## JavaScript Library
 
