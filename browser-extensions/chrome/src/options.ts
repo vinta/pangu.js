@@ -337,8 +337,8 @@ class OptionsController {
     }
 
     if (outcome === 'duplicate') {
-      // The entry is already visible in the list, so just close the input
-      await this.renderUrlList();
+      this.isAddingUrl = true;
+      alert(chrome.i18n.getMessage('already_in_blacklist'));
     }
   }
 
