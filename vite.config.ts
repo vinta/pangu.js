@@ -7,7 +7,8 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     minify: false,
-    target: 'es2022',
+    // Support line for the npm and CDN builds. The extension has its own floor in browser-extensions/, matched to its manifest
+    target: 'baseline-widely-available',
   },
   environments: {
     sharedEsm: {

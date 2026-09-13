@@ -136,13 +136,9 @@ class OptionsController {
 
     const ruleSection = document.getElementById('filter_mode_section') as HTMLElement;
     const clickMessage = document.getElementById('spacing_when_click_msg') as HTMLElement;
-    if (current.spacing_mode === 'spacing_when_load') {
-      ruleSection.style.display = 'block';
-      clickMessage.style.display = 'none';
-    } else {
-      ruleSection.style.display = 'none';
-      clickMessage.style.display = 'block';
-    }
+    const isSpacingWhenLoad = current.spacing_mode === 'spacing_when_load';
+    ruleSection.hidden = !isSpacingWhenLoad;
+    clickMessage.hidden = isSpacingWhenLoad;
   }
 
   private async renderFilterMode() {
@@ -228,7 +224,7 @@ class OptionsController {
     }
 
     if (this.isAddingUrl && addButton.parentElement) {
-      addButton.parentElement.style.display = 'none';
+      addButton.parentElement.hidden = true;
     }
 
     container.replaceChildren(listFragment);
@@ -252,7 +248,7 @@ class OptionsController {
     checkbox.disabled = !isSupported;
     checkbox.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
     const notSupportedMessage = document.getElementById('text-autospace-not-supported-msg') as HTMLElement;
-    notSupportedMessage.style.display = isSupported ? 'none' : 'block';
+    notSupportedMessage.hidden = isSupported;
   }
 
   private async renderAiSpacingCheckbox() {
@@ -312,7 +308,9 @@ class OptionsController {
     await playSound(newFilterMode === 'blacklist' ? 'Shouryuuken' : 'Hadouken');
   }
 
+  // One open editor at a time: opening a row or the add input closes the other, unsaved text and all
   private showAddUrlInput() {
+    this.editingUrls.clear();
     this.isAddingUrl = true;
     void this.renderUrlList();
   }
@@ -339,8 +337,8 @@ class OptionsController {
     }
 
     if (outcome === 'duplicate') {
-      // The entry is already visible in the list, so just close the input
-      await this.renderUrlList();
+      this.isAddingUrl = true;
+      alert(chrome.i18n.getMessage('already_in_list'));
     }
   }
 
@@ -351,6 +349,8 @@ class OptionsController {
 
   private async startEditingUrl(index: number) {
     const settings = await getSettings();
+    this.editingUrls.clear();
+    this.isAddingUrl = false;
     this.editingUrls.set(index, settings[settings.filter_mode][index]!);
     await this.renderUrlList();
 
@@ -371,7 +371,7 @@ class OptionsController {
 
     // Optimistically leave edit mode: on 'saved' the subscription re-renders with the row already back in display state
     this.editingUrls.delete(index);
-    let outcome: 'saved' | 'invalid';
+    let outcome: 'saved' | 'unchanged' | 'duplicate' | 'invalid';
     try {
       outcome = newUrl ? await this.editActiveList(index, newUrl) : 'invalid';
     } catch (error) {
@@ -383,6 +383,18 @@ class OptionsController {
     if (outcome === 'invalid') {
       this.editingUrls.set(index, newUrl);
       alert(chrome.i18n.getMessage('error_invalid_match_pattern'));
+      return;
+    }
+
+    if (outcome === 'duplicate') {
+      this.editingUrls.set(index, newUrl);
+      alert(chrome.i18n.getMessage('already_in_list'));
+      return;
+    }
+
+    if (outcome === 'unchanged') {
+      // A same-value write fires no onChanged echo, so the row would stay in edit mode
+      await this.renderUrlList();
     }
   }
 
@@ -431,6 +443,12 @@ class OptionsController {
     const key = settings.filter_mode;
     if (index < 0 || index >= settings[key].length) {
       return 'invalid' as const;
+    }
+    if (settings[key][index] === pattern) {
+      return 'unchanged' as const;
+    }
+    if (settings[key].includes(pattern)) {
+      return 'duplicate' as const;
     }
     const urls = [...settings[key]];
     urls[index] = pattern;

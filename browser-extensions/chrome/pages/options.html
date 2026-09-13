@@ -38,7 +38,7 @@
           <div id="spacing_mode_section" class="card">
             <div class="form-group">
               <button id="spacing_mode_btn" class="btn btn-primary-black btn-lg btn-block" data-i18n="spacing_when_load">網頁載入後自動召喚空格之神</button>
-              <p class="form-help-text mt-4" id="spacing_when_click_msg" style="display: none" data-i18n="spacing_when_click_msg">你可以按右上角那個黑人頭來召喚空格之神！</p>
+              <p class="form-help-text mt-4" id="spacing_when_click_msg" hidden data-i18n="spacing_when_click_msg">你可以按右上角那個黑人頭來召喚空格之神！</p>
             </div>
           </div>
           <div id="filter_mode_section" class="card mt-4">
@@ -48,7 +48,7 @@
             <div class="url-list-section">
               <!-- Template elements (hidden by default) -->
               <template id="url-display-template">
-                <li class="animate-repeat">
+                <li>
                   <input type="text" class="url-display-input" readonly />
                   <button class="btn btn-sm remove-url-btn"></button>
                 </li>
@@ -118,7 +118,7 @@
                 純視覺效果，不會插入任何空白字元，所以複製的文字不受影響。會套用到所有網站，無視黑名單和白名單。
               </p>
               <p class="form-help-text" data-i18n="text_autospace_limitations">但是缺點是不支援符號而且那個間距比真正的空格窄很多，建議還是跟空格之神搭配使用。</p>
-              <p class="form-help-text" id="text-autospace-not-supported-msg" style="display: none" data-i18n="text_autospace_not_supported">你的瀏覽器不支援這個功能，需要 Chrome v140 以上版本。</p>
+              <p class="form-help-text" id="text-autospace-not-supported-msg" hidden data-i18n="text_autospace_not_supported">你的瀏覽器不支援這個功能，需要 Chrome v140 以上版本。</p>
             </div>
           </div>
           <div class="card mt-4">

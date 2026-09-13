@@ -95,6 +95,7 @@
     "@types/dom-chromium-ai": "0.0.17",
     "@types/node": "20.19.43",
     "eslint": "10.7.0",
+    "eslint-plugin-baseline-js": "0.7.1",
     "prettier": "3.9.6",
     "prettier-plugin-organize-imports": "4.3.0",
     "publint": "0.3.22",

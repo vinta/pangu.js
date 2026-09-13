@@ -1,3 +1,4 @@
+import baselineJs from 'eslint-plugin-baseline-js';
 import { defineConfig } from 'eslint/config';
 import { builtinModules } from 'node:module';
 import tseslint from 'typescript-eslint';
@@ -69,6 +70,30 @@ export default defineConfig(
       '@typescript-eslint/prefer-for-of': 'error',
       '@typescript-eslint/prefer-optional-chain': 'error',
       '@typescript-eslint/require-await': 'off',
+    },
+  },
+  {
+    // Everything the Chrome extension ships, so a web API or JS builtin must exist in the extension's minimum Chrome version. The year mirrors minimum_chrome_version
+    // in browser-extensions/chrome/manifest.json (Chrome 102 is 2022-05); bump them together
+    files: ['src/shared/**/*.ts', 'src/browser/**/*.ts', 'browser-extensions/chrome/src/**/*.ts'],
+    plugins: { 'baseline-js': baselineJs },
+    rules: {
+      'baseline-js/use-baseline': [
+        'error',
+        {
+          available: 2022,
+          includeWebApis: { preset: 'type-aware' },
+          includeJsBuiltins: { preset: 'type-aware' },
+          ignoreFeatures: [
+            // Safari lacks requestIdleCallback; BrowserPangu.schedule() falls back to synchronous spacing after a typeof check
+            'requestidlecallback',
+            // Chrome-only APIs the extension uses on purpose: Prompt API (runtime-gated), Navigation API (Chrome 102), URLPattern (Chrome 95)
+            'languagemodel',
+            'navigation',
+            'urlpattern',
+          ],
+        },
+      ],
     },
   },
   {

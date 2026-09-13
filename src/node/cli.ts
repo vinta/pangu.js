@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { text } from 'node:stream/consumers';
 import pangu from './index.js';
 
 const usage = `
@@ -39,12 +40,7 @@ function wantsStdin(arg: string | undefined) {
 // Reading has to be async: readFileSync(0) throws EAGAIN once a pipe carries more than a buffer or two. console.log() puts a trailing newline back, so dropping one here passes piped
 // input through byte for byte
 async function readStdin() {
-  process.stdin.setEncoding('utf8');
-  const chunks: string[] = [];
-  for await (const chunk of process.stdin) {
-    chunks.push(String(chunk));
-  }
-  return chunks.join('').replace(/\n$/, '');
+  return (await text(process.stdin)).replace(/\n$/, '');
 }
 
 function spaceTextPrinted(text: string | undefined) {

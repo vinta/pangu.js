@@ -246,7 +246,7 @@ class PopupController {
 
     notificationMessage.textContent = text;
     notificationElement.className = `notification ${type}`;
-    notificationElement.style.display = 'block';
+    notificationElement.hidden = false;
 
     this.messageTimeoutId = window.setTimeout(() => {
       this.hideNotification();
@@ -254,7 +254,7 @@ class PopupController {
   }
 
   private hideNotification() {
-    document.getElementById('notification')!.style.display = 'none';
+    document.getElementById('notification')!.hidden = true;
 
     stopSound();
 
@@ -281,7 +281,7 @@ class PopupController {
       // The button only shows in blacklist mode, and the pattern is built from an already-validated tab URL, so no match-pattern validation here
       const settings = await getSettings();
       if (settings.blacklist.includes(domainPattern)) {
-        this.showMessage(chrome.i18n.getMessage('already_in_blacklist'), 'info', 1000 * 3);
+        this.showMessage(chrome.i18n.getMessage('already_in_list'), 'info', 1000 * 3);
         return;
       }
       await updateSettings({ blacklist: [...settings.blacklist, domainPattern] });

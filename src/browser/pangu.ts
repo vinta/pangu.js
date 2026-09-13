@@ -294,7 +294,7 @@ export class BrowserPangu extends Pangu {
   // text the page pass already settled
   private withNeighborTextNodes(textNodes: Text[]) {
     const firstTextNode = textNodes[0];
-    const lastTextNode = textNodes[textNodes.length - 1];
+    const lastTextNode = textNodes.at(-1);
     if (!firstTextNode || !lastTextNode) {
       return textNodes;
     }

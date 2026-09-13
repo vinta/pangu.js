@@ -11,7 +11,6 @@
     "message": "空格之神",
     "description": ""
   },
-
   "popup_subtitle": {
     "message": "讓空格之神赦免他們不加空格的罪",
     "description": ""
@@ -64,11 +63,10 @@
     "message": "把這個網址加到黑名單",
     "description": ""
   },
-  "already_in_blacklist": {
+  "already_in_list": {
     "message": "已經加過了啦",
     "description": ""
   },
-
   "options_subtitle": {
     "message": "自動在網頁的中文和英文、數字、符號之間插入空白",
     "description": ""

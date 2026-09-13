@@ -1,5 +1,13 @@
 # Changelog
 
+## vX.Y.Z / xxxx-xx-xx
+
+### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+
+- 修正在設定頁編輯黑名單或白名單的網址時，內容沒改就按「好了」會沒反應的問題
+- 修正在設定頁把網址編輯成名單裡已經有的網址時會存成重複網址的問題
+- 設定頁一次只會有一列網址在編輯狀態，點其他網址或「新增網址」會關掉原本那一列
+
 ## v10.1.0 / 2026-09-13
 
 ### [pangu.js](https://www.npmjs.com/package/pangu)
@@ -50,14 +58,21 @@
 
 ## v9.1.1 / 2026-08-31
 
+### [pangu.js](https://www.npmjs.com/package/pangu)
+
 - 修正右括號 `)`、`]`、`}` 後面緊接著 `-` 再接中文時，`-` 前面會漏加空格的問題（`*`、`=`、`&` 也一樣）
 - 修正中文後面緊接著 `-` 再接數字時，`-` 不再預設當成負號，而是預設當成分隔符號
 - 修正 `dist/browser/pangu.js` 會 import 其他檔案的問題，現在是獨立的單一檔案了，可以直接用 `<script type="module">` 載入
   - v8.1.0 到 v9.1.0 都有這個問題，在只複製 `dist/browser/` 目錄的 CDN 上（例如 cdnjs）會因為找不到檔案而載入失敗
+
+### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+
 - Chrome extension 支援的最低版本改成 Chrome 99
   - 為了用 Promise 版的 `chrome.tabs.sendMessage()`
 
 ## v9.1.0 / 2026-08-01
+
+### [pangu.js](https://www.npmjs.com/package/pangu)
 
 - CLI 的 `-v` 會在版本號前面加上 `pangu.js`，本來只印版本號
 - CLI 的 `-t`、`-f`、`-c` 不能再混用，同時給多個會出現錯誤訊息
@@ -69,6 +84,8 @@
 
 ## v9.0.0 / 2026-07-28
 
+### [pangu.js](https://www.npmjs.com/package/pangu)
+
 - 修正 `<wbr>` 這類元素把 `/` 兩邊拆成不同文字節點時，斜線前面會漏加空格的問題
 - 拿掉了 `package.json` 的 `module` 欄位
 - 拿掉了 `package.json` 的 `browser` 欄位
@@ -79,9 +96,13 @@
 
 ## v8.2.0 / 2026-07-26
 
+### [pangu.js](https://www.npmjs.com/package/pangu)
+
 - 修正引號的加空格規則，當引號的內容跨越換行時，不會再把引號外面本來就有的空格吃掉
 
 ## v8.1.0 / 2026-07-26
+
+### [pangu.js](https://www.npmjs.com/package/pangu)
 
 - 修正 `-` `*` `=` `<` `>` `_` `+` 這些符號的加空格規則，夾在半形字元中間時會跟兩邊黏成同一個詞，不會再被拆開
 - 修正 `+` 在字尾的加空格規則
@@ -91,15 +112,22 @@
 - 修正純文字中的 `<tag>` 現在會被當成一個詞來加空格，但是一般網頁中的 HTML 標籤不受影響
 - 修正文字節點的開頭或結尾是 `&nbsp;`、旁邊又緊接著連結之類的元素時，會多加一個半形空格的問題
 - 不再把單獨出現的 `&nbsp;` 改寫成半形空格，這是 v8.0.0 的行為，現在會原封不動保留你打的 `&nbsp;`，只在真的缺空格的地方補上空格
-- Chrome extension 的工具列圖示新增了 OFF 狀態，切到手動模式、或是目前網址被黑白名單排除時，圖示會換成頭戴紙袋的圖示
-- Chrome extension 會在所有網頁啟用瀏覽器原生的 [`text-autospace: normal;`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/text-autospace) 排版
-  - 預設啟用，可以在設定裡關掉
-  - 需要 Chrome v140 以上版本
 - `pangu/browser` 改成只提供 ESM，拿掉了 `require` 條件，`require('pangu/browser')` 會出現 `ERR_PACKAGE_PATH_NOT_EXPORTED`
   - 用 bundler 的話 `import` 照舊，不受影響
   - 在瀏覽器裡直接用 `<script>` 載入 UMD 檔案的方式也不受影響
 
+### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+
+- Chrome extension 的工具列圖示新增了 OFF 狀態，切到手動模式、或是目前網址被黑白名單排除時，圖示會換成頭戴紙袋的圖示
+- Chrome extension 會在所有網頁啟用瀏覽器原生的 [`text-autospace: normal;`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/text-autospace) 排版
+  - 預設啟用，可以在設定裡關掉
+  - 需要 Chrome v140 以上版本
+- Chrome extension 支援的最低版本改成 Chrome 96
+  - 為了用 `chrome.scripting.registerContentScripts()`
+
 ## v8.0.0 / 2026-07-19
+
+### [pangu.js](https://www.npmjs.com/package/pangu)
 
 - 各位觀眾！Paranoid Text Spacing 演算法 v8！
   - 修正有些網頁加空格會抖動的問題
@@ -110,23 +138,39 @@
   - 修正兩個變動的節點中間如果隔著沒變動的內容，不會再把它們誤判成相鄰節點而加錯空格
   - 修正連結被其他元素包住、後面又接著其他文字時，連結前後漏加空格的問題
   - 修正兩段文字中間本來就有空白時，不會再多加一個空格，之前隔著 `<a>` 這類元素、或空白被包在 `<span>` 這類元素裡時會看不到那個空白
-- 又一次史詩級性能提升！
+
+### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+
+- 再一次史詩級性能提升！
 
 ## v7.2.1 / 2026-03-02
 
+### [pangu.js](https://www.npmjs.com/package/pangu)
+
 - 修正在 CSS Grid 和 Flexbox 容器裡插入 `<pangu>` 元素會破壞排版的問題
+
+### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+
 - 移除 Chrome extension 的 `file://` host permission
 
 ## v7.2.0 / 2025-07-05
 
 - 趁末日前更新一下，不然以後就沒機會了
+
+### [pangu.js](https://www.npmjs.com/package/pangu)
+
 - 修正在 Google Calendar 會不小心在 CSS 隱藏元素與中文之間加空格的問題
 
 ## v7.0.0 / 2025-07-02
 
+### [pangu.js](https://www.npmjs.com/package/pangu)
+
 - 各位觀眾！Paranoid Text Spacing 演算法 v7 橫空出世！
   - 會自動判斷某些元素是不是被 CSS 隱藏來決定要不要加空格
   - 不會把半形的標點符號轉成全形了
+
+### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+
 - 史詩級性能提升！
   - 把 XPath 換成 [TreeWalker](https://developer.mozilla.org/en-US/docs/Web/API/TreeWalker)，快他媽 5 倍！
   - 比較慢的操作都丟到 [requestIdleCallback()](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback)，內容太多的網站終於不卡了！
