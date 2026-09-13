@@ -1,5 +1,11 @@
 # Changelog
 
+## vX.Y.Z / xxxx-xx-xx
+
+### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+
+- 修正在設定頁編輯黑名單或白名單的網址時，內容沒改就按「好了」會沒反應的問題
+
 ## v10.1.0 / 2026-09-13
 
 ### [pangu.js](https://www.npmjs.com/package/pangu)
