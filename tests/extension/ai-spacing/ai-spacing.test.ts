@@ -101,6 +101,7 @@ describe('AI spacing results', () => {
     const { spaceTextWithAi } = await loadAiSpacing();
 
     expect(await spaceTextWithAi('氣溫是-5度左右')).toBe('氣溫是 -5 度左右');
+    expect(await spaceTextWithAi('女朋友今天的氣溫是-273.15度')).toBe('女朋友今天的氣溫是 -273.15 度');
     expect(await spaceTextWithAi('從-5到-3度')).toBe('從 -5 到 -3 度');
     expect(await spaceTextWithAi('Nasdaq-100本週下跌-13.44%')).toBe('Nasdaq-100 本週下跌 -13.44%');
   });
