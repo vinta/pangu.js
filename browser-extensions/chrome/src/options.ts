@@ -308,7 +308,9 @@ class OptionsController {
     await playSound(newFilterMode === 'blacklist' ? 'Shouryuuken' : 'Hadouken');
   }
 
+  // One open editor at a time: opening a row or the add input closes the other, unsaved text and all
   private showAddUrlInput() {
+    this.editingUrls.clear();
     this.isAddingUrl = true;
     void this.renderUrlList();
   }
@@ -347,6 +349,8 @@ class OptionsController {
 
   private async startEditingUrl(index: number) {
     const settings = await getSettings();
+    this.editingUrls.clear();
+    this.isAddingUrl = false;
     this.editingUrls.set(index, settings[settings.filter_mode][index]!);
     await this.renderUrlList();
 
