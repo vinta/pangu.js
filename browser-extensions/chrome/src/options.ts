@@ -382,8 +382,14 @@ class OptionsController {
       return;
     }
 
-    if (outcome === 'unchanged' || outcome === 'duplicate') {
-      // Nothing was written, so no onChanged echo re-renders: close the row ourselves. A duplicate keeps the row's old value, the pattern is already in the list
+    if (outcome === 'duplicate') {
+      this.editingUrls.set(index, newUrl);
+      alert(chrome.i18n.getMessage('already_in_blacklist'));
+      return;
+    }
+
+    if (outcome === 'unchanged') {
+      // A same-value write fires no onChanged echo, so the row would stay in edit mode
       await this.renderUrlList();
     }
   }
