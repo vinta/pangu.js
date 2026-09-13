@@ -1,3 +1,4 @@
+import baselineJs from 'eslint-plugin-baseline-js';
 import { defineConfig } from 'eslint/config';
 import { builtinModules } from 'node:module';
 import tseslint from 'typescript-eslint';
@@ -69,6 +70,24 @@ export default defineConfig(
       '@typescript-eslint/prefer-for-of': 'error',
       '@typescript-eslint/prefer-optional-chain': 'error',
       '@typescript-eslint/require-await': 'off',
+    },
+  },
+  {
+    // src/shared and src/browser also ship inside the Chrome extension, so a web API or JS builtin there must exist in the extension's minimum Chrome version. The year mirrors
+    // minimum_chrome_version in browser-extensions/chrome/manifest.json (Chrome 102 is 2022-05); bump them together
+    files: ['src/shared/**/*.ts', 'src/browser/**/*.ts'],
+    plugins: { 'baseline-js': baselineJs },
+    rules: {
+      'baseline-js/use-baseline': [
+        'error',
+        {
+          available: 2022,
+          includeWebApis: { preset: 'type-aware' },
+          includeJsBuiltins: { preset: 'type-aware' },
+          // Safari lacks requestIdleCallback; BrowserPangu.schedule() falls back to synchronous spacing after a typeof check
+          ignoreFeatures: ['requestidlecallback'],
+        },
+      ],
     },
   },
   {
