@@ -7,7 +7,7 @@ const extensionRoot = import.meta.dirname;
 export default defineConfig({
   build: {
     outDir: resolve(extensionRoot, 'chrome/dist'),
-    target: 'chrome99',
+    target: 'chrome102',
     minify: false,
     sourcemap: true,
   },
