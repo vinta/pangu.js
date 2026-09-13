@@ -95,6 +95,8 @@
 - Chrome extension 會在所有網頁啟用瀏覽器原生的 [`text-autospace: normal;`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/text-autospace) 排版
   - 預設啟用，可以在設定裡關掉
   - 需要 Chrome v140 以上版本
+- Chrome extension 支援的最低版本改成 Chrome 96
+  - 為了用 `chrome.scripting.registerContentScripts()`
 - `pangu/browser` 改成只提供 ESM，拿掉了 `require` 條件，`require('pangu/browser')` 會出現 `ERR_PACKAGE_PATH_NOT_EXPORTED`
   - 用 bundler 的話 `import` 照舊，不受影響
   - 在瀏覽器裡直接用 `<script>` 載入 UMD 檔案的方式也不受影響
