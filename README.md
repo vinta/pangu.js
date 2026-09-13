@@ -43,7 +43,24 @@
   - [pangu.swift](https://github.com/X140Yu/pangu.Swift)
   - [pangu.skill](https://github.com/shihyuho/pangu.skill)
 
-## Usage
+## Chrome Extension
+
+Install [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd) and it spaces every page you browse. It also comes with the **AI Spacing** feature:
+
+### AI Spacing
+
+The same symbol can mean totally different things in different contexts:
+
+- For `+`:
+  - `這裡沒有18+的內容` means "or more" => `這裡沒有 18+ 的內容`
+  - `Switch 2+瑪利歐賽車世界同捆組` joins two things => `Switch 2 + 瑪利歐賽車世界同捆組`
+- For `-`:
+  - `女朋友今天的氣溫是-273.15度` is a negative number => `女朋友今天的氣溫是 -273.15 度`
+  - `博客來-4% 法則：讓錢活得比你久的提領金律` is a separator => `博客來 - 4% 法則：讓錢活得比你久的提領金律`
+
+Regex rules can't distinguish symbols like these, so the extension asks an LLM. It uses Chrome's built-in [Prompt API](https://developer.chrome.com/docs/ai/prompt-api), which runs Gemini Nano on your device. Fully offline, nothing leaves your machine. Needs Chrome 138+ and a one-time model download, started from the options page. It's free, btw.
+
+## JavaScript Library
 
 ```bash
 npm install pangu --save-exact
