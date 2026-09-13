@@ -246,7 +246,7 @@ class PopupController {
 
     notificationMessage.textContent = text;
     notificationElement.className = `notification ${type}`;
-    notificationElement.style.display = 'block';
+    notificationElement.hidden = false;
 
     this.messageTimeoutId = window.setTimeout(() => {
       this.hideNotification();
@@ -254,7 +254,7 @@ class PopupController {
   }
 
   private hideNotification() {
-    document.getElementById('notification')!.style.display = 'none';
+    document.getElementById('notification')!.hidden = true;
 
     stopSound();
 

@@ -136,13 +136,9 @@ class OptionsController {
 
     const ruleSection = document.getElementById('filter_mode_section') as HTMLElement;
     const clickMessage = document.getElementById('spacing_when_click_msg') as HTMLElement;
-    if (current.spacing_mode === 'spacing_when_load') {
-      ruleSection.style.display = 'block';
-      clickMessage.style.display = 'none';
-    } else {
-      ruleSection.style.display = 'none';
-      clickMessage.style.display = 'block';
-    }
+    const isSpacingWhenLoad = current.spacing_mode === 'spacing_when_load';
+    ruleSection.hidden = !isSpacingWhenLoad;
+    clickMessage.hidden = isSpacingWhenLoad;
   }
 
   private async renderFilterMode() {
@@ -228,7 +224,7 @@ class OptionsController {
     }
 
     if (this.isAddingUrl && addButton.parentElement) {
-      addButton.parentElement.style.display = 'none';
+      addButton.parentElement.hidden = true;
     }
 
     container.replaceChildren(listFragment);
@@ -252,7 +248,7 @@ class OptionsController {
     checkbox.disabled = !isSupported;
     checkbox.closest('.toggle')?.classList.toggle('toggle-disabled', !isSupported);
     const notSupportedMessage = document.getElementById('text-autospace-not-supported-msg') as HTMLElement;
-    notSupportedMessage.style.display = isSupported ? 'none' : 'block';
+    notSupportedMessage.hidden = isSupported;
   }
 
   private async renderAiSpacingCheckbox() {
