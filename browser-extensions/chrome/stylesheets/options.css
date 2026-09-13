@@ -345,22 +345,6 @@
   margin: 0;
 }
 
-/* Animation for list items */
-.animate-repeat {
-  animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .options-main {
