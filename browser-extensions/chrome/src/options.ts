@@ -158,8 +158,8 @@ class OptionsController {
     const listFragment = listTemplate.content.cloneNode(true) as DocumentFragment;
 
     const urlList = listFragment.querySelector('#url-list') as HTMLUListElement;
-    const addButton = listFragment.querySelector('#add-url-btn') as HTMLAnchorElement;
-    const restoreButton = listFragment.querySelector('#restore-defaults-btn') as HTMLAnchorElement;
+    const addButton = listFragment.querySelector('#add-url-btn') as HTMLButtonElement;
+    const restoreButton = listFragment.querySelector('#restore-defaults-btn') as HTMLButtonElement;
     const helpLink = listFragment.querySelector('#url-list-help a') as HTMLAnchorElement;
 
     addButton.textContent = chrome.i18n.getMessage('button_add_new_url');
