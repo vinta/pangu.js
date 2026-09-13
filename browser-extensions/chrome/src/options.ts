@@ -367,7 +367,7 @@ class OptionsController {
 
     // Optimistically leave edit mode: on 'saved' the subscription re-renders with the row already back in display state
     this.editingUrls.delete(index);
-    let outcome: 'saved' | 'unchanged' | 'invalid';
+    let outcome: 'saved' | 'unchanged' | 'duplicate' | 'invalid';
     try {
       outcome = newUrl ? await this.editActiveList(index, newUrl) : 'invalid';
     } catch (error) {
@@ -382,8 +382,8 @@ class OptionsController {
       return;
     }
 
-    if (outcome === 'unchanged') {
-      // A same-value write fires no onChanged echo, so the row would stay in edit mode
+    if (outcome === 'unchanged' || outcome === 'duplicate') {
+      // Nothing was written, so no onChanged echo re-renders: close the row ourselves. A duplicate keeps the row's old value, the pattern is already in the list
       await this.renderUrlList();
     }
   }
@@ -436,6 +436,9 @@ class OptionsController {
     }
     if (settings[key][index] === pattern) {
       return 'unchanged' as const;
+    }
+    if (settings[key].includes(pattern)) {
+      return 'duplicate' as const;
     }
     const urls = [...settings[key]];
     urls[index] = pattern;
