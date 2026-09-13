@@ -367,7 +367,7 @@ class OptionsController {
 
     // Optimistically leave edit mode: on 'saved' the subscription re-renders with the row already back in display state
     this.editingUrls.delete(index);
-    let outcome: 'saved' | 'invalid';
+    let outcome: 'saved' | 'unchanged' | 'invalid';
     try {
       outcome = newUrl ? await this.editActiveList(index, newUrl) : 'invalid';
     } catch (error) {
@@ -379,6 +379,12 @@ class OptionsController {
     if (outcome === 'invalid') {
       this.editingUrls.set(index, newUrl);
       alert(chrome.i18n.getMessage('error_invalid_match_pattern'));
+      return;
+    }
+
+    if (outcome === 'unchanged') {
+      // A same-value write fires no onChanged echo, so the row would stay in edit mode
+      await this.renderUrlList();
     }
   }
 
@@ -427,6 +433,9 @@ class OptionsController {
     const key = settings.filter_mode;
     if (index < 0 || index >= settings[key].length) {
       return 'invalid' as const;
+    }
+    if (settings[key][index] === pattern) {
+      return 'unchanged' as const;
     }
     const urls = [...settings[key]];
     urls[index] = pattern;
