@@ -1,6 +1,7 @@
 ---
 paths:
   - 'browser-extensions/chrome/**'
+  - 'src/browser/**'
 ---
 
 # Chrome Extension
