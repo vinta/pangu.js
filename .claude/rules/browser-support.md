@@ -8,6 +8,6 @@ A build target transpiles syntax only. An API or CSS feature must clear the floo
 | `browser-extensions/chrome/src/` | `minimum_chrome_version` in `browser-extensions/chrome/manifest.json`                                                                         |
 | `src/node/`                      | `engines.node` in `package.json`                                                                                                              |
 
-`eslint.config.js` enforces the `src/shared/` and `src/browser/` floor with `baseline-js/use-baseline`, whose `available` year mirrors `minimum_chrome_version`; a floor bump changes both. Extension-only code is out of its scope because it uses Chrome-only APIs on purpose.
+`eslint.config.js` enforces the extension floor on everything the extension ships with `baseline-js/use-baseline`, whose `available` year mirrors `minimum_chrome_version`; a floor bump changes both. The rule measures Baseline, not Chrome, so a Chrome-only API the extension adopts on purpose goes in `ignoreFeatures` by its web-features ID.
 
 Baseline status alone is not clearance: the extension floor is older than Baseline widely available, and the test browsers are current, so a too-new API passes every test and fails only on users' machines.
