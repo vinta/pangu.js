@@ -52,9 +52,9 @@ class OptionsController {
 
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
-      if (target.id === 'spacing_mode_btn') {
+      if (target.id === 'spacing-mode-btn') {
         this.toggleSpacingMode().catch(console.error);
-      } else if (target.id === 'filter_mode_btn') {
+      } else if (target.id === 'filter-mode-btn') {
         this.toggleFilterMode().catch(console.error);
       } else if (target.classList.contains('url-display-input')) {
         const index = parseInt(target.dataset.index || '0');
@@ -131,11 +131,11 @@ class OptionsController {
 
   private async renderSpacingMode() {
     const current = await getSettings();
-    const button = document.getElementById('spacing_mode_btn') as HTMLButtonElement;
+    const button = document.getElementById('spacing-mode-btn') as HTMLButtonElement;
     button.textContent = chrome.i18n.getMessage(current.spacing_mode);
 
-    const ruleSection = document.getElementById('filter_mode_section') as HTMLElement;
-    const clickMessage = document.getElementById('spacing_when_click_msg') as HTMLElement;
+    const ruleSection = document.getElementById('filter-mode-section') as HTMLElement;
+    const clickMessage = document.getElementById('spacing-when-click-msg') as HTMLElement;
     const isSpacingWhenLoad = current.spacing_mode === 'spacing_when_load';
     ruleSection.hidden = !isSpacingWhenLoad;
     clickMessage.hidden = isSpacingWhenLoad;
@@ -143,7 +143,7 @@ class OptionsController {
 
   private async renderFilterMode() {
     const current = await getSettings();
-    const button = document.getElementById('filter_mode_btn') as HTMLButtonElement;
+    const button = document.getElementById('filter-mode-btn') as HTMLButtonElement;
     button.textContent = chrome.i18n.getMessage(current.filter_mode);
 
     await this.renderUrlList();
