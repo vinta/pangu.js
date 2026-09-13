@@ -73,8 +73,8 @@ export default defineConfig(
     },
   },
   {
-    // Everything the Chrome extension ships, so a web API or JS builtin must exist in the extension's minimum Chrome version. The year mirrors minimum_chrome_version in
-    // browser-extensions/chrome/manifest.json (Chrome 102 is 2022-05); bump them together
+    // Everything the Chrome extension ships, so a web API or JS builtin must exist in the extension's minimum Chrome version. The year mirrors minimum_chrome_version
+    // in browser-extensions/chrome/manifest.json (Chrome 102 is 2022-05); bump them together
     files: ['src/shared/**/*.ts', 'src/browser/**/*.ts', 'browser-extensions/chrome/src/**/*.ts'],
     plugins: { 'baseline-js': baselineJs },
     rules: {
