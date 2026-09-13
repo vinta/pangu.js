@@ -1,6 +1,6 @@
 # Changelog
 
-## vX.Y.Z / xxxx-xx-xx
+## v10.1.1 / 2026-09-14
 
 ### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 
