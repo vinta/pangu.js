@@ -1,0 +1,1067 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pangu extension: how the service worker, content script, and AI spacing talk</title>
+    <style>
+      .viz-root {
+        color-scheme: light;
+        --surface-1: #fcfcfb;
+        --page: #f9f9f7;
+        --text-primary: #0b0b0b;
+        --text-secondary: #52514e;
+        --text-muted: #898781;
+        --grid: #e1e0d9;
+        --baseline: #c3c2b7;
+        --border: rgba(11, 11, 11, 0.1);
+        --wash: #f0efec;
+        --hover: rgba(11, 11, 11, 0.045);
+        --series-1: #2a78d6;
+        --series-2: #eb6834;
+        --series-3: #1baf7a;
+        --de-emphasis: #898781;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:where(:not([data-theme='light'])) .viz-root {
+          color-scheme: dark;
+          --surface-1: #1a1a19;
+          --page: #0d0d0d;
+          --text-primary: #ffffff;
+          --text-secondary: #c3c2b7;
+          --text-muted: #898781;
+          --grid: #2c2c2a;
+          --baseline: #383835;
+          --border: rgba(255, 255, 255, 0.1);
+          --wash: #232322;
+          --hover: rgba(255, 255, 255, 0.05);
+          --series-1: #3987e5;
+          --series-2: #d95926;
+          --series-3: #199e70;
+          --de-emphasis: #898781;
+        }
+      }
+      :root[data-theme='dark'] .viz-root {
+        color-scheme: dark;
+        --surface-1: #1a1a19;
+        --page: #0d0d0d;
+        --text-primary: #ffffff;
+        --text-secondary: #c3c2b7;
+        --text-muted: #898781;
+        --grid: #2c2c2a;
+        --baseline: #383835;
+        --border: rgba(255, 255, 255, 0.1);
+        --wash: #232322;
+        --hover: rgba(255, 255, 255, 0.05);
+        --series-1: #3987e5;
+        --series-2: #d95926;
+        --series-3: #199e70;
+        --de-emphasis: #898781;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+      }
+      .viz-root {
+        background: var(--page);
+        color: var(--text-primary);
+        font:
+          1rem/1.5 system-ui,
+          -apple-system,
+          'Segoe UI',
+          sans-serif;
+      }
+      main {
+        max-inline-size: 80rem;
+        margin-inline: auto;
+        padding-block: 2rem 4rem;
+        padding-inline: 1.5rem;
+      }
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        margin-block: 0 0.5rem;
+      }
+      h2 {
+        font-size: 1.375rem;
+        font-weight: 600;
+        margin-block: 2.25rem 0.75rem;
+      }
+      h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-block: 0 0.375rem;
+      }
+      p {
+        margin-block: 0 0.5rem;
+      }
+      .lede {
+        color: var(--text-secondary);
+        max-inline-size: 60rem;
+        margin-block-end: 1.5rem;
+      }
+      code,
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.9em;
+      }
+      .card {
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+      }
+      .facts {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+      }
+      .facts .card,
+      .notes .card {
+        padding-block: 0.875rem;
+        padding-inline: 1rem;
+      }
+      .facts p,
+      .notes p {
+        color: var(--text-secondary);
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.625rem 1.375rem;
+        align-items: center;
+        padding-block: 0.625rem;
+        padding-inline: 1rem;
+        margin-block: 1.25rem 0.75rem;
+        color: var(--text-secondary);
+      }
+      .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+      }
+      .swatch {
+        display: inline-block;
+        inline-size: 0.75rem;
+        block-size: 0.75rem;
+        border-radius: 0.1875rem;
+      }
+      figure {
+        margin: 0;
+        overflow-x: auto;
+      }
+      figure .card {
+        inline-size: max-content;
+        min-inline-size: 100%;
+        padding-block: 0.5rem;
+      }
+      figure svg {
+        display: block;
+        margin-inline: auto;
+      }
+      figcaption {
+        color: var(--text-muted);
+        margin-block-start: 0.5rem;
+      }
+      svg text {
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          sans-serif;
+      }
+      .t-label {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.75rem;
+        fill: var(--text-primary);
+      }
+      .t-sub {
+        font-size: 0.75rem;
+        fill: var(--text-secondary);
+      }
+      .t-muted {
+        fill: var(--text-muted);
+      }
+      .t-ctx {
+        font-size: 0.875rem;
+        font-weight: 600;
+        fill: var(--text-primary);
+      }
+      .t-lane {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.6875rem;
+        fill: var(--text-secondary);
+      }
+      .t-phase {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        fill: var(--text-primary);
+      }
+      .t-band {
+        font-size: 0.75rem;
+        font-weight: 600;
+        fill: var(--text-secondary);
+      }
+      .halo {
+        paint-order: stroke;
+        stroke: var(--surface-1);
+        stroke-width: 4px;
+        stroke-linejoin: round;
+      }
+      .halo-wash {
+        stroke: var(--wash);
+      }
+      .s-ui {
+        stroke: var(--de-emphasis);
+      }
+      .s-cs {
+        stroke: var(--series-1);
+      }
+      .s-sw {
+        stroke: var(--series-2);
+      }
+      .s-chrome {
+        stroke: var(--series-3);
+      }
+      .f-ui {
+        fill: var(--de-emphasis);
+        background: var(--de-emphasis);
+      }
+      .f-cs {
+        fill: var(--series-1);
+        background: var(--series-1);
+      }
+      .f-sw {
+        fill: var(--series-2);
+        background: var(--series-2);
+      }
+      .f-chrome {
+        fill: var(--series-3);
+        background: var(--series-3);
+      }
+      .lifeline {
+        stroke: var(--grid);
+        stroke-width: 1px;
+      }
+      .boundary {
+        stroke: var(--baseline);
+        stroke-width: 1px;
+      }
+      .phase-rule {
+        stroke: var(--grid);
+        stroke-width: 1px;
+      }
+      .band-rect {
+        fill: var(--wash);
+      }
+      .arrow {
+        fill: none;
+        stroke-width: 2px;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .arrow.response {
+        stroke-width: 1.5px;
+        stroke-dasharray: 5 4;
+      }
+      .head-open {
+        fill: none;
+        stroke-width: 1.5px;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .pill {
+        fill: var(--surface-1);
+        stroke: var(--baseline);
+        stroke-width: 1px;
+      }
+      .row-bg {
+        fill: transparent;
+      }
+      .row:hover .row-bg,
+      .row:focus .row-bg {
+        fill: var(--hover);
+      }
+      .row:focus {
+        outline: none;
+      }
+      .row:focus-visible .row-bg {
+        stroke: var(--text-muted);
+        stroke-width: 1px;
+      }
+      .tooltip {
+        position: fixed;
+        z-index: 10;
+        max-inline-size: 28rem;
+        padding-block: 0.625rem;
+        padding-inline: 0.75rem;
+        background: var(--surface-1);
+        color: var(--text-primary);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.14);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 80ms;
+      }
+      .tooltip.visible {
+        opacity: 1;
+      }
+      .tip-head {
+        font-weight: 600;
+        margin-block-end: 0.125rem;
+      }
+      .tip-route {
+        color: var(--text-secondary);
+        margin-block-end: 0.375rem;
+      }
+      .tip-src {
+        color: var(--text-muted);
+        margin-block-start: 0.375rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.875rem;
+        white-space: pre-line;
+      }
+      .notes {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        margin-block-start: 1rem;
+      }
+      table {
+        inline-size: 100%;
+        border-collapse: collapse;
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+      }
+      th,
+      td {
+        text-align: start;
+        vertical-align: top;
+        padding-block: 0.4375rem;
+        padding-inline: 0.625rem;
+        border-block-end: 1px solid var(--grid);
+      }
+      th {
+        font-weight: 600;
+        color: var(--text-secondary);
+        background: var(--page);
+      }
+      td.num {
+        font-variant-numeric: tabular-nums;
+        color: var(--text-muted);
+        inline-size: 2rem;
+      }
+      td.src {
+        color: var(--text-muted);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.875rem;
+        white-space: pre-line;
+      }
+      tr.phase-row td {
+        background: var(--page);
+        font-weight: 600;
+      }
+      @media (max-width: 62.5rem) {
+        .facts,
+        .notes {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body class="viz-root">
+    <main>
+      <h1>How the service worker, content script, and AI spacing talk</h1>
+      <p class="lede">
+        AI spacing is not a third context. It is one feature split across the two that exist: the content-script half flags candidates and applies late fixes, the service-worker half prompts the
+        on-device model. The shape <code>kind</code> string and one message, <code>CLASSIFY_CANDIDATES</code>, join the halves.
+      </p>
+
+      <section class="facts" aria-label="Key facts">
+        <div class="card">
+          <h3>One message enters the worker</h3>
+          <p><code>CLASSIFY_CANDIDATES</code>, sent by <code>ai-spacing/content-script.ts</code> over <code>chrome.runtime.sendMessage</code>. Nothing else messages the service worker.</p>
+        </div>
+        <div class="card">
+          <h3>The worker never messages the page</h3>
+          <p
+            >It only registers <code>dist/content-script.js</code> and <code>dist/content-script.css</code> with <code>chrome.scripting</code>. The popup is the only sender to the content script:
+            <code>PING</code> and <code>MANUAL_SPACING</code>.</p
+          >
+        </div>
+        <div class="card">
+          <h3>The content script is the gate</h3>
+          <p>It reads <code>is_ai_spacing_enabled</code> once at init. The worker reads no settings for classification; it answers whatever arrives.</p>
+        </div>
+        <div class="card">
+          <h3>Only sentences cross</h3>
+          <p>Candidates travel as <code>{ sentence, at }</code>. Text nodes stay in the page, and labels come back zipped by index.</p>
+        </div>
+      </section>
+
+      <div class="legend card" aria-label="Legend">
+        <span class="legend-item"><span class="swatch f-ui"></span>Popup</span>
+        <span class="legend-item"><span class="swatch f-cs"></span>Content script</span>
+        <span class="legend-item"><span class="swatch f-sw"></span>Service worker</span>
+        <span class="legend-item"><span class="swatch f-chrome"></span>Chrome APIs</span>
+        <span class="legend-item"
+          ><svg width="34" height="10" aria-hidden="true">
+            <path d="M2 5H26" class="arrow s-cs" />
+            <polygon points="24,1 32,5 24,9" class="f-cs" /></svg
+          >call, API, or event</span
+        >
+        <span class="legend-item"
+          ><svg width="34" height="10" aria-hidden="true">
+            <path d="M2 5H28" class="arrow response s-cs" />
+            <polyline points="24,1 32,5 24,9" class="head-open s-cs" /></svg
+          >response</span
+        >
+        <span class="legend-item"
+          ><svg width="30" height="16" aria-hidden="true"><rect x="1" y="2" width="28" height="12" rx="4" class="pill" /></svg>boxed label: message across contexts</span
+        >
+        <span class="legend-item">Arrow color is the sender. Hover or tab to a row for source lines.</span>
+      </div>
+
+      <figure>
+        <div class="card"><svg id="sequence" role="list" aria-label="Message sequence"></svg></div>
+        <figcaption>Paths in tooltips and the table are repo-relative. Steps 9 to 23 run again for every page in either spacing mode.</figcaption>
+      </figure>
+      <div id="tooltip" class="tooltip" role="tooltip"></div>
+
+      <section class="notes" aria-label="Notes">
+        <div class="card">
+          <h3>Why the model lives in the worker</h3>
+          <p>
+            <code>LanguageModel.params</code> and pinned sampling (<code>temperature: 0</code>, <code>topK: 1</code>) are available in extension contexts, not in the content script. Without them
+            classification stays off rather than sampling freely (ADR 0017).
+          </p>
+        </div>
+        <div class="card">
+          <h3>Worker lifetime costs a cold start</h3>
+          <p>
+            Chrome stops an idle service worker, and <code>baseSessions</code> and <code>cachedAnswers</code> die with it. The next <code>CLASSIFY_CANDIDATES</code> pays
+            <code>LanguageModel.create()</code>
+            again, which takes seconds. Warm-up (steps 9 to 12) exists for that.
+          </p>
+        </div>
+        <div class="card">
+          <h3>The options page skips the worker</h3>
+          <p>
+            <code>getModelAvailability()</code> and <code>downloadModel()</code> run in <code>options.ts</code> and call <code>LanguageModel</code> directly. Model state is browser-wide, so the toggle
+            can be on while the model is absent; pages then keep the rules output.
+          </p>
+        </div>
+      </section>
+
+      <h2>Channels</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Channel</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Carries</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>chrome.runtime.sendMessage</code></td>
+            <td>content script, <code>ai-spacing/content-script.ts</code></td>
+            <td>service worker, <code>onMessage</code> in <code>service-worker.ts</code></td>
+            <td><code>ClassifyCandidatesMessage</code>, answered with <code>ClassifyCandidatesResponse</code></td>
+          </tr>
+          <tr>
+            <td><code>chrome.tabs.sendMessage</code></td>
+            <td>popup</td>
+            <td>content script, <code>onMessage</code> in <code>content-script.ts</code></td>
+            <td><code>PingMessage</code>, <code>ManualSpacingMessage</code>, answered with <code>ContentScriptResponse</code></td>
+          </tr>
+          <tr>
+            <td><code>chrome.scripting</code></td>
+            <td>service worker; popup</td>
+            <td>Chrome, which injects into the page</td>
+            <td><code>registerContentScripts</code> (worker); <code>executeScript</code> (popup, manual mode)</td>
+          </tr>
+          <tr>
+            <td><code>chrome.storage.sync</code></td>
+            <td>popup, options page write</td>
+            <td>every context reads; <code>onChanged</code> wakes the worker</td>
+            <td><code>Settings</code></td>
+          </tr>
+          <tr>
+            <td>Function calls</td>
+            <td>core <code>pangu</code> and <code>ai-spacing/</code></td>
+            <td>same content script, no message</td>
+            <td><code>onTextNodesSettled(settledTextNodes)</code>, <code>applyLateFixes(lateFixes)</code></td>
+          </tr>
+          <tr>
+            <td>Prompt API</td>
+            <td>service worker <code>models.ts</code>; options page</td>
+            <td>on-device model</td>
+            <td><code>availability()</code>, <code>create()</code>, <code>clone()</code>, <code>prompt()</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Table view: every step</h2>
+      <table id="steps-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>From</th>
+            <th>To</th>
+            <th>What</th>
+            <th>Detail</th>
+            <th>Source</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </main>
+
+    <script>
+      const EXT = 'browser-extensions/chrome/src/';
+
+      const CONTEXTS = {
+        ui: 'Popup',
+        cs: 'Content script (page tab)',
+        sw: 'Service worker (extension)',
+        chrome: 'Chrome APIs',
+      };
+
+      const LANES = [
+        { id: 'ui', ctx: 'ui', name: 'Popup', lines: ['popup.ts'], w: 110 },
+        { id: 'core', ctx: 'cs', name: 'Content script: content-script.ts + core pangu', lines: ['content-script.ts', '+ core pangu'], w: 200 },
+        { id: 'csai', ctx: 'cs', name: 'Content script: ai-spacing/', lines: ['ai-spacing/', 'content-script.ts'], w: 205 },
+        { id: 'swai', ctx: 'sw', name: 'Service worker: ai-spacing/', lines: ['ai-spacing/service-worker.ts', '+ models.ts'], w: 215 },
+        { id: 'sw', ctx: 'sw', name: 'Service worker: service-worker.ts', lines: ['service-worker.ts'], w: 185 },
+        { id: 'chrome', ctx: 'chrome', name: 'Chrome APIs', lines: ['storage.sync, scripting,', 'LanguageModel'], w: 200 },
+      ];
+
+      // kind: call (solid, filled head), message (solid, boxed label), response (dashed, open head), self (loop on one lane)
+      const PHASES = [
+        {
+          title: '1  Registration: service worker, before any page loads',
+          steps: [
+            {
+              from: 'chrome',
+              to: 'sw',
+              kind: 'call',
+              label: 'runtime.onInstalled / onStartup',
+              sub: 'worker wakes',
+              detail: 'onInstalled runs reconcileSettings() first. Both then queue content script registration and repaint tab icons.',
+              src: [EXT + 'service-worker.ts:80-90'],
+            },
+            {
+              from: 'sw',
+              to: 'chrome',
+              kind: 'call',
+              label: 'storage.sync.get(DEFAULT_SETTINGS)',
+              sub: 'getSettings(), a local read with no cache',
+              detail: 'Registration only needs spacing_mode and is_text_autospace_enabled.',
+              src: [EXT + 'service-worker.ts:30-33', EXT + 'settings/storage.ts:33-35'],
+            },
+            {
+              from: 'sw',
+              to: 'chrome',
+              kind: 'call',
+              label: 'scripting.registerContentScripts',
+              sub: 'JS if spacing_when_load; CSS if text autospace is on',
+              detail:
+                'Unregisters everything first, then registers one script per call, so one failure cannot take down the other. Runs through registrationQueue. This is registration, not a message: the service worker never messages the content script.',
+              src: [EXT + 'service-worker.ts:18-61'],
+            },
+            {
+              from: 'chrome',
+              to: 'sw',
+              kind: 'call',
+              label: 'storage.onChanged',
+              sub: 'spacing_mode or is_text_autospace_enabled changed: register again',
+              detail: 'Registered at module scope so storage events wake the worker. The event payload says which keys changed, so a cold worker needs no cached state.',
+              src: [EXT + 'service-worker.ts:105-115', EXT + 'settings/storage.ts:42-53'],
+            },
+          ],
+        },
+        {
+          title: '2  Page load in spacing_when_load',
+          steps: [
+            {
+              from: 'chrome',
+              to: 'core',
+              kind: 'call',
+              label: 'inject dist/content-script.js',
+              sub: 'document_idle, every http and https page',
+              detail:
+                'One bundle holds content-script.ts, core pangu, and the content-script half of AI spacing. Registration matches every page; the script applies the blacklist and whitelist itself (ADR 0020).',
+              src: [EXT + 'service-worker.ts:45-53', EXT + 'content-script.ts:44-56'],
+            },
+            {
+              from: 'core',
+              to: 'chrome',
+              kind: 'call',
+              label: 'storage.sync.get',
+              sub: 'getSettings() once at init',
+              detail: 'The content script never subscribes to storage.onChanged. A settings change, including the AI spacing toggle, reaches a page on its next load.',
+              src: [EXT + 'content-script.ts:26-42'],
+            },
+            {
+              from: 'core',
+              to: 'csai',
+              kind: 'call',
+              label: 'pangu.onTextNodesSettled = applyAiSpacing',
+              sub: 'only if is_ai_spacing_enabled',
+              detail: 'The gate for AI spacing. Assigned before the sweep starts, so the first batch is captured too. The service worker reads no settings for classification.',
+              src: [EXT + 'content-script.ts:27-33', EXT + 'service-worker.ts:117'],
+            },
+            {
+              from: 'core',
+              to: 'core',
+              kind: 'self',
+              label: 'shouldAutoSpace(settings, url)',
+              sub: 'spacing_when_load and URL filters pass: startAutoSpacing()',
+              detail: 'An excluded URL calls stopAutoSpacePage() instead. The navigation currententrychange listener applies the URL policy again when the URL changes.',
+              src: [EXT + 'content-script.ts:7-21', EXT + 'content-script.ts:35-40'],
+            },
+          ],
+        },
+        {
+          title: '3  Warm-up: once per page',
+          steps: [
+            {
+              from: 'core',
+              to: 'csai',
+              kind: 'call',
+              label: 'warmUpAiSpacing()',
+              sub: 'called before autoSpacePage(); later calls return early',
+              detail: 'Scans document text per ambiguous shape with hasPotentialCandidates(). Only shapes that could match get a warm-up message.',
+              src: [EXT + 'content-script.ts:7-12', EXT + 'ai-spacing/content-script.ts:62-79'],
+            },
+            {
+              from: 'csai',
+              to: 'swai',
+              kind: 'message',
+              label: 'CLASSIFY_CANDIDATES { kind, candidates: [] }',
+              sub: 'runtime.sendMessage, one per shape; the answer is ignored',
+              detail:
+                'Sent with void, so a failure here does not turn AI spacing off. Its only job is to make the worker create the base session before real candidates arrive. The onMessage listener in service-worker.ts receives it and calls handleClassification().',
+              src: [EXT + 'ai-spacing/content-script.ts:11-19', EXT + 'ai-spacing/content-script.ts:72-78', EXT + 'service-worker.ts:119-122'],
+            },
+            {
+              from: 'swai',
+              to: 'chrome',
+              kind: 'call',
+              label: 'LanguageModel.create({ initialPrompts, temperature: 0, topK: 1 })',
+              sub: 'one base session per kind, cached as a promise',
+              detail:
+                "Throws unless LanguageModel.params exists and availability() is 'available', so it never starts a model download. A rejected create() leaves the cache, so a later batch tries again.",
+              src: [EXT + 'ai-spacing/models.ts:40-82'],
+            },
+            {
+              from: 'swai',
+              to: 'csai',
+              kind: 'response',
+              label: '{ ok: true, candidateLabels: [] }',
+              sub: 'nobody reads it',
+              detail: 'handleClassification() never rejects: every error becomes { ok: false, error }.',
+              src: [EXT + 'ai-spacing/service-worker.ts:12-25'],
+            },
+          ],
+        },
+        {
+          title: '4  Every settled batch',
+          steps: [
+            {
+              from: 'core',
+              to: 'core',
+              kind: 'self',
+              label: 'autoSpacePage()',
+              sub: 'the rules space a batch of text nodes',
+              detail: 'The first sweep is one batch; later page changes bring more batches.',
+              src: ['src/browser/pangu.ts:55'],
+            },
+            {
+              from: 'core',
+              to: 'csai',
+              kind: 'call',
+              label: 'onTextNodesSettled(settledTextNodes)',
+              sub: '{ node, unspaced, settled }[]',
+              detail: 'Fires once per batch, after the rules loop, when nothing in the batch writes to those text nodes again.',
+              src: ['src/browser/pangu.ts:227-245'],
+            },
+            {
+              from: 'csai',
+              to: 'csai',
+              kind: 'self',
+              label: 'find() per ambiguous shape',
+              sub: 'hyphenDigit, digitPlus: settled candidates',
+              detail:
+                'readSentence() reads the sentence around each symbol from the unspaced text. A settled candidate keeps its text node and settled text for the late fix. Returns early if modelFailed is set or no shape has candidates.',
+              src: [EXT + 'ai-spacing/content-script.ts:21-30', EXT + 'ai-spacing/content-script.ts:95-105'],
+            },
+            {
+              from: 'csai',
+              to: 'swai',
+              kind: 'message',
+              label: 'CLASSIFY_CANDIDATES { kind, candidates: { sentence, at }[] }',
+              sub: 'runtime.sendMessage, one per shape, sent concurrently',
+              detail: 'Only the sentence and the symbol index cross the boundary; text nodes stay in the page. kind picks the prompt spec on the worker side.',
+              src: [EXT + 'ai-spacing/content-script.ts:84-93', EXT + 'ai-spacing/content-script.ts:107', EXT + 'ai-spacing/messages.ts:10-15'],
+            },
+            {
+              from: 'swai',
+              to: 'swai',
+              kind: 'self',
+              label: 'handleClassification(kind, candidates)',
+              sub: 'PROMPT_SPECS.get(kind), then classifyCandidates()',
+              detail: 'The onMessage listener returns true to keep the channel open, because Chrome closes it when a listener returns a promise. sendResponse() is called when the promise resolves.',
+              src: [EXT + 'service-worker.ts:117-122', EXT + 'ai-spacing/service-worker.ts:12-25'],
+            },
+            {
+              from: 'swai',
+              to: 'chrome',
+              kind: 'call',
+              label: 'baseSession.clone(), prompt(question, { responseConstraint })',
+              sub: 'per candidate, one at a time; cachedAnswers skips repeats',
+              detail:
+                "The browser runs one model task at a time, so candidates go in sequence. Each gets a fresh clone, destroyed afterwards, so earlier answers cannot influence it. The response constraint is the shape's label enum.",
+              src: [EXT + 'ai-spacing/models.ts:84-137'],
+            },
+            {
+              from: 'chrome',
+              to: 'swai',
+              kind: 'response',
+              label: 'label | null',
+              sub: 'a JSON string inside the enum, or null on any error',
+              detail: 'A null is not cached, so the next batch asks again.',
+              src: [EXT + 'ai-spacing/models.ts:86-96', EXT + 'ai-spacing/models.ts:113-123'],
+            },
+            {
+              from: 'swai',
+              to: 'csai',
+              kind: 'response',
+              label: '{ ok: true, candidateLabels: (label | null)[] }',
+              sub: 'sendResponse(), zipped to candidates by index',
+              detail: 'A null skips one candidate. A per-candidate failure never fails the batch.',
+              src: [EXT + 'ai-spacing/messages.ts:19-22', EXT + 'service-worker.ts:120'],
+            },
+            {
+              from: 'csai',
+              to: 'csai',
+              kind: 'self',
+              label: 'edits(settledCandidate, label)',
+              sub: 'applyTextEdits(): one late fix per text node',
+              detail: 'A null or rejected label yields no edit. Core applies one late fix per text node per call, so every edit on one node composes into one late fix.',
+              src: [EXT + 'ai-spacing/content-script.ts:37-60', EXT + 'ai-spacing/shapes/base.ts:61-69'],
+            },
+            {
+              from: 'csai',
+              to: 'core',
+              kind: 'call',
+              label: 'pangu.applyLateFixes(lateFixes)',
+              sub: '{ node, settled, data }[]',
+              detail: 'Skipped when no candidate produced an edit.',
+              src: [EXT + 'ai-spacing/content-script.ts:109-112'],
+            },
+            {
+              from: 'core',
+              to: 'core',
+              kind: 'self',
+              label: 'schedule(): compare and set',
+              sub: 'writes only if node.data === settled',
+              detail: 'Same scheduling path as text spacing, so a hidden tab waits until it is visible. A disconnected, ignored, or rewritten text node is skipped.',
+              src: ['src/browser/pangu.ts:101-113'],
+            },
+          ],
+        },
+        {
+          title: '5  Alternative trigger: popup click in spacing_when_click',
+          steps: [
+            {
+              from: 'ui',
+              to: 'core',
+              kind: 'message',
+              label: 'PING',
+              sub: 'tabs.sendMessage; an error means not injected',
+              detail: 'The content script answers { success: true } to anything that is not MANUAL_SPACING.',
+              src: [EXT + 'popup.ts:214-223', EXT + 'content-script.ts:81-83'],
+            },
+            {
+              from: 'ui',
+              to: 'core',
+              kind: 'call',
+              label: 'scripting.executeScript(dist/content-script.js)',
+              sub: 'only when PING failed',
+              detail: 'Same bundle registration injects, so steps 6 to 8 run here too; step 8 sees spacing_when_click and starts nothing.',
+              src: [EXT + 'popup.ts:183-189'],
+            },
+            {
+              from: 'ui',
+              to: 'core',
+              kind: 'message',
+              label: 'MANUAL_SPACING',
+              sub: 'startManualSpacing(): steps 9 to 23, URL filters ignored',
+              detail: 'Runs startAutoSpacing() without the URL policy, until the URL changes.',
+              src: [EXT + 'popup.ts:191-193', EXT + 'content-script.ts:58-79'],
+            },
+            {
+              from: 'core',
+              to: 'ui',
+              kind: 'response',
+              label: '{ success }',
+              sub: 'false if the URL changed or init failed',
+              detail: 'The popup shows the success or error message from this answer.',
+              src: [EXT + 'content-script.ts:59-72', EXT + 'popup.ts:195-203'],
+            },
+          ],
+        },
+        {
+          title: '6  Failure: the classifier cannot answer',
+          steps: [
+            {
+              from: 'csai',
+              to: 'swai',
+              kind: 'message',
+              label: 'CLASSIFY_CANDIDATES',
+              sub: 'sendMessage rejects: no worker, e.g. extension reloaded',
+              detail: 'requestClassification() catches the rejection and returns { ok: false, error }.',
+              src: [EXT + 'ai-spacing/content-script.ts:11-19'],
+            },
+            {
+              from: 'swai',
+              to: 'csai',
+              kind: 'response',
+              label: '{ ok: false, error }',
+              sub: "no prompt spec, no params, model not 'available', or create() failed",
+              detail: 'Any error before the per-candidate loop fails the whole message.',
+              src: [EXT + 'ai-spacing/service-worker.ts:12-25', EXT + 'ai-spacing/models.ts:54-68'],
+            },
+            {
+              from: 'csai',
+              to: 'csai',
+              kind: 'self',
+              label: 'modelFailed = true',
+              sub: 'AI spacing off for this page; the rules output stays',
+              detail: 'Later batches return before flagging candidates. A page reload starts fresh. A failed warm-up message never sets this.',
+              src: [EXT + 'ai-spacing/content-script.ts:81-98'],
+            },
+          ],
+        },
+      ];
+
+      const SVG_NS = 'http://www.w3.org/2000/svg';
+      const GUTTER = 44;
+      const RIGHT = 12;
+      const HEADER_H = 108;
+      const PHASE_H = 40;
+      const STEP_H = 58;
+      const BOTTOM = 14;
+
+      let x = GUTTER;
+      const laneById = new Map();
+      for (const lane of LANES) {
+        lane.x0 = x;
+        lane.x1 = x + lane.w;
+        lane.cx = x + lane.w / 2;
+        lane.index = laneById.size;
+        laneById.set(lane.id, lane);
+        x += lane.w;
+      }
+      const WIDTH = x + RIGHT;
+      const stepCount = PHASES.reduce((sum, phase) => sum + phase.steps.length, 0);
+      const HEIGHT = HEADER_H + PHASES.length * PHASE_H + stepCount * STEP_H + BOTTOM;
+
+      const svg = document.getElementById('sequence');
+      svg.setAttribute('viewBox', `0 0 ${WIDTH} ${HEIGHT}`);
+      svg.setAttribute('width', WIDTH);
+      svg.setAttribute('height', HEIGHT);
+
+      function el(name, attrs, parent, text) {
+        const node = document.createElementNS(SVG_NS, name);
+        for (const [key, value] of Object.entries(attrs)) {
+          node.setAttribute(key, value);
+        }
+        if (text !== undefined) {
+          node.textContent = text;
+        }
+        parent.appendChild(node);
+        return node;
+      }
+
+      // Keeps a text element inside the plot area by shifting it horizontally
+      function clampText(textNode) {
+        const box = textNode.getBBox();
+        const minX = GUTTER;
+        const maxX = WIDTH - RIGHT;
+        let shift = 0;
+        if (box.x < minX) {
+          shift = minX - box.x;
+        } else if (box.x + box.width > maxX) {
+          shift = maxX - (box.x + box.width);
+        }
+        if (shift !== 0) {
+          textNode.setAttribute('x', Number(textNode.getAttribute('x')) + shift);
+        }
+      }
+
+      // Header: context names over their lanes, then lane file names
+      const csai = laneById.get('csai');
+      const swai = laneById.get('swai');
+      el('rect', { x: csai.x0 + 4, y: 66, width: swai.x1 - csai.x0 - 8, height: HEIGHT - 66 - 6, rx: 10, class: 'band-rect' }, svg);
+      el('text', { 'x': csai.x1, 'y': 86, 'text-anchor': 'middle', 'class': 't-band halo halo-wash' }, svg, 'AI spacing: one feature, two contexts');
+
+      const contextSpans = [];
+      for (const lane of LANES) {
+        const last = contextSpans.at(-1);
+        if (last && last.ctx === lane.ctx) {
+          last.x1 = lane.x1;
+        } else {
+          contextSpans.push({ ctx: lane.ctx, x0: lane.x0, x1: lane.x1 });
+        }
+      }
+      for (const [index, span] of contextSpans.entries()) {
+        el('rect', { x: span.x0 + 8, y: 4, width: span.x1 - span.x0 - 16, height: 3, rx: 1.5, class: `f-${span.ctx}` }, svg);
+        el('text', { 'x': (span.x0 + span.x1) / 2, 'y': 25, 'text-anchor': 'middle', 'class': 't-ctx' }, svg, CONTEXTS[span.ctx]);
+        if (index > 0) {
+          el('line', { x1: span.x0, y1: 0, x2: span.x0, y2: HEIGHT, class: 'boundary' }, svg);
+        }
+      }
+      for (const lane of LANES) {
+        lane.lines.forEach((line, lineIndex) => {
+          el('text', { 'x': lane.cx, 'y': 44 + lineIndex * 14, 'text-anchor': 'middle', 'class': 't-lane' }, svg, line);
+        });
+        el('line', { x1: lane.cx, y1: HEADER_H - 6, x2: lane.cx, y2: HEIGHT - BOTTOM, class: 'lifeline' }, svg);
+      }
+
+      const tooltip = document.getElementById('tooltip');
+
+      function showTooltip(step, clientX, clientY) {
+        tooltip.replaceChildren();
+        const head = document.createElement('div');
+        head.className = 'tip-head';
+        head.textContent = `${step.n}. `;
+        const code = document.createElement('code');
+        code.textContent = step.label;
+        head.appendChild(code);
+        const route = document.createElement('div');
+        route.className = 'tip-route';
+        const from = laneById.get(step.from);
+        const to = laneById.get(step.to);
+        route.textContent = step.kind === 'self' ? `Within ${from.name}` : `From ${from.name} to ${to.name}`;
+        const detail = document.createElement('p');
+        detail.textContent = step.detail;
+        const source = document.createElement('div');
+        source.className = 'tip-src';
+        source.textContent = step.src.join('\n');
+        tooltip.append(head, route, detail, source);
+        tooltip.classList.add('visible');
+        const box = tooltip.getBoundingClientRect();
+        const left = Math.min(clientX + 16, window.innerWidth - box.width - 8);
+        const top = clientY + 18 + box.height > window.innerHeight ? clientY - box.height - 12 : clientY + 18;
+        tooltip.style.left = `${Math.max(8, left)}px`;
+        tooltip.style.top = `${Math.max(8, top)}px`;
+      }
+      function hideTooltip() {
+        tooltip.classList.remove('visible');
+      }
+
+      function drawArrowHead(group, tipX, y, dir, step, open) {
+        const baseX = tipX - dir * 8;
+        const points = `${baseX},${y - 4.5} ${tipX},${y} ${baseX},${y + 4.5}`;
+        const ctx = laneById.get(step.from).ctx;
+        if (open) {
+          el('polyline', { points, class: `head-open s-${ctx}` }, group);
+        } else {
+          el('polygon', { points, class: `f-${ctx}` }, group);
+        }
+      }
+
+      function drawLabel(group, step, labelX, labelY, anchor) {
+        const text = el('text', { 'x': labelX, 'y': labelY, 'text-anchor': anchor, 'class': 't-label halo' }, group, step.label);
+        clampText(text);
+        if (step.kind === 'message') {
+          const box = text.getBBox();
+          const pill = el('rect', { x: box.x - 6, y: box.y - 2, width: box.width + 12, height: box.height + 4, rx: 4, class: 'pill' }, group);
+          group.insertBefore(pill, text);
+          text.classList.remove('halo');
+        }
+      }
+
+      const tbody = document.querySelector('#steps-table tbody');
+      let y = HEADER_H;
+      let n = 0;
+
+      for (const phase of PHASES) {
+        el('line', { x1: 8, y1: y + 10, x2: WIDTH - 8, y2: y + 10, class: 'phase-rule' }, svg);
+        el('text', { x: 12, y: y + 30, class: 't-phase halo' }, svg, phase.title);
+        const phaseRow = tbody.insertRow();
+        phaseRow.className = 'phase-row';
+        const phaseCell = phaseRow.insertCell();
+        phaseCell.colSpan = 6;
+        phaseCell.textContent = phase.title.replace(/^\d+\s+/, '');
+        y += PHASE_H;
+
+        for (const step of phase.steps) {
+          n += 1;
+          step.n = n;
+          const from = laneById.get(step.from);
+          const to = laneById.get(step.to);
+          const arrowY = y + 32;
+          const row = el('g', { 'class': 'row', 'tabindex': 0, 'role': 'listitem', 'aria-label': `${n}. ${step.label}. ${step.sub}` }, svg);
+          el('rect', { x: 4, y: y + 3, width: WIDTH - 8, height: STEP_H - 6, rx: 6, class: 'row-bg' }, row);
+          el('text', { 'x': 22, 'y': arrowY + 4, 'text-anchor': 'middle', 'class': 't-label t-muted' }, row, String(n));
+
+          if (step.kind === 'self') {
+            const side = from.index >= 4 ? -1 : 1;
+            const loopX = from.cx + side * 22;
+            el('path', { d: `M${from.cx + side * 3} ${arrowY - 9} H${loopX} V${arrowY + 9} H${from.cx + side * 10}`, class: `arrow s-${from.ctx}` }, row);
+            drawArrowHead(row, from.cx + side * 3, arrowY + 9, -side, step, false);
+            const textX = from.cx + side * 32;
+            const anchor = side === 1 ? 'start' : 'end';
+            drawLabel(row, step, textX, arrowY - 3, anchor);
+            clampText(el('text', { 'x': textX, 'y': arrowY + 13, 'text-anchor': anchor, 'class': 't-sub halo' }, row, step.sub));
+          } else {
+            const dir = Math.sign(to.cx - from.cx);
+            const startX = from.cx + dir * 4;
+            const tipX = to.cx - dir * 4;
+            const response = step.kind === 'response';
+            el('path', { d: `M${startX} ${arrowY} H${tipX - dir * (response ? 1 : 6)}`, class: `arrow s-${from.ctx}${response ? ' response' : ''}` }, row);
+            drawArrowHead(row, tipX, arrowY, dir, step, response);
+            const midX = (from.cx + to.cx) / 2;
+            drawLabel(row, step, midX, arrowY - 9, 'middle');
+            clampText(el('text', { 'x': midX, 'y': arrowY + 17, 'text-anchor': 'middle', 'class': 't-sub halo' }, row, step.sub));
+          }
+
+          row.addEventListener('mousemove', (event) => showTooltip(step, event.clientX, event.clientY));
+          row.addEventListener('mouseleave', hideTooltip);
+          row.addEventListener('focus', () => {
+            const box = row.getBoundingClientRect();
+            showTooltip(step, box.left + 40, box.bottom - 8);
+          });
+          row.addEventListener('blur', hideTooltip);
+
+          const tableRow = tbody.insertRow();
+          const cells = [
+            [String(n), 'num'],
+            [from.name, ''],
+            [step.kind === 'self' ? '(same)' : to.name, ''],
+            [step.label, 'mono'],
+            [`${step.sub}. ${step.detail}`, ''],
+            [step.src.join('\n'), 'src'],
+          ];
+          for (const [value, className] of cells) {
+            const cell = tableRow.insertCell();
+            cell.textContent = value;
+            if (className) {
+              cell.className = className;
+            }
+          }
+          y += STEP_H;
+        }
+      }
+    </script>
+  </body>
+</html>
