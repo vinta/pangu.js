@@ -219,7 +219,7 @@
 
 ### [pangu.js](https://www.npmjs.com/package/pangu)
 
-- 偉哉 Claude Code，精雕細琢的 v5.1.0 終於推出啦！
+- 偉哉 Claude Code，精雕細琢的 v5.1.1 終於推出啦！
 
 ### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 
