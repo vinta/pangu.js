@@ -157,10 +157,9 @@
 
 ## v7.2.0 / 2025-07-05
 
-- 趁末日前更新一下，不然以後就沒機會了
-
 ### [pangu.js](https://www.npmjs.com/package/pangu)
 
+- 趁末日前更新一下，不然以後就沒機會了
 - 修正在 Google Calendar 會不小心在 CSS 隱藏元素與中文之間加空格的問題
 
 ## v7.0.0 / 2025-07-02
@@ -400,18 +399,16 @@
 
 ## v2.3.0 / 2014-02-08
 
-- 威力加強版！
-
 ### [pangu.js](https://www.npmjs.com/package/pangu)
 
+- 威力加強版！
 - 解決特定情況下在同一個地方會一直加空格的問題
 
 ## v2.2.3 / 2014-02-07
 
-- 記事本不懂 Vim 的黑
-
 ### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 
+- 記事本不懂 Vim 的黑
 - 不會在 Google+ 的輸入框裡加空格
 
 ## v2.2.2 / 2014-02-07
