@@ -83,8 +83,6 @@ const text = pangu.spaceText('當你凝視著bug，bug也凝視著你');
 // text = '當你凝視著 bug，bug 也凝視著你'
 
 pangu.spaceNode(document.getElementById('main'));
-document.querySelectorAll('.comment').forEach((el) => pangu.spaceNode(el));
-document.querySelectorAll('p').forEach((el) => pangu.spaceNode(el));
 
 if (document.readyState === 'loading') {
   // Start automatic text spacing once the page is ready
