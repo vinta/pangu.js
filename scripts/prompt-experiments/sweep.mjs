@@ -1,7 +1,7 @@
 // Run with Node 22.18+ for the shipping TypeScript prompt import. Reuses the approved pangu-eval Playwright CLI session; verifies the configured profile before each run.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -264,9 +264,11 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     nodeVersion: process.version,
   };
   const file = join(output, `${runIndex + 1}-${variant}.json`);
+  const command = join(output, 'run-code.js');
   let stdout;
   try {
-    stdout = execFileSync('playwright-cli', ['-s=pangu-eval', '--raw', 'run-code', code], {
+    writeFileSync(command, code, { flag: 'wx' });
+    stdout = execFileSync('playwright-cli', ['-s=pangu-eval', '--raw', 'run-code', `--filename=${command}`], {
       encoding: 'utf8',
       maxBuffer: 10 * 1024 * 1024,
       timeout: 120000 + inputs.length * orderCount * repeats * 30000 * (diagnosticIds ? 1 + (corpus.diagnosticQuestions?.length ?? 2) : 1),
@@ -329,6 +331,8 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     console.error(`${variant}: incomplete run; ${result.error}; ${file}`);
     process.exitCode = 1;
     break;
+  } finally {
+    rmSync(command, { force: true });
   }
   writeFileSync(file, `${JSON.stringify(result, null, 2)}\n`, { flag: 'wx' });
   const scored = result.results.filter((kase) => !kase.review);

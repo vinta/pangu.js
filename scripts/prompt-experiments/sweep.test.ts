@@ -132,6 +132,8 @@ for (const [experiment, variant] of [
     onTestFinished(() => rmSync(root, { recursive: true, force: true }));
     const profile = join(root, 'Test Profile');
     const output = join(root, 'results');
+    const largeCorpus = join(root, 'large-corpus.json');
+    writeFileSync(largeCorpus, JSON.stringify({ ...sourceCorpus, cases: sourceCorpus.cases.map((kase, index) => (index === 0 ? { ...kase, source_verification: 'x'.repeat(2 * 1024 * 1024) } : kase)) }));
     const timeoutProbe = join(root, 'timeout-probe.mjs');
     writeFileSync(
       timeoutProbe,
@@ -151,6 +153,9 @@ syncBuiltinESMExports();
       join(root, 'playwright-cli'),
       `#!/usr/bin/env node
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+assert(process.argv.at(-1).startsWith('--filename='));
+const code = readFileSync(process.argv.at(-1).slice('--filename='.length), 'utf8');
 let calls = 0;
 const worker = {
   url: () => 'chrome-extension://' + 'a'.repeat(32) + '/dist/service-worker.js',
@@ -174,7 +179,7 @@ const worker = {
 };
 const info = { waitForURL: async () => {}, locator: () => ({ innerText: async () => process.env.TEST_PROFILE }) };
 const context = { serviceWorkers: () => [worker], waitForEvent: async () => info, browser: () => ({ version: () => 'test' }) };
-new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context }).then(run => console.log(JSON.stringify({ ...run, testCalls: calls, sessionId: 'private-session', profilePath: process.env.TEST_PROFILE, results: run.results.map(row => ({ ...row, requestToken: 'private-token', answers: row.answers.map(answer => ({ ...answer, requestToken: 'private-token' })) })) })));
+new Function('return (' + code + ')')()({ context: () => context }).then(run => console.log(JSON.stringify({ ...run, testCalls: calls, sessionId: 'private-session', profilePath: process.env.TEST_PROFILE, results: run.results.map(row => ({ ...row, requestToken: 'private-token', answers: row.answers.map(answer => ({ ...answer, requestToken: 'private-token' })) })) })));
 `,
       { mode: 0o755 },
     );
@@ -186,7 +191,7 @@ new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context 
         'scripts/prompt-experiments/sweep.mjs',
         '--experiment',
         experiment,
-        ...(experiment === 'hyphen-digit' ? ['--cases', hyphenCases] : []),
+        ...(experiment === 'hyphen-digit' ? ['--cases', largeCorpus] : []),
         '--extension-id',
         'a'.repeat(32),
         '--profile-path',
@@ -204,6 +209,7 @@ new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context 
       },
     );
     expect(run.status, run.stderr).toBe(1);
+    expect(existsSync(join(output, 'run-code.js'))).toBe(false);
     expect(JSON.parse(readFileSync(join(root, 'timeout.json'), 'utf8'))).toBe(120000 + (experiment === 'hyphen-digit' ? sourceCorpus.cases.length : 7) * 6 * 30000);
     const result = JSON.parse(readFileSync(join(output, `1-${variant}.json`), 'utf8')) as {
       omitResponseConstraintInput: boolean;
@@ -263,6 +269,7 @@ test.skipIf(!supportsTypeScript)('browser and profile failures leave incomplete 
     env: { ...process.env, PATH: `${root}:${process.env.PATH}` },
   });
   expect(run.status).toBe(1);
+  expect(existsSync(join(output, 'run-code.js'))).toBe(false);
   const artifact = JSON.parse(readFileSync(join(output, '1-shipping.json'), 'utf8')) as { status: string; error: string; stderr: string; inputs: unknown[]; results?: unknown[] };
   expect(artifact.status).toBe('incomplete');
   expect(artifact.error).toContain('Browser command failed (exit 9)');
@@ -285,6 +292,7 @@ test.skipIf(!supportsTypeScript)('browser and profile failures leave incomplete 
   writeFileSync(
     join(root, 'playwright-cli'),
     `#!/usr/bin/env node
+import { readFileSync } from 'node:fs';
 const profile = ${JSON.stringify(profile)};
 const worker = {
   url: () => 'chrome-extension://' + 'a'.repeat(32) + '/dist/service-worker.js',
@@ -298,7 +306,7 @@ const worker = {
 };
 const info = { waitForURL: async () => {}, locator: () => ({ innerText: async () => process.env.TEST_PROFILE ?? profile }) };
 const context = { serviceWorkers: () => [worker], waitForEvent: async () => info };
-new Function('return (' + process.argv.at(-1) + ')')()({ context: () => context }).then(run => console.log(JSON.stringify({ ...run, sessionId: 'private-session' })));
+new Function('return (' + readFileSync(process.argv.at(-1).slice('--filename='.length), 'utf8') + ')')()({ context: () => context }).then(run => console.log(JSON.stringify({ ...run, sessionId: 'private-session' })));
 `,
     { mode: 0o755 },
   );
