@@ -86,8 +86,13 @@ pangu.spaceNode(document.getElementById('main'));
 document.querySelectorAll('.comment').forEach((el) => pangu.spaceNode(el));
 document.querySelectorAll('p').forEach((el) => pangu.spaceNode(el));
 
-// Listen to any DOM change and automatically perform spacing via MutationObserver()
-document.addEventListener('DOMContentLoaded', () => pangu.autoSpacePage());
+if (document.readyState === 'loading') {
+  // Start automatic text spacing once the page is ready
+  // Consume the stream of DOM mutations and space dynamic content via MutationObserver
+  document.addEventListener('DOMContentLoaded', () => pangu.autoSpacePage());
+} else {
+  pangu.autoSpacePage();
+}
 ```
 
 Also on:
