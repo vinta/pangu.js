@@ -1,8 +1,13 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 
 const external = [/^node:/];
 
 export default defineConfig({
+  test: {
+    // Console output from extension code stays in the web-page console; in a test run it is only worth reading when the test fails
+    silent: 'passed-only',
+  },
   build: {
     outDir: 'dist',
     sourcemap: true,
