@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pangu.js — AI spacing walkthrough</title>
+    <link rel="icon" href="data:," />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #111827;
+        --muted: #526074;
+        --line: #e5e7eb;
+        --blue: #2563eb;
+        --purple: #7c3aed;
+        --green: #047857;
+        --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #f9fafb;
+        color: var(--ink);
+        font: 16px/1.6 var(--sans);
+      }
+      a {
+        color: var(--blue);
+        text-underline-offset: 4px;
+      }
+      a:focus-visible,
+      summary:focus-visible {
+        outline: 3px solid var(--blue);
+        outline-offset: 5px;
+        border-radius: 3px;
+      }
+      .skip {
+        position: absolute;
+        left: 16px;
+        top: -100px;
+        background: white;
+        padding: 12px;
+        z-index: 3;
+      }
+      .skip:focus {
+        top: 12px;
+      }
+      header {
+        background: white;
+        border-bottom: 1px solid var(--line);
+      }
+      .bar {
+        max-width: 1180px;
+        margin: auto;
+        padding: 20px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      .brand {
+        font-weight: 800;
+        font-size: 22px;
+        letter-spacing: -0.8px;
+        text-decoration: none;
+        color: var(--ink);
+      }
+      .brand span {
+        color: var(--blue);
+      }
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 22px;
+        font-size: 14px;
+      }
+      nav a {
+        color: var(--muted);
+        text-decoration: none;
+        padding: 6px 0;
+      }
+      nav a:hover {
+        color: var(--blue);
+        text-decoration: underline;
+      }
+      main {
+        max-width: 1180px;
+        margin: auto;
+        padding: 0 32px;
+      }
+      section {
+        padding: 64px 0;
+        scroll-margin-top: 20px;
+      }
+      section + section {
+        border-top: 1px solid var(--line);
+      }
+      .eyebrow {
+        color: var(--blue);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font: 700 12px/1.5 var(--sans);
+        margin: 0 0 14px;
+      }
+      h1 {
+        font-size: clamp(38px, 5.2vw, 64px);
+        line-height: 1.07;
+        letter-spacing: -2.5px;
+        max-width: 850px;
+        margin: 0 0 22px;
+      }
+      h2 {
+        font-size: clamp(29px, 4vw, 40px);
+        line-height: 1.15;
+        letter-spacing: -1.2px;
+        margin: 0 0 18px;
+      }
+      h3 {
+        font-size: 21px;
+        line-height: 1.3;
+        margin: 8px 0 12px;
+      }
+      p {
+        margin: 0 0 16px;
+      }
+      .intro {
+        color: var(--muted);
+        font-size: 19px;
+        max-width: 760px;
+        margin-bottom: 30px;
+      }
+      .muted,
+      small {
+        color: var(--muted);
+      }
+      code {
+        font: 0.85em/1.65 var(--mono);
+        overflow-wrap: anywhere;
+      }
+      .architecture {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 180px minmax(0, 1fr);
+        align-items: stretch;
+        margin-top: 36px;
+      }
+      .context {
+        background: white;
+        border: 1px solid #bfdbfe;
+        border-top: 4px solid var(--blue);
+        border-radius: 12px;
+        padding: 26px;
+        min-width: 0;
+      }
+      .context.worker {
+        border-color: #ddd6fe;
+        border-top-color: var(--purple);
+      }
+      .tag {
+        font: 700 11px/1.5 var(--sans);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--blue);
+      }
+      .worker .tag {
+        color: var(--purple);
+      }
+      .module {
+        padding: 14px 16px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #f9fafb;
+      }
+      .module strong {
+        display: block;
+        font-size: 14px;
+      }
+      .module small {
+        display: block;
+        font-size: 13px;
+      }
+      .ai {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+      }
+      .worker .ai {
+        background: #f5f3ff;
+        border-color: #ddd6fe;
+      }
+      .connector {
+        color: var(--muted);
+        text-align: center;
+        font: 12px/1.5 var(--mono);
+        padding: 9px 0;
+      }
+      .bridge {
+        align-self: center;
+        text-align: center;
+        padding: 16px 8px;
+        font-size: 12px;
+      }
+      .bridge .arrow {
+        display: block;
+        color: var(--blue);
+        font-size: 34px;
+        line-height: 1;
+        margin: 6px 0 22px;
+      }
+      .bridge .back {
+        color: var(--purple);
+      }
+      .bridge strong {
+        display: block;
+        font-size: 13px;
+      }
+      .note {
+        padding: 18px 22px;
+        background: #eff6ff;
+        border-left: 3px solid var(--blue);
+        margin: 24px 0 0;
+        border-radius: 0 8px 8px 0;
+      }
+      .note p {
+        margin: 0;
+      }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        margin: 30px 0;
+      }
+      .step {
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 24px;
+        min-width: 0;
+      }
+      .number {
+        font: 600 12px var(--mono);
+        color: var(--muted);
+        display: block;
+        margin-bottom: 14px;
+      }
+      .sample {
+        display: block;
+        font-size: clamp(20px, 2.3vw, 27px);
+        font-weight: 600;
+        margin: 18px 0;
+        white-space: pre-wrap;
+      }
+      .sample del {
+        text-decoration: none;
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .sample mark {
+        background: #d1fae5;
+        color: #065f46;
+        padding: 2px 3px;
+        border-radius: 4px;
+      }
+      .roundtrip {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+      }
+      .payload {
+        border-radius: 12px;
+        overflow: hidden;
+        min-width: 0;
+        background: #111827;
+        color: #e5e7eb;
+      }
+      .payload h3 {
+        font-size: 13px;
+        font-weight: 500;
+        margin: 0;
+        padding: 16px 20px;
+        border-bottom: 1px solid #374151;
+        color: #93c5fd;
+      }
+      .payload.reply h3 {
+        color: #c4b5fd;
+      }
+      pre {
+        margin: 0;
+        padding: 22px;
+        font: 13px/1.8 var(--mono);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      .payload p {
+        padding: 0 22px 20px;
+        color: #cbd5e1;
+        font-size: 13px;
+        margin: 0;
+      }
+      .flow {
+        list-style: none;
+        padding: 0;
+        margin: 30px 0;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+      }
+      .flow li {
+        position: relative;
+        border-top: 3px solid var(--purple);
+        padding: 20px 18px;
+        background: white;
+        border-radius: 0 0 10px 10px;
+      }
+      .flow strong {
+        display: block;
+        margin-bottom: 8px;
+      }
+      .flow p {
+        color: var(--muted);
+        font-size: 14px;
+        margin: 0;
+      }
+      details {
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        margin: 12px 0;
+      }
+      summary {
+        padding: 18px 22px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      details > div {
+        padding: 0 22px 18px;
+        color: var(--muted);
+      }
+      details p:last-child {
+        margin: 0;
+      }
+      .safety {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        align-items: start;
+      }
+      .guard {
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        padding: 24px;
+        border-radius: 12px;
+      }
+      .guard h3 {
+        color: var(--green);
+      }
+      .guard pre {
+        padding: 8px 0;
+        color: #065f46;
+      }
+      .sources {
+        font-size: 13px;
+        margin-top: 28px;
+        color: var(--muted);
+      }
+      .sources a {
+        margin-right: 12px;
+        display: inline-block;
+      }
+      footer {
+        border-top: 1px solid var(--line);
+        padding: 28px 0 40px;
+        color: var(--muted);
+        font-size: 13px;
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+      }
+      @media (max-width: 780px) {
+        .bar {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 8px;
+        }
+        main,
+        .bar {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+        section {
+          padding: 40px 0;
+        }
+        .architecture,
+        .steps,
+        .roundtrip,
+        .safety {
+          grid-template-columns: 1fr;
+        }
+        .flow {
+          grid-template-columns: 1fr 1fr;
+        }
+        .bridge {
+          padding: 20px;
+        }
+        .bridge .arrow {
+          display: inline;
+          font-size: 23px;
+          margin: 0 8px;
+        }
+        .bridge strong {
+          display: inline;
+        }
+        .bridge br {
+          display: none;
+        }
+        .bridge .return {
+          margin-top: 10px;
+        }
+        h1 {
+          letter-spacing: -1.5px;
+        }
+        footer {
+          flex-direction: column;
+        }
+      }
+      @media (max-width: 420px) {
+        .flow {
+          grid-template-columns: 1fr;
+        }
+        .context,
+        .step {
+          padding: 20px;
+        }
+        nav {
+          gap: 8px 16px;
+        }
+      }
+      @media print {
+        header {
+          position: static;
+        }
+        section {
+          break-before: page;
+        }
+        section:first-child {
+          break-before: auto;
+        }
+        details > div {
+          display: block;
+        }
+        .skip {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#overview">Skip to walkthrough</a>
+    <header>
+      <div class="bar">
+        <a class="brand" href="#overview">pangu<span>.js</span> / under the hood</a>
+        <nav aria-label="Walkthrough views">
+          <a href="#overview">01 Overview</a><a href="#content">02 Content script</a><a href="#worker">03 Service worker</a><a href="#safety">04 Safe return</a>
+        </nav>
+      </div>
+    </header>
+    <main>
+      <section id="overview" aria-labelledby="overview-title">
+        <p class="eyebrow">01 / The execution boundary</p>
+        <h1 id="overview-title">AI spacing walkthrough</h1>
+        <p class="intro">The content script owns the page text. The service worker owns model sessions. AI spacing has a module in each, connected by a request and its reply.</p>
+        <div class="architecture" aria-label="Content script and service worker communicate through Chrome messages">
+          <article class="context">
+            <span class="tag">Inside the page · content-script context</span>
+            <h3>Find text. Apply edits.</h3>
+            <div class="module"><strong>content-script.ts</strong><small>Read settings → connect AI callback → start pangu</small></div>
+            <div class="connector">↓ autoSpacePage()</div>
+            <div class="module"><strong>src/browser/pangu.ts</strong><small>Apply ordinary spacing rules to the DOM</small></div>
+            <div class="connector">↓ onTextNodesSettled()</div>
+            <div class="module ai"><strong>ai-spacing/content-script.ts</strong><small>Find candidates → request labels → prepare edits</small></div>
+          </article>
+          <div class="bridge">
+            <strong>sentence + position</strong><code>runtime.sendMessage</code><span class="arrow" aria-hidden="true">⟶</span>
+            <div class="return"><strong>classification labels</strong><code>sendResponse</code><span class="arrow back" aria-hidden="true">⟵</span></div>
+            <span class="muted">Chrome message boundary</span>
+          </div>
+          <article class="context worker">
+            <span class="tag">Extension background · worker context</span>
+            <h3>Classify the symbol.</h3>
+            <div class="module"><strong>service-worker.ts</strong><small>Receive the message via runtime.onMessage</small></div>
+            <div class="connector">↓ handleClassification()</div>
+            <div class="module ai"><strong>ai-spacing/service-worker.ts</strong><small>Select the prompt using the request's kind</small></div>
+            <div class="connector">↓ classifyCandidates()</div>
+            <div class="module ai"><strong>ai-spacing/models.ts</strong><small>Reuse cache or ask Chrome's on-device LanguageModel</small></div>
+          </article>
+        </div>
+        <div class="note"
+          ><p
+            ><strong>AI spacing spans both sides.</strong> Calls inside a context are ordinary function calls. Only sentences and labels cross the message boundary; DOM nodes stay with the content
+            script.</p
+          ></div
+        >
+        <details
+          ><summary>How does the content script start?</summary
+          ><div
+            ><p
+              >In automatic mode, the worker registers the content script for page loads; the content script checks the URL policy. In manual mode, the popup injects it if needed and sends
+              <code>MANUAL_SPACING</code> using <code>chrome.tabs.sendMessage()</code>.</p
+            ><p>The content script connects the AI callback only if <code>is_ai_spacing_enabled</code> is true. The worker's classification handler does not recheck that setting.</p></div
+          ></details
+        >
+        <p class="sources"
+          >Source: <a href="browser-extensions/chrome/src/content-script.ts">content-script.ts</a><a href="browser-extensions/chrome/src/service-worker.ts">service-worker.ts</a
+          ><a href="browser-extensions/chrome/src/popup.ts">popup.ts</a></p
+        >
+      </section>
+      <section id="content" aria-labelledby="content-title">
+        <p class="eyebrow">02 / Content script</p>
+        <h2 id="content-title">Rules first. Meaning second.</h2>
+        <p class="intro">Pangu finishes a batch of ordinary spacing, then gives AI spacing each node's original and settled text. “Settled” means the rules are done; an AI correction may follow.</p>
+        <div class="steps">
+          <article class="step"
+            ><span class="number">01 → ORIGINAL</span><h3>Read the page</h3><span class="sample" lang="zh-TW">氣溫是-5度</span
+            ><p class="muted">The original text tells us the author put the minus sign directly against the number.</p></article
+          >
+          <article class="step"
+            ><span class="number">02 → ORDINARY RULES</span><h3>Insert spacing</h3><span class="sample" lang="zh-TW">氣溫是 -<del aria-label="inserted space"> </del>5 度</span
+            ><p class="muted">The rules insert a space after the hyphen. The <code>hyphen-digit</code> shape flags that gap for classification.</p></article
+          >
+          <article class="step"
+            ><span class="number">03 → AI QUESTION</span><h3>Is this a negative number?</h3><span class="sample"><code>kind: hyphen-digit</code></span
+            ><p class="muted">The content module gathers sentence context and the symbol's position. The worker only needs these values.</p></article
+          >
+        </div>
+        <div class="roundtrip">
+          <article class="payload"
+            ><h3>OUTBOUND → content script to worker</h3
+            ><pre>
+{
+  "type": "CLASSIFY_CANDIDATES",
+  "kind": "hyphen-digit",
+  "candidates": [
+    { "sentence": "氣溫是-5度", "at": 3 }
+  ]
+}</pre
+            ><p><code>at</code> is the symbol's index within the sentence. No DOM reference crosses this boundary.</p></article
+          >
+          <article class="payload reply"
+            ><h3>INBOUND ← worker to content script</h3
+            ><pre>
+{
+  "ok": true,
+  "candidateLabels": [
+    "signed-number"
+  ]
+}</pre
+            ><p>Illustrative model answer. Labels match the candidate array by index. The model's actual choice can vary.</p></article
+          >
+        </div>
+        <details
+          ><summary>Which shapes ask the model?</summary
+          ><div
+            ><p
+              ><strong>hyphen-digit:</strong> a CJK character followed by a tight <code>-</code> and digit, where the rules inserted a gap after the hyphen. <code>signed-number</code> removes that
+              gap.</p
+            ><p
+              ><strong>digit-plus:</strong> a digit followed by <code>+</code> and CJK text, where the rules inserted a gap after the plus. <code>conjunction</code> adds a gap before it:
+              <span lang="zh-TW">Switch 2+ 瑪利歐</span> → <span lang="zh-TW">Switch 2 + 瑪利歐</span>. The current prompt accepts only context with a single plus.</p
+            ><p>Other labels leave the rules' output in place. Shapes with candidates send separate requests concurrently.</p></div
+          ></details
+        >
+        <p class="sources"
+          >Source: <a href="browser-extensions/chrome/src/ai-spacing/content-script.ts">AI content module</a><a href="browser-extensions/chrome/src/ai-spacing/messages.ts">message contract</a
+          ><a href="browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit.ts">hyphen-digit</a><a href="browser-extensions/chrome/src/ai-spacing/shapes/digit-plus.ts">digit-plus</a></p
+        >
+      </section>
+      <section id="worker" aria-labelledby="worker-title">
+        <p class="eyebrow">03 / Service worker</p>
+        <h2 id="worker-title">A label comes back, not a rewrite.</h2>
+        <p class="intro">The worker selects the shape's prompt, gets its base model session, and classifies candidates in order. A cached answer can skip inference.</p>
+        <ol class="flow">
+          <li
+            ><span class="number">01 → ROUTE</span><strong>Choose the prompt</strong
+            ><p><code>kind</code> selects <code>hyphen-digit</code> or <code>digit-plus</code>. Each has its own system prompt and allowed labels.</p></li
+          >
+          <li
+            ><span class="number">02 → REUSE</span><strong>Check the cache</strong
+            ><p>Reuse the shape's base session and any answer already stored for the generated question, including work still in progress.</p></li
+          >
+          <li
+            ><span class="number">03 → INFER ON A MISS</span><strong>Clone → prompt → destroy</strong
+            ><p>A temporary session clone answers one question with a constrained label. The clone is destroyed after the prompt.</p></li
+          >
+          <li
+            ><span class="number">04 → RESPOND</span><strong>Validate and return</strong
+            ><p>Parse and validate the answer. Return labels in request order, with <code>null</code> for failed or invalid individual answers.</p></li
+          >
+        </ol>
+        <details
+          ><summary>Warm-up: the same request with an empty array</summary
+          ><div
+            ><p
+              >Before ordinary spacing starts, the content module scans page text once for potential shapes and sends <code>candidates: []</code> for each relevant shape. That creates or reuses the
+              base session without prompting a candidate.</p
+            ><p
+              >The model must already be available. This path does not start a model download. The content script ignores warm-up replies; a warm-up failure alone does not set its AI failure flag.</p
+            ></div
+          ></details
+        >
+        <details
+          ><summary>Cache lifetime and concurrency</summary
+          ><div
+            ><p>Session and answer caches live in worker memory and disappear when the worker stops. Failed session creation and <code>null</code> answers are removed from their caches.</p
+            ><p>Candidates run sequentially <strong>inside each request</strong>. Separate requests can overlap; there is no global JavaScript queue. Matching requests can share pending work.</p></div
+          ></details
+        >
+        <p class="sources"
+          >Source: <a href="browser-extensions/chrome/src/ai-spacing/service-worker.ts">AI worker handler</a
+          ><a href="browser-extensions/chrome/src/ai-spacing/models.ts">model sessions and cache</a></p
+        >
+      </section>
+      <section id="safety" aria-labelledby="safety-title">
+        <p class="eyebrow">04 / Back to the page</p>
+        <h2 id="safety-title">Apply the fix only if the text still matches.</h2>
+        <p class="intro">The content module turns labels into exact edits and combines all edits for a node into one late fix. Pangu checks the node again when the scheduled write runs.</p>
+        <div class="safety">
+          <article class="guard"
+            ><span class="tag">Content-script context</span><h3>Guard the DOM write</h3
+            ><pre>
+applyLateFixes(fixes)
+  for each fix
+    if node is detached, changed, or ignored
+      skip
+    write fix.data
+    remember this AI-fixed text</pre
+            ><p
+              >Expected: <span lang="zh-TW">氣溫是 - 5 度</span><br />Write: <span class="sample" lang="zh-TW">氣溫是 <mark>-5</mark> 度</span></p
+            ><small>The rules preserve this correction while the node still contains pangu's last written text.</small></article
+          >
+          <div>
+            <details open
+              ><summary>The page changes while AI is thinking</summary
+              ><div
+                ><p
+                  >If the page replaces <span lang="zh-TW">氣溫是 - 5 度</span> with <span lang="zh-TW">氣溫是 8 度</span>, the stored snapshot no longer matches. The late fix is skipped, so an old
+                  model answer cannot overwrite the new temperature.</p
+                ></div
+              ></details
+            >
+            <details
+              ><summary>One candidate returns null or unsure</summary
+              ><div><p>That candidate produces no edit. Other successful candidates can still be applied, and AI spacing remains available for later batches.</p></div></details
+            >
+            <details
+              ><summary>A classification request returns ok: false</summary
+              ><div><p>A worker communication or model setup failure disables future AI batches for this page. Ordinary spacing continues. Work already in flight may still complete.</p></div></details
+            >
+          </div>
+        </div>
+        <p class="sources">Source: <a href="src/browser/pangu.ts">pangu DOM guards</a><a href="browser-extensions/chrome/src/ai-spacing/content-script.ts">late-fix composition and failures</a></p>
+      </section>
+      <footer
+        ><span>pangu.js · Source-based walkthrough · September 13, 2026<br />Illustrative data flow; this page does not run the extension or call a model.</span
+        ><a href="#overview">Back to overview ↑</a></footer
+      >
+    </main>
+  </body>
+</html>
