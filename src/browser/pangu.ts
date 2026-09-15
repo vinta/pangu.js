@@ -85,9 +85,9 @@ export class BrowserPangu extends Pangu {
     this.spaceNode(document.body);
   }
 
-  public spaceNode(contextNode: Node) {
+  public spaceNode(node: Node) {
     // Only process nodes with actual content (excluding text nodes that contain only whitespace)
-    const textNodes = DomWalker.collectTextNodes(contextNode, true);
+    const textNodes = DomWalker.collectTextNodes(node, true);
     this.schedule(() => this.spaceTextNodes(textNodes));
   }
 
@@ -281,8 +281,8 @@ export class BrowserPangu extends Pangu {
   // Same processing as the queued paths, but synchronous, for pre-paint re-spacing
   // inside the MutationObserver callback. Returns false when the subtree exceeds
   // maxTextNodes, so the caller can fall back to the debounced queue
-  private spaceNodeSync(contextNode: Node, maxTextNodes: number) {
-    const textNodes = DomWalker.collectTextNodes(contextNode);
+  private spaceNodeSync(node: Node, maxTextNodes: number) {
+    const textNodes = DomWalker.collectTextNodes(node);
     if (textNodes.length > maxTextNodes) {
       return false;
     }

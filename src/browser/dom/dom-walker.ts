@@ -5,15 +5,15 @@ export class DomWalker {
   public static readonly spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
   public static readonly ignoredClass = 'no-pangu-spacing';
 
-  public static collectTextNodes(contextNode: Node, reverse = false) {
+  public static collectTextNodes(root: Node, reverse = false) {
     const nodes: Text[] = [];
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- JS callers can pass a missing element
-    if (!contextNode || contextNode instanceof DocumentFragment) {
+    if (!root || root instanceof DocumentFragment) {
       return nodes;
     }
 
-    const walker = this.createTextWalker(contextNode);
+    const walker = this.createTextWalker(root);
 
     while (walker.nextNode()) {
       nodes.push(walker.currentNode as Text);
