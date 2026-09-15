@@ -126,6 +126,9 @@ writeFileSync(
 );
 
 const extensionURL = `chrome-extension://${values['extension-id']}`;
+const redact = (error) => publicError(error, [profilePath, extensionURL, process.env.HOME]);
+
+// Serialized with toString() and run inside playwright-cli: no module-scope references, JSON-only arguments.
 async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics, diagnosticQuestions }) {
   const context = page.context();
   const worker = context.serviceWorkers().find((candidate) => candidate.url() === `${extensionURL}/dist/service-worker.js`);
@@ -159,7 +162,7 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
       }
       let createMs = null;
       const answersById = new Map(inputs.map((input) => [input.id, []]));
-      for (const order of orders) {
+      for (const [orderIndex, order] of orders.entries()) {
         const started = performance.now();
         const base = await LanguageModel.create({ initialPrompts: [{ role: 'system', content: system }], temperature: 0, topK: 1 });
         createMs ??= Math.round(performance.now() - started);
@@ -211,7 +214,7 @@ async function runInBrowser(page, { profilePath, extensionURL, prompt, inputs, o
                 raw,
                 error,
                 ms: Math.round(performance.now() - start),
-                order: orders.indexOf(order),
+                order: orderIndex,
                 ...(diagnostics ? { followups } : {}),
               });
             }
@@ -285,21 +288,22 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
       throw new Error(run.runnerError);
     }
     assert(Array.isArray(run.results), 'browser result missing results array');
-    assert.equal(new Set(run.results.map((kase) => kase.id)).size, run.results.length, 'duplicate browser result IDs');
+    const returnedById = new Map(run.results.map((kase) => [kase.id, kase]));
+    assert.equal(returnedById.size, run.results.length, 'duplicate browser result IDs');
     assert(
       run.results.every((kase) => inputs.some((input) => input.id === kase.id)),
       'unexpected browser result ID',
     );
     run.results = inputs.map((input) => {
-      const returned = run.results.find((kase) => kase.id === input.id);
+      const returned = returnedById.get(input.id);
       const answers = (returned?.answers ?? []).map((answer) => ({
         ...pick(answer, ['answer', 'raw', 'ms', 'order']),
-        error: answer.error ? publicError(answer.error, [profilePath, extensionURL, process.env.HOME]) : null,
+        error: answer.error ? redact(answer.error) : null,
         ...(answer.followups
           ? {
               followups: answer.followups.map((followup) => ({
                 ...pick(followup, ['question', 'raw', 'ms']),
-                ...(followup.error ? { error: publicError(followup.error, [profilePath, extensionURL, process.env.HOME]) } : {}),
+                ...(followup.error ? { error: redact(followup.error) } : {}),
               })),
             }
           : {}),
@@ -324,17 +328,18 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
   } catch (error) {
     Object.assign(result, {
       status: 'incomplete',
-      error: publicError(error, [profilePath, extensionURL, process.env.HOME]),
+      error: redact(error),
       inputs,
     });
-    writeFileSync(file, `${JSON.stringify(result, null, 2)}\n`, { flag: 'wx' });
-    console.error(`${variant}: incomplete run; ${result.error}; ${file}`);
-    process.exitCode = 1;
-    break;
   } finally {
     rmSync(command, { force: true });
   }
   writeFileSync(file, `${JSON.stringify(result, null, 2)}\n`, { flag: 'wx' });
+  if (result.error !== undefined) {
+    console.error(`${variant}: incomplete run; ${result.error}; ${file}`);
+    process.exitCode = 1;
+    break;
+  }
   const scored = result.results.filter((kase) => !kase.review);
   const skipped = scored.filter((kase) => kase.skipped);
   const errors = result.results.flatMap((kase) => kase.answers).filter((answer) => answer.error);

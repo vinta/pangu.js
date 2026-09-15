@@ -179,7 +179,7 @@ const worker = {
 };
 const info = { waitForURL: async () => {}, locator: () => ({ innerText: async () => process.env.TEST_PROFILE }) };
 const context = { serviceWorkers: () => [worker], waitForEvent: async () => info, browser: () => ({ version: () => 'test' }) };
-new Function('return (' + code + ')')()({ context: () => context }).then(run => console.log(JSON.stringify({ ...run, testCalls: calls, sessionId: 'private-session', profilePath: process.env.TEST_PROFILE, results: run.results.map(row => ({ ...row, requestToken: 'private-token', answers: row.answers.map(answer => ({ ...answer, requestToken: 'private-token' })) })) })));
+new Function('return (' + code + ')')()({ context: () => context }).then(run => console.log(JSON.stringify({ ...run, testCalls: calls, sessionId: 'private-session', profilePath: process.env.TEST_PROFILE, results: run.results.toReversed().map(row => ({ ...row, requestToken: 'private-token', answers: row.answers.map(answer => ({ ...answer, requestToken: 'private-token' })) })) })));
 `,
       { mode: 0o755 },
     );
@@ -264,12 +264,14 @@ test.skipIf(!supportsTypeScript)('browser and profile failures leave incomplete 
   writeFileSync(join(root, 'playwright-cli'), '#!/usr/bin/env node\nprocess.stderr.write("worker unavailable; token=private-token; profile=/Users/example/Profile"); process.exit(9);\n', {
     mode: 0o755,
   });
-  const run = spawnSync(process.execPath, ['scripts/prompt-experiments/sweep.mjs', '--cases', hyphenCases, '--extension-id', 'a'.repeat(32), '--profile-path', profile, '--out', output], {
-    encoding: 'utf8',
-    env: { ...process.env, PATH: `${root}:${process.env.PATH}` },
-  });
+  const run = spawnSync(
+    process.execPath,
+    ['scripts/prompt-experiments/sweep.mjs', '--cases', hyphenCases, '--extension-id', 'a'.repeat(32), '--profile-path', profile, '--out', output, 'shipping', 'real-r1-semantic'],
+    { encoding: 'utf8', env: { ...process.env, PATH: `${root}:${process.env.PATH}` } },
+  );
   expect(run.status).toBe(1);
   expect(existsSync(join(output, 'run-code.js'))).toBe(false);
+  expect(existsSync(join(output, '2-real-r1-semantic.json'))).toBe(false);
   const artifact = JSON.parse(readFileSync(join(output, '1-shipping.json'), 'utf8')) as { status: string; error: string; stderr: string; inputs: unknown[]; results?: unknown[] };
   expect(artifact.status).toBe('incomplete');
   expect(artifact.error).toContain('Browser command failed (exit 9)');
