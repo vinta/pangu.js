@@ -31,7 +31,7 @@
   - [pangu.py](https://github.com/vinta/pangu.py)
   - [pangu.go](https://github.com/vinta/pangu)
   - [pangu.java](https://github.com/vinta/pangu.java)
-  - [pangu.space](https://github.com/vinta/pangu.space)
+  - [pangu.space](https://github.com/vinta/pangu.space) (HTTP API)
 - Community support:
   - [pangu.clj](https://github.com/coldnew/pangu.clj)
   - [pangu.dart](https://github.com/SemonCat/pangu.dart)
@@ -63,6 +63,8 @@ Regex rules can't distinguish semantic nuances like these, so the extension asks
 GPT-6 Astra writes the prompts. It runs the [prompt-experiments](.agents/skills/prompt-experiments/SKILL.md) skill: propose a change, then test it against the real Gemini Nano in Chrome. When a case fails, it interviews Gemini Nano for clues. When progress stalls, it searches online for new approaches to test. Prompts for a model, tuned by a bigger model, judged on real data.
 
 ## JavaScript Library
+
+Opinionated paranoid text spacing: automatically inserts whitespace between CJK (Chinese, Japanese, Korean) and ANS (alphabetical letters, numerical digits and symbols).
 
 ```bash
 npm install pangu --save-exact
