@@ -70,7 +70,7 @@ Opinionated paranoid text spacing: automatically inserts whitespace between CJK 
 npm install pangu --save-exact
 ```
 
-Learn more in the [changelog](CHANGELOG.md) or on [npm](https://www.npmjs.com/package/pangu).
+See the [changelog](CHANGELOG.md) or [npm](https://www.npmjs.com/package/pangu) for details.
 
 ### Browser
 
