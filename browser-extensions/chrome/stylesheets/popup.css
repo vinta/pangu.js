@@ -83,7 +83,6 @@
   text-decoration-color: currentColor;
 }
 
-/* Notification styles */
 .notification {
   position: absolute;
   top: var(--spacing-4);
@@ -128,17 +127,16 @@
   border: 1px solid var(--color-success-border);
 }
 
-/* Style for main toggle */
 .popup-section .toggle:not(.toggle-secondary) .toggle-switch {
   background-color: var(--color-surface-tertiary);
 }
 
 .popup-section .toggle:not(.toggle-secondary) .toggle-input:checked + .toggle-switch {
-  background-color: var(--color-primary-light); /* Light blue for active state */
+  background-color: var(--color-primary-light);
 }
 
 .popup-section .toggle:not(.toggle-secondary) .toggle-input:checked + .toggle-switch::after {
-  background-color: var(--color-primary); /* Blue circle for active state */
+  background-color: var(--color-primary);
 }
 
 /* Style for status toggle */
@@ -147,21 +145,20 @@
 }
 
 .toggle-secondary .toggle-input:checked + .toggle-switch {
-  background-color: var(--color-success-light); /* Light green for active state */
+  background-color: var(--color-success-light);
 }
 
 .toggle-secondary .toggle-input:checked + .toggle-switch::after {
-  background-color: #22c55e; /* Green circle for active state */
+  background-color: #22c55e;
 }
 
 .popup-section .toggle .toggle-label {
   font-size: var(--text-base);
 }
 
-/* Disabled toggle for status display */
 .toggle-secondary {
   cursor: not-allowed !important;
-  opacity: 1 !important; /* Override default disabled opacity */
+  opacity: 1 !important;
 }
 
 .toggle-secondary .toggle-switch {
