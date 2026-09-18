@@ -69,6 +69,16 @@
   gap: var(--spacing-3);
 }
 
+/* Footer links follow pangu.space: ink, blue on hover */
+.popup-footer a {
+  color: var(--color-text-primary);
+}
+
+.popup-footer a:hover {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
 /* Notification styles */
 .notification {
   position: absolute;

@@ -97,12 +97,6 @@
   text-align: right;
 }
 
-/* Ink links in running text need an underline to read as links */
-.form-help-text a,
-.url-list-help a {
-  text-decoration: underline;
-}
-
 /* Download button on the left, model status on the right; margin-left auto keeps the status right when the button is hidden */
 .ai-model-row {
   display: flex;
@@ -312,6 +306,16 @@
 
 .options-toggle-section .toggle .toggle-label {
   font-size: var(--text-base);
+}
+
+/* Footer links follow pangu.space: ink, blue on hover */
+.options-footer-section a {
+  color: var(--color-text-primary);
+}
+
+.options-footer-section a:hover {
+  color: var(--color-primary);
+  text-decoration: none;
 }
 
 .options-footer-links {
