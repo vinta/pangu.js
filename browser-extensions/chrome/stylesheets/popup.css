@@ -117,12 +117,10 @@
 /* Style for main toggle */
 .popup-section .toggle:not(.toggle-secondary) .toggle-switch {
   background-color: var(--color-surface-tertiary);
-  border-color: var(--color-border);
 }
 
 .popup-section .toggle:not(.toggle-secondary) .toggle-input:checked + .toggle-switch {
   background-color: var(--color-primary-light); /* Light blue for active state */
-  border-color: #93c5fd;
 }
 
 .popup-section .toggle:not(.toggle-secondary) .toggle-input:checked + .toggle-switch::after {
@@ -132,12 +130,10 @@
 /* Style for status toggle */
 .toggle-secondary .toggle-switch {
   background-color: var(--color-surface-tertiary);
-  border-color: var(--color-border);
 }
 
 .toggle-secondary .toggle-input:checked + .toggle-switch {
   background-color: #dcfce7; /* Light green for active state */
-  border-color: #86efac;
 }
 
 .toggle-secondary .toggle-input:checked + .toggle-switch::after {

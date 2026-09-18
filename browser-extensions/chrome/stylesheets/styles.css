@@ -219,7 +219,10 @@ input:focus-visible,
   height: 24px;
   background-color: var(--color-border);
   border-radius: var(--radius-full);
-  transition: background-color var(--transition);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  transition:
+    background-color var(--transition),
+    box-shadow var(--transition);
 }
 
 .toggle-switch::after {
@@ -237,6 +240,11 @@ input:focus-visible,
 
 .toggle-input:checked + .toggle-switch {
   background-color: var(--color-primary);
+  box-shadow: none;
+}
+
+.toggle-input:disabled + .toggle-switch {
+  box-shadow: none;
 }
 
 .toggle-input:checked + .toggle-switch::after {
