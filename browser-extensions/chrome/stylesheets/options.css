@@ -259,14 +259,15 @@
 
 .save-new-url-btn,
 .save-edit-url-btn {
-  background-color: var(--color-success);
-  color: white;
-  border-color: var(--color-success);
+  background-color: #dcfce7;
+  color: var(--color-success);
+  border-color: #86efac;
 }
 
 .save-new-url-btn:hover,
 .save-edit-url-btn:hover {
-  background-color: #059669;
+  background-color: #bbf7d0;
+  border-color: #4ade80;
 }
 
 .cancel-edit-btn {
