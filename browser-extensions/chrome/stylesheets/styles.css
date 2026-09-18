@@ -261,6 +261,10 @@ input:focus-visible,
   cursor: not-allowed;
 }
 
+.toggle-input:disabled ~ .toggle-label {
+  color: var(--color-text-secondary);
+}
+
 .toggle.toggle-disabled .toggle-switch {
   background-color: var(--color-surface-tertiary);
 }
