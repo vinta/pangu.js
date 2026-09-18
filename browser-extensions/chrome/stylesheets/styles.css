@@ -117,13 +117,13 @@ code {
 }
 
 a {
-  color: var(--color-primary);
+  color: var(--color-text-primary);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
 
 a:hover {
-  text-decoration: underline;
+  color: var(--color-primary);
 }
 
 a:focus-visible,
