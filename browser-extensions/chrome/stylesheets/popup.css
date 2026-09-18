@@ -71,7 +71,6 @@
   gap: var(--spacing-3);
 }
 
-/* Footer links: ink with a light underline, blue on hover */
 .popup-footer a {
   color: var(--color-text-primary);
   text-decoration: underline;

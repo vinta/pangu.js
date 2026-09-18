@@ -76,7 +76,7 @@
   margin-top: var(--spacing-2);
 }
 
-/* Trim the leading under a card's last line of text, so the bottom space matches the top; :has() is safe here since text-box needs Chrome 133 */
+/* :has() needs Chrome 105, fine here since text-box needs Chrome 133 */
 .form-help-text:not(:has(~ :not([hidden]))),
 .url-list-help {
   text-box: trim-end text;
@@ -294,7 +294,7 @@
   margin-bottom: 0;
 }
 
-/* The inline-flex toggle sits on the text baseline, so a toggle ending its card keeps descender space below it */
+/* A toggle ending its card sits on the text baseline and leaves descender space below it */
 .options-toggle-section .toggle:last-child {
   vertical-align: top;
 }
@@ -316,7 +316,6 @@
   font-size: var(--text-base);
 }
 
-/* Footer links: ink with a light underline, blue on hover */
 .options-footer-section a {
   color: var(--color-text-primary);
   text-decoration: underline;
