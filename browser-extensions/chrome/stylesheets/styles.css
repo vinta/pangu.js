@@ -126,6 +126,14 @@ a:hover {
   text-decoration: underline;
 }
 
+a:focus-visible,
+.btn:focus-visible,
+input:focus-visible,
+.toggle-input:focus-visible + .toggle-switch {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 /* Modern Button Styles */
 .btn {
   display: inline-flex;
@@ -147,11 +155,6 @@ a:hover {
 
 .btn-sm {
   padding: var(--spacing-1) var(--spacing-3);
-}
-
-.btn:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
 }
 
 .btn:disabled {
@@ -277,4 +280,13 @@ a:hover {
 }
 .mt-6 {
   margin-top: var(--spacing-6) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    transition: none !important;
+    animation: none !important;
+  }
 }

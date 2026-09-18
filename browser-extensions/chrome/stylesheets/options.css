@@ -171,9 +171,7 @@
 }
 
 .url-edit-input:focus {
-  outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
 }
 
 /* URL display input (clickable) */
@@ -200,7 +198,6 @@
 }
 
 .url-display-input:focus {
-  outline: none;
   cursor: text;
 }
 
