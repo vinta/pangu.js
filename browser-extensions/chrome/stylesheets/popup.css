@@ -1,6 +1,7 @@
 .popup-container {
   position: relative;
-  width: 400px;
+  width: max-content;
+  min-width: 400px;
   padding: 0;
   background-color: var(--color-surface);
   display: flex;
@@ -28,6 +29,7 @@
 .popup-title {
   font-size: var(--text-xl);
   font-weight: 600;
+  white-space: nowrap;
   color: var(--color-text-primary);
   margin: 0;
   line-height: 1.2;
