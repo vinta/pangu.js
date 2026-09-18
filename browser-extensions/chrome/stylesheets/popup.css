@@ -95,7 +95,7 @@
   font-size: var(--text-base);
   text-align: center;
   border-radius: var(--radius);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
   animation: slideDown 0.3s ease-out;
   cursor: pointer;
 }
