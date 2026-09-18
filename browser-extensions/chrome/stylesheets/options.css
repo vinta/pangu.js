@@ -303,12 +303,12 @@
 }
 
 .options-toggle-section .toggle .toggle-input:checked + .toggle-switch {
-  background-color: #dbeafe; /* Light blue for active state */
+  background-color: var(--color-primary-light); /* Light blue for active state */
   border-color: #93c5fd;
 }
 
 .options-toggle-section .toggle .toggle-input:checked + .toggle-switch::after {
-  background-color: #3b82f6; /* Blue circle for active state */
+  background-color: var(--color-primary); /* Blue circle for active state */
 }
 
 .options-toggle-section .toggle .toggle-label {

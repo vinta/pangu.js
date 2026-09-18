@@ -121,12 +121,12 @@
 }
 
 .popup-section .toggle:not(.toggle-secondary) .toggle-input:checked + .toggle-switch {
-  background-color: #dbeafe; /* Light blue for active state */
+  background-color: var(--color-primary-light); /* Light blue for active state */
   border-color: #93c5fd;
 }
 
 .popup-section .toggle:not(.toggle-secondary) .toggle-input:checked + .toggle-switch::after {
-  background-color: #3b82f6; /* Blue circle for active state */
+  background-color: var(--color-primary); /* Blue circle for active state */
 }
 
 /* Style for status toggle */
