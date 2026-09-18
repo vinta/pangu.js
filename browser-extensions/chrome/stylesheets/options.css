@@ -208,18 +208,18 @@
   display: inline-flex;
   align-items: center;
   padding: var(--spacing-2) var(--spacing-3);
-  background-color: #dcfce7;
+  background-color: var(--color-success-light);
   color: var(--color-success);
   font-size: var(--text-base);
   line-height: inherit;
-  border: 1px solid #86efac;
+  border: 1px solid var(--color-success-border);
   border-radius: var(--radius);
   transition: all var(--transition-fast);
 }
 
 #add-url-btn:hover {
-  background-color: #bbf7d0;
-  border-color: #4ade80;
+  background-color: var(--color-success-light-hover);
+  border-color: var(--color-success-border-hover);
 }
 
 /* Restore defaults button */
@@ -227,44 +227,44 @@
   display: inline-flex;
   align-items: center;
   padding: var(--spacing-2) var(--spacing-3);
-  background-color: #fee2e2;
+  background-color: var(--color-danger-light);
   color: var(--color-danger);
   font-size: var(--text-base);
   line-height: inherit;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--color-danger-border);
   border-radius: var(--radius);
   transition: all var(--transition-fast);
 }
 
 #restore-defaults-btn:hover {
-  background-color: #fecaca;
-  border-color: #f87171;
+  background-color: var(--color-danger-light-hover);
+  border-color: var(--color-danger-border-hover);
 }
 
 /* Small buttons for URL actions */
 
 .remove-url-btn {
-  background-color: #fee2e2;
+  background-color: var(--color-danger-light);
   color: var(--color-danger);
-  border: 1px solid #fecaca;
+  border: 1px solid var(--color-danger-border);
 }
 
 .remove-url-btn:hover {
-  background-color: #fecaca;
-  border-color: #f87171;
+  background-color: var(--color-danger-light-hover);
+  border-color: var(--color-danger-border-hover);
 }
 
 .save-new-url-btn,
 .save-edit-url-btn {
-  background-color: #dcfce7;
+  background-color: var(--color-success-light);
   color: var(--color-success);
-  border-color: #86efac;
+  border-color: var(--color-success-border);
 }
 
 .save-new-url-btn:hover,
 .save-edit-url-btn:hover {
-  background-color: #bbf7d0;
-  border-color: #4ade80;
+  background-color: var(--color-success-light-hover);
+  border-color: var(--color-success-border-hover);
 }
 
 .cancel-edit-btn {

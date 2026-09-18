@@ -7,7 +7,18 @@
   --color-secondary: #8b5cf6;
   --color-secondary-hover: #7c3aed;
   --color-success: #15803d;
+  --color-success-light: #dcfce7;
+  --color-success-light-hover: #bbf7d0;
+  --color-success-border: #86efac;
+  --color-success-border-hover: #4ade80;
   --color-danger: #b91c1c;
+  --color-danger-light: #fee2e2;
+  --color-danger-light-hover: #fecaca;
+  --color-danger-border: #fecaca;
+  --color-danger-border-hover: #f87171;
+  --color-info: #0369a1;
+  --color-info-light: #e0f2fe;
+  --color-info-border: #7dd3fc;
   --color-warning: #f59e0b;
 
   /* Surfaces */
