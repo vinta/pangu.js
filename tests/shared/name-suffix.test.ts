@@ -10,6 +10,8 @@ describe('Name suffixes', () => {
     expect(pangu.spaceText('Discovery+和discovery+都上架了')).toBe('Discovery+ 和 discovery+ 都上架了');
     expect(pangu.spaceText('Disney+上架了新片')).toBe('Disney+ 上架了新片');
     expect(pangu.spaceText('Disney+上架了C++課程')).toBe('Disney+ 上架了 C++ 課程');
+    expect(pangu.spaceText('mo店+免運無限次 天天超取290起-momo購物網')).toBe('mo 店+ 免運無限次 天天超取 290 起 - momo 購物網');
+    expect(pangu.spaceText('mo 店+ 免運無限次')).toBe('mo 店+ 免運無限次');
     expect(pangu.spaceText('PS+會員')).toBe('PS+ 會員');
     expect(pangu.spaceText('公視+上架了新片')).toBe('公視+ 上架了新片');
     expect(pangu.spaceText('如何使用PTS+（公視+）註冊與觀看？')).toBe('如何使用 PTS+（公視+）註冊與觀看？');

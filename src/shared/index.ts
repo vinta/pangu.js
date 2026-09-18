@@ -123,7 +123,7 @@ export const CJK_HASH = new RegExp(`([${CJK}])(#([^ \\u00a0]))`, 'g');
 // Non-breaking space: [ ] (U+00A0). A hashtag right after a slash in a list (/#tag) is a hashtag, not a C# shape
 export const HASH_CJK = new RegExp(`(([^ \\u00a0/])#)([${CJK}])`, 'g');
 
-const PRODUCT_NAME = 'Apple TV|CATCHPLAY|[Dd]iscovery|Disney|ESPN|Fitness|iCloud|Paramount|PS';
+const PRODUCT_NAME = 'Apple TV|CATCHPLAY|[Dd]iscovery|Disney|ESPN|Fitness|iCloud|mo ?店|Paramount|PS';
 const PRODUCT_NAME_IN_CJK = '公視|影劇館';
 const PRODUCT_TIER = 'Pro';
 const CREDIT_RATING = '(?:tw)?(?:AA|BBB|BB|CCC)|tw[AB]';

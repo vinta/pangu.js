@@ -1196,7 +1196,8 @@ test.describe('BrowserPangu', () => {
         '<p><span>Disney+</span><span>上架</span></p>' +
           '<p><span>影劇館+</span><span>上架</span></p>' +
           '<p><span>Discovery+</span><span>上架</span></p>' +
-          '<p><span>Apple TV+</span><span>上架</span></p>',
+          '<p><span>Apple TV+</span><span>上架</span></p>' +
+          '<p><span>mo店+</span><span>免運</span></p>',
       );
 
       const firstPass = await page.evaluate(() => {
@@ -1207,7 +1208,8 @@ test.describe('BrowserPangu', () => {
         '<p><span>Disney+</span><span> 上架</span></p>' +
           '<p><span>影劇館+</span><span> 上架</span></p>' +
           '<p><span>Discovery+</span><span> 上架</span></p>' +
-          '<p><span>Apple TV+</span><span> 上架</span></p>',
+          '<p><span>Apple TV+</span><span> 上架</span></p>' +
+          '<p><span>mo 店+</span><span> 免運</span></p>',
       );
       const secondPass = await page.evaluate(() => {
         pangu.spacePage();
