@@ -1,6 +1,5 @@
 :root {
   --color-primary: #3b82f6;
-  --color-primary-hover: #2563eb;
   --color-primary-light: #dbeafe;
   --color-secondary: #8b5cf6;
   --color-secondary-hover: #7c3aed;
@@ -150,23 +149,12 @@ input:focus-visible,
 }
 
 .btn-primary {
-  background-color: var(--color-primary);
-  color: var(--color-text-on-primary);
-  border-color: var(--color-primary);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
-}
-
-.btn-primary-black {
   background-color: var(--color-text-primary);
   color: var(--color-text-on-primary);
   border-color: var(--color-text-primary);
 }
 
-.btn-primary-black:hover:not(:disabled) {
+.btn-primary:hover:not(:disabled) {
   background-color: var(--color-text-primary);
   border-color: var(--color-text-primary);
   opacity: 0.9;
