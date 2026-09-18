@@ -152,7 +152,7 @@
 }
 
 .popup-section .toggle .toggle-label {
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
 }
 
 /* Disabled toggle for status display */

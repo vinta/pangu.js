@@ -212,7 +212,7 @@
   padding: var(--spacing-2) var(--spacing-3);
   background-color: #dcfce7;
   color: var(--color-success);
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   font-weight: normal;
   line-height: inherit;
   border: 1px solid #86efac;
@@ -232,7 +232,7 @@
   padding: var(--spacing-2) var(--spacing-3);
   background-color: #fef2f2;
   color: var(--color-danger);
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   font-weight: normal;
   line-height: inherit;
   border: 1px solid #fecaca;
@@ -316,7 +316,7 @@
 }
 
 .options-toggle-section .toggle .toggle-label {
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
 }
 
 /* Footer links follow pangu.space: ink, blue on hover */
