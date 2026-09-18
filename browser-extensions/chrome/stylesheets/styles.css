@@ -283,6 +283,10 @@ input:focus-visible,
   margin-bottom: var(--spacing-4);
 }
 
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
 /* Utility classes */
 .mt-2 {
   margin-top: var(--spacing-2) !important;

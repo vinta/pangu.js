@@ -291,6 +291,11 @@
   margin-bottom: 0;
 }
 
+/* The inline-flex toggle sits on the text baseline, so a toggle ending its card keeps descender space below it */
+.options-toggle-section .toggle:last-child {
+  vertical-align: top;
+}
+
 /* Style for options toggles */
 .options-toggle-section .toggle .toggle-switch {
   background-color: var(--color-surface-tertiary);
