@@ -77,6 +77,12 @@
   margin-top: var(--spacing-2);
 }
 
+/* Trim the leading under a card's last line of text, so the bottom space matches the top; :has() is safe here since text-box needs Chrome 133 */
+.form-help-text:not(:has(~ :not([hidden]))),
+.url-list-help {
+  text-box: trim-end text;
+}
+
 /* A note under a section's cards; the bottom margin collapses with the footer's 2rem, so the same value on top keeps the gaps equal */
 .options-section-note {
   font-size: var(--text-base);
