@@ -319,14 +319,17 @@
   font-size: var(--text-base);
 }
 
-/* Footer links follow pangu.space: ink, blue on hover */
+/* Footer links: ink with a light underline, blue on hover */
 .options-footer-section a {
   color: var(--color-text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--color-text-tertiary);
+  text-decoration-color: color-mix(in srgb, var(--color-text-tertiary) 50%, var(--color-border));
 }
 
 .options-footer-section a:hover {
   color: var(--color-primary);
-  text-decoration: none;
+  text-decoration-color: currentColor;
 }
 
 .options-footer-links {
