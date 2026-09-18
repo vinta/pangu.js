@@ -1,48 +1,49 @@
-/* CSS Variables for consistent theming */
 :root {
-  /* Colors */
   --color-primary: #3b82f6;
-  --color-primary-hover: #2563eb;
   --color-primary-light: #dbeafe;
   --color-secondary: #8b5cf6;
   --color-secondary-hover: #7c3aed;
-  --color-success: #10b981;
-  --color-danger: #ef4444;
+  --color-success: #15803d;
+  --color-success-light: #dcfce7;
+  --color-success-light-hover: #bbf7d0;
+  --color-success-border: #86efac;
+  --color-success-border-hover: #4ade80;
+  --color-danger: #b91c1c;
+  --color-danger-light: #fee2e2;
+  --color-danger-light-hover: #fecaca;
+  --color-danger-border: #fecaca;
+  --color-danger-border-hover: #f87171;
+  --color-info: #0369a1;
+  --color-info-light: #e0f2fe;
+  --color-info-border: #7dd3fc;
   --color-warning: #f59e0b;
 
-  /* Surfaces */
   --color-surface: #ffffff;
-  --color-surface-secondary: #f9fafb;
+  --color-surface-secondary: #fafafa;
   --color-surface-tertiary: #f3f4f6;
-  --color-border: #e5e7eb;
-  --color-border-light: #f3f4f6;
+  --color-border: #e5e5e7;
+  --color-border-light: #f5f5f7;
 
-  /* Text */
-  --color-text-primary: #111827;
-  --color-text-secondary: #6b7280;
-  --color-text-tertiary: #9ca3af;
+  --color-text-primary: #1d1d1f;
+  --color-text-secondary: #6e6e73;
+  --color-text-tertiary: #a1a1a6;
   --color-text-on-primary: #ffffff;
 
-  /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 
-  /* Typography */
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang TC', 'Noto Sans TC', 'Noto Sans', sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
 
-  /* Font sizes */
-  --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
   --text-lg: 1.125rem;
-  --text-xl: 1.25rem;
+  --text-xl: 1.375rem;
   --text-2xl: 1.5rem;
-  --text-3xl: 2rem;
+  --text-3xl: 2.5rem;
 
-  /* Spacing */
   --spacing-1: 0.25rem;
   --spacing-2: 0.5rem;
   --spacing-3: 0.75rem;
@@ -50,20 +51,19 @@
   --spacing-5: 1.25rem;
   --spacing-6: 1.5rem;
   --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
 
-  /* Border radius */
   --radius-sm: 0.375rem;
   --radius: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-full: 9999px;
 
-  /* Transitions */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Base styles */
 * {
   box-sizing: border-box;
 }
@@ -79,7 +79,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Typography */
 h1,
 h2,
 h3,
@@ -89,16 +88,6 @@ h6 {
   margin: 0;
   font-weight: 600;
   line-height: 1.25;
-}
-
-h1 {
-  font-size: var(--text-2xl);
-}
-h2 {
-  font-size: var(--text-xl);
-}
-h3 {
-  font-size: var(--text-lg);
 }
 
 p {
@@ -124,7 +113,14 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Modern Button Styles */
+a:focus-visible,
+.btn:focus-visible,
+input:focus-visible,
+.toggle-input:focus-visible + .toggle-switch {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -147,41 +143,22 @@ a:hover {
   padding: var(--spacing-1) var(--spacing-3);
 }
 
-.btn:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* Button variants */
 .btn-primary {
-  background-color: var(--color-primary);
-  color: var(--color-text-on-primary);
-  border-color: var(--color-primary);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
-}
-
-.btn-primary-black {
   background-color: var(--color-text-primary);
   color: var(--color-text-on-primary);
   border-color: var(--color-text-primary);
 }
 
-.btn-primary-black:hover:not(:disabled) {
+.btn-primary:hover:not(:disabled) {
   background-color: var(--color-text-primary);
   border-color: var(--color-text-primary);
   opacity: 0.9;
 }
-
-/* Button sizes */
 
 .btn-lg {
   padding: var(--spacing-3) var(--spacing-6);
@@ -192,13 +169,12 @@ a:hover {
   width: 100%;
 }
 
-/* Toggle Switch */
 .toggle {
   position: relative;
   display: inline-flex;
   align-items: center;
   cursor: pointer;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
 }
 
 .toggle-input {
@@ -214,7 +190,10 @@ a:hover {
   height: 24px;
   background-color: var(--color-border);
   border-radius: var(--radius-full);
-  transition: background-color var(--transition);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  transition:
+    background-color var(--transition),
+    box-shadow var(--transition);
 }
 
 .toggle-switch::after {
@@ -232,6 +211,11 @@ a:hover {
 
 .toggle-input:checked + .toggle-switch {
   background-color: var(--color-primary);
+  box-shadow: none;
+}
+
+.toggle-input:disabled + .toggle-switch {
+  box-shadow: none;
 }
 
 .toggle-input:checked + .toggle-switch::after {
@@ -248,11 +232,14 @@ a:hover {
   cursor: not-allowed;
 }
 
+.toggle-input:disabled ~ .toggle-label {
+  color: var(--color-text-secondary);
+}
+
 .toggle.toggle-disabled .toggle-switch {
   background-color: var(--color-surface-tertiary);
 }
 
-/* Cards */
 .card {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -261,18 +248,29 @@ a:hover {
   box-shadow: var(--shadow-sm);
 }
 
-/* Form elements */
 .form-group {
   margin-bottom: var(--spacing-4);
 }
 
-/* Utility classes */
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
 .mt-2 {
-  margin-top: var(--spacing-2) !important;
+  margin-top: var(--spacing-2);
 }
 .mt-4 {
-  margin-top: var(--spacing-4) !important;
+  margin-top: var(--spacing-4);
 }
 .mt-6 {
-  margin-top: var(--spacing-6) !important;
+  margin-top: var(--spacing-6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    transition: none !important;
+    animation: none !important;
+  }
 }

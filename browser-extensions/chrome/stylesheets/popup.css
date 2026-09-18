@@ -1,6 +1,7 @@
 .popup-container {
   position: relative;
-  width: 400px;
+  width: max-content;
+  min-width: 400px;
   padding: 0;
   background-color: var(--color-surface);
   display: flex;
@@ -10,7 +11,7 @@
 .popup-header {
   padding: var(--spacing-4);
   background-color: var(--color-surface-secondary);
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .popup-brand {
@@ -26,8 +27,9 @@
 }
 
 .popup-title {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: var(--text-xl);
+  font-weight: 600;
+  white-space: nowrap;
   color: var(--color-text-primary);
   margin: 0;
   line-height: 1.2;
@@ -56,7 +58,7 @@
 .popup-footer {
   padding: var(--spacing-3) var(--spacing-4);
   background-color: var(--color-surface-secondary);
-  border-top: 1px solid var(--color-border-light);
+  border-top: 1px solid var(--color-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -69,7 +71,18 @@
   gap: var(--spacing-3);
 }
 
-/* Notification styles */
+.popup-footer a {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--color-text-tertiary);
+  text-decoration-color: color-mix(in srgb, var(--color-text-tertiary) 50%, var(--color-border));
+}
+
+.popup-footer a:hover {
+  color: var(--color-primary);
+  text-decoration-color: currentColor;
+}
+
 .notification {
   position: absolute;
   top: var(--spacing-4);
@@ -80,7 +93,7 @@
   font-size: var(--text-base);
   text-align: center;
   border-radius: var(--radius);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
   animation: slideDown 0.3s ease-out;
   cursor: pointer;
 }
@@ -97,64 +110,51 @@
 }
 
 .notification.info {
-  background-color: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #7dd3fc;
+  background-color: var(--color-info-light);
+  color: var(--color-info);
+  border: 1px solid var(--color-info-border);
 }
 
 .notification.error {
-  background-color: #fee2e2;
-  color: #dc2626;
-  border: 1px solid #fca5a5;
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger-border);
 }
 
 .notification.success {
-  background-color: #dcfce7;
-  color: #16a34a;
-  border: 1px solid #86efac;
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+  border: 1px solid var(--color-success-border);
 }
 
-/* Style for main toggle */
-.popup-section .toggle:not(.toggle-secondary) .toggle-switch {
+.popup-section .toggle:not(.toggle-status) .toggle-switch {
   background-color: var(--color-surface-tertiary);
-  border-color: var(--color-border);
 }
 
-.popup-section .toggle:not(.toggle-secondary) .toggle-input:checked + .toggle-switch {
-  background-color: #dbeafe; /* Light blue for active state */
-  border-color: #93c5fd;
+.popup-section .toggle:not(.toggle-status) .toggle-input:checked + .toggle-switch {
+  background-color: var(--color-primary-light);
 }
 
-.popup-section .toggle:not(.toggle-secondary) .toggle-input:checked + .toggle-switch::after {
-  background-color: #3b82f6; /* Blue circle for active state */
+.popup-section .toggle:not(.toggle-status) .toggle-input:checked + .toggle-switch::after {
+  background-color: var(--color-primary);
 }
 
-/* Style for status toggle */
-.toggle-secondary .toggle-switch {
+.toggle-status .toggle-switch {
   background-color: var(--color-surface-tertiary);
-  border-color: var(--color-border);
 }
 
-.toggle-secondary .toggle-input:checked + .toggle-switch {
-  background-color: #dcfce7; /* Light green for active state */
-  border-color: #86efac;
+.toggle-status .toggle-input:checked + .toggle-switch {
+  background-color: var(--color-success-light);
 }
 
-.toggle-secondary .toggle-input:checked + .toggle-switch::after {
-  background-color: #22c55e; /* Green circle for active state */
+.toggle-status .toggle-input:checked + .toggle-switch::after {
+  background-color: #22c55e;
 }
 
 .popup-section .toggle .toggle-label {
-  color: var(--color-text-secondary);
   font-size: var(--text-base);
 }
 
-/* Disabled toggle for status display */
-.toggle-secondary {
-  cursor: not-allowed !important;
-  opacity: 1 !important; /* Override default disabled opacity */
-}
-
-.toggle-secondary .toggle-switch {
-  cursor: not-allowed !important;
+.toggle-status {
+  cursor: not-allowed;
 }

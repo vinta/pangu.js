@@ -9,7 +9,6 @@
   padding: var(--spacing-8);
 }
 
-/* Header styles */
 .options-header {
   margin-bottom: var(--spacing-8);
 }
@@ -30,19 +29,18 @@
 
 .options-title {
   font-size: var(--text-3xl);
-  font-weight: 700;
   color: var(--color-text-primary);
   margin-bottom: var(--spacing-1);
 }
 
 .options-description {
-  font-size: var(--text-base);
+  font-size: var(--text-lg);
   color: var(--color-text-secondary);
 }
 
 .options-quote {
   font-size: var(--text-base);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   font-style: italic;
   border-left: 3px solid var(--color-border);
   padding-left: var(--spacing-4);
@@ -50,7 +48,6 @@
   line-height: 1.8;
 }
 
-/* Section styles */
 .options-section {
   margin-bottom: var(--spacing-6);
 }
@@ -62,23 +59,30 @@
   margin-bottom: var(--spacing-3);
 }
 
-/* Card enhancements */
 .card {
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
   padding: var(--spacing-6);
   box-shadow: var(--shadow-sm);
 }
 
-/* Form help text */
 .form-help-text {
   font-size: var(--text-base);
   color: var(--color-text-secondary);
   margin-top: var(--spacing-2);
 }
 
-/* A note under a section's cards; the bottom margin collapses with the footer's 2rem, so the same value on top keeps the gaps equal */
+#spacing-when-click-msg {
+  margin-top: var(--spacing-4);
+}
+
+/* :has() needs Chrome 105, fine here since text-box needs Chrome 133 */
+.form-help-text:not(:has(~ :not([hidden]))),
+.url-list-help {
+  text-box: trim-end text;
+}
+
+/* Collapses with the footer's margin-top, so the gaps above and below the note are equal */
 .options-section-note {
   font-size: var(--text-base);
   color: var(--color-text-secondary);
@@ -86,7 +90,6 @@
   text-align: center;
 }
 
-/* URL list section */
 .url-list-section {
   margin-top: var(--spacing-4);
   border-top: 1px solid var(--color-border-light);
@@ -98,28 +101,24 @@
   text-align: right;
 }
 
-/* Download button on the left, model status on the right; margin-left auto keeps the status right when the button is hidden */
 .ai-model-row {
   display: flex;
   align-items: center;
   margin-top: var(--spacing-4);
 }
 
-/* Same box as #add-url-btn: its padding, weight, and the line-height it inherits */
+/* Same padding and line-height as #add-url-btn */
 #ai-model-download-btn {
   padding: var(--spacing-2) var(--spacing-3);
-  font-weight: normal;
   line-height: inherit;
 }
 
-/* Aligned like the URL list help but quieter since it is not a link */
+/* margin-left auto keeps the status right-aligned when the download button is hidden */
 .ai-model-status {
   margin-top: 0;
   margin-left: auto;
-  color: var(--color-text-tertiary);
 }
 
-/* URL list styles */
 .filter-mode-list {
   list-style: none;
   padding: 0;
@@ -129,18 +128,17 @@
   gap: var(--spacing-2);
 }
 
-/* Empty list message */
-.empty-list-message {
-  color: var(--color-text-tertiary);
+.filter-mode-list .empty-list-message {
+  color: var(--color-text-secondary);
   text-align: center;
-  padding: var(--spacing-3) var(--spacing-4) !important;
-  background-color: #f5f5f5 !important;
-  border: 1px solid #e0e0e0 !important;
-  border-radius: var(--radius) !important;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-surface-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
 }
 
-.empty-list-message:hover {
-  background-color: #f5f5f5 !important;
+.filter-mode-list .empty-list-message:hover {
+  background-color: var(--color-surface-tertiary);
 }
 
 .filter-mode-list li {
@@ -158,7 +156,6 @@
   background-color: var(--color-surface-tertiary);
 }
 
-/* URL edit input */
 .url-edit-input {
   flex: 1;
   padding: var(--spacing-1) var(--spacing-3);
@@ -171,12 +168,9 @@
 }
 
 .url-edit-input:focus {
-  outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
 }
 
-/* URL display input (clickable) */
 .url-display-input {
   flex: 1;
   padding: var(--spacing-1) var(--spacing-3);
@@ -200,73 +194,67 @@
 }
 
 .url-display-input:focus {
-  outline: none;
   cursor: text;
 }
 
-/* Add URL button */
 #add-url-btn {
   display: inline-flex;
   align-items: center;
   padding: var(--spacing-2) var(--spacing-3);
-  background-color: #dcfce7;
+  background-color: var(--color-success-light);
   color: var(--color-success);
   font-size: var(--text-base);
-  font-weight: normal;
   line-height: inherit;
-  border: 1px solid #86efac;
+  border: 1px solid var(--color-success-border);
   border-radius: var(--radius);
   transition: all var(--transition-fast);
 }
 
 #add-url-btn:hover {
-  background-color: #bbf7d0;
-  border-color: #4ade80;
+  background-color: var(--color-success-light-hover);
+  border-color: var(--color-success-border-hover);
 }
 
-/* Restore defaults button */
 #restore-defaults-btn {
   display: inline-flex;
   align-items: center;
   padding: var(--spacing-2) var(--spacing-3);
-  background-color: #fef2f2;
+  background-color: var(--color-danger-light);
   color: var(--color-danger);
   font-size: var(--text-base);
-  font-weight: normal;
   line-height: inherit;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--color-danger-border);
   border-radius: var(--radius);
   transition: all var(--transition-fast);
 }
 
 #restore-defaults-btn:hover {
-  background-color: #fee2e2;
-  border-color: #f87171;
+  background-color: var(--color-danger-light-hover);
+  border-color: var(--color-danger-border-hover);
 }
 
-/* Small buttons for URL actions */
-
 .remove-url-btn {
-  background-color: #fef2f2;
+  background-color: var(--color-danger-light);
   color: var(--color-danger);
-  border: 1px solid #fecaca;
+  border: 1px solid var(--color-danger-border);
 }
 
 .remove-url-btn:hover {
-  background-color: #fee2e2;
-  border-color: #f87171;
+  background-color: var(--color-danger-light-hover);
+  border-color: var(--color-danger-border-hover);
 }
 
 .save-new-url-btn,
 .save-edit-url-btn {
-  background-color: var(--color-success);
-  color: white;
-  border-color: var(--color-success);
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+  border-color: var(--color-success-border);
 }
 
 .save-new-url-btn:hover,
 .save-edit-url-btn:hover {
-  background-color: #059669;
+  background-color: var(--color-success-light-hover);
+  border-color: var(--color-success-border-hover);
 }
 
 .cancel-edit-btn {
@@ -279,15 +267,13 @@
   background-color: var(--color-border);
 }
 
-/* Footer styles */
 .options-footer-section {
   margin-top: var(--spacing-8);
   padding-top: var(--spacing-6);
-  border-top: 1px solid var(--color-border-light);
+  border-top: 1px solid var(--color-border);
   text-align: center;
 }
 
-/* Toggle sections in options page */
 .options-toggle-section {
   margin-bottom: var(--spacing-3);
 }
@@ -296,24 +282,37 @@
   margin-bottom: 0;
 }
 
-/* Style for options toggles */
+/* A toggle ending its card sits on the text baseline and leaves descender space below it */
+.options-toggle-section .toggle:last-child {
+  vertical-align: top;
+}
+
 .options-toggle-section .toggle .toggle-switch {
   background-color: var(--color-surface-tertiary);
-  border-color: var(--color-border);
 }
 
 .options-toggle-section .toggle .toggle-input:checked + .toggle-switch {
-  background-color: #dbeafe; /* Light blue for active state */
-  border-color: #93c5fd;
+  background-color: var(--color-primary-light);
 }
 
 .options-toggle-section .toggle .toggle-input:checked + .toggle-switch::after {
-  background-color: #3b82f6; /* Blue circle for active state */
+  background-color: var(--color-primary);
 }
 
 .options-toggle-section .toggle .toggle-label {
-  color: var(--color-text-secondary);
   font-size: var(--text-base);
+}
+
+.options-footer-section a {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--color-text-tertiary);
+  text-decoration-color: color-mix(in srgb, var(--color-text-tertiary) 50%, var(--color-border));
+}
+
+.options-footer-section a:hover {
+  color: var(--color-primary);
+  text-decoration-color: currentColor;
 }
 
 .options-footer-links {
@@ -345,7 +344,6 @@
   margin: 0;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .options-main {
     padding: var(--spacing-4);
