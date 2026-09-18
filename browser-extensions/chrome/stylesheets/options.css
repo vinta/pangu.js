@@ -137,13 +137,13 @@
   color: var(--color-text-secondary);
   text-align: center;
   padding: var(--spacing-3) var(--spacing-4) !important;
-  background-color: #f5f5f5 !important;
-  border: 1px solid #e0e0e0 !important;
+  background-color: var(--color-surface-tertiary) !important;
+  border: 1px solid var(--color-border) !important;
   border-radius: var(--radius) !important;
 }
 
 .empty-list-message:hover {
-  background-color: #f5f5f5 !important;
+  background-color: var(--color-surface-tertiary) !important;
 }
 
 .filter-mode-list li {
