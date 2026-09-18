@@ -119,13 +119,13 @@
 
 .notification.error {
   background-color: #fee2e2;
-  color: #dc2626;
+  color: var(--color-danger);
   border: 1px solid #fca5a5;
 }
 
 .notification.success {
   background-color: #dcfce7;
-  color: #16a34a;
+  color: var(--color-success);
   border: 1px solid #86efac;
 }
 
