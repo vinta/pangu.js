@@ -120,7 +120,7 @@
 .notification.error {
   background-color: #fee2e2;
   color: var(--color-danger);
-  border: 1px solid #fca5a5;
+  border: 1px solid #fecaca;
 }
 
 .notification.success {

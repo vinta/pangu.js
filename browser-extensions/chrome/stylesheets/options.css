@@ -227,7 +227,7 @@
   display: inline-flex;
   align-items: center;
   padding: var(--spacing-2) var(--spacing-3);
-  background-color: #fef2f2;
+  background-color: #fee2e2;
   color: var(--color-danger);
   font-size: var(--text-base);
   line-height: inherit;
@@ -237,20 +237,20 @@
 }
 
 #restore-defaults-btn:hover {
-  background-color: #fee2e2;
+  background-color: #fecaca;
   border-color: #f87171;
 }
 
 /* Small buttons for URL actions */
 
 .remove-url-btn {
-  background-color: #fef2f2;
+  background-color: #fee2e2;
   color: var(--color-danger);
   border: 1px solid #fecaca;
 }
 
 .remove-url-btn:hover {
-  background-color: #fee2e2;
+  background-color: #fecaca;
   border-color: #f87171;
 }
 
