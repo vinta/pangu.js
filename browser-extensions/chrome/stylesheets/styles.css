@@ -45,10 +45,8 @@
   --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
 
   /* Font sizes */
-  --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
-  --text-lg: 1.125rem;
   --text-xl: 1.375rem;
   --text-2xl: 1.5rem;
   --text-3xl: 2.5rem;
@@ -102,16 +100,6 @@ h6 {
   margin: 0;
   font-weight: 600;
   line-height: 1.25;
-}
-
-h1 {
-  font-size: var(--text-2xl);
-}
-h2 {
-  font-size: var(--text-xl);
-}
-h3 {
-  font-size: var(--text-lg);
 }
 
 p {
