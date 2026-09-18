@@ -42,7 +42,7 @@
 
 .options-quote {
   font-size: var(--text-base);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   font-style: italic;
   border-left: 3px solid var(--color-border);
   padding-left: var(--spacing-4);
@@ -116,7 +116,6 @@
 .ai-model-status {
   margin-top: 0;
   margin-left: auto;
-  color: var(--color-text-tertiary);
 }
 
 /* URL list styles */
@@ -131,7 +130,7 @@
 
 /* Empty list message */
 .empty-list-message {
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   text-align: center;
   padding: var(--spacing-3) var(--spacing-4) !important;
   background-color: #f5f5f5 !important;
