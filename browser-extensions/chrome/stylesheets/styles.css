@@ -140,7 +140,7 @@ input:focus-visible,
   align-items: center;
   justify-content: center;
   padding: var(--spacing-3) var(--spacing-4);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   font-weight: 500;
   line-height: 1.25rem;
   border-radius: var(--radius);
@@ -190,7 +190,7 @@ input:focus-visible,
 
 .btn-lg {
   padding: var(--spacing-3) var(--spacing-6);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
 }
 
 .btn-block {
@@ -252,7 +252,7 @@ input:focus-visible,
 }
 
 .toggle-label {
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   font-weight: 500;
   color: var(--color-text-primary);
 }
