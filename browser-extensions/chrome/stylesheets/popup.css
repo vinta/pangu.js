@@ -28,7 +28,6 @@
 .popup-title {
   font-size: var(--text-xl);
   font-weight: 600;
-  letter-spacing: -0.02em;
   color: var(--color-text-primary);
   margin: 0;
   line-height: 1.2;
