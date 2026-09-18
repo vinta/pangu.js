@@ -65,7 +65,6 @@
 /* Card enhancements */
 .card {
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
   padding: var(--spacing-6);
   box-shadow: var(--shadow-sm);
