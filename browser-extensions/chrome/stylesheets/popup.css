@@ -156,10 +156,5 @@
 }
 
 .toggle-status {
-  cursor: not-allowed !important;
-  opacity: 1 !important;
-}
-
-.toggle-status .toggle-switch {
-  cursor: not-allowed !important;
+  cursor: not-allowed;
 }

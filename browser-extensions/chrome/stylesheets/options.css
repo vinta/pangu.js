@@ -72,6 +72,10 @@
   margin-top: var(--spacing-2);
 }
 
+#spacing-when-click-msg {
+  margin-top: var(--spacing-4);
+}
+
 /* :has() needs Chrome 105, fine here since text-box needs Chrome 133 */
 .form-help-text:not(:has(~ :not([hidden]))),
 .url-list-help {
@@ -124,17 +128,17 @@
   gap: var(--spacing-2);
 }
 
-.empty-list-message {
+.filter-mode-list .empty-list-message {
   color: var(--color-text-secondary);
   text-align: center;
-  padding: var(--spacing-3) var(--spacing-4) !important;
-  background-color: var(--color-surface-tertiary) !important;
-  border: 1px solid var(--color-border) !important;
-  border-radius: var(--radius) !important;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-surface-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
 }
 
-.empty-list-message:hover {
-  background-color: var(--color-surface-tertiary) !important;
+.filter-mode-list .empty-list-message:hover {
+  background-color: var(--color-surface-tertiary);
 }
 
 .filter-mode-list li {

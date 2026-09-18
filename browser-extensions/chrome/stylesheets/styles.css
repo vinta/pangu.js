@@ -257,13 +257,13 @@ input:focus-visible,
 }
 
 .mt-2 {
-  margin-top: var(--spacing-2) !important;
+  margin-top: var(--spacing-2);
 }
 .mt-4 {
-  margin-top: var(--spacing-4) !important;
+  margin-top: var(--spacing-4);
 }
 .mt-6 {
-  margin-top: var(--spacing-6) !important;
+  margin-top: var(--spacing-6);
 }
 
 @media (prefers-reduced-motion: reduce) {
