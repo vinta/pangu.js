@@ -203,7 +203,7 @@ input:focus-visible,
   display: inline-flex;
   align-items: center;
   cursor: pointer;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
 }
 
 .toggle-input {
