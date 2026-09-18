@@ -127,28 +127,27 @@
   border: 1px solid var(--color-success-border);
 }
 
-.popup-section .toggle:not(.toggle-secondary) .toggle-switch {
+.popup-section .toggle:not(.toggle-status) .toggle-switch {
   background-color: var(--color-surface-tertiary);
 }
 
-.popup-section .toggle:not(.toggle-secondary) .toggle-input:checked + .toggle-switch {
+.popup-section .toggle:not(.toggle-status) .toggle-input:checked + .toggle-switch {
   background-color: var(--color-primary-light);
 }
 
-.popup-section .toggle:not(.toggle-secondary) .toggle-input:checked + .toggle-switch::after {
+.popup-section .toggle:not(.toggle-status) .toggle-input:checked + .toggle-switch::after {
   background-color: var(--color-primary);
 }
 
-/* Style for status toggle */
-.toggle-secondary .toggle-switch {
+.toggle-status .toggle-switch {
   background-color: var(--color-surface-tertiary);
 }
 
-.toggle-secondary .toggle-input:checked + .toggle-switch {
+.toggle-status .toggle-input:checked + .toggle-switch {
   background-color: var(--color-success-light);
 }
 
-.toggle-secondary .toggle-input:checked + .toggle-switch::after {
+.toggle-status .toggle-input:checked + .toggle-switch::after {
   background-color: #22c55e;
 }
 
@@ -156,11 +155,11 @@
   font-size: var(--text-base);
 }
 
-.toggle-secondary {
+.toggle-status {
   cursor: not-allowed !important;
   opacity: 1 !important;
 }
 
-.toggle-secondary .toggle-switch {
+.toggle-status .toggle-switch {
   cursor: not-allowed !important;
 }
