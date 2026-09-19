@@ -137,6 +137,8 @@ const matches = [...'預計18+才能觀看'.matchAll(DIGIT_PLUS_CJK)];
 
 The patterns with the `g` flag are the same objects the engine uses. `.test()` and `.exec()` leave `lastIndex` on them, so use `.search()`, `.matchAll()` or `.replace()` instead.
 
+Pattern names follow the spacing rules, so they may change in any release.
+
 ### CLI
 
 ```bash

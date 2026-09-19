@@ -4,7 +4,9 @@
 
 Add `./shared` to `exports`, pointing at the `dist/shared/index.js` and `dist/shared/index.d.ts` the tarball already ships. ESM only, same shape as `./browser`. No build change. `lint:package` runs `attw` on it with the `esm-only` profile, because the script lists entrypoints by hand.
 
-The `export` keyword in `src/shared/index.ts` is the public surface. Every exported name is API now: renaming or unexporting one is a breaking change. That includes `Pangu`, `PlaceholderReplacer` and a bare `pangu` instance, which is a feature: a Worker imports the engine and the patterns from one path and bundles one copy (16.9 KB). Importing `pangu` plus the patterns from a second path bundled the engine twice (34.2 KB), because the node entry inlines it per [ADR 0012](0012-cjs-half-is-self-contained.md).
+The `export` keyword in `src/shared/index.ts` decides what `pangu/shared` offers. SemVer asks a package to declare its public API, and this is the declaration: `Pangu`, `pangu`, `spaceText()` and `hasProperSpacing()` are stable. Everything else follows the spacing rules, so a pattern can be renamed or removed in any release. A major version means the spacing rules changed a lot, not that a name moved. The README says to install with `--save-exact`, and a missing named import fails at build time (`TS2305`, esbuild "No matching export"), so a rename is loud at upgrade time, never silent.
+
+Exporting the engine next to the patterns is a feature: a Worker imports the engine and the patterns from one path and bundles one copy (16.9 KB). Importing `pangu` plus the patterns from a second path bundled the engine twice (34.2 KB), because the node entry inlines it per [ADR 0012](0012-cjs-half-is-self-contained.md).
 
 Not taken:
 
