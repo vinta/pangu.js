@@ -8,7 +8,7 @@
 
 ### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 
-- 彈出視窗和設定頁改用跟 [pangu.space](https://github.com/vinta/pangu.space) 一樣的設計
+- 彈出視窗和設定頁改用跟 [pangu.space](https://pangu.space) 一樣的設計
   - 加深成功和錯誤訊息的顏色，文字對比符合 WCAG AA
   - 用鍵盤操作時，按鈕和開關會顯示一致的焦點外框
   - 系統開啟「減少動態效果」時不再播放動畫
