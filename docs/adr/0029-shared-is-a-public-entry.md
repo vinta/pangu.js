@@ -11,6 +11,6 @@ Not taken:
 - A `src/shared/patterns.ts` split behind `pangu/shared/patterns`. It needs a new build environment and importer changes, and the Worker still bundles every pattern twice
 - Re-exporting the patterns from `.`. The CJS half would need a class field per constant, and `./browser` would not match
 
-`pangu` now names three classes: `NodePangu` from `.`, `BrowserPangu` from `./browser`, `Pangu` from `./shared`. Types match runtime on each path, so the trap in [ADR 0010](0010-dot-entry-is-the-node-build.md) does not return.
+`pangu` is an instance on every path, of a different class each: `NodePangu` from `.`, `BrowserPangu` from `./browser`, `Pangu` from `./shared`. Types match runtime on each path, so the trap in [ADR 0010](0010-dot-entry-is-the-node-build.md) does not return.
 
 The `g`-flag patterns are the engine's own objects. `spaceText()` only calls `.replace()`, which resets `lastIndex`, so a caller's `.test()` cannot corrupt spacing. It can still surprise the caller, so the README says so.
