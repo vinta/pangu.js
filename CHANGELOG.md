@@ -1,5 +1,19 @@
 # Changelog
 
+## v10.2.0 / 2026-09-19
+
+### [pangu.js](https://www.npmjs.com/package/pangu)
+
+- `mo 店+` 後面的 `+` 不會被分開了
+
+### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+
+- 彈出視窗和設定頁改用跟 [pangu.space](https://github.com/vinta/pangu.space) 一樣的設計
+  - 加深成功和錯誤訊息的顏色，文字對比符合 WCAG AA
+  - 用鍵盤操作時，按鈕和開關會顯示一致的焦點外框
+  - 系統開啟「減少動態效果」時不再播放動畫
+- 拿掉了用不到的 `activeTab` 權限
+
 ## v10.1.1 / 2026-09-14
 
 ### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
