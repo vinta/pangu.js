@@ -45,3 +45,5 @@ Addendum (2026-07-28): the CJS entry was rewritten the day after this ADR was ac
 Addendum (2026-09-19): "`exports` exposes only `.` and `./browser`" in the Context section went stale. `./shared` now exposes `dist/shared/index.js`, see [ADR 0029](0029-shared-is-a-public-entry.md). Still ESM only, so no `sharedCjs` environment comes back.
 
 Vite library mode was kept over tsdown, which is otherwise the better-fitting tool for this job and is slated to become Rolldown Vite's library mode. The reason is local: Vite is not removable from this repo because the Chrome extension build needs it, so adopting tsdown would mean running two bundlers to save a config file. Worth revisiting if the extension build ever moves or if Vite's own library mode absorbs tsdown.
+
+Addendum (2026-09-20): the CJS file is now the only Node.js output that inlines the engine. `dist/node/index.js` and `dist/node/cli.js` import `dist/shared/index.js`, see [ADR 0030](0030-node-esm-and-cli-import-the-shared-entry.md). The `esm` environment named in the Consequences section is `sharedNodeEsm`, and it still runs first because it empties `dist/`.

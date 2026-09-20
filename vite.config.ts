@@ -16,27 +16,16 @@ export default defineConfig({
     target: 'baseline-widely-available',
   },
   environments: {
-    sharedEsm: {
+    // One copy of the engine for shared/index.js and the Node.js ESM outputs (ADR 0030). Without preserveModules Rolldown hoists the engine into a hashed chunk and the public shared/index.js becomes a facade
+    sharedNodeEsm: {
       consumer: 'client',
       build: {
         emptyOutDir: true,
-        lib: { entry: 'src/shared/index.ts', formats: ['es'], fileName: () => 'shared/index.js' },
-      },
-    },
-    nodeEsm: {
-      consumer: 'client',
-      build: {
-        emptyOutDir: false,
-        lib: { entry: 'src/node/index.ts', formats: ['es'], fileName: () => 'node/index.js' },
-        rolldownOptions: { external },
-      },
-    },
-    nodeCli: {
-      consumer: 'client',
-      build: {
-        emptyOutDir: false,
-        lib: { entry: 'src/node/cli.ts', formats: ['es'], fileName: () => 'node/cli.js' },
-        rolldownOptions: { external },
+        lib: {
+          entry: { 'shared/index': 'src/shared/index.ts', 'node/index': 'src/node/index.ts', 'node/cli': 'src/node/cli.ts' },
+          formats: ['es'],
+        },
+        rolldownOptions: { external, output: { preserveModules: true, preserveModulesRoot: 'src' } },
       },
     },
     // dist/browser/pangu.js must stay a self-contained single file so CDN users can load it as a standalone module without sibling chunks being hosted alongside (8.1.0-9.1.0 shipped an import-bearing pangu.js that would have 404ed on cdnjs)
@@ -67,9 +56,9 @@ export default defineConfig({
     },
   },
   builder: {
-    // Defining `builder` is what makes a plain `vite build` build every environment. They run in order, and sharedEsm has to go first because it is the only one that empties dist/
+    // Defining `builder` is what makes a plain `vite build` build every environment. They run in order, and sharedNodeEsm has to go first because it is the only one that empties dist/
     buildApp: async (builder) => {
-      for (const name of ['sharedEsm', 'nodeEsm', 'nodeCli', 'browserEsm', 'browserUmd', 'nodeCjs']) {
+      for (const name of ['sharedNodeEsm', 'browserEsm', 'browserUmd', 'nodeCjs']) {
         await builder.build(builder.environments[name]!);
       }
     },
