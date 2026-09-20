@@ -9,8 +9,9 @@ cd browser-extensions/chrome/
 rm -f ../paranoid-auto-spacing.zip
 zip -ry ../paranoid-auto-spacing.zip . \
   -x "images/*" \
-  -x "src/*" \
   -x "node_modules/*" \
+  -x "src/*" \
+  -x "tests/*" \
   -x "package.json" \
   -x ".DS_Store" \
   -x "*/.DS_Store"

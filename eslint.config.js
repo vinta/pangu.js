@@ -36,7 +36,7 @@ export default defineConfig(
     ignores: ['dist/', 'browser-extensions/chrome/dist/', 'scripts/prompt-experiments/', 'tmp/'],
   },
   {
-    files: ['src/**/*.ts', 'browser-extensions/chrome/src/**/*.ts', 'tests/**/*.ts', 'vite.config.ts', 'playwright.config.ts'],
+    files: ['src/**/*.ts', 'tests/**/*.ts', 'browser-extensions/chrome/src/**/*.ts', 'browser-extensions/chrome/tests/**/*.ts', 'vite.config.ts', 'playwright.config.ts'],
     extends: [...tseslint.configs.recommendedTypeChecked],
     languageOptions: {
       parser: tseslint.parser,

@@ -1,10 +1,10 @@
 import type { SettledTextNode } from 'pangu/browser';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { ContentScriptResponse } from '../../browser-extensions/chrome/src/messages';
-import { DEFAULT_SETTINGS, type Settings } from '../../browser-extensions/chrome/src/settings/storage';
+import type { ContentScriptResponse } from '../src/messages';
+import { DEFAULT_SETTINGS, type Settings } from '../src/settings/storage';
 
 const aiSpacing = vi.hoisted(() => ({ applyAiSpacing: vi.fn(), warmUpAiSpacing: vi.fn() }));
-vi.mock('../../browser-extensions/chrome/src/ai-spacing/content-script', () => aiSpacing);
+vi.mock('../src/ai-spacing/content-script', () => aiSpacing);
 
 async function loadContentScript(settings: Settings | Promise<Settings>, url = 'https://docs.google.com/document/d/abc') {
   vi.resetModules();
@@ -21,7 +21,7 @@ async function loadContentScript(settings: Settings | Promise<Settings>, url = '
   vi.stubGlobal('location', location);
   vi.stubGlobal('navigation', { addEventListener: addNavigationListener });
   vi.stubGlobal('chrome', { storage: { sync: { get: async () => settings } }, runtime: { onMessage: { addListener: addMessageListener } } });
-  await import('../../browser-extensions/chrome/src/content-script');
+  await import('../src/content-script');
 
   const receiveMessage = addMessageListener.mock.calls[0]![0];
   const click = () => new Promise<ContentScriptResponse>((resolve) => receiveMessage({ action: 'MANUAL_SPACING' }, {}, resolve));

@@ -29,3 +29,5 @@ Alternatives rejected:
 - Every entry that worked in 9.1.1 keeps working. The rejected shapes broke Chrome's registration or failed the old validator, so no synced entry of those shapes ever filtered a page.
 - The popup status row and the icon stop mislabeling `*.` entries, since they share the function.
 - `tests/extension/settings/urlpattern.playwright.ts` keeps testing raw `URLPattern`, including the apex mismatch. It records why the translation exists.
+
+Addendum (2026-09-21): the extension tests moved into the extension package. The file is now `browser-extensions/chrome/tests/settings/urlpattern.playwright.ts`.
