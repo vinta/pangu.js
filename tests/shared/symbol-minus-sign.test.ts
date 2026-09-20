@@ -16,6 +16,7 @@ describe('Symbol -', () => {
     expect(pangu.spaceText('博客來-4%法則：讓錢活得比你久的提領金律(電子書)')).toBe('博客來 - 4% 法則：讓錢活得比你久的提領金律 (電子書)');
     expect(pangu.spaceText('长者的智慧和复杂的维斯特洛- 文章')).toBe('长者的智慧和复杂的维斯特洛 - 文章');
     expect(pangu.spaceText('1976年-2018年')).toBe('1976 年 - 2018 年');
+    expect(pangu.spaceText('年增率-(GDP)')).toBe('年增率 - (GDP)'); // Regex-boundary case, no real text found
 
     // Hyphen reading: a hyphen in direct contact with CJK flips the hyphens between brackets on its line
     expect(pangu.spaceText('全球-實質國內生產毛額[GDP]-(年增率, IMF 預估)')).toBe('全球 - 實質國內生產毛額 [GDP] - (年增率, IMF 預估)');

@@ -20,5 +20,5 @@ Alternatives rejected:
 - `毛額[GDP]-(NSA)` alone stays tight: no hyphen on the line touches CJK. Real titles open with `CJK-CJK`, so the flip fires there.
 - A line that mixes a hyphen in CJK contact with a bracketed formula spaces the formula too (`f(x)-(y)` reads `f (x) - (y)`). No real text with this shape was found.
 - Only `-` gets this reading. `*`, `=`, and `&` between brackets stay tight.
-- Pre-existing, untouched: `CJK-(A)` reads `CJK -(A)`, spaced on one side only.
+- Fixed right after: `CJK-(A)` read `CJK -(A)`, spaced on one side only. `CJK_OPERATOR_ANS` now takes an opening bracket on its right, the mirror of the closing bracket `ANS_OPERATOR_CJK` takes on its left, so it reads `CJK - (A)`. The same holds for `*`, `=`, and `&`.
 - **Hyphen reading** returns to `CONTEXT.md` with a new sense. ADR 0002 folded the old contact-gated sense into symbol handling, where it stays.
