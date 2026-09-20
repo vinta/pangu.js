@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { chromium } from 'playwright';
 import { rolldown } from 'rolldown';
-import { outputDirectory, pick, publicError, publicFixture, scratchDirectory } from '../artifacts.mjs';
+import { buildExtension, outputDirectory, pick, publicError, publicFixture, scratchDirectory } from '../artifacts.mjs';
 
 const { values } = parseArgs({ options: { cases: { type: 'string', multiple: true }, out: { type: 'string' }, help: { type: 'boolean' } } });
 const usage = 'Usage: node collect-sources.mjs --cases <reviewed-corpus.json> [--cases <other-corpus.json>] --out tmp/prompt-experiments/<round>/<run>';
@@ -28,6 +28,7 @@ for (const kase of cases) {
   assert(kase.original_excerpt?.[kase.original_at] === '-' && kase.input?.[kase.at] === '-', `${kase.id}: record exact original and production target offsets`);
 }
 const out = outputDirectory(root, values.out);
+buildExtension(root);
 const temporary = scratchDirectory(root, 'pangu-source-check-');
 let browser;
 let page;
