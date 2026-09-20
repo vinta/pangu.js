@@ -53,6 +53,7 @@ export default defineConfig(
           fixStyle: 'separate-type-imports',
         },
       ],
+      '@typescript-eslint/explicit-member-accessibility': ['error', { overrides: { constructors: 'no-public' } }],
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-deprecated': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',

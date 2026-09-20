@@ -281,12 +281,12 @@ export class PlaceholderReplacer {
     this.pattern = pattern;
   }
 
-  store(item: string) {
+  public store(item: string) {
     this.items[this.index] = item;
     return `${this.startDelimiter}${this.placeholder}${this.index++}${this.endDelimiter}`;
   }
 
-  restore(text: string) {
+  public restore(text: string) {
     if (this.index === 0) {
       return text;
     }
@@ -297,7 +297,7 @@ export class PlaceholderReplacer {
 }
 
 export class Pangu {
-  readonly version: string = '10.2.0';
+  public readonly version: string = '10.2.0';
 
   public spaceText(text: string) {
     if (typeof text !== 'string') {
