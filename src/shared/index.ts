@@ -232,23 +232,6 @@ export const HTTP_URL = /(?<![A-Za-z0-9])https?:\/\/[^\s<>"`\u3000-\u303f\uff00-
 export const HTTP_URL_TRAILING_PUNCTUATION = /[.,;:!?'"]+$/;
 export const CJK_HTTP_URL = new RegExp(`([${CJK}])(?=\uE00A)`, 'g');
 
-function trimHttpUrl(url: string) {
-  // Count once: a content script sees attacker text, and recounting per pass is quadratic on a long run of closing parentheses
-  let unbalancedClosingParentheses = (url.match(/\)/g) ?? []).length - (url.match(/\(/g) ?? []).length;
-  for (;;) {
-    const trimmed = url.replace(HTTP_URL_TRAILING_PUNCTUATION, '');
-    if (trimmed.endsWith(')') && unbalancedClosingParentheses > 0) {
-      unbalancedClosingParentheses--;
-      url = trimmed.slice(0, -1);
-      continue;
-    }
-    if (trimmed === url) {
-      return url;
-    }
-    url = trimmed;
-  }
-}
-
 // Used by fixBracketSpacing to strip the spaces just inside a bracket pair; everything else between the brackets stays unchanged
 export const BRACKET_PATTERNS = [
   { pattern: /<([^<>]*)>/g, open: '<', close: '>' },
@@ -320,7 +303,7 @@ export class Pangu {
     // Hide every URL from the rules. Attribute values reach spaceText() through the HTML step below, so a URL inside href="..." is hidden the same way
     const urlManager = new PlaceholderReplacer('HTTP_URL_PLACEHOLDER_', '\uE00A', '\uE00B');
     newText = newText.replace(HTTP_URL, (match) => {
-      const url = trimHttpUrl(match);
+      const url = this.trimHttpUrl(match);
       return urlManager.store(url) + match.slice(url.length);
     });
 
@@ -506,7 +489,23 @@ export class Pangu {
     return this.spaceText(text) === text;
   }
 
-  // Strip the spaces that earlier rules left just inside a bracket pair: no space after an opening bracket or before a closing bracket
+  private trimHttpUrl(url: string) {
+    // Count once: a content script sees attacker text, and recounting per pass is quadratic on a long run of closing parentheses
+    let unbalancedClosingParentheses = (url.match(/\)/g) ?? []).length - (url.match(/\(/g) ?? []).length;
+    for (;;) {
+      const trimmed = url.replace(HTTP_URL_TRAILING_PUNCTUATION, '');
+      if (trimmed.endsWith(')') && unbalancedClosingParentheses > 0) {
+        unbalancedClosingParentheses--;
+        url = trimmed.slice(0, -1);
+        continue;
+      }
+      if (trimmed === url) {
+        return url;
+      }
+      url = trimmed;
+    }
+  }
+
   private fixBracketSpacing(text: string) {
     for (const { pattern, open, close } of BRACKET_PATTERNS) {
       text = text.replace(pattern, (_match, innerContent: string) => {
