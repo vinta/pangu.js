@@ -123,18 +123,18 @@ export const CJK_HASH = new RegExp(`([${CJK}])(#([^ \\u00a0]))`, 'g');
 // Non-breaking space: [ ] (U+00A0). A hashtag right after a slash in a list (/#tag) is a hashtag, not a C# shape
 export const HASH_CJK = new RegExp(`(([^ \\u00a0/])#)([${CJK}])`, 'g');
 
-const PRODUCT_NAME = 'Apple TV|CATCHPLAY|[Dd]iscovery|Disney|ESPN|Fitness|iCloud|mo ?店|Paramount|PS';
-const PRODUCT_NAME_IN_CJK = '公視|影劇館';
-const PRODUCT_TIER = 'Pro';
-const CREDIT_RATING = '(?:tw)?(?:AA|BBB|BB|CCC)|tw[AB]';
-const MULTI_LETTER_BLOOD_TYPE = 'AB|RhD|Rh';
+export const PRODUCT_NAME = 'Apple TV|CATCHPLAY|[Dd]iscovery|Disney|ESPN|Fitness|iCloud|mo ?店|Paramount|PS';
+export const PRODUCT_NAME_IN_CJK = '公視|影劇館';
+export const PRODUCT_TIER = 'Pro';
+export const CREDIT_RATING = '(?:tw)?(?:AA|BBB|BB|CCC)|tw[AB]';
+export const MULTI_LETTER_BLOOD_TYPE = 'AB|RhD|Rh';
 
 // Product names and tiers take + only; credit ratings and blood types take + or -
-const NAME_SUFFIX = `(?:(?<![A-Za-z0-9])(?:(?:${PRODUCT_NAME}|${PRODUCT_TIER})\\+|(?:${CREDIT_RATING}|${MULTI_LETTER_BLOOD_TYPE})[+-])|(?:${PRODUCT_NAME_IN_CJK})\\+)`;
+export const NAME_SUFFIX = `(?:(?<![A-Za-z0-9])(?:(?:${PRODUCT_NAME}|${PRODUCT_TIER})\\+|(?:${CREDIT_RATING}|${MULTI_LETTER_BLOOD_TYPE})[+-])|(?:${PRODUCT_NAME_IN_CJK})\\+)`;
 export const NAME_SUFFIX_AT_END = new RegExp(`${NAME_SUFFIX}$`);
 
 // A closing mark follows the suffix tight; a word or an opening bracket keeps its boundary space
-const CLOSING_AFTER_SUFFIX = /[/)\]}\uff09\u3011\u3015\u3009\u300b\u300d\u300f\uff0c\u3002\u3001\uff1b\uff1a\uff01\uff1f]/;
+export const CLOSING_AFTER_SUFFIX = /[/)\]}\uff09\u3011\u3015\u3009\u300b\u300d\u300f\uff0c\u3002\u3001\uff1b\uff1a\uff01\uff1f]/;
 
 // The operator set is - * = & only (no + | / < >). Only direct CJK contact makes a symbol an operator: a symbol between two half-width characters binds them into a joiner token (A-B, a=1, S&P)
 // and never gets spaces, so there is deliberately no between-half-width rule here
@@ -229,7 +229,7 @@ export const HTML_TAG_MENTION_CJK = new RegExp(`(?<=\uE005)([${CJK}])`, 'g');
 // prose written tight after a URL stays tight. The body ends at the Private Use Area too, so a URL never swallows a placeholder. See ADR 0026
 export const HTTP_URL = /(?<![A-Za-z0-9])https?:\/\/[^\s<>"`\u3000-\u303f\uff00-\uffef\u2018\u2019\u201c\u201d\u2026\ue000-\uf8ff]+/g;
 // Trailing half-width punctuation and an unbalanced closing parenthesis belong to the prose, not the URL
-const HTTP_URL_TRAILING_PUNCTUATION = /[.,;:!?'"]+$/;
+export const HTTP_URL_TRAILING_PUNCTUATION = /[.,;:!?'"]+$/;
 export const CJK_HTTP_URL = new RegExp(`([${CJK}])(?=\uE00A)`, 'g');
 
 function trimHttpUrl(url: string) {
