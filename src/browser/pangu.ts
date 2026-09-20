@@ -118,7 +118,7 @@ export class BrowserPangu extends Pangu {
     return !!node && DomWalker.spaceLikeTags.test(node.nodeName);
   }
 
-  private isGridOrFlexContainer(node: Node): boolean {
+  private isGridOrFlexContainer(node: Node) {
     if (node.nodeType !== Node.ELEMENT_NODE) {
       return false;
     }

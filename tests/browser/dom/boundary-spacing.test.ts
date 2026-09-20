@@ -25,7 +25,7 @@ const boundarySpacingContext: BoundarySpacingContext = {
 };
 
 // A layout-dependent fact that the decision must not need on this path
-function neverConsulted(name: string): () => boolean {
+function neverConsulted(name: string) {
   return () => {
     throw new Error(`${name} must not be consulted`);
   };

@@ -8,7 +8,7 @@ function escapeUrlPatternSyntax(part: string) {
   return part.replace(/[(){}:+?\\]/g, '\\$&');
 }
 
-function matchPatternToUrlPattern(pattern: string): URLPattern | null {
+function matchPatternToUrlPattern(pattern: string) {
   const match = MATCH_PATTERN.exec(pattern);
   if (!match) {
     return null;
