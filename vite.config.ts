@@ -53,7 +53,7 @@ export default defineConfig({
         lib: {
           // NOTE: cdnjs only mirrors the paths listed in its config, so a new sibling chunk would need a PR there
           // See https://github.com/cdnjs/packages/blob/master/packages/p/pangu.json
-          entry: 'src/browser/index.ts',
+          entry: 'src/browser/pangu.ts',
           formats: ['es'],
           fileName: () => 'browser/pangu.js',
         },
