@@ -13,4 +13,4 @@ Alternatives rejected:
 
 - Build-time code (devDependencies executed by `npm run build`) runs while the job can mint the npm OIDC token. Accepted for a solo maintainer; revisit if the repo gains a second committer or the dependency tree grows.
 - Security reviews will flag this shape again; this ADR is the standing answer, to be re-litigated only with new facts.
-- The version check reads `package.json` only. The hardcoded `this.version` in `src/shared/index.ts` stays in sync through `npm run bump-version`, which rewrites both.
+- The version check reads `package.json` only. The hardcoded `version` in `src/shared/index.ts` stays in sync through `npm run bump-version`, which rewrites both.

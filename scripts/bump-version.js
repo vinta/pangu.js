@@ -48,7 +48,7 @@ console.log(`Updated ${chromeManifestPath}`);
 // Update src/shared/index.ts
 const sharedIndexPath = join(projectRoot, 'src/shared/index.ts');
 const indexContent = readFileSync(sharedIndexPath, 'utf8');
-const updatedIndex = indexContent.replace(/this\.version\s*=\s*['"][^'"]+['"]/, `this.version = '${newVersion}'`);
+const updatedIndex = indexContent.replace(/^  version = '[^']+'/m, `  version = '${newVersion}'`);
 writeFileSync(sharedIndexPath, updatedIndex, 'utf8');
 console.log(`Updated ${sharedIndexPath}`);
 
