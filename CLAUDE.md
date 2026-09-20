@@ -29,8 +29,6 @@ npm run bump-version 1.2.3      # Bumps package.json, extension manifest, src/sh
 - Identifiers follow `CONTEXT.md`: a value of a glossary type mirrors the type name (`lateFixes: LateFix[]`), a state field or local takes the glossary state (`unspaced`, `settled`), and an identifier never uses a word from an _Avoid_ list.
 - Write code comments in English with ANS characters only. Never paste CJK sample text from tests into a comment; describe the shape generically (`CJK | CJK`, `A+CJK`) and use `\uXXXX` escape notation when a specific character matters.
 - `fixtures/` has no `.prettierignore` on purpose. A byte-sensitive fixture carries a leading `<!-- prettier-ignore -->` pragma that `loadFixture()` in `tests/browser/index.playwright.ts` strips, and browser tests byte-compare `innerHTML` against the `.expected.html` files. The pragma guards only the next node, so many fixtures still fail `prettier --check` and a repo-wide `prettier --write` breaks browser tests. Never format fixtures in bulk, and leave unreferenced fixtures alone.
-- Do not prune a Playwright test because a vitest table proves the same transformation. Browser-level integration redundancy is wanted. Propose each deletion individually; only a trivial exact duplicate goes without asking.
-- Merge pull requests with `gh pr merge <n> --merge`. Never squash.
 
 ## External Tool Documentation
 
