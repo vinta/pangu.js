@@ -36,7 +36,7 @@ try {
   writeFileSync(
     entry,
     [
-      ['Pangu', 'src/shared/index.ts'],
+      ['Pangu', 'dist/shared/index.js'],
       ['hyphenDigit', 'browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit.ts'],
       ['readSentence', 'browser-extensions/chrome/src/ai-spacing/sentence-context.ts'],
     ]
