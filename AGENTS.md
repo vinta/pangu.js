@@ -31,14 +31,14 @@
 - Install dependencies with `npm install` when needed; this repo uses `package-lock.json`.
 - Build everything with `npm run build`.
 - Build only the library with `npm run build:lib`.
-- Build only the Chrome extension with `npm run build:extension`.
+- Build the Chrome extension with `npm run build:extension`; it builds the library first.
 - Run all tests with `npm run test`.
 - Run shared logic tests with `npm run test:shared`.
 - Run Node.js tests with `npm run test:node`.
 - Run browser tests with `npm run test:browser`.
 - Run extension tests with `npm run test:extension`.
 - Run lint with `npm run lint`.
-- Run type checking with `npm run typecheck`; it covers all three tsconfigs.
+- Run type checking with `npm run typecheck`; it covers all three tsconfigs. It and `npm run lint` need `npm run build` first.
 - Clean generated artifacts with `npm run clean`.
 - Package the extension with `npm run pack-extension`.
 
