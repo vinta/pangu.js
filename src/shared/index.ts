@@ -297,7 +297,7 @@ export class PlaceholderReplacer {
 }
 
 export class Pangu {
-  version = '10.2.0';
+  readonly version: string = '10.2.0';
 
   public spaceText(text: string) {
     if (typeof text !== 'string') {
