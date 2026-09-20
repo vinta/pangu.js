@@ -21,7 +21,7 @@ const styleRules = {
     'error',
     {
       selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='forEach']",
-      message: 'Use `for…of` instead of `.forEach(…)`.',
+      message: 'Use `for of` instead of `.forEach()`.',
     },
   ],
 };
