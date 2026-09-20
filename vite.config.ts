@@ -28,7 +28,7 @@ export default defineConfig({
         rolldownOptions: { external, output: { preserveModules: true, preserveModulesRoot: 'src' } },
       },
     },
-    // dist/browser/pangu.js must stay a self-contained single file so CDN users can load it as a standalone module without sibling chunks being hosted alongside (8.1.0-9.1.0 shipped an import-bearing pangu.js that would have 404ed on cdnjs)
+    // dist/browser/pangu.js stays a self-contained single file so it works as a standalone module when downloaded or loaded from a CDN. cdnjs only mirrors the paths listed in its config (cdnjs/packages packages/p/pangu.json), so a new sibling chunk would need a PR there
     browserEsm: {
       consumer: 'client',
       build: {
