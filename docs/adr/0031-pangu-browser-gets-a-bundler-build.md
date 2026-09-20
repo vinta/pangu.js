@@ -24,7 +24,7 @@ The extension reads `dist/`, so after editing `src/` run `build:lib` before `bui
 It costs 2 things:
 
 - DevTools shows the engine as `dist/shared/index.js` and `dist/browser/*.js`, not the `.ts` sources. The content script's sourcemap stops at the built files, the same view any package user gets. They are unminified, one file per source module
-- cdnjs mirrors `browser/*.js`, so it will pick up `browser/index.js`, whose `./dom/` and `./scheduling/` imports it does not mirror. Nobody is sent to that URL. The fix is a PR to cdnjs/packages: exclude `index.js` or widen the globs
+- cdnjs mirrors `browser/*.js`, so it will pick up `browser/index.js`, whose `./dom/` and `./scheduling/` imports it does not mirror. We leave it. The README sends cdnjs users to `browser/pangu.umd.min.js`, nobody is sent to `index.js`, and `browser/*.js` keeps picking up a new top-level browser file without a PR to cdnjs/packages. If it ever matters, narrow the glob to `browser/pangu*.js`
 
 Not taken:
 
