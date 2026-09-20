@@ -12,18 +12,18 @@ export interface AutoSpacePageConfig {
 }
 
 interface UnsettledTextNode {
-  readonly node: Text; // the spaced but unsettled text is in node.data
-  readonly unspaced: string;
+  node: Text; // the spaced but unsettled text is in node.data
+  unspaced: string;
 }
 
 export interface SettledTextNode extends UnsettledTextNode {
-  readonly settled: string;
+  settled: string;
 }
 
 export interface LateFix {
-  readonly node: Text;
-  readonly settled: string;
-  readonly data: string;
+  node: Text;
+  settled: string;
+  data: string;
 }
 
 const TRAILING_WHITESPACE = /\s$/;
@@ -38,10 +38,10 @@ export class BrowserPangu extends Pangu {
   // Last data we wrote per text node: distinguishes pangu's own mutation records
   // (data still equals the entry, drop them) from page re-renders of spaced content
   // (data differs, re-space before the next paint)
-  private readonly lastWrittenData = new WeakMap<Text, string>();
+  private lastWrittenData = new WeakMap<Text, string>();
 
   // Text nodes a late fix wrote. While such a node still holds what pangu last wrote, the rules leave its text alone and only pair its boundaries
-  private readonly lateFixedTextNodes = new WeakSet<Text>();
+  private lateFixedTextNodes = new WeakSet<Text>();
 
   public readonly taskScheduler = new TaskScheduler();
   public readonly visibilityDetector = new VisibilityDetector();
@@ -98,7 +98,7 @@ export class BrowserPangu extends Pangu {
     }
   }
 
-  public applyLateFixes(lateFixes: readonly LateFix[]) {
+  public applyLateFixes(lateFixes: LateFix[]) {
     this.schedule(() => {
       for (const lateFix of lateFixes) {
         if (!lateFix.node.isConnected || lateFix.node.data !== lateFix.settled || DomWalker.isIgnoredNode(lateFix.node)) {
@@ -235,7 +235,7 @@ export class BrowserPangu extends Pangu {
     return this.lateFixedTextNodes.has(textNode) && this.lastWrittenData.get(textNode) === textNode.data;
   }
 
-  private emitTextNodesSettled(unsettledTextNodes: readonly UnsettledTextNode[]) {
+  private emitTextNodesSettled(unsettledTextNodes: UnsettledTextNode[]) {
     if (unsettledTextNodes.length === 0) {
       return;
     }

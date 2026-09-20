@@ -1,22 +1,22 @@
 import type { Candidate, CandidateLabel } from '../messages';
 
 export interface CandidateMatch extends Candidate {
-  readonly index: number;
+  index: number;
 }
 
 export interface SettledCandidate extends CandidateMatch {
-  readonly node: Text;
-  readonly settled: string;
+  node: Text;
+  settled: string;
 }
 
 export interface TextEdit {
-  readonly index: number;
-  readonly remove: number;
-  readonly insert: string;
+  index: number;
+  remove: number;
+  insert: string;
 }
 
 export interface AmbiguousShape {
-  readonly kind: string; // Joins this shape to its PromptSpec
+  kind: string; // Joins this shape to its PromptSpec
   hasPotentialCandidates(text: string): boolean; // The text scan decides whether to warm up
   // Use sentenceAt with the symbol's unspaced index when supplied. Only matches with an inserted gap qualify
   find(unspaced: string, settled: string, sentenceAt?: (at: number) => Candidate): CandidateMatch[];
@@ -51,16 +51,16 @@ export function indexOfNthSymbol(text: string, symbol: string, ordinal: number) 
 }
 
 export interface PromptSpec<Label extends string> {
-  readonly kind: string;
-  readonly systemPrompt: string;
-  readonly version: string;
-  readonly candidateLabels: readonly Label[];
+  kind: string;
+  systemPrompt: string;
+  version: string;
+  candidateLabels: Label[];
   buildQuestion(sentence: string, at: number): string;
 }
 
 // Composes every edit one text node collected into one late fix, since a second fix on the same node would fail core's compare-and-set check
 // Descending index order keeps an earlier edit from shifting a later one
-export function applyTextEdits(settled: string, textEdits: readonly TextEdit[]) {
+export function applyTextEdits(settled: string, textEdits: TextEdit[]) {
   let data = settled;
   for (const textEdit of [...textEdits].sort((left, right) => right.index - left.index)) {
     data = data.slice(0, textEdit.index) + textEdit.insert + data.slice(textEdit.index + textEdit.remove);

@@ -51,7 +51,7 @@ export class TaskQueue {
  * ensuring smooth user experience even when processing large amounts of text.
  */
 export class TaskScheduler {
-  public readonly config: TaskSchedulerConfig = {
+  public config: TaskSchedulerConfig = {
     enabled: true,
     timeout: 2000, // Not consulted by scheduleProcessing(), which uses a hardcoded 5000ms idle deadline
   };

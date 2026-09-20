@@ -263,12 +263,12 @@ export class PlaceholderReplacer {
 
   private items: string[] = [];
   private index = 0;
-  private pattern: RegExp;
+  private readonly pattern: RegExp;
 
   constructor(
-    private placeholder: string,
-    private startDelimiter: string,
-    private endDelimiter: string,
+    private readonly placeholder: string,
+    private readonly startDelimiter: string,
+    private readonly endDelimiter: string,
   ) {
     const cacheKey = `${startDelimiter}${placeholder}${endDelimiter}`;
     let pattern = PlaceholderReplacer.patternCache.get(cacheKey);
