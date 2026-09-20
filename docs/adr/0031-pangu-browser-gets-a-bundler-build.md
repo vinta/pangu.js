@@ -9,7 +9,7 @@
 
 `dist/browser/pangu.umd.js` does not change. The rename is what lets both builds exist: with `preserveModules` the output path is the source path, so an entry named `pangu.ts` would write over the CDN file.
 
-`pangu/browser` also exports `DomWalker`. The extension needs `DomWalker.isIgnoredElement()`, and a regular caller could not reach it. Its statics follow the same rule as the shared patterns in ADR 0029: they can be renamed or removed in any release.
+`pangu/browser` also exports `DomWalker`. The extension needs `DomWalker.isIgnoredElement()`, and a regular caller could not reach it. `TaskScheduler`, `VisibilityDetector` and the `TaskSchedulerConfig` type are exported too: `pangu.taskScheduler` and `pangu.visibilityDetector` were already public, but a caller could not name their types. All of them follow the same rule as the shared patterns in ADR 0029: they can be renamed or removed in any release.
 
 ## The extension is a regular caller
 
