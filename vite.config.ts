@@ -51,7 +51,7 @@ export default defineConfig({
       build: {
         emptyOutDir: false,
         lib: {
-          // NOTE: cdnjs only mirrors the paths listed in its config, so a new sibling chunk would need a PR there
+          // NOTE: cdnjs mirrors browser/*.js and shared/*.js but no nested folder, so an import from browser/dom/ or browser/scheduling/ would 404 there
           // See https://github.com/cdnjs/packages/blob/master/packages/p/pangu.json
           entry: 'src/browser/pangu.ts',
           formats: ['es'],

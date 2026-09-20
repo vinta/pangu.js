@@ -6,3 +6,5 @@ Unit tests exist to verify what users actually install, so every vitest file for
 
 - Do not "fix" test imports to point at `src/` for speed. The slow loop is a deliberate trade.
 - Bundle-internal modules that users cannot import from `dist/` (internal seams, e.g. the boundary spacing module) are the exception: their vitest files import from `src/` directly rather than exporting internals just to make them reachable from the bundle.
+
+Addendum (2026-09-21): vitest covers the browser build too. `tests/browser/imports.esm.test.ts` imports `dist/browser/index.js`, and `test:browser` runs vitest before Playwright.

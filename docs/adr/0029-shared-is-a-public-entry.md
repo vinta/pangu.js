@@ -10,7 +10,7 @@ Exporting the engine next to the patterns is a feature: a Worker imports the eng
 
 Not taken:
 
-- A `src/shared/patterns.ts` split behind `pangu/shared/patterns`. It needs a new build environment and importer changes, and the Worker still bundles every pattern twice
+- A `src/shared/patterns.ts` split behind `pangu/shared/patterns`. It needs one more `exports` path and importer changes, and the Worker gains nothing: it already bundles one copy from `pangu/shared`
 - Re-exporting the patterns from `.`. The CJS half would need a class field per constant, and `./browser` would not match
 
 `pangu` is an instance on every path, of a different class each: `NodePangu` from `.`, `BrowserPangu` from `./browser`, `Pangu` from `./shared`. Types match runtime on each path, so the trap in [ADR 0010](0010-dot-entry-is-the-node-build.md) does not return.

@@ -15,7 +15,7 @@ A bundle importing both paths also carried the engine twice (34.2 KB vs 16.9 KB)
 
 The other 3 outputs stay self-contained, each for its own reason:
 
-- `dist/browser/pangu.js`: a standalone module for people who download it or load it from a CDN. cdnjs only mirrors the paths listed in its config, so a new sibling file would need a PR there
+- `dist/browser/pangu.js`: a standalone module for people who download it or load it from a CDN. cdnjs mirrors `browser/*.js` and `shared/*.js` but no nested folder, so an import from `browser/dom/` or `browser/scheduling/` would 404 there
 - `dist/browser/pangu.umd.js`: loaded by a plain `<script>` tag, and Vite refuses UMD with multiple entries
 - `dist/node/index.cjs`: `require(esm)` needs Node.js 20.19+ while `engines` says `>=20.0.0`, and Jest never gets it, see [ADR 0012](0012-cjs-half-is-self-contained.md)
 

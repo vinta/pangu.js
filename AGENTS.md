@@ -17,12 +17,12 @@
 - `browser-extensions/chrome/pages/`, `stylesheets/`, `icons/`, `images/`, and `sounds/`: extension UI and store assets.
 - `browser-extensions/chrome/_locales/`: extension name, description, and UI strings; `zh_TW` is the default and only locale.
 - `browser-extensions/chrome/src/`: extension service worker, content script, popup, options page, and utilities.
-- `browser-extensions/chrome/tests/`: Chrome extension settings and URL-matching tests.
+- `browser-extensions/chrome/tests/`: Chrome extension tests for AI spacing, the content script, settings, URL matching, and the `text-autospace` stylesheet.
 - `scripts/`: release and extension packaging helpers.
 - `src/browser/`: browser DOM spacing, TreeWalker traversal, task scheduling, visibility detection, and UMD entry.
 - `src/node/`: Node.js API, CommonJS wrapper, and CLI implementation.
 - `src/shared/index.ts`: core platform-agnostic spacing logic and regex rules.
-- `tests/browser/`: Playwright browser behavior tests.
+- `tests/browser/`: Playwright browser behavior tests, plus vitest files for the ESM imports and the boundary spacing module.
 - `tests/node/`: Node-specific tests and file-processing coverage.
 - `tests/shared/`: shared spacing behavior tests.
 

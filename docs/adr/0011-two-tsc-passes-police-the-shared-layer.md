@@ -45,3 +45,5 @@ Neither pass may be narrowed to stop covering `src/shared/`, and `"types": []` o
 **The guard is invisible in the code.** Nothing named `guard` or `check` exists. If someone deletes a pass or adds `"types": ["node"]` to the browser config, everything keeps building and the invariant quietly stops being enforced. This ADR is the only thing standing between that and a future cleanup.
 
 **No dedicated test covers this.** The enforcement is the compile itself, which is why `typecheck` runs all three tsconfigs rather than just the root one.
+
+Addendum (2026-09-21): `build:types` no longer passes `--declarationDir dist`. `outDir` in both tsconfigs already points at `dist/`, so the 2 passes still write the same `dist/shared/index.d.ts`.
