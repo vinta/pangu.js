@@ -23,14 +23,6 @@ const styleRules = {
       selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='forEach']",
       message: 'Use `for of` instead of `.forEach()`.',
     },
-    {
-      selector: 'TSEnumDeclaration',
-      message: 'Use a union type or an `as const` object instead of an enum.',
-    },
-    {
-      selector: ':matches(TSAsExpression, TSTypeAssertion) > :matches(TSUnknownKeyword, TSAnyKeyword).typeAnnotation',
-      message: 'Write a proper type instead of casting to `any` or `unknown`.',
-    },
   ],
 };
 
