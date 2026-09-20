@@ -1,11 +1,13 @@
 #!/bin/bash
+set -e
+
 echo "Building Chrome Extension..."
 npm run build:extension
 
 echo "Creating extension package..."
 cd browser-extensions/chrome/
 rm -f ../paranoid-auto-spacing.zip
-zip -r ../paranoid-auto-spacing.zip . \
+zip -ry ../paranoid-auto-spacing.zip . \
   -x "images/*" \
   -x "src/*" \
   -x "node_modules/*" \

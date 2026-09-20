@@ -17,7 +17,7 @@ The Chrome extension imported `../../../src/browser/pangu` and `src/shared/index
 
 Now it imports `pangu/browser` and `pangu/shared`, and reads the built `dist/`. One exception: `browser-extensions/chrome/package.json` says `"pangu": "file:../.."`, so `node_modules/pangu` is a symlink to this repo. We never need to publish to develop the extension and the core together. The content script is the same size as before (54,650 to 54,656 bytes), with 1 engine.
 
-`npm run setup:extension` creates the symlink, and `build:extension` runs it first. A `postinstall` hook would never fire: `ignore-scripts` is on locally and in CI. It writes no lockfile, a symlink has no version to lock. The zip script excludes `node_modules/` and `package.json`, because `zip -r` follows the symlink and would pack the whole repo.
+`npm run setup:extension` creates the symlink, and `build:extension` runs it first. A `postinstall` hook would never fire: `ignore-scripts` is on locally and in CI. It writes no lockfile, a symlink has no version to lock. The zip script runs `zip -ry`, because plain `zip -r` follows the symlink into the whole repo. It still excludes `node_modules/` and `package.json`, so neither lands in the zip.
 
 The extension reads `dist/`, so `build:extension` runs `build:lib` first and a stale `dist/` cannot reach it. `test:extension` builds first, like `test:shared` and `test:node`. The prompt-experiment scripts that bundle extension sources run `build:extension` first for the same reason.
 
