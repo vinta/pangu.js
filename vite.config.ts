@@ -23,7 +23,7 @@ export default defineConfig({
         emptyOutDir: true,
         lib: {
           // Entries that share a module make Rolldown move it into a hashed chunk, which would leave the public shared/index.js as a facade. preserveModules below emits one file per source module instead
-          entry: { 'shared/index': 'src/shared/index.ts', 'node/index': 'src/node/index.ts', 'node/cli': 'src/node/cli.ts' },
+          entry: ['src/shared/index.ts', 'src/node/index.ts', 'src/node/cli.ts'],
           formats: ['es'],
         },
         rolldownOptions: { external, output: { preserveModules: true, preserveModulesRoot: 'src' } },
