@@ -132,7 +132,7 @@ try {
     entry,
     [
       `export { Pangu } from ${JSON.stringify(join(root, 'src/shared/index.ts'))};`,
-      `export { BrowserPangu } from ${JSON.stringify(join(root, 'src/browser/pangu.ts'))};`,
+      `export { BrowserPangu } from ${JSON.stringify(join(root, 'src/browser/index.ts'))};`,
       `export { applyTextEdits } from ${JSON.stringify(join(root, 'browser-extensions/chrome/src/ai-spacing/shapes/base.ts'))};`,
       `export { hyphenDigit } from ${JSON.stringify(join(root, 'browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit.ts'))};`,
       `export { readSentence } from ${JSON.stringify(join(root, 'browser-extensions/chrome/src/ai-spacing/sentence-context.ts'))};`,

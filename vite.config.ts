@@ -19,7 +19,7 @@ export default defineConfig({
       build: {
         emptyOutDir: true,
         lib: {
-          entry: ['src/shared/index.ts', 'src/node/index.ts', 'src/node/cli.ts'],
+          entry: ['src/shared/index.ts', 'src/node/index.ts', 'src/node/cli.ts', 'src/browser/index.ts'],
           formats: ['es'],
         },
         rolldownOptions: {
@@ -52,7 +52,7 @@ export default defineConfig({
         lib: {
           // NOTE: cdnjs only mirrors the paths listed in its config, so a new sibling chunk would need a PR there
           // See https://github.com/cdnjs/packages/blob/master/packages/p/pangu.json
-          entry: 'src/browser/pangu.ts',
+          entry: 'src/browser/index.ts',
           formats: ['es'],
           fileName: () => 'browser/pangu.js',
         },

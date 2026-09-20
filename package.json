@@ -56,8 +56,8 @@
     },
     "./browser": {
       "import": {
-        "types": "./dist/browser/pangu.d.ts",
-        "default": "./dist/browser/pangu.js"
+        "types": "./dist/browser/index.d.ts",
+        "default": "./dist/browser/index.js"
       }
     },
     "./shared": {

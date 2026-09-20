@@ -578,4 +578,6 @@ export class BrowserPangu extends Pangu {
 
 export const pangu = new BrowserPangu();
 
+export { DomWalker };
+
 export default pangu;

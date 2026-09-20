@@ -1,4 +1,4 @@
-import pangu from '../../../src/browser/pangu';
+import pangu from '../../../src/browser/index';
 import { applyAiSpacing, warmUpAiSpacing } from './ai-spacing/content-script';
 import type { ContentScriptResponse, MessageToContentScript } from './messages';
 import { getSettings, type Settings } from './settings/storage';

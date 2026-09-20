@@ -681,7 +681,7 @@
               label: 'autoSpacePage()',
               sub: 'the rules space a batch of text nodes',
               detail: 'The first sweep is one batch; later page changes bring more batches.',
-              src: ['src/browser/pangu.ts:55'],
+              src: ['src/browser/index.ts:55'],
             },
             {
               from: 'core',
@@ -690,7 +690,7 @@
               label: 'onTextNodesSettled(settledTextNodes)',
               sub: '{ node, unspaced, settled }[]',
               detail: 'Fires once per batch, after the rules loop, when nothing in the batch writes to those text nodes again.',
-              src: ['src/browser/pangu.ts:227-245'],
+              src: ['src/browser/index.ts:227-245'],
             },
             {
               from: 'csai',
@@ -773,7 +773,7 @@
               label: 'schedule(): compare and set',
               sub: 'writes only if node.data === settled',
               detail: 'Same scheduling path as text spacing, so a hidden tab waits until it is visible. A disconnected, ignored, or rewritten text node is skipped.',
-              src: ['src/browser/pangu.ts:101-113'],
+              src: ['src/browser/index.ts:101-113'],
             },
           ],
         },

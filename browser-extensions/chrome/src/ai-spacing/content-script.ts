@@ -1,4 +1,4 @@
-import pangu, { type LateFix, type SettledTextNode } from '../../../../src/browser/pangu';
+import pangu, { type LateFix, type SettledTextNode } from '../../../../src/browser/index';
 import type { CandidateLabel, ClassifyCandidatesMessage, ClassifyCandidatesResponse } from './messages';
 import { readSentence } from './sentence-context';
 import type { AmbiguousShape, SettledCandidate, TextEdit } from './shapes/base';

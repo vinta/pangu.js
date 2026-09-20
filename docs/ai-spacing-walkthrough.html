@@ -475,7 +475,7 @@
             <h3>Find text. Apply edits.</h3>
             <div class="module"><strong>content-script.ts</strong><small>Read settings → connect AI callback → start pangu</small></div>
             <div class="connector">↓ autoSpacePage()</div>
-            <div class="module"><strong>src/browser/pangu.ts</strong><small>Apply ordinary spacing rules to the DOM</small></div>
+            <div class="module"><strong>src/browser/index.ts</strong><small>Apply ordinary spacing rules to the DOM</small></div>
             <div class="connector">↓ onTextNodesSettled()</div>
             <div class="module ai"><strong>ai-spacing/content-script.ts</strong><small>Find candidates → request labels → prepare edits</small></div>
           </article>
@@ -657,7 +657,7 @@ applyLateFixes(fixes)
             >
           </div>
         </div>
-        <p class="sources">Source: <a href="../src/browser/pangu.ts">pangu DOM guards</a><a href="../browser-extensions/chrome/src/ai-spacing/content-script.ts">late-fix composition and failures</a></p>
+        <p class="sources">Source: <a href="../src/browser/index.ts">pangu DOM guards</a><a href="../browser-extensions/chrome/src/ai-spacing/content-script.ts">late-fix composition and failures</a></p>
       </section>
       <footer
         ><span>pangu.js · Source-based walkthrough · September 13, 2026<br />Illustrative data flow; this page does not run the extension or call a model.</span

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ContentScriptResponse } from '../../browser-extensions/chrome/src/messages';
 import { DEFAULT_SETTINGS, type Settings } from '../../browser-extensions/chrome/src/settings/storage';
-import type { SettledTextNode } from '../../src/browser/pangu';
+import type { SettledTextNode } from '../../src/browser/index';
 
 const aiSpacing = vi.hoisted(() => ({ applyAiSpacing: vi.fn(), warmUpAiSpacing: vi.fn() }));
 vi.mock('../../browser-extensions/chrome/src/ai-spacing/content-script', () => aiSpacing);
@@ -17,7 +17,7 @@ async function loadContentScript(settings: Settings | Promise<Settings>, url = '
   const addMessageListener = vi.fn<typeof chrome.runtime.onMessage.addListener>();
   const addNavigationListener = vi.fn<(type: string, listener: (event: { from: { url: string } }) => void) => void>();
   const location = { href: url };
-  vi.doMock('../../src/browser/pangu', () => ({ default: pangu }));
+  vi.doMock('../../src/browser/index', () => ({ default: pangu }));
   vi.stubGlobal('location', location);
   vi.stubGlobal('navigation', { addEventListener: addNavigationListener });
   vi.stubGlobal('chrome', { storage: { sync: { get: async () => settings } }, runtime: { onMessage: { addListener: addMessageListener } } });

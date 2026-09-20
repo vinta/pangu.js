@@ -30,3 +30,5 @@ Not taken:
 - Marking `../shared/index.js` external. ADR 0012 deleted that hack: externals are for other people's packages
 - The `module-sync` condition, so `require` and `import` load one ESM file. `require('pangu')` would return the namespace object, not the instance, which ADR 0012 already rejected
 - Sharing the CLI but not the Node.js ESM entry, or the reverse. It needs one more environment and the 2 outputs stop matching
+
+Addendum (2026-09-20): `defaultEsm` now has 4 entries. `src/browser/index.ts` joined it as the bundler build of `pangu/browser`, see [ADR 0031](0031-pangu-browser-gets-a-bundler-build.md). `dist/browser/pangu.js` is still self-contained.
