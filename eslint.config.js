@@ -23,6 +23,14 @@ const styleRules = {
       selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='forEach']",
       message: 'Use `for of` instead of `.forEach()`.',
     },
+    {
+      selector: 'TSEnumDeclaration',
+      message: 'Use a union type or an `as const` object instead of an enum.',
+    },
+    {
+      selector: ':matches(TSAsExpression, TSTypeAssertion) > :matches(TSUnknownKeyword, TSAnyKeyword).typeAnnotation',
+      message: 'Write a proper type instead of casting to `any` or `unknown`.',
+    },
   ],
 };
 
@@ -56,7 +64,7 @@ export default defineConfig(
       '@typescript-eslint/explicit-member-accessibility': ['error', { overrides: { constructors: 'no-public' } }],
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-deprecated': 'error',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-inferrable-types': 'error',
       '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { arguments: false } }],
       '@typescript-eslint/no-non-null-assertion': 'off',
