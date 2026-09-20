@@ -16,3 +16,5 @@ Not taken:
 `pangu` is an instance on every path, of a different class each: `NodePangu` from `.`, `BrowserPangu` from `./browser`, `Pangu` from `./shared`. Types match runtime on each path, so the trap in [ADR 0010](0010-dot-entry-is-the-node-build.md) does not return.
 
 The `g`-flag patterns are the engine's own objects. `spaceText()` only calls `.replace()`, which resets `lastIndex`, so a caller's `.test()` cannot corrupt spacing. It can still surprise the caller, so the README says so.
+
+Addendum (2026-09-20): "the README says so" went stale. `fa0536f9` removed the README's `### Shared` section, and the `lastIndex` note went with it. The `--save-exact` install line is still there.
