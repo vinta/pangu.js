@@ -4,12 +4,8 @@
 
 ### [pangu.js](https://www.npmjs.com/package/pangu)
 
-- 新增 `pangu/shared`，不依賴 Node.js 和瀏覽器 API 的核心，包含 `Pangu`、`pangu` 和組成規則用的 regex 常數
-- `pangu/browser` 改成指向 `dist/browser/index.js`，跟 `pangu/shared` 共用同一份核心，用 bundler 同時 import 兩者時不會再打包兩份
-  - `dist/browser/pangu.js` 和 `dist/browser/pangu.umd.js` 的路徑不變，還是獨立的單一檔案
-- `pangu/browser` 多 export 了 `DomWalker`
-- `import pangu from 'pangu'` 和 CLI 不再各自內嵌一份核心，改成 import `dist/shared/index.js`
-  - `pangu instanceof Pangu` 現在是 `true`（`Pangu` 來自 `pangu/shared`）
+- 新增 `pangu/shared` 的 exports，包含 `pangu`、`Pangu` 和組成規則用的 regex 常數
+- 新增 `pangu/browser` 的 exports，包含 `DomWalker`、`VisibilityDetector` 和 `TaskScheduler`
 
 ## v10.2.0 / 2026-09-19
 
