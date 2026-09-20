@@ -86,7 +86,7 @@
     "test": "npm run build && vitest run tests/ && playwright test --reporter=list",
     "test:shared": "npm run build && vitest run tests/shared/",
     "test:node": "npm run build && vitest run tests/node/",
-    "test:browser": "npm run build && playwright test --reporter=list",
+    "test:browser": "npm run build && vitest run tests/browser/ && playwright test --reporter=list",
     "test:extension": "npm run build && vitest run tests/extension/",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p src/browser/tsconfig.json && tsc --noEmit -p src/node/tsconfig.json",
     "lint": "npm run lint:code && npm run lint:package",
