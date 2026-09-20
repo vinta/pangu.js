@@ -78,11 +78,11 @@
   ],
   "scripts": {
     "clean": "rm -rf browser-extensions/chrome/dist/ dist/ playwright-report/ test-results/",
-    "build": "npm run clean && npm run build:lib && npm run build:extension",
+    "build": "npm run clean && npm run build:extension",
     "build:lib": "vite build && npm run build:types",
     "build:types": "tsc -p src/browser/tsconfig.json --emitDeclarationOnly --declarationDir dist && tsc -p src/node/tsconfig.json --emitDeclarationOnly --declarationDir dist",
     "setup:extension": "npm --prefix browser-extensions/chrome install --no-package-lock --no-audit --no-fund",
-    "build:extension": "npm run setup:extension && vite build --config browser-extensions/vite.config.extension.ts",
+    "build:extension": "npm run build:lib && npm run setup:extension && vite build --config browser-extensions/vite.config.extension.ts",
     "test": "npm run build && vitest run tests/ && playwright test --reporter=list",
     "test:shared": "npm run build && vitest run tests/shared/",
     "test:node": "npm run build && vitest run tests/node/",

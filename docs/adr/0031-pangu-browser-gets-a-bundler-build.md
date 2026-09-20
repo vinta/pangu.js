@@ -19,7 +19,7 @@ Now it imports `pangu/browser` and `pangu/shared`, and reads the built `dist/`. 
 
 `npm run setup:extension` creates the symlink, and `build:extension` runs it first. A `postinstall` hook would never fire: `ignore-scripts` is on locally and in CI. It writes no lockfile, a symlink has no version to lock. The zip script excludes `node_modules/` and `package.json`, because `zip -r` follows the symlink and would pack the whole repo.
 
-The extension reads `dist/`, so after editing `src/` run `build:lib` before `build:extension`. `test:extension` builds first, like `test:shared` and `test:node`.
+The extension reads `dist/`, so `build:extension` runs `build:lib` first and a stale `dist/` cannot reach it. `test:extension` builds first, like `test:shared` and `test:node`. The prompt-experiment scripts that bundle extension sources call `buildLib()` for the same reason.
 
 It costs 2 things:
 
