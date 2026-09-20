@@ -14,6 +14,7 @@ export default defineConfig({
     target: 'baseline-widely-available', // Support line for the npm and CDN builds. The extension has its own floor in browser-extensions/, matched to its manifest
   },
   environments: {
+    // dist/shared, the Node.js ESM files and dist/browser/index.js share one copy of the engine (ADR 0030, ADR 0031)
     esm: {
       consumer: 'client',
       build: {
