@@ -1,7 +1,7 @@
+import type { LateFix } from 'pangu/browser';
+import { pangu as corePangu } from 'pangu/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ClassifyCandidatesMessage } from '../../../browser-extensions/chrome/src/ai-spacing/messages';
-import type { LateFix } from '../../../src/browser/index';
-import { pangu as corePangu } from '../../../src/shared/index';
 
 async function loadAiSpacing() {
   vi.resetModules();
@@ -13,7 +13,7 @@ async function loadAiSpacing() {
       }
     }),
   };
-  vi.doMock('../../../src/browser/index', () => ({ default: pangu }));
+  vi.doMock('pangu/browser', () => ({ default: pangu }));
   const { handleClassification } = await import('../../../browser-extensions/chrome/src/ai-spacing/service-worker');
   const sendMessage = vi.fn(({ kind, candidates }: ClassifyCandidatesMessage) => handleClassification(kind, candidates));
   vi.stubGlobal('chrome', { runtime: { sendMessage } });

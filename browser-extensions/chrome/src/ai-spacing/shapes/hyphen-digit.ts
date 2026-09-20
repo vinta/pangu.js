@@ -1,4 +1,4 @@
-import { CJK } from '../../../../../src/shared/index';
+import { CJK } from 'pangu/shared';
 import type { AmbiguousShape, CandidateMatch, SettledCandidate } from './base';
 import { indexOfNthSymbol, sliceSentence } from './base';
 import { HYPHEN_DIGIT_LABELS } from './hyphen-digit-prompt';

@@ -8,6 +8,8 @@ rm -f ../paranoid-auto-spacing.zip
 zip -r ../paranoid-auto-spacing.zip . \
   -x "images/*" \
   -x "src/*" \
+  -x "node_modules/*" \
+  -x "package.json" \
   -x ".DS_Store" \
   -x "*/.DS_Store"
 cd ../..

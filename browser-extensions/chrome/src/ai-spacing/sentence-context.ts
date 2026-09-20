@@ -1,5 +1,4 @@
-import { DomWalker } from '../../../../src/browser/dom/dom-walker';
-import pangu from '../../../../src/browser/index';
+import pangu, { DomWalker } from 'pangu/browser';
 import { MAX_SENTENCE_SIDE, SENTENCE_TERMINATOR, sliceSentence } from './shapes/base';
 
 // A newline with the collapsible white space around it: spaces, tabs, and other segment breaks. NBSP never collapses. Chrome renders it as one space, even between two CJK characters where CSS Text would remove it
