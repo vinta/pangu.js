@@ -46,6 +46,10 @@ describe('Symbol -', () => {
     expect(pangu.spaceText('用USB-C充電')).toBe('用 USB-C 充電');
     expect(pangu.spaceText('照X-RAY檢查')).toBe('照 X-RAY 檢查');
 
+    // No hyphen on the line is in direct contact with CJK
+    expect(pangu.spaceText('arr[i]-(x+1)')).toBe('arr[i]-(x+1)');
+    expect(pangu.spaceText('毛額[GDP]-(NSA)')).toBe('毛額 [GDP]-(NSA)');
+
     // Hyphenated English names
     // prettier-ignore
     expect(pangu.spaceText('英文姓名須與護照上相同，包含標點符號；範例：王小明，英文名為WANG, HSIAO-MING，請於英文姓(Surname)欄位填入WANG,、英文名(Given Names)欄位填入HSIAO-MING。'))
