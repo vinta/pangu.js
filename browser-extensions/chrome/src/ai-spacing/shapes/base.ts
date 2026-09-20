@@ -54,13 +54,13 @@ export interface PromptSpec<Label extends string> {
   kind: string;
   systemPrompt: string;
   version: string;
-  candidateLabels: Label[];
+  candidateLabels: readonly Label[];
   buildQuestion(sentence: string, at: number): string;
 }
 
 // Composes every edit one text node collected into one late fix, since a second fix on the same node would fail core's compare-and-set check
 // Descending index order keeps an earlier edit from shifting a later one
-export function applyTextEdits(settled: string, textEdits: TextEdit[]) {
+export function applyTextEdits(settled: string, textEdits: readonly TextEdit[]) {
   let data = settled;
   for (const textEdit of [...textEdits].sort((left, right) => right.index - left.index)) {
     data = data.slice(0, textEdit.index) + textEdit.insert + data.slice(textEdit.index + textEdit.remove);

@@ -7,7 +7,7 @@ async function loadAiSpacing() {
   vi.resetModules();
   const pangu = {
     onTextNodesSettled: vi.fn(),
-    applyLateFixes: vi.fn((fixes: LateFix[]) => {
+    applyLateFixes: vi.fn((fixes: readonly LateFix[]) => {
       for (const { node, data } of fixes) {
         node.data = data;
       }
