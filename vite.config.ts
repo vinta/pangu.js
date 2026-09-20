@@ -16,12 +16,13 @@ export default defineConfig({
     target: 'baseline-widely-available',
   },
   environments: {
-    // One copy of the engine for shared/index.js and the Node.js ESM outputs (ADR 0030). Without preserveModules Rolldown hoists the engine into a hashed chunk and the public shared/index.js becomes a facade
+    // One copy of the engine for shared/index.js and the Node.js ESM outputs (ADR 0030)
     sharedNodeEsm: {
       consumer: 'client',
       build: {
         emptyOutDir: true,
         lib: {
+          // Entries that share a module make Rolldown move it into a hashed chunk, which would leave the public shared/index.js as a facade. preserveModules below emits one file per source module instead
           entry: { 'shared/index': 'src/shared/index.ts', 'node/index': 'src/node/index.ts', 'node/cli': 'src/node/cli.ts' },
           formats: ['es'],
         },
