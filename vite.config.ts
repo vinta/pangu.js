@@ -14,7 +14,7 @@ export default defineConfig({
     target: 'baseline-widely-available', // Support line for the npm and CDN builds. The extension has its own floor in browser-extensions/, matched to its manifest
   },
   environments: {
-    defaultEsm: {
+    esm: {
       consumer: 'client',
       build: {
         emptyOutDir: true,
@@ -77,8 +77,8 @@ export default defineConfig({
   builder: {
     buildApp: async (builder) => {
       // Defining `builder` is what makes a plain `vite build` build every environment
-      // They run in order, and defaultEsm has to go first because it is the only one that empties dist/
-      for (const name of ['defaultEsm', 'nodeCjs', 'browserEsm', 'browserUmd']) {
+      // They run in order, and esm has to go first because it is the only one that empties dist/
+      for (const name of ['esm', 'nodeCjs', 'browserEsm', 'browserUmd']) {
         await builder.build(builder.environments[name]!);
       }
     },

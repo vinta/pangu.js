@@ -19,7 +19,7 @@ The other 3 outputs stay self-contained, each for its own reason:
 - `dist/browser/pangu.umd.js`: loaded by a plain `<script>` tag, and Vite refuses UMD with multiple entries
 - `dist/node/index.cjs`: `require(esm)` needs Node.js 20.19+ while `engines` says `>=20.0.0`, and Jest never gets it, see [ADR 0012](0012-cjs-half-is-self-contained.md)
 
-The build is one environment, `defaultEsm`, with 3 entries and `output.preserveModules`. Multiple entries alone are not enough. On Vite 8.1.5, Rolldown moves the engine into a hashed `shared-6tKhGmJV.js` and turns the public `shared/index.js` into a facade that re-exports mangled aliases. `preserveEntrySignatures` does not change that.
+The build is one environment, `esm`, with 3 entries and `output.preserveModules`. Multiple entries alone are not enough. On Vite 8.1.5, Rolldown moves the engine into a hashed `shared-6tKhGmJV.js` and turns the public `shared/index.js` into a facade that re-exports mangled aliases. `preserveEntrySignatures` does not change that.
 
 The trigger is the top-level `await main()` in `src/node/cli.ts`. Rolldown merges a common chunk back into its entry, but it turns that off when any module uses top-level await. With the `await` stripped, the same 3 entries build clean without `preserveModules`. We keep `preserveModules` anyway, so one `await` cannot change the published layout. It mirrors `src/`, so every import in `dist/` is the import in the source.
 
@@ -31,4 +31,4 @@ Not taken:
 - The `module-sync` condition, so `require` and `import` load one ESM file. `require('pangu')` would return the namespace object, not the instance, which ADR 0012 already rejected
 - Sharing the CLI but not the Node.js ESM entry, or the reverse. It needs one more environment and the 2 outputs stop matching
 
-Addendum (2026-09-20): `defaultEsm` now has 4 entries. `src/browser/index.ts` joined it as the bundler build of `pangu/browser`, see [ADR 0031](0031-pangu-browser-gets-a-bundler-build.md). `dist/browser/pangu.js` is still self-contained.
+Addendum (2026-09-20): `esm` now has 4 entries. `src/browser/index.ts` joined it as the bundler build of `pangu/browser`, see [ADR 0031](0031-pangu-browser-gets-a-bundler-build.md). `dist/browser/pangu.js` is still self-contained.
