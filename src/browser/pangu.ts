@@ -26,10 +26,10 @@ export interface LateFix {
   data: string;
 }
 
-const TRAILING_WHITESPACE = /\s$/;
-const LEADING_WHITESPACE = /^\s/;
-
 export class BrowserPangu extends Pangu {
+  private static readonly trailingWhitespace = /\s$/;
+  private static readonly leadingWhitespace = /^\s/;
+
   // Pre-paint re-space stays bounded: subtrees with more text nodes than this fall back to the queue
   private static readonly maxSyncTextNodes = 256;
 
@@ -177,8 +177,8 @@ export class BrowserPangu extends Pangu {
         const boundarySpacingDecision = decideBoundarySpacing({
           currentTail,
           nextFirst,
-          currentEndsWithSpace: TRAILING_WHITESPACE.test(currentTextNode.data),
-          nextStartsWithSpace: LEADING_WHITESPACE.test(nextTextNode.data),
+          currentEndsWithSpace: BrowserPangu.trailingWhitespace.test(currentTextNode.data),
+          nextStartsWithSpace: BrowserPangu.leadingWhitespace.test(nextTextNode.data),
           whitespaceBetween,
           contentBetween,
           spaceLikeSiblingAfterCurrent: this.isSpaceLikeSibling(currentTextNode.nextSibling),
