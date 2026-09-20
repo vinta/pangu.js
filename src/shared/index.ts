@@ -521,3 +521,5 @@ export class Pangu {
 }
 
 export const pangu = new Pangu();
+
+export default pangu;

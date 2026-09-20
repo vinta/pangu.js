@@ -20,3 +20,5 @@ The `g`-flag patterns are the engine's own objects. `spaceText()` only calls `.r
 Addendum (2026-09-20): "the README says so" went stale. `fa0536f9` removed the README's `### Shared` section, and the `lastIndex` note went with it. The `--save-exact` install line is still there.
 
 Addendum (2026-09-20): "the node entry inlines it" went stale. Since [ADR 0030](0030-node-esm-and-cli-import-the-shared-entry.md) the Node.js ESM entry imports `dist/shared/index.js`, so a bundle importing `pangu` and `pangu/shared` carries one engine.
+
+Addendum (2026-09-21): `pangu/shared` also has a default export, the same `pangu` instance as the named one, so `import pangu from '…'` works on all 3 paths. `default` joins the stable names.
