@@ -121,24 +121,6 @@ const content = await pangu.spaceFile('/path/to/text.txt');
 
 You **SHOULD NOT** use `pangu.js` to space Markdown documents, this library is specially designed for HTML webpages and plain texts without any markup language. See [issue #127](https://github.com/vinta/pangu.js/issues/127).
 
-### Shared
-
-`pangu/shared` is the platform-free engine, plus every pattern `spaceText()` applies. No DOM, no `node:fs`, so it also runs in places like Cloudflare Workers. ESM only.
-
-```js
-import { pangu, CJK, DIGIT_PLUS_CJK } from 'pangu/shared';
-
-const text = pangu.spaceText('請問Jackey的鼻子有幾個？123個！');
-// text = '請問 Jackey 的鼻子有幾個？123 個！'
-
-const hasCjk = new RegExp(`[${CJK}]`).test(text);
-const matches = [...'預計18+才能觀看'.matchAll(DIGIT_PLUS_CJK)];
-```
-
-The patterns with the `g` flag are the same objects the engine uses. `.test()` and `.exec()` leave `lastIndex` on them, so use `.search()`, `.matchAll()` or `.replace()` instead.
-
-Pattern names follow the spacing rules, so they may change in any release.
-
 ### CLI
 
 ```bash
