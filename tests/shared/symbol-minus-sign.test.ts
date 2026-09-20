@@ -17,6 +17,13 @@ describe('Symbol -', () => {
     expect(pangu.spaceText('长者的智慧和复杂的维斯特洛- 文章')).toBe('长者的智慧和复杂的维斯特洛 - 文章');
     expect(pangu.spaceText('1976年-2018年')).toBe('1976 年 - 2018 年');
 
+    // Hyphen reading: a hyphen in direct contact with CJK flips the hyphens between brackets on its line
+    expect(pangu.spaceText('全球-實質國內生產毛額[GDP]-(年增率, IMF 預估)')).toBe('全球 - 實質國內生產毛額 [GDP] - (年增率, IMF 預估)');
+    expect(pangu.spaceText('全球-名目國內生產毛額[GDP]-(NSA,美元,IMF 預估)')).toBe('全球 - 名目國內生產毛額 [GDP] - (NSA, 美元, IMF 預估)');
+    expect(pangu.spaceText('台灣-消費者物價指數[CPI]-(年增率)')).toBe('台灣 - 消費者物價指數 [CPI] - (年增率)');
+    expect(pangu.spaceText('美國-核心消費者物價指數[Core CPI]-(SA,年增率)')).toBe('美國 - 核心消費者物價指數 [Core CPI] - (SA, 年增率)');
+    expect(pangu.spaceText('美國-個人消費支出物價指數[PCE]-(年增率)-第10百分位數')).toBe('美國 - 個人消費支出物價指數 [PCE] - (年增率) - 第 10 百分位數');
+
     // DO NOT change if already spacing
     expect(pangu.spaceText('前面 - 後面')).toBe('前面 - 後面');
     expect(pangu.spaceText('Vinta - Abc123')).toBe('Vinta - Abc123');
