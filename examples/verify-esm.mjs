@@ -7,7 +7,8 @@ import { join } from 'node:path';
 import * as panguNamespace from 'pangu';
 import pangu, { NodePangu, pangu as namedPangu } from 'pangu';
 // The browser entry is importable in plain Node: the spacing engine is platform-free and DOM APIs are only touched inside the DOM-walking methods, never at module scope
-import browserPangu, { BrowserPangu, pangu as namedBrowserPangu } from 'pangu/browser';
+import browserPangu, { BrowserPangu, DomWalker, TaskScheduler, VisibilityDetector, pangu as namedBrowserPangu } from 'pangu/browser';
+import sharedPangu, { CJK, Pangu, pangu as namedSharedPangu } from 'pangu/shared';
 
 console.log('=== Testing ESM Imports ===\n');
 
@@ -59,5 +60,23 @@ assert.equal(namedBrowserPangu, browserPangu);
 assert.ok(browserPangu instanceof BrowserPangu);
 assert.equal(browserPangu.spaceText('測試test'), '測試 test');
 console.log('\npangu/browser default, named pangu, and BrowserPangu work');
+
+// The classes behind the public taskScheduler and visibilityDetector fields are importable, and so is DomWalker
+assert.ok(browserPangu.taskScheduler instanceof TaskScheduler);
+assert.ok(browserPangu.visibilityDetector instanceof VisibilityDetector);
+assert.equal(typeof DomWalker.isIgnoredElement, 'function');
+console.log('pangu/browser DomWalker, TaskScheduler, and VisibilityDetector work');
+
+// The ./shared subpath has the same three-face surface, plus the patterns the engine is built from
+assert.equal(namedSharedPangu, sharedPangu);
+assert.ok(sharedPangu instanceof Pangu);
+assert.equal(sharedPangu.spaceText('測試test'), '測試 test');
+assert.ok(new RegExp(`[${CJK}]`).test('測試'));
+console.log('pangu/shared default, named pangu, Pangu, and CJK work');
+
+// Every entry imports the one Pangu in pangu/shared instead of inlining its own copy
+assert.ok(pangu instanceof Pangu);
+assert.ok(browserPangu instanceof Pangu);
+console.log('pangu and pangu/browser share the Pangu class of pangu/shared');
 
 console.log('\nESM imports working correctly!');

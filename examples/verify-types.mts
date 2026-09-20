@@ -4,7 +4,8 @@
 // verbatim, so a relative import written without a file extension ships as-is and fails to resolve for any consumer on moduleResolution node16/nodenext. This file is checked the way such a consumer
 // resolves the package, so that class of bug fails here instead of reaching npm.
 import panguNode, { NodePangu, pangu as namedPanguNode } from 'pangu';
-import panguBrowser, { BrowserPangu, pangu as namedPanguBrowser, type AutoSpacePageConfig } from 'pangu/browser';
+import panguBrowser, { BrowserPangu, DomWalker, TaskScheduler, VisibilityDetector, pangu as namedPanguBrowser, type AutoSpacePageConfig, type TaskSchedulerConfig } from 'pangu/browser';
+import panguShared, { CJK, Pangu, pangu as namedPanguShared } from 'pangu/shared';
 
 // Members inherited from the shared Pangu base class. These are the ones that disappear when dist/node/index.d.ts cannot resolve its '../shared/index.js' import, because NodePangu then extends an error type
 export const spaced: string = panguNode.spaceText('當你凝視著bug');
@@ -30,3 +31,17 @@ export const namedBrowserInstance: BrowserPangu = namedPanguBrowser;
 
 // The config interface is public API for autoSpacePage() callers, so its exported shape is pinned here
 export const config: AutoSpacePageConfig = { pageDelayMs: 100, nodeDelayMs: 50, nodeMaxWaitMs: 200 };
+
+// The types of the public taskScheduler and visibilityDetector fields can be named, and so can the scheduler config
+export const taskScheduler: TaskScheduler = panguBrowser.taskScheduler;
+export const visibilityDetector: VisibilityDetector = panguBrowser.visibilityDetector;
+export const taskSchedulerConfig: TaskSchedulerConfig = panguBrowser.taskScheduler.config;
+export const isIgnoredElement: (element: Element) => boolean = (element) => DomWalker.isIgnoredElement(element);
+
+// The ./shared subpath export carries the base class every entry extends, and the patterns as strings
+export const sharedInstance: Pangu = new Pangu();
+export const sharedDefaultSpaced: string = panguShared.spaceText('當你凝視著bug');
+export const namedSharedInstance: Pangu = namedPanguShared;
+export const cjk: string = CJK;
+export const nodeIsShared: Pangu = panguNode;
+export const browserIsShared: Pangu = panguBrowser;
