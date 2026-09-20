@@ -2,7 +2,7 @@ import { NAME_SUFFIX_AT_END, Pangu } from '../shared/index.js';
 import { decideBoundarySpacing, decideTextNodeSpacing, respaceCurrentTail } from './dom/boundary-spacing.js';
 import { DomWalker } from './dom/dom-walker.js';
 import { VisibilityDetector } from './dom/visibility-detector.js';
-import { TaskScheduler, type TaskSchedulerConfig } from './scheduling/task-scheduler.js';
+import { TaskQueue, TaskScheduler, type TaskSchedulerConfig } from './scheduling/task-scheduler.js';
 import { debounce, once, waitForVideosToLoad } from './scheduling/timing.js';
 
 export interface AutoSpacePageConfig {
@@ -578,7 +578,7 @@ export class BrowserPangu extends Pangu {
 
 export const pangu = new BrowserPangu();
 
-export { DomWalker, TaskScheduler, VisibilityDetector };
+export { DomWalker, TaskQueue, TaskScheduler, VisibilityDetector };
 export type { TaskSchedulerConfig };
 
 export default pangu;

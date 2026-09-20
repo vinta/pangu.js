@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import pangu, { BrowserPangu, DomWalker, pangu as namedPangu, TaskScheduler, VisibilityDetector } from '../../dist/browser/index.js';
+import pangu, { BrowserPangu, DomWalker, pangu as namedPangu, TaskQueue, TaskScheduler, VisibilityDetector } from '../../dist/browser/index.js';
 import { Pangu } from '../../dist/shared/index.js';
 
 describe('Browser ESM imports', () => {
@@ -19,6 +19,7 @@ describe('Browser ESM imports', () => {
 
   it('handle class imports', () => {
     expect(pangu.taskScheduler).toBeInstanceOf(TaskScheduler);
+    expect(pangu.taskScheduler.queue).toBeInstanceOf(TaskQueue);
     expect(pangu.visibilityDetector).toBeInstanceOf(VisibilityDetector);
     expect(typeof DomWalker.isIgnoredElement).toBe('function');
   });

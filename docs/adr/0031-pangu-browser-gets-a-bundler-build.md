@@ -43,3 +43,5 @@ npm keeps the old copy while the version stays the same (npm/cli#7169, closed wi
 The extension tests moved to `browser-extensions/chrome/tests/`. From `tests/`, `pangu/browser` resolves to the root `dist/` by self-reference. From the extension it resolves to the copy. `vi.doMock('pangu/browser')` mocked one file while the content script imported the other, and 11 tests failed. Inside the extension package both resolve to the copy.
 
 3 statements above went stale: the symlink, "a symlink has no version to lock", and the reason for `zip -ry`. `zip -ry` stays, it does no harm. DevTools now shows the engine as `node_modules/pangu/dist/...`. The content script is 54,926 bytes: the 270 new bytes are longer paths in `//#region` comments.
+
+Addendum (2026-09-21): `TaskQueue` is exported too. `pangu.taskScheduler.queue` was already public, but a caller could not name its type. Same rule as the others: it can be renamed or removed in any release.
