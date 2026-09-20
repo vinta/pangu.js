@@ -1,4 +1,4 @@
-import pangu, { BrowserPangu } from './pangu.js';
+import pangu, { BrowserPangu } from './index.js';
 
 // The UMD global carries the class as a property of the instance, so `window.pangu.BrowserPangu` stays constructible for <script> consumers
 const panguUmd = Object.assign(pangu, { BrowserPangu });

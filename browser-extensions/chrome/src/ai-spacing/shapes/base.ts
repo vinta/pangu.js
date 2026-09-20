@@ -1,22 +1,22 @@
 import type { Candidate, CandidateLabel } from '../messages';
 
 export interface CandidateMatch extends Candidate {
-  readonly index: number;
+  index: number;
 }
 
 export interface SettledCandidate extends CandidateMatch {
-  readonly node: Text;
-  readonly settled: string;
+  node: Text;
+  settled: string;
 }
 
 export interface TextEdit {
-  readonly index: number;
-  readonly remove: number;
-  readonly insert: string;
+  index: number;
+  remove: number;
+  insert: string;
 }
 
 export interface AmbiguousShape {
-  readonly kind: string; // Joins this shape to its PromptSpec
+  kind: string; // Joins this shape to its PromptSpec
   hasPotentialCandidates(text: string): boolean; // The text scan decides whether to warm up
   // Use sentenceAt with the symbol's unspaced index when supplied. Only matches with an inserted gap qualify
   find(unspaced: string, settled: string, sentenceAt?: (at: number) => Candidate): CandidateMatch[];
@@ -51,10 +51,10 @@ export function indexOfNthSymbol(text: string, symbol: string, ordinal: number) 
 }
 
 export interface PromptSpec<Label extends string> {
-  readonly kind: string;
-  readonly systemPrompt: string;
-  readonly version: string;
-  readonly candidateLabels: readonly Label[];
+  kind: string;
+  systemPrompt: string;
+  version: string;
+  candidateLabels: readonly Label[];
   buildQuestion(sentence: string, at: number): string;
 }
 

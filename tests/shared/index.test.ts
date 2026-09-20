@@ -3,7 +3,7 @@ import { Pangu } from '../../dist/shared/index.js';
 
 const pangu = new Pangu();
 
-describe('API', () => {
+describe('Pangu', () => {
   describe('spaceText()', () => {
     it('space text', () => {
       // prettier-ignore

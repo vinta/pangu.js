@@ -21,7 +21,7 @@ const styleRules = {
     'error',
     {
       selector: "CallExpression[callee.type='MemberExpression'][callee.property.name='forEach']",
-      message: 'Use `for…of` instead of `.forEach(…)`.',
+      message: 'Use `for of` instead of `.forEach()`.',
     },
   ],
 };
@@ -36,7 +36,7 @@ export default defineConfig(
     ignores: ['dist/', 'browser-extensions/chrome/dist/', 'scripts/prompt-experiments/', 'tmp/'],
   },
   {
-    files: ['src/**/*.ts', 'browser-extensions/chrome/src/**/*.ts', 'tests/**/*.ts', 'vite.config.ts', 'playwright.config.ts'],
+    files: ['src/**/*.ts', 'tests/**/*.ts', 'browser-extensions/chrome/src/**/*.ts', 'browser-extensions/chrome/tests/**/*.ts', 'vite.config.ts', 'playwright.config.ts'],
     extends: [...tseslint.configs.recommendedTypeChecked],
     languageOptions: {
       parser: tseslint.parser,
@@ -53,9 +53,10 @@ export default defineConfig(
           fixStyle: 'separate-type-imports',
         },
       ],
+      '@typescript-eslint/explicit-member-accessibility': ['error', { overrides: { constructors: 'no-public' } }],
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-deprecated': 'error',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-inferrable-types': 'error',
       '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { arguments: false } }],
       '@typescript-eslint/no-non-null-assertion': 'off',

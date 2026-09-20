@@ -17,12 +17,12 @@
 - `browser-extensions/chrome/pages/`, `stylesheets/`, `icons/`, `images/`, and `sounds/`: extension UI and store assets.
 - `browser-extensions/chrome/_locales/`: extension name, description, and UI strings; `zh_TW` is the default and only locale.
 - `browser-extensions/chrome/src/`: extension service worker, content script, popup, options page, and utilities.
+- `browser-extensions/chrome/tests/`: Chrome extension tests for AI spacing, the content script, settings, URL matching, and the `text-autospace` stylesheet.
 - `scripts/`: release and extension packaging helpers.
 - `src/browser/`: browser DOM spacing, TreeWalker traversal, task scheduling, visibility detection, and UMD entry.
 - `src/node/`: Node.js API, CommonJS wrapper, and CLI implementation.
 - `src/shared/index.ts`: core platform-agnostic spacing logic and regex rules.
-- `tests/browser/`: Playwright browser behavior tests.
-- `tests/extension/`: Chrome extension settings and URL-matching tests.
+- `tests/browser/`: Playwright browser behavior tests, plus vitest files for the ESM imports and the boundary spacing module.
 - `tests/node/`: Node-specific tests and file-processing coverage.
 - `tests/shared/`: shared spacing behavior tests.
 
@@ -31,14 +31,14 @@
 - Install dependencies with `npm install` when needed; this repo uses `package-lock.json`.
 - Build everything with `npm run build`.
 - Build only the library with `npm run build:lib`.
-- Build only the Chrome extension with `npm run build:extension`.
+- Build the Chrome extension with `npm run build:extension`; it builds the library first.
 - Run all tests with `npm run test`.
 - Run shared logic tests with `npm run test:shared`.
 - Run Node.js tests with `npm run test:node`.
 - Run browser tests with `npm run test:browser`.
 - Run extension tests with `npm run test:extension`.
 - Run lint with `npm run lint`.
-- Run type checking with `npm run typecheck`; it covers all three tsconfigs.
+- Run type checking with `npm run typecheck`; it covers all three tsconfigs. It and `npm run lint` need `npm run build` first.
 - Clean generated artifacts with `npm run clean`.
 - Package the extension with `npm run pack-extension`.
 

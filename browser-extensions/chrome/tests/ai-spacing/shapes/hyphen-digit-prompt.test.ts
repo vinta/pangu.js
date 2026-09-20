@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { HYPHEN_DIGIT_LABELS, hyphenDigitPrompt } from '../../../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-prompt';
+import { HYPHEN_DIGIT_LABELS, hyphenDigitPrompt } from '../../../src/ai-spacing/shapes/hyphen-digit-prompt';
 
 it('preserve the measured v29-zh system prompt and enum order', () => {
   expect(hyphenDigitPrompt.kind).toBe('hyphen-digit');

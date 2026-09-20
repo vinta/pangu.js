@@ -7,16 +7,16 @@ export class TaskQueue {
   private queue: (() => void)[] = [];
   private isProcessing = false;
 
-  add(task: () => void) {
+  public add(task: () => void) {
     this.queue.push(task);
     this.scheduleProcessing();
   }
 
-  clear() {
+  public clear() {
     this.queue.length = 0;
   }
 
-  get length() {
+  public get length() {
     return this.queue.length;
   }
 
@@ -51,14 +51,14 @@ export class TaskQueue {
  * ensuring smooth user experience even when processing large amounts of text.
  */
 export class TaskScheduler {
-  public readonly config: TaskSchedulerConfig = {
+  public config: TaskSchedulerConfig = {
     enabled: true,
     timeout: 2000, // Not consulted by scheduleProcessing(), which uses a hardcoded 5000ms idle deadline
   };
 
   private taskQueue = new TaskQueue();
 
-  get queue() {
+  public get queue() {
     return this.taskQueue;
   }
 }

@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { rolldown } from 'rolldown';
-import { scratchDirectory } from '../../artifacts.mjs';
+import { buildExtension, scratchDirectory } from '../../artifacts.mjs';
 
 const usage =
   'Usage: node scripts/prompt-experiments/hyphen-digit/corpus/check-inputs.mjs [--cases <corpus.json> ...]\nReplays supplied corpora, or the shared development corpus, in the attached pangu-eval session. Run outside the browser sandbox. No model inference.';
@@ -125,14 +125,15 @@ async function replay(page, bundle, cases) {
 }
 
 const root = fileURLToPath(new URL('../../../../', import.meta.url));
+buildExtension(root);
 const temporary = scratchDirectory(root, 'pangu-hyphen-inputs-');
 try {
   const entry = join(temporary, 'entry.ts');
   writeFileSync(
     entry,
     [
-      `export { Pangu } from ${JSON.stringify(join(root, 'src/shared/index.ts'))};`,
-      `export { BrowserPangu } from ${JSON.stringify(join(root, 'src/browser/pangu.ts'))};`,
+      `export { Pangu } from ${JSON.stringify(join(root, 'dist/shared/index.js'))};`,
+      `export { BrowserPangu } from ${JSON.stringify(join(root, 'dist/browser/index.js'))};`,
       `export { applyTextEdits } from ${JSON.stringify(join(root, 'browser-extensions/chrome/src/ai-spacing/shapes/base.ts'))};`,
       `export { hyphenDigit } from ${JSON.stringify(join(root, 'browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit.ts'))};`,
       `export { readSentence } from ${JSON.stringify(join(root, 'browser-extensions/chrome/src/ai-spacing/sentence-context.ts'))};`,

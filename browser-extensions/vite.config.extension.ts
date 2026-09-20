@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
@@ -5,6 +6,16 @@ const extensionRoot = import.meta.dirname;
 
 // We set `consumer: 'client'` because an environment defaults to the server consumer, which ignores `build.lib.fileName` and names outputs after the entry instead
 export default defineConfig({
+  plugins: [
+    // The service worker registers dist/content-script.css with chrome.scripting, and no script imports it, so it is emitted as is
+    {
+      name: 'copy-content-script-css',
+      applyToEnvironment: (environment) => environment.name === 'contentScript',
+      generateBundle() {
+        this.emitFile({ type: 'asset', fileName: 'content-script.css', source: readFileSync(resolve(extensionRoot, 'chrome/src/content-script.css')) });
+      },
+    },
+  ],
   build: {
     outDir: resolve(extensionRoot, 'chrome/dist'),
     target: 'chrome102',

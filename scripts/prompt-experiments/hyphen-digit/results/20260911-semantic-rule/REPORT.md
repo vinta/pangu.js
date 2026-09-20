@@ -129,8 +129,8 @@ Validation at `2026-09-11T10:26:28.065Z` passed the extension build, all three t
 
 - `scripts/prompt-experiments/sweep.test.ts`
 - `scripts/prompt-experiments/hyphen-digit/paired-gates.test.ts`
-- `tests/extension/ai-spacing/shapes/hyphen-digit.test.ts`
-- `tests/extension/ai-spacing/shapes/hyphen-digit-prompt.test.ts`
+- `browser-extensions/chrome/tests/ai-spacing/shapes/hyphen-digit.test.ts`
+- `browser-extensions/chrome/tests/ai-spacing/shapes/hyphen-digit-prompt.test.ts`
 
 Final verification corrected the mock example-page test to pass `canonical_source` after fresh metadata added that mapping. The production gate code and scored artifacts were unchanged. The historical prompt-lock check passed for the frozen evidence and qualified prompt.
 

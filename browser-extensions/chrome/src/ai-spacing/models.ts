@@ -97,7 +97,7 @@ function classifyOneCandidate(promptSpec: PromptSpec<CandidateLabel>, baseSessio
   return answer;
 }
 
-async function promptOneCandidate(promptSpec: PromptSpec<CandidateLabel>, baseSession: LanguageModel, question: string): Promise<CandidateLabel | null> {
+async function promptOneCandidate(promptSpec: PromptSpec<CandidateLabel>, baseSession: LanguageModel, question: string) {
   console.debug(`Shape ${promptSpec.kind} prompt:\n${question}`);
 
   try {
@@ -124,7 +124,7 @@ async function promptOneCandidate(promptSpec: PromptSpec<CandidateLabel>, baseSe
 }
 
 // A single candidate's failure stays that candidate's failure, so the batch always answers
-export async function classifyCandidates(promptSpec: PromptSpec<CandidateLabel>, candidates: readonly Candidate[]): Promise<(CandidateLabel | null)[]> {
+export async function classifyCandidates(promptSpec: PromptSpec<CandidateLabel>, candidates: Candidate[]) {
   const baseSession = await getBaseSession(promptSpec);
 
   // NOTE: Only one model instance in the browser and it runs one task at a time, so sending prompts in parallel won't make them faster

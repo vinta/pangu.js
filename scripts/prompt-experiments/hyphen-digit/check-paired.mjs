@@ -4,7 +4,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { isDeepStrictEqual, parseArgs } from 'node:util';
 import { rolldown } from 'rolldown';
-import { outputDirectory, publicCase } from '../artifacts.mjs';
+import { buildExtension, outputDirectory, publicCase } from '../artifacts.mjs';
 import { evaluatePaired } from './paired-gates.mjs';
 
 const usage = `Usage: node scripts/prompt-experiments/hyphen-digit/check-paired.mjs
@@ -110,6 +110,7 @@ async function main() {
   for (let index = 0; index < artifacts.length; index += 2) {
     comparisons.push({ baseline: artifacts[index], candidate: artifacts[index + 1] });
   }
+  buildExtension(fileURLToPath(new URL('../../../', import.meta.url)));
   const { hyphenDigit } = await productionModule('hyphen-digit');
   const { applyTextEdits } = await productionModule('base');
   const gate = evaluatePaired({

@@ -123,18 +123,18 @@ export const CJK_HASH = new RegExp(`([${CJK}])(#([^ \\u00a0]))`, 'g');
 // Non-breaking space: [ ] (U+00A0). A hashtag right after a slash in a list (/#tag) is a hashtag, not a C# shape
 export const HASH_CJK = new RegExp(`(([^ \\u00a0/])#)([${CJK}])`, 'g');
 
-const PRODUCT_NAME = 'Apple TV|CATCHPLAY|[Dd]iscovery|Disney|ESPN|Fitness|iCloud|mo ?店|Paramount|PS';
-const PRODUCT_NAME_IN_CJK = '公視|影劇館';
-const PRODUCT_TIER = 'Pro';
-const CREDIT_RATING = '(?:tw)?(?:AA|BBB|BB|CCC)|tw[AB]';
-const MULTI_LETTER_BLOOD_TYPE = 'AB|RhD|Rh';
+export const PRODUCT_NAME = 'Apple TV|CATCHPLAY|[Dd]iscovery|Disney|ESPN|Fitness|iCloud|mo ?店|Paramount|PS';
+export const PRODUCT_NAME_IN_CJK = '公視|影劇館';
+export const PRODUCT_TIER = 'Pro';
+export const CREDIT_RATING = '(?:tw)?(?:AA|BBB|BB|CCC)|tw[AB]';
+export const MULTI_LETTER_BLOOD_TYPE = 'AB|RhD|Rh';
 
 // Product names and tiers take + only; credit ratings and blood types take + or -
-const NAME_SUFFIX = `(?:(?<![A-Za-z0-9])(?:(?:${PRODUCT_NAME}|${PRODUCT_TIER})\\+|(?:${CREDIT_RATING}|${MULTI_LETTER_BLOOD_TYPE})[+-])|(?:${PRODUCT_NAME_IN_CJK})\\+)`;
+export const NAME_SUFFIX = `(?:(?<![A-Za-z0-9])(?:(?:${PRODUCT_NAME}|${PRODUCT_TIER})\\+|(?:${CREDIT_RATING}|${MULTI_LETTER_BLOOD_TYPE})[+-])|(?:${PRODUCT_NAME_IN_CJK})\\+)`;
 export const NAME_SUFFIX_AT_END = new RegExp(`${NAME_SUFFIX}$`);
 
 // A closing mark follows the suffix tight; a word or an opening bracket keeps its boundary space
-const CLOSING_AFTER_SUFFIX = /[/)\]}\uff09\u3011\u3015\u3009\u300b\u300d\u300f\uff0c\u3002\u3001\uff1b\uff1a\uff01\uff1f]/;
+export const CLOSING_AFTER_SUFFIX = /[/)\]}\uff09\u3011\u3015\u3009\u300b\u300d\u300f\uff0c\u3002\u3001\uff1b\uff1a\uff01\uff1f]/;
 
 // The operator set is - * = & only (no + | / < >). Only direct CJK contact makes a symbol an operator: a symbol between two half-width characters binds them into a joiner token (A-B, a=1, S&P)
 // and never gets spaces, so there is deliberately no between-half-width rule here
@@ -218,7 +218,7 @@ export const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
 
 // A bare unpaired non-void tag amid prose is a tag mention, not markup: it reads as one unit and is spaced from CJK it directly touches
 // A trailing self-closing slash is still bare, but void elements render on their own (<br> or <hr>), so they stay markup even unpaired
-export const VOID_HTML_TAGS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
+export const VOID_HTML_TAGS: ReadonlySet<string> = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
 export const BARE_HTML_TAG = /^<([a-zA-Z][a-zA-Z0-9]*)\s*\/?>$/;
 export const CLOSING_HTML_TAG = /<\/([a-zA-Z][a-zA-Z0-9]*)/g;
 
@@ -229,25 +229,8 @@ export const HTML_TAG_MENTION_CJK = new RegExp(`(?<=\uE005)([${CJK}])`, 'g');
 // prose written tight after a URL stays tight. The body ends at the Private Use Area too, so a URL never swallows a placeholder. See ADR 0026
 export const HTTP_URL = /(?<![A-Za-z0-9])https?:\/\/[^\s<>"`\u3000-\u303f\uff00-\uffef\u2018\u2019\u201c\u201d\u2026\ue000-\uf8ff]+/g;
 // Trailing half-width punctuation and an unbalanced closing parenthesis belong to the prose, not the URL
-const HTTP_URL_TRAILING_PUNCTUATION = /[.,;:!?'"]+$/;
+export const HTTP_URL_TRAILING_PUNCTUATION = /[.,;:!?'"]+$/;
 export const CJK_HTTP_URL = new RegExp(`([${CJK}])(?=\uE00A)`, 'g');
-
-function trimHttpUrl(url: string) {
-  // Count once: a content script sees attacker text, and recounting per pass is quadratic on a long run of closing parentheses
-  let unbalancedClosingParentheses = (url.match(/\)/g) ?? []).length - (url.match(/\(/g) ?? []).length;
-  for (;;) {
-    const trimmed = url.replace(HTTP_URL_TRAILING_PUNCTUATION, '');
-    if (trimmed.endsWith(')') && unbalancedClosingParentheses > 0) {
-      unbalancedClosingParentheses--;
-      url = trimmed.slice(0, -1);
-      continue;
-    }
-    if (trimmed === url) {
-      return url;
-    }
-    url = trimmed;
-  }
-}
 
 // Used by fixBracketSpacing to strip the spaces just inside a bracket pair; everything else between the brackets stays unchanged
 export const BRACKET_PATTERNS = [
@@ -255,7 +238,7 @@ export const BRACKET_PATTERNS = [
   { pattern: /\(([^()]*)\)/g, open: '(', close: ')' },
   { pattern: /\[([^\[\]]*)\]/g, open: '[', close: ']' },
   { pattern: /\{([^{}]*)\}/g, open: '{', close: '}' },
-];
+] as const;
 
 // We use characters from Unicode's Private Use Area (U+E000-U+F8FF) as delimiters to make placeholders unlikely to collide with ordinary text
 export class PlaceholderReplacer {
@@ -263,12 +246,12 @@ export class PlaceholderReplacer {
 
   private items: string[] = [];
   private index = 0;
-  private pattern: RegExp;
+  private readonly pattern: RegExp;
 
   constructor(
-    private placeholder: string,
-    private startDelimiter: string,
-    private endDelimiter: string,
+    private readonly placeholder: string,
+    private readonly startDelimiter: string,
+    private readonly endDelimiter: string,
   ) {
     const cacheKey = `${startDelimiter}${placeholder}${endDelimiter}`;
     let pattern = PlaceholderReplacer.patternCache.get(cacheKey);
@@ -281,12 +264,12 @@ export class PlaceholderReplacer {
     this.pattern = pattern;
   }
 
-  store(item: string) {
+  public store(item: string) {
     this.items[this.index] = item;
     return `${this.startDelimiter}${this.placeholder}${this.index++}${this.endDelimiter}`;
   }
 
-  restore(text: string) {
+  public restore(text: string) {
     if (this.index === 0) {
       return text;
     }
@@ -297,11 +280,7 @@ export class PlaceholderReplacer {
 }
 
 export class Pangu {
-  version: string;
-
-  constructor() {
-    this.version = '10.2.0';
-  }
+  public readonly version: string = '10.2.0';
 
   public spaceText(text: string) {
     if (typeof text !== 'string') {
@@ -324,7 +303,7 @@ export class Pangu {
     // Hide every URL from the rules. Attribute values reach spaceText() through the HTML step below, so a URL inside href="..." is hidden the same way
     const urlManager = new PlaceholderReplacer('HTTP_URL_PLACEHOLDER_', '\uE00A', '\uE00B');
     newText = newText.replace(HTTP_URL, (match) => {
-      const url = trimHttpUrl(match);
+      const url = this.trimHttpUrl(match);
       return urlManager.store(url) + match.slice(url.length);
     });
 
@@ -510,7 +489,23 @@ export class Pangu {
     return this.spaceText(text) === text;
   }
 
-  // Strip the spaces that earlier rules left just inside a bracket pair: no space after an opening bracket or before a closing bracket
+  private trimHttpUrl(url: string) {
+    // Count once: a content script sees attacker text, and recounting per pass is quadratic on a long run of closing parentheses
+    let unbalancedClosingParentheses = (url.match(/\)/g) ?? []).length - (url.match(/\(/g) ?? []).length;
+    for (;;) {
+      const trimmed = url.replace(HTTP_URL_TRAILING_PUNCTUATION, '');
+      if (trimmed.endsWith(')') && unbalancedClosingParentheses > 0) {
+        unbalancedClosingParentheses--;
+        url = trimmed.slice(0, -1);
+        continue;
+      }
+      if (trimmed === url) {
+        return url;
+      }
+      url = trimmed;
+    }
+  }
+
   private fixBracketSpacing(text: string) {
     for (const { pattern, open, close } of BRACKET_PATTERNS) {
       text = text.replace(pattern, (_match, innerContent: string) => {
@@ -526,3 +521,5 @@ export class Pangu {
 }
 
 export const pangu = new Pangu();
+
+export default pangu;

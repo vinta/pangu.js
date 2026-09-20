@@ -1,4 +1,4 @@
-import { CJK, DIGIT_PLUS_CJK } from '../../../../../src/shared/index';
+import { CJK, DIGIT_PLUS_CJK } from 'pangu/shared';
 import type { AmbiguousShape, CandidateMatch } from './base';
 import { indexOfNthSymbol, sliceSentence } from './base';
 import { DIGIT_PLUS_LABELS } from './digit-plus-prompt';

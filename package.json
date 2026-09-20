@@ -56,8 +56,14 @@
     },
     "./browser": {
       "import": {
-        "types": "./dist/browser/pangu.d.ts",
-        "default": "./dist/browser/pangu.js"
+        "types": "./dist/browser/index.d.ts",
+        "default": "./dist/browser/index.js"
+      }
+    },
+    "./shared": {
+      "import": {
+        "types": "./dist/shared/index.d.ts",
+        "default": "./dist/shared/index.js"
       }
     },
     "./package.json": "./package.json"
@@ -72,19 +78,20 @@
   ],
   "scripts": {
     "clean": "rm -rf browser-extensions/chrome/dist/ dist/ playwright-report/ test-results/",
-    "build": "npm run clean && npm run build:lib && npm run build:extension",
+    "build": "npm run clean && npm run build:extension",
     "build:lib": "vite build && npm run build:types",
-    "build:types": "tsc -p src/browser/tsconfig.json --emitDeclarationOnly --declarationDir dist && tsc -p src/node/tsconfig.json --emitDeclarationOnly --declarationDir dist",
-    "build:extension": "vite build --config browser-extensions/vite.config.extension.ts && cp -f browser-extensions/chrome/src/content-script.css browser-extensions/chrome/dist/",
-    "test": "npm run build && vitest run tests/ && playwright test --reporter=list",
+    "build:types": "tsc -p src/browser/tsconfig.json --emitDeclarationOnly && tsc -p src/node/tsconfig.json --emitDeclarationOnly",
+    "setup:extension": "rm -rf browser-extensions/chrome/node_modules && npm --prefix browser-extensions/chrome install --install-links --no-package-lock --no-audit --no-fund",
+    "build:extension": "npm run build:lib && npm run setup:extension && vite build --config browser-extensions/vite.config.extension.ts",
+    "test": "npm run build && vitest run tests/ browser-extensions/chrome/tests/ && playwright test --reporter=list",
     "test:shared": "npm run build && vitest run tests/shared/",
     "test:node": "npm run build && vitest run tests/node/",
-    "test:browser": "npm run build && playwright test --reporter=list",
-    "test:extension": "vitest run tests/extension/",
+    "test:browser": "npm run build && vitest run tests/browser/ && playwright test tests/browser/ --reporter=list",
+    "test:extension": "npm run build && vitest run browser-extensions/chrome/tests/ && playwright test browser-extensions/chrome/tests/ --reporter=list",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p src/browser/tsconfig.json && tsc --noEmit -p src/node/tsconfig.json",
     "lint": "npm run lint:code && npm run lint:package",
     "lint:code": "eslint",
-    "lint:package": "attw --pack . --entrypoints . && attw --pack . --entrypoints ./browser --profile esm-only && publint",
+    "lint:package": "attw --pack . --entrypoints . && attw --pack . --entrypoints ./browser ./shared --profile esm-only && publint",
     "bump-version": "node ./scripts/bump-version.js",
     "pack-extension": "./scripts/pack-extension-chrome.sh"
   },

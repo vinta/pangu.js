@@ -114,6 +114,11 @@ export function outputDirectory(root, path) {
   return directory;
 }
 
+// The extension sources import pangu from the copy of the built dist/ that setup:extension installs, and build:extension refreshes both
+export function buildExtension(root) {
+  execFileSync('npm', ['run', 'build:extension'], { cwd: root, stdio: 'inherit' });
+}
+
 export function scratchDirectory(root, prefix) {
   return outputDirectory(root, join(root, 'tmp', 'prompt-experiments', `${prefix}${randomUUID()}`));
 }

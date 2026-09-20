@@ -1,4 +1,4 @@
-import pangu, { type LateFix, type SettledTextNode } from '../../../../src/browser/pangu';
+import pangu, { type LateFix, type SettledTextNode } from 'pangu/browser';
 import type { CandidateLabel, ClassifyCandidatesMessage, ClassifyCandidatesResponse } from './messages';
 import { readSentence } from './sentence-context';
 import type { AmbiguousShape, SettledCandidate, TextEdit } from './shapes/base';
@@ -18,7 +18,7 @@ async function requestClassification(kind: string, candidates: ClassifyCandidate
   }
 }
 
-function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: readonly SettledTextNode[], unspacedByNode: ReadonlyMap<Text, string>) {
+function findCandidates(ambiguousShape: AmbiguousShape, settledTextNodes: SettledTextNode[], unspacedByNode: ReadonlyMap<Text, string>) {
   const settledCandidates: SettledCandidate[] = [];
   for (const settledTextNode of settledTextNodes) {
     const sentenceAt = (at: number) => readSentence(settledTextNode.node, settledTextNode.unspaced, at, unspacedByNode);
@@ -34,7 +34,7 @@ interface ShapeCandidates {
   settledCandidates: SettledCandidate[];
 }
 
-function collectLateFixes(labeledShapeCandidates: readonly (ShapeCandidates & { candidateLabels: readonly (CandidateLabel | null)[] })[]) {
+function collectLateFixes(labeledShapeCandidates: (ShapeCandidates & { candidateLabels: (CandidateLabel | null)[] })[]) {
   // Core applies one fix per text node per call, so every edit for one node composes into a single late fix
   const textEditsByNode = new Map<Text, { settled: string; textEdits: TextEdit[] }>();
   for (const { ambiguousShape, settledCandidates, candidateLabels } of labeledShapeCandidates) {
@@ -81,7 +81,7 @@ export function warmUpAiSpacing() {
 // Once the worker fails to answer, AI spacing stays off for this page
 let modelFailed = false;
 
-async function classifyShapeCandidates({ ambiguousShape, settledCandidates }: ShapeCandidates): Promise<readonly (CandidateLabel | null)[]> {
+async function classifyShapeCandidates({ ambiguousShape, settledCandidates }: ShapeCandidates): Promise<(CandidateLabel | null)[]> {
   const candidates = settledCandidates.map(({ sentence, at }) => ({ sentence, at }));
   const response = await requestClassification(ambiguousShape.kind, candidates);
   if (response.ok) {
@@ -92,7 +92,7 @@ async function classifyShapeCandidates({ ambiguousShape, settledCandidates }: Sh
   return [];
 }
 
-export async function applyAiSpacing(settledTextNodes: readonly SettledTextNode[]) {
+export async function applyAiSpacing(settledTextNodes: SettledTextNode[]) {
   if (modelFailed) {
     return;
   }

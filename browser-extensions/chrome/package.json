@@ -1,0 +1,8 @@
+{
+  "name": "paranoid-auto-spacing",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "pangu": "file:../.."
+  }
+}

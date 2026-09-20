@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { DIGIT_PLUS_LABELS, digitPlusPrompt } from '../../../../browser-extensions/chrome/src/ai-spacing/shapes/digit-plus-prompt';
+import { DIGIT_PLUS_LABELS, digitPlusPrompt } from '../../../src/ai-spacing/shapes/digit-plus-prompt';
 
 it('preserve the measured v18-en-real-examples system prompt and enum order', () => {
   expect(digitPlusPrompt.kind).toBe('digit-plus');

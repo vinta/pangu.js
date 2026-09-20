@@ -38,24 +38,34 @@ execSync(`npm version ${newVersion} --no-git-tag-version`, { stdio: 'pipe' });
 // Update version in other files
 console.log('Updating version in other files...');
 
+// newVersion is always greater than the current one, so unchanged content means the pattern no longer matches the file
+const replaceVersion = (filePath, content, pattern, replacement) => {
+  const updatedContent = content.replace(pattern, replacement);
+  if (updatedContent === content) {
+    console.error(`Error: No version to update in ${filePath}. Restore the bumped files with git before retrying`);
+    process.exit(1);
+  }
+  return updatedContent;
+};
+
 // Update browser-extensions/chrome/manifest.json
 const chromeManifestPath = join(projectRoot, 'browser-extensions/chrome/manifest.json');
 const manifestContent = readFileSync(chromeManifestPath, 'utf8');
-const updatedManifest = manifestContent.replace(/"version":\s*"[^"]+"/, `"version": "${newVersion}"`);
+const updatedManifest = replaceVersion(chromeManifestPath, manifestContent, /"version":\s*"[^"]+"/, `"version": "${newVersion}"`);
 writeFileSync(chromeManifestPath, updatedManifest, 'utf8');
 console.log(`Updated ${chromeManifestPath}`);
 
 // Update src/shared/index.ts
 const sharedIndexPath = join(projectRoot, 'src/shared/index.ts');
 const indexContent = readFileSync(sharedIndexPath, 'utf8');
-const updatedIndex = indexContent.replace(/this\.version\s*=\s*['"][^'"]+['"]/, `this.version = '${newVersion}'`);
+const updatedIndex = replaceVersion(sharedIndexPath, indexContent, /readonly version: string = '[^']+'/, `readonly version: string = '${newVersion}'`);
 writeFileSync(sharedIndexPath, updatedIndex, 'utf8');
 console.log(`Updated ${sharedIndexPath}`);
 
 // Update examples/package.json
 const examplesPackagePath = join(projectRoot, 'examples/package.json');
 const examplesPackageContent = readFileSync(examplesPackagePath, 'utf8');
-const updatedExamplesPackage = examplesPackageContent.replace(/"pangu":\s*"[\d.]+"/, `"pangu": "${newVersion}"`);
+const updatedExamplesPackage = replaceVersion(examplesPackagePath, examplesPackageContent, /"pangu":\s*"[\d.]+"/, `"pangu": "${newVersion}"`);
 writeFileSync(examplesPackagePath, updatedExamplesPackage, 'utf8');
 console.log(`Updated ${examplesPackagePath}`);
 

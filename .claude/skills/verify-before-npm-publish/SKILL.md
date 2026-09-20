@@ -66,7 +66,7 @@ Either way, confirm the pin came back before moving on: `git diff --quiet exampl
 | `TS2834` in a `dist/**/*.d.ts`   | a relative import in `src/` is missing its `.js` extension                               |
 | `TS2339` on an inherited method  | a base-class `.d.ts` import failed to resolve, collapsing the subclass to an error type  |
 | `Cannot find module` at run time | `package.json` `files` doesn't ship the referenced file, or an `exports` path is wrong   |
-| `stray file in dist/`            | a multi-entry `vite.config.ts` pass emitted a shared chunk; give each entry its own pass |
+| `stray file in dist/`            | the `esm` environment emitted a hashed shared chunk; keep `output.preserveModules` on it |
 
 To read the shipped artifact directly, unpack the tarball: `tar -xzf "$TGZ" -C "$TARBALL_DIR"` exposes `package/dist/**/*.d.ts` and `package/package.json`.
 

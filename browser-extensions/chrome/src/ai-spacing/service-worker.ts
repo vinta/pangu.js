@@ -9,7 +9,7 @@ const PROMPT_SPECS = new Map<string, PromptSpec<CandidateLabel>>([
   [digitPlusPrompt.kind, digitPlusPrompt],
 ]);
 
-export async function handleClassification(kind: string, candidates: readonly Candidate[]): Promise<ClassifyCandidatesResponse> {
+export async function handleClassification(kind: string, candidates: Candidate[]): Promise<ClassifyCandidatesResponse> {
   const promptSpec = PROMPT_SPECS.get(kind);
 
   if (promptSpec === undefined) {
