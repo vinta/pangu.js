@@ -31,7 +31,7 @@
   - [pangu.py](https://github.com/vinta/pangu.py)
   - [pangu.go](https://github.com/vinta/pangu)
   - [pangu.java](https://github.com/vinta/pangu.java)
-  - [pangu.space](https://github.com/vinta/pangu.space) (HTTP API)
+  - [pangu.space](https://github.com/vinta/pangu.space) (Website and HTTP API)
 - Community support:
   - [pangu.clj](https://github.com/coldnew/pangu.clj)
   - [pangu.dart](https://github.com/SemonCat/pangu.dart)
