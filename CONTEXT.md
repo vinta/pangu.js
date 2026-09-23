@@ -59,7 +59,7 @@ The algorithm behind text spacing. It has two stages. First, the rules decide ev
 ### Rule Spacing
 
 **Symbol handling**:
-A symbol between two ANS characters binds them into a joiner token, and the symbol never gets spaces. A symbol in direct contact with CJK reads as an operator and gets spaces, unless an affix reading attaches it to its ANS side. `|` follows pipe reading. `+` follows plus reading. The separators `_` and `/` never get spaces.
+A symbol between two ANS characters binds them into a joiner token, and the symbol never gets spaces. A symbol in direct contact with CJK reads as an operator and gets spaces, unless an affix reading attaches it to its ANS side. `|` follows pipe reading. `+` follows plus reading. A `-` between two brackets follows hyphen reading. The separators `_` and `/` never get spaces.
 
 **Joiner token**:
 ANS characters that any symbol joins tight (`A/B`, `26/30`, `vinta/hal-9000`, `S&P`, `Q&A`, `A+B`, `5+5`, `foo=bar&baz=1`, `A<B`, `HSIAO-MING`). A joiner token is never split. It is spaced from adjacent CJK as one unit. Pipes and plus signs also follow pipe reading and plus reading.
@@ -69,6 +69,9 @@ Decided per line, never across lines. If one pipe is in direct contact with CJK,
 
 **Plus reading**:
 Decided per line, never across lines. If one plus is in direct contact with CJK, every undecided plus on the line becomes a separator with spaces on both sides. This covers bundle plans (`A CJK + A`). A plus is already decided in three cases: it is adjacent to a space, an affix reading attaches it (`N+ CJK`, `CJK +N`), or it sits inside a preserved pattern (`C++`). By default, a plus after a word is a separator (`CJK+A+CJK` reads `CJK + A + CJK`, `A+CJK` reads `A + CJK`). Listed names follow name-suffix reading. Plus reading runs before the operator rules, so a `CJK+A` contact flips the line's joiners too. If no plus on the line is in direct contact with CJK, the pluses stay tight as joiner tokens (`CJK A+A CJK`, `CJK N+N CJK`). A plus touching full-width punctuation stays tight on that side. A plus after a closing bracket is a separator before an opening full-width bracket or quote, even when it is the line's only plus. Only the closing-bracket side gets a space. See ADR 0022.
+
+**Hyphen reading**:
+Decided per line, never across lines. If one hyphen is in direct contact with CJK, every hyphen between a closing bracket and an opening bracket on the line becomes a separator with spaces on both sides. This covers data series titles (`CJK-CJK[A]-(A)` reads `CJK - CJK [A] - (A)`). Only a hyphen between brackets flips; a hyphen inside a joiner token stays tight (`HSIAO-MING`, `USB-C`). Hyphen reading runs before the operator rules. If no hyphen on the line is in direct contact with CJK, a hyphen between brackets stays tight (`毛額[GDP]-(NSA)`). See ADR 0032.
 
 **Affix reading**:
 A symbol that attaches to its ANS side at a CJK boundary instead of reading as an operator. Four cases: `+` before digits as a sign (`CJK +N`), `-` before a lowercase flag (`CJK -m CJK`), `+` after a whole digit run as a suffix (`CJK N+ CJK`, never `AN+ CJK`), and single-letter grades (`A+`, `D-`). A plus after a word is not an affix: `A+CJK` reads as a separator (`A + CJK`); see plus reading and ADR 0019. A hyphen before digits is not an affix: `CJK-N` reads as an operator (`N CJK - N CJK`, `CJK - N CJK`); see ADR 0015. A capitalized word after a hyphen keeps the operator reading (`CJK - Vinta`).

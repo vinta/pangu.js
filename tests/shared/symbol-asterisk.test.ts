@@ -9,6 +9,7 @@ describe('Symbol *', () => {
     expect(pangu.spaceText('Vinta*陳上進')).toBe('Vinta * 陳上進');
     expect(pangu.spaceText('陳上進*Vinta')).toBe('陳上進 * Vinta');
     expect(pangu.spaceText('標示*的欄位代表必填')).toBe('標示 * 的欄位代表必填');
+    expect(pangu.spaceText('時薪*(平日時數+假日時數)')).toBe('時薪 * (平日時數 + 假日時數)');
 
     // DO NOT change if already spacing
     expect(pangu.spaceText('前面 * 後面')).toBe('前面 * 後面');

@@ -138,10 +138,14 @@ export const CLOSING_AFTER_SUFFIX = /[/)\]}\uff09\u3011\u3015\u3009\u300b\u300d\
 
 // The operator set is - * = & only (no + | / < >). Only direct CJK contact makes a symbol an operator: a symbol between two half-width characters binds them into a joiner token (A-B, a=1, S&P)
 // and never gets spaces, so there is deliberately no between-half-width rule here
-// On the left, a closing bracket also counts as the half-width side: ]-CJK reads as an operator whose operand is the bracketed run
+// A bracket also counts as the half-width side: ]-CJK and CJK-( read as an operator whose operand is the bracketed run
 // Listed name suffixes keep their signs attached
-export const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS}])([${AN}])`, 'g');
+export const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS}])([${AN}${LEFT_BRACKETS_BASIC}])`, 'g');
 export const ANS_OPERATOR_CJK = new RegExp(`([${AN}${RIGHT_BRACKETS_BASIC}])([${OPERATORS}])(?<!${NAME_SUFFIX})([${CJK}])`, 'g');
+
+// Hyphen patterns, decided per line like the pipe. Only a hyphen between a closing and an opening bracket flips, since no word connector sits there (CJK-CJK[A]-(A) reads CJK - CJK [A] - (A))
+export const HYPHEN_CJK_CONTACT = new RegExp(`[${CJK}]\\-|\\-[${CJK}]`);
+export const HYPHEN_SEPARATOR = new RegExp(`(?<=[${RIGHT_BRACKETS_BASIC}])\\-(?=[${LEFT_BRACKETS_BASIC}])`, 'g');
 
 // Pipe patterns for separator vs joiner-token behavior, decided per line
 export const PIPE_CJK_CONTACT = new RegExp(`[${CJK}]\\||\\|[${CJK}]`);
@@ -418,6 +422,12 @@ export class Pangu {
           : line;
         return spaced.replace(RIGHT_BRACKET_PLUS_FULL_WIDTH_LEFT_BRACKET, ' +');
       })
+      .join('\n');
+
+    // Hyphen reading is per line and runs before the operator rules space the CJK contact away
+    newText = newText
+      .split('\n')
+      .map((line) => (HYPHEN_CJK_CONTACT.test(line) ? line.replace(HYPHEN_SEPARATOR, ' - ') : line))
       .join('\n');
 
     newText = newText.replace(CJK_OPERATOR_ANS, '$1 $2 $3');

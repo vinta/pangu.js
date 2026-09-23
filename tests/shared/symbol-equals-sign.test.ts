@@ -8,6 +8,8 @@ describe('Symbol =', () => {
     expect(pangu.spaceText('前面=後面')).toBe('前面 = 後面');
     expect(pangu.spaceText('Vinta=陳上進')).toBe('Vinta = 陳上進');
     expect(pangu.spaceText('陳上進=Vinta')).toBe('陳上進 = Vinta');
+    expect(pangu.spaceText('年增率=(今年-去年)')).toBe('年增率 = (今年 - 去年)');
+    expect(pangu.spaceText('總價=(單價*數量)')).toBe('總價 = (單價 * 數量)');
 
     // DO NOT change if already spacing
     expect(pangu.spaceText('前面 = 後面')).toBe('前面 = 後面');
