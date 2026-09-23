@@ -1134,21 +1134,15 @@ test.describe('BrowserPangu', () => {
 
     test('should not insert <pangu> when an avatar image separates two links (real-world case)', async ({ page }) => {
       // https://github.com/vinta/pangu.js/issues/201: Mastodon renders no whitespace between tags, and the avatar <img> sits inside the next link before its first text
-      const html =
-        '<div class="status__info">' +
-        '<a href="https://pawoo.net/@Mash710/109265935694071443" class="status__relative-time" target="_blank" rel="noopener noreferrer"><span class="status__visibility-icon"><i role="img" class="fa fa-globe" title="Public"></i></span><time datetime="2022-11-01T01:24:24.000Z" title="Oct 31, 2022, 21:24">11m</time></a>' +
-        '<a href="https://pawoo.net/@Mash710" title="Mash710@pawoo.net" class="status__display-name" target="_blank" rel="noopener noreferrer">' +
-        '<div class="status__avatar"><div class="account__avatar" style="width: 46px; height: 46px;"><img src="https://mas.to/avatars/original/missing.png" alt="Mash710@pawoo.net"></div></div>' +
-        '<span class="display-name"><bdi><strong class="display-name__html">ましこどり<img draggable="false" class="emojione" alt="🔞" title=":underage:" src="/emoji/1f51e.svg"><img draggable="false" class="emojione" alt="🚸" title=":children_crossing:" src="/emoji/1f6b8.svg"></strong></bdi><span class="display-name__account">@Mash710@pawoo.net</span></span>' +
-        '</a>' +
-        '</div>';
-      await page.setContent(`<div id="test">${html}</div>`);
+      const htmlContent = loadFixture('mastodon-status-info.html');
+      const expected = loadFixture('mastodon-status-info.expected.html').trim();
 
+      await page.setContent(htmlContent);
       await page.evaluate(() => {
-        pangu.spaceNode(document.getElementById('test')!);
+        pangu.spacePage();
       });
-
-      expect(await page.evaluate(() => document.getElementById('test')!.innerHTML)).toBe(html);
+      const actual = await page.evaluate(() => document.body.innerHTML.trim());
+      expect(actual).toBe(expected);
     });
 
     test('should not add a space when a wrapped space-like element separates the nodes', async ({ page }) => {
