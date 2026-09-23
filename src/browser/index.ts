@@ -182,7 +182,7 @@ export class BrowserPangu extends Pangu {
           currentBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(currentBoundaryNode.nodeName) || currentTextNode.parentElement?.closest('sup')?.contains(nextTextNode) === false,
           nextBoundaryIsIgnored: DomWalker.ignoredTags.test(nextBoundaryNode.nodeName),
           nextBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(nextBoundaryNode.nodeName),
-          hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(nextNode),
+          precedingNodeHidden: () => this.isPrecedingNodeHidden(nextNode),
           currentNodeHidden: () => this.isNodeHidden(currentNode),
           nextNodeHidden: () => this.isNodeHidden(nextNode),
           inGridOrFlexContainer: () => !!nextBoundaryNode.parentNode && this.isGridOrFlexContainer(nextBoundaryNode.parentNode),
@@ -243,7 +243,7 @@ export class BrowserPangu extends Pangu {
     const textNodeSpacingDecisions = decideTextNodeSpacing({
       text: textNode.data,
       previousElementLastChar: this.findPreviousElementLastChar(textNode),
-      hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(textNode),
+      precedingNodeHidden: () => this.isPrecedingNodeHidden(textNode),
     });
 
     for (const textNodeSpacingDecision of textNodeSpacingDecisions) {
@@ -400,7 +400,7 @@ export class BrowserPangu extends Pangu {
     return { whitespaceBetween, contentBetween, spaceLikeBetween, blockEdgeBetween };
   }
 
-  private isHiddenBoundaryBefore(node: Node) {
+  private isPrecedingNodeHidden(node: Node) {
     return this.visibilityDetector.shouldSkipSpacingBeforeNode(node);
   }
 

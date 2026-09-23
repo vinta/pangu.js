@@ -27,7 +27,7 @@ export interface BoundarySpacingContext {
   nextBoundaryIsSpaceSensitive: boolean;
   // These facts read computed styles, so they are supplied lazily and only
   // consulted for boundaries that survive the cheap checks
-  hiddenBoundaryBefore: () => boolean;
+  precedingNodeHidden: () => boolean;
   currentNodeHidden: () => boolean;
   nextNodeHidden: () => boolean;
   inGridOrFlexContainer: () => boolean;
@@ -38,7 +38,7 @@ export interface TextNodeSpacingContext {
   previousElementLastChar: string | null;
   // Reads computed styles, so it is supplied lazily and only consulted when
   // the text node starts with a space
-  hiddenBoundaryBefore: () => boolean;
+  precedingNodeHidden: () => boolean;
 }
 
 export function decideBoundarySpacing(boundarySpacingContext: BoundarySpacingContext) {
@@ -59,7 +59,7 @@ export function decideBoundarySpacing(boundarySpacingContext: BoundarySpacingCon
   }
 
   if (!boundarySpacingContext.nextBoundaryIsSpaceSensitive) {
-    if (boundarySpacingContext.nextBoundaryIsIgnored || boundarySpacingContext.hiddenBoundaryBefore()) {
+    if (boundarySpacingContext.nextBoundaryIsIgnored || boundarySpacingContext.precedingNodeHidden()) {
       return 'none';
     }
     return 'prepend-next';
@@ -90,7 +90,7 @@ export function decideTextNodeSpacing(textNodeSpacingContext: TextNodeSpacingCon
 
   // The standalone quote rule reads the text left by the trim rule
   let { text } = textNodeSpacingContext;
-  if (text.startsWith(' ') && textNodeSpacingContext.hiddenBoundaryBefore()) {
+  if (text.startsWith(' ') && textNodeSpacingContext.precedingNodeHidden()) {
     textNodeSpacingDecisions.push('trim-leading-space');
     text = text.substring(1);
   }
