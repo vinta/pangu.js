@@ -29,7 +29,7 @@ A text node settles when nothing will rewrite it again in this batch. Text spaci
 _Avoid_: finished, final, done
 
 **Pangu element**:
-An inline `<pangu>` element that holds one space. Pangu inserts it between two text nodes that both sit in a link, underline, strike-through, or `<i>`, because a space that is added inside either node would render as part of that node (`<a>A</a><pangu> </pangu><a>CJK</a>`). Pangu never inserts it inside a grid or flex container, because there the element would become a layout item.
+An inline `<pangu>` element that holds one space. Pangu inserts it between two text nodes that both sit in a link, underline, strike-through, or `<i>`, because a space that is added inside either node would render as part of that node (`<a>A</a><pangu> </pangu><a>CJK</a>`). When a wrapper such as `<span>` starts with the next text node, the pangu element goes before the wrapper, but never between list items or table cells. Pangu never inserts it inside a grid or flex container, because there the element would become a layout item.
 
 **Native text-autospace**:
 The gap that the browser renders between CJK and ANS letters or digits through the `text-autospace` CSS property. It is visual only: no character is inserted. The gap is narrower than a real space. The gap ignores symbols. The browser suppresses the gap wherever a real space already exists. So native text-autospace combines with text spacing and boundary spacing without adding a second gap.
