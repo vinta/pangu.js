@@ -8,7 +8,6 @@
 - 新增 `pangu/browser` 的 exports，包含 `DomWalker`、`VisibilityDetector` 和 `TaskScheduler`
 - 修正包在 `<span>` 或連結裡的圖片旁邊會被多加空格的問題
 - 修正 `<i>` 內外文字之間的空格，並將空格放在 `<i>` 外面
-- 修正帶副檔名的 glob pattern（例如 `*[0-9].log`）會被多加空格的問題
 
 ## v10.2.0 / 2026-09-19
 
