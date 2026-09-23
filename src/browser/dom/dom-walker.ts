@@ -1,6 +1,7 @@
 export class DomWalker {
   public static readonly blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
   public static readonly ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
+  // <i> is in both lists: an <i> between two text nodes holds no text and separates them, while an <i> around a text node keeps the space outside, so an icon drawn from its text stays intact
   public static readonly spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
   public static readonly spaceSensitiveTags = /^(a|del|i|pre|s|strike|u)$/i;
   public static readonly ignoredClass = 'no-pangu-spacing';

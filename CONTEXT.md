@@ -18,7 +18,7 @@ Alphabetical letters, numerical digits, and symbols. When an ANS character is ad
 Inserting whitespace between CJK and ANS characters inside one string. On a page that string is one text node's data; for the string API it is the whole input.
 
 **Boundary spacing**:
-Deciding whether whitespace goes between two adjacent text nodes on a page, and where it goes. `CJK<b>A</b>` gets the space at the start of the `A` node. `CJK<a>A</a>` gets the space at the end of the `CJK` node, because a link, underline, or strike-through would render a space that is added inside it. `<a>A</a><a>CJK</a>` gets a pangu element between the links. In three cases, nothing is added: whitespace, a block edge, an image, an icon, or a line break already separates the nodes, an ignored tag such as `<code>` sits between them, or one node is hidden.
+Deciding whether whitespace goes between two adjacent text nodes on a page, and where it goes. `CJK<b>A</b>` gets the space at the start of the `A` node. `CJK<a>A</a>` gets the space at the end of the `CJK` node, because a link, underline, or strike-through would render a space that is added inside it. `CJK<i>A</i>` does too, because an `<i>` can be an icon drawn from its text, and a space would change that text. `<a>A</a><a>CJK</a>` gets a pangu element between the links. In three cases, nothing is added: whitespace, a block edge, an image, an icon with no text, or a line break already separates the nodes, an ignored tag such as `<code>` sits between them, or one node is hidden.
 
 **Decision**:
 What the rules choose for one text node or one boundary before pangu writes anything. A boundary spacing decision says where the space goes: nowhere, at the start of the next text node, at the end of the current one, or in a pangu element between them. A text node decision says what the node needs first: trim its leading space, prepend a space, or apply text spacing. A decision is computed from facts alone, with no DOM access, so it runs in vitest. The classifier never makes a decision; it answers with a label.
@@ -29,7 +29,7 @@ A text node settles when nothing will rewrite it again in this batch. Text spaci
 _Avoid_: finished, final, done
 
 **Pangu element**:
-An inline `<pangu>` element that holds one space. Pangu inserts it between two text nodes that both sit in a link, underline, or strike-through, because a space that is added inside either node would render as part of that node (`<a>A</a><pangu> </pangu><a>CJK</a>`). Pangu never inserts it inside a grid or flex container, because there the element would become a layout item.
+An inline `<pangu>` element that holds one space. Pangu inserts it between two text nodes that both sit in a link, underline, strike-through, or `<i>`, because a space that is added inside either node would render as part of that node (`<a>A</a><pangu> </pangu><a>CJK</a>`). Pangu never inserts it inside a grid or flex container, because there the element would become a layout item.
 
 **Native text-autospace**:
 The gap that the browser renders between CJK and ANS letters or digits through the `text-autospace` CSS property. It is visual only: no character is inserted. The gap is narrower than a real space. The gap ignores symbols. The browser suppresses the gap wherever a real space already exists. So native text-autospace combines with text spacing and boundary spacing without adding a second gap.
