@@ -13,11 +13,12 @@ Alternatives rejected:
 - **Space `<i>` like `<em>`** (e8334246). The space lands inside the icon and changes what it draws.
 - **Keep 117d4236's rules and skip `<pangu>` in table containers**, like grid and flex. Prototyped: tables pass, but a `<pangu>` still lands inside `<ul>`.
 - **Add table cells and list items to `blockTags`.** Prototyped: it misses CSS tables built from `<span>`, and it changes every released cell and list-item boundary.
+- **Climb the `<pangu>` out of wrappers that start with the next text node** (622f9494, reverted). It fixes the `<span>` limitation below, but it puts a `<pangu>` between `<span style="display:table-cell">` cells, and it moves every `<pangu>` pangu inserts.
 
 ## Consequences
 
 - Icons drawn from text get spaces outside: `公開 <i class="material-icons">public</i> 發佈`. v10.2.0 kept them tight.
-- Fixed right after: `<i>中文</i><span><a>English</a></span>` got no space, because the `<pangu>` landed as the first child of `<span>` and was removed. For every tag, the `<pangu>` now goes before the highest wrapper that starts with the next text node, but never between list items or table cells. The 2 italic rows that pinned this shape are back.
+- `<i>` shares a limitation links already have: `<i>中文</i><span><a>English</a></span>` gets no space, because the `<pangu>` would be the first child of `<span>` and is removed. The 2 italic rows that pinned a `<pangu>` in this shape retire as rare cases.
 - `<em>` still takes the space inside (`該研究發表於<em> Nature</em> 期刊`).
 - A hidden link no longer gets a visible space before it.
 - Glossary: boundary spacing and pangu element list `<i>` next to links, underline, and strike-through, and the separator "an icon" narrows to an icon with no text.

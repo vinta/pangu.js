@@ -29,7 +29,6 @@ export interface LateFix {
 export class BrowserPangu extends Pangu {
   private static readonly trailingWhitespace = /\s$/;
   private static readonly leadingWhitespace = /^\s/;
-  private static readonly listItemAndCellTags = /^(li|dt|dd|td|th)$/i;
 
   // Pre-paint re-space stays bounded: subtrees with more text nodes than this fall back to the queue
   private static readonly maxSyncTextNodes = 256;
@@ -185,10 +184,7 @@ export class BrowserPangu extends Pangu {
           nextBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(nextBoundaryNode.nodeName),
           hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(nextNode),
           hiddenBoundaryAfter: () => this.isHiddenBoundaryAfter(currentNode) || this.isHiddenBoundaryAfter(nextNode),
-          inGridOrFlexContainer: () => {
-            const insertionNode = this.findPanguInsertionNode(nextBoundaryNode);
-            return !!insertionNode.parentNode && this.isGridOrFlexContainer(insertionNode.parentNode);
-          },
+          inGridOrFlexContainer: () => !!nextBoundaryNode.parentNode && this.isGridOrFlexContainer(nextBoundaryNode.parentNode),
         });
 
         // A junction space can come with a second space that belongs inside the current text node's tail (CJK/ + CJK reads CJK / CJK): write the respaced tail back before placing the junction space
@@ -211,7 +207,7 @@ export class BrowserPangu extends Pangu {
             this.lastWrittenData.set(currentTextNode, currentTextNode.data);
             break;
           case 'insert-element':
-            this.insertPanguElement(this.findPanguInsertionNode(nextBoundaryNode));
+            this.insertPanguElement(nextBoundaryNode);
             break;
           case 'none':
             break;
@@ -312,24 +308,12 @@ export class BrowserPangu extends Pangu {
     return false;
   }
 
-  // Wrappers that start with the next text node are climbed, so the pangu element lands outside them
-  // List items and table cells stop the climb, since a pangu element between them would land in a <ul> or <tr>
-  private findPanguInsertionNode(nextBoundaryNode: Node) {
-    let node: Node = nextBoundaryNode;
-    let parent = node.parentElement;
-    while (parent && !DomWalker.blockTags.test(parent.nodeName) && !BrowserPangu.listItemAndCellTags.test(parent.nodeName) && DomWalker.isFirstTextChild(parent, node)) {
-      node = parent;
-      parent = node.parentElement;
-    }
-    return node;
-  }
-
-  private insertPanguElement(insertionNode: Node) {
+  private insertPanguElement(nextBoundaryNode: Node) {
     const panguSpace = document.createElement('pangu');
     panguSpace.innerHTML = ' ';
 
-    if (insertionNode.parentNode) {
-      insertionNode.parentNode.insertBefore(panguSpace, insertionNode);
+    if (nextBoundaryNode.parentNode) {
+      nextBoundaryNode.parentNode.insertBefore(panguSpace, nextBoundaryNode);
     }
 
     // Clean up orphaned space element
