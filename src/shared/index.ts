@@ -140,7 +140,8 @@ export const CLOSING_AFTER_SUFFIX = /[/)\]}\uff09\u3011\u3015\u3009\u300b\u300d\
 // and never gets spaces, so there is deliberately no between-half-width rule here
 // A bracket also counts as the half-width side: ]-CJK and CJK-( read as an operator whose operand is the bracketed run
 // Listed name suffixes keep their signs attached
-export const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])([${OPERATORS}])([${AN}${LEFT_BRACKETS_BASIC}])`, 'g');
+// An asterisk before a square bracket opens a bracket glob (*[0-9].log), so it stays tight against the bracket. See ADR 0033
+export const CJK_OPERATOR_ANS = new RegExp(`([${CJK}])(?!\\*\\[)([${OPERATORS}])([${AN}${LEFT_BRACKETS_BASIC}])`, 'g');
 export const ANS_OPERATOR_CJK = new RegExp(`([${AN}${RIGHT_BRACKETS_BASIC}])([${OPERATORS}])(?<!${NAME_SUFFIX})([${CJK}])`, 'g');
 
 // Hyphen patterns, decided per line like the pipe. Only a hyphen between a closing and an opening bracket flips, since no word connector sits there (CJK-CJK[A]-(A) reads CJK - CJK [A] - (A))

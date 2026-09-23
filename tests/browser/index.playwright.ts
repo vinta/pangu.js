@@ -1132,6 +1132,92 @@ test.describe('BrowserPangu', () => {
       expect(html).toBe('字<span><em> </em></span>x');
     });
 
+    test('should not insert <pangu> when an avatar image separates two links (real-world case)', async ({ page }) => {
+      // https://github.com/vinta/pangu.js/issues/201: Mastodon renders no whitespace between tags, and the avatar <img> sits inside the next link before its first text
+      const htmlContent = loadFixture('mastodon-status-info.html');
+      const expected = loadFixture('mastodon-status-info.expected.html').trim();
+
+      await page.setContent(htmlContent);
+      await page.evaluate(() => {
+        pangu.spacePage();
+      });
+      const actual = await page.evaluate(() => document.body.innerHTML.trim());
+      expect(actual).toBe(expected);
+    });
+
+    test('should not add a space when a wrapped space-like element separates the nodes', async ({ page }) => {
+      await page.setContent(
+        '<p id="wrapped">中文<span><img src="x.png"></span>English</p>' +
+          '<p id="leading">中文<a href="#"><i class="icon"></i>English</a></p>' +
+          '<p id="trailing"><a href="#">中文<span><img src="x.png"></span></a><a href="#">English</a></p>',
+      );
+
+      await page.evaluate(() => pangu.spacePage());
+
+      expect(await page.locator('#wrapped').innerHTML()).toBe('中文<span><img src="x.png"></span>English');
+      expect(await page.locator('#leading').innerHTML()).toBe('中文<a href="#"><i class="icon"></i>English</a>');
+      expect(await page.locator('#trailing').innerHTML()).toBe('<a href="#">中文<span><img src="x.png"></span></a><a href="#">English</a>');
+    });
+
+    test('should keep boundary spaces outside <i> and leave empty icons tight', async ({ page }) => {
+      const cases = [
+        { html: '該研究發表於<i>Nature</i>期刊', expected: '該研究發表於 <i>Nature</i> 期刊' },
+        { html: '該研究發表於<em>Nature</em>期刊', expected: '該研究發表於<em> Nature</em> 期刊' },
+        { html: '公開<i class="fa fa-globe"></i>Public', expected: '公開<i class="fa fa-globe"></i>Public' },
+        { html: '公開<i class="material-icons">public</i>發佈', expected: '公開 <i class="material-icons">public</i> 發佈' },
+        { html: '中文<span><i><b>Nature</b></i></span>中文', expected: '中文 <span><i><b>Nature</b></i></span> 中文' },
+        // Rare cases, ignore
+        // { html: '<a>中文</a><i><a>Nature</a></i><a>中文</a>', expected: '<a>中文</a><pangu> </pangu><i><a>Nature</a></i><pangu> </pangu><a>中文</a>' },
+        // { html: '<i>中文</i><span><a>English</a></span>', expected: '<i>中文</i><pangu> </pangu><span><a>English</a></span>' },
+        { html: '<i>中文<b>English</b>中文</i>', expected: '<i>中文<b> English</b> 中文</i>' },
+        { html: '中文<i hidden="">English</i>中文', expected: '中文<i hidden="">English</i>中文' },
+        { html: '中文<span hidden=""><i>English</i></span>中文', expected: '中文<span hidden=""><i>English</i></span>中文' },
+        { html: '<div><i>中文</i></div>English', expected: '<div><i>中文</i></div>English' },
+        { html: '<span>中文</span><p><i>English</i></p>', expected: '<span>中文</span><p><i>English</i></p>' },
+        { html: '<div><i><a>中文</a></i></div><span><a>English</a></span>', expected: '<div><i><a>中文</a></i></div><span><a>English</a></span>' },
+        { html: '<div style="display:flex"><a>中文</a><i><a>English</a></i></div>', expected: '<div style="display:flex"><a>中文</a><i><a>English</a></i></div>' },
+        {
+          html: '<table><tbody><tr><td><a>編輯</a></td><td><i class="material-icons">delete</i></td></tr></tbody></table>',
+          expected: '<table><tbody><tr><td><a>編輯</a></td><td><i class="material-icons">delete</i></td></tr></tbody></table>',
+        },
+        { html: '<ul><li><a>編輯</a></li><li><i>delete</i></li></ul>', expected: '<ul><li><a>編輯</a></li><li><i>delete</i></li></ul>' },
+      ];
+      await page.setContent(cases.map(({ html }, index) => `<div id="case-${index}">${html}</div>`).join(''));
+
+      await page.evaluate(() => pangu.spacePage());
+
+      for (const [index, { expected }] of cases.entries()) {
+        expect(await page.locator(`#case-${index}`).innerHTML()).toBe(expected);
+      }
+
+      const firstPass = await page.locator('body').innerHTML();
+      await page.evaluate(() => pangu.spacePage());
+      expect(await page.locator('body').innerHTML()).toBe(firstPass);
+    });
+
+    test('should not add a space across a block edge next to a link', async ({ page }) => {
+      // The boundary node stops on the link, so only the scan sees the block edge
+      const cases = ['<div><a>中文</a></div><a>English</a>', '<p><a>中文</a></p>English', '<a href="#"><div>中文</div></a><span>English</span>'];
+      await page.setContent(cases.map((html, index) => `<div id="case-${index}">${html}</div>`).join(''));
+
+      await page.evaluate(() => pangu.spacePage());
+
+      for (const [index, html] of cases.entries()) {
+        expect(await page.locator(`#case-${index}`).innerHTML()).toBe(html);
+      }
+    });
+
+    test('should not add a space before a hidden link', async ({ page }) => {
+      const cases = ['中文<a hidden="">English</a>中文', '<a>中文</a><a hidden="">English</a>'];
+      await page.setContent(cases.map((html, index) => `<div id="case-${index}">${html}</div>`).join(''));
+
+      await page.evaluate(() => pangu.spacePage());
+
+      for (const [index, html] of cases.entries()) {
+        expect(await page.locator(`#case-${index}`).innerHTML()).toBe(html);
+      }
+    });
+
     test('should keep adding a space across an ignored island with inner whitespace', async ({ page }) => {
       // Whitespace inside <code> is invisible to the scan, the island stays transparent
       await page.setContent('<p id="test">字<code>a b</code>x</p>');

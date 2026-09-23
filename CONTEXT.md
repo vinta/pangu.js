@@ -18,7 +18,7 @@ Alphabetical letters, numerical digits, and symbols. When an ANS character is ad
 Inserting whitespace between CJK and ANS characters inside one string. On a page that string is one text node's data; for the string API it is the whole input.
 
 **Boundary spacing**:
-Deciding whether whitespace goes between two adjacent text nodes on a page, and where it goes. `CJK<b>A</b>` gets the space at the start of the `A` node. `CJK<a>A</a>` gets the space at the end of the `CJK` node, because a link, underline, or strike-through would render a space that is added inside it. `<a>A</a><a>CJK</a>` gets a pangu element between the links. In three cases, nothing is added: whitespace or a block edge already separates the nodes, an ignored tag such as `<code>` sits between them, or one node is hidden.
+Deciding whether whitespace goes between two adjacent text nodes on a page, and where it goes. `CJK<b>A</b>` gets the space at the start of the `A` node. `CJK<a>A</a>` gets the space at the end of the `CJK` node, because a link, underline, or strike-through would render a space that is added inside it. `CJK<i>A</i>` does too, because an `<i>` can be an icon drawn from its text, and a space would change that text. `<a>A</a><a>CJK</a>` gets a pangu element between the links. In three cases, nothing is added: whitespace, a block edge, an image, an icon with no text, or a line break already separates the nodes, an ignored tag such as `<code>` sits between them, or one node is hidden.
 
 **Decision**:
 What the rules choose for one text node or one boundary before pangu writes anything. A boundary spacing decision says where the space goes: nowhere, at the start of the next text node, at the end of the current one, or in a pangu element between them. A text node decision says what the node needs first: trim its leading space, prepend a space, or apply text spacing. A decision is computed from facts alone, with no DOM access, so it runs in vitest. The classifier never makes a decision; it answers with a label.
@@ -29,7 +29,7 @@ A text node settles when nothing will rewrite it again in this batch. Text spaci
 _Avoid_: finished, final, done
 
 **Pangu element**:
-An inline `<pangu>` element that holds one space. Pangu inserts it between two text nodes that both sit in a link, underline, or strike-through, because a space that is added inside either node would render as part of that node (`<a>A</a><pangu> </pangu><a>CJK</a>`). Pangu never inserts it inside a grid or flex container, because there the element would become a layout item.
+An inline `<pangu>` element that holds one space. Pangu inserts it between two text nodes that both sit in a link, underline, strike-through, or `<i>`, because a space that is added inside either node would render as part of that node (`<a>A</a><pangu> </pangu><a>CJK</a>`). Pangu never inserts it inside a grid or flex container, because there the element would become a layout item.
 
 **Native text-autospace**:
 The gap that the browser renders between CJK and ANS letters or digits through the `text-autospace` CSS property. It is visual only: no character is inserted. The gap is narrower than a real space. The gap ignores symbols. The browser suppresses the gap wherever a real space already exists. So native text-autospace combines with text spacing and boundary spacing without adding a second gap.
@@ -86,7 +86,7 @@ A `+` or `-` attached to a listed name, such as `Disney+`, `公視+`, or `AB-`. 
 The invariant behind every symbol rule. ANS text that has no contact with CJK is never modified. A symbol must be in direct contact with CJK to read as an operator. So CJK elsewhere in the line or text never allows spacing between ANS characters.
 
 **Pattern preservation**:
-Some tokens keep their internal shape, even where an operator reading would otherwise apply: compound words (`state-of-the-art`, `GPT-5`, `claude-4-opus`), programming terms (`C++`, `A+`, `i++`, `D-`, `C#`, `F#`), arrow tokens (`=>`, `->`), glob patterns (`*.log`, `templates/*.html`), and file paths (`/usr/bin`, `src/main.py`, `C:\Users\`).
+Some tokens keep their internal shape, even where an operator reading would otherwise apply: compound words (`state-of-the-art`, `GPT-5`, `claude-4-opus`), programming terms (`C++`, `A+`, `i++`, `D-`, `C#`, `F#`), arrow tokens (`=>`, `->`), glob patterns (`*.log`, `*[0-9].log`, `templates/*.html`), and file paths (`/usr/bin`, `src/main.py`, `C:\Users\`).
 
 **Punctuation**:
 Half-width punctuation is not converted to full-width, with two exceptions. A colon that is in direct contact with CJK and sits right before a parenthesis becomes the full-width colon `\uFF1A`. Middle dots (`\u00B7` `\u2022` `\u2027`) normalize to the katakana middle dot `\u30FB`. Multiple consecutive punctuation marks are preserved. One or more of `!` `;` `,` `?` whose right side is in direct contact with CJK always get a trailing space, no matter what is on their left (`(N CJK),CJK`, `N%,CJK`). So a stray space that is typed before the mark is rewritten, not preserved.

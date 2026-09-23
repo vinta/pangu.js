@@ -1,5 +1,7 @@
 # A hyphen in CJK contact turns every hyphen between brackets on its line into a separator
 
+**Partially superseded by [ADR 0033](0033-asterisk-before-a-square-bracket-stays-tight.md): the "fixed right after" consequence no longer covers `*` before `[`. An asterisk before a square bracket opens a bracket glob and stays tight, so `刪掉*[0-9].log的檔案` reads `刪掉 *[0-9].log 的檔案`.**
+
 Data series titles chain their parts with hyphens: `全球-名目國內生產毛額[GDP]-(NSA,美元,IMF 預估)`. The first hyphen touches CJK and read as an operator. The second sits between `]` and `(`, and no rule puts an opening bracket on the right of an operator, so the title came out half-spaced: `全球 - 名目國內生產毛額 [GDP]-(NSA, 美元, IMF 預估)`.
 
 The decision gives `-` a per-line reading, following pipe reading ([ADR 0004](0004-pipe-reads-per-line-on-cjk-contact.md)) and plus reading ([ADR 0019](0019-plus-after-a-word-reads-as-a-separator.md)):
