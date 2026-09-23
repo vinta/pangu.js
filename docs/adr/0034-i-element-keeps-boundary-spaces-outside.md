@@ -1,16 +1,16 @@
 # An `<i>` element keeps its boundary spaces outside
 
-v10.2.0 treated every `<i>` as a separator, like an image, so `該研究發表於<i>Nature</i>期刊` got no spaces while the same title in `<em>` did. e8334246 spaced `<i>` like `<em>`, with the space inside. A space inside an icon changes the text the icon font draws from: `<i class="material-icons"> public</i>`. 117d4236 moved the space outside with rules only `<i>` used. They marked the boundary space-sensitive after the boundary node had already climbed past the `<i>` to its `<td>`, so a `<pangu>` landed between table cells and widened the table.
+v10.2.0 treated every `<i>` as a separator, like an image, so `該研究發表於<i>Nature</i>期刊` got no spaces while the same title in `<em>` did. e8334246 spaced `<i>` like `<em>`, with the space inside. An icon drawn from its text is an `inline-block`, which drops a space at its start or end, so the space inside leaves no visible gap: `下一頁<i class="material-icons"> arrow_forward</i>` renders the icon tight against `下一頁`. 117d4236 moved the space outside with rules only `<i>` used. They marked the boundary space-sensitive after the boundary node had already climbed past the `<i>` to its `<td>`, so a `<pangu>` landed between table cells and widened the table.
 
 The decision:
 
-1. **`<i>` joins the space-sensitive tags**, next to links, underline, and strike-through. `該研究發表於<i>Nature</i>期刊` reads `該研究發表於 <i>Nature</i> 期刊`, and `公開<i class="material-icons">public</i>發佈` keeps the icon's text intact.
+1. **`<i>` joins the space-sensitive tags**, next to links, underline, and strike-through. `該研究發表於<i>Nature</i>期刊` reads `該研究發表於 <i>Nature</i> 期刊`, and `公開<i class="material-icons">public</i>發佈` gets a visible gap on both sides of the icon.
 2. **An `<i>` with no text between two text nodes still separates them.** `公開<i class="fa fa-globe"></i>Public` stays tight.
 3. **No visible space goes before a hidden node.** `<i>` now shares the link path, so the hidden check covers the next node for every space-sensitive tag: `中文<i hidden>English</i>中文` and `中文<a hidden>English</a>中文` stay as written.
 
 Alternatives rejected:
 
-- **Space `<i>` like `<em>`** (e8334246). The space lands inside the icon and changes what it draws.
+- **Space `<i>` like `<em>`** (e8334246). The space lands inside the icon, where the `inline-block` drops it, so an icon after CJK sits tight against it.
 - **Keep 117d4236's rules and skip `<pangu>` in table containers**, like grid and flex. Prototyped: tables pass, but a `<pangu>` still lands inside `<ul>`.
 - **Add table cells and list items to `blockTags`.** Prototyped: it misses CSS tables built from `<span>`, and it changes every released cell and list-item boundary.
 - **Climb the `<pangu>` out of wrappers that start with the next text node** (622f9494, reverted). It fixes the `<span>` limitation below, but it puts a `<pangu>` between `<span style="display:table-cell">` cells, and it moves every `<pangu>` pangu inserts.
