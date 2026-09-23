@@ -3,8 +3,7 @@ export class DomWalker {
   public static readonly ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
   // <i> is in both lists: an <i> between two text nodes holds no text and separates them, while an <i> around a text node keeps the space outside, so an icon drawn from its text stays intact. See ADR 0034
   public static readonly spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
-  // TODO: <em>, <mark>, and <cite> still take the boundary space inside, like <b>. Adding them here reverses that documented contract, so it needs an ADR like ADR 0034
-  // Material Symbols icons in a <span> have no telling tag, only a computed font-family, which costs a style read per boundary
+  // TODO: <mark> still takes the boundary space inside, like <b>, where its highlight renders the space. Adding it here reverses that documented contract, so it needs an ADR like ADR 0034
   public static readonly spaceSensitiveTags = /^(a|del|i|pre|s|strike|u)$/i;
   public static readonly ignoredClass = 'no-pangu-spacing';
 
