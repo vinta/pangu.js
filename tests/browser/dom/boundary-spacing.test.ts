@@ -235,19 +235,6 @@ describe('layout-dependent facts are consulted lazily', () => {
     expect(decideBoundarySpacing(boundaryContext({ ...layoutFactsUnavailable, blockEdgeBetween: true }))).toBe('none');
   });
 
-  // FIXME: Reverted with the flush-boundary spacing feature. When it returns, block boundaries consult the hidden and flush facts,
-  // so this replaces the test above (and the flush facts join layoutFactsUnavailable plus the prepend-next/append-current neverConsulted sets).
-  it.todo('consults only hidden and flush facts when the current boundary is a block', () => {
-    const context = boundaryContext({
-      ...layoutFactsUnavailable,
-      blockEdgeBetween: true,
-      precedingNodeHidden: () => false,
-      currentNodeHidden: () => false,
-      nextNodeHidden: () => false,
-    });
-    expect(decideBoundarySpacing(context)).toBe('none');
-  });
-
   it('leaves hidden-node and grid/flex unconsulted on the prepend-next path', () => {
     const context = boundaryContext({
       currentNodeHidden: neverConsulted('currentNodeHidden'),

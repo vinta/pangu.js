@@ -621,7 +621,7 @@ test.describe('BrowserPangu', () => {
     // FIXME: Spaces belong around an inline <code> element between CJK (https://github.com/vinta/pangu.js/issues/97).
     // The presentationalTags rule that once did this was retired in 50cfcf3;
     // Reviving it belongs to Markdown support (https://github.com/vinta/pangu.js/issues/127)
-    test.fixme('handle spacing around inline code elements', async ({ page }) => {
+    test.fail('handle spacing around inline code elements', async ({ page }) => {
       await page.setContent('<p>中文<code>English</code>中文</p>');
       await page.evaluate(() => {
         pangu.spaceNode(document.body);
@@ -1187,7 +1187,7 @@ test.describe('BrowserPangu', () => {
 
     // FIXME: <mark> takes the boundary space inside, like <b>, where its highlight renders the space.
     // Adding it to spaceSensitiveTags reverses that documented contract, so it needs an ADR like ADR 0034
-    test.fixme('should keep boundary spaces outside <mark>', async ({ page }) => {
+    test.fail('should keep boundary spaces outside <mark>', async ({ page }) => {
       await page.setContent('<p id="mark">搜尋<mark>React</mark>的結果</p>');
 
       await page.evaluate(() => pangu.spacePage());

@@ -16,13 +16,13 @@ describe('Symbol :', () => {
     expect(pangu.spaceText('前面: I have no idea後面')).toBe('前面: I have no idea 後面');
   });
 
-  // FIXME
-  it.todo('handle : symbol as emoticon', () => {
+  // FIXME: See https://github.com/vinta/pangu.js/issues/316
+  it.fails('handle : symbol as emoticon', () => {
     expect(pangu.spaceText('前面:)後面')).toBe('前面 :) 後面');
   });
 
-  // FIXME
-  it.todo('handle : symbol as separator', () => {
+  // FIXME: But rare cases, I suppose?
+  it.fails('handle : symbol as separator', () => {
     expect(pangu.spaceText('前面:後面:再後面')).toBe('前面:後面:再後面');
     expect(pangu.spaceText('前面:後面:再後面:更後面')).toBe('前面:後面:再後面:更後面');
     expect(pangu.spaceText('前面:後面:再後面:更後面:超後面')).toBe('前面:後面:再後面:更後面:超後面');

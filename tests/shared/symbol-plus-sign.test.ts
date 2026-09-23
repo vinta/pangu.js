@@ -45,7 +45,7 @@ describe('Symbol +', () => {
   });
 
   // FIXME
-  it.todo('handle + symbol as separator after a product name ending in a digit', () => {
+  it.fails('handle + symbol as separator after a product name ending in a digit', () => {
     expect(pangu.spaceText('Switch 2+瑪利歐賽車世界同捆組')).toBe('Switch 2 + 瑪利歐賽車世界同捆組');
   });
 

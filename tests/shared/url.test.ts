@@ -50,7 +50,7 @@ describe('HTTP URLs', () => {
   });
 
   // FIXME: CJK characters continue the URL, and no rule tells URL-internal CJK from prose written tight after the URL. See ADR 0026
-  it.todo('space a URL from CJK on both sides', () => {
+  it.fails('space a URL from CJK on both sides', () => {
     // prettier-ignore
     expect(pangu.spaceText('搜尋https://www.google.com/search?q=pangu.js&hl=zh-TW看看'))
                      .toBe('搜尋 https://www.google.com/search?q=pangu.js&hl=zh-TW 看看');
