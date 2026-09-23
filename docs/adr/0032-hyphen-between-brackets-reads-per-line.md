@@ -12,7 +12,7 @@ The decision gives `-` a per-line reading, following pipe reading ([ADR 0004](00
 Alternatives rejected:
 
 - **Widen `ANS_OPERATOR_CJK` to accept an opening bracket before the CJK.** It fixes `]-(年增率` and misses `]-(NSA,`, where the bracket content starts with ANS.
-- **Space the hyphen when either bracket group touches CJK.** It also fixes a title with no other hyphen, but it needs a lookbehind through the bracket content, the action at a distance ADR 0004 declined.
+- **Space the hyphen when either bracket group touches CJK.** It also fixes a title with no other hyphen (`毛額[GDP]-(NSA)`), a shape none of the 121 sampled macromicro pages had. It needs a lookbehind through the bracket content, and it would be the one symbol reading not decided per line like pipe reading and plus reading.
 - **An ambiguous shape for AI spacing.** The line's first hyphen already decides the reading, so there is nothing for a classifier to choose, and npm consumers would get nothing.
 
 ## Consequences
