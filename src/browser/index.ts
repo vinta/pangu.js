@@ -171,7 +171,7 @@ export class BrowserPangu extends Pangu {
             nextInsertionNode = nextInsertionNode.parentElement;
           }
         }
-        const { whitespaceBetween, contentBetween, spaceLikeBetween } = this.scanBetweenTextNodes(currentTextNode, nextTextNode);
+        const { whitespaceBetween, contentBetween, spaceLikeBetween, blockEdgeBetween } = this.scanBetweenTextNodes(currentTextNode, nextTextNode);
 
         // Stable bindings for the lazy facts: the loop variables are reassigned across iterations
         const currentNode = currentTextNode;
@@ -189,9 +189,8 @@ export class BrowserPangu extends Pangu {
           whitespaceBetween,
           contentBetween,
           spaceLikeBetween,
-          currentBoundaryIsBlock: DomWalker.blockTags.test(currentBoundaryNode.nodeName),
+          blockEdgeBetween,
           currentBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(currentBoundaryNode.nodeName) || currentTextNode.parentElement?.closest('sup, i')?.contains(nextTextNode) === false,
-          nextBoundaryIsBlock: DomWalker.blockTags.test(nextBoundaryNode.nodeName),
           nextBoundaryIsIgnored: DomWalker.ignoredTags.test(nextBoundaryNode.nodeName),
           nextBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(nextBoundaryNode.nodeName) || nextItalic?.contains(currentTextNode) === false,
           hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(nextNode),
@@ -353,6 +352,7 @@ export class BrowserPangu extends Pangu {
     let whitespaceBetween = false;
     let contentBetween = false;
     let spaceLikeBetween = false;
+    let blockEdgeBetween = false;
 
     const scan = (node: Node) => {
       if (node.nodeType === Node.TEXT_NODE && node.textContent) {
@@ -380,7 +380,7 @@ export class BrowserPangu extends Pangu {
     let node: Node | null = currentTextNode;
     while (node && !containerOfNext) {
       if (DomWalker.blockTags.test(node.nodeName)) {
-        spaceLikeBetween = true;
+        blockEdgeBetween = true;
         break;
       }
       let sibling = node.nextSibling;
@@ -396,7 +396,7 @@ export class BrowserPangu extends Pangu {
     // each level. Nothing past the next text node is ever visited
     while (containerOfNext && containerOfNext !== nextTextNode) {
       if (DomWalker.blockTags.test(containerOfNext.nodeName)) {
-        spaceLikeBetween = true;
+        blockEdgeBetween = true;
         break;
       }
       let child: Node | null = containerOfNext.firstChild;
@@ -407,7 +407,7 @@ export class BrowserPangu extends Pangu {
       containerOfNext = child;
     }
 
-    return { whitespaceBetween, contentBetween, spaceLikeBetween };
+    return { whitespaceBetween, contentBetween, spaceLikeBetween, blockEdgeBetween };
   }
 
   private isHiddenBoundaryBefore(node: Node) {

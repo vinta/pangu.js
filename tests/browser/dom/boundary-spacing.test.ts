@@ -11,9 +11,8 @@ const boundarySpacingContext: BoundarySpacingContext = {
   whitespaceBetween: false,
   contentBetween: false,
   spaceLikeBetween: false,
-  currentBoundaryIsBlock: false,
+  blockEdgeBetween: false,
   currentBoundaryIsSpaceSensitive: false,
-  nextBoundaryIsBlock: false,
   nextBoundaryIsIgnored: false,
   nextBoundaryIsSpaceSensitive: false,
   hiddenBoundaryBefore: () => false,
@@ -67,9 +66,8 @@ describe('decideBoundarySpacing()', () => {
     { name: 'inserts an element when both boundaries are space-sensitive', context: insertElementBoundary, decision: 'insert-element' },
     { name: 'does nothing when collectable text sits between the nodes', context: { contentBetween: true }, decision: 'none' },
     { name: 'does nothing when collectable text sits between space-sensitive nodes', context: { ...insertElementBoundary, contentBetween: true }, decision: 'none' },
-    { name: 'does nothing when the current boundary is a block', context: { currentBoundaryIsBlock: true }, decision: 'none' },
+    { name: 'does nothing when a block edge sits between the nodes', context: { blockEdgeBetween: true }, decision: 'none' },
     { name: 'does nothing when the next boundary is ignored', context: { nextBoundaryIsIgnored: true }, decision: 'none' },
-    { name: 'does nothing when the next boundary is a block', context: { nextBoundaryIsBlock: true }, decision: 'none' },
   ];
 
   it.each(decisionCases)('$name', ({ context, decision }) => {
@@ -229,8 +227,8 @@ describe('layout-dependent facts are consulted lazily', () => {
     expect(decideBoundarySpacing(boundaryContext({ ...layoutFactsUnavailable, currentTail: '中', nextFirst: '文' }))).toBe('none');
   });
 
-  it('consults no layout fact when the current boundary is a block', () => {
-    expect(decideBoundarySpacing(boundaryContext({ ...layoutFactsUnavailable, currentBoundaryIsBlock: true }))).toBe('none');
+  it('consults no layout fact when a block edge sits between the nodes', () => {
+    expect(decideBoundarySpacing(boundaryContext({ ...layoutFactsUnavailable, blockEdgeBetween: true }))).toBe('none');
   });
 
   // FIXME: Reverted with the flush-boundary spacing feature. When it returns, block boundaries consult the hidden and flush facts,
@@ -238,7 +236,7 @@ describe('layout-dependent facts are consulted lazily', () => {
   it.todo('consults only hidden and flush facts when the current boundary is a block', () => {
     const context = boundaryContext({
       ...layoutFactsUnavailable,
-      currentBoundaryIsBlock: true,
+      blockEdgeBetween: true,
       hiddenBoundaryBefore: () => false,
       hiddenBoundaryAfter: () => false,
     });

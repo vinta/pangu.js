@@ -21,9 +21,8 @@ export interface BoundarySpacingContext {
   // not count, so spacing across those islands is preserved
   contentBetween: boolean;
   spaceLikeBetween: boolean;
-  currentBoundaryIsBlock: boolean;
+  blockEdgeBetween: boolean;
   currentBoundaryIsSpaceSensitive: boolean;
-  nextBoundaryIsBlock: boolean;
   nextBoundaryIsIgnored: boolean;
   nextBoundaryIsSpaceSensitive: boolean;
   // These facts read computed styles, so they are supplied lazily and only
@@ -54,7 +53,7 @@ export function decideBoundarySpacing(boundarySpacingContext: BoundarySpacingCon
     return 'none';
   }
 
-  if (boundarySpacingContext.currentBoundaryIsBlock || boundarySpacingContext.nextBoundaryIsBlock) {
+  if (boundarySpacingContext.blockEdgeBetween) {
     return 'none';
   }
 
