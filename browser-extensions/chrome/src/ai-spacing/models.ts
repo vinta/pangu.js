@@ -30,8 +30,6 @@ export async function isModelSupported() {
 
 export async function downloadModel() {
   // The download is browser-wide and outlives this page, so the session only exists to start it
-  // TODO: 2026-09-08: after On-device AI is toggled off and on in chrome://settings/ai, availability stays 'downloading' and downloadprogress never moves past 0 until Chrome restarts;
-  // consider telling the user to restart Chrome when the download stays at 0
   console.debug(`Model download requested at ${new Date().toISOString()}`);
   const session = await LanguageModel.create({ expectedOutputs: PAGE_MODEL_LANGUAGES });
   console.debug(`Model download finished at ${new Date().toISOString()}`);
@@ -71,9 +69,6 @@ async function createBaseSession(promptSpec: PromptSpec<CandidateLabel>) {
   // create() at availability 'downloadable' silently starts a multi-gigabyte download, so we only create a session once the model is already there
   const baseSession = await LanguageModel.create({
     initialPrompts: [{ role: 'system', content: promptSpec.systemPrompt }],
-    // TODO: These two sampling parameters are deprecated, migrate when needed
-    // https://developer.chrome.com/docs/ai/prompt-api#sampling_parameters
-    // https://github.com/webmachinelearning/prompt-api#configuration-of-sampling-modes
     temperature: 0,
     topK: 1,
   });
