@@ -1185,6 +1185,16 @@ test.describe('BrowserPangu', () => {
       expect(await page.locator('body').innerHTML()).toBe(firstPass);
     });
 
+    // FIXME: <mark> takes the boundary space inside, like <b>, where its highlight renders the space.
+    // Adding it to spaceSensitiveTags reverses that documented contract, so it needs an ADR like ADR 0034
+    test.fixme('should keep boundary spaces outside <mark>', async ({ page }) => {
+      await page.setContent('<p id="mark">搜尋<mark>React</mark>的結果</p>');
+
+      await page.evaluate(() => pangu.spacePage());
+
+      expect(await page.locator('#mark').innerHTML()).toBe('搜尋 <mark>React</mark> 的結果');
+    });
+
     test('should not add a space across a block edge next to a link', async ({ page }) => {
       // The boundary node stops on the link, so only the scan sees the block edge
       const cases = ['<div><a>中文</a></div><a>English</a>', '<p><a>中文</a></p>English', '<a href="#"><div>中文</div></a><span>English</span>'];
