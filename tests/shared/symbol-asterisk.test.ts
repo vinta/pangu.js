@@ -36,10 +36,19 @@ describe('Symbol *', () => {
   });
 
   it('preserve bracket globs', () => {
-    for (const pattern of ['*[0-9].log', '*[a-z].log', '*[!0-9].log', '*[0-9].tar.gz', '*[0-9][0-9].log', '*[0-9]*.log']) {
-      const expected = `刪掉 ${pattern} 的檔案`;
-      expect(pangu.spaceText(`刪掉${pattern}的檔案`)).toBe(expected);
-      expect(pangu.spaceText(expected)).toBe(expected);
-    }
+    expect(pangu.spaceText('刪掉*[0-9].log的檔案')).toBe('刪掉 *[0-9].log 的檔案');
+    expect(pangu.spaceText('刪掉*[a-z].log的檔案')).toBe('刪掉 *[a-z].log 的檔案');
+    expect(pangu.spaceText('刪掉*[!0-9].log的檔案')).toBe('刪掉 *[!0-9].log 的檔案');
+    expect(pangu.spaceText('刪掉*[0-9].tar.gz的檔案')).toBe('刪掉 *[0-9].tar.gz 的檔案');
+    expect(pangu.spaceText('刪掉*[0-9][0-9].log的檔案')).toBe('刪掉 *[0-9][0-9].log 的檔案');
+    expect(pangu.spaceText('刪掉*[0-9]*.log的檔案')).toBe('刪掉 *[0-9]*.log 的檔案');
+
+    // DO NOT change if already spacing
+    expect(pangu.spaceText('刪掉 *[0-9].log 的檔案')).toBe('刪掉 *[0-9].log 的檔案');
+    expect(pangu.spaceText('刪掉 *[a-z].log 的檔案')).toBe('刪掉 *[a-z].log 的檔案');
+    expect(pangu.spaceText('刪掉 *[!0-9].log 的檔案')).toBe('刪掉 *[!0-9].log 的檔案');
+    expect(pangu.spaceText('刪掉 *[0-9].tar.gz 的檔案')).toBe('刪掉 *[0-9].tar.gz 的檔案');
+    expect(pangu.spaceText('刪掉 *[0-9][0-9].log 的檔案')).toBe('刪掉 *[0-9][0-9].log 的檔案');
+    expect(pangu.spaceText('刪掉 *[0-9]*.log 的檔案')).toBe('刪掉 *[0-9]*.log 的檔案');
   });
 });
