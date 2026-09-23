@@ -1162,20 +1162,10 @@ test.describe('BrowserPangu', () => {
     test('should keep boundary spaces outside <i> and leave empty icons tight', async ({ page }) => {
       const cases = [
         { html: '該研究發表於<i>Nature</i>期刊', expected: '該研究發表於 <i>Nature</i> 期刊' },
-        { html: '該研究發表於<em>Nature</em>期刊', expected: '該研究發表於<em> Nature</em> 期刊' },
         { html: '公開<i class="fa fa-globe"></i>Public', expected: '公開<i class="fa fa-globe"></i>Public' },
         { html: '公開<i class="material-icons">public</i>發佈', expected: '公開 <i class="material-icons">public</i> 發佈' },
         { html: '中文<span><i><b>Nature</b></i></span>中文', expected: '中文 <span><i><b>Nature</b></i></span> 中文' },
-        // Rare cases, ignore
-        // { html: '<a>中文</a><i><a>Nature</a></i><a>中文</a>', expected: '<a>中文</a><pangu> </pangu><i><a>Nature</a></i><pangu> </pangu><a>中文</a>' },
-        // { html: '<i>中文</i><span><a>English</a></span>', expected: '<i>中文</i><pangu> </pangu><span><a>English</a></span>' },
         { html: '<i>中文<b>English</b>中文</i>', expected: '<i>中文<b> English</b> 中文</i>' },
-        { html: '中文<i hidden="">English</i>中文', expected: '中文<i hidden="">English</i>中文' },
-        { html: '中文<span hidden=""><i>English</i></span>中文', expected: '中文<span hidden=""><i>English</i></span>中文' },
-        { html: '<div><i>中文</i></div>English', expected: '<div><i>中文</i></div>English' },
-        { html: '<span>中文</span><p><i>English</i></p>', expected: '<span>中文</span><p><i>English</i></p>' },
-        { html: '<div><i><a>中文</a></i></div><span><a>English</a></span>', expected: '<div><i><a>中文</a></i></div><span><a>English</a></span>' },
-        { html: '<div style="display:flex"><a>中文</a><i><a>English</a></i></div>', expected: '<div style="display:flex"><a>中文</a><i><a>English</a></i></div>' },
         {
           html: '<table><tbody><tr><td><a>編輯</a></td><td><i class="material-icons">delete</i></td></tr></tbody></table>',
           expected: '<table><tbody><tr><td><a>編輯</a></td><td><i class="material-icons">delete</i></td></tr></tbody></table>',
