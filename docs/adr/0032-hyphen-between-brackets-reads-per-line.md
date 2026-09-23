@@ -6,7 +6,7 @@ The decision gives `-` a per-line reading, following pipe reading ([ADR 0004](00
 
 1. A hyphen in direct contact with CJK flips every hyphen between a closing bracket and an opening bracket on its line: `全球 - 名目國內生產毛額 [GDP] - (NSA, 美元, IMF 預估)`.
 2. Only a hyphen between brackets flips. No word connector sits there, so [ADR 0003](0003-symbols-between-half-width-are-tokens.md)'s joiner tokens (`HSIAO-MING`, `USB-C`, `GPT-5`) are untouched.
-3. A line with no hyphen in direct contact with CJK keeps the hyphen tight (`arr[i]-(x+1)`), even when CJK appears elsewhere on the line.
+3. A line with no hyphen in direct contact with CJK keeps the hyphen tight (`毛額[GDP]-(NSA)`), even when CJK appears elsewhere on the line.
 4. Hyphen reading runs before the operator rules, which would otherwise space the CJK contact away before it is tested.
 
 Alternatives rejected:

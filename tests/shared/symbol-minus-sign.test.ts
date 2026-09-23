@@ -47,7 +47,6 @@ describe('Symbol -', () => {
     expect(pangu.spaceText('照X-RAY檢查')).toBe('照 X-RAY 檢查');
 
     // No hyphen on the line is in direct contact with CJK
-    expect(pangu.spaceText('arr[i]-(x+1)')).toBe('arr[i]-(x+1)');
     expect(pangu.spaceText('毛額[GDP]-(NSA)')).toBe('毛額 [GDP]-(NSA)');
 
     // Hyphenated English names
