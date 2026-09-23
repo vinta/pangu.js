@@ -32,19 +32,21 @@ npm run bump-version 1.2.3      # Bumps package.json, extension manifest, src/sh
 
 Pre-resolved Context7 IDs for the `find-docs` skill. Pass them to `ctx7 docs` and skip `ctx7 library`:
 
-| Tool              | `libraryId`                                    |
-| ----------------- | ---------------------------------------------- |
-| attw              | `/arethetypeswrong/arethetypeswrong.github.io` |
-| Chrome Extensions | `/websites/developer_chrome_extensions`        |
-| ESLint            | `/eslint/eslint`                               |
-| MDN Web Docs      | `/mdn/content`                                 |
-| Node.js           | `/nodejs/node`                                 |
-| npm               | `/websites/npmjs`                              |
-| Playwright        | `/microsoft/playwright`                        |
-| Prettier          | `/prettier/prettier`                           |
-| publint           | `/publint/publint`                             |
-| Shields.io        | `/websites/shields_io_badges`                  |
-| TypeScript        | `/websites/typescriptlang`                     |
-| typescript-eslint | `/typescript-eslint/typescript-eslint`         |
-| Vite              | `/vitejs/vite`                                 |
-| Vitest            | `/vitest-dev/vitest`                           |
+| Tool               | `libraryId`                                    |
+| ------------------ | ---------------------------------------------- |
+| attw               | `/arethetypeswrong/arethetypeswrong.github.io` |
+| Chrome built-in AI | `/websites/developer_chrome_ai`                |
+| Chrome Extensions  | `/websites/developer_chrome_extensions`        |
+| ESLint             | `/eslint/eslint`                               |
+| GitHub Actions     | `/websites/github_en_actions`                  |
+| MDN Web Docs       | `/mdn/content`                                 |
+| Node.js            | `/nodejs/node`                                 |
+| npm                | `/websites/npmjs`                              |
+| Playwright         | `/microsoft/playwright`                        |
+| Prettier           | `/prettier/prettier`                           |
+| publint            | `/publint/publint`                             |
+| Shields.io         | `/websites/shields_io_badges`                  |
+| TypeScript         | `/websites/typescriptlang`                     |
+| typescript-eslint  | `/typescript-eslint/typescript-eslint`         |
+| Vite               | `/vitejs/vite`                                 |
+| Vitest             | `/vitest-dev/vitest`                           |
