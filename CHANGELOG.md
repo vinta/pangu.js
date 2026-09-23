@@ -6,10 +6,10 @@
 
 - 新增 `pangu/shared` 的 exports，包含 `pangu`、`Pangu` 和組成規則用的 regex 常數
 - 新增 `pangu/browser` 的 exports，包含 `DomWalker`、`VisibilityDetector` 和 `TaskScheduler`
-- 修正包在 `<span>` 或連結裡的圖片旁邊會被多加空格的問題
+- 修正包在 `<span>` 或連結裡的圖片旁邊會被多加空格的問題 ([#201](https://github.com/vinta/pangu.js/issues/201))
 - 修正 `<i>` 內外文字之間的空格，並將空格放在 `<i>` 外面
-- 修正連結和區塊元素相鄰時，區塊邊界會被多加空格的問題
-- 修正隱藏的連結前面會被多加空格的問題
+- 修正 `<a>` 和區塊元素相鄰時，區塊邊界會被多加空格的問題
+- 修正隱藏的 `<a>` 前面會被多加空格的問題
 
 ## v10.2.0 / 2026-09-19
 
@@ -54,7 +54,7 @@
 - 各位觀眾！Paranoid Text Spacing 演算法 v10 強勢登場！
   - 中文和 `/` 之間不會加空格，除非是 `/src/index.ts` 之類的檔案路徑
     - 本來就有空格的 `A / B` 則維持不變
-  - 所有 `http://`、`https://` 開頭的網址裡面都不會加空格，包含中文的網址會維持原樣
+  - 所有 `http://`、`https://` 開頭的網址裡面都不會加空格，包含中文的網址會維持原樣 ([#155](https://github.com/vinta/pangu.js/issues/155))
   - 英文單字後面緊接著 `+` 再接中文時，`+` 不再當成單字的後綴，而是當成分隔符號
     - 同一行只要有 `+` 直接碰到中文，這一行其他的 `+` 也會一起加空格；`+` 碰到全形標點符號的那一邊則不加空格
     - 同一行有兩個以上的 `+` 時，右括號後面的 `+` 就算緊接著全形引號或括號也會當成分隔符號，只在右括號那一邊加空格
@@ -100,13 +100,13 @@
 
 ### [pangu.js](https://www.npmjs.com/package/pangu)
 
-- CLI 的 `-v` 會在版本號前面加上 `pangu.js`，本來只印版本號
+- CLI 的 `-v` 會在版本號前面加上 `pangu.js`，本來只印版本號 ([#310](https://github.com/vinta/pangu.js/issues/310))
 - CLI 的 `-t`、`-f`、`-c` 不能再混用，同時給多個會出現錯誤訊息
-- CLI 支援從 stdin 讀取文字，`echo "他們在release的前一天爆炸" | pangu` 會直接印出加好空格的結果，`-c` 也可以這樣用
+- CLI 支援從 stdin 讀取文字，`echo "他們在release的前一天爆炸" | pangu` 會直接印出加好空格的結果，`-c` 也可以這樣用 ([#309](https://github.com/vinta/pangu.js/issues/309))
 - 修正 CLI 的輸出被導向 pipe 時，超過 64KB 的部分會被截斷的問題
 - 修正 CLI 的 `-f` 現在會原封不動輸出加完空格的檔案內容，不會多加一個換行，檔案結尾本來有幾個換行就是幾個
 - 修正引號的加空格規則，內容以 `+` 或 `|` 結尾時，結尾引號前面不會再多一個空格，同樣的文字加第二次空格也不會變，排版完馬上用 `-c` 檢查也會通過
-- 新增 `pangu-js` 這個 CLI command，不管 PATH 順序如何都會執行到 pangu.js
+- 新增 `pangu-js` 這個 CLI command，不管 PATH 順序如何都會執行到 pangu.js ([#310](https://github.com/vinta/pangu.js/issues/310))
 
 ## v9.0.0 / 2026-07-28
 
@@ -145,8 +145,8 @@
 
 ### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 
-- Chrome extension 的工具列圖示新增了 OFF 狀態，切到手動模式、或是目前網址被黑白名單排除時，圖示會換成頭戴紙袋的圖示
-- Chrome extension 會在所有網頁啟用瀏覽器原生的 [`text-autospace: normal;`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/text-autospace) 排版
+- Chrome extension 的工具列圖示新增了 OFF 狀態，切到手動模式、或是目前網址被黑白名單排除時，圖示會換成頭戴紙袋的圖示 ([#296](https://github.com/vinta/pangu.js/issues/296))
+- Chrome extension 會在所有網頁啟用瀏覽器原生的 [`text-autospace: normal;`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/text-autospace) 排版 ([#269](https://github.com/vinta/pangu.js/issues/269))
   - 預設啟用，可以在設定裡關掉
   - 需要 Chrome v140 以上版本
 - Chrome extension 支援的最低版本改成 Chrome 96
@@ -193,7 +193,7 @@
 
 - 各位觀眾！Paranoid Text Spacing 演算法 v7！
   - 會自動判斷某些元素是不是被 CSS 隱藏來決定要不要加空格
-  - 不會把半形的標點符號轉成全形了
+  - 不會把半形的標點符號轉成全形了 ([#278](https://github.com/vinta/pangu.js/issues/278))
 
 ### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 
@@ -253,11 +253,11 @@
 
 ### [pangu.js](https://www.npmjs.com/package/pangu)
 
-- 請 Claude Code 幫我把 codebase 改寫成 TypeScript 了
+- 請 Claude Code 幫我把 codebase 改寫成 TypeScript 了 ([#171](https://github.com/vinta/pangu.js/issues/171))
 
 ### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
 
-- 請 Claude Code 幫我把 Chrome extension 升級成 Manifest v3 了
+- 請 Claude Code 幫我把 Chrome extension 升級成 Manifest v3 了 ([#215](https://github.com/vinta/pangu.js/issues/215))
 
 ## v4.0.7 / 2019-02-15
 
