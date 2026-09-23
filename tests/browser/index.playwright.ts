@@ -1189,6 +1189,18 @@ test.describe('BrowserPangu', () => {
       expect(await page.locator('body').innerHTML()).toBe(firstPass);
     });
 
+    test('should not add a space across a block edge next to a link', async ({ page }) => {
+      // The boundary node stops on the link, so only the scan sees the block edge
+      const cases = ['<div><a>中文</a></div><a>English</a>', '<p><a>中文</a></p>English', '<a href="#"><div>中文</div></a><span>English</span>'];
+      await page.setContent(cases.map((html, index) => `<div id="case-${index}">${html}</div>`).join(''));
+
+      await page.evaluate(() => pangu.spacePage());
+
+      for (const [index, html] of cases.entries()) {
+        expect(await page.locator(`#case-${index}`).innerHTML()).toBe(html);
+      }
+    });
+
     test('should keep adding a space across an ignored island with inner whitespace', async ({ page }) => {
       // Whitespace inside <code> is invisible to the scan, the island stays transparent
       await page.setContent('<p id="test">字<code>a b</code>x</p>');
