@@ -164,7 +164,7 @@ export class BrowserPangu extends Pangu {
 
         const currentBoundaryNode = DomWalker.findBoundaryNode(currentTextNode, 'last');
         const nextBoundaryNode = DomWalker.findBoundaryNode(nextTextNode, 'first');
-        const { whitespaceBetween, contentBetween } = this.scanBetweenTextNodes(currentBoundaryNode, nextBoundaryNode);
+        const { whitespaceBetween, contentBetween, spaceLikeBetween } = this.scanBetweenTextNodes(currentTextNode, nextTextNode);
 
         // Stable bindings for the lazy facts: the loop variables are reassigned across iterations
         const currentNode = currentTextNode;
@@ -181,6 +181,7 @@ export class BrowserPangu extends Pangu {
           nextStartsWithSpace: BrowserPangu.leadingWhitespace.test(nextTextNode.data),
           whitespaceBetween,
           contentBetween,
+          spaceLikeBetween,
           spaceLikeSiblingAfterCurrent: this.isSpaceLikeSibling(currentTextNode.nextSibling),
           spaceLikeSiblingAfterCurrentBoundary: this.isSpaceLikeSibling(currentBoundaryNode.nextSibling),
           spaceLikeSiblingBeforeNext: this.isSpaceLikeSibling(nextTextNode.previousSibling),
@@ -340,13 +341,15 @@ export class BrowserPangu extends Pangu {
     return null;
   }
 
-  private scanBetweenTextNodes(currentBoundaryNode: Node, nextBoundaryNode: Node) {
-    // Scan the document-order gap between the two boundary nodes. Whitespace
-    // text means the nodes are already separated. Collectable text (checked
+  private scanBetweenTextNodes(currentTextNode: Node, nextTextNode: Node) {
+    // Scan the document-order gap between the two text nodes. Whitespace text
+    // or a space-like element (an avatar <img> leading the next link) means the
+    // nodes are already separated. Collectable text (checked
     // through the same DomWalker rules that build the list, so ignored islands
     // like <code> do not count) means the nodes are not adjacent at all
     let whitespaceBetween = false;
     let contentBetween = false;
+    let spaceLikeBetween = false;
 
     const scan = (node: Node) => {
       if (node.nodeType === Node.TEXT_NODE && node.textContent) {
@@ -356,6 +359,8 @@ export class BrowserPangu extends Pangu {
         if (/\S/.test(node.textContent)) {
           contentBetween = true;
         }
+      } else if (node instanceof Element && DomWalker.spaceLikeTags.test(node.nodeName)) {
+        spaceLikeBetween = true;
       } else if (node instanceof Element && !DomWalker.isIgnoredElement(node)) {
         // Descend so wrapped whitespace counts too. Ignored islands like <code>
         // stay invisible, matching how the nodes themselves are collected
@@ -365,14 +370,14 @@ export class BrowserPangu extends Pangu {
       }
     };
 
-    // Climb from the current boundary, scanning the following siblings at each
-    // level until one is or holds the next boundary. The climb never escapes
-    // the common ancestor because the next boundary is found below it first
+    // Climb from the current text node, scanning the following siblings at each
+    // level until one holds the next text node. The climb never escapes the
+    // common ancestor because the next text node is found below it first
     let containerOfNext: Node | null = null;
-    let node: Node | null = currentBoundaryNode;
+    let node: Node | null = currentTextNode;
     while (node && !containerOfNext) {
       let sibling = node.nextSibling;
-      while (sibling && !sibling.contains(nextBoundaryNode)) {
+      while (sibling && !sibling.contains(nextTextNode)) {
         scan(sibling);
         sibling = sibling.nextSibling;
       }
@@ -380,18 +385,18 @@ export class BrowserPangu extends Pangu {
       node = node.parentNode;
     }
 
-    // Descend to the next boundary, scanning the children before its path at
-    // each level. Nothing past the boundary is ever visited
-    while (containerOfNext && containerOfNext !== nextBoundaryNode) {
+    // Descend to the next text node, scanning the children before its path at
+    // each level. Nothing past the next text node is ever visited
+    while (containerOfNext && containerOfNext !== nextTextNode) {
       let child: Node | null = containerOfNext.firstChild;
-      while (child && !child.contains(nextBoundaryNode)) {
+      while (child && !child.contains(nextTextNode)) {
         scan(child);
         child = child.nextSibling;
       }
       containerOfNext = child;
     }
 
-    return { whitespaceBetween, contentBetween };
+    return { whitespaceBetween, contentBetween, spaceLikeBetween };
   }
 
   private isHiddenBoundaryBefore(node: Node) {

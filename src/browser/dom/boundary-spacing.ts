@@ -20,6 +20,7 @@ export interface BoundarySpacingContext {
   // nodes). Content the engine never collects (ignored tags like <code>) does
   // not count, so spacing across those islands is preserved
   contentBetween: boolean;
+  spaceLikeBetween: boolean;
   spaceLikeSiblingAfterCurrent: boolean;
   spaceLikeSiblingAfterCurrentBoundary: boolean;
   spaceLikeSiblingBeforeNext: boolean;
@@ -49,7 +50,7 @@ export function decideBoundarySpacing(boundarySpacingContext: BoundarySpacingCon
     return 'none';
   }
 
-  if (boundarySpacingContext.currentEndsWithSpace || boundarySpacingContext.nextStartsWithSpace || boundarySpacingContext.whitespaceBetween) {
+  if (boundarySpacingContext.currentEndsWithSpace || boundarySpacingContext.nextStartsWithSpace || boundarySpacingContext.whitespaceBetween || boundarySpacingContext.spaceLikeBetween) {
     return 'none';
   }
 

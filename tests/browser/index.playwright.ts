@@ -1132,6 +1132,39 @@ test.describe('BrowserPangu', () => {
       expect(html).toBe('字<span><em> </em></span>x');
     });
 
+    test('should not insert <pangu> when an avatar image separates two links (real-world case)', async ({ page }) => {
+      // https://github.com/vinta/pangu.js/issues/201: Mastodon renders no whitespace between tags, and the avatar <img> sits inside the next link before its first text
+      const html =
+        '<div class="status__info">' +
+        '<a href="https://pawoo.net/@Mash710/109265935694071443" class="status__relative-time" target="_blank" rel="noopener noreferrer"><span class="status__visibility-icon"><i role="img" class="fa fa-globe" title="Public"></i></span><time datetime="2022-11-01T01:24:24.000Z" title="Oct 31, 2022, 21:24">11m</time></a>' +
+        '<a href="https://pawoo.net/@Mash710" title="Mash710@pawoo.net" class="status__display-name" target="_blank" rel="noopener noreferrer">' +
+        '<div class="status__avatar"><div class="account__avatar" style="width: 46px; height: 46px;"><img src="https://mas.to/avatars/original/missing.png" alt="Mash710@pawoo.net"></div></div>' +
+        '<span class="display-name"><bdi><strong class="display-name__html">ましこどり<img draggable="false" class="emojione" alt="🔞" title=":underage:" src="/emoji/1f51e.svg"><img draggable="false" class="emojione" alt="🚸" title=":children_crossing:" src="/emoji/1f6b8.svg"></strong></bdi><span class="display-name__account">@Mash710@pawoo.net</span></span>' +
+        '</a>' +
+        '</div>';
+      await page.setContent(`<div id="test">${html}</div>`);
+
+      await page.evaluate(() => {
+        pangu.spaceNode(document.getElementById('test')!);
+      });
+
+      expect(await page.evaluate(() => document.getElementById('test')!.innerHTML)).toBe(html);
+    });
+
+    test('should not add a space when a wrapped space-like element separates the nodes', async ({ page }) => {
+      await page.setContent(
+        '<p id="wrapped">中文<span><img src="x.png"></span>English</p>' +
+          '<p id="leading">中文<a href="#"><i class="icon"></i>English</a></p>' +
+          '<p id="trailing"><a href="#">中文<span><img src="x.png"></span></a><a href="#">English</a></p>',
+      );
+
+      await page.evaluate(() => pangu.spacePage());
+
+      expect(await page.locator('#wrapped').innerHTML()).toBe('中文<span><img src="x.png"></span>English');
+      expect(await page.locator('#leading').innerHTML()).toBe('中文<a href="#"><i class="icon"></i>English</a>');
+      expect(await page.locator('#trailing').innerHTML()).toBe('<a href="#">中文<span><img src="x.png"></span></a><a href="#">English</a>');
+    });
+
     test('should keep adding a space across an ignored island with inner whitespace', async ({ page }) => {
       // Whitespace inside <code> is invisible to the scan, the island stays transparent
       await page.setContent('<p id="test">字<code>a b</code>x</p>');
