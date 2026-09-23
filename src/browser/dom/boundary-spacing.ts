@@ -28,7 +28,8 @@ export interface BoundarySpacingContext {
   // These facts read computed styles, so they are supplied lazily and only
   // consulted for boundaries that survive the cheap checks
   hiddenBoundaryBefore: () => boolean;
-  hiddenBoundaryAfter: () => boolean;
+  currentNodeHidden: () => boolean;
+  nextNodeHidden: () => boolean;
   inGridOrFlexContainer: () => boolean;
 }
 
@@ -65,13 +66,13 @@ export function decideBoundarySpacing(boundarySpacingContext: BoundarySpacingCon
   }
 
   if (!boundarySpacingContext.currentBoundaryIsSpaceSensitive) {
-    if (boundarySpacingContext.hiddenBoundaryAfter()) {
+    if (boundarySpacingContext.currentNodeHidden() || boundarySpacingContext.nextNodeHidden()) {
       return 'none';
     }
     return 'append-current';
   }
 
-  if (boundarySpacingContext.hiddenBoundaryAfter()) {
+  if (boundarySpacingContext.currentNodeHidden() || boundarySpacingContext.nextNodeHidden()) {
     return 'none';
   }
 

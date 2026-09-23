@@ -16,7 +16,8 @@ const boundarySpacingContext: BoundarySpacingContext = {
   nextBoundaryIsIgnored: false,
   nextBoundaryIsSpaceSensitive: false,
   hiddenBoundaryBefore: () => false,
-  hiddenBoundaryAfter: () => false,
+  currentNodeHidden: () => false,
+  nextNodeHidden: () => false,
   inGridOrFlexContainer: () => false,
 };
 
@@ -127,9 +128,11 @@ describe('decideBoundarySpacing()', () => {
 
   const visibilityCases: BoundaryCase[] = [
     { name: 'a hidden boundary before vetoes prepend-next', context: { hiddenBoundaryBefore: () => true }, decision: 'none' },
-    { name: 'a hidden boundary after vetoes append-current', context: { ...appendCurrentBoundary, hiddenBoundaryAfter: () => true }, decision: 'none' },
-    { name: 'a hidden boundary after vetoes insert-element', context: { ...insertElementBoundary, hiddenBoundaryAfter: () => true }, decision: 'none' },
-    { name: 'a hidden boundary after leaves prepend-next alone', context: { hiddenBoundaryAfter: () => true }, decision: 'prepend-next' },
+    { name: 'a hidden current node vetoes append-current', context: { ...appendCurrentBoundary, currentNodeHidden: () => true }, decision: 'none' },
+    { name: 'a hidden next node vetoes append-current', context: { ...appendCurrentBoundary, nextNodeHidden: () => true }, decision: 'none' },
+    { name: 'a hidden current node vetoes insert-element', context: { ...insertElementBoundary, currentNodeHidden: () => true }, decision: 'none' },
+    { name: 'a hidden next node vetoes insert-element', context: { ...insertElementBoundary, nextNodeHidden: () => true }, decision: 'none' },
+    { name: 'a hidden current node leaves prepend-next alone', context: { currentNodeHidden: () => true }, decision: 'prepend-next' },
     { name: 'a hidden boundary before leaves append-current alone', context: { ...appendCurrentBoundary, hiddenBoundaryBefore: () => true }, decision: 'append-current' },
     { name: 'a hidden boundary before leaves insert-element alone', context: { ...insertElementBoundary, hiddenBoundaryBefore: () => true }, decision: 'insert-element' },
   ];
@@ -215,7 +218,8 @@ describe('decideTextNodeSpacing()', () => {
 describe('layout-dependent facts are consulted lazily', () => {
   const layoutFactsUnavailable: Partial<BoundarySpacingContext> = {
     hiddenBoundaryBefore: neverConsulted('hiddenBoundaryBefore'),
-    hiddenBoundaryAfter: neverConsulted('hiddenBoundaryAfter'),
+    currentNodeHidden: neverConsulted('currentNodeHidden'),
+    nextNodeHidden: neverConsulted('nextNodeHidden'),
     inGridOrFlexContainer: neverConsulted('inGridOrFlexContainer'),
   };
 
@@ -238,13 +242,18 @@ describe('layout-dependent facts are consulted lazily', () => {
       ...layoutFactsUnavailable,
       blockEdgeBetween: true,
       hiddenBoundaryBefore: () => false,
-      hiddenBoundaryAfter: () => false,
+      currentNodeHidden: () => false,
+      nextNodeHidden: () => false,
     });
     expect(decideBoundarySpacing(context)).toBe('none');
   });
 
-  it('leaves hidden-after and grid/flex unconsulted on the prepend-next path', () => {
-    const context = boundaryContext({ hiddenBoundaryAfter: neverConsulted('hiddenBoundaryAfter'), inGridOrFlexContainer: neverConsulted('inGridOrFlexContainer') });
+  it('leaves hidden-node and grid/flex unconsulted on the prepend-next path', () => {
+    const context = boundaryContext({
+      currentNodeHidden: neverConsulted('currentNodeHidden'),
+      nextNodeHidden: neverConsulted('nextNodeHidden'),
+      inGridOrFlexContainer: neverConsulted('inGridOrFlexContainer'),
+    });
     expect(decideBoundarySpacing(context)).toBe('prepend-next');
   });
 

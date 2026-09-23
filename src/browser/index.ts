@@ -183,7 +183,8 @@ export class BrowserPangu extends Pangu {
           nextBoundaryIsIgnored: DomWalker.ignoredTags.test(nextBoundaryNode.nodeName),
           nextBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(nextBoundaryNode.nodeName),
           hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(nextNode),
-          hiddenBoundaryAfter: () => this.isHiddenBoundaryAfter(currentNode) || this.isHiddenBoundaryAfter(nextNode),
+          currentNodeHidden: () => this.isNodeHidden(currentNode),
+          nextNodeHidden: () => this.isNodeHidden(nextNode),
           inGridOrFlexContainer: () => !!nextBoundaryNode.parentNode && this.isGridOrFlexContainer(nextBoundaryNode.parentNode),
         });
 
@@ -403,7 +404,7 @@ export class BrowserPangu extends Pangu {
     return this.visibilityDetector.shouldSkipSpacingBeforeNode(node);
   }
 
-  private isHiddenBoundaryAfter(node: Node) {
+  private isNodeHidden(node: Node) {
     return this.visibilityDetector.shouldSkipSpacingAfterNode(node);
   }
 
