@@ -6,6 +6,7 @@
 
 - 新增 `pangu/shared` 的 exports，包含 `pangu`、`Pangu` 和組成規則用的 regex 常數
 - 新增 `pangu/browser` 的 exports，包含 `DomWalker`、`VisibilityDetector` 和 `TaskScheduler`
+- `<i>` 包住的斜體文字現在會跟 `<em>` 一樣加空格了
 
 ## v10.2.0 / 2026-09-19
 

@@ -21,10 +21,6 @@ export interface BoundarySpacingContext {
   // not count, so spacing across those islands is preserved
   contentBetween: boolean;
   spaceLikeBetween: boolean;
-  spaceLikeSiblingAfterCurrent: boolean;
-  spaceLikeSiblingAfterCurrentBoundary: boolean;
-  spaceLikeSiblingBeforeNext: boolean;
-  spaceLikeSiblingBeforeNextBoundary: boolean;
   currentBoundaryIsBlock: boolean;
   currentBoundaryIsSpaceSensitive: boolean;
   nextBoundaryIsBlock: boolean;
@@ -46,10 +42,6 @@ export interface TextNodeSpacingContext {
 }
 
 export function decideBoundarySpacing(boundarySpacingContext: BoundarySpacingContext) {
-  if (boundarySpacingContext.spaceLikeSiblingAfterCurrent) {
-    return 'none';
-  }
-
   if (boundarySpacingContext.currentEndsWithSpace || boundarySpacingContext.nextStartsWithSpace || boundarySpacingContext.whitespaceBetween || boundarySpacingContext.spaceLikeBetween) {
     return 'none';
   }
@@ -62,17 +54,12 @@ export function decideBoundarySpacing(boundarySpacingContext: BoundarySpacingCon
     return 'none';
   }
 
-  if (boundarySpacingContext.spaceLikeSiblingAfterCurrentBoundary || boundarySpacingContext.currentBoundaryIsBlock) {
+  if (boundarySpacingContext.currentBoundaryIsBlock) {
     return 'none';
   }
 
   if (!boundarySpacingContext.nextBoundaryIsSpaceSensitive) {
-    if (
-      boundarySpacingContext.nextBoundaryIsIgnored ||
-      boundarySpacingContext.nextBoundaryIsBlock ||
-      boundarySpacingContext.spaceLikeSiblingBeforeNext ||
-      boundarySpacingContext.hiddenBoundaryBefore()
-    ) {
+    if (boundarySpacingContext.nextBoundaryIsIgnored || boundarySpacingContext.nextBoundaryIsBlock || boundarySpacingContext.hiddenBoundaryBefore()) {
       return 'none';
     }
     return 'prepend-next';
@@ -85,7 +72,7 @@ export function decideBoundarySpacing(boundarySpacingContext: BoundarySpacingCon
     return 'append-current';
   }
 
-  if (boundarySpacingContext.spaceLikeSiblingBeforeNextBoundary || boundarySpacingContext.hiddenBoundaryAfter()) {
+  if (boundarySpacingContext.hiddenBoundaryAfter()) {
     return 'none';
   }
 

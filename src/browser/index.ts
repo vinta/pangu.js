@@ -114,10 +114,6 @@ export class BrowserPangu extends Pangu {
 
   // INTERNAL
 
-  private isSpaceLikeSibling(node: Node | null) {
-    return !!node && DomWalker.spaceLikeTags.test(node.nodeName);
-  }
-
   private isGridOrFlexContainer(node: Node) {
     if (node.nodeType !== Node.ELEMENT_NODE) {
       return false;
@@ -182,10 +178,6 @@ export class BrowserPangu extends Pangu {
           whitespaceBetween,
           contentBetween,
           spaceLikeBetween,
-          spaceLikeSiblingAfterCurrent: this.isSpaceLikeSibling(currentTextNode.nextSibling),
-          spaceLikeSiblingAfterCurrentBoundary: this.isSpaceLikeSibling(currentBoundaryNode.nextSibling),
-          spaceLikeSiblingBeforeNext: this.isSpaceLikeSibling(nextTextNode.previousSibling),
-          spaceLikeSiblingBeforeNextBoundary: this.isSpaceLikeSibling(nextBoundaryNode.previousSibling),
           currentBoundaryIsBlock: DomWalker.blockTags.test(currentBoundaryNode.nodeName),
           currentBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(currentBoundaryNode.nodeName) || currentTextNode.parentElement?.closest('sup')?.contains(nextTextNode) === false,
           nextBoundaryIsBlock: DomWalker.blockTags.test(nextBoundaryNode.nodeName),

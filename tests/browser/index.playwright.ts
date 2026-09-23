@@ -1159,6 +1159,16 @@ test.describe('BrowserPangu', () => {
       expect(await page.locator('#trailing').innerHTML()).toBe('<a href="#">中文<span><img src="x.png"></span></a><a href="#">English</a>');
     });
 
+    test('should space italic text in <i> like <em>, while an empty <i> icon stays tight', async ({ page }) => {
+      await page.setContent('<p id="italic">該研究發表於<i>Nature</i>期刊</p><p id="emphasis">該研究發表於<em>Nature</em>期刊</p><p id="icon">公開<i class="fa fa-globe"></i>Public</p>');
+
+      await page.evaluate(() => pangu.spacePage());
+
+      expect(await page.locator('#italic').innerHTML()).toBe('該研究發表於<i> Nature</i> 期刊');
+      expect(await page.locator('#emphasis').innerHTML()).toBe('該研究發表於<em> Nature</em> 期刊');
+      expect(await page.locator('#icon').innerHTML()).toBe('公開<i class="fa fa-globe"></i>Public');
+    });
+
     test('should keep adding a space across an ignored island with inner whitespace', async ({ page }) => {
       // Whitespace inside <code> is invisible to the scan, the island stays transparent
       await page.setContent('<p id="test">字<code>a b</code>x</p>');

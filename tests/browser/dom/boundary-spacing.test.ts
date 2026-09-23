@@ -11,10 +11,6 @@ const boundarySpacingContext: BoundarySpacingContext = {
   whitespaceBetween: false,
   contentBetween: false,
   spaceLikeBetween: false,
-  spaceLikeSiblingAfterCurrent: false,
-  spaceLikeSiblingAfterCurrentBoundary: false,
-  spaceLikeSiblingBeforeNext: false,
-  spaceLikeSiblingBeforeNextBoundary: false,
   currentBoundaryIsBlock: false,
   currentBoundaryIsSpaceSensitive: false,
   nextBoundaryIsBlock: false,
@@ -85,9 +81,6 @@ describe('decideBoundarySpacing()', () => {
     { name: 'the next text node already starts with a space', context: { nextStartsWithSpace: true }, decision: 'none' },
     { name: 'whitespace sits between the two text nodes', context: { whitespaceBetween: true }, decision: 'none' },
     { name: 'a space-like element sits between the two text nodes', context: { spaceLikeBetween: true }, decision: 'none' },
-    { name: 'a space-like sibling follows the current text node', context: { spaceLikeSiblingAfterCurrent: true }, decision: 'none' },
-    { name: 'a space-like sibling follows the current boundary', context: { spaceLikeSiblingAfterCurrentBoundary: true }, decision: 'none' },
-    { name: 'a space-like sibling precedes the next text node', context: { spaceLikeSiblingBeforeNext: true }, decision: 'none' },
   ];
 
   it.each(existingSpaceCases)('does nothing when $name', ({ context, decision }) => {
@@ -149,10 +142,8 @@ describe('decideBoundarySpacing()', () => {
 
   const insertElementCases: BoundaryCase[] = [
     { name: 'a Grid/Flexbox container downgrades insert-element', context: { ...insertElementBoundary, inGridOrFlexContainer: () => true }, decision: 'none' },
-    { name: 'a space-like sibling before the next boundary downgrades insert-element', context: { ...insertElementBoundary, spaceLikeSiblingBeforeNextBoundary: true }, decision: 'none' },
     { name: 'a Grid/Flexbox container leaves prepend-next alone', context: { inGridOrFlexContainer: () => true }, decision: 'prepend-next' },
     { name: 'a Grid/Flexbox container leaves append-current alone', context: { ...appendCurrentBoundary, inGridOrFlexContainer: () => true }, decision: 'append-current' },
-    { name: 'a space-like sibling before the next boundary leaves prepend-next alone', context: { spaceLikeSiblingBeforeNextBoundary: true }, decision: 'prepend-next' },
   ];
 
   it.each(insertElementCases)('$name', ({ context, decision }) => {
