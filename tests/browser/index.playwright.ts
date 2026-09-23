@@ -1159,14 +1159,34 @@ test.describe('BrowserPangu', () => {
       expect(await page.locator('#trailing').innerHTML()).toBe('<a href="#">中文<span><img src="x.png"></span></a><a href="#">English</a>');
     });
 
-    test('should space italic text in <i> like <em>, while an empty <i> icon stays tight', async ({ page }) => {
-      await page.setContent('<p id="italic">該研究發表於<i>Nature</i>期刊</p><p id="emphasis">該研究發表於<em>Nature</em>期刊</p><p id="icon">公開<i class="fa fa-globe"></i>Public</p>');
+    test('should keep boundary spaces outside <i> and leave empty icons tight', async ({ page }) => {
+      const cases = [
+        { html: '該研究發表於<i>Nature</i>期刊', expected: '該研究發表於 <i>Nature</i> 期刊' },
+        { html: '該研究發表於<em>Nature</em>期刊', expected: '該研究發表於<em> Nature</em> 期刊' },
+        { html: '公開<i class="fa fa-globe"></i>Public', expected: '公開<i class="fa fa-globe"></i>Public' },
+        { html: '公開<i class="material-icons">public</i>發佈', expected: '公開 <i class="material-icons">public</i> 發佈' },
+        { html: '中文<span><i><b>Nature</b></i></span>中文', expected: '中文 <span><i><b>Nature</b></i></span> 中文' },
+        { html: '<a>中文</a><i><a>Nature</a></i><a>中文</a>', expected: '<a>中文</a><pangu> </pangu><i><a>Nature</a></i><pangu> </pangu><a>中文</a>' },
+        { html: '<i>中文</i><span><a>English</a></span>', expected: '<i>中文</i><pangu> </pangu><span><a>English</a></span>' },
+        { html: '<i>中文<b>English</b>中文</i>', expected: '<i>中文<b> English</b> 中文</i>' },
+        { html: '中文<i hidden="">English</i>中文', expected: '中文<i hidden="">English</i>中文' },
+        { html: '中文<span hidden=""><i>English</i></span>中文', expected: '中文<span hidden=""><i>English</i></span>中文' },
+        { html: '<div><i>中文</i></div>English', expected: '<div><i>中文</i></div>English' },
+        { html: '<span>中文</span><p><i>English</i></p>', expected: '<span>中文</span><p><i>English</i></p>' },
+        { html: '<div><i><a>中文</a></i></div><span><a>English</a></span>', expected: '<div><i><a>中文</a></i></div><span><a>English</a></span>' },
+        { html: '<div style="display:flex"><a>中文</a><i><a>English</a></i></div>', expected: '<div style="display:flex"><a>中文</a><i><a>English</a></i></div>' },
+      ];
+      await page.setContent(cases.map(({ html }, index) => `<div id="case-${index}">${html}</div>`).join(''));
 
       await page.evaluate(() => pangu.spacePage());
 
-      expect(await page.locator('#italic').innerHTML()).toBe('該研究發表於<i> Nature</i> 期刊');
-      expect(await page.locator('#emphasis').innerHTML()).toBe('該研究發表於<em> Nature</em> 期刊');
-      expect(await page.locator('#icon').innerHTML()).toBe('公開<i class="fa fa-globe"></i>Public');
+      for (const [index, { expected }] of cases.entries()) {
+        expect(await page.locator(`#case-${index}`).innerHTML()).toBe(expected);
+      }
+
+      const firstPass = await page.locator('body').innerHTML();
+      await page.evaluate(() => pangu.spacePage());
+      expect(await page.locator('body').innerHTML()).toBe(firstPass);
     });
 
     test('should keep adding a space across an ignored island with inner whitespace', async ({ page }) => {

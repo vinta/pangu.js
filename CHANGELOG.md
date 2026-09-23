@@ -7,7 +7,7 @@
 - 新增 `pangu/shared` 的 exports，包含 `pangu`、`Pangu` 和組成規則用的 regex 常數
 - 新增 `pangu/browser` 的 exports，包含 `DomWalker`、`VisibilityDetector` 和 `TaskScheduler`
 - 修正包在 `<span>` 或連結裡的圖片旁邊會被多加空格的問題
-- 修正被 `<i>` 包住的斜體文字不會跟 `<em>` 一樣加空格的問題
+- 修正 `<i>` 內外文字之間的空格，並將空格放在 `<i>` 外面
 
 ## v10.2.0 / 2026-09-19
 

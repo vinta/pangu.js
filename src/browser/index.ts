@@ -160,6 +160,17 @@ export class BrowserPangu extends Pangu {
 
         const currentBoundaryNode = DomWalker.findBoundaryNode(currentTextNode, 'last');
         const nextBoundaryNode = DomWalker.findBoundaryNode(nextTextNode, 'first');
+        const nextItalic = nextTextNode.parentElement?.closest('i');
+        let nextInsertionNode = nextBoundaryNode;
+        if (nextItalic || currentTextNode.parentElement?.closest('i')) {
+          while (
+            nextInsertionNode.parentElement &&
+            !DomWalker.blockTags.test(nextInsertionNode.parentElement.nodeName) &&
+            DomWalker.isFirstTextChild(nextInsertionNode.parentElement, nextInsertionNode)
+          ) {
+            nextInsertionNode = nextInsertionNode.parentElement;
+          }
+        }
         const { whitespaceBetween, contentBetween, spaceLikeBetween } = this.scanBetweenTextNodes(currentTextNode, nextTextNode);
 
         // Stable bindings for the lazy facts: the loop variables are reassigned across iterations
@@ -179,13 +190,13 @@ export class BrowserPangu extends Pangu {
           contentBetween,
           spaceLikeBetween,
           currentBoundaryIsBlock: DomWalker.blockTags.test(currentBoundaryNode.nodeName),
-          currentBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(currentBoundaryNode.nodeName) || currentTextNode.parentElement?.closest('sup')?.contains(nextTextNode) === false,
+          currentBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(currentBoundaryNode.nodeName) || currentTextNode.parentElement?.closest('sup, i')?.contains(nextTextNode) === false,
           nextBoundaryIsBlock: DomWalker.blockTags.test(nextBoundaryNode.nodeName),
           nextBoundaryIsIgnored: DomWalker.ignoredTags.test(nextBoundaryNode.nodeName),
-          nextBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(nextBoundaryNode.nodeName),
+          nextBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(nextBoundaryNode.nodeName) || nextItalic?.contains(currentTextNode) === false,
           hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(nextNode),
-          hiddenBoundaryAfter: () => this.isHiddenBoundaryAfter(currentNode),
-          inGridOrFlexContainer: () => !!nextBoundaryNode.parentNode && this.isGridOrFlexContainer(nextBoundaryNode.parentNode),
+          hiddenBoundaryAfter: () => this.isHiddenBoundaryAfter(currentNode) || (!!nextItalic && this.isHiddenBoundaryAfter(nextNode)),
+          inGridOrFlexContainer: () => !!nextInsertionNode.parentNode && this.isGridOrFlexContainer(nextInsertionNode.parentNode),
         });
 
         // A junction space can come with a second space that belongs inside the current text node's tail (CJK/ + CJK reads CJK / CJK): write the respaced tail back before placing the junction space
@@ -208,7 +219,7 @@ export class BrowserPangu extends Pangu {
             this.lastWrittenData.set(currentTextNode, currentTextNode.data);
             break;
           case 'insert-element':
-            this.insertPanguElement(nextBoundaryNode);
+            this.insertPanguElement(nextInsertionNode);
             break;
           case 'none':
             break;
@@ -368,6 +379,10 @@ export class BrowserPangu extends Pangu {
     let containerOfNext: Node | null = null;
     let node: Node | null = currentTextNode;
     while (node && !containerOfNext) {
+      if (DomWalker.blockTags.test(node.nodeName)) {
+        spaceLikeBetween = true;
+        break;
+      }
       let sibling = node.nextSibling;
       while (sibling && !sibling.contains(nextTextNode)) {
         scan(sibling);
@@ -380,6 +395,10 @@ export class BrowserPangu extends Pangu {
     // Descend to the next text node, scanning the children before its path at
     // each level. Nothing past the next text node is ever visited
     while (containerOfNext && containerOfNext !== nextTextNode) {
+      if (DomWalker.blockTags.test(containerOfNext.nodeName)) {
+        spaceLikeBetween = true;
+        break;
+      }
       let child: Node | null = containerOfNext.firstChild;
       while (child && !child.contains(nextTextNode)) {
         scan(child);

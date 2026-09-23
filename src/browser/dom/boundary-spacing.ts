@@ -54,12 +54,12 @@ export function decideBoundarySpacing(boundarySpacingContext: BoundarySpacingCon
     return 'none';
   }
 
-  if (boundarySpacingContext.currentBoundaryIsBlock) {
+  if (boundarySpacingContext.currentBoundaryIsBlock || boundarySpacingContext.nextBoundaryIsBlock) {
     return 'none';
   }
 
   if (!boundarySpacingContext.nextBoundaryIsSpaceSensitive) {
-    if (boundarySpacingContext.nextBoundaryIsIgnored || boundarySpacingContext.nextBoundaryIsBlock || boundarySpacingContext.hiddenBoundaryBefore()) {
+    if (boundarySpacingContext.nextBoundaryIsIgnored || boundarySpacingContext.hiddenBoundaryBefore()) {
       return 'none';
     }
     return 'prepend-next';
