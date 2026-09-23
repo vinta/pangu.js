@@ -160,17 +160,6 @@ export class BrowserPangu extends Pangu {
 
         const currentBoundaryNode = DomWalker.findBoundaryNode(currentTextNode, 'last');
         const nextBoundaryNode = DomWalker.findBoundaryNode(nextTextNode, 'first');
-        const nextItalic = nextTextNode.parentElement?.closest('i');
-        let nextInsertionNode = nextBoundaryNode;
-        if (nextItalic || currentTextNode.parentElement?.closest('i')) {
-          while (
-            nextInsertionNode.parentElement &&
-            !DomWalker.blockTags.test(nextInsertionNode.parentElement.nodeName) &&
-            DomWalker.isFirstTextChild(nextInsertionNode.parentElement, nextInsertionNode)
-          ) {
-            nextInsertionNode = nextInsertionNode.parentElement;
-          }
-        }
         const { whitespaceBetween, contentBetween, spaceLikeBetween, blockEdgeBetween } = this.scanBetweenTextNodes(currentTextNode, nextTextNode);
 
         // Stable bindings for the lazy facts: the loop variables are reassigned across iterations
@@ -190,12 +179,12 @@ export class BrowserPangu extends Pangu {
           contentBetween,
           spaceLikeBetween,
           blockEdgeBetween,
-          currentBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(currentBoundaryNode.nodeName) || currentTextNode.parentElement?.closest('sup, i')?.contains(nextTextNode) === false,
+          currentBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(currentBoundaryNode.nodeName) || currentTextNode.parentElement?.closest('sup')?.contains(nextTextNode) === false,
           nextBoundaryIsIgnored: DomWalker.ignoredTags.test(nextBoundaryNode.nodeName),
-          nextBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(nextBoundaryNode.nodeName) || nextItalic?.contains(currentTextNode) === false,
+          nextBoundaryIsSpaceSensitive: DomWalker.spaceSensitiveTags.test(nextBoundaryNode.nodeName),
           hiddenBoundaryBefore: () => this.isHiddenBoundaryBefore(nextNode),
-          hiddenBoundaryAfter: () => this.isHiddenBoundaryAfter(currentNode) || (!!nextItalic && this.isHiddenBoundaryAfter(nextNode)),
-          inGridOrFlexContainer: () => !!nextInsertionNode.parentNode && this.isGridOrFlexContainer(nextInsertionNode.parentNode),
+          hiddenBoundaryAfter: () => this.isHiddenBoundaryAfter(currentNode) || this.isHiddenBoundaryAfter(nextNode),
+          inGridOrFlexContainer: () => !!nextBoundaryNode.parentNode && this.isGridOrFlexContainer(nextBoundaryNode.parentNode),
         });
 
         // A junction space can come with a second space that belongs inside the current text node's tail (CJK/ + CJK reads CJK / CJK): write the respaced tail back before placing the junction space
@@ -218,7 +207,7 @@ export class BrowserPangu extends Pangu {
             this.lastWrittenData.set(currentTextNode, currentTextNode.data);
             break;
           case 'insert-element':
-            this.insertPanguElement(nextInsertionNode);
+            this.insertPanguElement(nextBoundaryNode);
             break;
           case 'none':
             break;

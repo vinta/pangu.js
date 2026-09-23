@@ -2,7 +2,7 @@ export class DomWalker {
   public static readonly blockTags = /^(div|p|h1|h2|h3|h4|h5|h6)$/i;
   public static readonly ignoredTags = /^(code|pre|script|style|textarea|iframe|input)$/i;
   public static readonly spaceLikeTags = /^(br|hr|i|img|pangu)$/i;
-  public static readonly spaceSensitiveTags = /^(a|del|pre|s|strike|u)$/i;
+  public static readonly spaceSensitiveTags = /^(a|del|i|pre|s|strike|u)$/i;
   public static readonly ignoredClass = 'no-pangu-spacing';
 
   public static collectTextNodes(root: Node, reverse = false) {
