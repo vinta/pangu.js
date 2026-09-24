@@ -1,5 +1,11 @@
 # Changelog
 
+## v10.4.0 / 2026-09-24
+
+### [pangu.js](https://www.npmjs.com/package/pangu)
+
+- 新增 `pangu/browser/standalone` 的 exports，指向獨立的單一檔案 `dist/browser/pangu.js`，沒有 bundler 的話用這個
+
 ## v10.3.0 / 2026-09-24
 
 ### [pangu.js](https://www.npmjs.com/package/pangu)
