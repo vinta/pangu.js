@@ -14,6 +14,8 @@ allowed-tools:
   - Bash(git fetch:*)
   - Bash(git ls-remote:*)
   - Bash(gh run list:*)
+  - Bash(sort:*)
+  - Bash(comm:*)
   - Read
 ---
 
@@ -61,6 +63,14 @@ tar -xzf "$TGZ" -C "$TARBALL_DIR"
 [ "$(node -p "require('./examples/package.json').dependencies.pangu")" = "$VERSION" ] || fail "examples pin"
 grep -m1 '^## v' CHANGELOG.md | grep -q "^## v$VERSION " || fail "CHANGELOG top heading"
 
+# CDN links reach any shipped path, so a file dropped since the published version breaks them
+PUBLISHED="$(npm view pangu version)"
+npm pack "pangu@$PUBLISHED" --pack-destination "$TARBALL_DIR"
+tar -tzf "$TARBALL_DIR/pangu-$PUBLISHED.tgz" | sort > "$TARBALL_DIR/published.txt"
+tar -tzf "$TGZ" | sort > "$TARBALL_DIR/packed.txt"
+REMOVED="$(comm -23 "$TARBALL_DIR/published.txt" "$TARBALL_DIR/packed.txt")"
+[ -z "$REMOVED" ] || { echo "$REMOVED"; fail "files removed since $PUBLISHED"; }
+
 # From here the examples pin is modified, so guarantee its restoration on any exit
 cp examples/package.json "$TARBALL_DIR/package.json.orig"
 trap 'cp "$TARBALL_DIR/package.json.orig" examples/package.json; rm -rf "$TARBALL_DIR" examples/node_modules examples/package-lock.json' EXIT
@@ -90,6 +100,7 @@ Either way, confirm the pin came back before moving on: `git diff --quiet exampl
 | `TS2339` on an inherited method  | a base-class `.d.ts` import failed to resolve, collapsing the subclass to an error type  |
 | `Cannot find module` at run time | `package.json` `files` doesn't ship the referenced file, or an `exports` path is wrong   |
 | `stray file in dist/`            | the `esm` environment emitted a hashed shared chunk; keep `output.preserveModules` on it |
+| `files removed since X.Y.Z`      | a rename or build change dropped a shipped path; restore it or release as a major        |
 
 To read the shipped artifact directly, unpack the tarball: `tar -xzf "$TGZ" -C "$TARBALL_DIR"` exposes `package/dist/**/*.d.ts` and `package/package.json`.
 
