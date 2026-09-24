@@ -10,17 +10,17 @@
 - Example inputs use real names only. Never invent a product name (`NotDisney+`, `GoPro+`) to show an unlisted or boundary case; a made-up name proves nothing about real text. A synthetic token is allowed only for a regex-boundary unit test, and says so.
 - A per-line reading (pipe, plus, hyphen) must test its contact before an earlier rule spaces that contact away. Plus reading missed every `CJK+A` line until it moved ahead of the operator rules, while the glossary promised the flip all along. When a glossary promise fails on a shape, check rule order before the regex.
 
-## Workflow
-
-### Common Development Commands
+## Releasing
 
 ```bash
 npm run bump-version 1.2.3      # Bumps package.json, extension manifest, src/shared/index.ts, examples/package.json, then builds and packs the extension zip. Does NOT commit or tag.
 ```
 
-**npm publishing** runs in GitHub Actions (`publish.yml`) on a pushed `v*` tag, using npm Trusted Publishing (OIDC). Never run `npm publish` locally. ADR 0014 records why publishing is one job, not a pack/publish split.
-
-**Releasing**: `/verify-before-npm-publish` must print `VERIFY OK` on the exact HEAD being tagged, so rerun it whenever HEAD moves after a pass. Tag (`git tag -a vX.Y.Z -m ""`) and push master plus the tag only after the user says "publish", then confirm with `npm install pangu@X.Y.Z --min-release-age=0` in a scratch directory. In the sibling `pangu.space` repo, bump the `api` and `web` pins plus the root lockfile in one `build: bump pangu to X.Y.Z` commit and stop: push and `wrangler deploy` are the user's. Do not publish the extension when only its `manifest.json` version changed.
+1. **Verify**: `/verify-before-npm-publish` must print `VERIFY OK` on the exact HEAD being tagged, so rerun it whenever HEAD moves after a pass.
+2. **Tag**: tag (`git tag -a vX.Y.Z -m ""`) and push master plus the tag only after the user says "publish".
+3. **npm publishing** runs in GitHub Actions (`publish.yml`) on a pushed `v*` tag, using npm Trusted Publishing (OIDC). Never run `npm publish` locally. ADR 0014 records why publishing is one job, not a pack/publish split.
+4. **Confirm**: `npm install pangu@X.Y.Z --min-release-age=0` in a scratch directory.
+5. **pangu.space**: in the sibling repo, bump the `api` and `web` pins plus the root lockfile in one `build: bump pangu to X.Y.Z` commit and stop: push and `wrangler deploy` are the user's.
 
 ## Gotcha
 
