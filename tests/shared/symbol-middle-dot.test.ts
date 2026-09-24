@@ -12,9 +12,7 @@ describe('Symbol ·', () => {
   });
 
   it('should not convert if already spaced', () => {
-    expect(pangu.spaceText('安室 · 奈美惠')).toBe('安室 · 奈美惠');
-
-    // Douban section headings
+    expect(pangu.spaceText('哥爾 · D · 羅傑')).toBe('哥爾 · D · 羅傑');
     expect(pangu.spaceText('看过 · · ·')).toBe('看过 · · ·');
     expect(pangu.spaceText('看过 · · · (2026部)')).toBe('看过 · · · (2026 部)');
   });
