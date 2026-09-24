@@ -11,6 +11,8 @@ allowed-tools:
   - Bash(rm:*)
   - Bash(tar:*)
   - Bash(git diff:*)
+  - Bash(git show:*)
+  - Bash(git describe:*)
   - Bash(sort:*)
   - Bash(comm:*)
 ---
@@ -52,7 +54,14 @@ if tar -tzf "$TGZ" | grep -E '^package/dist/[^/]+$'; then echo "VERIFY FAILED (s
 tar -xzf "$TGZ" -C "$TARBALL_DIR"
 [ "$(node -p "require('$TARBALL_DIR/package/package.json').version")" = "$VERSION" ] || fail "tarball package.json version"
 [ "$(node --input-type=module -e "import { pangu } from '$TARBALL_DIR/package/dist/shared/index.js'; console.log(pangu.version)")" = "$VERSION" ] || fail "pangu.version"
-[ "$(node -p "require('./browser-extensions/chrome/manifest.json').version")" = "$VERSION" ] || fail "extension manifest version"
+# The last store release is the manifest version at the latest tag, so any change in extension build inputs since then needs a manifest bump, and no change needs a restored manifest
+MANIFEST="$(node -p "require('./browser-extensions/chrome/manifest.json').version")"
+STORE="$(git show "$(git describe --tags --abbrev=0):browser-extensions/chrome/manifest.json" | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).version")"
+if git diff --quiet -I "readonly version: string" "v$STORE" HEAD -- src/browser src/shared browser-extensions/chrome browser-extensions/vite.config.extension.ts ':!browser-extensions/chrome/manifest.json' ':!browser-extensions/chrome/tests'; then
+  [ "$MANIFEST" != "$VERSION" ] || fail "extension unchanged since v$STORE, restore the manifest version"
+else
+  [ "$MANIFEST" = "$VERSION" ] || fail "extension changed since v$STORE, manifest version"
+fi
 [ "$(node -p "require('./examples/package.json').dependencies.pangu")" = "$VERSION" ] || fail "examples pin"
 grep -m1 '^## v' CHANGELOG.md | grep -q "^## v$VERSION " || fail "CHANGELOG top heading"
 

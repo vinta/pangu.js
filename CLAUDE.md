@@ -16,6 +16,8 @@
 npm run bump-version 1.2.3      # Bumps package.json, extension manifest, src/shared/index.ts, examples/package.json, then builds and packs the extension zip. Does NOT commit or tag.
 ```
 
+When the release won't ship a new extension to the Chrome Web Store, restore the manifest version with `git restore browser-extensions/chrome/manifest.json` before committing, so the manifest doesn't claim an extension release that never happens. `/verify-before-npm-publish` decides: it fails when extension build inputs changed since the last store release but the manifest wasn't bumped, or didn't change but the manifest was.
+
 1. **Verify**: `/verify-before-npm-publish` must print `VERIFY OK` on the exact HEAD being tagged, so rerun it whenever HEAD moves after a pass.
 2. **Tag**: tag (`git tag -a vX.Y.Z -m ""`) and push master plus the tag only after the user says "publish".
 3. **npm publishing** runs in GitHub Actions (`publish.yml`) on a pushed `v*` tag, using npm Trusted Publishing (OIDC). Never run `npm publish` locally. ADR 0014 records why publishing is one job, not a pack/publish split.
