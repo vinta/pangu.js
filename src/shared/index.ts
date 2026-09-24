@@ -219,7 +219,8 @@ export const S_A = new RegExp(`(%)([${A}])`, 'g');
 export const COPYRIGHT_DIGIT = /(\u00a9)([0-9])/g;
 
 // Characters: · • ‧
-export const MIDDLE_DOT = /([ ]*)([\u00b7\u2022\u2027])([ ]*)/g;
+// A run of middle dots is a mask (card number), not a name separator, so only a lone dot converts
+export const MIDDLE_DOT = /([ ]*)(?<![\u00b7\u2022\u2027])([\u00b7\u2022\u2027])(?![\u00b7\u2022\u2027])([ ]*)/g;
 
 // A bare unpaired non-void tag amid prose is a tag mention, not markup: it reads as one unit and is spaced from CJK it directly touches
 // A trailing self-closing slash is still bare, but void elements render on their own (<br> or <hr>), so they stay markup even unpaired
