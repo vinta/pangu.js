@@ -5,6 +5,7 @@
 // resolves the package, so that class of bug fails here instead of reaching npm.
 import panguNode, { NodePangu, pangu as namedPanguNode } from 'pangu';
 import panguBrowser, { BrowserPangu, DomWalker, TaskScheduler, VisibilityDetector, pangu as namedPanguBrowser, type AutoSpacePageConfig, type TaskSchedulerConfig } from 'pangu/browser';
+import panguStandalone from 'pangu/browser/standalone';
 import panguShared, { CJK, Pangu, pangu as namedPanguShared } from 'pangu/shared';
 
 // Members inherited from the shared Pangu base class. These are the ones that disappear when dist/node/index.d.ts cannot resolve its '../shared/index.js' import, because NodePangu then extends an error type
@@ -37,6 +38,10 @@ export const taskScheduler: TaskScheduler = panguBrowser.taskScheduler;
 export const visibilityDetector: VisibilityDetector = panguBrowser.visibilityDetector;
 export const taskSchedulerConfig: TaskSchedulerConfig = panguBrowser.taskScheduler.config;
 export const isIgnoredElement: (element: Element) => boolean = (element) => DomWalker.isIgnoredElement(element);
+
+// The ./browser/standalone subpath resolves through dist/browser/pangu.d.ts, which re-exports the ./browser declarations, so its instance has the ./browser type
+export const standaloneInstance: BrowserPangu = panguStandalone;
+export const standaloneSpaced: string = panguStandalone.spaceText('當你凝視著bug');
 
 // The ./shared subpath export carries the base class every entry extends, and the patterns as strings
 export const sharedInstance: Pangu = new Pangu();

@@ -95,12 +95,16 @@ if (document.readyState === 'loading') {
 }
 ```
 
+`pangu/browser` is a bundler build, it imports its sibling files. For a plain `<script type="module">` with no bundler, copy `pangu/browser/standalone` instead: one self-contained file, the same `dist/browser/pangu.js` the CDNs serve.
+
 Also on:
 
 - [jsDelivr](https://www.jsdelivr.com/package/npm/pangu)
   - `https://cdn.jsdelivr.net/npm/pangu@x.y.z/dist/browser/pangu.umd.js`
+  - `https://cdn.jsdelivr.net/npm/pangu@x.y.z/dist/browser/pangu.js`
 - [unpkg](https://app.unpkg.com/pangu)
   - `https://unpkg.com/pangu@x.y.z/dist/browser/pangu.umd.js`
+  - `https://unpkg.com/pangu@x.y.z/dist/browser/pangu.js`
 - [cdnjs](https://cdnjs.com/libraries/pangu)
   - `https://cdnjs.cloudflare.com/ajax/libs/pangu/x.y.z/browser/pangu.umd.min.js`
 

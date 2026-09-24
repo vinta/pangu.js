@@ -60,6 +60,12 @@
         "default": "./dist/browser/index.js"
       }
     },
+    "./browser/standalone": {
+      "import": {
+        "types": "./dist/browser/pangu.d.ts",
+        "default": "./dist/browser/pangu.js"
+      }
+    },
     "./shared": {
       "import": {
         "types": "./dist/shared/index.d.ts",
@@ -91,7 +97,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p src/browser/tsconfig.json && tsc --noEmit -p src/node/tsconfig.json",
     "lint": "npm run lint:code && npm run lint:package",
     "lint:code": "eslint",
-    "lint:package": "attw --pack . --entrypoints . && attw --pack . --entrypoints ./browser ./shared --profile esm-only && publint",
+    "lint:package": "attw --pack . --entrypoints . && attw --pack . --entrypoints ./browser ./browser/standalone ./shared --profile esm-only && publint",
     "bump-version": "node ./scripts/bump-version.js",
     "pack-extension": "./scripts/pack-extension-chrome.sh"
   },

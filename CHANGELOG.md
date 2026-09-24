@@ -12,6 +12,7 @@
 - 特別處理了 `<i>`，現在 `CJK<i>A</i>CJK` 會變成 `CJK <i>A</i> CJK`，本來不會加空格
 - `<a>` 和區塊元素相鄰時，區塊邊界不會加空格
 - 隱藏的 `<a>` 前面不會加空格
+- `pangu/browser` 改成指向 bundler 用的 build，會 import 旁邊的檔案。沒有 bundler、直接用 `<script type="module">` 載入的話，請改用獨立的單一檔案 `dist/browser/pangu.js`
 
 ## v10.2.0 / 2026-09-19
 

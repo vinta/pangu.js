@@ -8,6 +8,7 @@ import * as panguNamespace from 'pangu';
 import pangu, { NodePangu, pangu as namedPangu } from 'pangu';
 // The browser entry is importable in plain Node: the spacing engine is platform-free and DOM APIs are only touched inside the DOM-walking methods, never at module scope
 import browserPangu, { BrowserPangu, DomWalker, TaskScheduler, VisibilityDetector, pangu as namedBrowserPangu } from 'pangu/browser';
+import standalonePangu from 'pangu/browser/standalone';
 import sharedPangu, { CJK, Pangu, pangu as namedSharedPangu } from 'pangu/shared';
 
 console.log('=== Testing ESM Imports ===\n');
@@ -66,6 +67,10 @@ assert.ok(browserPangu.taskScheduler instanceof TaskScheduler);
 assert.ok(browserPangu.visibilityDetector instanceof VisibilityDetector);
 assert.equal(typeof DomWalker.isIgnoredElement, 'function');
 console.log('pangu/browser DomWalker, TaskScheduler, and VisibilityDetector work');
+
+// The ./browser/standalone subpath is the one-file build, so it inlines its own engine instead of sharing the Pangu class
+assert.equal(standalonePangu.spaceText('測試test'), '測試 test');
+console.log('pangu/browser/standalone default works');
 
 // The ./shared subpath has the same three-face surface, plus the patterns the engine is built from
 assert.equal(namedSharedPangu, sharedPangu);
