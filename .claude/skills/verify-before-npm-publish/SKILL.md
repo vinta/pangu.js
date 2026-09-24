@@ -53,6 +53,14 @@ TGZ="$(ls "$TARBALL_DIR"/pangu-*.tgz)"
 # Every file under dist/ lives in an entry folder. A file directly in dist/ is a code-split chunk that a build config change let back in
 if tar -tzf "$TGZ" | grep -E '^package/dist/[^/]+$'; then echo "VERIFY FAILED (stray file in dist/)"; exit 1; fi
 
+# bump-version writes every version copy, so a mismatch means a hand edit missed one
+tar -xzf "$TGZ" -C "$TARBALL_DIR"
+[ "$(node -p "require('$TARBALL_DIR/package/package.json').version")" = "$VERSION" ] || fail "tarball package.json version"
+[ "$(node --input-type=module -e "import { pangu } from '$TARBALL_DIR/package/dist/shared/index.js'; console.log(pangu.version)")" = "$VERSION" ] || fail "pangu.version"
+[ "$(node -p "require('./browser-extensions/chrome/manifest.json').version")" = "$VERSION" ] || fail "extension manifest version"
+[ "$(node -p "require('./examples/package.json').dependencies.pangu")" = "$VERSION" ] || fail "examples pin"
+grep -m1 '^## v' CHANGELOG.md | grep -q "^## v$VERSION " || fail "CHANGELOG top heading"
+
 # From here the examples pin is modified, so guarantee its restoration on any exit
 cp examples/package.json "$TARBALL_DIR/package.json.orig"
 trap 'cp "$TARBALL_DIR/package.json.orig" examples/package.json; rm -rf "$TARBALL_DIR" examples/node_modules examples/package-lock.json' EXIT
