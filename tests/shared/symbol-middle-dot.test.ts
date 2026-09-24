@@ -10,6 +10,13 @@ describe('Symbol ·', () => {
     expect(pangu.spaceText('喬治·R·R·馬丁')).toBe('喬治・R・R・馬丁');
     expect(pangu.spaceText('M·奈特·沙马兰')).toBe('M・奈特・沙马兰');
   });
+
+  // FIXME
+  it.fails('should not convert · symbols spaced by &nbsp;', () => {
+    // Douban section headings
+    expect(pangu.spaceText('看过  · · ·')).toBe('看过  · · ·');
+    expect(pangu.spaceText('看过  · · · (2026部)')).toBe('看过  · · · (2026 部)');
+  });
 });
 
 // \u2022
