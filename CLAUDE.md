@@ -29,6 +29,7 @@ npm run bump-version 1.2.3      # Bumps package.json, extension manifest, src/sh
 - Write code comments in English with ANS characters only. Never paste CJK sample text from tests into a comment; describe the shape generically (`CJK | CJK`, `A+CJK`) and use `\uXXXX` escape notation when a specific character matters.
 - In `tests/shared/`, write each `spaceText` case as its own literal `expect(...).toBe(...)` line, never a loop or `it.each`, so a failure names its input.
 - Keep every `// FIXME` line and `FIXME:` prefix in tests, even beside `it.fails` or `test.fail`: the user greps FIXME to find pending work.
+- Prefix a console call with `[pangu]` only in code that runs in an ordinary web page's console (content scripts, `src/shared/`), where the prefix is the only filter separating our logs from the site's. Options page, popup, and service worker logs stay unprefixed.
 - `fixtures/` has no `.prettierignore` on purpose. A byte-sensitive fixture carries a leading `<!-- prettier-ignore -->` pragma that `loadFixture()` strips before browser tests byte-compare `innerHTML` against the `.expected.html` files. The pragma guards only the next node, so many fixtures fail `prettier --check`. Never format fixtures in bulk (a repo-wide `prettier --write` breaks browser tests), and leave unreferenced fixtures alone.
 
 ## External Tool Documentation
