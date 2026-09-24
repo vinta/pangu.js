@@ -1,15 +1,17 @@
 # Changelog
 
-## vX.Y.X / xxxx-xx-xx
+## v10.3.0 / 2026-09-24
 
 ### [pangu.js](https://www.npmjs.com/package/pangu)
 
 - 新增 `pangu/shared` 的 exports，包含 `pangu`、`Pangu` 和組成規則用的 regex 常數
-- 新增 `pangu/browser` 的 exports，包含 `DomWalker`、`VisibilityDetector` 和 `TaskScheduler`
-- 修正包在 `<span>` 或連結裡的圖片旁邊會被多加空格的問題 ([#201](https://github.com/vinta/pangu.js/issues/201))
-- 修正 `<i>` 內外文字之間的空格，並將空格放在 `<i>` 外面
-- 修正 `<a>` 和區塊元素相鄰時，區塊邊界會被多加空格的問題
-- 修正隱藏的 `<a>` 前面會被多加空格的問題
+- 新增 `pangu/browser` 的 exports，包含 `DomWalker`、`VisibilityDetector`、`TaskScheduler` 和 `TaskQueue`
+- 包在 `<span>` 或 `<a>` 裡的圖片跟旁邊的文字之間不會加空格 ([#201](https://github.com/vinta/pangu.js/issues/201))
+- 中文碰到 `-` 的那一行，`CJK-CJK[A]-(CJK)` 會變成 `CJK - CJK [A] - (CJK)`
+- `CJK=(CJK)` 會變成 `CJK = (CJK)`（`-`、`*`、`&` 也一樣）
+- 特別處理了 `<i>`，現在 `CJK<i>A</i>CJK` 會變成 `CJK <i>A</i> CJK`，本來不會加空格
+- `<a>` 和區塊元素相鄰時，區塊邊界不會加空格
+- 隱藏的 `<a>` 前面不會加空格
 
 ## v10.2.0 / 2026-09-19
 
