@@ -1277,6 +1277,16 @@ test.describe('BrowserPangu', () => {
       expect(actual).toBe(expected);
     });
 
+    test('should not convert middle dots spaced by &nbsp; (real-world case)', async ({ page }) => {
+      // Douban section heading
+      await page.setContent('<h2>看过 &nbsp;·&nbsp;·&nbsp;·<span class="pl">&nbsp;(<a href="/people/vinta/collect" target="_self">2026部</a>)</span></h2>');
+      await page.evaluate(() => {
+        pangu.spacePage();
+      });
+      const actual = await page.evaluate(() => document.body.innerHTML);
+      expect(actual).toBe('<h2>看过 &nbsp;·&nbsp;·&nbsp;·<span class="pl">&nbsp;(<a href="/people/vinta/collect" target="_self">2026 部</a>)</span></h2>');
+    });
+
     test('keep product name suffixes when spacing adjacent nodes', async ({ page }) => {
       await page.setContent(
         '<p><span>Disney+</span><span>上架</span></p>' +
