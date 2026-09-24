@@ -11,11 +11,13 @@ describe('Symbol ·', () => {
     expect(pangu.spaceText('M·奈特·沙马兰')).toBe('M・奈特・沙马兰');
   });
 
-  // FIXME
-  it.fails('should not convert if already spaced', () => {
+  it('should not convert if already spaced', () => {
+    expect(pangu.spaceText('安室 · 奈美惠')).toBe('安室 · 奈美惠');
+    expect(pangu.spaceText('安室\u00a0·\u00a0奈美惠')).toBe('安室\u00a0·\u00a0奈美惠');
+
     // Douban section headings
-    expect(pangu.spaceText('看过  · · ·')).toBe('看过  · · ·');
-    expect(pangu.spaceText('看过  · · · (2026部)')).toBe('看过  · · · (2026 部)');
+    expect(pangu.spaceText('看过 \u00a0·\u00a0·\u00a0·')).toBe('看过 \u00a0·\u00a0·\u00a0·');
+    expect(pangu.spaceText('看过 \u00a0·\u00a0·\u00a0·\u00a0(2026部)')).toBe('看过 \u00a0·\u00a0·\u00a0·\u00a0(2026 部)');
   });
 });
 
@@ -31,6 +33,7 @@ describe('Symbol •', () => {
     expect(pangu.spaceText('前面 • 後面')).toBe('前面 • 後面');
     expect(pangu.spaceText('喬治 • R • R • 馬丁')).toBe('喬治 • R • R • 馬丁');
     expect(pangu.spaceText('M • 奈特 • 沙马兰')).toBe('M • 奈特 • 沙马兰');
+    expect(pangu.spaceText('前面\u00a0•\u00a0後面')).toBe('前面\u00a0•\u00a0後面');
   });
 
   it('should not convert consecutive • symbols', () => {
@@ -51,5 +54,6 @@ describe('Symbol ‧', () => {
     expect(pangu.spaceText('前面 ‧ 後面')).toBe('前面 ‧ 後面');
     expect(pangu.spaceText('喬治 ‧ R ‧ R ‧ 馬丁')).toBe('喬治 ‧ R ‧ R ‧ 馬丁');
     expect(pangu.spaceText('M ‧ 奈特 ‧ 沙马兰')).toBe('M ‧ 奈特 ‧ 沙马兰');
+    expect(pangu.spaceText('前面\u00a0‧\u00a0後面')).toBe('前面\u00a0‧\u00a0後面');
   });
 });
