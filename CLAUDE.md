@@ -20,6 +20,8 @@ npm run bump-version 1.2.3      # Bumps package.json, extension manifest, src/sh
 
 **npm publishing** runs in GitHub Actions (`publish.yml`) on a pushed `v*` tag, using npm Trusted Publishing (OIDC). Never run `npm publish` locally. ADR 0014 records why publishing is one job, not a pack/publish split.
 
+**Releasing**: `/verify-before-npm-publish` must print `VERIFY OK` on the exact HEAD being tagged, so rerun it whenever HEAD moves after a pass. Tag (`git tag -a vX.Y.Z -m ""`) and push master plus the tag only after the user says "publish", then confirm with `npm install pangu@X.Y.Z --min-release-age=0` in a scratch directory. In the sibling `pangu.space` repo, bump the `api` and `web` pins plus the root lockfile in one `build: bump pangu to X.Y.Z` commit and stop: push and `wrangler deploy` are the user's. Do not publish the extension when only its `manifest.json` version changed.
+
 ## Gotcha
 
 - When adding or editing a glossary entry, a definition uses only bold glossary terms, platform names as the platform spells them (`Text` node, string, line, element), and ordinary English in its ordinary sense. One word carries one sense: a word needed in a technical sense gets its own entry or gets replaced. A term matches the code identifier for the same concept; when they diverge, define the code's word or rename the code.
