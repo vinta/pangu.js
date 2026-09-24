@@ -77,9 +77,11 @@ See the [changelog](CHANGELOG.md) or [npm](https://www.npmjs.com/package/pangu) 
 **Make sure to import from `pangu/browser`** in ESM, which is the DOM-aware build (`spaceNode()`, `autoSpacePage()`) with matching TypeScript types and resolves correctly across all bundlers.
 
 ```js
-import pangu from 'pangu/browser';
+import pangu from 'pangu/browser'; // use this with a bundler
 // or
-// <script src="https://cdn.jsdelivr.net/npm/pangu@latest/dist/browser/pangu.umd.js"></script>
+// import pangu from 'pangu/browser/standalone'; // use this if no bundler, it's one self-contained file
+// or
+// <script src="https://cdn.jsdelivr.net/npm/pangu@latest/dist/browser/pangu.umd.js"></script> <!-- use this if you don't use ES module, it sets window.pangu -->
 
 const text = pangu.spaceText('當你凝視著bug，bug也凝視著你');
 // text = '當你凝視著 bug，bug 也凝視著你'
@@ -95,18 +97,17 @@ if (document.readyState === 'loading') {
 }
 ```
 
-`pangu/browser` is a bundler build, it imports its sibling files. For a plain `<script type="module">` with no bundler, copy `pangu/browser/standalone` instead: one self-contained file, the same `dist/browser/pangu.js` the CDNs serve.
-
 Also on:
 
 - [jsDelivr](https://www.jsdelivr.com/package/npm/pangu)
-  - `https://cdn.jsdelivr.net/npm/pangu@x.y.z/dist/browser/pangu.umd.js`
-  - `https://cdn.jsdelivr.net/npm/pangu@x.y.z/dist/browser/pangu.js`
+  - `https://cdn.jsdelivr.net/npm/pangu@x.y.z/dist/browser/pangu.umd.js` (UMD)
+  - `https://cdn.jsdelivr.net/npm/pangu@x.y.z/dist/browser/pangu.js` (self-contained ESM)
 - [unpkg](https://app.unpkg.com/pangu)
-  - `https://unpkg.com/pangu@x.y.z/dist/browser/pangu.umd.js`
-  - `https://unpkg.com/pangu@x.y.z/dist/browser/pangu.js`
+  - `https://unpkg.com/pangu@x.y.z/dist/browser/pangu.umd.js` (UMD)
+  - `https://unpkg.com/pangu@x.y.z/dist/browser/pangu.js` (self-contained ESM)
 - [cdnjs](https://cdnjs.com/libraries/pangu)
-  - `https://cdnjs.cloudflare.com/ajax/libs/pangu/x.y.z/browser/pangu.umd.min.js`
+  - `https://cdnjs.cloudflare.com/ajax/libs/pangu/x.y.z/browser/pangu.umd.min.js` (UMD)
+  - `https://cdnjs.cloudflare.com/ajax/libs/pangu/x.y.z/browser/pangu.min.js` (self-contained ESM)
 
 Replace `x.y.z` with the version you want to use.
 
@@ -115,7 +116,7 @@ Replace `x.y.z` with the version you want to use.
 ```js
 import pangu from 'pangu';
 // or
-// const pangu = require('pangu');
+// const pangu = require('pangu'); // use this if you're still using CommonJS
 
 const text = pangu.spaceText('與PM戰鬥的人，應當小心自己不要成為PM');
 // text = '與 PM 戰鬥的人，應當小心自己不要成為 PM'
