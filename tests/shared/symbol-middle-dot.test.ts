@@ -12,7 +12,7 @@ describe('Symbol ·', () => {
   });
 
   // FIXME
-  it.fails('should not convert · symbols spaced by &nbsp;', () => {
+  it.fails('should not convert if already spaced', () => {
     // Douban section headings
     expect(pangu.spaceText('看过  · · ·')).toBe('看过  · · ·');
     expect(pangu.spaceText('看过  · · · (2026部)')).toBe('看过  · · · (2026 部)');
