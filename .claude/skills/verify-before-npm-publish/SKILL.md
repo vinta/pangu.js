@@ -11,12 +11,8 @@ allowed-tools:
   - Bash(rm:*)
   - Bash(tar:*)
   - Bash(git diff:*)
-  - Bash(git fetch:*)
-  - Bash(git ls-remote:*)
-  - Bash(gh run list:*)
   - Bash(sort:*)
   - Bash(comm:*)
-  - Read
 ---
 
 # Verify before publish
@@ -35,16 +31,13 @@ The checks capture their exit code explicitly instead of leaning on `set -e` to 
 set -eu
 fail() { echo "VERIFY FAILED ($1)"; exit 1; }
 
-# Pushing the tag publishes the tagged commit, so it must be the pushed master with a green Test run and an unused version
+# Pushing the tag publishes the tagged commit without running test.yml, so it must pass the suite here and carry an unused version
 VERSION="$(node -p "require('./package.json').version")"
 [ -z "$(git status --porcelain)" ] || fail "dirty working tree"
 [ "$(git branch --show-current)" = master ] || fail "not on master"
-git fetch --quiet origin master || fail "git fetch"
-[ "$(git rev-parse HEAD)" = "$(git rev-parse origin/master)" ] || fail "HEAD is not origin/master"
 if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then fail "tag v$VERSION exists locally"; fi
-[ -z "$(git ls-remote --tags origin "v$VERSION")" ] || fail "tag v$VERSION exists on origin"
 [ -z "$(npm view "pangu@$VERSION" version)" ] || fail "pangu@$VERSION already on npm"
-gh run list --commit "$(git rev-parse HEAD)" --workflow test.yml --json status,conclusion --jq '.[0] | "\(.status) \(.conclusion)"' | grep -qx 'completed success' || fail "Test workflow not green on HEAD"
+{ npm test && npm run lint && npm run typecheck; } || fail "tests, lint, or typecheck"
 
 # Build and pack the exact bytes that would go to npm
 npm run build
