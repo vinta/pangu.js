@@ -11,6 +11,7 @@ const alone = mkdtempSync(join(tmpdir(), 'pangu-standalone-'));
 for (const name of ['pangu.js', 'pangu.js.map']) {
   copyFileSync(new URL(`../../dist/browser/${name}`, import.meta.url), join(alone, name));
 }
+
 // dist/browser/pangu.d.ts re-exports dist/browser/index.d.ts, so the bundler entry is also the type of the standalone file
 const standalone = (await import(/* @vite-ignore */ pathToFileURL(join(alone, 'pangu.js')).href)) as typeof browserEntry;
 
