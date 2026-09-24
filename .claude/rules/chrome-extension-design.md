@@ -12,3 +12,5 @@ The extension's styles follow the pangu.space design system (sibling repo `pangu
 - The options headline stays `--text-3xl` at every width, with no `keep-all` or zero-width space. It may wrap below a 632px window.
 - Extension pages are desktop only, since Chrome extensions do not run on phones, so they skip the site's 44px touch targets. The 768px layout switch serves narrow desktop windows: it stacks the logo above the title so the 40px title stays on one line.
 - The status toggle's green knob stays a raw hex value, a single mark on one page. The notifications and the soft green and red buttons use the shared `--color-success-*`, `--color-danger-*`, and `--color-info-*` tokens.
+
+A token with zero uses stays when it fills a slot in the `--color-*`, `--shadow-*`, or `--transition-*` family: each family stays aligned and complete (sm/md/lg shadows, fast/normal/slow transitions, a full semantic color set). Never propose removing one.
