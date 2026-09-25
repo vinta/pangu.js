@@ -73,6 +73,9 @@ jobs:
   browser-test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -89,13 +92,13 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+        run: npx playwright install --with-deps ${{ matrix.browser }}
 
       - name: Run build
         run: npm run build
 
       - name: Run browser test
-        run: npm run test:browser
+        run: npm run test:browser -- --project=${{ matrix.browser }}
 
       - name: Run extension test
-        run: npm run test:extension
+        run: npm run test:extension -- --project=${{ matrix.browser }}
