@@ -51,6 +51,9 @@ async function loadContentScript(page: Page, html: string, candidateLabels: Stub
       if (!('navigation' in window)) {
         Object.defineProperty(window, 'navigation', { value: { addEventListener: () => {} } });
       }
+      // The fake clock's idle deadline reports no time remaining, so the task queue would never run a task
+      const fakeRequestIdleCallback = window.requestIdleCallback.bind(window);
+      window.requestIdleCallback = (callback, options) => fakeRequestIdleCallback(({ didTimeout }) => callback({ didTimeout, timeRemaining: () => 50 }), options);
     },
     { candidateLabels, aiEnabled },
   );
@@ -60,6 +63,7 @@ async function loadContentScript(page: Page, html: string, candidateLabels: Stub
 // What the page pass classifies
 async function classify(page: Page, html: string, candidateLabels: StubLabels = []) {
   await loadContentScript(page, html, candidateLabels);
+  await page.clock.runFor(1000);
   return sentCandidates(page);
 }
 
@@ -70,10 +74,15 @@ async function classifyCandidate(page: Page, html: string) {
     const node = document.querySelector('#candidate')!.firstChild as Text;
     node.data = node.data;
   });
+  await page.clock.runFor(500);
   return sentCandidates(page);
 }
 
 test.describe('AI spacing DOM context', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.clock.install();
+  });
+
   test('inserts the digit-plus separator using original neighboring inline context', async ({ page }) => {
     expect(await classify(page, '<p><span>Switch </span><a>2+瑪利歐賽車世界同捆組</a><b>現貨</b></p>', ['conjunction'])).toEqual([{ sentence: 'Switch 2+瑪利歐賽車世界同捆組現貨', at: 8 }]);
     await expect(page.locator('p')).toHaveText('Switch 2 + 瑪利歐賽車世界同捆組現貨');
@@ -82,6 +91,7 @@ test.describe('AI spacing DOM context', () => {
 
   test('does not classify a digit-plus when an inline sibling adds a second plus', async ({ page }) => {
     await loadContentScript(page, '<p><a>Switch 2+瑪利歐賽車世界同捆組</a><span>，另送A+B</span></p>', ['conjunction']);
+    await page.clock.runFor(1000);
 
     await expect(page.locator('p')).toHaveText('Switch 2+ 瑪利歐賽車世界同捆組，另送 A+B');
     expect(await page.evaluate(() => window.__aiClassifications.flatMap(({ candidates }) => candidates))).toEqual([]);
@@ -104,6 +114,7 @@ test.describe('AI spacing DOM context', () => {
 
   test('retains core digit-plus spacing without classification when AI spacing is disabled', async ({ page }) => {
     await loadContentScript(page, '<p>Switch 2+瑪利歐賽車世界同捆組</p>', ['conjunction'], false);
+    await page.clock.runFor(1000);
 
     await expect(page.locator('p')).toHaveText('Switch 2+ 瑪利歐賽車世界同捆組');
     expect(await page.evaluate(() => window.__aiClassifications)).toEqual([]);
