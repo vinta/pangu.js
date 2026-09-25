@@ -4,7 +4,7 @@
 
 ### [pangu.js](https://www.npmjs.com/package/pangu)
 
-- `CJK •••• 1234` 不會變成 `CJK・・・・1234`（`·`、`‧` 也一樣）
+- `CJK •••• N` 不會變成 `CJK・・・・N`（`·`、`‧` 也一樣）
 - `CJK · CJK` 和 `CJK&nbsp;·&nbsp;CJK` 的 `·` 不會變成 `・` 了（`•`、`‧` 也一樣）
 
 ## v10.4.0 / 2026-09-24
