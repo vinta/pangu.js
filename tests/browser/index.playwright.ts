@@ -24,12 +24,16 @@ test.describe('BrowserPangu', () => {
   });
 
   test.describe('autoSpacePage()', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.clock.install();
+    });
+
     test('handle dynamic content with MutationObserver', async ({ page }) => {
       await page.evaluate(() => {
         pangu.autoSpacePage();
       });
 
-      await page.waitForTimeout(50);
+      await page.clock.runFor(50);
 
       // Dynamically add content after autoSpacePage is active
       await page.evaluate(() => {
@@ -39,7 +43,7 @@ test.describe('BrowserPangu', () => {
         document.body.appendChild(div);
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       const result = await page.evaluate(() => document.getElementById('test-div')!.textContent);
       expect(result).toBe('小明在開發軟體時總是嚴格地遵循各項協定與標準，直到他看了 ISO 3166-1');
@@ -52,7 +56,7 @@ test.describe('BrowserPangu', () => {
         pangu.autoSpacePage();
       });
 
-      await page.waitForTimeout(50);
+      await page.clock.runFor(50);
 
       // Two separately queued siblings whose boundary needs a space
       await page.evaluate(() => {
@@ -65,7 +69,7 @@ test.describe('BrowserPangu', () => {
         container.appendChild(span2);
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.textContent);
       expect(result).toBe('中文 abc');
@@ -80,7 +84,7 @@ test.describe('BrowserPangu', () => {
         pangu.autoSpacePage({ pageDelayMs: 60000 });
       });
 
-      await page.waitForTimeout(50);
+      await page.clock.runFor(50);
 
       // The two queued spans sandwich an untouched sibling, so their text nodes are not adjacent
       await page.evaluate(() => {
@@ -94,7 +98,7 @@ test.describe('BrowserPangu', () => {
         container.appendChild(last);
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       // No space may appear between X and abc. The unqueued X is paired with each queued neighbor, so 甲 X gets its space while Xabc stays tight as two ANS tokens
       const result = await page.evaluate(() => document.getElementById('container')!.textContent);
@@ -109,7 +113,7 @@ test.describe('BrowserPangu', () => {
       });
 
       // Well inside the 5 s loadeddata fallback, so the page pass must not have run yet
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.textContent);
       expect(result).toBe('中文abc');
@@ -123,7 +127,7 @@ test.describe('BrowserPangu', () => {
         pangu.autoSpacePage({ pageDelayMs: 50 });
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.textContent);
       expect(result).toBe('中文 abc');
@@ -137,13 +141,13 @@ test.describe('BrowserPangu', () => {
         pangu.autoSpacePage({ pageDelayMs: 50 });
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       await page.evaluate(() => {
         document.getElementById('count')!.textContent = '1';
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.innerHTML);
       expect(result).toBe('（<span id="count">1</span> 人的回答統計）');
@@ -156,7 +160,7 @@ test.describe('BrowserPangu', () => {
         pangu.autoSpacePage({ pageDelayMs: 50 });
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       // The host keeps an unlisted suffix tight
       await page.evaluate(() => {
@@ -164,13 +168,13 @@ test.describe('BrowserPangu', () => {
         pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '私視+ 的節目' }]);
       });
 
-      await page.waitForTimeout(100);
+      await page.clock.runFor(100);
 
       await page.evaluate(() => {
         document.getElementById('count')!.textContent = '1';
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.innerHTML);
       expect(result).toBe('私視+ 的節目<span id="count"> 1</span>');
@@ -183,7 +187,7 @@ test.describe('BrowserPangu', () => {
         pangu.autoSpacePage({ pageDelayMs: 50 });
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       // A framework re-render writes nodeValue on both text nodes in one task. Re-spacing the first pairs it with the second, whose own mutation record is still pending
       await page.evaluate(() => {
@@ -192,7 +196,7 @@ test.describe('BrowserPangu', () => {
         spans[1]!.firstChild!.nodeValue = '丁4';
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.innerHTML);
       expect(result).toBe('<span>丙 3</span><span> 丁 4</span>');
@@ -205,7 +209,7 @@ test.describe('BrowserPangu', () => {
         pangu.autoSpacePage({ pageDelayMs: 50 });
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       // The late fix sits right at the tail, where the junction reading would put the space back
       await page.evaluate(() => {
@@ -213,13 +217,13 @@ test.describe('BrowserPangu', () => {
         pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '私視+' }]);
       });
 
-      await page.waitForTimeout(100);
+      await page.clock.runFor(100);
 
       await page.evaluate(() => {
         document.getElementById('count')!.textContent = '上架';
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.innerHTML);
       expect(result).toBe('私視+<span id="count"> 上架</span>');
@@ -232,21 +236,21 @@ test.describe('BrowserPangu', () => {
         pangu.autoSpacePage({ pageDelayMs: 50 });
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       await page.evaluate(() => {
         const textNode = document.getElementById('container')!.firstChild as Text;
         pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '私視+ 的節目' }]);
       });
 
-      await page.waitForTimeout(100);
+      await page.clock.runFor(100);
 
       // The parent is queued, so the fixed node is in the mutated subtree itself rather than a neighbor of it
       await page.evaluate(() => {
         document.getElementById('container')!.appendChild(document.createTextNode('1'));
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.textContent);
       expect(result).toBe('私視+ 的節目 1');
@@ -259,27 +263,27 @@ test.describe('BrowserPangu', () => {
         pangu.autoSpacePage({ pageDelayMs: 50 });
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       await page.evaluate(() => {
         const textNode = document.getElementById('container')!.lastChild as Text;
         pangu.applyLateFixes([{ node: textNode, settled: textNode.data, data: '私視+ 的節目' }]);
       });
 
-      await page.waitForTimeout(100);
+      await page.clock.runFor(100);
 
       // The first fill prepends the junction space to the fixed node, so it no longer holds the bytes the late fix wrote
       await page.evaluate(() => {
         document.getElementById('count')!.textContent = '1';
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       await page.evaluate(() => {
         document.getElementById('count')!.firstChild!.nodeValue = '2';
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.innerHTML);
       expect(result).toBe('<span id="count">2</span> 私視+ 的節目');
@@ -292,13 +296,13 @@ test.describe('BrowserPangu', () => {
         pangu.autoSpacePage({ pageDelayMs: 50 });
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       await page.evaluate(() => {
         document.getElementById('count')!.textContent = '甲';
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       const result = await page.evaluate(() => [document.title, document.querySelector('nav')!.innerHTML]);
       expect(result).toEqual(['中文', '<span id="count">甲</span> abc']);
@@ -312,7 +316,7 @@ test.describe('BrowserPangu', () => {
         pangu.autoSpacePage({ pageDelayMs: 60000 });
       });
 
-      await page.waitForTimeout(50);
+      await page.clock.runFor(50);
 
       // The two queued spans sandwich a wrapper whose whitespace already separates them
       await page.evaluate(() => {
@@ -326,7 +330,7 @@ test.describe('BrowserPangu', () => {
         container.appendChild(last);
       });
 
-      await page.waitForTimeout(600);
+      await page.clock.runFor(600);
 
       const result = await page.evaluate(() => document.getElementById('container')!.textContent);
       expect(result).toBe('甲 abc');
