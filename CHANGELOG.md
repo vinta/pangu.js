@@ -1,5 +1,12 @@
 # Changelog
 
+## vX.Y.Z / xxxx-xx-xx
+
+### [pangu.js](https://www.npmjs.com/package/pangu)
+
+- 連續兩個以上的 `·`、`•`、`‧` 不會被轉成 `・` 了，`國泰CUBE卡 •••• 1234` 的卡號遮罩會保持原樣
+- 前後有空格或 `&nbsp;` 的 `·`、`•`、`‧` 不會被轉成 `・` 了，`安室 · 奈美惠` 會保持原樣
+
 ## v10.4.0 / 2026-09-24
 
 ### [pangu.js](https://www.npmjs.com/package/pangu)
