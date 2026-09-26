@@ -67,7 +67,8 @@ grep -m1 '^## v' CHANGELOG.md | grep -q "^## v$VERSION " || fail "CHANGELOG top 
 
 # CDN links reach any shipped path, so a file dropped since the published version breaks them
 PUBLISHED="$(npm view pangu version)"
-npm pack "pangu@$PUBLISHED" --pack-destination "$TARBALL_DIR"
+# A user-level min-release-age would refuse a version published days ago
+npm pack "pangu@$PUBLISHED" --min-release-age=0 --pack-destination "$TARBALL_DIR"
 tar -tzf "$TARBALL_DIR/pangu-$PUBLISHED.tgz" | sort > "$TARBALL_DIR/published.txt"
 tar -tzf "$TGZ" | sort > "$TARBALL_DIR/packed.txt"
 REMOVED="$(comm -23 "$TARBALL_DIR/published.txt" "$TARBALL_DIR/packed.txt")"
