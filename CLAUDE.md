@@ -22,7 +22,6 @@ When the release won't ship a new extension to the Chrome Web Store, restore the
 2. **Tag**: tag (`git tag -a vX.Y.Z -m ""`) and push master plus the tag only after the user says "publish".
 3. **npm publishing** runs in GitHub Actions (`publish.yml`) on a pushed `v*` tag, using npm Trusted Publishing (OIDC). Never run `npm publish` locally. ADR 0014 records why publishing is one job, not a pack/publish split.
 4. **Confirm**: `npm install pangu@X.Y.Z --min-release-age=0` in a scratch directory.
-5. **pangu.space**: in the sibling repo, bump the `api` and `web` pins plus the root lockfile in one `build: bump pangu to X.Y.Z` commit and stop: push and `wrangler deploy` are the user's.
 
 ## Gotcha
 
