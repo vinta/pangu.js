@@ -1,15 +1,18 @@
 {
   "printWidth": 200,
-  "tabWidth": 2,
-  "useTabs": false,
-  "semi": true,
   "singleQuote": true,
   "quoteProps": "consistent",
-  "trailingComma": "all",
-  "bracketSpacing": true,
-  "bracketSameLine": false,
-  "arrowParens": "always",
   "htmlWhitespaceSensitivity": "strict",
   "organizeImportsSkipDestructiveCodeActions": true,
-  "plugins": ["prettier-plugin-organize-imports"]
+  "plugins": [
+    "prettier-plugin-organize-imports"
+  ],
+  "overrides": [
+    {
+      "files": "**/*.json",
+      "options": {
+        "parser": "json-stringify"
+      }
+    }
+  ]
 }
