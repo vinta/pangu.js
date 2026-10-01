@@ -1,8 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    // The published .d.ts files are checked the way consumers resolve them, so an extensionless relative import fails the build here instead of breaking anyone using moduleResolution node16/nodenext
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "outDir": "../../dist",
@@ -13,5 +16,8 @@
     "sourceMap": true,
     "types": []
   },
-  "include": ["./**/*.ts", "../shared/**/*.ts"]
+  "include": [
+    "./**/*.ts",
+    "../shared/**/*.ts"
+  ]
 }

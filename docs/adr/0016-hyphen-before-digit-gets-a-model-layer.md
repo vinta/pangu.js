@@ -11,6 +11,7 @@ The decision:
 The other ambiguous symbol classes — filename-versus-mention, formula-versus-prose, brand suffixes — are deferred, not ruled out. Their first probe on this contract did not clear the zero-regression bar, which is why the hyphen goes first. But the prompt campaign that followed moved this same model, on this same contract, from failing that bar on the hyphen to clearing it, through prompt work alone. "The model's priors are wrong there" is therefore one probe's reading rather than a closed question, and each class earns its own decision on its own measurements.
 
 Alternatives rejected:
+
 - **Any backend other than the browser's own.** A local model server is a companion install, a hosted API is a network round trip and someone's bill, and a fine-tuned encoder is a training pipeline. None of that belongs behind a text-spacing library that has always been a pure function.
 - **A cue-character lexicon instead of a model** — a list of characters that may precede a signed number, consulted by a widened rule. It is cheaper and fully deterministic, but it is an open-ended word list, the machinery [ADR 0013](0013-protected-word-list-removed.md) removed, and ADR 0015 already named it as such when it declined the same idea.
 
