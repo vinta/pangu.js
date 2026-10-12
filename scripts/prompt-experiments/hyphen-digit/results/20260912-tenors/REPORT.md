@@ -114,7 +114,7 @@ const examplePages = new Set(selection.promptExamples.map(id => (byId.get(id).ca
 const examplesExcluded = original.filter(kase => !examplePages.has(kase.canonical_source ?? kase.source));
 assert.equal(original.length, 22);
 assert.equal(examplesExcluded.length, 20);
-const out = outputDirectory(process.cwd(), 'tmp/prompt-experiments/tenors-shared-rerun/inputs');
+const out = outputDirectory(process.cwd(), 'local/prompt-experiments/tenors-shared-rerun/inputs');
 for (const [name, cases] of Object.entries({ original, examplesExcluded })) {
   writeFileSync(`${out}/${name}.json`, JSON.stringify({ ...corpus, cases }, null, 2) + '\n', { flag: 'wx' });
 }
@@ -124,7 +124,7 @@ JS
 Check corpus structure and render all frozen prompts without a browser or model inference:
 
 ```bash
-node scripts/prompt-experiments/sweep.mjs --cases tmp/prompt-experiments/tenors-shared-rerun/inputs/original.json --prompts scripts/prompt-experiments/hyphen-digit/results/20260912-tenors/prompts.mjs --check shipping v27-zh tenor-meaning target-ordinal english-instructions sourced-examples target-unit english-sourced-examples cds-maturity cds-before-examples maturity-and-cashflow
+node scripts/prompt-experiments/sweep.mjs --cases local/prompt-experiments/tenors-shared-rerun/inputs/original.json --prompts scripts/prompt-experiments/hyphen-digit/results/20260912-tenors/prompts.mjs --check shipping v27-zh tenor-meaning target-ordinal english-instructions sourced-examples target-unit english-sourced-examples cds-maturity cds-before-examples maturity-and-cashflow
 ```
 
 `shipping` means current production; `v27-zh` is the frozen historical baseline. Use the recorded code revision and its lockfile when reproducing the original setup. Browser or model updates can change answers even with the same prompts and settings.
@@ -132,14 +132,14 @@ node scripts/prompt-experiments/sweep.mjs --cases tmp/prompt-experiments/tenors-
 Then compare current shipping with the candidate that fixed both tenors. This command runs model inference in the verified Chrome Beta session:
 
 ```bash
-node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases tmp/prompt-experiments/tenors-shared-rerun/inputs/examplesExcluded.json --prompts scripts/prompt-experiments/hyphen-digit/results/20260912-tenors/prompts.mjs --out tmp/prompt-experiments/tenors-shared-rerun/screening --orders 2 --repeats 1 shipping cds-maturity
+node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases local/prompt-experiments/tenors-shared-rerun/inputs/examplesExcluded.json --prompts scripts/prompt-experiments/hyphen-digit/results/20260912-tenors/prompts.mjs --out local/prompt-experiments/tenors-shared-rerun/screening --orders 2 --repeats 1 shipping cds-maturity
 ```
 
 Choose a new output directory for another invocation. Substitute `v27-zh` for `shipping` to compare the frozen historical baseline, or another candidate ID to repeat its comparison. New prompt examples require excluding their entire source pages too. Use the shared [fixture replay](../../../README.md#collect-and-replay-a-new-source) and [paired gate helper](../../../README.md#paired-gate-helper) to check production inputs and spacing before drawing conclusions.
 
 ## Retention
 
-This round keeps only this report and `prompts.mjs`. Source provenance and replay fixtures stay in the shared development corpus. The selection and corpus blob ID above preserve this round’s inputs without a duplicate corpus file. Raw answers, diagnostics, intermediate snapshots, and verification output are disposable local files under `tmp/prompt-experiments/`.
+This round keeps only this report and `prompts.mjs`. Source provenance and replay fixtures stay in the shared development corpus. The selection and corpus blob ID above preserve this round’s inputs without a duplicate corpus file. Raw answers, diagnostics, intermediate snapshots, and verification output are disposable local files under `local/prompt-experiments/`.
 
 Before this retention change, all 993 initial answers were checked and all 9 paired gates were reproduced. Individual and combined spacing were recomputed for all 24 completed accuracy runs; the 3 diagnostics stayed outside accuracy scoring. Two startup error fields had been sanitized after writing, with no model answers changed. No new model inference ran during this reorganization.
 

@@ -137,7 +137,7 @@ const byId = new Map(corpus.cases.map(kase => [kase.id, kase]));
 const cases = selection.ids.map(id => byId.get(id));
 assert.equal(cases.length, 30);
 assert(cases.every(Boolean));
-const out = outputDirectory(process.cwd(), 'tmp/prompt-experiments/all-development-rerun/inputs');
+const out = outputDirectory(process.cwd(), 'local/prompt-experiments/all-development-rerun/inputs');
 writeFileSync(`${out}/development.json`, JSON.stringify({ ...corpus, cases }, null, 2) + '\n', { flag: 'wx' });
 JS
 ````
@@ -145,11 +145,11 @@ JS
 The commands below use new output directories. Repeating an invocation requires another new directory. Runner tests and fixture replay can be reused only under the skill's documented conditions.
 
 ```bash
-npx vitest run --exclude '**/tmp/**' scripts/prompt-experiments/sweep.test.ts scripts/prompt-experiments/hyphen-digit/paired-gates.test.ts
-node scripts/prompt-experiments/hyphen-digit/corpus/check-inputs.mjs --cases tmp/prompt-experiments/all-development-rerun/inputs/development.json
-node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases tmp/prompt-experiments/all-development-rerun/inputs/development.json --prompts scripts/prompt-experiments/hyphen-digit/results/20260912-all-development/prompts.mjs --out tmp/prompt-experiments/all-development-rerun/screen shipping question-first-cashflow
-node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases tmp/prompt-experiments/all-development-rerun/inputs/development.json --prompts scripts/prompt-experiments/hyphen-digit/results/20260912-all-development/prompts.mjs --orders 2 --repeats 3 --out tmp/prompt-experiments/all-development-rerun/confirm-1 shipping question-first-cashflow
-node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases tmp/prompt-experiments/all-development-rerun/inputs/development.json --prompts scripts/prompt-experiments/hyphen-digit/results/20260912-all-development/prompts.mjs --orders 2 --repeats 3 --out tmp/prompt-experiments/all-development-rerun/confirm-2 question-first-cashflow shipping
+npx vitest run --exclude '**/local/**' scripts/prompt-experiments/sweep.test.ts scripts/prompt-experiments/hyphen-digit/paired-gates.test.ts
+node scripts/prompt-experiments/hyphen-digit/corpus/check-inputs.mjs --cases local/prompt-experiments/all-development-rerun/inputs/development.json
+node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases local/prompt-experiments/all-development-rerun/inputs/development.json --prompts scripts/prompt-experiments/hyphen-digit/results/20260912-all-development/prompts.mjs --out local/prompt-experiments/all-development-rerun/screen shipping question-first-cashflow
+node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases local/prompt-experiments/all-development-rerun/inputs/development.json --prompts scripts/prompt-experiments/hyphen-digit/results/20260912-all-development/prompts.mjs --orders 2 --repeats 3 --out local/prompt-experiments/all-development-rerun/confirm-1 shipping question-first-cashflow
+node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases local/prompt-experiments/all-development-rerun/inputs/development.json --prompts scripts/prompt-experiments/hyphen-digit/results/20260912-all-development/prompts.mjs --orders 2 --repeats 3 --out local/prompt-experiments/all-development-rerun/confirm-2 question-first-cashflow shipping
 ```
 
 For other screening candidates, substitute their frozen ID. The original diagnostic selections used one order and one attempt: shipping on `real-development-10,macromicro-us-cds-5y,macromicro-us-treasury-10y`; `repeat-meaning` on `real-development-08,real-development-10`; `question-first` on `macromicro-labor-15-64`. Pass these through `--diagnostics` with the frozen follow-up questions in `prompts.mjs` and the corpus. Their answers are interpretation evidence only.
@@ -242,12 +242,12 @@ const corpus = JSON.parse(hash === selection.corpusBlob ? readFileSync(selection
 const cases = selection.ids.map(id => corpus.cases.find(kase => kase.id === id));
 assert.equal(cases.length, 3);
 assert(cases.every(Boolean));
-const out = outputDirectory(process.cwd(), 'tmp/prompt-experiments/all-development-holdout-rerun/inputs');
+const out = outputDirectory(process.cwd(), 'local/prompt-experiments/all-development-holdout-rerun/inputs');
 writeFileSync(`${out}/holdout.json`, JSON.stringify({ ...corpus, role: 'holdout', cases }, null, 2) + '\n', { flag: 'wx' });
 JS
 ````
 
-Use the same sweep command and frozen prompt module shown above, with `--cases tmp/prompt-experiments/all-development-holdout-rerun/inputs/holdout.json --orders 2 --repeats 3`. Run shipping/candidate, then candidate/shipping, using separate new output directories. Save all four result files before inspecting answers. Evaluate both comparisons with `phase: 'holdout'` in the shared paired gate helper. Each prompt has 12 scheduled attempts per target across the two runs.
+Use the same sweep command and frozen prompt module shown above, with `--cases local/prompt-experiments/all-development-holdout-rerun/inputs/holdout.json --orders 2 --repeats 3`. Run shipping/candidate, then candidate/shipping, using separate new output directories. Save all four result files before inspecting answers. Evaluate both comparisons with `phase: 'holdout'` in the shared paired gate helper. Each prompt has 12 scheduled attempts per target across the two runs.
 
 ## Final completion
 

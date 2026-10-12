@@ -90,9 +90,9 @@ export function publicError(error, privateValues = []) {
 
 export function outputDirectory(root, path) {
   const directory = resolve(path);
-  const base = resolve(root, 'tmp', 'prompt-experiments');
+  const base = resolve(root, 'local', 'prompt-experiments');
   if (!directory.startsWith(`${base}${sep}`)) {
-    throw new Error(`Invalid experiment output: ${path}; use a new directory under tmp/prompt-experiments/`);
+    throw new Error(`Invalid experiment output: ${path}; use a new directory under local/prompt-experiments/`);
   }
   let parent = resolve(root);
   for (const part of relative(root, directory).split(sep)) {
@@ -104,7 +104,7 @@ export function outputDirectory(root, path) {
   try {
     execFileSync('git', ['-C', root, 'check-ignore', '--quiet', '--no-index', directory]);
   } catch {
-    throw new Error(`Experiment output is not ignored: ${path}; add /tmp/ to the repository .gitignore`);
+    throw new Error(`Experiment output is not ignored: ${path}; add /local/ to the repository .gitignore`);
   }
   if (execFileSync('git', ['-C', root, 'ls-files', '--', relative(root, directory)], { encoding: 'utf8' }).trim()) {
     throw new Error(`Experiment output is tracked: ${path}; use an ignored, untracked directory`);
@@ -120,5 +120,5 @@ export function buildExtension(root) {
 }
 
 export function scratchDirectory(root, prefix) {
-  return outputDirectory(root, join(root, 'tmp', 'prompt-experiments', `${prefix}${randomUUID()}`));
+  return outputDirectory(root, join(root, 'local', 'prompt-experiments', `${prefix}${randomUUID()}`));
 }

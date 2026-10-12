@@ -33,7 +33,7 @@ const parserOptions = {
 
 export default defineConfig(
   {
-    ignores: ['dist/', 'browser-extensions/chrome/dist/', 'scripts/prompt-experiments/', 'tmp/'],
+    ignores: ['dist/', 'browser-extensions/chrome/dist/', 'scripts/prompt-experiments/', 'local/'],
   },
   {
     files: ['src/**/*.ts', 'tests/**/*.ts', 'browser-extensions/chrome/src/**/*.ts', 'browser-extensions/chrome/tests/**/*.ts', 'vite.config.ts', 'playwright.config.ts'],

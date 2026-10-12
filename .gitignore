@@ -21,7 +21,7 @@ playwright-report/
 !/scripts/prompt-experiments/.env.example
 
 # Local experiment setup and raw captures
-/tmp/
+/local/
 
 # Examples
 examples/package-lock.json

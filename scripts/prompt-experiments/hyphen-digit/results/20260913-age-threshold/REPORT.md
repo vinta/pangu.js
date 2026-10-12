@@ -198,7 +198,7 @@ const report = readFileSync('scripts/prompt-experiments/hyphen-digit/results/202
 const selection = JSON.parse(report.match(/```json\n([\s\S]*?)\n```/)[1]);
 const restored = JSON.parse(execFileSync('git', ['show', selection.corpusBlob], { encoding: 'utf8' }));
 const byId = new Map(restored.cases.map((kase) => [kase.id, kase]));
-const out = outputDirectory(process.cwd(), 'tmp/prompt-experiments/age-threshold-rerun/inputs');
+const out = outputDirectory(process.cwd(), 'local/prompt-experiments/age-threshold-rerun/inputs');
 for (const [role, ids] of [['development', selection.developmentIds], ['holdout', selection.holdoutIds]]) {
   const cases = ids.map((id) => {
     assert(byId.has(id), 'Missing frozen case: ' + id);
@@ -208,32 +208,32 @@ for (const [role, ids] of [['development', selection.developmentIds], ['holdout'
 }
 NODE
 
-corpus=tmp/prompt-experiments/age-threshold-rerun/inputs/development.json
-holdout=tmp/prompt-experiments/age-threshold-rerun/inputs/holdout.json
+corpus=local/prompt-experiments/age-threshold-rerun/inputs/development.json
+holdout=local/prompt-experiments/age-threshold-rerun/inputs/holdout.json
 prompts=scripts/prompt-experiments/hyphen-digit/results/20260913-age-threshold/prompts.mjs
 
 # Replay the production contract when the documented reuse conditions require it.
 node scripts/prompt-experiments/hyphen-digit/corpus/check-inputs.mjs --cases "$corpus" --cases "$holdout"
 
 # Fresh screening control and accepted candidate.
-node --env-file=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases "$corpus" --prompts "$prompts" --out tmp/prompt-experiments/age-threshold-rerun/screen shipping age-conditions
+node --env-file=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases "$corpus" --prompts "$prompts" --out local/prompt-experiments/age-threshold-rerun/screen shipping age-conditions
 
 # Fresh confirmation, reversing prompt order in run 2.
-node --env-file=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases "$corpus" --prompts "$prompts" --orders 2 --repeats 3 --out tmp/prompt-experiments/age-threshold-rerun/confirm-1 shipping age-conditions
-node --env-file=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases "$corpus" --prompts "$prompts" --orders 2 --repeats 3 --out tmp/prompt-experiments/age-threshold-rerun/confirm-2 age-conditions shipping
+node --env-file=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases "$corpus" --prompts "$prompts" --orders 2 --repeats 3 --out local/prompt-experiments/age-threshold-rerun/confirm-1 shipping age-conditions
+node --env-file=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases "$corpus" --prompts "$prompts" --orders 2 --repeats 3 --out local/prompt-experiments/age-threshold-rerun/confirm-2 age-conditions shipping
 
 # Run both historical holdout comparisons with fresh inference.
-node --env-file=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases "$holdout" --prompts "$prompts" --orders 2 --repeats 3 --out tmp/prompt-experiments/age-threshold-rerun/holdout-1 shipping age-conditions
-node --env-file=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases "$holdout" --prompts "$prompts" --orders 2 --repeats 3 --out tmp/prompt-experiments/age-threshold-rerun/holdout-2 age-conditions shipping
+node --env-file=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases "$holdout" --prompts "$prompts" --orders 2 --repeats 3 --out local/prompt-experiments/age-threshold-rerun/holdout-1 shipping age-conditions
+node --env-file=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases "$holdout" --prompts "$prompts" --orders 2 --repeats 3 --out local/prompt-experiments/age-threshold-rerun/holdout-2 age-conditions shipping
 
 # Check the screening pair with production edits and the frozen baseline.
-node scripts/prompt-experiments/hyphen-digit/check-paired.mjs --phase screening --cases "$corpus" --prompts "$prompts" --baseline v28-zh --out tmp/prompt-experiments/age-threshold-rerun/gate-screen tmp/prompt-experiments/age-threshold-rerun/screen/1-shipping.json tmp/prompt-experiments/age-threshold-rerun/screen/2-age-conditions.json
+node scripts/prompt-experiments/hyphen-digit/check-paired.mjs --phase screening --cases "$corpus" --prompts "$prompts" --baseline v28-zh --out local/prompt-experiments/age-threshold-rerun/gate-screen local/prompt-experiments/age-threshold-rerun/screen/1-shipping.json local/prompt-experiments/age-threshold-rerun/screen/2-age-conditions.json
 
 # Check both confirmation pairs in baseline/candidate order.
-node scripts/prompt-experiments/hyphen-digit/check-paired.mjs --phase confirmation --cases "$corpus" --prompts "$prompts" --baseline v28-zh --out tmp/prompt-experiments/age-threshold-rerun/gate-confirmation tmp/prompt-experiments/age-threshold-rerun/confirm-1/1-shipping.json tmp/prompt-experiments/age-threshold-rerun/confirm-1/2-age-conditions.json tmp/prompt-experiments/age-threshold-rerun/confirm-2/2-shipping.json tmp/prompt-experiments/age-threshold-rerun/confirm-2/1-age-conditions.json
+node scripts/prompt-experiments/hyphen-digit/check-paired.mjs --phase confirmation --cases "$corpus" --prompts "$prompts" --baseline v28-zh --out local/prompt-experiments/age-threshold-rerun/gate-confirmation local/prompt-experiments/age-threshold-rerun/confirm-1/1-shipping.json local/prompt-experiments/age-threshold-rerun/confirm-1/2-age-conditions.json local/prompt-experiments/age-threshold-rerun/confirm-2/2-shipping.json local/prompt-experiments/age-threshold-rerun/confirm-2/1-age-conditions.json
 
 # Check both holdout pairs only after all 4 artifacts are saved.
-node scripts/prompt-experiments/hyphen-digit/check-paired.mjs --phase holdout --cases "$holdout" --prompts "$prompts" --baseline v28-zh --out tmp/prompt-experiments/age-threshold-rerun/gate-holdout tmp/prompt-experiments/age-threshold-rerun/holdout-1/1-shipping.json tmp/prompt-experiments/age-threshold-rerun/holdout-1/2-age-conditions.json tmp/prompt-experiments/age-threshold-rerun/holdout-2/2-shipping.json tmp/prompt-experiments/age-threshold-rerun/holdout-2/1-age-conditions.json
+node scripts/prompt-experiments/hyphen-digit/check-paired.mjs --phase holdout --cases "$holdout" --prompts "$prompts" --baseline v28-zh --out local/prompt-experiments/age-threshold-rerun/gate-holdout local/prompt-experiments/age-threshold-rerun/holdout-1/1-shipping.json local/prompt-experiments/age-threshold-rerun/holdout-1/2-age-conditions.json local/prompt-experiments/age-threshold-rerun/holdout-2/2-shipping.json local/prompt-experiments/age-threshold-rerun/holdout-2/1-age-conditions.json
 ````
 
 A successful sweep alone does not establish spacing or paired-gate correctness. Keep the baseline/candidate argument order for saved pairs, even when candidate inference ran first.

@@ -26,6 +26,6 @@
     "scripts/prompt-experiments",
     "src/node/index.cts",
     "examples",
-    "tmp"
+    "local"
   ]
 }

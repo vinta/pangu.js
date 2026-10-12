@@ -113,7 +113,7 @@ if (values.check) {
   process.exit(0);
 }
 assert(/^[a-p]{32}$/.test(values['extension-id'] ?? ''), `invalid --extension-id ${values['extension-id'] ?? '(missing)'}; copy the shipping extension ID from chrome://extensions/`);
-assert(values.out, 'provide --out tmp/prompt-experiments/<round>/<run>; use a new directory for each invocation');
+assert(values.out, 'provide --out local/prompt-experiments/<round>/<run>; use a new directory for each invocation');
 const profilePath = values['profile-path'];
 assert(profilePath && isAbsolute(profilePath), `invalid --profile-path ${profilePath ?? '(missing)'}; copy the absolute Profile Path from chrome://version`);
 const output = outputDirectory(fileURLToPath(new URL('../../', import.meta.url)), values.out);

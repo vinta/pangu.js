@@ -157,27 +157,27 @@ const cases = selection.ids.map((id) => {
   assert(byId.has(id), 'Missing frozen case: ' + id);
   return { ...byId.get(id), role: 'development' };
 });
-const out = outputDirectory(process.cwd(), 'tmp/prompt-experiments/all-52-rerun/inputs');
+const out = outputDirectory(process.cwd(), 'local/prompt-experiments/all-52-rerun/inputs');
 writeFileSync(out + '/development.json', JSON.stringify({ ...restored, role: 'development', cases }, null, 2) + '\n', { flag: 'wx' });
 NODE
 
-corpus=tmp/prompt-experiments/all-52-rerun/inputs/development.json
+corpus=local/prompt-experiments/all-52-rerun/inputs/development.json
 prompts=scripts/prompt-experiments/hyphen-digit/results/20260913-all-52/prompts.mjs
 
 # Replay when the documented reuse conditions require it.
 node scripts/prompt-experiments/hyphen-digit/corpus/check-inputs.mjs --cases "$corpus"
 
 # Screen the final candidate against fresh shipping.
-node --env-file=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases "$corpus" --prompts "$prompts" --out tmp/prompt-experiments/all-52-rerun/screen shipping letter-unit
+node --env-file=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases "$corpus" --prompts "$prompts" --out local/prompt-experiments/all-52-rerun/screen shipping letter-unit
 
-node scripts/prompt-experiments/hyphen-digit/check-paired.mjs --phase screening --cases "$corpus" --prompts "$prompts" --baseline v28-zh --out tmp/prompt-experiments/all-52-rerun/gate-screen tmp/prompt-experiments/all-52-rerun/screen/1-shipping.json tmp/prompt-experiments/all-52-rerun/screen/2-letter-unit.json
+node scripts/prompt-experiments/hyphen-digit/check-paired.mjs --phase screening --cases "$corpus" --prompts "$prompts" --baseline v28-zh --out local/prompt-experiments/all-52-rerun/gate-screen local/prompt-experiments/all-52-rerun/screen/1-shipping.json local/prompt-experiments/all-52-rerun/screen/2-letter-unit.json
 
 # Confirm with fresh pairs and reversed prompt order.
-node --env-file=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases "$corpus" --prompts "$prompts" --orders 2 --repeats 3 --out tmp/prompt-experiments/all-52-rerun/confirm-1 shipping letter-unit
-node --env-file=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases "$corpus" --prompts "$prompts" --orders 2 --repeats 3 --out tmp/prompt-experiments/all-52-rerun/confirm-2 letter-unit shipping
+node --env-file=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases "$corpus" --prompts "$prompts" --orders 2 --repeats 3 --out local/prompt-experiments/all-52-rerun/confirm-1 shipping letter-unit
+node --env-file=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases "$corpus" --prompts "$prompts" --orders 2 --repeats 3 --out local/prompt-experiments/all-52-rerun/confirm-2 letter-unit shipping
 
 # Check confirmation labels, production spacing, and the frozen protocol.
-node scripts/prompt-experiments/hyphen-digit/check-paired.mjs --phase confirmation --cases "$corpus" --prompts "$prompts" --baseline v28-zh --out tmp/prompt-experiments/all-52-rerun/gate-confirmation tmp/prompt-experiments/all-52-rerun/confirm-1/1-shipping.json tmp/prompt-experiments/all-52-rerun/confirm-1/2-letter-unit.json tmp/prompt-experiments/all-52-rerun/confirm-2/2-shipping.json tmp/prompt-experiments/all-52-rerun/confirm-2/1-letter-unit.json
+node scripts/prompt-experiments/hyphen-digit/check-paired.mjs --phase confirmation --cases "$corpus" --prompts "$prompts" --baseline v28-zh --out local/prompt-experiments/all-52-rerun/gate-confirmation local/prompt-experiments/all-52-rerun/confirm-1/1-shipping.json local/prompt-experiments/all-52-rerun/confirm-1/2-letter-unit.json local/prompt-experiments/all-52-rerun/confirm-2/2-shipping.json local/prompt-experiments/all-52-rerun/confirm-2/1-letter-unit.json
 ````
 
 For another screening candidate, substitute its frozen ID and use `--phase screening` with its saved baseline/candidate pair. Diagnostic runs use a development corpus with `diagnosticQuestions` copied from `DIAGNOSTIC_QUESTIONS` in the module, `--orders 1 --repeats 1`, and the recorded case IDs. Diagnostics do not count toward accuracy.

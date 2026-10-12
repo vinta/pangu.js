@@ -6,7 +6,7 @@ Keep enough to rerun an experiment and understand its decisions. Raw execution h
 
 Keep reusable helpers under `scripts/prompt-experiments/`. Keep reusable cases in each shape’s shared corpus under `<shape>/corpus/`. Each completed round under `<shape>/results/<round>/` keeps only `REPORT.md` and `prompts.mjs`.
 
-Write raw answers, diagnostics, rendered inputs, intermediate prompt/corpus snapshots, source captures, gate outputs, and verification results under `tmp/prompt-experiments/<round>/`. Use a new subdirectory for each invocation and never overwrite run output. Keep personal connection settings in `scripts/prompt-experiments/.env.local`; [setup](setup.md) explains discovery and use.
+Write raw answers, diagnostics, rendered inputs, intermediate prompt/corpus snapshots, source captures, gate outputs, and verification results under `local/prompt-experiments/<round>/`. Use a new subdirectory for each invocation and never overwrite run output. Keep personal connection settings in `scripts/prompt-experiments/.env.local`; [setup](setup.md) explains discovery and use.
 
 Sweep and source collection use `artifacts.mjs` to enforce the temporary root, ignored/untracked destinations, and exclusive output creation; their writes need no duplicate manual probes. Before a private write that bypasses those helpers, run `git check-ignore -- <destination>` and `git ls-files -- <destination>` from the repository root. Proceed only when the first confirms a repository ignore rule and the second returns no tracked path. Check existing files inside directories too.
 

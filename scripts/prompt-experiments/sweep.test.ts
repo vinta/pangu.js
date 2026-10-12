@@ -70,7 +70,7 @@ test.skipIf(!supportsTypeScript)('requires an absolute Chrome profile path witho
 
   const outside = spawnSync(process.execPath, [...args, '--profile-path', profile, '--out', 'scripts/prompt-experiments/results'], { encoding: 'utf8' });
   expect(outside.status).toBe(1);
-  expect(outside.stderr).toContain('use a new directory under tmp/prompt-experiments/');
+  expect(outside.stderr).toContain('use a new directory under local/prompt-experiments/');
 
   // A valid profile reaches output creation; an existing directory stops the run before Chrome is contacted.
   mkdirSync(output);
@@ -367,7 +367,7 @@ test('public artifact fields preserve evidence and omit unknown metadata', () =>
 test('temporary output directories reject traversal and preserve existing runs', () => {
   const root = scratchDirectory(process.cwd(), 'pangu-output-');
   onTestFinished(() => rmSync(root, { recursive: true, force: true }));
-  expect(() => outputDirectory(process.cwd(), join(root, '..', '..', '..', 'results'))).toThrow('use a new directory under tmp/prompt-experiments/');
+  expect(() => outputDirectory(process.cwd(), join(root, '..', '..', '..', 'results'))).toThrow('use a new directory under local/prompt-experiments/');
   symlinkSync(process.cwd(), join(root, 'linked'));
   expect(() => outputDirectory(process.cwd(), join(root, 'linked', 'run'))).toThrow('contains a symlink');
   const output = outputDirectory(process.cwd(), join(root, 'run'));

@@ -5,7 +5,7 @@ description: Use when running or verifying pangu.js prompt experiments, diagnosi
 
 # Prompt experiments
 
-Use the existing helpers in the [command reference](../../../scripts/prompt-experiments/README.md). Keep helpers and durable round records under `scripts/prompt-experiments/`, and raw output under `tmp/prompt-experiments/`. Applying results to production is a separate task; leave production source and prompt tests unchanged.
+Use the existing helpers in the [command reference](../../../scripts/prompt-experiments/README.md). Keep helpers and durable round records under `scripts/prompt-experiments/`, and raw output under `local/prompt-experiments/`. Applying results to production is a separate task; leave production source and prompt tests unchanged.
 
 ## Resume or start
 

@@ -192,7 +192,7 @@ const report = readFileSync('scripts/prompt-experiments/hyphen-digit/results/202
 const selection = JSON.parse(report.match(/```json\n([\s\S]*?)\n```/)[1]);
 const corpus = JSON.parse(execFileSync('git', ['cat-file', 'blob', selection.corpusBlob], { encoding: 'utf8' }));
 const byId = new Map(corpus.cases.map(kase => [kase.id, kase]));
-const out = outputDirectory(process.cwd(), 'tmp/prompt-experiments/round1-rerun/inputs');
+const out = outputDirectory(process.cwd(), 'local/prompt-experiments/round1-rerun/inputs');
 for (const name of ['development', 'evaluatedHoldout', 'diagnostics']) {
   const cases = selection[name].map(id => {
     assert(byId.has(id), `Recorded corpus is missing case: ${id}`);
@@ -206,14 +206,14 @@ JS
 Check both corpus selections and render the frozen prompts without browser or model inference:
 
 ```bash
-node scripts/prompt-experiments/sweep.mjs --cases tmp/prompt-experiments/round1-rerun/inputs/development.json --prompts scripts/prompt-experiments/hyphen-digit/results/20260911-semantic-rule/prompts.mjs --check v26-zh real-r1-semantic
-node scripts/prompt-experiments/sweep.mjs --cases tmp/prompt-experiments/round1-rerun/inputs/evaluatedHoldout.json --prompts scripts/prompt-experiments/hyphen-digit/results/20260911-semantic-rule/prompts.mjs --check v26-zh real-r1-semantic
+node scripts/prompt-experiments/sweep.mjs --cases local/prompt-experiments/round1-rerun/inputs/development.json --prompts scripts/prompt-experiments/hyphen-digit/results/20260911-semantic-rule/prompts.mjs --check v26-zh real-r1-semantic
+node scripts/prompt-experiments/sweep.mjs --cases local/prompt-experiments/round1-rerun/inputs/evaluatedHoldout.json --prompts scripts/prompt-experiments/hyphen-digit/results/20260911-semantic-rule/prompts.mjs --check v26-zh real-r1-semantic
 ```
 
 Repeat the historical screening comparison in the verified Chrome Beta session:
 
 ```bash
-node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases tmp/prompt-experiments/round1-rerun/inputs/development.json --prompts scripts/prompt-experiments/hyphen-digit/results/20260911-semantic-rule/prompts.mjs --out tmp/prompt-experiments/round1-rerun/screening --orders 2 --repeats 1 v26-zh real-r1-semantic
+node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --cases local/prompt-experiments/round1-rerun/inputs/development.json --prompts scripts/prompt-experiments/hyphen-digit/results/20260911-semantic-rule/prompts.mjs --out local/prompt-experiments/round1-rerun/screening --orders 2 --repeats 1 v26-zh real-r1-semantic
 ```
 
 For confirmation, run 2 fresh comparisons with `--orders 2 --repeats 3`, reversing prompt order in the second. Repeat that protocol on `evaluatedHoldout.json` for the historical holdout comparison. Use a new output directory for every invocation. For diagnostics, use `diagnostics.json`, `--orders 1 --repeats 1`, and `--diagnostics` with the comma-separated diagnostic IDs above, evaluating `v26-zh` only.
@@ -222,7 +222,7 @@ For confirmation, run 2 fresh comparisons with `--orders 2 --repeats 3`, reversi
 
 ## Retention
 
-This round keeps only `REPORT.md` and `prompts.mjs`; its cases stay in the shared corpus at the pinned version above. Original source captures, raw runs, diagnostics, gates, protocol snapshots, and one-off helpers were moved directly to `tmp/prompt-experiments/20260911-round1/`, without compression. The original report is there too. Moved helpers are historical snapshots; use shared tooling for new runs.
+This round keeps only `REPORT.md` and `prompts.mjs`; its cases stay in the shared corpus at the pinned version above. Original source captures, raw runs, diagnostics, gates, protocol snapshots, and one-off helpers were moved directly to `local/prompt-experiments/20260911-round1/`, without compression. The original report is there too. Moved helpers are historical snapshots; use shared tooling for new runs.
 
 During this reorganization, all 29 historical cases matched the shared corpus's scientific fields. All 822 evaluation answers and 179 rendered evaluation questions were checked. Recomputed screening, confirmation, and holdout gates exactly matched the saved gates; integration retries also reproduced their recorded spacing outcomes. File hashes verified that all 52 original files arrived unchanged. No browser or model inference ran.
 

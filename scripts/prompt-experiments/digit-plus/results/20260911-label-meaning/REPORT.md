@@ -218,7 +218,7 @@ const corpora = Object.fromEntries(Object.entries(record.corpora).map(([name, { 
   const current = execFileSync('git', ['hash-object', path], { encoding: 'utf8' }).trim();
   return [name, JSON.parse(current === blob ? readFileSync(path, 'utf8') : execFileSync('git', ['cat-file', 'blob', blob], { encoding: 'utf8' }))];
 }));
-const out = outputDirectory(process.cwd(), 'tmp/prompt-experiments/digit-plus-rerun/inputs');
+const out = outputDirectory(process.cwd(), 'local/prompt-experiments/digit-plus-rerun/inputs');
 for (const [name, ids] of Object.entries({ ...record.selections, realDevelopment: record.realDevelopment })) {
   const corpus = corpora[name === 'realDevelopment' ? 'development' : 'historical'];
   const byId = new Map(corpus.cases.map(kase => [kase.id, kase]));
@@ -235,13 +235,13 @@ JS
 Check exact selections and render their measured prompts without a browser:
 
 ```bash
-node scripts/prompt-experiments/sweep.mjs --experiment digit-plus --cases tmp/prompt-experiments/digit-plus-rerun/inputs/original.json --prompts scripts/prompt-experiments/digit-plus/results/20260911-label-meaning/prompts.mjs --check v1-zh v2-zh
-node scripts/prompt-experiments/sweep.mjs --experiment digit-plus --cases tmp/prompt-experiments/digit-plus-rerun/inputs/single.json --prompts scripts/prompt-experiments/digit-plus/results/20260911-label-meaning/prompts.mjs --check v1-zh v3-zh-single
-node scripts/prompt-experiments/sweep.mjs --experiment digit-plus --cases tmp/prompt-experiments/digit-plus-rerun/inputs/quantity.json --prompts scripts/prompt-experiments/digit-plus/results/20260911-label-meaning/prompts.mjs --check v1-zh
-node scripts/prompt-experiments/sweep.mjs --experiment digit-plus --cases tmp/prompt-experiments/digit-plus-rerun/inputs/products.json --prompts scripts/prompt-experiments/digit-plus/results/20260911-label-meaning/prompts.mjs --check v1-zh v4-zh-merged v5-zh-separate
+node scripts/prompt-experiments/sweep.mjs --experiment digit-plus --cases local/prompt-experiments/digit-plus-rerun/inputs/original.json --prompts scripts/prompt-experiments/digit-plus/results/20260911-label-meaning/prompts.mjs --check v1-zh v2-zh
+node scripts/prompt-experiments/sweep.mjs --experiment digit-plus --cases local/prompt-experiments/digit-plus-rerun/inputs/single.json --prompts scripts/prompt-experiments/digit-plus/results/20260911-label-meaning/prompts.mjs --check v1-zh v3-zh-single
+node scripts/prompt-experiments/sweep.mjs --experiment digit-plus --cases local/prompt-experiments/digit-plus-rerun/inputs/quantity.json --prompts scripts/prompt-experiments/digit-plus/results/20260911-label-meaning/prompts.mjs --check v1-zh
+node scripts/prompt-experiments/sweep.mjs --experiment digit-plus --cases local/prompt-experiments/digit-plus-rerun/inputs/products.json --prompts scripts/prompt-experiments/digit-plus/results/20260911-label-meaning/prompts.mjs --check v1-zh v4-zh-merged v5-zh-separate
 ```
 
-To repeat a historical screen in the verified Chrome Beta session, replace `--check` with `--out tmp/prompt-experiments/digit-plus-rerun/<new-run> --orders 2 --repeats 1`. Load local connection settings with `node --env-file-if-exists=scripts/prompt-experiments/.env.local`. This reproduces the historical setup only; synthetic inputs do not qualify as a new source-based experiment.
+To repeat a historical screen in the verified Chrome Beta session, replace `--check` with `--out local/prompt-experiments/digit-plus-rerun/<new-run> --orders 2 --repeats 1`. Load local connection settings with `node --env-file-if-exists=scripts/prompt-experiments/.env.local`. This reproduces the historical setup only; synthetic inputs do not qualify as a new source-based experiment.
 
 The original repeat check used 2 fresh runs of v1 alone on `original.json`, each with `--orders 2 --repeats 3`. Explicit quantity used v1 on `quantity.json` with the same order/repeat counts, once. These were historical repeat checks, not the current matched-prompt confirmation protocol.
 
@@ -251,6 +251,6 @@ Use the [shared runner](../../../README.md) and a fresh output directory for eve
 
 ## Retention
 
-This round keeps only `REPORT.md` and `prompts.mjs`. Source records and historical cases live in the shared corpus files pinned above. All 26 original files, including the 3 former reports and the old registry/corpus, moved unchanged to `tmp/prompt-experiments/digit-plus-20260911/original/`. No archive was created. The old embedded holdouts are also retained privately under that round's `reserved-holdout/` directory.
+This round keeps only `REPORT.md` and `prompts.mjs`. Source records and historical cases live in the shared corpus files pinned above. All 26 original files, including the 3 former reports and the old registry/corpus, moved unchanged to `local/prompt-experiments/digit-plus-20260911/original/`. No archive was created. The old embedded holdouts are also retained privately under that round's `reserved-holdout/` directory.
 
 Migration verification checked original-file hashes, exact prompts and case selections, saved label scores, and runner behavior. No browser or new model inference ran. Original answers are needed to recompute the original scores; reruns may differ with runtime or model changes.
