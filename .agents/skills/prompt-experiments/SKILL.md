@@ -44,6 +44,8 @@ Use verified real text for examples, diagnostics, development, confirmation, and
 
 Before scoring, every eligible target needs a verified label and individual/combined spacing. Keep routing and authored-space exclusions separate from classifier accuracy. Disputed meanings stay unscored; gold `unsure` needs an explanation of why the exact production context is insufficient.
 
+When other enabled shapes route in a scored excerpt, use [composed-output evaluation](references/artifacts.md#composed-output) before freezing gold or interpreting component scores.
+
 Keep canonical pages disjoint across examples, development, and holdout. Record exposure; uncertain exposure belongs in development. Promoting a development case to an example excludes its whole page from scoring and requires a fresh baseline. Keep holdout text and labels outside the prompt-editing context until frozen evaluation. If holdout evidence guides tuning, end the round, move affected pages to development, and reserve fresh holdouts.
 
 ## Screening loop
@@ -63,7 +65,7 @@ When ending the round, read [verification and retention](references/artifacts.md
 
 ## Acceptance gates
 
-A correct attempt has no error, returns the expected label, and produces expected individual-target and combined-excerpt spacing through production edits. Missing attempts and skips fail. A case passes only when every scheduled attempt passes. Report label and spacing correctness separately.
+A correct component attempt has no error, returns the expected label, and produces expected individual-target and combined-excerpt spacing for that shape through production edits. Missing attempts and skips fail. A case passes only when every scheduled attempt passes. Report label and spacing correctness separately.
 
 | Phase        | Required result                                                                                                                                                          |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

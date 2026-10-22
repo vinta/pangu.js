@@ -27,6 +27,16 @@ Keep legacy synthetic cases in a separate historical corpus for reproducing old 
 
 Freeze shared corpus, code, and execution controls at round start; freeze each candidate's prompt and input construction before its first inference. Recheck controls at phase transitions or when the [reuse conditions](../SKILL.md#checks-to-reuse) change. Use the recorded Git version to restore a historical corpus when shared records change. Any helper changes needed for reproduction belong in shared versioned tooling, with their code revision recorded.
 
+## Composed output
+
+Component spacing applies only the experiment's shape. When another enabled shape routes in the same excerpt, preserve the original text and independently annotate every routed companion target. Keep component gold and complete-excerpt gold separately. Use complete expected output in case-review documents; label any component-only output explicitly.
+
+Compare all current shipping shapes against the same set with only the candidate shape changed or added. Freeze companion prompts, question builders, schemas, and sampling alongside the candidate. Classify every target from original context and derive all edits against the same core-settled snapshot, then combine once with production edit application. Sequentially classifying rewritten text tests a different pipeline.
+
+Check both the candidate shape's component gate and complete-excerpt spacing on the same paired answers during confirmation and holdout. Preserve baseline-passing excerpts and correct-attempt counts; attribute failures to shapes and report absolute component and complete-excerpt accuracy separately. A whole-excerpt gain from different companion answers cannot establish a candidate-shape gain. Deterministic gold composition checks offsets and contracts; fresh companion inference establishes measured output.
+
+Use the shared [composed-output evaluator](../../../../scripts/prompt-experiments/README.md#composed-output) when its supported shapes and phase match the task. Record uncovered interactions and distinguish a contract-only new shape from verified extension integration. Reuse the existing exposure rules for previously evaluated holdouts.
+
 ## Confirmation and holdout
 
 Freeze one candidate, examples, source roles, questions, schema, sampling, and spacing expectations. Run 2 fresh confirmation comparisons, each with 2 case orders and 3 attempts per target per order. Run both prompts and reverse their execution order in the second comparison. This gives 12 answers per target per prompt; screening baseline reuse ends here.
