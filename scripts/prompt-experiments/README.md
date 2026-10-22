@@ -92,13 +92,13 @@ Use the shared [paired gate helper](#paired-gate-helper) with `--experiment plus
 
 Component combined-spacing scores include only the experiment's shape. When other shapes route in the same excerpt, use `composition.mjs` to check complete output as well. It currently accepts plus-digit corpora and discovers the shipping hyphen-digit and digit-plus targets from the same original text. Each record needs `companion_targets` (including an empty array when none route), `expected_composed_output` for its input slice, and `expected_composed_excerpt_output` for the full excerpt. Each companion records `kind`, `excerptAt`, and independently reviewed `expected_label`.
 
-The frozen prompt module exports `PROMPTS` and `SHAPE_PROMPTS`, mapping every shape kind to its frozen prompt key. Include `rules-only` for the absent plus-digit baseline. Prepare validates complete annotations, production companion questions, and both levels of gold, then writes component corpora plus a frozen manifest:
+The frozen prompt module exports `PROMPTS`, `BASELINE_SHAPE_PROMPTS`, and `SHAPE_PROMPTS`; each map names the frozen prompt key that its side runs for every shape kind. Every baseline entry must reproduce the shipping prompt, and the candidate reuses the baseline companion keys, so only its plus-digit entry can differ. Prepare validates complete annotations, production companion questions, and both levels of gold, then writes component corpora plus a frozen manifest:
 
 ```bash
 node scripts/prompt-experiments/composition.mjs prepare --cases scripts/prompt-experiments/plus-digit/corpus/development.json --prompts scripts/prompt-experiments/plus-digit/results/20261023-composed-output/prompts.mjs --out local/prompt-experiments/new-composition/prepared
 ```
 
-Run each generated component corpus through `sweep.mjs --experiment <shape> --orders 2 --repeats 3`. The baseline uses the frozen shipping prompt for each companion and `rules-only` for plus-digit; the candidate uses the same companion prompts and the frozen plus-digit candidate. Generate fresh artifacts for every shape on each side. Run baseline then candidate for comparison 1, followed by candidate then baseline for comparison 2. No sweep is needed for a shape with zero targets. Save the artifact paths as two comparisons:
+Run each generated component corpus through `sweep.mjs --experiment <shape> --orders 2 --repeats 3`. The baseline uses the frozen shipping prompt for every shape; the candidate uses the same companion prompts and the frozen plus-digit candidate. Generate fresh artifacts for every shape on each side. Run baseline then candidate for comparison 1, followed by candidate then baseline for comparison 2. No sweep is needed for a shape with zero targets. Save the artifact paths as two comparisons:
 
 ```json
 [

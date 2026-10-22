@@ -13,9 +13,11 @@ const { loadCorpus } = await import(loaderPath);
 const frozenPath = './plus-digit/results/20261023-first-shape/prompts.mjs';
 const frozen = await import(frozenPath);
 const registry = {
-  SHAPE_PROMPTS: { 'plus-digit': 'v1-en', 'hyphen-digit': 'hyphen-frozen', 'digit-plus': 'digit-frozen' },
+  BASELINE_SHAPE_PROMPTS: { 'plus-digit': 'v1-en', 'hyphen-digit': 'hyphen-frozen', 'digit-plus': 'digit-frozen' },
+  SHAPE_PROMPTS: { 'plus-digit': 'candidate', 'hyphen-digit': 'hyphen-frozen', 'digit-plus': 'digit-frozen' },
   PROMPTS: {
     ...frozen.PROMPTS,
+    candidate: { ...frozen.PROMPTS['v1-en'], system: 'Candidate.' },
     ...Object.fromEntries(
       [
         [hyphenDigitPrompt, 'hyphen-frozen'],
@@ -89,13 +91,13 @@ function setup() {
   return { corpus, prepared: prepareComposition(corpus, registry), path, directory };
 }
 
-function artifacts(prepared: any, side: string) {
+// The shipping baseline misses both seed conjunctions unless a test passes another plus-digit answer.
+function artifacts(prepared: any, side: string, plusDigitAnswer = side === 'baseline' ? () => 'signed-number' : (kase: any) => kase.expected_label) {
   return Object.fromEntries(
     Object.entries(prepared.corpora).map(([kind, corpus]: any) => {
-      const variant = side === 'baseline' && kind === 'plus-digit' ? 'rules-only' : registry.SHAPE_PROMPTS[kind as keyof typeof registry.SHAPE_PROMPTS];
+      const variant = (side === 'baseline' ? registry.BASELINE_SHAPE_PROMPTS : registry.SHAPE_PROMPTS)[kind as keyof typeof registry.SHAPE_PROMPTS];
       const prompt = registry.PROMPTS[variant];
       const labels = Object.values(corpus.enums)[0];
-      const offline = variant === 'rules-only';
       return [
         kind,
         {
@@ -105,11 +107,10 @@ function artifacts(prepared: any, side: string) {
           system: prompt.system,
           sampling: 'temperature 0, topK 1',
           omitResponseConstraintInput: false,
-          backend: offline ? 'rules-only' : 'prompt-api',
-          context: offline ? 'offline' : 'extension-sw',
-          offlineLabel: offline ? 'signed-number' : undefined,
-          profileVerified: !offline,
-          extensionWorkerVerified: !offline,
+          backend: 'prompt-api',
+          context: 'extension-sw',
+          profileVerified: true,
+          extensionWorkerVerified: true,
           repeats: 3,
           expectedAttemptsPerCase: 6,
           orders: [corpus.cases.map((kase: any) => kase.id), corpus.cases.map((kase: any) => kase.id).reverse()],
@@ -119,7 +120,7 @@ function artifacts(prepared: any, side: string) {
             responseConstraint: { type: 'string', enum: labels },
             answers: [0, 1].flatMap((order) =>
               Array.from({ length: 3 }, () => {
-                const answer = offline ? 'signed-number' : kase.expected_label;
+                const answer = kind === 'plus-digit' ? plusDigitAnswer(kase) : kase.expected_label;
                 return { order, answer, raw: JSON.stringify(answer), error: null };
               }),
             ),
@@ -183,6 +184,16 @@ test('scores components and complete excerpts separately, composing descending-i
   expect(gate.runs[0].candidate.excerpts[0].attempts[0].output).toBe('氣溫在 -50℃ 至 +200℃；遊戲 2 + 資料片');
 });
 
+test('rejects a candidate that loses a plus-digit fix the shipping baseline makes', () => {
+  const { prepared } = setup();
+  const pairs = Array.from({ length: 2 }, () => ({ baseline: artifacts(prepared, 'baseline', (kase: any) => kase.expected_label), candidate: artifacts(prepared, 'candidate') }));
+  const answer = pairs[0].candidate['plus-digit'].results.find((row: any) => row.id === 'join-9').answers[0];
+  Object.assign(answer, { answer: 'signed-number', raw: '"signed-number"' });
+  const gate = evaluateComposition(prepared, pairs, registry);
+  expect(gate.passed).toBe(false);
+  expect(gate.runs[0].regressions).toEqual(['seed']);
+});
+
 test('attributes companion failures and rejects whole-excerpt regression or per-target attempt decline', () => {
   const { prepared } = setup();
   const pairs = comparisons(prepared);
@@ -212,14 +223,26 @@ test('rejects unsafe signed-plus answers, inference errors, missing answers, cha
   }
 });
 
-test('companion prompts stay shipping while the plus-digit candidate can differ', () => {
+test('every baseline prompt and both companion sides stay shipping while the plus-digit candidate can differ', () => {
   const { corpus } = setup();
   const changedCompanion = { ...registry, PROMPTS: { ...registry.PROMPTS, 'hyphen-frozen': { ...registry.PROMPTS['hyphen-frozen'], system: 'Changed.' } } };
-  expect(() => prepareComposition(corpus, changedCompanion)).toThrow('frozen companion system differs');
-  const changedCandidate = { ...registry, PROMPTS: { ...registry.PROMPTS, 'v1-en': { ...registry.PROMPTS['v1-en'], system: 'Changed.', build: () => 'Changed.' } } };
+  expect(() => prepareComposition(corpus, changedCompanion)).toThrow('hyphen-digit: frozen baseline system differs from shipping');
+  const splitCompanion = {
+    ...registry,
+    SHAPE_PROMPTS: { ...registry.SHAPE_PROMPTS, 'hyphen-digit': 'hyphen-changed' },
+    PROMPTS: { ...registry.PROMPTS, 'hyphen-changed': { ...registry.PROMPTS['hyphen-frozen'], build: () => 'Changed.' } },
+  };
+  expect(() => prepareComposition(corpus, splitCompanion)).toThrow('companion prompts must match on both sides');
+  const changedCandidate = { ...registry, PROMPTS: { ...registry.PROMPTS, candidate: { ...registry.PROMPTS.candidate, system: 'Changed.', build: () => 'Changed.' } } };
   expect(() => prepareComposition(corpus, changedCandidate)).not.toThrow();
-  const missing = { ...registry, SHAPE_PROMPTS: { 'hyphen-digit': 'hyphen-frozen', 'plus-digit': 'v1-en' } };
-  expect(() => prepareComposition(corpus, missing)).toThrow('freeze one prompt key');
+  const changedBaseline = { ...registry, PROMPTS: { ...registry.PROMPTS, 'v1-en': { ...registry.PROMPTS['v1-en'], system: 'Changed.' } } };
+  expect(() => prepareComposition(corpus, changedBaseline)).toThrow('plus-digit: frozen baseline system differs from shipping');
+  const changedBaselineQuestion = { ...registry, PROMPTS: { ...registry.PROMPTS, 'v1-en': { ...registry.PROMPTS['v1-en'], build: () => 'Changed.' } } };
+  expect(() => prepareComposition(corpus, changedBaselineQuestion)).toThrow('plus-digit: frozen baseline question differs from shipping');
+  const missing = { ...registry, SHAPE_PROMPTS: { 'hyphen-digit': 'hyphen-frozen', 'plus-digit': 'candidate' } };
+  expect(() => prepareComposition(corpus, missing)).toThrow('SHAPE_PROMPTS: freeze one prompt key');
+  const { BASELINE_SHAPE_PROMPTS: _, ...noBaseline } = registry;
+  expect(() => prepareComposition(corpus, noBaseline)).toThrow('BASELINE_SHAPE_PROMPTS: freeze one prompt key');
   expect(readFileSync(new URL('./composition.mjs', import.meta.url), 'utf8')).not.toContain('LanguageModel.create');
 });
 
@@ -235,7 +258,8 @@ test('prepared component corpora pass the existing sweep CLI preflight without a
 import { hyphenDigitPrompt as hyphen } from ${JSON.stringify(`${shipping}hyphen-digit-prompt.ts`)};
 import { digitPlusPrompt as digit } from ${JSON.stringify(`${shipping}digit-plus-prompt.ts`)};
 const adapt = p => ({ system: p.systemPrompt, labels: p.candidateLabels, build: k => p.buildQuestion(k.input, k.at) });
-export const PROMPTS = { ...plus, 'hyphen-frozen': adapt(hyphen), 'digit-frozen': adapt(digit) };
+export const PROMPTS = { ...plus, candidate: { ...plus['v1-en'], system: 'Candidate.' }, 'hyphen-frozen': adapt(hyphen), 'digit-frozen': adapt(digit) };
+export const BASELINE_SHAPE_PROMPTS = ${JSON.stringify(registry.BASELINE_SHAPE_PROMPTS)};
 export const SHAPE_PROMPTS = ${JSON.stringify(registry.SHAPE_PROMPTS)};`,
   );
   const output = join(directory, 'prepared');
@@ -246,11 +270,8 @@ export const SHAPE_PROMPTS = ${JSON.stringify(registry.SHAPE_PROMPTS)};`,
   expect(snapshot['browser-extensions/chrome/src/ai-spacing/shapes/plus-digit-prompt.ts']).toMatch(/^[a-f0-9]{64}$/);
   for (const [kind, component] of Object.entries(prepared.corpora)) {
     writeFileSync(path, JSON.stringify(component));
-    const result = spawnSync(
-      process.execPath,
-      ['scripts/prompt-experiments/sweep.mjs', '--experiment', kind, '--cases', path, '--prompts', prompts, '--check', registry.SHAPE_PROMPTS[kind as keyof typeof registry.SHAPE_PROMPTS]],
-      { encoding: 'utf8' },
-    );
+    const variants = new Set([registry.BASELINE_SHAPE_PROMPTS, registry.SHAPE_PROMPTS].map((map) => map[kind as keyof typeof map]));
+    const result = spawnSync(process.execPath, ['scripts/prompt-experiments/sweep.mjs', '--experiment', kind, '--cases', path, '--prompts', prompts, '--check', ...variants], { encoding: 'utf8' });
     expect(result.status, result.stderr).toBe(0);
   }
 });

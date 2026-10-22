@@ -31,15 +31,19 @@ const edits = (kind, kase, label) => shapes[kind].shape.edits({ index: kase.sett
 
 export function prepareComposition(corpus, registry) {
   assert.equal(corpus.role, 'development', 'composition reuses exposed cases; mark the corpus development');
-  assert.deepEqual(Object.keys(registry.SHAPE_PROMPTS).sort(), Object.keys(shapes).sort(), 'freeze one prompt key for every shipping shape');
-  assert.equal(registry.PROMPTS['rules-only']?.offlineLabel, 'signed-number', 'freeze the no-edit rules-only baseline');
+  for (const map of ['BASELINE_SHAPE_PROMPTS', 'SHAPE_PROMPTS']) {
+    assert.deepEqual(Object.keys(registry[map] ?? {}).sort(), Object.keys(shapes).sort(), `${map}: freeze one prompt key for every shipping shape`);
+  }
   for (const [kind, shape] of Object.entries(shapes)) {
-    const prompt = registry.PROMPTS[registry.SHAPE_PROMPTS[kind]];
-    assert(prompt && typeof prompt.build === 'function', `${kind}: missing frozen prompt`);
-    assert.deepEqual(prompt.labels, shape.prompt.candidateLabels, `${kind}: frozen labels differ from the shape`);
-    assert.equal(prompt.omitResponseConstraintInput ?? false, false, `${kind}: freeze response-constraint input`);
-    assert.equal(prompt.offlineLabel, undefined, `${kind}: companion and candidate prompts must use inference`);
-    if (kind !== 'plus-digit') assert.equal(prompt.system, shape.prompt.systemPrompt, `${kind}: frozen companion system differs from shipping`);
+    for (const key of [registry.BASELINE_SHAPE_PROMPTS[kind], registry.SHAPE_PROMPTS[kind]]) {
+      const prompt = registry.PROMPTS[key];
+      assert(prompt && typeof prompt.build === 'function', `${kind}: missing frozen prompt ${key}`);
+      assert.deepEqual(prompt.labels, shape.prompt.candidateLabels, `${kind}: frozen labels differ from the shape`);
+      assert.equal(prompt.omitResponseConstraintInput ?? false, false, `${kind}: freeze response-constraint input`);
+      assert.equal(prompt.offlineLabel, undefined, `${kind}: baseline and candidate prompts must use inference`);
+    }
+    assert.equal(registry.PROMPTS[registry.BASELINE_SHAPE_PROMPTS[kind]].system, shape.prompt.systemPrompt, `${kind}: frozen baseline system differs from shipping`);
+    if (kind !== 'plus-digit') assert.equal(registry.SHAPE_PROMPTS[kind], registry.BASELINE_SHAPE_PROMPTS[kind], `${kind}: companion prompts must match on both sides`);
   }
   const componentCases = Object.fromEntries(Object.keys(shapes).map((kind) => [kind, []]));
   const groups = [...Map.groupBy(corpus.cases, keyFor).values()].map((group) => {
@@ -70,7 +74,7 @@ export function prepareComposition(corpus, registry) {
     const targets = detected.map((target) => {
       const annotation = annotations.find((item) => targetKey(item) === targetKey(target));
       const { kind } = target;
-      const prompt = registry.PROMPTS[registry.SHAPE_PROMPTS[kind]];
+      const baseline = registry.PROMPTS[registry.BASELINE_SHAPE_PROMPTS[kind]];
       const candidateLabels = shapes[kind].prompt.candidateLabels;
       assert(candidateLabels.includes(annotation.expected_label), `${first.id}: invalid ${kind} gold label`);
       const sourceCase = group.find((kase) => kase.id === annotation.id) ?? first;
@@ -99,10 +103,7 @@ export function prepareComposition(corpus, registry) {
         const inputIndex = indexOfNthSymbol(pangu.spaceText(kase.input), kind === 'hyphen-digit' ? '-' : '+', kase.ordinal - 1);
         kase.expected_output = applyTextEdits(pangu.spaceText(kase.input), edits(kind, { settled_index: inputIndex }, kase.expected_label));
       }
-      if (kind !== 'plus-digit') {
-        const shipping = shapes[kind].prompt;
-        assert.equal(prompt.build(kase, candidateLabels), shipping.buildQuestion(kase.input, kase.at), `${kind}: frozen companion question differs from shipping`);
-      }
+      assert.equal(baseline.build(kase, candidateLabels), shapes[kind].prompt.buildQuestion(kase.input, kase.at), `${kind}: frozen baseline question differs from shipping`);
       componentCases[kind].push(kase);
       return { kind, id: kase.id, excerptAt: target.excerptAt, expected_label: kase.expected_label, settled_index: target.index };
     });
@@ -145,22 +146,20 @@ export function prepareComposition(corpus, registry) {
       ]),
   );
   const frozenPrompts = Object.fromEntries(
-    Object.entries({ ...registry.SHAPE_PROMPTS, baseline: 'rules-only' }).map(([kind, key]) => {
+    [...Object.entries(registry.BASELINE_SHAPE_PROMPTS), ...Object.entries(registry.SHAPE_PROMPTS)].map(([kind, key]) => {
       const prompt = registry.PROMPTS[key];
-      const cases = componentCases[kind === 'baseline' ? 'plus-digit' : kind];
       return [
         key,
         {
           system: prompt.system,
           labels: prompt.labels,
-          offlineLabel: prompt.offlineLabel ?? null,
           omitResponseConstraintInput: prompt.omitResponseConstraintInput ?? false,
-          questions: Object.fromEntries(cases.map((kase) => [kase.id, prompt.build(kase, prompt.labels)])),
+          questions: Object.fromEntries(componentCases[kind].map((kase) => [kase.id, prompt.build(kase, prompt.labels)])),
         },
       ];
     }),
   );
-  return { groups, corpora, shapePrompts: registry.SHAPE_PROMPTS, frozenPrompts };
+  return { groups, corpora, baselineShapePrompts: registry.BASELINE_SHAPE_PROMPTS, shapePrompts: registry.SHAPE_PROMPTS, frozenPrompts };
 }
 
 export function evaluateComposition(prepared, comparisons, registry) {
@@ -176,31 +175,26 @@ export function evaluateComposition(prepared, comparisons, registry) {
     for (const kind of kinds) {
       const artifact = artifacts[kind];
       assert(artifact, `${side}: missing ${kind} artifact`);
-      const variant = side === 'baseline' && kind === 'plus-digit' ? 'rules-only' : prepared.shapePrompts[kind];
+      const variant = (side === 'baseline' ? prepared.baselineShapePrompts : prepared.shapePrompts)[kind];
       const prompt = registry.PROMPTS[variant];
       const cases = prepared.corpora[kind].cases;
       const candidateLabels = prepared.corpora[kind].enums[shapes[kind].enum];
-      const offline = variant === 'rules-only';
       for (const [field, expected] of Object.entries({
         variant,
         system: prompt.system,
         omitResponseConstraintInput: false,
         sampling: 'temperature 0, topK 1',
-        backend: offline ? 'rules-only' : 'prompt-api',
-        context: offline ? 'offline' : 'extension-sw',
+        backend: 'prompt-api',
+        context: 'extension-sw',
+        profileVerified: true,
+        extensionWorkerVerified: true,
       })) {
         check(artifact[field], expected, `${side}/${kind}: ${field} differs from frozen protocol`);
-      }
-      if (offline) check(artifact.offlineLabel, 'signed-number', `${side}/${kind}: invalid offline baseline`);
-      else {
-        check(artifact.profileVerified, true, `${side}/${kind}: unverified profile`);
-        check(artifact.extensionWorkerVerified, true, `${side}/${kind}: unverified worker`);
       }
       for (const kase of cases) {
         const result = artifact.results?.find((row) => row.id === kase.id);
         check(result?.question, prompt.build(kase, candidateLabels), `${side}/${kind}/${kase.id}: question differs from frozen prompt`);
         check(result?.responseConstraint, { type: 'string', enum: candidateLabels }, `${side}/${kind}/${kase.id}: response schema differs`);
-        if (offline) for (const answer of result?.answers ?? []) check(answer.answer, 'signed-number', `${kase.id}: rules-only made an edit`);
       }
       components[kind] = scoreArtifact({
         artifact,
@@ -320,7 +314,7 @@ async function main() {
     const registry = await import(pathToFileURL(prepared.source.prompts));
     const recomputed = prepareComposition(loadCorpus(prepared.source.cases), registry);
     assert.deepEqual(
-      { groups: prepared.groups, corpora: prepared.corpora, shapePrompts: prepared.shapePrompts, frozenPrompts: prepared.frozenPrompts },
+      { groups: prepared.groups, corpora: prepared.corpora, baselineShapePrompts: prepared.baselineShapePrompts, shapePrompts: prepared.shapePrompts, frozenPrompts: prepared.frozenPrompts },
       recomputed,
       'prepared data or imported prompts changed; use the frozen inputs',
     );
@@ -341,7 +335,7 @@ async function main() {
         ]),
       ),
     );
-    const modelRuns = comparisons.flatMap((comparison) => Object.values(comparison).flatMap((side) => Object.values(side))).filter((artifact) => artifact.backend !== 'rules-only');
+    const modelRuns = comparisons.flatMap((comparison) => Object.values(comparison).flatMap((side) => Object.values(side)));
     assert(
       modelRuns.every((artifact) => typeof artifact.browserVersion === 'string' && artifact.browserVersion === modelRuns[0].browserVersion),
       'browser runtime changed or missing between composed sides',
