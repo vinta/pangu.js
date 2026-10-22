@@ -7,6 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { digitPlusPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/digit-plus-prompt.ts';
 import { hyphenDigitPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-prompt.ts';
+import { plusDigitPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/plus-digit-prompt.ts';
 import { outputDirectory, pick, publicCase, publicError } from './artifacts.mjs';
 
 const { values, positionals } = parseArgs({
@@ -33,14 +34,14 @@ assert(['hyphen-digit', 'digit-plus', 'plus-digit'].includes(values.experiment),
 const plusDigit = values.experiment === 'plus-digit';
 const experiment = values.experiment === 'hyphen-digit' ? null : await import(`./${values.experiment}/experiment.mjs`);
 assert(experiment || values.cases, 'provide --cases <verified-corpus.json> for --experiment hyphen-digit');
-assert(!plusDigit || values.prompts, 'provide --prompts <frozen-prompts.mjs> for plus-digit; no shipping prompt exists');
+assert(!plusDigit || values.prompts, 'provide --prompts <frozen-prompts.mjs> for the plus-digit comparison');
 const variants = positionals.length ? positionals : plusDigit ? ['rules-only'] : experiment ? ['v18-en-real-examples'] : ['shipping'];
 const promptPath = values.prompts ? pathToFileURL(resolve(values.prompts)).href : experiment ? './digit-plus/results/20260911-label-meaning/prompts.mjs' : './hyphen-digit/prompts.js';
 const registry = (await import(promptPath)).PROMPTS;
 assert(registry && typeof registry === 'object' && !Array.isArray(registry), 'Prompt module must export a PROMPTS object');
 assert(!Object.hasOwn(registry, 'shipping'), 'Prompt module cannot override shipping; shipping always imports the production prompt');
-const shipping = plusDigit ? null : experiment ? digitPlusPrompt : hyphenDigitPrompt;
-const prompts = { ...registry, ...(shipping ? { shipping: { system: shipping.systemPrompt, labels: shipping.candidateLabels, build: (kase) => shipping.buildQuestion(kase.input, kase.at) } } : {}) };
+const shipping = plusDigit ? plusDigitPrompt : experiment ? digitPlusPrompt : hyphenDigitPrompt;
+const prompts = { ...registry, shipping: { system: shipping.systemPrompt, labels: shipping.candidateLabels, build: (kase) => shipping.buildQuestion(kase.input, kase.at) } };
 if (plusDigit) {
   assert.equal(registry['rules-only']?.offlineLabel, 'signed-number', 'plus-digit requires rules-only with offlineLabel: signed-number');
 }
@@ -116,7 +117,7 @@ const runs = variants.map((variant) => {
   return { variant, prompt, inputs };
 });
 if (values.check) {
-  console.log(`Checked ${cases.length} cases (offline structure only); rendered variants: ${variants.join(', ')}; shipping source version: ${shipping?.version ?? 'none (contract-only shape)'}`);
+  console.log(`Checked ${cases.length} cases (offline structure only); rendered variants: ${variants.join(', ')}; shipping source version: ${shipping.version}`);
   process.exit(0);
 }
 const needsBrowser = runs.some(({ prompt }) => !prompt.offlineLabel);

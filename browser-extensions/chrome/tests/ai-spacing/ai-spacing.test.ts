@@ -32,9 +32,9 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-function stubDigitPlusModel(answer: (question: string) => string | Promise<string>) {
+function stubPlusModel(answer: (question: string) => string | Promise<string>, kind: 'digit-plus' | 'plus-digit' = 'digit-plus') {
   const prompt = vi.fn((question: string, { responseConstraint }: { responseConstraint: { enum: string[] } }) => {
-    expect(responseConstraint.enum).toEqual(['conjunction', 'lower-bound', 'unsure']);
+    expect(responseConstraint.enum).toEqual(kind === 'digit-plus' ? ['conjunction', 'lower-bound', 'unsure'] : ['signed-number', 'conjunction', 'unsure']);
     return answer(question);
   });
   const clone = async () => ({ prompt, destroy: vi.fn() });
@@ -44,7 +44,7 @@ function stubDigitPlusModel(answer: (question: string) => string | Promise<strin
 
 describe('AI spacing results', () => {
   it('routes the five digit-plus originals through core spacing, the worker, and late edits', async () => {
-    const prompt = stubDigitPlusModel((question) => (question.startsWith('Sentence: Switch 2+') ? '"conjunction"' : '"lower-bound"'));
+    const prompt = stubPlusModel((question) => (question.startsWith('Sentence: Switch 2+') ? '"conjunction"' : '"lower-bound"'));
     const { spaceTextWithAi, sendMessage } = await loadAiSpacing();
 
     expect(await spaceTextWithAi('Switch 2+瑪利歐賽車世界同捆組')).toBe('Switch 2 + 瑪利歐賽車世界同捆組');
@@ -57,7 +57,7 @@ describe('AI spacing results', () => {
   });
 
   it.each(['"unsure"', '"signed-number"', 'null', 'conjunction'])('retains core digit-plus spacing for answer %s', async (answer) => {
-    const prompt = stubDigitPlusModel(() => answer);
+    const prompt = stubPlusModel(() => answer);
     const { spaceTextWithAi, pangu } = await loadAiSpacing();
 
     expect(await spaceTextWithAi('Switch 2+瑪利歐賽車世界同捆組')).toBe('Switch 2+ 瑪利歐賽車世界同捆組');
@@ -66,7 +66,7 @@ describe('AI spacing results', () => {
   });
 
   it('retains core digit-plus spacing when a candidate prompt fails', async () => {
-    stubDigitPlusModel(() => Promise.reject(new Error('candidate failed')));
+    stubPlusModel(() => Promise.reject(new Error('candidate failed')));
     const { spaceTextWithAi, pangu } = await loadAiSpacing();
 
     expect(await spaceTextWithAi('Switch 2+瑪利歐賽車世界同捆組')).toBe('Switch 2+ 瑪利歐賽車世界同捆組');
@@ -95,6 +95,48 @@ describe('AI spacing results', () => {
     expect(sendMessage).not.toHaveBeenCalled();
   });
 
+  it('routes the plus-digit seed and sign controls through the worker', async () => {
+    const prompt = stubPlusModel((question) => (question.includes('英文字母+') ? '"conjunction"' : '"signed-number"'), 'plus-digit');
+    const { spaceTextWithAi, sendMessage } = await loadAiSpacing();
+
+    expect(await spaceTextWithAi('開啟密碼為您的身分證字號（大寫英文字母+9位數字；外籍人士為居留證號碼：兩個大寫英文字母+8位數字）')).toBe(
+      '開啟密碼為您的身分證字號（大寫英文字母 + 9 位數字；外籍人士為居留證號碼：兩個大寫英文字母 + 8 位數字）',
+    );
+    expect(await spaceTextWithAi('打+886這個號碼')).toBe('打 +886 這個號碼');
+    expect(await spaceTextWithAi('氣溫是+5度左右')).toBe('氣溫是 +5 度左右');
+    expect(prompt).toHaveBeenCalledTimes(4);
+    expect(sendMessage.mock.calls.map(([message]) => message.kind)).toEqual(['plus-digit', 'plus-digit', 'plus-digit']);
+  });
+
+  it.each(['"signed-number"', '"unsure"', '"lower-bound"', 'null', 'conjunction'])('retains core plus-digit spacing for answer %s', async (answer) => {
+    const prompt = stubPlusModel(() => answer, 'plus-digit');
+    const { spaceTextWithAi, pangu } = await loadAiSpacing();
+
+    expect(await spaceTextWithAi('交通票券+5大夯景點')).toBe('交通票券 +5 大夯景點');
+    expect(prompt).toHaveBeenCalledTimes(1);
+    expect(pangu.applyLateFixes).not.toHaveBeenCalled();
+  });
+
+  it('retains core plus-digit spacing when a candidate prompt fails', async () => {
+    stubPlusModel(() => Promise.reject(new Error('candidate failed')), 'plus-digit');
+    const { spaceTextWithAi, pangu } = await loadAiSpacing();
+
+    expect(await spaceTextWithAi('交通票券+5大夯景點')).toBe('交通票券 +5 大夯景點');
+    expect(pangu.applyLateFixes).not.toHaveBeenCalled();
+  });
+
+  it('retains core plus-digit spacing when the model is unavailable', async () => {
+    const create = vi.fn();
+    vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'unavailable', create });
+    const { spaceTextWithAi, pangu, sendMessage } = await loadAiSpacing();
+
+    expect(await spaceTextWithAi('交通票券+5大夯景點')).toBe('交通票券 +5 大夯景點');
+    expect(await spaceTextWithAi('兒童+1位家長')).toBe('兒童 +1 位家長');
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(create).not.toHaveBeenCalled();
+    expect(pangu.applyLateFixes).not.toHaveBeenCalled();
+  });
+
   it('joins negative signs when the model answers signed-number', async () => {
     const clone = async () => ({ prompt: async () => '"signed-number"', destroy: vi.fn() });
     vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create: async () => ({ clone }) });
@@ -119,6 +161,18 @@ describe('AI spacing results', () => {
 });
 
 describe('AI spacing warm-up', () => {
+  it('warms the plus-digit model once for multiple sign or conjunction candidates', async () => {
+    vi.stubGlobal('LanguageModel', undefined);
+    vi.stubGlobal('document', { documentElement: { textContent: '交通票券+5大夯景點；請撥+886' } });
+    const { sendMessage, warmUpAiSpacing } = await loadAiSpacing();
+
+    warmUpAiSpacing();
+    warmUpAiSpacing();
+
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(sendMessage).toHaveBeenCalledWith({ type: 'CLASSIFY_CANDIDATES', kind: 'plus-digit', candidates: [] });
+  });
+
   it('warms the digit-plus model once even when the page contains multiple pluses', async () => {
     vi.stubGlobal('LanguageModel', undefined);
     vi.stubGlobal('document', { documentElement: { textContent: 'Switch 2+瑪利歐。有100+的選擇' } });
@@ -202,10 +256,13 @@ describe('AI spacing model sessions', () => {
 });
 
 describe('AI spacing message flow', () => {
-  it('combines hyphen deletion and digit-plus insertion in one late fix for the same node', async () => {
+  it('combines hyphen deletion and both plus insertions in one late fix for the same node', async () => {
     const prompt = vi.fn(async (_question: string, { responseConstraint }: { responseConstraint: { enum: string[] } }) => {
       if (responseConstraint.enum.includes('conjunction')) {
-        expect(responseConstraint.enum).toEqual(['conjunction', 'lower-bound', 'unsure']);
+        expect([
+          ['conjunction', 'lower-bound', 'unsure'],
+          ['signed-number', 'conjunction', 'unsure'],
+        ]).toContainEqual(responseConstraint.enum);
         return '"conjunction"';
       }
       expect(responseConstraint.enum).toEqual(['signed-number', 'range-or-separator', 'unsure']);
@@ -214,17 +271,17 @@ describe('AI spacing message flow', () => {
     const create = vi.fn(async () => ({ clone: async () => ({ prompt, destroy: vi.fn() }) }));
     vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create });
     const { pangu, sendMessage, applyAiSpacing } = await loadAiSpacing();
-    const unspaced = '氣溫是-5度，Switch 2+瑪利歐賽車世界同捆組';
+    const unspaced = '氣溫是-5度，Switch 2+瑪利歐賽車世界同捆組；交通票券+5大夯景點';
     const settled = corePangu.spaceText(unspaced);
     const node = { data: settled } as Text;
 
     await applyAiSpacing([{ node, unspaced, settled }]);
 
-    expect(node.data).toBe('氣溫是 -5 度，Switch 2 + 瑪利歐賽車世界同捆組');
-    expect(sendMessage.mock.calls.map(([message]) => message.kind)).toEqual(['hyphen-digit', 'digit-plus']);
-    expect(create).toHaveBeenCalledTimes(2);
+    expect(node.data).toBe('氣溫是 -5 度，Switch 2 + 瑪利歐賽車世界同捆組；交通票券 + 5 大夯景點');
+    expect(sendMessage.mock.calls.map(([message]) => message.kind)).toEqual(['hyphen-digit', 'digit-plus', 'plus-digit']);
+    expect(create).toHaveBeenCalledTimes(3);
     expect(pangu.applyLateFixes).toHaveBeenCalledTimes(1);
-    expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node, settled, data: '氣溫是 -5 度，Switch 2 + 瑪利歐賽車世界同捆組' }]);
+    expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node, settled, data: '氣溫是 -5 度，Switch 2 + 瑪利歐賽車世界同捆組；交通票券 + 5 大夯景點' }]);
   });
 
   it.each(['"負"', 'null', 'signed-number'])('keeps invalid answer %s in place and composes successful fixes into one write', async (invalidAnswer) => {

@@ -74,9 +74,9 @@ Digit-plus prompt modules can provide `labels` and `expectedLabel(kase)` when co
 
 ### plus-digit
 
-Use `--experiment plus-digit --prompts <round>/prompts.mjs`. Cases default to [corpus/development.json](plus-digit/corpus/development.json). There is no shipping prompt. The default variant is `rules-only`, whose frozen entry must have `offlineLabel: 'signed-number'`, `system`, and `build(kase)`. The runner creates its scheduled answers offline and never contacts Chrome for that entry. Candidate entries use the usual model path and the fixed labels `signed-number`, `conjunction`, `unsure`.
+Use `--experiment plus-digit --prompts <round>/prompts.mjs`. Cases default to [corpus/development.json](plus-digit/corpus/development.json). `shipping` imports the production plus-digit prompt. The default variant remains `rules-only` for the original shape comparison; its frozen entry must have `offlineLabel: 'signed-number'`, `system`, and `build(kase)`. The runner creates its scheduled answers offline and never contacts Chrome for that entry. Candidate entries use the usual model path and the fixed labels `signed-number`, `conjunction`, `unsure`.
 
-`input` contains one `+` in the contract sentence slice. `expected_output` is that input after core spacing and the gold edit. Keep the full authored excerpt in `sourceExcerpt`, its target offset in `excerptAt`, and combined gold in `expected_excerpt_output`. Records from one excerpt share `excerptId`; retain every eligible target when selecting an excerpt. The loader checks the core output and sentence slice, then freezes individual and combined edits. This verifies the phase 1 contract only; production detector and DOM routing remain unverified.
+`input` contains one `+` in the contract sentence slice. `expected_output` is that input after core spacing and the gold edit. Keep the full authored excerpt in `sourceExcerpt`, its target offset in `excerptAt`, and combined gold in `expected_excerpt_output`. Records from one excerpt share `excerptId`; retain every eligible target when selecting an excerpt. The loader checks the core output and sentence slice, then freezes individual and combined production edits. Composition preparation checks production detection; browser corpus replay verifies DOM routing.
 
 ```bash
 # Check the corpus and frozen prompt without inference.
@@ -113,7 +113,7 @@ Include every detected shape on each side and use actual paths beneath the ignor
 node scripts/prompt-experiments/composition.mjs check --prepared local/prompt-experiments/new-composition/prepared/prepared.json --runs local/prompt-experiments/new-composition/comparisons.json --out local/prompt-experiments/new-composition/gate
 ```
 
-The gate checks frozen controls, fresh artifacts, reversed execution order, component safety, complete-excerpt regressions, attempt declines, and a stable improvement. Run the experiment's component gate on the same plus-digit artifacts as well: a composed improvement can come from different companion answers, so it cannot by itself establish a plus-digit gain. `gate.json` retains separate component labels/spacing, full outputs, and failures attributed to shapes. The harness reuses production detectors and edits for shipping shapes; the new shape remains contract-only until extension integration is tested. Previously evaluated holdouts must be marked development for this follow-up.
+The gate checks frozen controls, fresh artifacts, reversed execution order, component safety, complete-excerpt regressions, attempt declines, and a stable improvement. Run the experiment's component gate on the same plus-digit artifacts as well: a composed improvement can come from different companion answers, so it cannot by itself establish a plus-digit gain. `gate.json` retains separate component labels/spacing, full outputs, and failures attributed to shapes. The harness uses production detectors and edits for all three shapes. DOM fixture replay separately verifies extraction across text nodes. Previously evaluated holdouts must be marked development for this follow-up.
 
 ## Runner options
 
@@ -149,7 +149,7 @@ Prepare new source records in an ignored, untracked input directory first. After
 
 ## Paired gate helper
 
-Run `check-paired.mjs` on saved hyphen-digit or plus-digit artifacts. It checks the frozen prompts, inputs, schema, sampling, and runtime verification flags. The evaluator bundles current production sources in memory; it runs offline without building the extension. Hyphen-digit uses production edits; plus-digit uses its phase 1 edit contract.
+Run `check-paired.mjs` on saved hyphen-digit or plus-digit artifacts. It checks the frozen prompts, inputs, schema, sampling, and runtime verification flags. Both shapes use production edits, bundled in memory; the evaluator runs offline without building the extension.
 
 ```bash
 node scripts/prompt-experiments/hyphen-digit/check-paired.mjs \

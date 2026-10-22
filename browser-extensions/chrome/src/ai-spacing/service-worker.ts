@@ -3,10 +3,12 @@ import { classifyCandidates } from './models';
 import type { PromptSpec } from './shapes/base';
 import { digitPlusPrompt } from './shapes/digit-plus-prompt';
 import { hyphenDigitPrompt } from './shapes/hyphen-digit-prompt';
+import { plusDigitPrompt } from './shapes/plus-digit-prompt';
 
 const PROMPT_SPECS = new Map<string, PromptSpec<CandidateLabel>>([
   [hyphenDigitPrompt.kind, hyphenDigitPrompt],
   [digitPlusPrompt.kind, digitPlusPrompt],
+  [plusDigitPrompt.kind, plusDigitPrompt],
 ]);
 
 export async function handleClassification(kind: string, candidates: Candidate[]): Promise<ClassifyCandidatesResponse> {

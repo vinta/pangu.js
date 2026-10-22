@@ -1,13 +1,15 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { applyTextEdits, indexOfNthSymbol, sliceSentence } from '../../../browser-extensions/chrome/src/ai-spacing/shapes/base.ts';
+import { plusDigitPrompt } from '../../../browser-extensions/chrome/src/ai-spacing/shapes/plus-digit-prompt.ts';
 import { evaluatePaired as pairedGate, scoreArtifact } from '../hyphen-digit/paired-gates.mjs';
 import { productionModule } from '../production.mjs';
 
 const { default: pangu, CJK_SIGN_DIGIT } = await productionModule('src/shared/index.ts');
+const { plusDigit } = await productionModule('browser-extensions/chrome/src/ai-spacing/shapes/plus-digit.ts');
 
-export const labels = ['signed-number', 'conjunction', 'unsure'];
-export const editsForLabel = (kase, label) => (label === 'conjunction' ? [{ index: kase.settled_index + 1, remove: 0, insert: ' ' }] : []);
+export const labels = plusDigitPrompt.candidateLabels;
+export const editsForLabel = (kase, label) => plusDigit.edits({ index: kase.settled_index }, label);
 
 export function loadCorpus(path = new URL('./corpus/development.json', import.meta.url)) {
   const corpus = JSON.parse(readFileSync(path, 'utf8'));

@@ -7,46 +7,39 @@ import { isDeepStrictEqual, parseArgs } from 'node:util';
 import { applyTextEdits, indexOfNthSymbol, sliceSentence } from '../../browser-extensions/chrome/src/ai-spacing/shapes/base.ts';
 import { digitPlusPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/digit-plus-prompt.ts';
 import { hyphenDigitPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-prompt.ts';
+import { plusDigitPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/plus-digit-prompt.ts';
 import { outputDirectory, publicCase } from './artifacts.mjs';
 import { scoreArtifact } from './hyphen-digit/paired-gates.mjs';
-import { editsForLabel, labels, loadCorpus } from './plus-digit/experiment.mjs';
+import { loadCorpus } from './plus-digit/experiment.mjs';
 import { productionModule } from './production.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const { default: pangu, CJK_SIGN_DIGIT } = await productionModule('src/shared/index.ts');
+const { default: pangu } = await productionModule('src/shared/index.ts');
 const { hyphenDigit } = await productionModule('browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit.ts');
 const { digitPlus } = await productionModule('browser-extensions/chrome/src/ai-spacing/shapes/digit-plus.ts');
+const { plusDigit } = await productionModule('browser-extensions/chrome/src/ai-spacing/shapes/plus-digit.ts');
 const shapes = {
   'hyphen-digit': { shape: hyphenDigit, prompt: hyphenDigitPrompt, enum: 'hyphen' },
   'digit-plus': { shape: digitPlus, prompt: digitPlusPrompt, enum: 'plus' },
-  'plus-digit': { enum: 'plus' },
+  'plus-digit': { shape: plusDigit, prompt: plusDigitPrompt, enum: 'plus' },
 };
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 const readJSON = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const keyFor = (kase) => JSON.stringify([kase.canonical_source ?? kase.source, kase.excerptId ?? kase.sourceExcerpt]);
 const targetKey = (target) => `${target.kind}:${target.excerptAt}`;
-const edits = (kind, kase, label) => (kind === 'plus-digit' ? editsForLabel(kase, label) : shapes[kind].shape.edits({ index: kase.settled_index }, label));
-
-function eligiblePlus(original, settled) {
-  return [...original.matchAll(CJK_SIGN_DIGIT)].flatMap((match) => {
-    const excerptAt = match.index + 1;
-    const context = sliceSentence(original, excerptAt);
-    const index = indexOfNthSymbol(settled, '+', original.slice(0, excerptAt).split('+').length - 1);
-    return context.sentence.split('+').length === 2 && settled[index - 1] === ' ' && /[0-9]/.test(settled[index + 1] ?? '') ? [{ kind: 'plus-digit', excerptAt, index, ...context }] : [];
-  });
-}
+const edits = (kind, kase, label) => shapes[kind].shape.edits({ index: kase.settled_index }, label);
 
 export function prepareComposition(corpus, registry) {
   assert.equal(corpus.role, 'development', 'composition reuses exposed cases; mark the corpus development');
-  assert.deepEqual(Object.keys(registry.SHAPE_PROMPTS).sort(), Object.keys(shapes).sort(), 'freeze one prompt key for every shipping shape and plus-digit');
+  assert.deepEqual(Object.keys(registry.SHAPE_PROMPTS).sort(), Object.keys(shapes).sort(), 'freeze one prompt key for every shipping shape');
   assert.equal(registry.PROMPTS['rules-only']?.offlineLabel, 'signed-number', 'freeze the no-edit rules-only baseline');
   for (const [kind, shape] of Object.entries(shapes)) {
     const prompt = registry.PROMPTS[registry.SHAPE_PROMPTS[kind]];
     assert(prompt && typeof prompt.build === 'function', `${kind}: missing frozen prompt`);
-    assert.deepEqual(prompt.labels, shape.prompt?.candidateLabels ?? labels, `${kind}: frozen labels differ from the shape`);
+    assert.deepEqual(prompt.labels, shape.prompt.candidateLabels, `${kind}: frozen labels differ from the shape`);
     assert.equal(prompt.omitResponseConstraintInput ?? false, false, `${kind}: freeze response-constraint input`);
     assert.equal(prompt.offlineLabel, undefined, `${kind}: companion and candidate prompts must use inference`);
-    if (shape.prompt) assert.equal(prompt.system, shape.prompt.systemPrompt, `${kind}: frozen companion system differs from shipping`);
+    if (kind !== 'plus-digit') assert.equal(prompt.system, shape.prompt.systemPrompt, `${kind}: frozen companion system differs from shipping`);
   }
   const componentCases = Object.fromEntries(Object.keys(shapes).map((kind) => [kind, []]));
   const groups = [...Map.groupBy(corpus.cases, keyFor).values()].map((group) => {
@@ -60,16 +53,15 @@ export function prepareComposition(corpus, registry) {
     }
     const annotations = [...group.map((kase) => ({ kind: 'plus-digit', excerptAt: kase.excerptAt, expected_label: kase.expected_label, id: kase.id })), ...first.companion_targets];
     assert.equal(new Set(annotations.map(targetKey)).size, annotations.length, `${first.id}: duplicate target annotation`);
-    const detected = [...eligiblePlus(original, settled)];
-    for (const [kind, { shape }] of Object.entries(shapes)) {
-      if (!shape) continue;
-      shape
+    // Preserve the target order of the phase 1 prepared manifests: plus-digit first, then its companion shapes.
+    const detected = ['plus-digit', 'hyphen-digit', 'digit-plus'].flatMap((kind) =>
+      shapes[kind].shape
         .find(original, settled, (excerptAt) => {
           const context = sliceSentence(original, excerptAt);
           return { ...context, excerptAt };
         })
-        .forEach((target) => detected.push({ ...target, kind }));
-    }
+        .map((target) => ({ ...target, kind })),
+    );
     assert.deepEqual(
       detected.map(targetKey).sort(),
       annotations.map(targetKey).sort(),
@@ -79,7 +71,7 @@ export function prepareComposition(corpus, registry) {
       const annotation = annotations.find((item) => targetKey(item) === targetKey(target));
       const { kind } = target;
       const prompt = registry.PROMPTS[registry.SHAPE_PROMPTS[kind]];
-      const candidateLabels = kind === 'plus-digit' ? labels : shapes[kind].prompt.candidateLabels;
+      const candidateLabels = shapes[kind].prompt.candidateLabels;
       assert(candidateLabels.includes(annotation.expected_label), `${first.id}: invalid ${kind} gold label`);
       const sourceCase = group.find((kase) => kase.id === annotation.id) ?? first;
       const kase = {
@@ -98,7 +90,7 @@ export function prepareComposition(corpus, registry) {
         retrieved_at: first.retrievedDate,
         annotation_rationale: annotation.rationale ?? `Companion ${kind} independently annotated in the composition corpus. ${first.rationale}`,
         source_verification: first.evidence,
-        routing_status: kind === 'plus-digit' ? (first.routing_status ?? first.contract_routing) : 'Shipping detector matched the saved excerpt; DOM routing remains unverified.',
+        routing_status: 'Shipping detector matched the saved excerpt; DOM routing remains unverified.',
       };
       kase.symbol = kind === 'hyphen-digit' ? '-' : '+';
       kase.targets = [{ ordinal: kase.ordinal, expected_label: kase.expected_label }];
@@ -147,7 +139,7 @@ export function prepareComposition(corpus, registry) {
         {
           set: `${corpus.set ?? 'plus-digit'}:composition:${kind}`,
           role: 'development',
-          enums: { [shapes[kind].enum]: kind === 'plus-digit' ? labels : shapes[kind].prompt.candidateLabels },
+          enums: { [shapes[kind].enum]: shapes[kind].prompt.candidateLabels },
           cases,
         },
       ]),
@@ -278,7 +270,7 @@ export function evaluateComposition(prepared, comparisons, registry) {
 
 function sourceSnapshot() {
   const source = readFileSync(join(root, 'browser-extensions/chrome/src/ai-spacing/content-script.ts'), 'utf8');
-  assert(source.includes('const AMBIGUOUS_SHAPES: AmbiguousShape[] = [hyphenDigit, digitPlus];'), 'shipping registry changed; update composition coverage before scoring');
+  assert(source.includes('const AMBIGUOUS_SHAPES: AmbiguousShape[] = [hyphenDigit, digitPlus, plusDigit];'), 'shipping registry changed; update composition coverage before scoring');
   return Object.fromEntries(
     [
       'src/shared/index.ts',
@@ -286,8 +278,10 @@ function sourceSnapshot() {
       'browser-extensions/chrome/src/ai-spacing/shapes/base.ts',
       'browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit.ts',
       'browser-extensions/chrome/src/ai-spacing/shapes/digit-plus.ts',
+      'browser-extensions/chrome/src/ai-spacing/shapes/plus-digit.ts',
       'browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-prompt.ts',
       'browser-extensions/chrome/src/ai-spacing/shapes/digit-plus-prompt.ts',
+      'browser-extensions/chrome/src/ai-spacing/shapes/plus-digit-prompt.ts',
       'scripts/prompt-experiments/plus-digit/experiment.mjs',
       'scripts/prompt-experiments/composition.mjs',
       'scripts/prompt-experiments/sweep.mjs',

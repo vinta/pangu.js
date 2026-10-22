@@ -147,6 +147,8 @@ test('prepares every shipping shape from one original and settled snapshot, with
   expect(hyphen.input).toBe(plus.input);
   expect(hyphen.expected_spacing).toBe('氣溫在 -50℃ 至 +200℃；遊戲 2+ 資料片');
   expect(plus.expected_spacing).toBe('氣溫在 - 50℃ 至 +200℃；遊戲 2+ 資料片');
+  expect(prepared.groups[0].targets.map(({ kind }: { kind: string }) => kind)).toEqual(['plus-digit', 'hyphen-digit', 'digit-plus']);
+  expect(plus.routing_status).toBe('Shipping detector matched the saved excerpt; DOM routing remains unverified.');
   expect(prepared.groups[0].expected).toBe('氣溫在 -50℃ 至 +200℃；遊戲 2 + 資料片');
 });
 
@@ -210,10 +212,12 @@ test('rejects unsafe signed-plus answers, inference errors, missing answers, cha
   }
 });
 
-test('shipping prompts and schemas must stay frozen, including a shape with zero targets', () => {
+test('companion prompts stay shipping while the plus-digit candidate can differ', () => {
   const { corpus } = setup();
-  const changed = { ...registry, PROMPTS: { ...registry.PROMPTS, 'hyphen-frozen': { ...registry.PROMPTS['hyphen-frozen'], system: 'Changed.' } } };
-  expect(() => prepareComposition(corpus, changed)).toThrow('frozen companion system differs');
+  const changedCompanion = { ...registry, PROMPTS: { ...registry.PROMPTS, 'hyphen-frozen': { ...registry.PROMPTS['hyphen-frozen'], system: 'Changed.' } } };
+  expect(() => prepareComposition(corpus, changedCompanion)).toThrow('frozen companion system differs');
+  const changedCandidate = { ...registry, PROMPTS: { ...registry.PROMPTS, 'v1-en': { ...registry.PROMPTS['v1-en'], system: 'Changed.', build: () => 'Changed.' } } };
+  expect(() => prepareComposition(corpus, changedCandidate)).not.toThrow();
   const missing = { ...registry, SHAPE_PROMPTS: { 'hyphen-digit': 'hyphen-frozen', 'plus-digit': 'v1-en' } };
   expect(() => prepareComposition(corpus, missing)).toThrow('freeze one prompt key');
   expect(readFileSync(new URL('./composition.mjs', import.meta.url), 'utf8')).not.toContain('LanguageModel.create');
@@ -231,8 +235,15 @@ test('prepared component corpora pass the existing sweep CLI preflight without a
 import { hyphenDigitPrompt as hyphen } from ${JSON.stringify(`${shipping}hyphen-digit-prompt.ts`)};
 import { digitPlusPrompt as digit } from ${JSON.stringify(`${shipping}digit-plus-prompt.ts`)};
 const adapt = p => ({ system: p.systemPrompt, labels: p.candidateLabels, build: k => p.buildQuestion(k.input, k.at) });
-export const PROMPTS = { ...plus, 'hyphen-frozen': adapt(hyphen), 'digit-frozen': adapt(digit) };`,
+export const PROMPTS = { ...plus, 'hyphen-frozen': adapt(hyphen), 'digit-frozen': adapt(digit) };
+export const SHAPE_PROMPTS = ${JSON.stringify(registry.SHAPE_PROMPTS)};`,
   );
+  const output = join(directory, 'prepared');
+  const preparation = spawnSync(process.execPath, ['scripts/prompt-experiments/composition.mjs', 'prepare', '--cases', path, '--prompts', prompts, '--out', output], { encoding: 'utf8' });
+  expect(preparation.status, preparation.stderr).toBe(0);
+  const snapshot = JSON.parse(readFileSync(join(output, 'prepared.json'), 'utf8')).frozen.sources;
+  expect(snapshot['browser-extensions/chrome/src/ai-spacing/shapes/plus-digit.ts']).toMatch(/^[a-f0-9]{64}$/);
+  expect(snapshot['browser-extensions/chrome/src/ai-spacing/shapes/plus-digit-prompt.ts']).toMatch(/^[a-f0-9]{64}$/);
   for (const [kind, component] of Object.entries(prepared.corpora)) {
     writeFileSync(path, JSON.stringify(component));
     const result = spawnSync(

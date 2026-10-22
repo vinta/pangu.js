@@ -12,7 +12,7 @@ const usage = `Usage: node scripts/prompt-experiments/hyphen-digit/check-paired.
   --prompts <frozen-prompts.mjs> --baseline <frozen-baseline-key>
   --out local/prompt-experiments/<round>/<gate> [--example-source <canonical-url> ...]
   <baseline-1.json> <candidate-1.json> [<baseline-2.json> <candidate-2.json>]
-Checks saved artifacts offline with production edits or the plus-digit phase 1 contract. Screening takes one pair; confirmation and holdout take two.
+Checks saved artifacts offline with production edits. Screening takes one pair; confirmation and holdout take two.
 The candidate key comes from its artifact. --baseline selects the frozen entry for shipping artifacts.
 Writes gate.json in a new ignored directory; exits 1 for a failed gate or invalid input.`;
 

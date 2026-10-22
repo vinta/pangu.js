@@ -185,15 +185,17 @@ test('plus-digit requires each fresh confirmation and holdout comparison to meet
   expect(compare('holdout').passed).toBe(false);
 });
 
-test.skipIf(!supportsTypeScript)('plus-digit sweep runs the rules-only baseline offline and rejects shipping', () => {
+test.skipIf(!supportsTypeScript)('plus-digit sweep runs the rules-only baseline offline and imports shipping', () => {
   const { root, cases, prompts } = setup();
   writeFileSync(join(root, 'playwright-cli'), '#!/usr/bin/env node\nprocess.exit(99);\n', { mode: 0o755 });
   const args = ['scripts/prompt-experiments/sweep.mjs', '--experiment', 'plus-digit', '--cases', cases, '--prompts', prompts];
   const run = (...extra: string[]) => spawnSync(process.execPath, [...args, ...extra], { encoding: 'utf8', env: { ...process.env, PATH: `${root}:${process.env.PATH}` } });
   const check = run('--check', 'candidate');
   expect(check.status, check.stderr).toBe(0);
-  expect(check.stdout).toContain('none (contract-only shape)');
-  expect(run('--check', 'shipping').stderr).toContain('unknown variant shipping');
+  expect(check.stdout).toContain('shipping source version: v1-en');
+  const shipping = run('--check', 'shipping');
+  expect(shipping.status, shipping.stderr).toBe(0);
+  expect(shipping.stdout).toContain('rendered variants: shipping; shipping source version: v1-en');
   const output = join(root, 'offline');
   const baseline = run('--out', output, '--repeats', '3', 'rules-only');
   expect(baseline.status, baseline.stderr).toBe(0);

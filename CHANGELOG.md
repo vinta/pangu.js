@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### [為什麼你們就是不能加個空格呢？](https://chromewebstore.google.com/detail/paphcfdffjnbcgkokihcdjliihicmbpd)
+
+- 空格之神 AI 新增中文後面緊接 `+` 再接數字的判斷，例如把 `英文字母+9位數字` 分成 `英文字母 + 9 位數字`
+  - 同一句只有一個 `+` 時才會交給模型判斷；判斷為正號或不確定時維持原本的空格
+
 ## v10.4.1 / 2026-09-26
 
 ### [pangu.js](https://www.npmjs.com/package/pangu)
