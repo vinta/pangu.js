@@ -18,6 +18,7 @@ const { default: pangu } = await productionModule('src/shared/index.ts');
 const { hyphenDigit } = await productionModule('browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit.ts');
 const { digitPlus } = await productionModule('browser-extensions/chrome/src/ai-spacing/shapes/digit-plus.ts');
 const { plusDigit } = await productionModule('browser-extensions/chrome/src/ai-spacing/shapes/plus-digit.ts');
+const { AMBIGUOUS_SHAPES } = await productionModule('browser-extensions/chrome/src/ai-spacing/shapes/ambiguous-shapes.ts');
 const shapes = {
   'hyphen-digit': { shape: hyphenDigit, prompt: hyphenDigitPrompt, enum: 'hyphen' },
   'digit-plus': { shape: digitPlus, prompt: digitPlusPrompt, enum: 'plus' },
@@ -262,12 +263,12 @@ export function evaluateComposition(prepared, comparisons, registry) {
 }
 
 function sourceSnapshot() {
-  const source = readFileSync(join(root, 'browser-extensions/chrome/src/ai-spacing/content-script.ts'), 'utf8');
-  assert(source.includes('const AMBIGUOUS_SHAPES: AmbiguousShape[] = [hyphenDigit, digitPlus, plusDigit];'), 'shipping registry changed; update composition coverage before scoring');
+  assert.deepEqual(AMBIGUOUS_SHAPES.map((shape) => shape.kind).sort(), Object.keys(shapes).sort(), 'shipping registry changed; update composition coverage before scoring');
   return Object.fromEntries(
     [
       'src/shared/index.ts',
       'browser-extensions/chrome/src/ai-spacing/content-script.ts',
+      'browser-extensions/chrome/src/ai-spacing/shapes/ambiguous-shapes.ts',
       'browser-extensions/chrome/src/ai-spacing/shapes/base.ts',
       'browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit.ts',
       'browser-extensions/chrome/src/ai-spacing/shapes/digit-plus.ts',

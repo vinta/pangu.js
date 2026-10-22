@@ -1,13 +1,9 @@
 import pangu, { type LateFix, type SettledTextNode } from 'pangu/browser';
 import type { CandidateLabel, ClassifyCandidatesMessage, ClassifyCandidatesResponse } from './messages';
 import { readSentence } from './sentence-context';
+import { AMBIGUOUS_SHAPES } from './shapes/ambiguous-shapes';
 import type { AmbiguousShape, SettledCandidate, TextEdit } from './shapes/base';
 import { applyTextEdits } from './shapes/base';
-import { digitPlus } from './shapes/digit-plus';
-import { hyphenDigit } from './shapes/hyphen-digit';
-import { plusDigit } from './shapes/plus-digit';
-
-const AMBIGUOUS_SHAPES: AmbiguousShape[] = [hyphenDigit, digitPlus, plusDigit];
 
 async function requestClassification(kind: string, candidates: ClassifyCandidatesMessage['candidates']): Promise<ClassifyCandidatesResponse> {
   const message: ClassifyCandidatesMessage = { type: 'CLASSIFY_CANDIDATES', kind, candidates };
