@@ -342,9 +342,12 @@ test.describe('plus-digit reviewed corpus through the production content script'
     await page.clock.install();
   });
 
+  test('replay every reviewed case', () => {
+    expect(plusDigitCorpus.cases).toHaveLength(22);
+  });
+
   for (const kase of plusDigitCorpus.cases) {
     test(kase.id, async ({ page }) => {
-      expect(plusDigitCorpus.cases).toHaveLength(22);
       const group = plusDigitCorpus.cases.filter((other) => other.excerptId === kase.excerptId);
       const targets = [
         ...kase.companion_targets.map((target) => ({ kind: target.kind, ...sliceSentence(kase.sourceExcerpt, target.excerptAt), label: target.expected_label })),
