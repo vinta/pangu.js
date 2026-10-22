@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, onTestFinished, test } from 'vitest';
 import { publicCase, scratchDirectory } from './artifacts.mjs';
@@ -73,7 +73,6 @@ function setup() {
   writeFileSync(
     prompts,
     `export const PROMPTS = {
-    'rules-only': { system: 'No edit.', build: kase => kase.input, offlineLabel: 'signed-number' },
     'frozen-shipping': { system: 'Ship.', build: kase => kase.input },
     candidate: { system: 'Classify.', build: kase => kase.input }
   };`,
@@ -190,54 +189,30 @@ test('plus-digit requires each fresh confirmation and holdout comparison to meet
   expect(compare('holdout').passed).toBe(false);
 });
 
-test.skipIf(!supportsTypeScript)('plus-digit sweep runs the rules-only baseline offline and imports shipping', () => {
-  const { root, cases, prompts } = setup();
-  writeFileSync(join(root, 'playwright-cli'), '#!/usr/bin/env node\nprocess.exit(99);\n', { mode: 0o755 });
-  const args = ['scripts/prompt-experiments/sweep.mjs', '--experiment', 'plus-digit', '--cases', cases, '--prompts', prompts];
-  const run = (...extra: string[]) => spawnSync(process.execPath, [...args, ...extra], { encoding: 'utf8', env: { ...process.env, PATH: `${root}:${process.env.PATH}` } });
+test.skipIf(!supportsTypeScript)('plus-digit sweep defaults to shipping and rejects retired offline baselines', () => {
+  const { cases, prompts } = setup();
+  const run = (...extra: string[]) =>
+    spawnSync(process.execPath, ['scripts/prompt-experiments/sweep.mjs', '--experiment', 'plus-digit', '--cases', cases, '--prompts', prompts, ...extra], { encoding: 'utf8' });
   const check = run('--check', 'candidate');
   expect(check.status, check.stderr).toBe(0);
   expect(check.stdout).toContain('shipping source version: v1-en');
-  const shipping = run('--check', 'shipping');
-  expect(shipping.status, shipping.stderr).toBe(0);
-  expect(shipping.stdout).toContain('rendered variants: shipping; shipping source version: v1-en');
-  const output = join(root, 'offline');
-  const baseline = run('--out', output, '--repeats', '3', 'rules-only');
-  expect(baseline.status, baseline.stderr).toBe(0);
-  const saved = JSON.parse(readFileSync(join(output, '1-rules-only.json'), 'utf8'));
-  expect(saved).toMatchObject({
-    backend: 'rules-only',
-    context: 'offline',
-    offlineLabel: 'signed-number',
-    status: 'complete',
-    evaluation: { labels: { passed: 1, total: 3 }, targetSpacing: { passed: 1, total: 3 }, combinedSpacing: { passed: 1, total: 3 } },
-  });
-  expect(saved.results.every((kase: { answers: { answer: string }[] }) => kase.answers.length === 6 && kase.answers.every((answer) => answer.answer === 'signed-number'))).toBe(true);
-  expect(saved.profileVerified).toBeUndefined();
-  expect(existsSync(join(output, 'run-code.js'))).toBe(false);
-  writeFileSync(prompts, `export const PROMPTS = { candidate: { system: 'Classify.', build: kase => kase.input } };`);
   const defaulted = run('--check');
   expect(defaulted.status, defaulted.stderr).toBe(0);
-  expect(defaulted.stdout).toContain('rendered variants: shipping;');
+  expect(defaulted.stdout).toContain('rendered variants: shipping; shipping source version: v1-en');
+  writeFileSync(prompts, `export const PROMPTS = { 'rules-only': { system: 'No edit.', build: kase => kase.input, offlineLabel: 'signed-number' } };`);
+  const retired = run('--check', 'rules-only');
+  expect(retired.status).toBe(1);
+  expect(retired.stderr).toContain('offline baselines are retired');
 });
 
-test.skipIf(!supportsTypeScript).each([1, 3])('offline plus-digit scores %i orders while paired gates require two', (orders) => {
-  const { root, cases, prompts } = setup();
-  const output = join(root, 'offline');
-  const run = spawnSync(
-    process.execPath,
-    ['scripts/prompt-experiments/sweep.mjs', '--experiment', 'plus-digit', '--cases', cases, '--prompts', prompts, '--orders', String(orders), '--out', output, 'rules-only'],
-    { encoding: 'utf8' },
-  );
-  expect(run.status, run.stderr).toBe(0);
-  const saved = JSON.parse(readFileSync(join(output, '1-rules-only.json'), 'utf8'));
-  expect(saved).toMatchObject({
-    status: 'complete',
-    expectedAttemptsPerCase: orders,
-    evaluation: { labels: { passed: 1, total: 3 }, targetSpacing: { passed: 1, total: 3 }, combinedSpacing: { passed: 1, total: 3 } },
-  });
-  const selected = loadCorpus(cases).cases;
-  const gate = evaluatePaired({ phase: 'screening', cases: selected, comparisons: [{ baseline: saved, candidate: artifact(selected) }] });
+test.each([1, 3])('plus-digit scores %i orders while paired gates require two', (orderCount) => {
+  const { cases: path } = setup();
+  const cases = loadCorpus(path).cases;
+  const run = artifact(cases, 'shipping', 1, missConjunctions);
+  Object.assign(run, { orders: Array.from({ length: orderCount }, () => cases.map((kase) => kase.id)), expectedAttemptsPerCase: orderCount });
+  for (const row of run.results) row.answers = Array.from({ length: orderCount }, (_, order) => ({ order, answer: 'signed-number', raw: '"signed-number"', error: null }));
+  expect(score(run)).toMatchObject({ labels: { passed: 1, total: 3 }, targetSpacing: { passed: 1, total: 3 }, combinedSpacing: { passed: 1, total: 3 } });
+  const gate = evaluatePaired({ phase: 'screening', cases, comparisons: [{ baseline: run, candidate: artifact(cases) }] });
   expect(gate.passed).toBe(false);
   expect(gate.runs[0].baseline.issues).toContain('wrong declared attempt schedule');
 });

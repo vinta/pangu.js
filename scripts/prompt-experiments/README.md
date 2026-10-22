@@ -74,7 +74,7 @@ Digit-plus prompt modules can provide `labels` and `expectedLabel(kase)` when co
 
 ### plus-digit
 
-Use `--experiment plus-digit --prompts <round>/prompts.mjs`. Cases default to [corpus/development.json](plus-digit/corpus/development.json). `shipping` imports the production plus-digit prompt; it is the default variant and the control for new rounds. A `rules-only` entry with `offlineLabel: 'signed-number'`, `system`, and `build(kase)` scores core spacing without inference; the runner creates its scheduled answers offline and never contacts Chrome for that entry. Candidate entries use the usual model path and the fixed labels `signed-number`, `conjunction`, `unsure`.
+Use `--experiment plus-digit --prompts <round>/prompts.mjs`. Cases default to [corpus/development.json](plus-digit/corpus/development.json). `shipping` imports the production plus-digit prompt; it is the default variant and the control for new rounds. Candidate entries use the usual model path and the fixed labels `signed-number`, `conjunction`, `unsure`.
 
 `input` contains one `+` in the contract sentence slice. `expected_output` is that input after core spacing and the gold edit. Keep the full authored excerpt in `sourceExcerpt`, its target offset in `excerptAt`, and combined gold in `expected_excerpt_output`. Records from one excerpt share `excerptId`; retain every eligible target when selecting an excerpt. The loader checks the core output and sentence slice, then freezes individual and combined production edits. Composition preparation checks production detection; browser corpus replay verifies DOM routing.
 

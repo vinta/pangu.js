@@ -98,7 +98,7 @@ if (!experiment) {
 const runs = variants.map((variant) => {
   assert(Object.hasOwn(prompts, variant), `unknown variant ${variant}; add it to ${promptPath}`);
   const prompt = prompts[variant];
-  assert(prompt.offlineLabel === undefined || (plusDigit && variant === 'rules-only' && prompt.offlineLabel === 'signed-number'), `invalid offline baseline: ${variant}`);
+  assert.equal(prompt.offlineLabel, undefined, `${variant}: offline baselines are retired; gate against shipping, or rerun the original round at its recorded revision`);
   const inputs = cases
     .filter((kase) => !diagnosticIds || diagnosticIds.includes(kase.id))
     .map((kase) => {
@@ -108,7 +108,7 @@ const runs = variants.map((variant) => {
       assert(Array.isArray(labels) && labels.length > 0 && labels.every((label) => typeof label === 'string') && new Set(labels).size === labels.length, `invalid labels: ${variant}`);
       assert(labels.includes(expectedLabel), `unknown expected label for ${variant}/${kase.id}: ${expectedLabel}`);
       const question = prompt.build(kase, labels);
-      assert((question === null && !prompt.offlineLabel) || typeof question === 'string', `invalid prompt for ${variant}/${kase.id}; return a string or null for abstention`);
+      assert(question === null || typeof question === 'string', `invalid prompt for ${variant}/${kase.id}; return a string or null for abstention`);
       return { ...kase, expected_label: expectedLabel, question, responseConstraint: { type: 'string', enum: labels } };
     });
   return { variant, prompt, inputs };
@@ -117,11 +117,10 @@ if (values.check) {
   console.log(`Checked ${cases.length} cases (offline structure only); rendered variants: ${variants.join(', ')}; shipping source version: ${shipping.version}`);
   process.exit(0);
 }
-const needsBrowser = runs.some(({ prompt }) => !prompt.offlineLabel);
-assert(!needsBrowser || /^[a-p]{32}$/.test(values['extension-id'] ?? ''), `invalid --extension-id ${values['extension-id'] ?? '(missing)'}; copy the shipping extension ID from chrome://extensions/`);
+assert(/^[a-p]{32}$/.test(values['extension-id'] ?? ''), `invalid --extension-id ${values['extension-id'] ?? '(missing)'}; copy the shipping extension ID from chrome://extensions/`);
 assert(values.out, 'provide --out local/prompt-experiments/<round>/<run>; use a new directory for each invocation');
 const profilePath = values['profile-path'];
-assert(!needsBrowser || (profilePath && isAbsolute(profilePath)), `invalid --profile-path ${profilePath ?? '(missing)'}; copy the absolute Profile Path from chrome://version`);
+assert(profilePath && isAbsolute(profilePath), `invalid --profile-path ${profilePath ?? '(missing)'}; copy the absolute Profile Path from chrome://version`);
 const output = outputDirectory(fileURLToPath(new URL('../../', import.meta.url)), values.out);
 writeFileSync(
   join(output, 'cases.json'),
@@ -254,14 +253,11 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
   const code = `async page => { try { return await (${runInBrowser.toString()})(page, ${JSON.stringify({ profilePath, extensionURL, prompt, inputs, orders, repeats, diagnostics: Boolean(diagnosticIds), diagnosticQuestions: diagnosticIds ? corpus.diagnosticQuestions : undefined })}); } catch (error) { return { runnerError: String(error.message ?? error) }; } }`;
   const result = {
     set: corpus.set ?? `${values.experiment}:${corpus.role}`,
-    backend: prompt.offlineLabel ? 'rules-only' : 'prompt-api',
-    model: prompt.offlineLabel ? null : 'gemini-nano',
-    ...(prompt.offlineLabel ? { offlineLabel: prompt.offlineLabel } : {}),
+    backend: 'prompt-api',
+    model: 'gemini-nano',
     modelVersion: null,
-    modelVersionStatus: prompt.offlineLabel
-      ? 'Offline constant baseline; no model invoked'
-      : 'Prompt API does not expose the model version; record the observed component version in the round runtime record',
-    context: prompt.offlineLabel ? 'offline' : 'extension-sw',
+    modelVersionStatus: 'Prompt API does not expose the model version; record the observed component version in the round runtime record',
+    context: 'extension-sw',
     variant,
     promptVersion: variant === 'shipping' ? shipping.version : variant,
     repeats,
@@ -279,31 +275,22 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
   const command = join(output, 'run-code.js');
   let stdout;
   try {
+    writeFileSync(command, code, { flag: 'wx' });
+    stdout = execFileSync('playwright-cli', ['-s=pangu-eval', '--raw', 'run-code', `--filename=${command}`], {
+      encoding: 'utf8',
+      maxBuffer: 10 * 1024 * 1024,
+      timeout: 120000 + inputs.length * orderCount * repeats * 30000 * (diagnosticIds ? 1 + (corpus.diagnosticQuestions?.length ?? 2) : 1),
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
     let run;
-    if (prompt.offlineLabel) {
-      run = {
-        results: inputs.map((input) => ({
-          ...input,
-          answers: orders.flatMap((_, order) => Array.from({ length: repeats }, () => ({ answer: prompt.offlineLabel, raw: JSON.stringify(prompt.offlineLabel), error: null, ms: 0, order }))),
-        })),
-      };
-    } else {
-      writeFileSync(command, code, { flag: 'wx' });
-      stdout = execFileSync('playwright-cli', ['-s=pangu-eval', '--raw', 'run-code', `--filename=${command}`], {
-        encoding: 'utf8',
-        maxBuffer: 10 * 1024 * 1024,
-        timeout: 120000 + inputs.length * orderCount * repeats * 30000 * (diagnosticIds ? 1 + (corpus.diagnosticQuestions?.length ?? 2) : 1),
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
-      try {
-        run = JSON.parse(stdout);
-      } catch {
-        throw new Error('Browser command returned invalid JSON; verify the browser attachment');
-      }
-      if (run.runnerError !== undefined) {
-        assert(typeof run.runnerError === 'string' && run.runnerError.trim(), 'Invalid browser runner error; expected a nonempty message');
-        throw new Error(run.runnerError);
-      }
+    try {
+      run = JSON.parse(stdout);
+    } catch {
+      throw new Error('Browser command returned invalid JSON; verify the browser attachment');
+    }
+    if (run.runnerError !== undefined) {
+      assert(typeof run.runnerError === 'string' && run.runnerError.trim(), 'Invalid browser runner error; expected a nonempty message');
+      throw new Error(run.runnerError);
     }
     assert(Array.isArray(run.results), 'browser result missing results array');
     const returnedById = new Map(run.results.map((kase) => [kase.id, kase]));
