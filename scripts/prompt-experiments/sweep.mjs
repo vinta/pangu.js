@@ -35,16 +35,13 @@ const plusDigit = values.experiment === 'plus-digit';
 const experiment = values.experiment === 'hyphen-digit' ? null : await import(`./${values.experiment}/experiment.mjs`);
 assert(experiment || values.cases, 'provide --cases <verified-corpus.json> for --experiment hyphen-digit');
 assert(!plusDigit || values.prompts, 'provide --prompts <frozen-prompts.mjs> for the plus-digit comparison');
-const variants = positionals.length ? positionals : plusDigit ? ['rules-only'] : experiment ? ['v18-en-real-examples'] : ['shipping'];
+const variants = positionals.length ? positionals : experiment && !plusDigit ? ['v18-en-real-examples'] : ['shipping'];
 const promptPath = values.prompts ? pathToFileURL(resolve(values.prompts)).href : experiment ? './digit-plus/results/20260911-label-meaning/prompts.mjs' : './hyphen-digit/prompts.js';
 const registry = (await import(promptPath)).PROMPTS;
 assert(registry && typeof registry === 'object' && !Array.isArray(registry), 'Prompt module must export a PROMPTS object');
 assert(!Object.hasOwn(registry, 'shipping'), 'Prompt module cannot override shipping; shipping always imports the production prompt');
 const shipping = plusDigit ? plusDigitPrompt : experiment ? digitPlusPrompt : hyphenDigitPrompt;
 const prompts = { ...registry, shipping: { system: shipping.systemPrompt, labels: shipping.candidateLabels, build: (kase) => shipping.buildQuestion(kase.input, kase.at) } };
-if (plusDigit) {
-  assert.equal(registry['rules-only']?.offlineLabel, 'signed-number', 'plus-digit requires rules-only with offlineLabel: signed-number');
-}
 const corpus = experiment ? experiment.loadCorpus(values.cases) : JSON.parse(readFileSync(values.cases, 'utf8'));
 const cases = corpus.cases?.map(publicCase);
 assert(Array.isArray(cases) && cases.length > 0, 'empty corpus; provide at least one scored case');

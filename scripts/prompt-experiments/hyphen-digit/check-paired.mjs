@@ -60,7 +60,6 @@ async function main() {
   const cases = corpus.cases.map(publicCase);
   const labels = plusDigit ? plusDigit.labels : ['signed-number', 'range-or-separator', 'unsure'];
   assert.deepEqual(corpus.enums?.[plusDigit ? 'plus' : 'hyphen'], labels, `${values.cases}: expected the ordered ${values.experiment} label schema`);
-  if (plusDigit) assert.equal(values.baseline, 'rules-only', 'plus-digit comparisons require --baseline rules-only');
   const { PROMPTS } = await import(pathToFileURL(resolve(values.prompts)));
   assert(PROMPTS && typeof PROMPTS === 'object', `${values.prompts}: export a PROMPTS registry with the frozen baseline and candidate`);
   const artifacts = positionals.map(readJSON);
@@ -89,26 +88,13 @@ async function main() {
     check(artifact.system, prompt.system, 'system');
     check(artifact.omitResponseConstraintInput, prompt.omitResponseConstraintInput ?? false, 'omitResponseConstraintInput');
     check(artifact.sampling, 'temperature 0, topK 1', 'sampling');
-    if (plusDigit && index % 2 === 0) {
-      check(prompt.offlineLabel, 'signed-number', 'frozen offlineLabel');
-      check(artifact.variant, 'rules-only', 'variant');
-      check(artifact.backend, 'rules-only', 'backend');
-      check(artifact.context, 'offline', 'context');
-      check(artifact.offlineLabel, 'signed-number', 'offlineLabel');
-    } else {
-      check(artifact.profileVerified, true, 'profileVerified');
-      check(artifact.extensionWorkerVerified, true, 'extensionWorkerVerified');
-    }
+    check(artifact.profileVerified, true, 'profileVerified');
+    check(artifact.extensionWorkerVerified, true, 'extensionWorkerVerified');
     for (const kase of cases) {
       const result = artifact.results?.find((row) => row.id === kase.id);
       if (result) {
         check(result.question, prompt.build(kase, labels), `${kase.id} question`);
         check(result.responseConstraint, { type: 'string', enum: labels }, `${kase.id} responseConstraint`);
-        if (plusDigit && index % 2 === 0) {
-          for (const answer of result.answers ?? []) {
-            check(answer.answer, 'signed-number', `${kase.id} offline answer`);
-          }
-        }
       }
     }
   }

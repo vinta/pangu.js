@@ -74,23 +74,28 @@ function setup() {
     prompts,
     `export const PROMPTS = {
     'rules-only': { system: 'No edit.', build: kase => kase.input, offlineLabel: 'signed-number' },
+    'frozen-shipping': { system: 'Ship.', build: kase => kase.input },
     candidate: { system: 'Classify.', build: kase => kase.input }
   };`,
   );
   return { root, cases, prompts, corpus };
 }
 
-function artifact(cases: ReturnType<typeof fixture>['cases'], variant = 'candidate', repeats = 1) {
+type FixtureCase = ReturnType<typeof fixture>['cases'][number];
+const missConjunctions = () => 'signed-number';
+
+function artifact(cases: FixtureCase[], variant = 'candidate', repeats = 1, answerFor = (kase: FixtureCase) => kase.expected_label) {
   return {
     status: 'complete',
     purpose: 'accuracy',
     variant,
-    system: variant === 'rules-only' ? 'No edit.' : 'Classify.',
+    system: variant === 'shipping' ? 'Ship.' : 'Classify.',
     omitResponseConstraintInput: false,
     sampling: 'temperature 0, topK 1',
-    backend: variant === 'rules-only' ? 'rules-only' : 'prompt-api',
-    context: variant === 'rules-only' ? 'offline' : 'extension-sw',
-    ...(variant === 'rules-only' ? { offlineLabel: 'signed-number' } : { profileVerified: true, extensionWorkerVerified: true }),
+    backend: 'prompt-api',
+    context: 'extension-sw',
+    profileVerified: true,
+    extensionWorkerVerified: true,
     repeats,
     expectedAttemptsPerCase: repeats * 2,
     orders: [cases.map((kase) => kase.id), cases.map((kase) => kase.id).reverse()],
@@ -101,7 +106,7 @@ function artifact(cases: ReturnType<typeof fixture>['cases'], variant = 'candida
       responseConstraint: { type: 'string', enum: labels },
       answers: [0, 1].flatMap((order) =>
         Array.from({ length: repeats }, () => {
-          const answer = variant === 'rules-only' ? 'signed-number' : kase.expected_label;
+          const answer = answerFor(kase);
           return { order, answer, raw: JSON.stringify(answer), error: null as string | null };
         }),
       ),
@@ -152,7 +157,7 @@ test('plus-digit loader validates tight targets, contract contexts, seed provena
 test('plus-digit gates separate safe unsure labels, false conjunction controls and combined-excerpt failures', () => {
   const { cases: path } = setup();
   const cases = loadCorpus(path).cases;
-  const baseline = artifact(cases, 'rules-only');
+  const baseline = artifact(cases, 'shipping', 1, missConjunctions);
   const candidate = artifact(cases);
   const compare = () => evaluatePaired({ phase: 'screening', cases, comparisons: [{ baseline, candidate }] });
   expect(compare()).toMatchObject({ passed: true, stableImprovements: ['join-9', 'join-8'] });
@@ -175,7 +180,7 @@ test('plus-digit gates separate safe unsure labels, false conjunction controls a
 test('plus-digit requires each fresh confirmation and holdout comparison to meet the gate', () => {
   const { cases: path } = setup();
   const cases = loadCorpus(path).cases;
-  const first = { baseline: artifact(cases, 'rules-only', 3), candidate: artifact(cases, 'candidate', 3) };
+  const first = { baseline: artifact(cases, 'shipping', 3, missConjunctions), candidate: artifact(cases, 'candidate', 3) };
   const second = structuredClone(first);
   const compare = (phase: string) => evaluatePaired({ phase, cases, comparisons: [first, second] });
   expect(compare('confirmation').passed).toBe(true);
@@ -210,6 +215,10 @@ test.skipIf(!supportsTypeScript)('plus-digit sweep runs the rules-only baseline 
   expect(saved.results.every((kase: { answers: { answer: string }[] }) => kase.answers.length === 6 && kase.answers.every((answer) => answer.answer === 'signed-number'))).toBe(true);
   expect(saved.profileVerified).toBeUndefined();
   expect(existsSync(join(output, 'run-code.js'))).toBe(false);
+  writeFileSync(prompts, `export const PROMPTS = { candidate: { system: 'Classify.', build: kase => kase.input } };`);
+  const defaulted = run('--check');
+  expect(defaulted.status, defaulted.stderr).toBe(0);
+  expect(defaulted.stdout).toContain('rendered variants: shipping;');
 });
 
 test.skipIf(!supportsTypeScript).each([1, 3])('offline plus-digit scores %i orders while paired gates require two', (orders) => {
@@ -233,14 +242,12 @@ test.skipIf(!supportsTypeScript).each([1, 3])('offline plus-digit scores %i orde
   expect(gate.runs[0].baseline.issues).toContain('wrong declared attempt schedule');
 });
 
-test.skipIf(!supportsTypeScript)('shared paired CLI verifies plus-digit frozen prompts and offline baseline provenance', () => {
+test.skipIf(!supportsTypeScript)('shared paired CLI gates plus-digit candidates against the frozen shipping control', () => {
   const { root, cases: path, prompts } = setup();
   const cases = loadCorpus(path).cases;
-  const baseline = artifact(cases, 'rules-only');
-  const candidate = artifact(cases);
   const files = [join(root, 'baseline.json'), join(root, 'candidate.json')];
   let invocation = 0;
-  const run = () => {
+  const run = (baseline: ReturnType<typeof artifact>, candidate: ReturnType<typeof artifact>) => {
     writeFileSync(files[0]!, JSON.stringify(baseline));
     writeFileSync(files[1]!, JSON.stringify(candidate));
     const out = join(root, `gate-${invocation++}`);
@@ -257,7 +264,7 @@ test.skipIf(!supportsTypeScript)('shared paired CLI verifies plus-digit frozen p
         '--prompts',
         prompts,
         '--baseline',
-        'rules-only',
+        'frozen-shipping',
         '--out',
         out,
         ...files,
@@ -266,11 +273,17 @@ test.skipIf(!supportsTypeScript)('shared paired CLI verifies plus-digit frozen p
     );
     return { ...result, gate: JSON.parse(readFileSync(join(out, 'gate.json'), 'utf8')) };
   };
-  const good = run();
+  const baseline = artifact(cases, 'shipping', 1, missConjunctions);
+  const candidate = artifact(cases);
+  const good = run(baseline, candidate);
   expect(good.status, good.stderr).toBe(0);
   expect(good.gate).toMatchObject({ passed: true, frozen: true, protocolIssues: [] });
-  changeAnswer(baseline, 0, 'conjunction');
-  const changedBaseline = run();
-  expect(changedBaseline.status).toBe(1);
-  expect(changedBaseline.gate.protocolIssues).toContain(`${files[0]}: join-9 offline answer differs from the frozen protocol`);
+  const unverified = run({ ...baseline, profileVerified: false }, candidate);
+  expect(unverified.status).toBe(1);
+  expect(unverified.gate.protocolIssues).toContain(`${files[0]}: profileVerified differs from the frozen protocol`);
+  const regressed = artifact(cases);
+  changeAnswer(regressed, 0, 'signed-number');
+  const lost = run(artifact(cases, 'shipping'), regressed);
+  expect(lost.status).toBe(1);
+  expect(lost.gate.runs[0].regressions).toEqual(['join-9', 'join-8']);
 });
