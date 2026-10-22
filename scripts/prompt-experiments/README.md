@@ -72,6 +72,22 @@ node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-e
 
 Digit-plus prompt modules can provide `labels` and `expectedLabel(kase)` when comparing label sets. These preserve the historical merged/separate product-name comparisons. Current development inputs require exactly one plus; only a corpus marked `historical: true` permits the old multiple-plus cases. `shipping` loads the current production digit-plus prompt; use it as the control for new experiments. The versioned entries remain frozen historical prompts.
 
+### plus-digit
+
+Use `--experiment plus-digit --prompts <round>/prompts.mjs`. Cases default to [corpus/development.json](plus-digit/corpus/development.json). There is no shipping prompt. The default variant is `rules-only`, whose frozen entry must have `offlineLabel: 'signed-number'`, `system`, and `build(kase)`. The runner creates its scheduled answers offline and never contacts Chrome for that entry. Candidate entries use the usual model path and the fixed labels `signed-number`, `conjunction`, `unsure`.
+
+`input` contains one `+` in the contract sentence slice. `expected_output` is that input after core spacing and the gold edit. Keep the full authored excerpt in `sourceExcerpt`, its target offset in `excerptAt`, and combined gold in `expected_excerpt_output`. Records from one excerpt share `excerptId`; retain every eligible target when selecting an excerpt. The loader checks the core output and sentence slice, then freezes individual and combined edits. This verifies the phase 1 contract only; production detector and DOM routing remain unverified.
+
+```bash
+# Check the corpus and frozen prompt without inference.
+node scripts/prompt-experiments/sweep.mjs --experiment plus-digit --prompts scripts/prompt-experiments/plus-digit/results/new-round/prompts.mjs --check rules-only candidate
+
+# Measure the offline baseline and candidate with matched orders and repetitions.
+node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --experiment plus-digit --prompts scripts/prompt-experiments/plus-digit/results/new-round/prompts.mjs --out local/prompt-experiments/new-round/screening rules-only candidate
+```
+
+Use the shared [paired gate helper](#paired-gate-helper) with `--experiment plus-digit --baseline rules-only`. It reports label, target-spacing, and combined-spacing accuracy separately. An `unsure` answer on a sign is a label miss but keeps safe spacing. Every sign must keep correct target spacing in every attempt; screening and confirmation also need a stable conjunction fix. Invalid answers, errors, skips, and missing attempts fail the gate.
+
 ## Runner options
 
 `--orders` defaults to 2; `--repeats` defaults to 1.
@@ -85,7 +101,7 @@ Use `--diagnostics <id1,id2>` with a development corpus, `--orders 1 --repeats 1
 Run when no matching pass is recorded, or after runner, gate, or relevant dependency changes. Prompt wording changes alone do not require another run.
 
 ```bash
-npx vitest run --exclude '**/local/**' scripts/prompt-experiments/sweep.test.ts scripts/prompt-experiments/hyphen-digit/paired-gates.test.ts scripts/prompt-experiments/hyphen-digit/check-paired.test.ts
+npx vitest run --exclude '**/local/**' scripts/prompt-experiments/sweep.test.ts scripts/prompt-experiments/plus-digit.test.ts scripts/prompt-experiments/hyphen-digit/paired-gates.test.ts scripts/prompt-experiments/hyphen-digit/check-paired.test.ts
 ```
 
 These tests require no browser and run separately from `npm test`.
@@ -106,7 +122,7 @@ Prepare new source records in an ignored, untracked input directory first. After
 
 ## Paired gate helper
 
-Run `check-paired.mjs` on saved hyphen-digit artifacts. It calls the shared evaluator with production edits and checks the frozen prompts, inputs, schema, sampling, and runtime verification flags. It runs offline.
+Run `check-paired.mjs` on saved hyphen-digit or plus-digit artifacts. It checks the frozen prompts, inputs, schema, sampling, and runtime verification flags. The evaluator bundles current production sources in memory; it runs offline without building the extension. Hyphen-digit uses production edits; plus-digit uses its phase 1 edit contract.
 
 ```bash
 node scripts/prompt-experiments/hyphen-digit/check-paired.mjs \
