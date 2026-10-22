@@ -4,6 +4,8 @@
 
 Phase 1 complete. Frozen winner: `v1-en`. Harness/preflight, screening, both confirmation comparisons, and both holdout comparisons passed. One candidate was tested; no prompt edits followed screening. Stop this round with two persistent development misses and the coverage limits below. Phase 2 was not run: `src/`, `browser-extensions/`, ADRs, and CHANGELOG are unchanged.
 
+This round's individual and combined spacing metrics apply core plus plus-digit edits only. The [composed-output follow-up](../20261023-composed-output/REPORT.md) evaluates the same frozen candidate alongside the existing shipping shapes, including the three companion minus targets. Its complete-output expectations are recorded separately in the shared corpus.
+
 | Phase                               | Gate | Rules-only labels          | Candidate labels            | Rules-only spacing         | Candidate spacing           |
 | ----------------------------------- | ---- | -------------------------- | --------------------------- | -------------------------- | --------------------------- |
 | Screening                           | Pass | 8/14 cases; 16/28 attempts | 12/14 cases; 24/28 attempts | 8/14 cases; 16/28 attempts | 12/14 cases; 24/28 attempts |

@@ -88,6 +88,33 @@ node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-e
 
 Use the shared [paired gate helper](#paired-gate-helper) with `--experiment plus-digit --baseline rules-only`. It reports label, target-spacing, and combined-spacing accuracy separately. An `unsure` answer on a sign is a label miss but keeps safe spacing. Every sign must keep correct target spacing in every attempt; screening and confirmation also need a stable conjunction fix. Invalid answers, errors, skips, and missing attempts fail the gate.
 
+### Composed output
+
+Component combined-spacing scores include only the experiment's shape. When other shapes route in the same excerpt, use `composition.mjs` to check complete output as well. It currently accepts plus-digit corpora and discovers the shipping hyphen-digit and digit-plus targets from the same original text. Each record needs `companion_targets` (including an empty array when none route), `expected_composed_output` for its input slice, and `expected_composed_excerpt_output` for the full excerpt. Each companion records `kind`, `excerptAt`, and independently reviewed `expected_label`.
+
+The frozen prompt module exports `PROMPTS` and `SHAPE_PROMPTS`, mapping every shape kind to its frozen prompt key. Include `rules-only` for the absent plus-digit baseline. Prepare validates complete annotations, production companion questions, and both levels of gold, then writes component corpora plus a frozen manifest:
+
+```bash
+node scripts/prompt-experiments/composition.mjs prepare --cases scripts/prompt-experiments/plus-digit/corpus/development.json --prompts scripts/prompt-experiments/plus-digit/results/20261023-composed-output/prompts.mjs --out local/prompt-experiments/new-composition/prepared
+```
+
+Run each generated component corpus through `sweep.mjs --experiment <shape> --orders 2 --repeats 3`. The baseline uses the frozen shipping prompt for each companion and `rules-only` for plus-digit; the candidate uses the same companion prompts and the frozen plus-digit candidate. Generate fresh artifacts for every shape on each side. Run baseline then candidate for comparison 1, followed by candidate then baseline for comparison 2. No sweep is needed for a shape with zero targets. Save the artifact paths as two comparisons:
+
+```json
+[
+  { "baseline": { "hyphen-digit": "baseline-1-hyphen.json", "plus-digit": "baseline-1-plus.json" }, "candidate": { "hyphen-digit": "candidate-1-hyphen.json", "plus-digit": "candidate-1-plus.json" } },
+  { "baseline": { "hyphen-digit": "baseline-2-hyphen.json", "plus-digit": "baseline-2-plus.json" }, "candidate": { "hyphen-digit": "candidate-2-hyphen.json", "plus-digit": "candidate-2-plus.json" } }
+]
+```
+
+Include every detected shape on each side and use actual paths beneath the ignored round directory. Check the saved answers offline:
+
+```bash
+node scripts/prompt-experiments/composition.mjs check --prepared local/prompt-experiments/new-composition/prepared/prepared.json --runs local/prompt-experiments/new-composition/comparisons.json --out local/prompt-experiments/new-composition/gate
+```
+
+The gate checks frozen controls, fresh artifacts, reversed execution order, component safety, complete-excerpt regressions, attempt declines, and a stable improvement. Run the experiment's component gate on the same plus-digit artifacts as well: a composed improvement can come from different companion answers, so it cannot by itself establish a plus-digit gain. `gate.json` retains separate component labels/spacing, full outputs, and failures attributed to shapes. The harness reuses production detectors and edits for shipping shapes; the new shape remains contract-only until extension integration is tested. Previously evaluated holdouts must be marked development for this follow-up.
+
 ## Runner options
 
 `--orders` defaults to 2; `--repeats` defaults to 1.
@@ -101,7 +128,7 @@ Use `--diagnostics <id1,id2>` with a development corpus, `--orders 1 --repeats 1
 Run when no matching pass is recorded, or after runner, gate, or relevant dependency changes. Prompt wording changes alone do not require another run.
 
 ```bash
-npx vitest run --exclude '**/local/**' scripts/prompt-experiments/sweep.test.ts scripts/prompt-experiments/plus-digit.test.ts scripts/prompt-experiments/hyphen-digit/paired-gates.test.ts scripts/prompt-experiments/hyphen-digit/check-paired.test.ts
+npx vitest run --exclude '**/local/**' scripts/prompt-experiments/sweep.test.ts scripts/prompt-experiments/plus-digit.test.ts scripts/prompt-experiments/composition.test.ts scripts/prompt-experiments/hyphen-digit/paired-gates.test.ts scripts/prompt-experiments/hyphen-digit/check-paired.test.ts
 ```
 
 These tests require no browser and run separately from `npm test`.
