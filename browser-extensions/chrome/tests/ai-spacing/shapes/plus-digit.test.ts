@@ -5,6 +5,7 @@ import { digitPlus } from '../../../src/ai-spacing/shapes/digit-plus';
 import { hyphenDigit } from '../../../src/ai-spacing/shapes/hyphen-digit';
 import { plusDigit } from '../../../src/ai-spacing/shapes/plus-digit';
 
+// Except the first find() cases, inputs are synthetic regex-boundary tokens shaped like the user seed (CJK+N)
 describe('plusDigit.find()', () => {
   it.each(['大寫英文字母+9位數字', '打+886這個號碼', '氣溫是+5度左右'])('find a tight original and exact settled form in %s', (unspaced) => {
     const settled = pangu.spaceText(unspaced);

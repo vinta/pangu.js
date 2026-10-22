@@ -137,13 +137,13 @@ test.describe('AI spacing DOM context', () => {
   });
 
   test('classifies plus-digit using original neighboring inline context', async ({ page }) => {
-    const sentence = '型號A的套票+1位家長限B區';
-    expect(await classify(page, '<p><span>型號A的</span><a>套票+1位家長</a><b>限B區</b></p>', ['conjunction'])).toEqual([{ sentence, at: sentence.indexOf('+') }]);
-    await expect(page.locator('p')).toHaveText('型號 A 的套票 + 1 位家長限 B 區');
+    const sentence = '●可12歲以下兒童+1位家長使用';
+    expect(await classify(page, '<p><span>●可12歲以下</span><a>兒童+1位家長</a><b>使用</b></p>', ['conjunction'])).toEqual([{ sentence, at: sentence.indexOf('+') }]);
+    await expect(page.locator('p')).toHaveText('●可 12 歲以下兒童 + 1 位家長使用');
     expect(await page.evaluate(() => window.__aiClassifications.filter(({ candidates }) => candidates.length > 0).map(({ kind }) => kind))).toEqual(['plus-digit']);
   });
 
-  for (const sentence of ['氣溫是-5度，套票+1位家長', '套票+1位家長，氣溫是-5度']) {
+  for (const sentence of ['保存冷凍於-18°C以下，交通票券+5大夯景點', '交通票券+5大夯景點，保存冷凍於-18°C以下']) {
     test(`composes plus-digit insertion and hyphen deletion from the same snapshot: ${sentence}`, async ({ page }) => {
       await classify(page, `<p>${sentence}</p>`, {
         [`hyphen-digit:${sentence.indexOf('-')}:${sentence}`]: 'signed-number',
@@ -155,7 +155,7 @@ test.describe('AI spacing DOM context', () => {
           { type: 'CLASSIFY_CANDIDATES', kind: 'hyphen-digit', candidates: [{ sentence, at: sentence.indexOf('-') }] },
           { type: 'CLASSIFY_CANDIDATES', kind: 'plus-digit', candidates: [{ sentence, at: sentence.indexOf('+') }] },
         ]);
-      await expect.poll(() => page.locator('p').textContent()).toBe(sentence.startsWith('氣溫') ? '氣溫是 -5 度，套票 + 1 位家長' : '套票 + 1 位家長，氣溫是 -5 度');
+      await expect.poll(() => page.locator('p').textContent()).toBe(sentence.startsWith('保存') ? '保存冷凍於 -18°C 以下，交通票券 + 5 大夯景點' : '交通票券 + 5 大夯景點，保存冷凍於 -18°C 以下');
     });
   }
 
