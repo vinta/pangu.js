@@ -20,9 +20,9 @@ const { digitPlus } = await productionModule('browser-extensions/chrome/src/ai-s
 const { plusDigit } = await productionModule('browser-extensions/chrome/src/ai-spacing/shapes/plus-digit.ts');
 const { AMBIGUOUS_SHAPES } = await productionModule('browser-extensions/chrome/src/ai-spacing/shapes/ambiguous-shapes.ts');
 const shapes = {
-  'hyphen-digit': { shape: hyphenDigit, prompt: hyphenDigitPrompt, enum: 'hyphen' },
-  'digit-plus': { shape: digitPlus, prompt: digitPlusPrompt, enum: 'plus' },
-  'plus-digit': { shape: plusDigit, prompt: plusDigitPrompt, enum: 'plus' },
+  'hyphen-digit': { shape: hyphenDigit, prompt: hyphenDigitPrompt, enum: 'hyphen', symbol: '-' },
+  'digit-plus': { shape: digitPlus, prompt: digitPlusPrompt, enum: 'plus', symbol: '+' },
+  'plus-digit': { shape: plusDigit, prompt: plusDigitPrompt, enum: 'plus', symbol: '+' },
 };
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 const readJSON = (path) => JSON.parse(readFileSync(path, 'utf8'));
@@ -84,7 +84,7 @@ export function prepareComposition(corpus, registry) {
         enum: shapes[kind].enum,
         input: target.sentence,
         at: target.at,
-        ordinal: target.sentence.slice(0, target.at).split(kind === 'hyphen-digit' ? '-' : '+').length,
+        ordinal: target.sentence.slice(0, target.at).split(shapes[kind].symbol).length,
         expected_label: annotation.expected_label,
         original_excerpt: original,
         original_at: target.excerptAt,
@@ -96,11 +96,11 @@ export function prepareComposition(corpus, registry) {
         source_verification: first.evidence,
         routing_status: 'Shipping detector matched the saved excerpt; DOM routing remains unverified.',
       };
-      kase.symbol = kind === 'hyphen-digit' ? '-' : '+';
+      kase.symbol = shapes[kind].symbol;
       kase.targets = [{ ordinal: kase.ordinal, expected_label: kase.expected_label }];
       kase.expected_target_spacing = applyTextEdits(settled, edits(kind, kase, kase.expected_label));
       if (kind !== 'plus-digit') {
-        const inputIndex = indexOfNthSymbol(pangu.spaceText(kase.input), kind === 'hyphen-digit' ? '-' : '+', kase.ordinal - 1);
+        const inputIndex = indexOfNthSymbol(pangu.spaceText(kase.input), shapes[kind].symbol, kase.ordinal - 1);
         kase.expected_output = applyTextEdits(pangu.spaceText(kase.input), edits(kind, { settled_index: inputIndex }, kase.expected_label));
       }
       assert.equal(baseline.build(kase, candidateLabels), shapes[kind].prompt.buildQuestion(kase.input, kase.at), `${kind}: frozen baseline question differs from shipping`);
@@ -115,7 +115,7 @@ export function prepareComposition(corpus, registry) {
       const localEdits = targets
         .filter((target) => target.excerptAt >= start && target.excerptAt < start + kase.input.length)
         .flatMap((target) => {
-          const symbol = target.kind === 'hyphen-digit' ? '-' : '+';
+          const { symbol } = shapes[target.kind];
           const localAt = target.excerptAt - start;
           const index = indexOfNthSymbol(inputSettled, symbol, kase.input.slice(0, localAt).split(symbol).length - 1);
           return edits(target.kind, { settled_index: index }, target.expected_label);
