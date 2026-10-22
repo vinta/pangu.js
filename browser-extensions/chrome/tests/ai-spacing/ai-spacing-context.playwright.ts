@@ -346,42 +346,48 @@ test.describe('plus-digit reviewed corpus through the production content script'
     expect(plusDigitCorpus.cases).toHaveLength(22);
   });
 
-  for (const kase of plusDigitCorpus.cases) {
-    test(kase.id, async ({ page }) => {
-      const group = plusDigitCorpus.cases.filter((other) => other.excerptId === kase.excerptId);
+  // One replay per excerpt: its page carries every member's target
+  const excerpts = [...new Set(plusDigitCorpus.cases.map((kase) => kase.excerptId))].map((excerptId) => plusDigitCorpus.cases.filter((kase) => kase.excerptId === excerptId));
+  for (const group of excerpts) {
+    const excerpt = group[0]!;
+    test(group.map((kase) => kase.id).join(', '), async ({ page }) => {
       const targets = [
-        ...kase.companion_targets.map((target) => ({ kind: target.kind, ...sliceSentence(kase.sourceExcerpt, target.excerptAt), label: target.expected_label })),
+        ...excerpt.companion_targets.map((target) => ({ kind: target.kind, ...sliceSentence(excerpt.sourceExcerpt, target.excerptAt), label: target.expected_label })),
         ...group.map((target) => ({ kind: 'plus-digit', sentence: target.input, at: target.at, label: target.expected_label })),
       ];
       const labels = Object.fromEntries(targets.map((target) => [`${target.kind}:${target.at}:${target.sentence}`, target.kind === 'plus-digit' ? target.label : 'unsure'])) as Record<
         string,
         CandidateLabel
       >;
-      const html = `<html><head><style>${kase.source_css}</style></head><body><section id="fixture">${kase.source_html}</section></body></html>`;
+      const html = `<html><head><style>${excerpt.source_css}</style></head><body><section id="fixture">${excerpt.source_html}</section></body></html>`;
       const expectedCandidates = targets.map(({ kind, sentence, at }) => ({ kind, sentence, at }));
-      const originalOrdinal = kase.sourceExcerpt.slice(0, kase.excerptAt).split('+').length - 1;
 
-      async function replay(expectedExcerpt: string, expectedInput: string) {
+      async function replay(expectedExcerpt: string, expectedInput: (kase: PlusDigitCase) => string) {
         const originalText = await loadContentScript(page, html, labels);
-        expect(originalText?.trim()).toBe(kase.sourceExcerpt);
+        expect(originalText?.trim()).toBe(excerpt.sourceExcerpt);
         await page.clock.runFor(1000);
 
         // Exact message equality also rejects newly routed, missing, or duplicate targets; no inference is used in this replay.
         await expect.poll(() => page.evaluate(() => window.__aiClassifications.flatMap(({ kind, candidates }) => candidates.map((candidate) => ({ kind, ...candidate }))))).toEqual(expectedCandidates);
         await expect.poll(async () => (await page.locator('#fixture').textContent())?.trim()).toBe(expectedExcerpt);
         const output = (await page.locator('#fixture').textContent())!.trim();
-        expect(sliceSentence(output, indexOfNthSymbol(output, '+', originalOrdinal)).sentence).toBe(expectedInput);
+        for (const kase of group) {
+          const originalOrdinal = kase.sourceExcerpt.slice(0, kase.excerptAt).split('+').length - 1;
+          expect(sliceSentence(output, indexOfNthSymbol(output, '+', originalOrdinal)).sentence, kase.id).toBe(expectedInput(kase));
+        }
       }
 
-      await replay(kase.expected_excerpt_output, kase.expected_output);
-      if (kase.companion_targets.length) {
+      await replay(excerpt.expected_excerpt_output, (kase) => kase.expected_output);
+      if (excerpt.companion_targets.length) {
         for (const target of targets) {
           labels[`${target.kind}:${target.at}:${target.sentence}`] = target.label;
         }
-        await replay(kase.expected_composed_excerpt_output, kase.expected_composed_output);
+        await replay(excerpt.expected_composed_excerpt_output, (kase) => kase.expected_composed_output);
       } else {
-        expect(kase.expected_composed_excerpt_output).toBe(kase.expected_excerpt_output);
-        expect(kase.expected_composed_output).toBe(kase.expected_output);
+        for (const kase of group) {
+          expect(kase.expected_composed_excerpt_output, kase.id).toBe(kase.expected_excerpt_output);
+          expect(kase.expected_composed_output, kase.id).toBe(kase.expected_output);
+        }
       }
     });
   }
