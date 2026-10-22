@@ -8,7 +8,7 @@ The first round's combined-excerpt metric applied only plus-digit edits to core 
 
 ## Frozen controls
 
-Starting revision: `099431c4d072bde011ed70617a8f297b61b42edd`. Corpus: `../../corpus/development.json` at this follow-up's commit. Ordered selection: `user-seed-1`, `user-seed-2`, `chu-id-format`, `colatour-parent-child`, `eztravel-transport-attractions`, `udn-score-title`, `udn-score-21`, `udn-score-20`, `boca-phone-886`, `boca-phone-853`, `nidec-temperature-85`, `jingxu-capacitance-56`, `jingxu-temperature-125`, `udn-points-threes`, `holdout-plus-digit-01`, `holdout-plus-digit-02`, `holdout-plus-digit-03`, `holdout-plus-digit-04`, `holdout-plus-digit-05`, `holdout-plus-digit-06`, `holdout-plus-digit-07`, `holdout-plus-digit-08`.
+Starting revision: `83d7f57065528c44b2f46501aedc3edd89bb7068`. Corpus: `../../corpus/development.json` at this follow-up's commit. Ordered selection: `user-seed-1`, `user-seed-2`, `chu-id-format`, `colatour-parent-child`, `eztravel-transport-attractions`, `udn-score-title`, `udn-score-21`, `udn-score-20`, `boca-phone-886`, `boca-phone-853`, `nidec-temperature-85`, `jingxu-capacitance-56`, `jingxu-temperature-125`, `udn-points-threes`, `holdout-plus-digit-01`, `holdout-plus-digit-02`, `holdout-plus-digit-03`, `holdout-plus-digit-04`, `holdout-plus-digit-05`, `holdout-plus-digit-06`, `holdout-plus-digit-07`, `holdout-plus-digit-08`.
 
 All 22 cases are development data. Eight were holdouts in the completed first round, but their subsequent review exposed them. This follow-up claims no new holdout evidence and does not tune prompts. It retains 21 source excerpts from 15 page identities, including the user seed, with the first round's provenance and collection limits.
 
