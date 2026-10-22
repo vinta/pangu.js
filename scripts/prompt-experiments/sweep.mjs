@@ -30,17 +30,24 @@ const repeats = Number(values.repeats);
 assert(Number.isSafeInteger(repeats) && repeats > 0, `invalid --repeats ${values.repeats}; use a positive integer`);
 const orderCount = Number(values.orders);
 assert(Number.isSafeInteger(orderCount) && orderCount > 0, `invalid --orders ${values.orders}; use a positive integer`);
-assert(['hyphen-digit', 'digit-plus', 'plus-digit'].includes(values.experiment), `invalid --experiment ${values.experiment}; use hyphen-digit, digit-plus, or plus-digit`);
+// A shape without defaultPrompts has no reusable prompt module, so each run names its frozen one
+const EXPERIMENTS = {
+  'hyphen-digit': { symbol: '-', shipping: hyphenDigitPrompt, defaultVariant: 'shipping', defaultPrompts: './hyphen-digit/prompts.js' },
+  'digit-plus': { symbol: '+', shipping: digitPlusPrompt, defaultVariant: 'v18-en-real-examples', defaultPrompts: './digit-plus/results/20260911-label-meaning/prompts.mjs' },
+  'plus-digit': { symbol: '+', shipping: plusDigitPrompt, defaultVariant: 'shipping' },
+};
+assert(Object.hasOwn(EXPERIMENTS, values.experiment), `invalid --experiment ${values.experiment}; use ${Object.keys(EXPERIMENTS).join(', ')}`);
+const settings = EXPERIMENTS[values.experiment];
 const plusDigit = values.experiment === 'plus-digit';
 const experiment = values.experiment === 'hyphen-digit' ? null : await import(`./${values.experiment}/experiment.mjs`);
 assert(experiment || values.cases, 'provide --cases <verified-corpus.json> for --experiment hyphen-digit');
-assert(!plusDigit || values.prompts, 'provide --prompts <frozen-prompts.mjs> for the plus-digit comparison');
-const variants = positionals.length ? positionals : experiment && !plusDigit ? ['v18-en-real-examples'] : ['shipping'];
-const promptPath = values.prompts ? pathToFileURL(resolve(values.prompts)).href : experiment ? './digit-plus/results/20260911-label-meaning/prompts.mjs' : './hyphen-digit/prompts.js';
+assert(settings.defaultPrompts || values.prompts, `provide --prompts <frozen-prompts.mjs> for --experiment ${values.experiment}`);
+const variants = positionals.length ? positionals : [settings.defaultVariant];
+const promptPath = values.prompts ? pathToFileURL(resolve(values.prompts)).href : settings.defaultPrompts;
 const registry = (await import(promptPath)).PROMPTS;
 assert(registry && typeof registry === 'object' && !Array.isArray(registry), 'Prompt module must export a PROMPTS object');
 assert(!Object.hasOwn(registry, 'shipping'), 'Prompt module cannot override shipping; shipping always imports the production prompt');
-const shipping = plusDigit ? plusDigitPrompt : experiment ? digitPlusPrompt : hyphenDigitPrompt;
+const { shipping } = settings;
 const prompts = { ...registry, shipping: { system: shipping.systemPrompt, labels: shipping.candidateLabels, build: (kase) => shipping.buildQuestion(kase.input, kase.at) } };
 const corpus = experiment ? experiment.loadCorpus(values.cases) : JSON.parse(readFileSync(values.cases, 'utf8'));
 const cases = corpus.cases?.map(publicCase);
@@ -80,7 +87,7 @@ for (const id of diagnosticIds ?? []) {
 assert.equal(new Set(cases.map((kase) => kase.id)).size, cases.length, 'duplicate case IDs');
 for (const kase of cases) {
   assert(typeof kase.input === 'string' && Number.isSafeInteger(kase.at) && kase.at >= 0, `invalid input or target offset: ${kase.id}`);
-  assert.equal(kase.input[kase.at], experiment ? '+' : '-', `invalid symbol offset: ${kase.id}`);
+  assert.equal(kase.input[kase.at], settings.symbol, `invalid symbol offset: ${kase.id}`);
   assert(corpus.enums?.[kase.enum]?.includes(kase.expected_label), `unknown expected label: ${kase.id}`);
   if (!experiment) {
     assert(!kase.review, `unresolved review case: ${kase.id}; exclude it from scored corpora`);
