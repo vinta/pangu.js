@@ -102,12 +102,30 @@ Run each generated component corpus through `sweep.mjs --experiment <shape> --or
 
 ```json
 [
-  { "baseline": { "hyphen-digit": "baseline-1-hyphen.json", "plus-digit": "baseline-1-plus.json" }, "candidate": { "hyphen-digit": "candidate-1-hyphen.json", "plus-digit": "candidate-1-plus.json" } },
-  { "baseline": { "hyphen-digit": "baseline-2-hyphen.json", "plus-digit": "baseline-2-plus.json" }, "candidate": { "hyphen-digit": "candidate-2-hyphen.json", "plus-digit": "candidate-2-plus.json" } }
+  {
+    "baseline": {
+      "hyphen-digit": "local/prompt-experiments/new-composition/baseline-1-hyphen/1-hyphen-v29-zh.json",
+      "plus-digit": "local/prompt-experiments/new-composition/baseline-1-plus/1-v1-en.json"
+    },
+    "candidate": {
+      "hyphen-digit": "local/prompt-experiments/new-composition/candidate-1-hyphen/1-hyphen-v29-zh.json",
+      "plus-digit": "local/prompt-experiments/new-composition/candidate-1-plus/1-v2-en.json"
+    }
+  },
+  {
+    "baseline": {
+      "hyphen-digit": "local/prompt-experiments/new-composition/baseline-2-hyphen/1-hyphen-v29-zh.json",
+      "plus-digit": "local/prompt-experiments/new-composition/baseline-2-plus/1-v1-en.json"
+    },
+    "candidate": {
+      "hyphen-digit": "local/prompt-experiments/new-composition/candidate-2-hyphen/1-hyphen-v29-zh.json",
+      "plus-digit": "local/prompt-experiments/new-composition/candidate-2-plus/1-v2-en.json"
+    }
+  }
 ]
 ```
 
-Include every detected shape on each side and use actual paths beneath the ignored round directory. Check the saved answers offline:
+Include every detected shape on each side and use actual paths beneath the ignored round directory. Paths resolve from the repository root, where these commands run, not from the comparisons file. Check the saved answers offline:
 
 ```bash
 node scripts/prompt-experiments/composition.mjs check --prepared local/prompt-experiments/new-composition/prepared/prepared.json --runs local/prompt-experiments/new-composition/comparisons.json --out local/prompt-experiments/new-composition/gate
