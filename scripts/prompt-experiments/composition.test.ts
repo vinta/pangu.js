@@ -12,6 +12,7 @@ const loaderPath = './plus-digit/experiment.mjs';
 const { loadCorpus } = await import(loaderPath);
 const frozenPath = './plus-digit/results/20261023-first-shape/prompts.mjs';
 const frozen = await import(frozenPath);
+const supportsTypeScript = 'typescript' in process.features && process.features.typescript;
 const registry = {
   BASELINE_SHAPE_PROMPTS: { 'plus-digit': 'v1-en', 'hyphen-digit': 'hyphen-frozen', 'digit-plus': 'digit-frozen' },
   SHAPE_PROMPTS: { 'plus-digit': 'candidate', 'hyphen-digit': 'hyphen-frozen', 'digit-plus': 'digit-frozen' },
@@ -246,7 +247,7 @@ test('every baseline prompt and both companion sides stay shipping while the plu
   expect(readFileSync(new URL('./composition.mjs', import.meta.url), 'utf8')).not.toContain('LanguageModel.create');
 });
 
-test('prepared component corpora pass the existing sweep CLI preflight without a browser', () => {
+test.skipIf(!supportsTypeScript)('prepared component corpora pass the existing sweep CLI preflight without a browser', () => {
   const { corpus, path, directory } = setup();
   delete corpus.cases[0].routing_status;
   const prepared = prepareComposition(corpus, registry);
