@@ -42,6 +42,8 @@ Reuse a complete baseline's saved answers only within the same round and continu
 
 Use verified real text for examples, diagnostics, development, confirmation, and holdout. Preserve authored text and context; synthetic fixtures are only for deterministic implementation tests. Read [source collection](references/sources.md) for new/changed records, evidence gaps or disputes, and live-page behavior. Reuse verified snapshots; regenerate affected production inputs and spacing from saved context when the contract changes.
 
+For new or changed cases, complete [user case review](references/artifacts.md#user-case-review) before model inference. Unchanged cases need no repeat user review.
+
 Before scoring, every eligible target needs a verified label and individual/combined spacing. Keep routing and authored-space exclusions separate from classifier accuracy. Disputed meanings stay unscored; gold `unsure` needs an explanation of why the exact production context is insufficient.
 
 When other enabled shapes route in a scored excerpt, use [composed-output evaluation](references/artifacts.md#composed-output) before freezing gold or interpreting component scores.
