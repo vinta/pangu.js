@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 
-const groupCases = (cases) => Map.groupBy(cases, (kase) => JSON.stringify([kase.canonical_source ?? kase.source, kase.excerptId ?? kase.original_excerpt]));
+export const excerptKey = (kase) => JSON.stringify([kase.canonical_source ?? kase.source, kase.excerptId ?? kase.original_excerpt]);
+const groupCases = (cases) => Map.groupBy(cases, excerptKey);
 
 export function scoreArtifact({ artifact, cases, repeats, editsForLabel, applyTextEdits, labels, spacingOnly = false, orderCount = 2 }) {
   const scheduled = repeats * orderCount;

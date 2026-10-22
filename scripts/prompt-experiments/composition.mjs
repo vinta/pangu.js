@@ -9,7 +9,7 @@ import { digitPlusPrompt } from '../../browser-extensions/chrome/src/ai-spacing/
 import { hyphenDigitPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-prompt.ts';
 import { plusDigitPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/plus-digit-prompt.ts';
 import { outputDirectory, publicCase } from './artifacts.mjs';
-import { scoreArtifact } from './hyphen-digit/paired-gates.mjs';
+import { excerptKey, scoreArtifact } from './hyphen-digit/paired-gates.mjs';
 import { loadCorpus } from './plus-digit/experiment.mjs';
 import { productionModule } from './production.mjs';
 
@@ -25,7 +25,6 @@ const shapes = {
 };
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 const readJSON = (path) => JSON.parse(readFileSync(path, 'utf8'));
-const keyFor = (kase) => JSON.stringify([kase.canonical_source ?? kase.source, kase.excerptId ?? kase.sourceExcerpt]);
 const targetKey = (target) => `${target.kind}:${target.excerptAt}`;
 const edits = (kind, kase, label) => shapes[kind].shape.edits({ index: kase.settled_index }, label);
 
@@ -46,7 +45,7 @@ export function prepareComposition(corpus, registry) {
     if (kind !== 'plus-digit') assert.equal(registry.SHAPE_PROMPTS[kind], registry.BASELINE_SHAPE_PROMPTS[kind], `${kind}: companion prompts must match on both sides`);
   }
   const componentCases = Object.fromEntries(Object.keys(shapes).map((kind) => [kind, []]));
-  const groups = [...Map.groupBy(corpus.cases, keyFor).values()].map((group) => {
+  const groups = [...Map.groupBy(corpus.cases, excerptKey).values()].map((group) => {
     const first = group[0];
     const original = first.sourceExcerpt;
     const settled = pangu.spaceText(original);
@@ -123,14 +122,14 @@ export function prepareComposition(corpus, registry) {
       assert.equal(applyTextEdits(inputSettled, localEdits), kase.expected_composed_output, `${kase.id}: composed input gold disagrees with all annotated edits`);
     }
     for (const kind of Object.keys(shapes)) {
-      const members = componentCases[kind].filter((kase) => keyFor(kase) === keyFor(first));
+      const members = componentCases[kind].filter((kase) => excerptKey(kase) === excerptKey(first));
       const spacing = applyTextEdits(
         settled,
         members.flatMap((kase) => edits(kind, kase, kase.expected_label)),
       );
       for (const kase of members) kase.expected_spacing = spacing;
     }
-    return { id: first.excerptId ?? first.id, key: keyFor(first), original, settled, expected: first.expected_composed_excerpt_output, targets };
+    return { id: first.excerptId ?? first.id, key: excerptKey(first), original, settled, expected: first.expected_composed_excerpt_output, targets };
   });
   const corpora = Object.fromEntries(
     Object.entries(componentCases)

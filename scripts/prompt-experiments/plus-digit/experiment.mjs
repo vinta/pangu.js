@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { applyTextEdits, indexOfNthSymbol, sliceSentence } from '../../../browser-extensions/chrome/src/ai-spacing/shapes/base.ts';
 import { plusDigitPrompt } from '../../../browser-extensions/chrome/src/ai-spacing/shapes/plus-digit-prompt.ts';
-import { evaluatePaired as pairedGate, scoreArtifact } from '../hyphen-digit/paired-gates.mjs';
+import { excerptKey, evaluatePaired as pairedGate, scoreArtifact } from '../hyphen-digit/paired-gates.mjs';
 import { productionModule } from '../production.mjs';
 
 const { default: pangu, CJK_SIGN_DIGIT } = await productionModule('src/shared/index.ts');
@@ -57,7 +57,7 @@ export function loadCorpus(path = new URL('./corpus/development.json', import.me
     prepared.expected_target_spacing = applyTextEdits(settled, editsForLabel(prepared, kase.expected_label));
     return prepared;
   });
-  const groups = Map.groupBy(corpus.cases, (kase) => JSON.stringify([kase.canonical_source ?? kase.source, kase.excerptId ?? kase.sourceExcerpt]));
+  const groups = Map.groupBy(corpus.cases, excerptKey);
   for (const group of groups.values()) {
     assert.equal(new Set(group.map((kase) => kase.excerptAt)).size, group.length, `${group[0].id}: duplicate excerpt target`);
     assert(
