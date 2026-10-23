@@ -164,7 +164,7 @@ test('plus-digit gates separate safe unsure labels, false conjunction controls a
   const safe = compare();
   expect(safe.passed).toBe(true);
   expect(safe.runs[0].candidate.cases[2]).toMatchObject({ labelCorrect: 0, targetSpacingCorrect: 2, fullSpacingCorrect: 2, passed: true });
-  expect(score(candidate)).toMatchObject({ labels: { passed: 2, total: 3 }, targetSpacing: { passed: 3, total: 3 }, combinedSpacing: { passed: 3, total: 3 }, labelMisses: ['sign'] });
+  expect(score(candidate, cases)).toMatchObject({ labels: { passed: 2, total: 3 }, targetSpacing: { passed: 3, total: 3 }, combinedSpacing: { passed: 3, total: 3 }, labelMisses: ['sign'] });
   changeAnswer(candidate, 2, 'conjunction');
   expect(compare()).toMatchObject({ passed: false, runs: [expect.objectContaining({ unsafeControls: ['sign'] })] });
   changeAnswer(candidate, 2, 'signed-number');
@@ -189,6 +189,16 @@ test('plus-digit requires each fresh confirmation and holdout comparison to meet
   expect(compare('holdout').passed).toBe(false);
 });
 
+test('plus-digit score reports result rows that drifted from the frozen cases', () => {
+  const { cases: path } = setup();
+  const cases = loadCorpus(path).cases;
+  const run = artifact(cases);
+  expect(score(run, cases).issues).toEqual([]);
+  run.results[0]!.settled = '字母 + 9 位；字母 +8 位';
+  // Scoring still uses the frozen settled text, so only the issue changes
+  expect(score(run, cases)).toMatchObject({ labels: { passed: 3, total: 3 }, combinedSpacing: { passed: 3, total: 3 }, issues: ['join-9: result differs from frozen settled'] });
+});
+
 test.skipIf(!supportsTypeScript)('plus-digit sweep defaults to shipping and rejects retired offline baselines', () => {
   const { cases, prompts } = setup();
   const run = (...extra: string[]) =>
@@ -211,7 +221,7 @@ test.each([1, 3])('plus-digit scores %i orders while paired gates require two', 
   const run = artifact(cases, 'shipping', 1, missConjunctions);
   Object.assign(run, { orders: Array.from({ length: orderCount }, () => cases.map((kase) => kase.id)), expectedAttemptsPerCase: orderCount });
   for (const row of run.results) row.answers = Array.from({ length: orderCount }, (_, order) => ({ order, answer: 'signed-number', raw: '"signed-number"', error: null }));
-  expect(score(run)).toMatchObject({ labels: { passed: 1, total: 3 }, targetSpacing: { passed: 1, total: 3 }, combinedSpacing: { passed: 1, total: 3 } });
+  expect(score(run, cases)).toMatchObject({ labels: { passed: 1, total: 3 }, targetSpacing: { passed: 1, total: 3 }, combinedSpacing: { passed: 1, total: 3 } });
   const gate = evaluatePaired({ phase: 'screening', cases, comparisons: [{ baseline: run, candidate: artifact(cases) }] });
   expect(gate.passed).toBe(false);
   expect(gate.runs[0].baseline.issues).toContain('wrong declared attempt schedule');

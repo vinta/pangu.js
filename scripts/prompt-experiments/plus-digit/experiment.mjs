@@ -82,8 +82,9 @@ export function evaluatePaired(options) {
   return pairedGate({ ...options, ...editContract, symbol: '+', protectedLabels: ['signed-number'] });
 }
 
-export function score(artifact) {
-  const result = scoreArtifact({ artifact, cases: artifact.results, repeats: artifact.repeats, orderCount: artifact.orders.length, ...editContract });
+// cases: the frozen corpus rows the run scheduled; result rows are checked against them for drift
+export function score(artifact, cases) {
+  const result = scoreArtifact({ artifact, cases, repeats: artifact.repeats, orderCount: artifact.orders.length, ...editContract });
   const count = (rows, field) => ({ passed: rows.filter((row) => row[field] === row.scheduled).length, total: rows.length });
   return {
     labels: count(result.cases, 'labelCorrect'),
@@ -93,7 +94,7 @@ export function score(artifact) {
       labels.map((label) => [
         label,
         count(
-          result.cases.filter((row) => artifact.results.find((kase) => kase.id === row.id).expected_label === label),
+          result.cases.filter((row) => cases.find((kase) => kase.id === row.id).expected_label === label),
           'labelCorrect',
         ),
       ]),
@@ -101,5 +102,6 @@ export function score(artifact) {
     misses: result.cases.filter((row) => !row.passed).map((row) => row.id),
     labelMisses: result.cases.filter((row) => row.labelCorrect !== row.scheduled).map((row) => row.id),
     unstable: artifact.results.filter((row) => !row.stable).map((row) => row.id),
+    issues: result.issues,
   };
 }

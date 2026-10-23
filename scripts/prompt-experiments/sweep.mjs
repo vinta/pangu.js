@@ -336,7 +336,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     Object.assign(result, pick(run, ['availability', 'createMs', 'browserVersion', 'profileVerified', 'extensionWorkerVerified', 'results']), {
       status: run.results.every((kase) => kase.complete) ? 'complete' : 'incomplete',
     });
-    if (experiment) result.evaluation = experiment.score(result);
+    if (experiment) result.evaluation = experiment.score(result, diagnosticIds ? cases.filter((kase) => diagnosticIds.includes(kase.id)) : cases);
   } catch (error) {
     Object.assign(result, {
       status: 'incomplete',
@@ -365,7 +365,7 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
   }
   if (experiment) {
     console.log(`${variant}: ${JSON.stringify(result.evaluation)}; errors ${errors.length}; ${file}`);
-    if (errors.length || incomplete.length || skipped.length || (values['require-perfect'] && scored.some((kase) => !kase.correct))) {
+    if (errors.length || incomplete.length || skipped.length || result.evaluation?.issues?.length || (values['require-perfect'] && scored.some((kase) => !kase.correct))) {
       process.exitCode = 1;
     }
     continue;
