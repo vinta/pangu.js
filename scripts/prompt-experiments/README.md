@@ -95,8 +95,10 @@ Component combined-spacing scores include only the experiment's shape. When othe
 The frozen prompt module exports `PROMPTS`, `BASELINE_SHAPE_PROMPTS`, and `SHAPE_PROMPTS`; each map names the frozen prompt key that its side runs for every shape kind. Every baseline entry must reproduce the shipping prompt, and the candidate reuses the baseline companion keys, so only its plus-digit entry can differ. Prepare validates complete annotations, production companion questions, and both levels of gold, then writes component corpora plus a frozen manifest:
 
 ```bash
-node scripts/prompt-experiments/composition.mjs prepare --cases scripts/prompt-experiments/plus-digit/corpus/development.json --prompts scripts/prompt-experiments/plus-digit/results/20261023-composed-output/prompts.mjs --out local/prompt-experiments/new-composition/prepared
+node scripts/prompt-experiments/composition.mjs prepare --cases scripts/prompt-experiments/plus-digit/corpus/development.json --prompts scripts/prompt-experiments/plus-digit/results/new-round/prompts.mjs --out local/prompt-experiments/new-composition/prepared
 ```
+
+The committed [composed-output round](plus-digit/results/20261023-composed-output/REPORT.md) predates `BASELINE_SHAPE_PROMPTS` and the retirement of offline baselines, so it reruns only at its recorded harness revision.
 
 Run each generated component corpus through `sweep.mjs --experiment <shape> --orders 2 --repeats 3`. The baseline uses the frozen shipping prompt for every shape; the candidate uses the same companion prompts and the frozen plus-digit candidate. Generate fresh artifacts for every shape on each side. Run baseline then candidate for comparison 1, followed by candidate then baseline for comparison 2. No sweep is needed for a shape with zero targets. Save the artifact paths as two comparisons:
 
