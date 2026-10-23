@@ -8,7 +8,7 @@ The first round's combined-excerpt metric applied only plus-digit edits to core 
 
 ## Frozen controls
 
-Starting revision: `83d7f57065528c44b2f46501aedc3edd89bb7068`. Corpus: `../../corpus/development.json` at this follow-up's commit. Ordered selection: `user-seed-1`, `user-seed-2`, `chu-id-format`, `colatour-parent-child`, `eztravel-transport-attractions`, `udn-score-title`, `udn-score-21`, `udn-score-20`, `boca-phone-886`, `boca-phone-853`, `nidec-temperature-85`, `jingxu-capacitance-56`, `jingxu-temperature-125`, `udn-points-threes`, `holdout-plus-digit-01`, `holdout-plus-digit-02`, `holdout-plus-digit-03`, `holdout-plus-digit-04`, `holdout-plus-digit-05`, `holdout-plus-digit-06`, `holdout-plus-digit-07`, `holdout-plus-digit-08`.
+Starting revision: `83d7f57065528c44b2f46501aedc3edd89bb7068`. Harness revision: `005d988296ee75a7935a6ca90acb29b8d6385e47`; the reproduction below runs at that revision. Corpus: `../../corpus/development.json` at this follow-up's commit. Ordered selection: `user-seed-1`, `user-seed-2`, `chu-id-format`, `colatour-parent-child`, `eztravel-transport-attractions`, `udn-score-title`, `udn-score-21`, `udn-score-20`, `boca-phone-886`, `boca-phone-853`, `nidec-temperature-85`, `jingxu-capacitance-56`, `jingxu-temperature-125`, `udn-points-threes`, `holdout-plus-digit-01`, `holdout-plus-digit-02`, `holdout-plus-digit-03`, `holdout-plus-digit-04`, `holdout-plus-digit-05`, `holdout-plus-digit-06`, `holdout-plus-digit-07`, `holdout-plus-digit-08`.
 
 All 22 cases are development data. Eight were holdouts in the completed first round, but their subsequent review exposed them. This follow-up claims no new holdout evidence and does not tune prompts. It retains 21 source excerpts from 15 page identities, including the user seed, with the first round's provenance and collection limits.
 
@@ -71,7 +71,7 @@ No additional source collection occurred. The original two public collection pas
 
 ## Reproduction
 
-Use this follow-up's committed harness, corpus, and frozen prompt module. [Composed-output commands](../../../README.md#composed-output) describe preparation, the runs manifest, and offline verification. Prepare with the exact ordered selection above, then execute the following schedule using `sweep.mjs --orders 2 --repeats 3 --prompts scripts/prompt-experiments/plus-digit/results/20261023-composed-output/prompts.mjs`, the corresponding generated corpus, and a new output directory for each invocation:
+Use this follow-up's committed harness, corpus, and frozen prompt module. Later harness revisions retire the `rules-only` offline baseline and require `BASELINE_SHAPE_PROMPTS`, so check out the harness revision above before running these commands. [Composed-output commands](../../../README.md#composed-output) describe preparation, the runs manifest, and offline verification. Prepare with the exact ordered selection above, then execute the following schedule using `sweep.mjs --orders 2 --repeats 3 --prompts scripts/prompt-experiments/plus-digit/results/20261023-composed-output/prompts.mjs`, the corresponding generated corpus, and a new output directory for each invocation:
 
 | Order | Comparison/side | Experiment   | Frozen prompt   |
 | ----- | --------------- | ------------ | --------------- |
