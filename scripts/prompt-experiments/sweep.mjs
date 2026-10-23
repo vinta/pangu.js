@@ -7,6 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { digitPlusPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/digit-plus-prompt.ts';
 import { hyphenDigitPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit-prompt.ts';
+import { plusDigitPrompt } from '../../browser-extensions/chrome/src/ai-spacing/shapes/plus-digit-prompt.ts';
 import { outputDirectory, pick, publicCase, publicError } from './artifacts.mjs';
 
 const { values, positionals } = parseArgs({
@@ -29,17 +30,26 @@ const repeats = Number(values.repeats);
 assert(Number.isSafeInteger(repeats) && repeats > 0, `invalid --repeats ${values.repeats}; use a positive integer`);
 const orderCount = Number(values.orders);
 assert(Number.isSafeInteger(orderCount) && orderCount > 0, `invalid --orders ${values.orders}; use a positive integer`);
-assert(['hyphen-digit', 'digit-plus'].includes(values.experiment), `invalid --experiment ${values.experiment}; use hyphen-digit or digit-plus`);
-const digitPlus = values.experiment === 'digit-plus' ? await import('./digit-plus/experiment.mjs') : null;
-assert(digitPlus || values.cases, 'provide --cases <verified-corpus.json> for --experiment hyphen-digit');
-const variants = positionals.length ? positionals : digitPlus ? ['v18-en-real-examples'] : ['shipping'];
-const promptPath = values.prompts ? pathToFileURL(resolve(values.prompts)).href : digitPlus ? './digit-plus/results/20260911-label-meaning/prompts.mjs' : './hyphen-digit/prompts.js';
+// A shape without defaultPrompts has no reusable prompt module, so each run names its frozen one
+const EXPERIMENTS = {
+  'hyphen-digit': { symbol: '-', shipping: hyphenDigitPrompt, defaultVariant: 'shipping', defaultPrompts: './hyphen-digit/prompts.js' },
+  'digit-plus': { symbol: '+', shipping: digitPlusPrompt, defaultVariant: 'v18-en-real-examples', defaultPrompts: './digit-plus/results/20260911-label-meaning/prompts.mjs' },
+  'plus-digit': { symbol: '+', shipping: plusDigitPrompt, defaultVariant: 'shipping' },
+};
+assert(Object.hasOwn(EXPERIMENTS, values.experiment), `invalid --experiment ${values.experiment}; use ${Object.keys(EXPERIMENTS).join(', ')}`);
+const settings = EXPERIMENTS[values.experiment];
+const plusDigit = values.experiment === 'plus-digit';
+const experiment = values.experiment === 'hyphen-digit' ? null : await import(`./${values.experiment}/experiment.mjs`);
+assert(experiment || values.cases, 'provide --cases <verified-corpus.json> for --experiment hyphen-digit');
+assert(settings.defaultPrompts || values.prompts, `provide --prompts <frozen-prompts.mjs> for --experiment ${values.experiment}`);
+const variants = positionals.length ? positionals : [settings.defaultVariant];
+const promptPath = values.prompts ? pathToFileURL(resolve(values.prompts)).href : settings.defaultPrompts;
 const registry = (await import(promptPath)).PROMPTS;
 assert(registry && typeof registry === 'object' && !Array.isArray(registry), 'Prompt module must export a PROMPTS object');
 assert(!Object.hasOwn(registry, 'shipping'), 'Prompt module cannot override shipping; shipping always imports the production prompt');
-const shipping = digitPlus ? digitPlusPrompt : hyphenDigitPrompt;
+const { shipping } = settings;
 const prompts = { ...registry, shipping: { system: shipping.systemPrompt, labels: shipping.candidateLabels, build: (kase) => shipping.buildQuestion(kase.input, kase.at) } };
-const corpus = digitPlus ? digitPlus.loadCorpus(values.cases) : JSON.parse(readFileSync(values.cases, 'utf8'));
+const corpus = experiment ? experiment.loadCorpus(values.cases) : JSON.parse(readFileSync(values.cases, 'utf8'));
 const cases = corpus.cases?.map(publicCase);
 assert(Array.isArray(cases) && cases.length > 0, 'empty corpus; provide at least one scored case');
 assert(['development', 'holdout'].includes(corpus.role), 'invalid corpus role; use development or holdout');
@@ -77,9 +87,9 @@ for (const id of diagnosticIds ?? []) {
 assert.equal(new Set(cases.map((kase) => kase.id)).size, cases.length, 'duplicate case IDs');
 for (const kase of cases) {
   assert(typeof kase.input === 'string' && Number.isSafeInteger(kase.at) && kase.at >= 0, `invalid input or target offset: ${kase.id}`);
-  assert.equal(kase.input[kase.at], digitPlus ? '+' : '-', `invalid symbol offset: ${kase.id}`);
+  assert.equal(kase.input[kase.at], settings.symbol, `invalid symbol offset: ${kase.id}`);
   assert(corpus.enums?.[kase.enum]?.includes(kase.expected_label), `unknown expected label: ${kase.id}`);
-  if (!digitPlus) {
+  if (!experiment) {
     assert(!kase.review, `unresolved review case: ${kase.id}; exclude it from scored corpora`);
     for (const field of ['source', 'retrieved_at', 'original_excerpt', 'source_html', 'annotation_rationale', 'source_verification', 'routing_status', 'settled']) {
       assert(typeof kase[field] === 'string' && kase[field].trim(), `missing ${field}: ${kase.id}; record verified source and production input evidence`);
@@ -89,17 +99,19 @@ for (const kase of cases) {
     assert(Number.isSafeInteger(kase.settled_index) && kase.settled_index >= 0 && kase.settled[kase.settled_index] === '-', `invalid settled target offset: ${kase.id}`);
   }
 }
-if (!digitPlus) {
+if (!experiment) {
   assert.deepEqual(corpus.enums.hyphen, hyphenDigitPrompt.candidateLabels, 'shipping labels differ from the corpus; update the cases before comparing prompts');
 }
 const runs = variants.map((variant) => {
   assert(Object.hasOwn(prompts, variant), `unknown variant ${variant}; add it to ${promptPath}`);
   const prompt = prompts[variant];
+  assert.equal(prompt.offlineLabel, undefined, `${variant}: offline baselines are retired; gate against shipping, or rerun the original round at its recorded revision`);
   const inputs = cases
     .filter((kase) => !diagnosticIds || diagnosticIds.includes(kase.id))
     .map((kase) => {
-      const labels = digitPlus ? (prompt.labels ?? corpus.enums[kase.enum]) : corpus.enums[kase.enum];
-      const expectedLabel = digitPlus && prompt.expectedLabel ? prompt.expectedLabel(kase) : kase.expected_label;
+      const labels = experiment ? (prompt.labels ?? corpus.enums[kase.enum]) : corpus.enums[kase.enum];
+      if (plusDigit) assert.deepEqual(labels, experiment.labels, `plus-digit labels must stay frozen: ${variant}`);
+      const expectedLabel = experiment && !plusDigit && prompt.expectedLabel ? prompt.expectedLabel(kase) : kase.expected_label;
       assert(Array.isArray(labels) && labels.length > 0 && labels.every((label) => typeof label === 'string') && new Set(labels).size === labels.length, `invalid labels: ${variant}`);
       assert(labels.includes(expectedLabel), `unknown expected label for ${variant}/${kase.id}: ${expectedLabel}`);
       const question = prompt.build(kase, labels);
@@ -323,8 +335,8 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     });
     Object.assign(result, pick(run, ['availability', 'createMs', 'browserVersion', 'profileVerified', 'extensionWorkerVerified', 'results']), {
       status: run.results.every((kase) => kase.complete) ? 'complete' : 'incomplete',
-      ...(digitPlus ? { evaluation: digitPlus.score(run) } : {}),
     });
+    if (experiment) result.evaluation = experiment.score(result, diagnosticIds ? cases.filter((kase) => diagnosticIds.includes(kase.id)) : cases);
   } catch (error) {
     Object.assign(result, {
       status: 'incomplete',
@@ -351,9 +363,9 @@ for (const [runIndex, { variant, prompt, inputs }] of runs.entries()) {
     }
     continue;
   }
-  if (digitPlus) {
+  if (experiment) {
     console.log(`${variant}: ${JSON.stringify(result.evaluation)}; errors ${errors.length}; ${file}`);
-    if (errors.length || incomplete.length || skipped.length || (values['require-perfect'] && scored.some((kase) => !kase.correct))) {
+    if (errors.length || incomplete.length || skipped.length || result.evaluation?.issues?.length || (values['require-perfect'] && scored.some((kase) => !kase.correct))) {
       process.exitCode = 1;
     }
     continue;

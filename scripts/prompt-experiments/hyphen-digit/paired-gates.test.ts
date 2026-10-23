@@ -3,8 +3,10 @@ import { expect, test } from 'vitest';
 import type { CandidateLabel } from '../../../browser-extensions/chrome/src/ai-spacing/messages';
 import type { SettledCandidate } from '../../../browser-extensions/chrome/src/ai-spacing/shapes/base';
 import { applyTextEdits } from '../../../browser-extensions/chrome/src/ai-spacing/shapes/base';
-import { hyphenDigit } from '../../../browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit';
 
+const production = '../production.mjs';
+const { productionModule } = await import(production);
+const { hyphenDigit } = await productionModule('browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit.ts');
 const gateModule = './paired-gates.mjs';
 const { evaluatePaired } = await import(gateModule);
 type Case = {

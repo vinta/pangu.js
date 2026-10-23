@@ -1,7 +1,9 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 
-import type { CandidateLabel, ClassifyCandidatesMessage } from '../../src/ai-spacing/messages';
+import type { CandidateLabel, ClassifyCandidatesMessage, ClassifyCandidatesResponse } from '../../src/ai-spacing/messages';
+import { indexOfNthSymbol, sliceSentence } from '../../src/ai-spacing/shapes/base';
 import type { Settings } from '../../src/settings/storage';
 
 type StubLabels = CandidateLabel[] | Record<string, CandidateLabel>;
@@ -10,6 +12,7 @@ declare global {
   interface Window {
     __aiClassifications: ClassifyCandidatesMessage[];
     __aiLabels: StubLabels;
+    __releaseClassification: () => void;
   }
 }
 
@@ -22,6 +25,7 @@ async function sentCandidates(page: Page) {
 // A fresh document per case, then the built content script injected the way Chrome does on spacing_when_load, with the worker stubbed to answer the given labels
 async function loadContentScript(page: Page, html: string, candidateLabels: StubLabels, aiEnabled = true) {
   await page.goto(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+  const originalText = await page.locator('body').textContent();
   await page.evaluate(
     ({ candidateLabels, aiEnabled }) => {
       window.__aiClassifications = [];
@@ -33,11 +37,22 @@ async function loadContentScript(page: Page, html: string, candidateLabels: Stub
             onMessage: { addListener: () => {} },
             sendMessage: async (message: ClassifyCandidatesMessage) => {
               window.__aiClassifications.push(message);
-              const labels = message.kind === 'digit-plus' ? ['conjunction', 'lower-bound', 'unsure'] : ['signed-number', 'range-or-separator', 'unsure'];
+              const labelsByKind: Record<string, string[]> = {
+                'digit-plus': ['conjunction', 'lower-bound', 'unsure'],
+                'hyphen-digit': ['signed-number', 'range-or-separator', 'unsure'],
+                'plus-digit': ['signed-number', 'conjunction', 'unsure'],
+              };
+              const labels = labelsByKind[message.kind];
+              if (!labels) {
+                throw new Error(`Unknown shape ${message.kind}`);
+              }
               return {
                 ok: true,
                 candidateLabels: message.candidates.map((candidate, index) => {
-                  const label = (Array.isArray(window.__aiLabels) ? window.__aiLabels[index] : window.__aiLabels[candidate.sentence]) ?? 'unsure';
+                  const label =
+                    (Array.isArray(window.__aiLabels)
+                      ? window.__aiLabels[index]
+                      : (window.__aiLabels[`${message.kind}:${candidate.at}:${candidate.sentence}`] ?? window.__aiLabels[candidate.sentence])) ?? 'unsure';
                   if (!labels.includes(label)) {
                     throw new Error(`Invalid stub label ${label} for ${message.kind}`);
                   }
@@ -58,6 +73,7 @@ async function loadContentScript(page: Page, html: string, candidateLabels: Stub
     { candidateLabels, aiEnabled },
   );
   await page.addScriptTag({ path: 'browser-extensions/chrome/dist/content-script.js' });
+  return originalText;
 }
 
 // What the page pass classifies
@@ -118,6 +134,114 @@ test.describe('AI spacing DOM context', () => {
 
     await expect(page.locator('p')).toHaveText('Switch 2+ 瑪利歐賽車世界同捆組');
     expect(await page.evaluate(() => window.__aiClassifications)).toEqual([]);
+  });
+
+  test('classifies plus-digit using original neighboring inline context', async ({ page }) => {
+    const sentence = '●可12歲以下兒童+1位家長使用';
+    expect(await classify(page, '<p><span>●可12歲以下</span><a>兒童+1位家長</a><b>使用</b></p>', ['conjunction'])).toEqual([{ sentence, at: sentence.indexOf('+') }]);
+    await expect(page.locator('p')).toHaveText('●可 12 歲以下兒童 + 1 位家長使用');
+    expect(await page.evaluate(() => window.__aiClassifications.filter(({ candidates }) => candidates.length > 0).map(({ kind }) => kind))).toEqual(['plus-digit']);
+  });
+
+  // Real sentences joined by a full stop as separate contexts in one node, in both orders: hyphen-digit, plus-digit
+  for (const text of ['保存冷凍於-18°C以下。交通票券+5大夯景點', '交通票券+5大夯景點。保存冷凍於-18°C以下']) {
+    test(`composes plus-digit insertion and hyphen deletion from the same snapshot: ${text}`, async ({ page }) => {
+      await classify(page, `<p>${text}</p>`, { '保存冷凍於-18°C以下': 'signed-number', '交通票券+5大夯景點': 'conjunction' });
+      await expect
+        .poll(() => page.evaluate(() => window.__aiClassifications.filter(({ candidates }) => candidates.length > 0)))
+        .toEqual([
+          { type: 'CLASSIFY_CANDIDATES', kind: 'hyphen-digit', candidates: [{ sentence: '保存冷凍於-18°C以下', at: 5 }] },
+          { type: 'CLASSIFY_CANDIDATES', kind: 'plus-digit', candidates: [{ sentence: '交通票券+5大夯景點', at: 4 }] },
+        ]);
+      await expect.poll(() => page.locator('p').textContent()).toBe(text.startsWith('保存') ? '保存冷凍於 -18°C 以下。交通票券 + 5 大夯景點' : '交通票券 + 5 大夯景點。保存冷凍於 -18°C 以下');
+    });
+  }
+
+  test('routes digit-plus and plus-digit to separate workers across a semicolon', async ({ page }) => {
+    // Real sentences joined as separate contexts: plus-digit; digit-plus
+    await classify(page, '<p>交通票券+5大夯景點；Switch 2+瑪利歐賽車世界同捆組</p>', ['conjunction']);
+    await expect
+      .poll(() => page.evaluate(() => window.__aiClassifications.filter(({ candidates }) => candidates.length > 0)))
+      .toEqual([
+        { type: 'CLASSIFY_CANDIDATES', kind: 'digit-plus', candidates: [{ sentence: 'Switch 2+瑪利歐賽車世界同捆組', at: 8 }] },
+        { type: 'CLASSIFY_CANDIDATES', kind: 'plus-digit', candidates: [{ sentence: '交通票券+5大夯景點', at: 4 }] },
+      ]);
+    await expect.poll(() => page.locator('p').textContent()).toBe('交通票券 + 5 大夯景點；Switch 2 + 瑪利歐賽車世界同捆組');
+  });
+
+  test('excludes plus-digit when neighboring inline context contains another plus', async ({ page }) => {
+    await loadContentScript(page, '<p><a>一個標示Z5U的電容，其工作溫度為+10°C</a><span>至+85°C，容值變動範圍在+22%至−56%之間。</span></p>', ['conjunction']);
+    await page.clock.runFor(1000);
+
+    await expect.poll(() => page.locator('p').textContent()).toBe('一個標示 Z5U 的電容，其工作溫度為 +10°C 至 +85°C，容值變動範圍在 +22% 至−56% 之間。');
+    expect(await page.evaluate(() => window.__aiClassifications.flatMap(({ candidates }) => candidates))).toEqual([]);
+  });
+
+  test('excludes authored spaces from plus-digit routing', async ({ page }) => {
+    // Synthetic regex-boundary variants of a real phrase, each with an authored space beside the plus
+    await loadContentScript(page, '<p>交通票券 +5大夯景點；交通票券+ 5大夯景點；交通票券 + 5大夯景點</p>', ['conjunction']);
+    await page.clock.runFor(1000);
+
+    await expect.poll(() => page.locator('p').textContent()).toBe('交通票券 +5 大夯景點；交通票券 + 5 大夯景點；交通票券 + 5 大夯景點');
+    expect(await page.evaluate(() => window.__aiClassifications.flatMap(({ candidates }) => candidates))).toEqual([]);
+  });
+
+  test('retains core plus-digit spacing when AI spacing is disabled', async ({ page }) => {
+    await loadContentScript(page, '<p>交通票券+5大夯景點</p>', ['conjunction'], false);
+    await page.clock.runFor(1000);
+
+    await expect.poll(() => page.locator('p').textContent()).toBe('交通票券 +5 大夯景點');
+    expect(await page.evaluate(() => window.__aiClassifications)).toEqual([]);
+  });
+
+  for (const failure of ['unavailable', 'worker error']) {
+    test(`retains core plus-digit spacing after ${failure}`, async ({ page }) => {
+      await loadContentScript(page, '<p>交通票券+5大夯景點</p>', ['conjunction']);
+      await page.evaluate((failure) => {
+        Object.assign(chrome.runtime, {
+          sendMessage: async (message: ClassifyCandidatesMessage) => {
+            window.__aiClassifications.push(message);
+            if (failure === 'worker error') {
+              throw new Error('worker disconnected');
+            }
+            return { ok: false, error: 'model unavailable' };
+          },
+        });
+      }, failure);
+      await page.clock.runFor(1000);
+
+      await expect.poll(() => page.locator('p').textContent()).toBe('交通票券 +5 大夯景點');
+      expect(await sentCandidates(page)).toEqual([{ sentence: '交通票券+5大夯景點', at: 4 }]);
+    });
+  }
+
+  test('drops a plus-digit answer after the page rewrites the settled text', async ({ page }) => {
+    await loadContentScript(page, '<p>交通票券+5大夯景點</p>', ['conjunction']);
+    await page.evaluate(() => {
+      const sendMessage = chrome.runtime.sendMessage;
+      Object.assign(chrome.runtime, {
+        sendMessage: async (message: ClassifyCandidatesMessage) => {
+          const response = sendMessage<ClassifyCandidatesMessage, ClassifyCandidatesResponse>(message);
+          if (message.candidates.length) {
+            await new Promise<void>((resolve) => {
+              window.__releaseClassification = resolve;
+            });
+          }
+          return response;
+        },
+      });
+    });
+    await page.clock.runFor(1000);
+    expect(await sentCandidates(page)).toEqual([{ sentence: '交通票券+5大夯景點', at: 4 }]);
+    await expect.poll(() => page.locator('p').textContent()).toBe('交通票券 +5 大夯景點');
+
+    await page.evaluate(() => {
+      document.querySelector('p')!.firstChild!.textContent = '頁面已改寫';
+      window.__releaseClassification();
+    });
+    await page.clock.runFor(1000);
+
+    await expect.poll(() => page.locator('p').textContent()).toBe('頁面已改寫');
   });
 
   test('plain text and nested inline elements provide the same sentence and symbol position', async ({ page }) => {
@@ -192,4 +316,79 @@ test.describe('AI spacing DOM context', () => {
       { sentence: '目前已經發展成為一個擁有運-12輕型多用途飛機', at: 13 },
     ]);
   });
+});
+
+interface PlusDigitCase {
+  id: string;
+  excerptId: string;
+  input: string;
+  at: number;
+  excerptAt: number;
+  expected_label: CandidateLabel;
+  sourceExcerpt: string;
+  source_html: string;
+  source_css: string;
+  expected_output: string;
+  expected_excerpt_output: string;
+  expected_composed_output: string;
+  expected_composed_excerpt_output: string;
+  companion_targets: { kind: string; excerptAt: number; expected_label: CandidateLabel }[];
+}
+
+const plusDigitCorpus = JSON.parse(readFileSync(new URL('../../../../scripts/prompt-experiments/plus-digit/corpus/development.json', import.meta.url), 'utf8')) as { cases: PlusDigitCase[] };
+
+test.describe('plus-digit reviewed corpus through the production content script', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.clock.install();
+  });
+
+  test('replay every reviewed case', () => {
+    expect(plusDigitCorpus.cases).toHaveLength(22);
+  });
+
+  // One replay per excerpt: its page carries every member's target
+  const excerpts = [...new Set(plusDigitCorpus.cases.map((kase) => kase.excerptId))].map((excerptId) => plusDigitCorpus.cases.filter((kase) => kase.excerptId === excerptId));
+  for (const group of excerpts) {
+    const excerpt = group[0]!;
+    test(group.map((kase) => kase.id).join(', '), async ({ page }) => {
+      const targets = [
+        ...excerpt.companion_targets.map((target) => ({ kind: target.kind, ...sliceSentence(excerpt.sourceExcerpt, target.excerptAt), label: target.expected_label })),
+        ...group.map((target) => ({ kind: 'plus-digit', sentence: target.input, at: target.at, label: target.expected_label })),
+      ];
+      const labels = Object.fromEntries(targets.map((target) => [`${target.kind}:${target.at}:${target.sentence}`, target.kind === 'plus-digit' ? target.label : 'unsure'])) as Record<
+        string,
+        CandidateLabel
+      >;
+      const html = `<html><head><style>${excerpt.source_css}</style></head><body><section id="fixture">${excerpt.source_html}</section></body></html>`;
+      const expectedCandidates = targets.map(({ kind, sentence, at }) => ({ kind, sentence, at }));
+
+      async function replay(expectedExcerpt: string, expectedInput: (kase: PlusDigitCase) => string) {
+        const originalText = await loadContentScript(page, html, labels);
+        expect(originalText?.trim()).toBe(excerpt.sourceExcerpt);
+        await page.clock.runFor(1000);
+
+        // Exact message equality also rejects newly routed, missing, or duplicate targets; no inference is used in this replay.
+        await expect.poll(() => page.evaluate(() => window.__aiClassifications.flatMap(({ kind, candidates }) => candidates.map((candidate) => ({ kind, ...candidate }))))).toEqual(expectedCandidates);
+        await expect.poll(async () => (await page.locator('#fixture').textContent())?.trim()).toBe(expectedExcerpt);
+        const output = (await page.locator('#fixture').textContent())!.trim();
+        for (const kase of group) {
+          const originalOrdinal = kase.sourceExcerpt.slice(0, kase.excerptAt).split('+').length - 1;
+          expect(sliceSentence(output, indexOfNthSymbol(output, '+', originalOrdinal)).sentence, kase.id).toBe(expectedInput(kase));
+        }
+      }
+
+      await replay(excerpt.expected_excerpt_output, (kase) => kase.expected_output);
+      if (excerpt.companion_targets.length) {
+        for (const target of targets) {
+          labels[`${target.kind}:${target.at}:${target.sentence}`] = target.label;
+        }
+        await replay(excerpt.expected_composed_excerpt_output, (kase) => kase.expected_composed_output);
+      } else {
+        for (const kase of group) {
+          expect(kase.expected_composed_excerpt_output, kase.id).toBe(kase.expected_excerpt_output);
+          expect(kase.expected_composed_output, kase.id).toBe(kase.expected_output);
+        }
+      }
+    });
+  }
 });

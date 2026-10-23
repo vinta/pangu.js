@@ -50,6 +50,23 @@ export function indexOfNthSymbol(text: string, symbol: string, ordinal: number) 
   return index;
 }
 
+// The plus shapes: tightPlus captures what precedes the plus in group 1. The frozen prompts expect the only plus in the full model context, inline siblings included
+export function findSinglePlusCandidateMatches(unspaced: string, settled: string, sentenceAt: (at: number) => Candidate, tightPlus: RegExp, isSettledForm: (index: number) => boolean) {
+  const candidateMatches: CandidateMatch[] = [];
+  for (const plusMatch of unspaced.matchAll(tightPlus)) {
+    const unspacedIndex = plusMatch.index + plusMatch[1]!.length;
+    const index = indexOfNthSymbol(settled, '+', unspaced.slice(0, unspacedIndex).split('+').length - 1);
+    if (index === -1 || !isSettledForm(index)) {
+      continue;
+    }
+    const candidate = sentenceAt(unspacedIndex);
+    if (candidate.sentence.split('+').length === 2) {
+      candidateMatches.push({ ...candidate, index });
+    }
+  }
+  return candidateMatches;
+}
+
 export interface PromptSpec<Label extends string> {
   kind: string;
   systemPrompt: string;

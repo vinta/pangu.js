@@ -72,6 +72,69 @@ node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-e
 
 Digit-plus prompt modules can provide `labels` and `expectedLabel(kase)` when comparing label sets. These preserve the historical merged/separate product-name comparisons. Current development inputs require exactly one plus; only a corpus marked `historical: true` permits the old multiple-plus cases. `shipping` loads the current production digit-plus prompt; use it as the control for new experiments. The versioned entries remain frozen historical prompts.
 
+### plus-digit
+
+Use `--experiment plus-digit --prompts <round>/prompts.mjs`. Cases default to [corpus/development.json](plus-digit/corpus/development.json). `shipping` imports the production plus-digit prompt; it is the default variant and the control for new rounds. Candidate entries use the usual model path and the fixed labels `signed-number`, `conjunction`, `unsure`.
+
+`input` contains one `+` in the contract sentence slice. `expected_output` is that input after core spacing and the gold edit. Keep the full authored excerpt in `sourceExcerpt`, its target offset in `excerptAt`, and combined gold in `expected_excerpt_output`. Records from one excerpt share `excerptId`; retain every eligible target when selecting an excerpt. The loader checks the core output and sentence slice, then freezes individual and combined production edits. Composition preparation checks production detection; browser corpus replay verifies DOM routing.
+
+```bash
+# Check the corpus and frozen prompt without inference.
+node scripts/prompt-experiments/sweep.mjs --experiment plus-digit --prompts scripts/prompt-experiments/plus-digit/results/new-round/prompts.mjs --check shipping candidate
+
+# Measure fresh shipping and the candidate with matched orders and repetitions.
+node --env-file-if-exists=scripts/prompt-experiments/.env.local scripts/prompt-experiments/sweep.mjs --experiment plus-digit --prompts scripts/prompt-experiments/plus-digit/results/new-round/prompts.mjs --out local/prompt-experiments/new-round/screening shipping candidate
+```
+
+Use the shared [paired gate helper](#paired-gate-helper) with `--experiment plus-digit --baseline <frozen-shipping-key>`, the round's frozen copy of the shipping prompt. It reports label, target-spacing, and combined-spacing accuracy separately. An `unsure` answer on a sign is a label miss but keeps safe spacing. Every sign must keep correct target spacing in every attempt; screening and confirmation also need a stable conjunction fix. Invalid answers, errors, skips, and missing attempts fail the gate.
+
+### Composed output
+
+Component combined-spacing scores include only the experiment's shape. When other shapes route in the same excerpt, use `composition.mjs` to check complete output as well. It currently accepts plus-digit corpora and discovers the shipping hyphen-digit and digit-plus targets from the same original text. Each record needs `companion_targets` (including an empty array when none route), `expected_composed_output` for its input slice, and `expected_composed_excerpt_output` for the full excerpt. Each companion records `kind`, `excerptAt`, and independently reviewed `expected_label`.
+
+The frozen prompt module exports `PROMPTS`, `BASELINE_SHAPE_PROMPTS`, and `SHAPE_PROMPTS`; each map names the frozen prompt key that its side runs for every shape kind. Every baseline entry must reproduce the shipping prompt, and the candidate reuses the baseline companion keys, so only its plus-digit entry can differ. Prepare validates complete annotations, production companion questions, and both levels of gold, then writes component corpora plus a frozen manifest:
+
+```bash
+node scripts/prompt-experiments/composition.mjs prepare --cases scripts/prompt-experiments/plus-digit/corpus/development.json --prompts scripts/prompt-experiments/plus-digit/results/new-round/prompts.mjs --out local/prompt-experiments/new-composition/prepared
+```
+
+The committed [composed-output round](plus-digit/results/20261023-composed-output/REPORT.md) predates `BASELINE_SHAPE_PROMPTS` and the retirement of offline baselines, so it reruns only at its recorded harness revision.
+
+Run each generated component corpus through `sweep.mjs --experiment <shape> --orders 2 --repeats 3`. The baseline uses the frozen shipping prompt for every shape; the candidate uses the same companion prompts and the frozen plus-digit candidate. Generate fresh artifacts for every shape on each side. Run baseline then candidate for comparison 1, followed by candidate then baseline for comparison 2. No sweep is needed for a shape with zero targets. Save the artifact paths as two comparisons:
+
+```json
+[
+  {
+    "baseline": {
+      "hyphen-digit": "local/prompt-experiments/new-composition/baseline-1-hyphen/1-hyphen-v29-zh.json",
+      "plus-digit": "local/prompt-experiments/new-composition/baseline-1-plus/1-v6-en-range-sign.json"
+    },
+    "candidate": {
+      "hyphen-digit": "local/prompt-experiments/new-composition/candidate-1-hyphen/1-hyphen-v29-zh.json",
+      "plus-digit": "local/prompt-experiments/new-composition/candidate-1-plus/1-candidate.json"
+    }
+  },
+  {
+    "baseline": {
+      "hyphen-digit": "local/prompt-experiments/new-composition/baseline-2-hyphen/1-hyphen-v29-zh.json",
+      "plus-digit": "local/prompt-experiments/new-composition/baseline-2-plus/1-v6-en-range-sign.json"
+    },
+    "candidate": {
+      "hyphen-digit": "local/prompt-experiments/new-composition/candidate-2-hyphen/1-hyphen-v29-zh.json",
+      "plus-digit": "local/prompt-experiments/new-composition/candidate-2-plus/1-candidate.json"
+    }
+  }
+]
+```
+
+Include every detected shape on each side and use actual paths beneath the ignored round directory. Paths resolve from the repository root, where these commands run, not from the comparisons file. Check the saved answers offline:
+
+```bash
+node scripts/prompt-experiments/composition.mjs check --prepared local/prompt-experiments/new-composition/prepared/prepared.json --runs local/prompt-experiments/new-composition/comparisons.json --out local/prompt-experiments/new-composition/gate
+```
+
+The gate checks frozen controls, fresh artifacts, reversed execution order, component safety, complete-excerpt regressions, attempt declines, and a stable improvement. Run the experiment's component gate on the same plus-digit artifacts as well: a composed improvement can come from different companion answers, so it cannot by itself establish a plus-digit gain. `gate.json` retains separate component labels/spacing, full outputs, and failures attributed to shapes. The harness uses production detectors and edits for all three shapes. DOM fixture replay separately verifies extraction across text nodes. Previously evaluated holdouts must be marked development for this follow-up.
+
 ## Runner options
 
 `--orders` defaults to 2; `--repeats` defaults to 1.
@@ -85,7 +148,7 @@ Use `--diagnostics <id1,id2>` with a development corpus, `--orders 1 --repeats 1
 Run when no matching pass is recorded, or after runner, gate, or relevant dependency changes. Prompt wording changes alone do not require another run.
 
 ```bash
-npx vitest run --exclude '**/local/**' scripts/prompt-experiments/sweep.test.ts scripts/prompt-experiments/hyphen-digit/paired-gates.test.ts scripts/prompt-experiments/hyphen-digit/check-paired.test.ts
+npx vitest run --exclude '**/local/**' scripts/prompt-experiments/sweep.test.ts scripts/prompt-experiments/plus-digit.test.ts scripts/prompt-experiments/composition.test.ts scripts/prompt-experiments/hyphen-digit/paired-gates.test.ts scripts/prompt-experiments/hyphen-digit/check-paired.test.ts
 ```
 
 These tests require no browser and run separately from `npm test`.
@@ -106,7 +169,7 @@ Prepare new source records in an ignored, untracked input directory first. After
 
 ## Paired gate helper
 
-Run `check-paired.mjs` on saved hyphen-digit artifacts. It calls the shared evaluator with production edits and checks the frozen prompts, inputs, schema, sampling, and runtime verification flags. It runs offline.
+Run `check-paired.mjs` on saved hyphen-digit or plus-digit artifacts. It checks the frozen prompts, inputs, schema, sampling, and runtime verification flags. Both shapes use production edits, bundled in memory; the evaluator runs offline without building the extension.
 
 ```bash
 node scripts/prompt-experiments/hyphen-digit/check-paired.mjs \

@@ -1,0 +1,1173 @@
+{
+  "role": "development",
+  "enums": {
+    "plus": [
+      "signed-number",
+      "conjunction",
+      "unsure"
+    ]
+  },
+  "diagnosticQuestions": [
+    "Translate the sentence into English, preserving what the + means.",
+    "Identify the text immediately before and after the single +. What does that + connect or modify?",
+    "Explain the difference between signed-number, conjunction, and unsure for this sentence."
+  ],
+  "collection": {
+    "round": "20261023-first-shape",
+    "capturedDate": "2026-10-23",
+    "routing": "contract-eligible; shipping plus-digit detector routes every case; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+    "sourcePages": 14,
+    "publishers": 13,
+    "userSeedPages": 1,
+    "userSeedTargets": 2,
+    "notes": [
+      "Public source pages were opened in Chrome Beta with Pangu disabled; no seed URL search.",
+      "22 retained targets: 20 public targets (6 conjunctions and 14 signs) plus 2 user conjunction targets.",
+      "All labels and model inputs were exposed during development. No prompt-example pages.",
+      "Jingxu technical explanations resemble Wikipedia; identical passages are excluded from holdout.",
+      "Source excerpts preserve exact authored text apart from removing outer collapsible whitespace; live model input was checked with existing readSentence().",
+      "HTML fixtures retain each target text node and relevant display/white-space styles; Phase 2 replayed these fixtures, not the original whole pages, through the production content script in Chromium, Firefox, and WebKit.",
+      "The final 8 records were unseen holdouts in this round; after frozen evaluation they became development records. REPORT.md pins the original 14 development and 8 holdout IDs.",
+      "Collection spans 2026-10-22 UTC / 2026-10-23 Asia/Taipei; individual fresh_verification timestamps retain UTC."
+    ]
+  },
+  "cases": [
+    {
+      "id": "user-seed-1",
+      "enum": "plus",
+      "input": "開啟密碼為您的身分證字號（大寫英文字母+9位數字",
+      "expected_output": "開啟密碼為您的身分證字號（大寫英文字母 + 9 位數字",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "ordinal": 1,
+      "at": 19,
+      "expected_label": "conjunction",
+      "source": "provided by users",
+      "canonical_source": "provided by users",
+      "publisher": "user-provided (publisher unavailable)",
+      "retrievedDate": "2026-10-23",
+      "sourceExcerpt": "開啟密碼為您的身分證字號（大寫英文字母+9位數字；外籍人士為居留證號碼：兩個大寫英文字母+8位數字）",
+      "excerptId": "user-seed",
+      "excerptAt": 19,
+      "category": "id-format",
+      "rationale": "The plus joins a letter component and a digit component of an identification number; it does not sign the digit count.",
+      "evidence": "user-provided; maintainer-confirmed real case",
+      "source_html": "<p>開啟密碼為您的身分證字號（大寫英文字母+9位數字；外籍人士為居留證號碼：兩個大寫英文字母+8位數字）</p>",
+      "source_css": "",
+      "source_surface": "maintainer-confirmed user text; original page/DOM unavailable",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Development in 20261023-first-shape; no prompt examples.",
+        "inference_note": "Evaluated in screening and both confirmation comparisons in 20261023-first-shape."
+      },
+      "expected_excerpt_output": "開啟密碼為您的身分證字號（大寫英文字母 + 9 位數字；外籍人士為居留證號碼：兩個大寫英文字母 + 8 位數字）",
+      "companion_targets": [],
+      "expected_composed_output": "開啟密碼為您的身分證字號（大寫英文字母 + 9 位數字",
+      "expected_composed_excerpt_output": "開啟密碼為您的身分證字號（大寫英文字母 + 9 位數字；外籍人士為居留證號碼：兩個大寫英文字母 + 8 位數字）"
+    },
+    {
+      "id": "user-seed-2",
+      "enum": "plus",
+      "input": "外籍人士為居留證號碼：兩個大寫英文字母+8位數字）",
+      "expected_output": "外籍人士為居留證號碼：兩個大寫英文字母 + 8 位數字）",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "ordinal": 1,
+      "at": 19,
+      "expected_label": "conjunction",
+      "source": "provided by users",
+      "canonical_source": "provided by users",
+      "publisher": "user-provided (publisher unavailable)",
+      "retrievedDate": "2026-10-23",
+      "sourceExcerpt": "開啟密碼為您的身分證字號（大寫英文字母+9位數字；外籍人士為居留證號碼：兩個大寫英文字母+8位數字）",
+      "excerptId": "user-seed",
+      "excerptAt": 44,
+      "category": "id-format",
+      "rationale": "The plus joins a letter component and a digit component of an identification number; it does not sign the digit count.",
+      "evidence": "user-provided; maintainer-confirmed real case",
+      "source_html": "<p>開啟密碼為您的身分證字號（大寫英文字母+9位數字；外籍人士為居留證號碼：兩個大寫英文字母+8位數字）</p>",
+      "source_css": "",
+      "source_surface": "maintainer-confirmed user text; original page/DOM unavailable",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Development in 20261023-first-shape; no prompt examples.",
+        "inference_note": "Evaluated in screening and both confirmation comparisons in 20261023-first-shape."
+      },
+      "expected_excerpt_output": "開啟密碼為您的身分證字號（大寫英文字母 + 9 位數字；外籍人士為居留證號碼：兩個大寫英文字母 + 8 位數字）",
+      "companion_targets": [],
+      "expected_composed_output": "外籍人士為居留證號碼：兩個大寫英文字母 + 8 位數字）",
+      "expected_composed_excerpt_output": "開啟密碼為您的身分證字號（大寫英文字母 + 9 位數字；外籍人士為居留證號碼：兩個大寫英文字母 + 8 位數字）"
+    },
+    {
+      "id": "chu-id-format",
+      "enum": "plus",
+      "input": "身分證字號：格式 英文字母+9位數字，驗證語法 ^[A-z][0-9]{9}$",
+      "expected_output": "身分證字號：格式 英文字母 + 9 位數字，驗證語法 ^[A-z][0-9]{9}$",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "ordinal": 1,
+      "at": 13,
+      "expected_label": "conjunction",
+      "source": "https://sites.google.com/g.chu.edu.tw/gforms/驗證輸入",
+      "canonical_source": "https://sites.google.com/g.chu.edu.tw/gforms/%E9%A9%97%E8%AD%89%E8%BC%B8%E5%85%A5",
+      "publisher": "中華大學 Google Forms 教學",
+      "retrievedDate": "2026-10-23",
+      "sourceExcerpt": "身分證字號：格式 英文字母+9位數字，驗證語法 ^[A-z][0-9]{9}$",
+      "excerptId": "chu-id-format",
+      "excerptAt": 13,
+      "category": "id-format",
+      "rationale": "The plus joins the letter and nine-digit components of an ID format.",
+      "evidence": "Verified exact rendered text node and live readSentence() context in Chrome Beta with Pangu disabled; source node retained in minimal HTML fixture. Source excerpt trims only outer collapsible whitespace.",
+      "source_html": "<div><p style=\"display:block;white-space:pre-wrap\">身分證字號：格式 英文字母+9位數字，驗證語法 ^[A-z][0-9]{9}$</p></div>",
+      "source_css": "",
+      "source_surface": "rendered text node",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Development in 20261023-first-shape; no prompt examples.",
+        "inference_note": "Evaluated in screening and both confirmation comparisons in 20261023-first-shape."
+      },
+      "expected_excerpt_output": "身分證字號：格式 英文字母 + 9 位數字，驗證語法 ^[A-z][0-9]{9}$",
+      "companion_targets": [],
+      "expected_composed_output": "身分證字號：格式 英文字母 + 9 位數字，驗證語法 ^[A-z][0-9]{9}$",
+      "expected_composed_excerpt_output": "身分證字號：格式 英文字母 + 9 位數字，驗證語法 ^[A-z][0-9]{9}$"
+    },
+    {
+      "id": "colatour-parent-child",
+      "enum": "plus",
+      "input": "●可12歲以下兒童+1位家長使用",
+      "expected_output": "●可 12 歲以下兒童 + 1 位家長使用",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "ordinal": 1,
+      "at": 9,
+      "expected_label": "conjunction",
+      "source": "https://www.colatour.com.tw/C10G_DomTour/C10G_Q02_DisplayTicket.aspx?TicketRateNo=349",
+      "canonical_source": "https://www.colatour.com.tw/C10G_DomTour/C10G_Q02_DisplayTicket.aspx?TicketRateNo=349",
+      "publisher": "可樂旅遊",
+      "retrievedDate": "2026-10-23",
+      "sourceExcerpt": "●可12歲以下兒童+1位家長使用",
+      "excerptId": "colatour-parent-child",
+      "excerptAt": 9,
+      "category": "ticket-bundle",
+      "rationale": "The ticket admits a child together with one parent; + joins the two people.",
+      "evidence": "Verified exact rendered text node and live readSentence() context in Chrome Beta with Pangu disabled; source node retained in minimal HTML fixture. Source excerpt trims only outer collapsible whitespace.",
+      "source_html": "<div><span style=\"display:inline;white-space:normal\">●可12歲以下兒童+1位家長使用 \n</span></div>",
+      "source_css": "",
+      "source_surface": "rendered text node",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Development in 20261023-first-shape; no prompt examples.",
+        "inference_note": "Evaluated in screening and both confirmation comparisons in 20261023-first-shape."
+      },
+      "expected_excerpt_output": "●可 12 歲以下兒童 + 1 位家長使用",
+      "companion_targets": [],
+      "expected_composed_output": "●可 12 歲以下兒童 + 1 位家長使用",
+      "expected_composed_excerpt_output": "●可 12 歲以下兒童 + 1 位家長使用"
+    },
+    {
+      "id": "eztravel-transport-attractions",
+      "enum": "plus",
+      "input": "交通票券+5大夯景點",
+      "expected_output": "交通票券 + 5 大夯景點",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "ordinal": 1,
+      "at": 4,
+      "expected_label": "conjunction",
+      "source": "https://activity.eztravel.com.tw/activity/e/ticket/",
+      "canonical_source": "https://activity.eztravel.com.tw/activity/e/ticket/",
+      "publisher": "易遊網",
+      "retrievedDate": "2026-10-23",
+      "sourceExcerpt": "交通票券+5大夯景點",
+      "excerptId": "eztravel-transport-attractions",
+      "excerptAt": 4,
+      "category": "ticket-bundle",
+      "rationale": "The bundle contains transport tickets and five attractions; + joins bundle components.",
+      "evidence": "Verified exact rendered text node and live readSentence() context in Chrome Beta with Pangu disabled; source node retained in minimal HTML fixture. Source excerpt trims only outer collapsible whitespace.",
+      "source_html": "<div><li style=\"display:block;white-space:nowrap\">交通票券+5大夯景點</li></div>",
+      "source_css": "",
+      "source_surface": "rendered text node",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Development in 20261023-first-shape; no prompt examples.",
+        "inference_note": "Evaluated in screening and both confirmation comparisons in 20261023-first-shape."
+      },
+      "expected_excerpt_output": "交通票券 + 5 大夯景點",
+      "companion_targets": [],
+      "expected_composed_output": "交通票券 + 5 大夯景點",
+      "expected_composed_excerpt_output": "交通票券 + 5 大夯景點"
+    },
+    {
+      "id": "udn-score-title",
+      "enum": "plus",
+      "input": "正負值+21高效輸出 溫班亞瑪摧毀雷霆冠軍夢",
+      "expected_output": "正負值 +21 高效輸出 溫班亞瑪摧毀雷霆冠軍夢",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "signed-number"
+        }
+      ],
+      "ordinal": 1,
+      "at": 3,
+      "expected_label": "signed-number",
+      "source": "https://udn.com/news/amp/story/7002/9202219",
+      "canonical_source": "https://udn.com/news/story/7002/9202219",
+      "publisher": "聯合新聞網",
+      "retrievedDate": "2026-10-23",
+      "sourceExcerpt": "NBA／現場高呼MVP！正負值+21高效輸出 溫班亞瑪摧毀雷霆冠軍夢",
+      "excerptId": "udn-score-title",
+      "excerptAt": 15,
+      "category": "score-delta",
+      "rationale": "The basketball plus/minus statistic is positive 21, not a second item.",
+      "evidence": "Verified exact rendered text node and live readSentence() context in Chrome Beta with Pangu disabled; source node retained in minimal HTML fixture. Source excerpt trims only outer collapsible whitespace.",
+      "source_html": "<div><h1 style=\"display:block;white-space:normal\">NBA／現場高呼MVP！正負值+21高效輸出 溫班亞瑪摧毀雷霆冠軍夢</h1></div>",
+      "source_css": "",
+      "source_surface": "rendered text node",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Development in 20261023-first-shape; no prompt examples.",
+        "inference_note": "Evaluated in screening and both confirmation comparisons in 20261023-first-shape."
+      },
+      "expected_excerpt_output": "NBA／現場高呼 MVP！正負值 +21 高效輸出 溫班亞瑪摧毀雷霆冠軍夢",
+      "companion_targets": [],
+      "expected_composed_output": "正負值 +21 高效輸出 溫班亞瑪摧毀雷霆冠軍夢",
+      "expected_composed_excerpt_output": "NBA／現場高呼 MVP！正負值 +21 高效輸出 溫班亞瑪摧毀雷霆冠軍夢"
+    },
+    {
+      "id": "udn-score-21",
+      "enum": "plus",
+      "input": "溫班亞瑪因左小腿拉傷缺席12場比賽後回歸，儘管受到上場時間限制，仍在21分鐘內繳出正負值+21的高效表現，全場多次引爆現場氣氛，甚讓現場球迷高喊「MVP」",
+      "expected_output": "溫班亞瑪因左小腿拉傷缺席 12 場比賽後回歸，儘管受到上場時間限制，仍在 21 分鐘內繳出正負值 +21 的高效表現，全場多次引爆現場氣氛，甚讓現場球迷高喊「MVP」",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "signed-number"
+        }
+      ],
+      "ordinal": 1,
+      "at": 44,
+      "expected_label": "signed-number",
+      "source": "https://udn.com/news/amp/story/7002/9202219",
+      "canonical_source": "https://udn.com/news/story/7002/9202219",
+      "publisher": "聯合新聞網",
+      "retrievedDate": "2026-10-23",
+      "sourceExcerpt": "溫班亞瑪因左小腿拉傷缺席12場比賽後回歸，儘管受到上場時間限制，仍在21分鐘內繳出正負值+21的高效表現，全場多次引爆現場氣氛，甚讓現場球迷高喊「MVP」。",
+      "excerptId": "udn-score-21",
+      "excerptAt": 44,
+      "category": "score-delta",
+      "rationale": "The basketball plus/minus statistic is positive 21.",
+      "evidence": "Verified exact rendered text node and live readSentence() context in Chrome Beta with Pangu disabled; source node retained in minimal HTML fixture. Source excerpt trims only outer collapsible whitespace.",
+      "source_html": "<div><p style=\"display:block;white-space:normal\">  溫班亞瑪因左小腿拉傷缺席12場比賽後回歸，儘管受到上場時間限制，仍在21分鐘內繳出正負值+21的高效表現，全場多次引爆現場氣氛，甚讓現場球迷高喊「MVP」。</p></div>",
+      "source_css": "",
+      "source_surface": "rendered text node",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Development in 20261023-first-shape; no prompt examples.",
+        "inference_note": "Evaluated in screening and both confirmation comparisons in 20261023-first-shape."
+      },
+      "expected_excerpt_output": "溫班亞瑪因左小腿拉傷缺席 12 場比賽後回歸，儘管受到上場時間限制，仍在 21 分鐘內繳出正負值 +21 的高效表現，全場多次引爆現場氣氛，甚讓現場球迷高喊「MVP」。",
+      "companion_targets": [],
+      "expected_composed_output": "溫班亞瑪因左小腿拉傷缺席 12 場比賽後回歸，儘管受到上場時間限制，仍在 21 分鐘內繳出正負值 +21 的高效表現，全場多次引爆現場氣氛，甚讓現場球迷高喊「MVP」",
+      "expected_composed_excerpt_output": "溫班亞瑪因左小腿拉傷缺席 12 場比賽後回歸，儘管受到上場時間限制，仍在 21 分鐘內繳出正負值 +21 的高效表現，全場多次引爆現場氣氛，甚讓現場球迷高喊「MVP」。"
+    },
+    {
+      "id": "udn-score-20",
+      "enum": "plus",
+      "input": "即便半場結束時馬刺仍落後3分，溫班亞瑪短短7分鐘內的正負值就達到+20，徹底改變比賽節奏",
+      "expected_output": "即便半場結束時馬刺仍落後 3 分，溫班亞瑪短短 7 分鐘內的正負值就達到 +20，徹底改變比賽節奏",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "signed-number"
+        }
+      ],
+      "ordinal": 1,
+      "at": 32,
+      "expected_label": "signed-number",
+      "source": "https://udn.com/news/amp/story/7002/9202219",
+      "canonical_source": "https://udn.com/news/story/7002/9202219",
+      "publisher": "聯合新聞網",
+      "retrievedDate": "2026-10-23",
+      "sourceExcerpt": "馬刺在溫班亞瑪缺陣期間仍繳出9勝3敗的成績，此役他一上場便帶來巨大影響。進入第二節前，他脫下運動褲準備登場時，全場觀眾已提前沸騰。即便半場結束時馬刺仍落後3分，溫班亞瑪短短7分鐘內的正負值就達到+20，徹底改變比賽節奏。",
+      "excerptId": "udn-score-20",
+      "excerptAt": 97,
+      "category": "score-delta",
+      "rationale": "The basketball plus/minus statistic is positive 20.",
+      "evidence": "Verified exact rendered text node and live readSentence() context in Chrome Beta with Pangu disabled; source node retained in minimal HTML fixture. Source excerpt trims only outer collapsible whitespace.",
+      "source_html": "<div><p style=\"display:block;white-space:normal\">  馬刺在溫班亞瑪缺陣期間仍繳出9勝3敗的成績，此役他一上場便帶來巨大影響。進入第二節前，他脫下運動褲準備登場時，全場觀眾已提前沸騰。即便半場結束時馬刺仍落後3分，溫班亞瑪短短7分鐘內的正負值就達到+20，徹底改變比賽節奏。</p></div>",
+      "source_css": "",
+      "source_surface": "rendered text node",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Development in 20261023-first-shape; no prompt examples.",
+        "inference_note": "Evaluated in screening and both confirmation comparisons in 20261023-first-shape."
+      },
+      "expected_excerpt_output": "馬刺在溫班亞瑪缺陣期間仍繳出 9 勝 3 敗的成績，此役他一上場便帶來巨大影響。進入第二節前，他脫下運動褲準備登場時，全場觀眾已提前沸騰。即便半場結束時馬刺仍落後 3 分，溫班亞瑪短短 7 分鐘內的正負值就達到 +20，徹底改變比賽節奏。",
+      "companion_targets": [],
+      "expected_composed_output": "即便半場結束時馬刺仍落後 3 分，溫班亞瑪短短 7 分鐘內的正負值就達到 +20，徹底改變比賽節奏",
+      "expected_composed_excerpt_output": "馬刺在溫班亞瑪缺陣期間仍繳出 9 勝 3 敗的成績，此役他一上場便帶來巨大影響。進入第二節前，他脫下運動褲準備登場時，全場觀眾已提前沸騰。即便半場結束時馬刺仍落後 3 分，溫班亞瑪短短 7 分鐘內的正負值就達到 +20，徹底改變比賽節奏。"
+    },
+    {
+      "id": "boca-phone-886",
+      "enum": "plus",
+      "input": "該中心設置簡明易記的國內免付費「旅外國人緊急服務專線」電話0800-085-095 [諧音「你幫我 你救我」，海外付費請撥+886-800-085-095]，國人在海外遭遇緊急危難時，可透過該專線電話尋求聯繫協助",
+      "expected_output": "該中心設置簡明易記的國內免付費「旅外國人緊急服務專線」電話 0800-085-095 [諧音「你幫我 你救我」，海外付費請撥 +886-800-085-095]，國人在海外遭遇緊急危難時，可透過該專線電話尋求聯繫協助",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "signed-number"
+        }
+      ],
+      "ordinal": 1,
+      "at": 61,
+      "expected_label": "signed-number",
+      "source": "https://www.boca.gov.tw/cp-53-378-353fb-1.html",
+      "canonical_source": "https://www.boca.gov.tw/cp-53-378-353fb-1.html",
+      "publisher": "外交部領事事務局",
+      "retrievedDate": "2026-10-23",
+      "sourceExcerpt": "該中心設置簡明易記的國內免付費「旅外國人緊急服務專線」電話0800-085-095 [諧音「你幫我 你救我」，海外付費請撥+886-800-085-095]，國人在海外遭遇緊急危難時，可透過該專線電話尋求聯繫協助。",
+      "excerptId": "boca-phone-886",
+      "excerptAt": 61,
+      "category": "phone-prefix",
+      "rationale": "+886 is the international dialing prefix of the telephone number.",
+      "evidence": "Verified exact rendered text node and live readSentence() context in Chrome Beta with Pangu disabled; source node retained in minimal HTML fixture. Source excerpt trims only outer collapsible whitespace.",
+      "source_html": "<div><p style=\"display:block;white-space:normal\">該中心設置簡明易記的國內免付費「旅外國人緊急服務專線」電話0800-085-095 [諧音「你幫我 你救我」，海外付費請撥+886-800-085-095]，國人在海外遭遇緊急危難時，可透過該專線電話尋求聯繫協助。</p></div>",
+      "source_css": "",
+      "source_surface": "rendered text node",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Development in 20261023-first-shape; no prompt examples.",
+        "inference_note": "Evaluated in screening and both confirmation comparisons in 20261023-first-shape."
+      },
+      "expected_excerpt_output": "該中心設置簡明易記的國內免付費「旅外國人緊急服務專線」電話 0800-085-095 [諧音「你幫我 你救我」，海外付費請撥 +886-800-085-095]，國人在海外遭遇緊急危難時，可透過該專線電話尋求聯繫協助。",
+      "companion_targets": [],
+      "expected_composed_output": "該中心設置簡明易記的國內免付費「旅外國人緊急服務專線」電話 0800-085-095 [諧音「你幫我 你救我」，海外付費請撥 +886-800-085-095]，國人在海外遭遇緊急危難時，可透過該專線電話尋求聯繫協助",
+      "expected_composed_excerpt_output": "該中心設置簡明易記的國內免付費「旅外國人緊急服務專線」電話 0800-085-095 [諧音「你幫我 你救我」，海外付費請撥 +886-800-085-095]，國人在海外遭遇緊急危難時，可透過該專線電話尋求聯繫協助。"
+    },
+    {
+      "id": "boca-phone-853",
+      "enum": "plus",
+      "input": "澳門地區：陸委會澳門辦事處緊急聯絡電話+853-6687-2557",
+      "expected_output": "澳門地區：陸委會澳門辦事處緊急聯絡電話 +853-6687-2557",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "signed-number"
+        }
+      ],
+      "ordinal": 1,
+      "at": 19,
+      "expected_label": "signed-number",
+      "source": "https://www.boca.gov.tw/cp-53-378-353fb-1.html",
+      "canonical_source": "https://www.boca.gov.tw/cp-53-378-353fb-1.html",
+      "publisher": "外交部領事事務局",
+      "retrievedDate": "2026-10-23",
+      "sourceExcerpt": "澳門地區：陸委會澳門辦事處緊急聯絡電話+853-6687-2557",
+      "excerptId": "boca-phone-853",
+      "excerptAt": 19,
+      "category": "phone-prefix",
+      "rationale": "+853 is the international dialing prefix of the telephone number.",
+      "evidence": "Verified exact rendered text node and live readSentence() context in Chrome Beta with Pangu disabled; source node retained in minimal HTML fixture. Source excerpt trims only outer collapsible whitespace.",
+      "source_html": "<div><p style=\"display:block;white-space:normal\">澳門地區：陸委會澳門辦事處緊急聯絡電話+853-6687-2557</p></div>",
+      "source_css": "",
+      "source_surface": "rendered text node",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Development in 20261023-first-shape; no prompt examples.",
+        "inference_note": "Evaluated in screening and both confirmation comparisons in 20261023-first-shape."
+      },
+      "expected_excerpt_output": "澳門地區：陸委會澳門辦事處緊急聯絡電話 +853-6687-2557",
+      "companion_targets": [],
+      "expected_composed_output": "澳門地區：陸委會澳門辦事處緊急聯絡電話 +853-6687-2557",
+      "expected_composed_excerpt_output": "澳門地區：陸委會澳門辦事處緊急聯絡電話 +853-6687-2557"
+    },
+    {
+      "id": "nidec-temperature-85",
+      "enum": "plus",
+      "input": "還支持 -40℃至+85℃的寬工作溫度範圍",
+      "expected_output": "還支持 -40℃ 至 +85℃ 的寬工作溫度範圍",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "signed-number"
+        }
+      ],
+      "ordinal": 1,
+      "at": 9,
+      "expected_label": "signed-number",
+      "source": "https://www.nidec-components.com/tw/information/page_67.html",
+      "canonical_source": "https://www.nidec-components.com/tw/information/page_67.html",
+      "publisher": "Nidec Components 台灣網站",
+      "retrievedDate": "2026-10-23",
+      "sourceExcerpt": "還支持 -40℃至+85℃的寬工作溫度範圍。",
+      "excerptId": "nidec-temperature-85",
+      "excerptAt": 9,
+      "category": "temperature",
+      "rationale": "The upper operating-temperature bound is positive 85 degrees Celsius.",
+      "evidence": "Verified exact rendered text node and live readSentence() context in Chrome Beta with Pangu disabled; source node retained in minimal HTML fixture. Source excerpt trims only outer collapsible whitespace.",
+      "source_html": "<div><span style=\"display:inline-block;white-space:normal\">還支持 -40℃至+85℃的寬工作溫度範圍。</span></div>",
+      "source_css": "",
+      "source_surface": "rendered text node",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Development in 20261023-first-shape; no prompt examples.",
+        "inference_note": "Evaluated in screening and both confirmation comparisons in 20261023-first-shape."
+      },
+      "expected_excerpt_output": "還支持 -40℃ 至 +85℃ 的寬工作溫度範圍。",
+      "companion_targets": [],
+      "expected_composed_output": "還支持 -40℃ 至 +85℃ 的寬工作溫度範圍",
+      "expected_composed_excerpt_output": "還支持 -40℃ 至 +85℃ 的寬工作溫度範圍。"
+    },
+    {
+      "id": "jingxu-capacitance-56",
+      "enum": "plus",
+      "input": "一般的Class 3電容在10°C至55°C的溫度範圍內，電容量會有-22%至+56%的變化",
+      "expected_output": "一般的 Class 3 電容在 10°C 至 55°C 的溫度範圍內，電容量會有 - 22% 至 +56% 的變化",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "signed-number"
+        }
+      ],
+      "ordinal": 1,
+      "at": 39,
+      "expected_label": "signed-number",
+      "source": "https://www.jingxutec.com/faq",
+      "canonical_source": "https://www.jingxutec.com/faq",
+      "publisher": "京旭科技",
+      "retrievedDate": "2026-10-23",
+      "sourceExcerpt": "Class 3 陶瓷電容：其容積效率更好，但其電容準確度及穩定性也更差。一般的Class 3電容在10°C至55°C的溫度範圍內，電容量會有-22%至+56%的變化。Class 3電容的散逸因數約為4%。一般Class 3電容會用在",
+      "excerptId": "jingxu-capacitance-56",
+      "excerptAt": 75,
+      "category": "percentage-bound",
+      "rationale": "The upper capacitance-change bound is positive 56 percent.",
+      "evidence": "Verified exact rendered text node and live readSentence() context in Chrome Beta with Pangu disabled; source node retained in minimal HTML fixture. Source excerpt trims only outer collapsible whitespace.",
+      "source_html": "<div><span style=\"display:inline;white-space:normal\">Class 3 陶瓷電容：其容積效率更好，但其電容準確度及穩定性也更差。一般的Class 3電容在10°C至55°C的溫度範圍內，電容量會有-22%至+56%的變化。Class 3電容的散逸因數約為4%。一般Class 3電容會用在</span></div>",
+      "source_css": "",
+      "source_surface": "rendered text node",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Development in 20261023-first-shape; no prompt examples.",
+        "inference_note": "Evaluated in screening and both confirmation comparisons in 20261023-first-shape."
+      },
+      "expected_excerpt_output": "Class 3 陶瓷電容：其容積效率更好，但其電容準確度及穩定性也更差。一般的 Class 3 電容在 10°C 至 55°C 的溫度範圍內，電容量會有 - 22% 至 +56% 的變化。Class 3 電容的散逸因數約為 4%。一般 Class 3 電容會用在",
+      "companion_targets": [
+        {
+          "kind": "hyphen-digit",
+          "excerptAt": 70,
+          "expected_label": "signed-number",
+          "rationale": "The minus signs the negative lower bound of the stated temperature or capacitance-change range."
+        }
+      ],
+      "expected_composed_output": "一般的 Class 3 電容在 10°C 至 55°C 的溫度範圍內，電容量會有 -22% 至 +56% 的變化",
+      "expected_composed_excerpt_output": "Class 3 陶瓷電容：其容積效率更好，但其電容準確度及穩定性也更差。一般的 Class 3 電容在 10°C 至 55°C 的溫度範圍內，電容量會有 -22% 至 +56% 的變化。Class 3 電容的散逸因數約為 4%。一般 Class 3 電容會用在"
+    },
+    {
+      "id": "jingxu-temperature-125",
+      "enum": "plus",
+      "input": "標示X7R的電容，其工作溫度為-55°C至+125°C，容值變動範圍在±15%之間",
+      "expected_output": "標示 X7R 的電容，其工作溫度為 - 55°C 至 +125°C，容值變動範圍在 ±15% 之間",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "signed-number"
+        }
+      ],
+      "ordinal": 1,
+      "at": 21,
+      "expected_label": "signed-number",
+      "source": "https://www.jingxutec.com/faq",
+      "canonical_source": "https://www.jingxutec.com/faq",
+      "publisher": "京旭科技",
+      "retrievedDate": "2026-10-23",
+      "sourceExcerpt": "一個標示Z5U的電容，其工作溫度為+10°C至+85°C，容值變動範圍在+22%至−56%之間。標示X7R的電容，其工作溫度為-55°C至+125°C，容值變動範圍在±15%之間。",
+      "excerptId": "jingxu-temperature-125",
+      "excerptAt": 69,
+      "category": "temperature",
+      "rationale": "The upper operating-temperature bound is positive 125 degrees Celsius.",
+      "evidence": "Verified exact rendered text node and live readSentence() context in Chrome Beta with Pangu disabled; source node retained in minimal HTML fixture. Source excerpt trims only outer collapsible whitespace.",
+      "source_html": "<div><span style=\"display:inline;white-space:normal\">一個標示Z5U的電容，其工作溫度為+10°C至+85°C，容值變動範圍在+22%至−56%之間。標示X7R的電容，其工作溫度為-55°C至+125°C，容值變動範圍在±15%之間。</span></div>",
+      "source_css": "",
+      "source_surface": "rendered text node",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Development in 20261023-first-shape; no prompt examples.",
+        "inference_note": "Evaluated in screening and both confirmation comparisons in 20261023-first-shape."
+      },
+      "expected_excerpt_output": "一個標示 Z5U 的電容，其工作溫度為 +10°C 至 +85°C，容值變動範圍在 +22% 至−56% 之間。標示 X7R 的電容，其工作溫度為 - 55°C 至 +125°C，容值變動範圍在 ±15% 之間。",
+      "companion_targets": [
+        {
+          "kind": "hyphen-digit",
+          "excerptAt": 63,
+          "expected_label": "signed-number",
+          "rationale": "The minus signs the negative lower bound of the stated temperature or capacitance-change range."
+        }
+      ],
+      "expected_composed_output": "標示 X7R 的電容，其工作溫度為 -55°C 至 +125°C，容值變動範圍在 ±15% 之間",
+      "expected_composed_excerpt_output": "一個標示 Z5U 的電容，其工作溫度為 +10°C 至 +85°C，容值變動範圍在 +22% 至−56% 之間。標示 X7R 的電容，其工作溫度為 -55°C 至 +125°C，容值變動範圍在 ±15% 之間。"
+    },
+    {
+      "id": "udn-points-threes",
+      "enum": "plus",
+      "input": "NBA／詹皇末節10分+2記三分帶走比賽 艾頓嗨喊：GOAT moment",
+      "expected_output": "NBA／詹皇末節 10 分 + 2 記三分帶走比賽 艾頓嗨喊：GOAT moment",
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "ordinal": 1,
+      "at": 11,
+      "expected_label": "conjunction",
+      "source": "https://udn.com/news/amp/story/7002/9189704",
+      "canonical_source": "https://udn.com/news/story/7002/9189704",
+      "publisher": "聯合新聞網",
+      "retrievedDate": "2026-10-23",
+      "sourceExcerpt": "NBA／詹皇末節10分+2記三分帶走比賽 艾頓嗨喊：GOAT moment！",
+      "excerptId": "udn-points-threes",
+      "excerptAt": 11,
+      "category": "sports-items",
+      "rationale": "The headline joins ten points and two three-pointers as two performance items.",
+      "evidence": "Verified exact rendered text node and live readSentence() context in Chrome Beta with Pangu disabled; source node retained in minimal HTML fixture. Source excerpt trims only outer collapsible whitespace.",
+      "source_html": "<div><h1 style=\"display:block;white-space:normal\">NBA／詹皇末節10分+2記三分帶走比賽 艾頓嗨喊：GOAT moment！</h1></div>",
+      "source_css": "",
+      "source_surface": "rendered text node",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Development in 20261023-first-shape; no prompt examples.",
+        "inference_note": "Evaluated in screening and both confirmation comparisons in 20261023-first-shape."
+      },
+      "expected_excerpt_output": "NBA／詹皇末節 10 分 + 2 記三分帶走比賽 艾頓嗨喊：GOAT moment！",
+      "companion_targets": [],
+      "expected_composed_output": "NBA／詹皇末節 10 分 + 2 記三分帶走比賽 艾頓嗨喊：GOAT moment",
+      "expected_composed_excerpt_output": "NBA／詹皇末節 10 分 + 2 記三分帶走比賽 艾頓嗨喊：GOAT moment！"
+    },
+    {
+      "id": "holdout-plus-digit-01",
+      "enum": "plus",
+      "input": "小心+886",
+      "at": 2,
+      "symbol": "+",
+      "expected_label": "signed-number",
+      "source": "https://news.tvbs.com.tw/local/2950059",
+      "source_html": "<h1 data-section=\"article-title\" class=\"mt-4 mb-4\">小心+886！「9種開頭」陌生來電不能接　警政署：一定是詐騙</h1>",
+      "routing_status": "Shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit.",
+      "source_css": "#fixture > h1 { display:block; white-space:normal; }",
+      "canonical_source": "https://news.tvbs.com.tw/local/2950059",
+      "role": "development",
+      "verification_status": "source and context verified; production routing verified by Phase 2 content-script replay in Chromium, Firefox, and WebKit",
+      "source_surface": "rendered text",
+      "expected_output": "小心 +886",
+      "sourceTitle": "小心+886！「9種開頭」陌生來電不能接　警政署：一定是詐騙",
+      "publisher": "TVBS",
+      "retrievedDate": "2026-10-22",
+      "sourceExcerpt": "小心+886！「9種開頭」陌生來電不能接　警政署：一定是詐騙",
+      "excerptId": "holdout-excerpt-1",
+      "excerptAt": 2,
+      "expected_excerpt_output": "小心 +886！「9 種開頭」陌生來電不能接　警政署：一定是詐騙",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "category": "international-phone-prefix",
+      "rationale": "The +886 token names the international phone prefix; it is not a joined item count.",
+      "evidence": "Exact authored text node captured in connected Chrome Beta with Pangu disabled; production readSentence context recorded; fixture replay passed.",
+      "sourceLocation": "Visible h1 text node",
+      "sourceIndependence": "Fresh publisher page, no excluded development domain; retained passage is not a copied/syndicated news paragraph. Same-page numerical rows are correlated and are not separate publishers.",
+      "ordinal": 1,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Collected in a separate context after confirmation; prompt and questions were frozen before collection. Both holdout comparisons were saved before answers were inspected. No subsequent prompt changes."
+      },
+      "fresh_verification": {
+        "timestamp": "2026-10-22T18:53:11.036Z",
+        "method": "Connected Chrome Beta DOM authored-node capture plus readSentence and fixture replay",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://news.tvbs.com.tw/local/2950059",
+        "http_status": 200,
+        "evidence_kind": "rendered authored node"
+      },
+      "source_style_check": [
+        {
+          "tag": "H1",
+          "display": "block",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        }
+      ],
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "signed-number"
+        }
+      ],
+      "role_note": "Evaluated as a blinded holdout in 20261023-first-shape; retained for future development only.",
+      "companion_targets": [],
+      "expected_composed_output": "小心 +886",
+      "expected_composed_excerpt_output": "小心 +886！「9 種開頭」陌生來電不能接　警政署：一定是詐騙"
+    },
+    {
+      "id": "holdout-plus-digit-02",
+      "enum": "plus",
+      "input": "5日漲+13.2%",
+      "at": 3,
+      "symbol": "+",
+      "expected_label": "signed-number",
+      "source": "https://fasttbreaklab.com/",
+      "source_html": "<span style=\"background:#1f2937;border:1px solid #374151;border-radius:20px;padding:3px 10px;font-size:11px;color:#a78bfa;margin:2px\">5日漲+13.2%</span>",
+      "routing_status": "Shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit.",
+      "source_css": "#fixture > span { display:block; white-space:normal; }",
+      "canonical_source": "https://fasttbreaklab.com/",
+      "role": "development",
+      "verification_status": "source and context verified; production routing verified by Phase 2 content-script replay in Chromium, Firefox, and WebKit",
+      "source_surface": "rendered text",
+      "expected_output": "5 日漲 +13.2%",
+      "sourceTitle": "台股每日精選 | FastBreak Lab",
+      "publisher": "FastBreak Lab",
+      "retrievedDate": "2026-10-22",
+      "sourceExcerpt": "5日漲+13.2%",
+      "excerptId": "holdout-excerpt-2",
+      "excerptAt": 3,
+      "expected_excerpt_output": "5 日漲 +13.2%",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "category": "financial-percentage-change",
+      "rationale": "The leading plus marks a positive five-day percentage change.",
+      "evidence": "Exact authored text node captured in connected Chrome Beta with Pangu disabled; production readSentence context recorded; fixture replay passed.",
+      "sourceLocation": "Visible span text node",
+      "sourceIndependence": "Fresh publisher page, no excluded development domain; retained passage is not a copied/syndicated news paragraph. Same-page numerical rows are correlated and are not separate publishers.",
+      "ordinal": 1,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Collected in a separate context after confirmation; prompt and questions were frozen before collection. Both holdout comparisons were saved before answers were inspected. No subsequent prompt changes."
+      },
+      "fresh_verification": {
+        "timestamp": "2026-10-22T18:49:35.063Z",
+        "method": "Connected Chrome Beta DOM authored-node capture plus readSentence and fixture replay",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://fasttbreaklab.com/",
+        "http_status": 200,
+        "evidence_kind": "rendered authored node"
+      },
+      "source_style_check": [
+        {
+          "tag": "SPAN",
+          "display": "block",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        }
+      ],
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "signed-number"
+        }
+      ],
+      "role_note": "Evaluated as a blinded holdout in 20261023-first-shape; retained for future development only.",
+      "companion_targets": [],
+      "expected_composed_output": "5 日漲 +13.2%",
+      "expected_composed_excerpt_output": "5 日漲 +13.2%"
+    },
+    {
+      "id": "holdout-plus-digit-03",
+      "enum": "plus",
+      "input": "5日漲+11.9%",
+      "at": 3,
+      "symbol": "+",
+      "expected_label": "signed-number",
+      "source": "https://fasttbreaklab.com/",
+      "source_html": "<span style=\"background:#1f2937;border:1px solid #374151;border-radius:20px;padding:3px 10px;font-size:11px;color:#a78bfa;margin:2px\">5日漲+11.9%</span>",
+      "routing_status": "Shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit.",
+      "source_css": "#fixture > span { display:block; white-space:normal; }",
+      "canonical_source": "https://fasttbreaklab.com/",
+      "role": "development",
+      "verification_status": "source and context verified; production routing verified by Phase 2 content-script replay in Chromium, Firefox, and WebKit",
+      "source_surface": "rendered text",
+      "expected_output": "5 日漲 +11.9%",
+      "sourceTitle": "台股每日精選 | FastBreak Lab",
+      "publisher": "FastBreak Lab",
+      "retrievedDate": "2026-10-22",
+      "sourceExcerpt": "5日漲+11.9%",
+      "excerptId": "holdout-excerpt-3",
+      "excerptAt": 3,
+      "expected_excerpt_output": "5 日漲 +11.9%",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "category": "financial-percentage-change",
+      "rationale": "The leading plus marks a positive five-day percentage change.",
+      "evidence": "Exact authored text node captured in connected Chrome Beta with Pangu disabled; production readSentence context recorded; fixture replay passed.",
+      "sourceLocation": "Visible span text node",
+      "sourceIndependence": "Fresh publisher page, no excluded development domain; retained passage is not a copied/syndicated news paragraph. Same-page numerical rows are correlated and are not separate publishers.",
+      "ordinal": 1,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Collected in a separate context after confirmation; prompt and questions were frozen before collection. Both holdout comparisons were saved before answers were inspected. No subsequent prompt changes."
+      },
+      "fresh_verification": {
+        "timestamp": "2026-10-22T18:49:35.063Z",
+        "method": "Connected Chrome Beta DOM authored-node capture plus readSentence and fixture replay",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://fasttbreaklab.com/",
+        "http_status": 200,
+        "evidence_kind": "rendered authored node"
+      },
+      "source_style_check": [
+        {
+          "tag": "SPAN",
+          "display": "block",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        }
+      ],
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "signed-number"
+        }
+      ],
+      "role_note": "Evaluated as a blinded holdout in 20261023-first-shape; retained for future development only.",
+      "companion_targets": [],
+      "expected_composed_output": "5 日漲 +11.9%",
+      "expected_composed_excerpt_output": "5 日漲 +11.9%"
+    },
+    {
+      "id": "holdout-plus-digit-04",
+      "enum": "plus",
+      "input": "5日漲+25.1%",
+      "at": 3,
+      "symbol": "+",
+      "expected_label": "signed-number",
+      "source": "https://fasttbreaklab.com/",
+      "source_html": "<span style=\"background:#1f2937;border:1px solid #374151;border-radius:20px;padding:3px 10px;font-size:11px;color:#a78bfa;margin:2px\">5日漲+25.1%</span>",
+      "routing_status": "Shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit.",
+      "source_css": "#fixture > span { display:block; white-space:normal; }",
+      "canonical_source": "https://fasttbreaklab.com/",
+      "role": "development",
+      "verification_status": "source and context verified; production routing verified by Phase 2 content-script replay in Chromium, Firefox, and WebKit",
+      "source_surface": "rendered text",
+      "expected_output": "5 日漲 +25.1%",
+      "sourceTitle": "台股每日精選 | FastBreak Lab",
+      "publisher": "FastBreak Lab",
+      "retrievedDate": "2026-10-22",
+      "sourceExcerpt": "5日漲+25.1%",
+      "excerptId": "holdout-excerpt-4",
+      "excerptAt": 3,
+      "expected_excerpt_output": "5 日漲 +25.1%",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "category": "financial-percentage-change",
+      "rationale": "The leading plus marks a positive five-day percentage change.",
+      "evidence": "Exact authored text node captured in connected Chrome Beta with Pangu disabled; production readSentence context recorded; fixture replay passed.",
+      "sourceLocation": "Visible span text node",
+      "sourceIndependence": "Fresh publisher page, no excluded development domain; retained passage is not a copied/syndicated news paragraph. Same-page numerical rows are correlated and are not separate publishers.",
+      "ordinal": 1,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Collected in a separate context after confirmation; prompt and questions were frozen before collection. Both holdout comparisons were saved before answers were inspected. No subsequent prompt changes."
+      },
+      "fresh_verification": {
+        "timestamp": "2026-10-22T18:49:35.063Z",
+        "method": "Connected Chrome Beta DOM authored-node capture plus readSentence and fixture replay",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://fasttbreaklab.com/",
+        "http_status": 200,
+        "evidence_kind": "rendered authored node"
+      },
+      "source_style_check": [
+        {
+          "tag": "SPAN",
+          "display": "block",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        }
+      ],
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "signed-number"
+        }
+      ],
+      "role_note": "Evaluated as a blinded holdout in 20261023-first-shape; retained for future development only.",
+      "companion_targets": [],
+      "expected_composed_output": "5 日漲 +25.1%",
+      "expected_composed_excerpt_output": "5 日漲 +25.1%"
+    },
+    {
+      "id": "holdout-plus-digit-05",
+      "enum": "plus",
+      "input": "第三戰迎戰傷兵回歸的國王，德魯雖僅攻下9分，但仍貢獻10籃板、2助攻、2抄截，並以正負值+22居全隊第二、效率值23排名全隊第三",
+      "at": 44,
+      "symbol": "+",
+      "expected_label": "signed-number",
+      "source": "https://tpbl.basketball/news/377",
+      "source_html": "<p>第三戰迎戰傷兵回歸的國王，德魯雖僅攻下9分，但仍貢獻10籃板、2助攻、2抄截，並以正負值+22居全隊第二、效率值23排名全隊第三。即便得分不若前兩戰亮眼，他仍透過積極跑動、籃板鞏固與防守干擾，在場上持續發揮關鍵影響力。</p>",
+      "routing_status": "Shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit.",
+      "source_css": "#fixture > p { display:block; white-space:normal; }",
+      "canonical_source": "https://tpbl.basketball/news/377",
+      "role": "development",
+      "verification_status": "source and context verified; production routing verified by Phase 2 content-script replay in Chromium, Firefox, and WebKit",
+      "source_surface": "rendered text",
+      "expected_output": "第三戰迎戰傷兵回歸的國王，德魯雖僅攻下 9 分，但仍貢獻 10 籃板、2 助攻、2 抄截，並以正負值 +22 居全隊第二、效率值 23 排名全隊第三",
+      "sourceTitle": "全面身手撐起三戰　德魯場均雙十奪第二十週MVP | 台灣職業籃球大聯盟",
+      "publisher": "台灣職業籃球大聯盟",
+      "retrievedDate": "2026-10-22",
+      "sourceExcerpt": "第三戰迎戰傷兵回歸的國王，德魯雖僅攻下9分，但仍貢獻10籃板、2助攻、2抄截，並以正負值+22居全隊第二、效率值23排名全隊第三。即便得分不若前兩戰亮眼，他仍透過積極跑動、籃板鞏固與防守干擾，在場上持續發揮關鍵影響力。",
+      "excerptId": "holdout-excerpt-5",
+      "excerptAt": 44,
+      "expected_excerpt_output": "第三戰迎戰傷兵回歸的國王，德魯雖僅攻下 9 分，但仍貢獻 10 籃板、2 助攻、2 抄截，並以正負值 +22 居全隊第二、效率值 23 排名全隊第三。即便得分不若前兩戰亮眼，他仍透過積極跑動、籃板鞏固與防守干擾，在場上持續發揮關鍵影響力。",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "category": "score-delta",
+      "rationale": "The basketball plus/minus statistic is a positive score differential.",
+      "evidence": "Exact authored text node captured in connected Chrome Beta with Pangu disabled; production readSentence context recorded; fixture replay passed.",
+      "sourceLocation": "Visible p text node",
+      "sourceIndependence": "Fresh publisher page, no excluded development domain; retained passage is not a copied/syndicated news paragraph. Same-page numerical rows are correlated and are not separate publishers.",
+      "ordinal": 1,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Collected in a separate context after confirmation; prompt and questions were frozen before collection. Both holdout comparisons were saved before answers were inspected. No subsequent prompt changes."
+      },
+      "fresh_verification": {
+        "timestamp": "2026-10-22T18:49:52.573Z",
+        "method": "Connected Chrome Beta DOM authored-node capture plus readSentence and fixture replay",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://tpbl.basketball/news/377",
+        "http_status": 200,
+        "evidence_kind": "rendered authored node"
+      },
+      "source_style_check": [
+        {
+          "tag": "P",
+          "display": "block",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        }
+      ],
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "signed-number"
+        }
+      ],
+      "role_note": "Evaluated as a blinded holdout in 20261023-first-shape; retained for future development only.",
+      "companion_targets": [],
+      "expected_composed_output": "第三戰迎戰傷兵回歸的國王，德魯雖僅攻下 9 分，但仍貢獻 10 籃板、2 助攻、2 抄截，並以正負值 +22 居全隊第二、效率值 23 排名全隊第三",
+      "expected_composed_excerpt_output": "第三戰迎戰傷兵回歸的國王，德魯雖僅攻下 9 分，但仍貢獻 10 籃板、2 助攻、2 抄截，並以正負值 +22 居全隊第二、效率值 23 排名全隊第三。即便得分不若前兩戰亮眼，他仍透過積極跑動、籃板鞏固與防守干擾，在場上持續發揮關鍵影響力。"
+    },
+    {
+      "id": "holdout-plus-digit-06",
+      "enum": "plus",
+      "input": "過去廠商習慣填寫「藥物納入全民健康保險給付建議書」提交給健保署後，產品暫時納入「健保尚未納入給付特材品項表(Z碼)(簡稱Z code表)」就能取得 Z 碼 (3個英文字母+9個數字)",
+      "at": 85,
+      "symbol": "+",
+      "expected_label": "conjunction",
+      "source": "https://www.tmti.org/news_detail.php?id=11300107&tbl=LAW",
+      "source_html": "<div>\n過去廠商習慣填寫「藥物納入全民健康保險給付建議書」提交給健保署後，產品暫時納入「健保尚未納入給付特材品項表(Z碼)(簡稱Z code表)」就能取得 Z 碼 (3個英文字母+9個數字)。<br></div>",
+      "routing_status": "Shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit.",
+      "source_css": "#fixture > div { display:block; white-space:normal; }",
+      "canonical_source": "https://www.tmti.org/news_detail.php?id=11300107&tbl=LAW",
+      "role": "development",
+      "verification_status": "source and context verified; production routing verified by Phase 2 content-script replay in Chromium, Firefox, and WebKit",
+      "source_surface": "rendered text",
+      "expected_output": "過去廠商習慣填寫「藥物納入全民健康保險給付建議書」提交給健保署後，產品暫時納入「健保尚未納入給付特材品項表 (Z 碼)(簡稱 Z code 表)」就能取得 Z 碼 (3 個英文字母 + 9 個數字)",
+      "sourceTitle": "臺灣生技醫療器材工業同業公會 - 最新消息",
+      "publisher": "臺灣生技醫療器材工業同業公會",
+      "retrievedDate": "2026-10-22",
+      "sourceExcerpt": "過去廠商習慣填寫「藥物納入全民健康保險給付建議書」提交給健保署後，產品暫時納入「健保尚未納入給付特材品項表(Z碼)(簡稱Z code表)」就能取得 Z 碼 (3個英文字母+9個數字)。",
+      "excerptId": "holdout-excerpt-6",
+      "excerptAt": 85,
+      "expected_excerpt_output": "過去廠商習慣填寫「藥物納入全民健康保險給付建議書」提交給健保署後，產品暫時納入「健保尚未納入給付特材品項表 (Z 碼)(簡稱 Z code 表)」就能取得 Z 碼 (3 個英文字母 + 9 個數字)。",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "category": "id-format",
+      "rationale": "The Z code format joins three letters and nine digits as components of one identifier.",
+      "evidence": "Exact authored text node captured in connected Chrome Beta with Pangu disabled; production readSentence context recorded; fixture replay passed.",
+      "sourceLocation": "Visible div text node",
+      "sourceIndependence": "Publisher-specific first-person member guidance; distinct medical Z-code passage. The supplied rel=canonical incorrectly points at the site home page, so final detail URL is the page identity.",
+      "ordinal": 1,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Collected in a separate context after confirmation; prompt and questions were frozen before collection. Both holdout comparisons were saved before answers were inspected. No subsequent prompt changes."
+      },
+      "fresh_verification": {
+        "timestamp": "2026-10-22T18:49:52.573Z",
+        "method": "Connected Chrome Beta DOM authored-node capture plus readSentence and fixture replay",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.tmti.org/news_detail.php?id=11300107&tbl=LAW",
+        "http_status": 200,
+        "evidence_kind": "rendered authored node"
+      },
+      "source_style_check": [
+        {
+          "tag": "DIV",
+          "display": "block",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        }
+      ],
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "role_note": "Evaluated as a blinded holdout in 20261023-first-shape; retained for future development only.",
+      "companion_targets": [],
+      "expected_composed_output": "過去廠商習慣填寫「藥物納入全民健康保險給付建議書」提交給健保署後，產品暫時納入「健保尚未納入給付特材品項表 (Z 碼)(簡稱 Z code 表)」就能取得 Z 碼 (3 個英文字母 + 9 個數字)",
+      "expected_composed_excerpt_output": "過去廠商習慣填寫「藥物納入全民健康保險給付建議書」提交給健保署後，產品暫時納入「健保尚未納入給付特材品項表 (Z 碼)(簡稱 Z code 表)」就能取得 Z 碼 (3 個英文字母 + 9 個數字)。"
+    },
+    {
+      "id": "holdout-plus-digit-07",
+      "enum": "plus",
+      "input": "耐高溫測量系統適合在-50℃至+200℃範圍内使用",
+      "at": 15,
+      "symbol": "+",
+      "expected_label": "signed-number",
+      "source": "https://www.zwickroell.com/tw/accessories/extensometers/strain-gauge-clip-on-extensometer/",
+      "source_html": "<li>耐高溫測量系統適合在-50℃至+200℃範圍内使用。</li>",
+      "routing_status": "Shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit.",
+      "source_css": "#fixture > li { display:list-item; white-space:normal; }",
+      "canonical_source": "https://www.zwickroell.com/tw/accessories/extensometers/strain-gauge-clip-on-extensometer/",
+      "role": "development",
+      "verification_status": "source and context verified; production routing verified by Phase 2 content-script replay in Chromium, Firefox, and WebKit",
+      "source_surface": "rendered text",
+      "expected_output": "耐高溫測量系統適合在 - 50℃ 至 +200℃ 範圍内使用",
+      "sourceTitle": "應變計夾式延伸計 | ZwickRoell",
+      "publisher": "ZwickRoell",
+      "retrievedDate": "2026-10-22",
+      "sourceExcerpt": "耐高溫測量系統適合在-50℃至+200℃範圍内使用。",
+      "excerptId": "holdout-excerpt-7",
+      "excerptAt": 15,
+      "expected_excerpt_output": "耐高溫測量系統適合在 - 50℃ 至 +200℃ 範圍内使用。",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "category": "positive-temperature",
+      "rationale": "The signed positive endpoint of a temperature range is +200 degrees Celsius.",
+      "evidence": "Exact authored text node captured in connected Chrome Beta with Pangu disabled; production readSentence context recorded; fixture replay passed.",
+      "sourceLocation": "Visible li text node",
+      "sourceIndependence": "Fresh publisher page, no excluded development domain; retained passage is not a copied/syndicated news paragraph. Same-page numerical rows are correlated and are not separate publishers.",
+      "ordinal": 1,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Collected in a separate context after confirmation; prompt and questions were frozen before collection. Both holdout comparisons were saved before answers were inspected. No subsequent prompt changes."
+      },
+      "fresh_verification": {
+        "timestamp": "2026-10-22T18:51:37.980Z",
+        "method": "Connected Chrome Beta DOM authored-node capture plus readSentence and fixture replay",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://www.zwickroell.com/tw/accessories/extensometers/strain-gauge-clip-on-extensometer/",
+        "http_status": 200,
+        "evidence_kind": "rendered authored node"
+      },
+      "source_style_check": [
+        {
+          "tag": "LI",
+          "display": "list-item",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        }
+      ],
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "signed-number"
+        }
+      ],
+      "role_note": "Evaluated as a blinded holdout in 20261023-first-shape; retained for future development only.",
+      "companion_targets": [
+        {
+          "kind": "hyphen-digit",
+          "excerptAt": 10,
+          "expected_label": "signed-number",
+          "rationale": "The minus signs the negative lower bound of the stated temperature or capacitance-change range."
+        }
+      ],
+      "expected_composed_output": "耐高溫測量系統適合在 -50℃ 至 +200℃ 範圍内使用",
+      "expected_composed_excerpt_output": "耐高溫測量系統適合在 -50℃ 至 +200℃ 範圍内使用。"
+    },
+    {
+      "id": "holdout-plus-digit-08",
+      "enum": "plus",
+      "input": "蘭陽動植物王國 - 媽咪愛獨家【親子優惠套票】1位大人+1位3-11歲兒童or65歲以上年長者-加送一張餵食券-使用期限自購買日起180天(農曆春節不適用)",
+      "at": 27,
+      "symbol": "+",
+      "expected_label": "conjunction",
+      "source": "https://mamilove.com.tw/market/category/amusement-ticket",
+      "source_html": "<div class=\"name\" data-v-7b52d2cc=\"\">\n        蘭陽動植物王國 - 媽咪愛獨家【親子優惠套票】1位大人+1位3-11歲兒童or65歲以上年長者-加送一張餵食券-使用期限自購買日起180天(農曆春節不適用)\n      </div>",
+      "routing_status": "Shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit.",
+      "source_css": "#fixture > div { display:flow-root; white-space:normal; }",
+      "canonical_source": "https://mamilove.com.tw/market/category/amusement-ticket",
+      "role": "development",
+      "verification_status": "source and context verified; production routing verified by Phase 2 content-script replay in Chromium, Firefox, and WebKit",
+      "source_surface": "rendered text",
+      "expected_output": "蘭陽動植物王國 - 媽咪愛獨家【親子優惠套票】1 位大人 + 1 位 3-11 歲兒童 or65 歲以上年長者 - 加送一張餵食券 - 使用期限自購買日起 180 天 (農曆春節不適用)",
+      "sourceTitle": "旅遊館 - 遊樂票券 最熱銷商品｜媽咪愛",
+      "publisher": "媽咪愛",
+      "retrievedDate": "2026-10-22",
+      "sourceExcerpt": "蘭陽動植物王國 - 媽咪愛獨家【親子優惠套票】1位大人+1位3-11歲兒童or65歲以上年長者-加送一張餵食券-使用期限自購買日起180天(農曆春節不適用)",
+      "excerptId": "holdout-excerpt-8",
+      "excerptAt": 27,
+      "expected_excerpt_output": "蘭陽動植物王國 - 媽咪愛獨家【親子優惠套票】1 位大人 + 1 位 3-11 歲兒童 or65 歲以上年長者 - 加送一張餵食券 - 使用期限自購買日起 180 天 (農曆春節不適用)",
+      "contract_routing": "eligible; shipping plus-digit detector matched the saved excerpt; Phase 2 content-script replay verified DOM routing in Chromium, Firefox, and WebKit",
+      "category": "item-join",
+      "rationale": "The ticket combines one adult with one eligible child or senior.",
+      "evidence": "Exact authored text node captured in connected Chrome Beta with Pangu disabled; production readSentence context recorded; fixture replay passed.",
+      "sourceLocation": "Visible div text node",
+      "sourceIndependence": "Fresh publisher page, no excluded development domain; retained passage is not a copied/syndicated news paragraph. Same-page numerical rows are correlated and are not separate publishers.",
+      "ordinal": 1,
+      "prior_exposure": {
+        "source_inspected": true,
+        "label_reviewed": true,
+        "model_inference": true,
+        "prompt_example": false,
+        "topic_discussed": true,
+        "note": "Collected in a separate context after confirmation; prompt and questions were frozen before collection. Both holdout comparisons were saved before answers were inspected. No subsequent prompt changes."
+      },
+      "fresh_verification": {
+        "timestamp": "2026-10-22T18:51:52.856Z",
+        "method": "Connected Chrome Beta DOM authored-node capture plus readSentence and fixture replay",
+        "pangu_disabled": true,
+        "verified": true,
+        "final_url": "https://mamilove.com.tw/market/category/amusement-ticket",
+        "http_status": 200,
+        "evidence_kind": "rendered authored node"
+      },
+      "source_style_check": [
+        {
+          "tag": "DIV",
+          "display": "flow-root",
+          "whiteSpace": "normal",
+          "visibility": "visible"
+        }
+      ],
+      "targets": [
+        {
+          "ordinal": 1,
+          "expected_label": "conjunction"
+        }
+      ],
+      "role_note": "Evaluated as a blinded holdout in 20261023-first-shape; retained for future development only.",
+      "companion_targets": [],
+      "expected_composed_output": "蘭陽動植物王國 - 媽咪愛獨家【親子優惠套票】1 位大人 + 1 位 3-11 歲兒童 or65 歲以上年長者 - 加送一張餵食券 - 使用期限自購買日起 180 天 (農曆春節不適用)",
+      "expected_composed_excerpt_output": "蘭陽動植物王國 - 媽咪愛獨家【親子優惠套票】1 位大人 + 1 位 3-11 歲兒童 or65 歲以上年長者 - 加送一張餵食券 - 使用期限自購買日起 180 天 (農曆春節不適用)"
+    }
+  ]
+}

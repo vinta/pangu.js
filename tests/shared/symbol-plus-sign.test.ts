@@ -79,4 +79,12 @@ describe('Symbol +', () => {
     expect(pangu.spaceText('評分3.5+的餐廳')).toBe('評分 3.5+ 的餐廳');
     expect(pangu.spaceText('Python 3+的版本')).toBe('Python 3+ 的版本');
   });
+
+  it('keeps CJK+digit as a sign until the extension classifies the sentence', () => {
+    // FIXME: Core cannot distinguish an ID component from a signed number; AI spacing adds the conjunction spaces (ADR 0035)
+    // Extension output spaces both pluses as conjunctions: CJK + N
+    expect(pangu.spaceText('開啟密碼為您的身分證字號（大寫英文字母+9位數字；外籍人士為居留證號碼：兩個大寫英文字母+8位數字）')).toBe(
+      '開啟密碼為您的身分證字號（大寫英文字母 +9 位數字；外籍人士為居留證號碼：兩個大寫英文字母 +8 位數字）',
+    );
+  });
 });

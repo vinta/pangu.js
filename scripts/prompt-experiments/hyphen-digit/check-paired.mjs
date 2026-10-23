@@ -3,12 +3,12 @@ import { readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { isDeepStrictEqual, parseArgs } from 'node:util';
-import { rolldown } from 'rolldown';
-import { buildExtension, outputDirectory, publicCase } from '../artifacts.mjs';
+import { outputDirectory, publicCase } from '../artifacts.mjs';
+import { productionModule } from '../production.mjs';
 import { evaluatePaired } from './paired-gates.mjs';
 
 const usage = `Usage: node scripts/prompt-experiments/hyphen-digit/check-paired.mjs
-  --phase screening|confirmation|holdout --cases <frozen-corpus.json>
+  --experiment hyphen-digit|plus-digit --phase screening|confirmation|holdout --cases <frozen-corpus.json>
   --prompts <frozen-prompts.mjs> --baseline <frozen-baseline-key>
   --out local/prompt-experiments/<round>/<gate> [--example-source <canonical-url> ...]
   <baseline-1.json> <candidate-1.json> [<baseline-2.json> <candidate-2.json>]
@@ -26,21 +26,11 @@ function readJSON(path) {
   }
 }
 
-async function productionModule(path) {
-  const bundle = await rolldown({ input: fileURLToPath(new URL(`../../../browser-extensions/chrome/src/ai-spacing/shapes/${path}.ts`, import.meta.url)) });
-  try {
-    const { output } = await bundle.generate({ format: 'esm' });
-    assert(output.length === 1 && output[0].type === 'chunk', `${path}: expected one production bundle; check the production imports`);
-    return await import(`data:text/javascript;base64,${Buffer.from(output[0].code).toString('base64')}`);
-  } finally {
-    await bundle.close();
-  }
-}
-
 async function main() {
   const { values, positionals } = parseArgs({
     allowPositionals: true,
     options: {
+      'experiment': { type: 'string', default: 'hyphen-digit' },
       'phase': { type: 'string' },
       'cases': { type: 'string' },
       'prompts': { type: 'string' },
@@ -61,13 +51,15 @@ async function main() {
   const count = values.phase === 'screening' ? 2 : 4;
   assert.equal(positionals.length, count, `${values.phase}: provide ${count} artifact paths in baseline/candidate pairs; see --help`);
 
-  const corpus = readJSON(values.cases);
+  assert(['hyphen-digit', 'plus-digit'].includes(values.experiment), `invalid --experiment ${values.experiment}; use hyphen-digit or plus-digit`);
+  const plusDigit = values.experiment === 'plus-digit' ? await import('../plus-digit/experiment.mjs') : null;
+  const corpus = plusDigit ? plusDigit.loadCorpus(values.cases) : readJSON(values.cases);
   const role = values.phase === 'holdout' ? 'holdout' : 'development';
   assert.equal(corpus.role, role, `${values.cases}: ${values.phase} requires a frozen ${role} corpus`);
   assert(Array.isArray(corpus.cases) && corpus.cases.length > 0 && corpus.cases.every((kase) => kase && typeof kase.id === 'string'), `${values.cases}: provide a nonempty cases array with case IDs`);
   const cases = corpus.cases.map(publicCase);
-  const labels = ['signed-number', 'range-or-separator', 'unsure'];
-  assert.deepEqual(corpus.enums?.hyphen, labels, `${values.cases}: expected the ordered hyphen-digit label schema`);
+  const labels = plusDigit ? plusDigit.labels : ['signed-number', 'range-or-separator', 'unsure'];
+  assert.deepEqual(corpus.enums?.[plusDigit ? 'plus' : 'hyphen'], labels, `${values.cases}: expected the ordered ${values.experiment} label schema`);
   const { PROMPTS } = await import(pathToFileURL(resolve(values.prompts)));
   assert(PROMPTS && typeof PROMPTS === 'object', `${values.prompts}: export a PROMPTS registry with the frozen baseline and candidate`);
   const artifacts = positionals.map(readJSON);
@@ -110,17 +102,20 @@ async function main() {
   for (let index = 0; index < artifacts.length; index += 2) {
     comparisons.push({ baseline: artifacts[index], candidate: artifacts[index + 1] });
   }
-  buildExtension(fileURLToPath(new URL('../../../', import.meta.url)));
-  const { hyphenDigit } = await productionModule('hyphen-digit');
-  const { applyTextEdits } = await productionModule('base');
-  const gate = evaluatePaired({
+  const options = {
     phase: values.phase,
     cases,
     comparisons,
     exampleSources: values['example-source'] ?? [],
-    editsForLabel: (kase, label) => hyphenDigit.edits({ index: kase.settled_index }, label),
-    applyTextEdits,
-  });
+  };
+  let gate;
+  if (plusDigit) {
+    gate = plusDigit.evaluatePaired(options);
+  } else {
+    const { hyphenDigit } = await productionModule('browser-extensions/chrome/src/ai-spacing/shapes/hyphen-digit.ts');
+    const { applyTextEdits } = await productionModule('browser-extensions/chrome/src/ai-spacing/shapes/base.ts');
+    gate = evaluatePaired({ ...options, editsForLabel: (kase, label) => hyphenDigit.edits({ index: kase.settled_index }, label), applyTextEdits });
+  }
   Object.assign(gate, { protocolIssues, frozen: gate.frozen && protocolIssues.length === 0, passed: gate.passed && protocolIssues.length === 0 });
   const directory = outputDirectory(fileURLToPath(new URL('../../../', import.meta.url)), values.out);
   const file = join(directory, 'gate.json');
@@ -130,6 +125,7 @@ async function main() {
     matched: run.matched,
     regressions: run.regressions,
     attemptDeclines: run.attemptDeclines,
+    ...(run.unsafeControls ? { unsafeControls: run.unsafeControls } : {}),
     ...Object.fromEntries(
       ['baseline', 'candidate'].map((key) => [
         key,
