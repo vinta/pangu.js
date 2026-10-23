@@ -143,60 +143,60 @@ test.describe('AI spacing DOM context', () => {
     expect(await page.evaluate(() => window.__aiClassifications.filter(({ candidates }) => candidates.length > 0).map(({ kind }) => kind))).toEqual(['plus-digit']);
   });
 
-  for (const sentence of ['保存冷凍於-18°C以下，交通票券+5大夯景點', '交通票券+5大夯景點，保存冷凍於-18°C以下']) {
-    test(`composes plus-digit insertion and hyphen deletion from the same snapshot: ${sentence}`, async ({ page }) => {
-      await classify(page, `<p>${sentence}</p>`, {
-        [`hyphen-digit:${sentence.indexOf('-')}:${sentence}`]: 'signed-number',
-        [`plus-digit:${sentence.indexOf('+')}:${sentence}`]: 'conjunction',
-      });
+  // Real sentences joined by a full stop as separate contexts in one node, in both orders: hyphen-digit, plus-digit
+  for (const text of ['保存冷凍於-18°C以下。交通票券+5大夯景點', '交通票券+5大夯景點。保存冷凍於-18°C以下']) {
+    test(`composes plus-digit insertion and hyphen deletion from the same snapshot: ${text}`, async ({ page }) => {
+      await classify(page, `<p>${text}</p>`, { '保存冷凍於-18°C以下': 'signed-number', '交通票券+5大夯景點': 'conjunction' });
       await expect
         .poll(() => page.evaluate(() => window.__aiClassifications.filter(({ candidates }) => candidates.length > 0)))
         .toEqual([
-          { type: 'CLASSIFY_CANDIDATES', kind: 'hyphen-digit', candidates: [{ sentence, at: sentence.indexOf('-') }] },
-          { type: 'CLASSIFY_CANDIDATES', kind: 'plus-digit', candidates: [{ sentence, at: sentence.indexOf('+') }] },
+          { type: 'CLASSIFY_CANDIDATES', kind: 'hyphen-digit', candidates: [{ sentence: '保存冷凍於-18°C以下', at: 5 }] },
+          { type: 'CLASSIFY_CANDIDATES', kind: 'plus-digit', candidates: [{ sentence: '交通票券+5大夯景點', at: 4 }] },
         ]);
-      await expect.poll(() => page.locator('p').textContent()).toBe(sentence.startsWith('保存') ? '保存冷凍於 -18°C 以下，交通票券 + 5 大夯景點' : '交通票券 + 5 大夯景點，保存冷凍於 -18°C 以下');
+      await expect.poll(() => page.locator('p').textContent()).toBe(text.startsWith('保存') ? '保存冷凍於 -18°C 以下。交通票券 + 5 大夯景點' : '交通票券 + 5 大夯景點。保存冷凍於 -18°C 以下');
     });
   }
 
   test('routes digit-plus and plus-digit to separate workers across a semicolon', async ({ page }) => {
-    await classify(page, '<p>套票+1位家長；Switch 2+瑪利歐</p>', ['conjunction']);
+    // Real sentences joined as separate contexts: plus-digit; digit-plus
+    await classify(page, '<p>交通票券+5大夯景點；Switch 2+瑪利歐賽車世界同捆組</p>', ['conjunction']);
     await expect
       .poll(() => page.evaluate(() => window.__aiClassifications.filter(({ candidates }) => candidates.length > 0)))
       .toEqual([
-        { type: 'CLASSIFY_CANDIDATES', kind: 'digit-plus', candidates: [{ sentence: 'Switch 2+瑪利歐', at: 8 }] },
-        { type: 'CLASSIFY_CANDIDATES', kind: 'plus-digit', candidates: [{ sentence: '套票+1位家長', at: 2 }] },
+        { type: 'CLASSIFY_CANDIDATES', kind: 'digit-plus', candidates: [{ sentence: 'Switch 2+瑪利歐賽車世界同捆組', at: 8 }] },
+        { type: 'CLASSIFY_CANDIDATES', kind: 'plus-digit', candidates: [{ sentence: '交通票券+5大夯景點', at: 4 }] },
       ]);
-    await expect.poll(() => page.locator('p').textContent()).toBe('套票 + 1 位家長；Switch 2 + 瑪利歐');
+    await expect.poll(() => page.locator('p').textContent()).toBe('交通票券 + 5 大夯景點；Switch 2 + 瑪利歐賽車世界同捆組');
   });
 
-  test('excludes both plus shapes when neighboring inline context contains another plus', async ({ page }) => {
-    await loadContentScript(page, '<p><a>套票+1位家長</a><span>，另送Switch 2+瑪利歐</span></p>', ['conjunction']);
+  test('excludes plus-digit when neighboring inline context contains another plus', async ({ page }) => {
+    await loadContentScript(page, '<p><a>一個標示Z5U的電容，其工作溫度為+10°C</a><span>至+85°C，容值變動範圍在+22%至−56%之間。</span></p>', ['conjunction']);
     await page.clock.runFor(1000);
 
-    await expect.poll(() => page.locator('p').textContent()).toBe('套票 +1 位家長，另送 Switch 2+ 瑪利歐');
+    await expect.poll(() => page.locator('p').textContent()).toBe('一個標示 Z5U 的電容，其工作溫度為 +10°C 至 +85°C，容值變動範圍在 +22% 至−56% 之間。');
     expect(await page.evaluate(() => window.__aiClassifications.flatMap(({ candidates }) => candidates))).toEqual([]);
   });
 
-  test('excludes authored spaces and non-CJK prefixes from plus-digit routing', async ({ page }) => {
-    await loadContentScript(page, '<p>套票 +1位家長；套票+ 1位家長；套票 + 1位家長；價格A+1</p>', ['conjunction']);
+  test('excludes authored spaces from plus-digit routing', async ({ page }) => {
+    // Synthetic regex-boundary variants of a real phrase, each with an authored space beside the plus
+    await loadContentScript(page, '<p>交通票券 +5大夯景點；交通票券+ 5大夯景點；交通票券 + 5大夯景點</p>', ['conjunction']);
     await page.clock.runFor(1000);
 
-    await expect.poll(() => page.locator('p').textContent()).toBe('套票 +1 位家長；套票 + 1 位家長；套票 + 1 位家長；價格 A + 1');
+    await expect.poll(() => page.locator('p').textContent()).toBe('交通票券 +5 大夯景點；交通票券 + 5 大夯景點；交通票券 + 5 大夯景點');
     expect(await page.evaluate(() => window.__aiClassifications.flatMap(({ candidates }) => candidates))).toEqual([]);
   });
 
   test('retains core plus-digit spacing when AI spacing is disabled', async ({ page }) => {
-    await loadContentScript(page, '<p>套票+1位家長</p>', ['conjunction'], false);
+    await loadContentScript(page, '<p>交通票券+5大夯景點</p>', ['conjunction'], false);
     await page.clock.runFor(1000);
 
-    await expect.poll(() => page.locator('p').textContent()).toBe('套票 +1 位家長');
+    await expect.poll(() => page.locator('p').textContent()).toBe('交通票券 +5 大夯景點');
     expect(await page.evaluate(() => window.__aiClassifications)).toEqual([]);
   });
 
   for (const failure of ['unavailable', 'worker error']) {
     test(`retains core plus-digit spacing after ${failure}`, async ({ page }) => {
-      await loadContentScript(page, '<p>套票+1位家長</p>', ['conjunction']);
+      await loadContentScript(page, '<p>交通票券+5大夯景點</p>', ['conjunction']);
       await page.evaluate((failure) => {
         Object.assign(chrome.runtime, {
           sendMessage: async (message: ClassifyCandidatesMessage) => {
@@ -210,13 +210,13 @@ test.describe('AI spacing DOM context', () => {
       }, failure);
       await page.clock.runFor(1000);
 
-      await expect.poll(() => page.locator('p').textContent()).toBe('套票 +1 位家長');
-      expect(await sentCandidates(page)).toEqual([{ sentence: '套票+1位家長', at: 2 }]);
+      await expect.poll(() => page.locator('p').textContent()).toBe('交通票券 +5 大夯景點');
+      expect(await sentCandidates(page)).toEqual([{ sentence: '交通票券+5大夯景點', at: 4 }]);
     });
   }
 
   test('drops a plus-digit answer after the page rewrites the settled text', async ({ page }) => {
-    await loadContentScript(page, '<p>套票+1位家長</p>', ['conjunction']);
+    await loadContentScript(page, '<p>交通票券+5大夯景點</p>', ['conjunction']);
     await page.evaluate(() => {
       const sendMessage = chrome.runtime.sendMessage;
       Object.assign(chrome.runtime, {
@@ -232,8 +232,8 @@ test.describe('AI spacing DOM context', () => {
       });
     });
     await page.clock.runFor(1000);
-    expect(await sentCandidates(page)).toEqual([{ sentence: '套票+1位家長', at: 2 }]);
-    await expect.poll(() => page.locator('p').textContent()).toBe('套票 +1 位家長');
+    expect(await sentCandidates(page)).toEqual([{ sentence: '交通票券+5大夯景點', at: 4 }]);
+    await expect.poll(() => page.locator('p').textContent()).toBe('交通票券 +5 大夯景點');
 
     await page.evaluate(() => {
       document.querySelector('p')!.firstChild!.textContent = '頁面已改寫';

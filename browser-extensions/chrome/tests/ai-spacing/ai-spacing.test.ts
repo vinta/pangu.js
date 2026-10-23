@@ -103,7 +103,7 @@ describe('AI spacing results', () => {
       '開啟密碼為您的身分證字號（大寫英文字母 + 9 位數字；外籍人士為居留證號碼：兩個大寫英文字母 + 8 位數字）',
     );
     expect(await spaceTextWithAi('打+886這個號碼')).toBe('打 +886 這個號碼');
-    expect(await spaceTextWithAi('氣溫是+5度左右')).toBe('氣溫是 +5 度左右');
+    expect(await spaceTextWithAi('5日漲+13.2%')).toBe('5 日漲 +13.2%');
     expect(prompt).toHaveBeenCalledTimes(4);
     expect(sendMessage.mock.calls.map(([message]) => message.kind)).toEqual(['plus-digit', 'plus-digit', 'plus-digit']);
   });
@@ -142,7 +142,7 @@ describe('AI spacing results', () => {
     vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create: async () => ({ clone }) });
     const { spaceTextWithAi } = await loadAiSpacing();
 
-    expect(await spaceTextWithAi('氣溫是-5度左右')).toBe('氣溫是 -5 度左右');
+    expect(await spaceTextWithAi('保存冷凍於-18°C以下')).toBe('保存冷凍於 -18°C 以下');
     expect(await spaceTextWithAi('女朋友今天的氣溫是-273.15度')).toBe('女朋友今天的氣溫是 -273.15 度');
     expect(await spaceTextWithAi('從-5到-3度')).toBe('從 -5 到 -3 度');
     expect(await spaceTextWithAi('Nasdaq-100本週下跌-13.44%')).toBe('Nasdaq-100 本週下跌 -13.44%');
@@ -163,7 +163,8 @@ describe('AI spacing results', () => {
 describe('AI spacing warm-up', () => {
   it('warms the plus-digit model once for multiple sign or conjunction candidates', async () => {
     vi.stubGlobal('LanguageModel', undefined);
-    vi.stubGlobal('document', { documentElement: { textContent: '交通票券+5大夯景點；請撥+886' } });
+    // Real sentences joined as separate contexts: plus-digit; plus-digit
+    vi.stubGlobal('document', { documentElement: { textContent: '交通票券+5大夯景點；澳門地區：陸委會澳門辦事處緊急聯絡電話+853-6687-2557' } });
     const { sendMessage, warmUpAiSpacing } = await loadAiSpacing();
 
     warmUpAiSpacing();
@@ -187,7 +188,7 @@ describe('AI spacing warm-up', () => {
 
   it('warms the model when a tight hyphen-digit shape appears in the page', async () => {
     vi.stubGlobal('LanguageModel', undefined);
-    vi.stubGlobal('document', { documentElement: { textContent: '氣溫是-5度' } });
+    vi.stubGlobal('document', { documentElement: { textContent: '保存冷凍於-18°C以下' } });
     const { sendMessage, warmUpAiSpacing } = await loadAiSpacing();
 
     warmUpAiSpacing();
@@ -198,7 +199,7 @@ describe('AI spacing warm-up', () => {
 
   it('warms up only once per page', async () => {
     vi.stubGlobal('LanguageModel', undefined);
-    vi.stubGlobal('document', { documentElement: { textContent: '氣溫是-5度' } });
+    vi.stubGlobal('document', { documentElement: { textContent: '保存冷凍於-18°C以下' } });
     const { sendMessage, warmUpAiSpacing } = await loadAiSpacing();
 
     warmUpAiSpacing();
@@ -207,7 +208,7 @@ describe('AI spacing warm-up', () => {
     expect(sendMessage).toHaveBeenCalledTimes(1);
   });
 
-  it.each(['公視+上架了新片', 'abc-5，氣溫是 -5度', '沒有連字號'])('skips model warm-up for %s', async (textContent) => {
+  it.each(['公視+上架了新片', '理想的 冰箱冷凍溫度 應為攝氏 -18 度以下。', 'Introduction to Computers and Programming-1', '沒有連字號'])('skips model warm-up for %s', async (textContent) => {
     vi.stubGlobal('document', { documentElement: { textContent } });
     const { sendMessage, warmUpAiSpacing } = await loadAiSpacing();
 
@@ -235,7 +236,7 @@ describe('AI spacing model sessions', () => {
     expect(create).toHaveBeenCalledTimes(1);
     expect(clone).not.toHaveBeenCalled();
 
-    const batch = handleClassification('hyphen-digit', [{ sentence: '氣溫是-5度', at: 3 }]);
+    const batch = handleClassification('hyphen-digit', [{ sentence: '保存冷凍於-18°C以下', at: 5 }]);
     finishCreation();
 
     expect(await warmup).toEqual({ ok: true, candidateLabels: [] });
@@ -271,17 +272,18 @@ describe('AI spacing message flow', () => {
     const create = vi.fn(async () => ({ clone: async () => ({ prompt, destroy: vi.fn() }) }));
     vi.stubGlobal('LanguageModel', { params: vi.fn(), availability: async () => 'available', create });
     const { pangu, sendMessage, applyAiSpacing } = await loadAiSpacing();
-    const unspaced = '氣溫是-5度，Switch 2+瑪利歐賽車世界同捆組；交通票券+5大夯景點';
+    // Real sentences joined as separate contexts: hyphen-digit; digit-plus; plus-digit
+    const unspaced = '保存冷凍於-18°C以下；Switch 2+瑪利歐賽車世界同捆組；交通票券+5大夯景點';
     const settled = corePangu.spaceText(unspaced);
     const node = { data: settled } as Text;
 
     await applyAiSpacing([{ node, unspaced, settled }]);
 
-    expect(node.data).toBe('氣溫是 -5 度，Switch 2 + 瑪利歐賽車世界同捆組；交通票券 + 5 大夯景點');
+    expect(node.data).toBe('保存冷凍於 -18°C 以下；Switch 2 + 瑪利歐賽車世界同捆組；交通票券 + 5 大夯景點');
     expect(sendMessage.mock.calls.map(([message]) => message.kind)).toEqual(['hyphen-digit', 'digit-plus', 'plus-digit']);
     expect(create).toHaveBeenCalledTimes(3);
     expect(pangu.applyLateFixes).toHaveBeenCalledTimes(1);
-    expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node, settled, data: '氣溫是 -5 度，Switch 2 + 瑪利歐賽車世界同捆組；交通票券 + 5 大夯景點' }]);
+    expect(pangu.applyLateFixes).toHaveBeenCalledWith([{ node, settled, data: '保存冷凍於 -18°C 以下；Switch 2 + 瑪利歐賽車世界同捆組；交通票券 + 5 大夯景點' }]);
   });
 
   it.each(['"負"', 'null', 'signed-number'])('keeps invalid answer %s in place and composes successful fixes into one write', async (invalidAnswer) => {
@@ -312,7 +314,7 @@ describe('AI spacing message flow', () => {
     const { pangu, sendMessage, applyAiSpacing } = await loadAiSpacing();
     const onTextNodesSettled = pangu.onTextNodesSettled;
 
-    await applyAiSpacing([{ node: {} as Text, unspaced: '氣溫是-5度', settled: '氣溫是 - 5 度' }]);
+    await applyAiSpacing([{ node: {} as Text, unspaced: '保存冷凍於-18°C以下', settled: '保存冷凍於 - 18°C 以下' }]);
     await applyAiSpacing([{ node: {} as Text, unspaced: '從-3度', settled: '從 - 3 度' }]);
 
     expect(sendMessage).toHaveBeenCalledTimes(1);
