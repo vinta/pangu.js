@@ -28,7 +28,7 @@ In Chrome Beta 144+, enable remote debugging at `chrome://inspect/#remote-debugg
 
 Keep the connection flow above for the existing Chrome Beta profile. The launch flag `--remote-debugging-port=9222` fixes the port, but [Chrome 136+ requires a non-default `--user-data-dir`](https://developer.chrome.com/blog/remote-debugging-port) with it; it does not configure the standard user-data directory used here.
 
-Run browser launches outside the execution sandbox through normal escalation, including indirect launches from package scripts. Before a full browser suite, confirm each requested browser launches and closes in that same context. On a startup permission or application-registration failure, stop the run and diagnose one launch. Put raw launch logs only in a destination verified ignored and untracked under [artifact rules](artifacts.md).
+Run browser launches outside the execution sandbox through normal escalation, including indirect launches from package scripts. Before a full browser suite, confirm each requested browser launches and closes in that same context. On a startup permission or application-registration failure, stop the run and diagnose one launch.
 
 At `chrome://extensions`, enable Developer mode and [load unpacked](https://developer.chrome.com/docs/extensions/get-started/tutorial/hello-world#load-unpacked) from this checkout's `browser-extensions/chrome/`. Reload after setup builds.
 
@@ -58,7 +58,7 @@ This connection flow disables HTTP `/json/version` discovery and accepts `/devto
 
 Chrome [reuses the port recorded in `DevToolsActivePort`, falling back to a free port if occupied](https://github.com/chromium/chromium/blob/main/chrome/browser/devtools/remote_debugging_server.cc). Try the saved URL even after a restart; reread `DevToolsActivePort` only to repair a failed attachment. A 403 does not prove the URL is stale: check Chrome's connection approval and any message about a rejected origin first. A successful attachment verifies the saved settings are usable.
 
-Inspect `playwright-cli list` locally before attaching. Detach a stale `pangu-eval` attachment and attach to the verified endpoint. Keep unfiltered CLI output local. After work, close only temporary inspection pages and run `playwright-cli -s=pangu-eval detach` to leave the browser running.
+Inspect `playwright-cli list` locally before attaching. Detach a stale `pangu-eval` attachment and attach to the verified endpoint. After work, close only temporary inspection pages and run `playwright-cli -s=pangu-eval detach` to leave the browser running.
 
 ## Validation layers
 

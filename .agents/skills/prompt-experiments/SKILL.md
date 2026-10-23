@@ -5,7 +5,7 @@ description: Use when running or verifying pangu.js prompt experiments, diagnosi
 
 # Prompt experiments
 
-Use the existing helpers in the [command reference](../../../scripts/prompt-experiments/README.md). Keep helpers and durable round records under `scripts/prompt-experiments/`, and raw output under `local/prompt-experiments/`. Applying results to production is a separate task; leave production source and prompt tests unchanged.
+Use the existing helpers in the [command reference](../../../scripts/prompt-experiments/README.md). Follow [artifact destinations](references/artifacts.md#destinations) when writing experiment files. Applying results to production is a separate task; leave production source and prompt tests unchanged.
 
 ## Resume or start
 
@@ -34,7 +34,7 @@ Read [setup and repair](references/setup.md) for a missing prerequisite or faile
 | [Manual runtime evidence](references/setup.md#runtime-evidence)            | Missing evidence, reconnect, or changed browser/profile/model, loaded checkout, or production sampling                                                                                                              |
 | Fresh screening baseline                                                   | New round; changed scored records, example-page exclusions, gold, production inputs/edits, baseline prompt/options, tooling, or schedule; browser/model restart, update, reconnect, or uncertain runtime continuity |
 
-Use the first `sweep.mjs` invocation as the preflight for cases, rendered prompts, extension worker/profile, and model readiness. Its output records those checks, browser/Node versions, and requested sampling/schema options. Read that evidence; inspect a failed check only when repairing it. Use `--check` for offline work or diagnosis. Helper-managed output enforces ignored, untracked destinations; apply [destination checks](references/artifacts.md#destinations) only to private writes that bypass it.
+Use the first `sweep.mjs` invocation as the preflight for cases, rendered prompts, extension worker/profile, and model readiness. Its output records those checks, browser/Node versions, and requested sampling/schema options. Read that evidence; inspect a failed check only when repairing it. Use `--check` for offline work or diagnosis.
 
 Reuse a complete baseline's saved answers only within the same round and continuous browser connection with unchanged model/runtime and controls above. The runner still creates fresh inference sessions. Record which baseline each screening comparison uses. Gates check orders and sampling, not browser/model identity; if continuity cannot be established, run shipping with the candidate. Match production sampling, language declarations, and schema handling.
 

@@ -6,9 +6,9 @@ Keep enough to rerun an experiment and understand its decisions. Raw execution h
 
 Keep reusable helpers under `scripts/prompt-experiments/`. Keep reusable cases in each shape’s shared corpus under `<shape>/corpus/`. Each completed round under `<shape>/results/<round>/` keeps only `REPORT.md` and `prompts.mjs`.
 
-Write raw answers, diagnostics, rendered inputs, intermediate prompt/corpus snapshots, source captures, gate outputs, and verification results under `local/prompt-experiments/<round>/`. Use a new subdirectory for each invocation and never overwrite run output. Keep personal connection settings in `scripts/prompt-experiments/.env.local`; [setup](setup.md) explains discovery and use.
+Use `scratchDirectory()` to create a system temp directory for each experiment round, and write temporary experiment artifacts there. The [command reference](../../../../scripts/prompt-experiments/README.md) shows the shell setup.
 
-Sweep and source collection use `artifacts.mjs` to enforce the temporary root, ignored/untracked destinations, and exclusive output creation; their writes need no duplicate manual probes. Before a private write that bypasses those helpers, run `git check-ignore -- <destination>` and `git ls-files -- <destination>` from the repository root. Proceed only when the first confirms a repository ignore rule and the second returns no tracked path. Check existing files inside directories too.
+Keep personal connection settings in `scripts/prompt-experiments/.env.local`; [setup](setup.md) explains discovery and use. Before saving them, run `git check-ignore -- <destination>` and `git ls-files -- <destination>` from the repository root. Proceed only when the first confirms a repository ignore rule and the second returns no tracked path.
 
 Select public fields before writing durable records, including nested objects. Keep credentials, connection/profile values, machine paths, session identifiers, authenticated content, and unfiltered logs/captures local. Review embedded fixtures and metadata; a secret scan alone does not establish privacy.
 
@@ -31,7 +31,7 @@ Freeze shared corpus, code, and execution controls at round start; freeze each c
 
 Only new cases or changed case content trigger review. This covers examples, diagnostics, development, confirmation, and holdout. Changes to source text, model context, targets, labels, expected spacing, or source attribution require review of the affected cases. Reuse unchanged cases across rounds and prompt changes without another review; run settings and exposure bookkeeping alone do not trigger one.
 
-After source verification and deterministic input/spacing checks, create `local/case-review-<experiment>-<round>-<role>-vNN.md`. Use the user's requested repository checkout for `local/`, including when experiment code lives in a worktree. Choose an unused version and preserve earlier reviews. Include only the new or changed cases, mark the document `Pending review`, and identify the corpus revision or content hash and case IDs.
+After source verification and deterministic input/spacing checks, create `case-review-<experiment>-<round>-<role>-vNN.md` in the round directory. Choose an unused version and preserve earlier reviews. Include only the new or changed cases, mark the document `Pending review`, and identify the corpus revision or content hash and case IDs.
 
 For each case, include its stable ID, source link or supplied provenance, target positions, expected labels for every routed shape, and what changed. Show the exact original excerpt immediately followed by its complete expected output in a `text` code block, one per line, without arrows or added prefixes. For multiline originals, use adjacent original/expected blocks and preserve their line breaks. Include the exact model input separately when it differs from the excerpt. Complete expected output includes all routed shapes; label any additional component-only output explicitly.
 
@@ -63,12 +63,14 @@ Finalize from saved evidence: use the [hyphen-digit paired gate command](../../.
 
 Complete `REPORT.md` with the hypothesis, comparisons, each phase's pass/fail/incomplete/not-run status, remaining failures, and coverage limits. Report label and spacing accuracy separately, since different labels can produce the same edit. State that applying the candidate and verifying its extension integration remain separate work.
 
-Keep successful and failed raw runs locally until their scores, individual/combined spacing, and paired gates have been checked and the findings recorded. Use shared helpers for verification rather than creating a verifier for every round. Durable records must not depend on temporary files or archives.
+Retain successful and failed raw runs until their scores, individual/combined spacing, and paired gates have been checked and the findings recorded. Use shared helpers for verification rather than creating a verifier for every round. Durable records must not depend on temporary files or archives.
+
+System cleanup timing and retention are not guaranteed. On resume, check that required temporary evidence still exists. If an unfinished phase lost required evidence, mark it incomplete and repeat the affected collection, review, or comparison before continuing; preserve recorded exposure history. Completed temporary output needs no archive or cleanup step.
 
 Preserve exact scored text and model inputs; exclude sensitive cases or collect another verified source instead of altering them for privacy. Fixtures must reproduce production inputs, UTF-16 target offsets, routing, individual edits, combined spacing, and authored-space exclusions. Validate any retained public references.
 
-Keep reserved holdout cases in ignored temporary storage and outside the prompt-editing context until evaluation of the frozen prompt. After evaluation, merge them into the shared development corpus with inference exposure recorded. They remain useful regression cases but are no longer unseen holdouts.
+Keep reserved holdout cases outside the prompt-editing context until evaluation of the frozen prompt. After evaluation, merge them into the shared development corpus with inference exposure recorded. They remain useful regression cases but are no longer unseen holdouts.
 
 When auditing a completed round, check its report, frozen prompts, and pinned corpus selection first. Recompute original scores and gates when raw answers remain. Otherwise, report which setup checks passed and that original scores could not be independently recomputed. A new inference run produces new evidence; model or runtime changes can change its answers.
 
-Done when the report, frozen prompts, and recorded version of the shared corpus explain every tested iteration and support rerunning the setup without temporary artifacts. Temporary output may then be removed.
+Done when the report, frozen prompts, and recorded version of the shared corpus explain every tested iteration and support rerunning the setup without temporary artifacts.

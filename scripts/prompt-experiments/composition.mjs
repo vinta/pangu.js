@@ -290,7 +290,7 @@ async function main() {
     positionals.length === 1 && ['prepare', 'check'].includes(positionals[0]),
     'use composition.mjs prepare --cases <corpus> --prompts <module> --out <new-private-dir>, or check --prepared <prepared.json> --runs <comparisons.json> --out <new-private-dir>',
   );
-  assert(values.out, 'missing --out; use a new ignored local/prompt-experiments directory');
+  assert(values.out, 'missing --out; use a new directory under the system temp directory');
   if (positionals[0] === 'prepare') {
     assert(values.cases && values.prompts, 'prepare requires --cases and --prompts');
     const registry = await import(pathToFileURL(resolve(values.prompts)));

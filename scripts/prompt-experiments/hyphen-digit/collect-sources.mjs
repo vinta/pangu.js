@@ -8,7 +8,7 @@ import { rolldown } from 'rolldown';
 import { buildExtension, outputDirectory, pick, publicError, publicFixture, scratchDirectory } from '../artifacts.mjs';
 
 const { values } = parseArgs({ options: { cases: { type: 'string', multiple: true }, out: { type: 'string' }, help: { type: 'boolean' } } });
-const usage = 'Usage: node collect-sources.mjs --cases <reviewed-corpus.json> [--cases <other-corpus.json>] --out local/prompt-experiments/<round>/<run>';
+const usage = 'Usage: node collect-sources.mjs --cases <reviewed-corpus.json> [--cases <other-corpus.json>] --out <system-temp-directory>/<round>/<run>';
 if (values.help) {
   console.log(usage);
   process.exit(0);

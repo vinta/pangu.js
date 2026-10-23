@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { basename, dirname, join, relative } from 'node:path';
 import { expect, onTestFinished, test } from 'vitest';
 import { outputDirectory, publicCase, publicError, publicFixture, scratchDirectory } from './artifacts.mjs';
 
@@ -70,7 +71,7 @@ test.skipIf(!supportsTypeScript)('requires an absolute Chrome profile path witho
 
   const outside = spawnSync(process.execPath, [...args, '--profile-path', profile, '--out', 'scripts/prompt-experiments/results'], { encoding: 'utf8' });
   expect(outside.status).toBe(1);
-  expect(outside.stderr).toContain('use a new directory under local/prompt-experiments/');
+  expect(outside.stderr).toContain('use a new directory under the system temp directory');
 
   // A valid profile reaches output creation; an existing directory stops the run before Chrome is contacted.
   mkdirSync(output);
@@ -133,7 +134,10 @@ for (const [experiment, variant] of [
     const profile = join(root, 'Test Profile');
     const output = join(root, 'results');
     const largeCorpus = join(root, 'large-corpus.json');
-    writeFileSync(largeCorpus, JSON.stringify({ ...sourceCorpus, cases: sourceCorpus.cases.map((kase, index) => (index === 0 ? { ...kase, source_verification: 'x'.repeat(2 * 1024 * 1024) } : kase)) }));
+    writeFileSync(
+      largeCorpus,
+      JSON.stringify({ ...sourceCorpus, cases: sourceCorpus.cases.map((kase, index) => (index === 0 ? { ...kase, source_verification: 'x'.repeat(2 * 1024 * 1024) } : kase)) }),
+    );
     const timeoutProbe = join(root, 'timeout-probe.mjs');
     writeFileSync(
       timeoutProbe,
@@ -367,10 +371,23 @@ test('public artifact fields preserve evidence and omit unknown metadata', () =>
 test('temporary output directories reject traversal and preserve existing runs', () => {
   const root = scratchDirectory(process.cwd(), 'pangu-output-');
   onTestFinished(() => rmSync(root, { recursive: true, force: true }));
-  expect(() => outputDirectory(process.cwd(), join(root, '..', '..', '..', 'results'))).toThrow('use a new directory under local/prompt-experiments/');
+  const message = 'use a new directory under the system temp directory';
+  expect(dirname(root)).toBe(realpathSync(tmpdir()));
+  expect(() => outputDirectory(process.cwd(), join(root, '..', '..', 'results'))).toThrow(message);
+  expect(() => outputDirectory(process.cwd(), tmpdir())).toThrow(message);
+  expect(() => outputDirectory(process.cwd(), join(process.cwd(), 'local', 'prompt-experiments', 'run'))).toThrow(message);
+  expect(() => outputDirectory(root, root)).toThrow(message);
+  expect(() => outputDirectory(root, join(root, 'run'))).toThrow(message);
+  const caseAlias = join(dirname(root), basename(root).toUpperCase());
+  if (lstatSync(caseAlias, { throwIfNoEntry: false })?.ino === statSync(root).ino) {
+    expect(() => outputDirectory(root, join(caseAlias, 'local', 'run'))).toThrow('inside the repository');
+  }
   symlinkSync(process.cwd(), join(root, 'linked'));
   expect(() => outputDirectory(process.cwd(), join(root, 'linked', 'run'))).toThrow('contains a symlink');
   const output = outputDirectory(process.cwd(), join(root, 'run'));
+  const alias = join(tmpdir(), relative(realpathSync(tmpdir()), root), 'nested', 'run');
+  expect(outputDirectory(process.cwd(), alias)).toBe(join(root, 'nested', 'run'));
+  if (process.platform !== 'win32') expect(statSync(output).mode & 0o777).toBe(0o700);
   const file = join(output, 'answer.json');
   writeFileSync(file, 'original answer');
   expect(() => outputDirectory(process.cwd(), output)).toThrow('EEXIST');

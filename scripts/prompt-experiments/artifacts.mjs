@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { lstatSync, mkdirSync } from 'node:fs';
+import { lstatSync, mkdirSync, realpathSync, statSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 
 export const pick = (value, fields) => Object.fromEntries(fields.filter((field) => value?.[field] !== undefined).map((field) => [field, value[field]]));
@@ -93,28 +94,28 @@ export function publicError(error, privateValues = []) {
 }
 
 export function outputDirectory(root, path) {
-  const directory = resolve(path);
-  const base = resolve(root, 'local', 'prompt-experiments');
-  if (!directory.startsWith(`${base}${sep}`)) {
-    throw new Error(`Invalid experiment output: ${path}; use a new directory under local/prompt-experiments/`);
+  const temporary = resolve(tmpdir());
+  const base = realpathSync(temporary);
+  const requested = resolve(path);
+  const directory = requested.startsWith(`${temporary}${sep}`) ? join(base, relative(temporary, requested)) : requested;
+  const repository = realpathSync(root);
+  if (!directory.startsWith(`${base}${sep}`) || directory === repository || directory.startsWith(`${repository}${sep}`)) {
+    throw new Error(`Invalid experiment output: ${path}; use a new directory under the system temp directory (${base}), outside the repository`);
   }
-  let parent = resolve(root);
-  for (const part of relative(root, directory).split(sep)) {
+  const repositoryInfo = statSync(repository);
+  let parent = base;
+  for (const part of relative(base, directory).split(sep)) {
     parent = join(parent, part);
-    if (lstatSync(parent, { throwIfNoEntry: false })?.isSymbolicLink()) {
-      throw new Error(`Experiment output contains a symlink: ${parent}; use a directory inside the repository`);
+    const info = lstatSync(parent, { throwIfNoEntry: false });
+    if (info?.dev === repositoryInfo.dev && info.ino === repositoryInfo.ino) {
+      throw new Error(`Experiment output is inside the repository: ${path}; use a system temp directory outside the repository`);
+    }
+    if (info?.isSymbolicLink()) {
+      throw new Error(`Experiment output contains a symlink: ${parent}; use a directory inside the system temp directory`);
     }
   }
-  try {
-    execFileSync('git', ['-C', root, 'check-ignore', '--quiet', '--no-index', directory]);
-  } catch {
-    throw new Error(`Experiment output is not ignored: ${path}; add /local/ to the repository .gitignore`);
-  }
-  if (execFileSync('git', ['-C', root, 'ls-files', '--', relative(root, directory)], { encoding: 'utf8' }).trim()) {
-    throw new Error(`Experiment output is tracked: ${path}; use an ignored, untracked directory`);
-  }
-  mkdirSync(dirname(directory), { recursive: true });
-  mkdirSync(directory, { recursive: false });
+  mkdirSync(dirname(directory), { recursive: true, mode: 0o700 });
+  mkdirSync(directory, { recursive: false, mode: 0o700 });
   return directory;
 }
 
@@ -124,5 +125,5 @@ export function buildExtension(root) {
 }
 
 export function scratchDirectory(root, prefix) {
-  return outputDirectory(root, join(root, 'local', 'prompt-experiments', `${prefix}${randomUUID()}`));
+  return outputDirectory(root, join(tmpdir(), `${prefix}${randomUUID()}`));
 }
