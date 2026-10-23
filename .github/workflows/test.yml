@@ -92,7 +92,9 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps ${{ matrix.browser }}
+        run: |
+          sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+          npx playwright install --with-deps ${{ matrix.browser }}
 
       - name: Run build
         run: npm run build
