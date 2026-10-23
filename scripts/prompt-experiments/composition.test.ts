@@ -10,15 +10,15 @@ const modulePath = './composition.mjs';
 const { prepareComposition, evaluateComposition } = await import(modulePath);
 const loaderPath = './plus-digit/experiment.mjs';
 const { loadCorpus } = await import(loaderPath);
-const frozenPath = './plus-digit/results/20261023-first-shape/prompts.mjs';
+const frozenPath = './plus-digit/results/20261023-current-cases/prompts.mjs';
 const frozen = await import(frozenPath);
 const supportsTypeScript = 'typescript' in process.features && process.features.typescript;
 const registry = {
-  BASELINE_SHAPE_PROMPTS: { 'plus-digit': 'v1-en', 'hyphen-digit': 'hyphen-frozen', 'digit-plus': 'digit-frozen' },
+  BASELINE_SHAPE_PROMPTS: { 'plus-digit': 'v6-en-range-sign', 'hyphen-digit': 'hyphen-frozen', 'digit-plus': 'digit-frozen' },
   SHAPE_PROMPTS: { 'plus-digit': 'candidate', 'hyphen-digit': 'hyphen-frozen', 'digit-plus': 'digit-frozen' },
   PROMPTS: {
     ...frozen.PROMPTS,
-    candidate: { ...frozen.PROMPTS['v1-en'], system: 'Candidate.' },
+    candidate: { ...frozen.PROMPTS['v6-en-range-sign'], system: 'Candidate.' },
     ...Object.fromEntries(
       [
         [hyphenDigitPrompt, 'hyphen-frozen'],
@@ -236,9 +236,9 @@ test('every baseline prompt and both companion sides stay shipping while the plu
   expect(() => prepareComposition(corpus, splitCompanion)).toThrow('companion prompts must match on both sides');
   const changedCandidate = { ...registry, PROMPTS: { ...registry.PROMPTS, candidate: { ...registry.PROMPTS.candidate, system: 'Changed.', build: () => 'Changed.' } } };
   expect(() => prepareComposition(corpus, changedCandidate)).not.toThrow();
-  const changedBaseline = { ...registry, PROMPTS: { ...registry.PROMPTS, 'v1-en': { ...registry.PROMPTS['v1-en'], system: 'Changed.' } } };
+  const changedBaseline = { ...registry, PROMPTS: { ...registry.PROMPTS, 'v6-en-range-sign': { ...registry.PROMPTS['v6-en-range-sign'], system: 'Changed.' } } };
   expect(() => prepareComposition(corpus, changedBaseline)).toThrow('plus-digit: frozen baseline system differs from shipping');
-  const changedBaselineQuestion = { ...registry, PROMPTS: { ...registry.PROMPTS, 'v1-en': { ...registry.PROMPTS['v1-en'], build: () => 'Changed.' } } };
+  const changedBaselineQuestion = { ...registry, PROMPTS: { ...registry.PROMPTS, 'v6-en-range-sign': { ...registry.PROMPTS['v6-en-range-sign'], build: () => 'Changed.' } } };
   expect(() => prepareComposition(corpus, changedBaselineQuestion)).toThrow('plus-digit: frozen baseline question differs from shipping');
   const missing = { ...registry, SHAPE_PROMPTS: { 'hyphen-digit': 'hyphen-frozen', 'plus-digit': 'candidate' } };
   expect(() => prepareComposition(corpus, missing)).toThrow('SHAPE_PROMPTS: freeze one prompt key');
@@ -259,7 +259,7 @@ test.skipIf(!supportsTypeScript)('prepared component corpora pass the existing s
 import { hyphenDigitPrompt as hyphen } from ${JSON.stringify(`${shipping}hyphen-digit-prompt.ts`)};
 import { digitPlusPrompt as digit } from ${JSON.stringify(`${shipping}digit-plus-prompt.ts`)};
 const adapt = p => ({ system: p.systemPrompt, labels: p.candidateLabels, build: k => p.buildQuestion(k.input, k.at) });
-export const PROMPTS = { ...plus, candidate: { ...plus['v1-en'], system: 'Candidate.' }, 'hyphen-frozen': adapt(hyphen), 'digit-frozen': adapt(digit) };
+export const PROMPTS = { ...plus, candidate: { ...plus['v6-en-range-sign'], system: 'Candidate.' }, 'hyphen-frozen': adapt(hyphen), 'digit-frozen': adapt(digit) };
 export const BASELINE_SHAPE_PROMPTS = ${JSON.stringify(registry.BASELINE_SHAPE_PROMPTS)};
 export const SHAPE_PROMPTS = ${JSON.stringify(registry.SHAPE_PROMPTS)};`,
   );

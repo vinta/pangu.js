@@ -205,10 +205,10 @@ test.skipIf(!supportsTypeScript)('plus-digit sweep defaults to shipping and reje
     spawnSync(process.execPath, ['scripts/prompt-experiments/sweep.mjs', '--experiment', 'plus-digit', '--cases', cases, '--prompts', prompts, ...extra], { encoding: 'utf8' });
   const check = run('--check', 'candidate');
   expect(check.status, check.stderr).toBe(0);
-  expect(check.stdout).toContain('shipping source version: v1-en');
+  expect(check.stdout).toContain('shipping source version: v6-en-range-sign');
   const defaulted = run('--check');
   expect(defaulted.status, defaulted.stderr).toBe(0);
-  expect(defaulted.stdout).toContain('rendered variants: shipping; shipping source version: v1-en');
+  expect(defaulted.stdout).toContain('rendered variants: shipping; shipping source version: v6-en-range-sign');
   writeFileSync(prompts, `export const PROMPTS = { 'rules-only': { system: 'No edit.', build: kase => kase.input, offlineLabel: 'signed-number' } };`);
   const retired = run('--check', 'rules-only');
   expect(retired.status).toBe(1);

@@ -107,21 +107,21 @@ Run each generated component corpus through `sweep.mjs --experiment <shape> --or
   {
     "baseline": {
       "hyphen-digit": "local/prompt-experiments/new-composition/baseline-1-hyphen/1-hyphen-v29-zh.json",
-      "plus-digit": "local/prompt-experiments/new-composition/baseline-1-plus/1-v1-en.json"
+      "plus-digit": "local/prompt-experiments/new-composition/baseline-1-plus/1-v6-en-range-sign.json"
     },
     "candidate": {
       "hyphen-digit": "local/prompt-experiments/new-composition/candidate-1-hyphen/1-hyphen-v29-zh.json",
-      "plus-digit": "local/prompt-experiments/new-composition/candidate-1-plus/1-v2-en.json"
+      "plus-digit": "local/prompt-experiments/new-composition/candidate-1-plus/1-candidate.json"
     }
   },
   {
     "baseline": {
       "hyphen-digit": "local/prompt-experiments/new-composition/baseline-2-hyphen/1-hyphen-v29-zh.json",
-      "plus-digit": "local/prompt-experiments/new-composition/baseline-2-plus/1-v1-en.json"
+      "plus-digit": "local/prompt-experiments/new-composition/baseline-2-plus/1-v6-en-range-sign.json"
     },
     "candidate": {
       "hyphen-digit": "local/prompt-experiments/new-composition/candidate-2-hyphen/1-hyphen-v29-zh.json",
-      "plus-digit": "local/prompt-experiments/new-composition/candidate-2-plus/1-v2-en.json"
+      "plus-digit": "local/prompt-experiments/new-composition/candidate-2-plus/1-candidate.json"
     }
   }
 ]
