@@ -9,8 +9,6 @@ export const HYPHEN_DIGIT_LABELS = {
 
 export type HyphenDigitLabel = (typeof HYPHEN_DIGIT_LABELS)[keyof typeof HYPHEN_DIGIT_LABELS];
 
-const PROMPT_VERSION = 'v29-zh';
-
 const SYSTEM_PROMPT =
   '你是中文數字判讀助手。判斷句子裡指定的「-」是負號還是分隔符號。只判斷指定符號，不要改寫句子，不要解釋，只回答一個選項名稱。先依完整句意判斷數字代表的事物；只有該數值確實小於零時才選 signed-number。編號、年齡區間、年齡門檻或期間前的連接符號選 range-or-separator，不要只因「-」緊接數字就判為負號。';
 
@@ -29,7 +27,7 @@ function buildQuestion(sentence: string, at: number) {
 export const hyphenDigitPrompt: PromptSpec<HyphenDigitLabel> = {
   kind: 'hyphen-digit',
   systemPrompt: SYSTEM_PROMPT,
-  version: PROMPT_VERSION,
+  version: 'v29-zh',
   candidateLabels: Object.values(HYPHEN_DIGIT_LABELS),
   buildQuestion,
 };
