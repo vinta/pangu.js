@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    // Type checking
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -8,24 +9,28 @@
     "noImplicitOverride": true,
     "exactOptionalPropertyTypes": true,
     "noUncheckedIndexedAccess": true,
+
+    // Module resolution
     "module": "ESNext",
     "target": "ES2022",
     "moduleResolution": "bundler",
-    "types": [
-      "node",
-      "chrome",
-      "dom-chromium-ai"
-    ],
+
+    // TypeScript 6 stopped auto-enumerating `node_modules/@types`, so every ambient type package this config needs has to be listed. This one spans the extension sources (`chrome` for the extension
+    // APIs, `dom-chromium-ai` for the built-in Prompt API the hyphen-digit classifier calls) plus the Node sources and the Vite and Playwright configs (`node`). The narrower `src/node/tsconfig.json`
+    // overrides it back down to just `node`.
+    "types": ["node", "chrome", "dom-chromium-ai"],
+
+    // Vite transpiles each file in isolation, so keep type-only imports explicit and erased predictably. This implies `isolatedModules`, which rejects syntax that only works when the compiler can
+    // see the whole program
     "verbatimModuleSyntax": true,
+
+    // This base tsconfig is only used for type checking, not compilation
     "noEmit": true,
-    "skipLibCheck": true
+
+    // Other
+    "skipLibCheck": true,
   },
-  "exclude": [
-    "dist",
-    "browser-extensions/chrome/dist",
-    "scripts/prompt-experiments",
-    "src/node/index.cts",
-    "examples",
-    "local"
-  ]
+  // src/node/index.cts is a CommonJS file that this ESM-modeled project cannot express: `module: "ESNext"` rejects its `import =` with TS1202. Excluding it here loses nothing, since
+  // src/node/tsconfig.json (NodeNext) is the project that both typechecks it correctly and emits its .d.cts, and eslint never lints .cts files (no `files` glob matches them)
+  "exclude": ["dist", "browser-extensions/chrome/dist", "scripts/prompt-experiments", "src/node/index.cts", "examples", "local"],
 }
