@@ -54,6 +54,7 @@ The same symbol can mean totally different things in different contexts:
 - For `+`:
   - `這裡沒有18+的內容` means "or more" => `這裡沒有 18+ 的內容`
   - `Switch 2+瑪利歐賽車世界同捆組` joins two things => `Switch 2 + 瑪利歐賽車世界同捆組`
+  - `大寫英文字母+9位數字` combines two parts => `大寫英文字母 + 9 位數字`
 - For `-`:
   - `女朋友今天的氣溫是-273.15度` is a negative number => `女朋友今天的氣溫是 -273.15 度`
   - `博客來-4% 法則：讓錢活得比你久的提領金律` is a separator => `博客來 - 4% 法則：讓錢活得比你久的提領金律`
