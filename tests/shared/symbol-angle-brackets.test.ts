@@ -46,6 +46,12 @@ describe('Symbol < >', () => {
                      .toBe('<attackOnJava>那一天，人類終於回想起了，曾經一度被 XML 所支配的恐懼</attackOnJava> <!-- 進擊的 Java -->');
   });
 
+  it('space single-quoted attribute values', () => {
+    expect(pangu.spaceText("<input value='測試123'>")).toBe("<input value='測試 123'>");
+    expect(pangu.spaceText("<div data-title='測試123'>")).toBe("<div data-title='測試 123'>");
+    expect(pangu.spaceText(`<input value='say "測試123"'>`)).toBe(`<input value='say "測試 123"'>`);
+  });
+
   it('handle < > symbols as tag mention', () => {
     expect(pangu.spaceText('在這裡插入一個<div>標籤')).toBe('在這裡插入一個 <div> 標籤');
     expect(pangu.spaceText('型別是List<String>的容器')).toBe('型別是 List<String> 的容器');

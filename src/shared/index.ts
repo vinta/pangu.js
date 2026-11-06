@@ -338,9 +338,10 @@ export class Pangu {
             return mentionedTagManager.store(match);
           }
         }
-        const processedTag = match.replace(/(\w+)="([^"]*)"/g, (_attrMatch, attrName: string, attrValue: string) => {
-          const processedValue = this.spaceText(attrValue);
-          return `${attrName}="${processedValue}"`;
+        const processedTag = match.replace(/(\w+)=("[^"]*"|'[^']*')/g, (_attrMatch, attrName: string, quotedValue: string) => {
+          const quote = quotedValue.charAt(0);
+          const attrValue = quotedValue.slice(1, -1);
+          return `${attrName}=${quote}${this.spaceText(attrValue)}${quote}`;
         });
 
         return htmlTagManager.store(processedTag);
